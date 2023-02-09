@@ -51,16 +51,17 @@ namespace PersonalFinancer.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CurrencyTypes",
+                name: "Currencies",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CurrencyTypes", x => x.Id);
+                    table.PrimaryKey("PK_Currencies", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -189,7 +190,7 @@ namespace PersonalFinancer.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CategoryTransactions",
+                name: "Categories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -199,9 +200,9 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CategoryTransactions", x => x.Id);
+                    table.PrimaryKey("PK_Categories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CategoryTransactions_AspNetUsers_UserId",
+                        name: "FK_Categories_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
@@ -217,7 +218,7 @@ namespace PersonalFinancer.Data.Migrations
                     Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     AccountTypeId = table.Column<int>(type: "int", nullable: false),
-                    CurrencyTypeId = table.Column<int>(type: "int", nullable: false)
+                    CurrencyId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -235,9 +236,9 @@ namespace PersonalFinancer.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Accounts_CurrencyTypes_CurrencyTypeId",
-                        column: x => x.CurrencyTypeId,
-                        principalTable: "CurrencyTypes",
+                        name: "FK_Accounts_Currencies_CurrencyId",
+                        column: x => x.CurrencyId,
+                        principalTable: "Currencies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -250,9 +251,10 @@ namespace PersonalFinancer.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     AccountId = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CategoryTransactionId = table.Column<int>(type: "int", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    TransactionType = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PaymentRefference = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Refference = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -264,9 +266,9 @@ namespace PersonalFinancer.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Transactions_CategoryTransactions_CategoryTransactionId",
-                        column: x => x.CategoryTransactionId,
-                        principalTable: "CategoryTransactions",
+                        name: "FK_Transactions_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -281,50 +283,27 @@ namespace PersonalFinancer.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[,]
-                {
-                    { "2c990863-a80e-4d7e-b372-115fe0dceace", 0, "5f5bf43e-7f48-4089-bbb4-b4297c989618", "petar_hristov@mail.com", false, "Petar", "Hristov", false, null, "PETAR_HRISTOV@MAIL.COM", "ADMIN", "AQAAAAEAACcQAAAAEAtJYbUSq+0kvYabWB64RwhSAl/GZW+lRRjLisYWvNgnNaqFKWT4vcJvF5gIQb26rw==", "+359111111111", false, "67920a4a-0f98-47b9-b4dd-2426b52e01bd", false, "admin" },
-                    { "2e8ce625-1278-4368-87c5-9c79fd7692a4", 0, "c7925f05-2abf-4f07-809d-9fe36ebd4a07", "ivan.ivanov@abv.bg", false, "Ivan", "Ivanov", false, null, "IVAN.IVANOV@ABV.BG", "REGULARUSER", "AQAAAAEAACcQAAAAEFRCunrlWMOaxNIzTvrPcISOVdyKt7UCh4ERNeMEvASLwCCf3al/q8cU4pF/SLbdDw==", "+359222222222", false, "c1631380-f560-4278-8410-c9b4b352d089", false, "regularUser" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "CategoryTransactions",
+                table: "Categories",
                 columns: new[] { "Id", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { 1, "Food & Drink", null },
-                    { 2, "Utilities", null },
-                    { 3, "Transportation", null },
-                    { 4, "Housing", null },
-                    { 5, "Medical & Healthcare", null }
+                    { 1, "Initial Balance", null },
+                    { 2, "Food & Drink", null },
+                    { 3, "Utilities", null },
+                    { 4, "Transport", null },
+                    { 5, "Housing", null },
+                    { 6, "Medical & Healthcare", null }
                 });
 
             migrationBuilder.InsertData(
-                table: "CurrencyTypes",
-                columns: new[] { "Id", "Name" },
+                table: "Currencies",
+                columns: new[] { "Id", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { 1, "BGN" },
-                    { 2, "EUR" },
-                    { 3, "USD" }
+                    { 1, "BGN", null },
+                    { 2, "EUR", null },
+                    { 3, "USD", null }
                 });
-
-            migrationBuilder.InsertData(
-                table: "Accounts",
-                columns: new[] { "Id", "AccountTypeId", "Balance", "CurrencyTypeId", "Name", "OwnerId" },
-                values: new object[] { 1, 1, 100.00m, 1, "MyCashMoney", "2e8ce625-1278-4368-87c5-9c79fd7692a4" });
-
-            migrationBuilder.InsertData(
-                table: "Accounts",
-                columns: new[] { "Id", "AccountTypeId", "Balance", "CurrencyTypeId", "Name", "OwnerId" },
-                values: new object[] { 2, 2, 1500.00m, 2, "MyBankMoney", "2e8ce625-1278-4368-87c5-9c79fd7692a4" });
-
-            migrationBuilder.InsertData(
-                table: "Transactions",
-                columns: new[] { "Id", "AccountId", "Amount", "CategoryTransactionId", "CreatedOn", "PaymentRefference" },
-                values: new object[] { 1, 1, 25m, 3, new DateTime(2023, 2, 8, 9, 23, 49, 306, DateTimeKind.Utc).AddTicks(8075), "My first transport transaction." });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_AccountTypeId",
@@ -332,9 +311,9 @@ namespace PersonalFinancer.Data.Migrations
                 column: "AccountTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Accounts_CurrencyTypeId",
+                name: "IX_Accounts_CurrencyId",
                 table: "Accounts",
-                column: "CurrencyTypeId");
+                column: "CurrencyId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_OwnerId",
@@ -386,8 +365,8 @@ namespace PersonalFinancer.Data.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CategoryTransactions_UserId",
-                table: "CategoryTransactions",
+                name: "IX_Categories_UserId",
+                table: "Categories",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -396,9 +375,9 @@ namespace PersonalFinancer.Data.Migrations
                 column: "AccountId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transactions_CategoryTransactionId",
+                name: "IX_Transactions_CategoryId",
                 table: "Transactions",
-                column: "CategoryTransactionId");
+                column: "CategoryId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -428,13 +407,13 @@ namespace PersonalFinancer.Data.Migrations
                 name: "Accounts");
 
             migrationBuilder.DropTable(
-                name: "CategoryTransactions");
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "AccountTypes");
 
             migrationBuilder.DropTable(
-                name: "CurrencyTypes");
+                name: "Currencies");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

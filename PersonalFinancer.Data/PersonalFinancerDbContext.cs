@@ -35,9 +35,6 @@ namespace PersonalFinancer.Web.Data
 			builder.ApplyConfiguration(new AccountTypeEntityTypeConfiguration());
 			builder.ApplyConfiguration(new CurrencyTypeEntityTypeConfiguration());
 			builder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
-			//builder.ApplyConfiguration(new ApplicationUserEntityTypeConfiguration());
-			//builder.ApplyConfiguration(new AccountEntityTypeConfiguration());
-			//builder.ApplyConfiguration(new TransactionEntityTypeConfiguration());
 		}
 	}
 }

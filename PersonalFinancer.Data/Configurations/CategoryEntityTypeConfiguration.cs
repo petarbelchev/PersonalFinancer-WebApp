@@ -28,7 +28,7 @@ namespace PersonalFinancer.Data.Configurations
 				new Category
 				{
 					Id = 4,
-					Name = "Transportation"
+					Name = "Transport"
 				},
 				new Category
 				{

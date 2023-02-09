@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonalFinancer.Web.Data;
 
@@ -12,10 +11,9 @@ using PersonalFinancer.Web.Data;
 namespace PersonalFinancer.Data.Migrations
 {
     [DbContext(typeof(PersonalFinancerDbContext))]
-    [Migration("20230208155818_ChangedTablesNames")]
-    partial class ChangedTablesNames
+    partial class PersonalFinancerDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -196,26 +194,6 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Accounts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AccountTypeId = 1,
-                            Balance = 100.00m,
-                            CurrencyId = 1,
-                            Name = "MyCashMoney",
-                            OwnerId = "2e8ce625-1278-4368-87c5-9c79fd7692a4"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            AccountTypeId = 2,
-                            Balance = 1500.00m,
-                            CurrencyId = 2,
-                            Name = "MyBankMoney",
-                            OwnerId = "2e8ce625-1278-4368-87c5-9c79fd7692a4"
-                        });
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.AccountType", b =>
@@ -326,46 +304,6 @@ namespace PersonalFinancer.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "2c990863-a80e-4d7e-b372-115fe0dceace",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "13af682f-79f6-4afe-a3e5-e472cfd77a24",
-                            Email = "petar_hristov@mail.com",
-                            EmailConfirmed = false,
-                            FirstName = "Petar",
-                            LastName = "Hristov",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "PETAR_HRISTOV@MAIL.COM",
-                            NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAEMng7VLFnu1mVZB2XvyBVpzqdKRk+jAZ2wyohTHeEdvFrtvsnri6PFJWvefi/spHJQ==",
-                            PhoneNumber = "+359111111111",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "345b0c88-3304-4f17-880c-1d8f3bfa2b90",
-                            TwoFactorEnabled = false,
-                            UserName = "admin"
-                        },
-                        new
-                        {
-                            Id = "2e8ce625-1278-4368-87c5-9c79fd7692a4",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "0fca5902-f4e0-4a81-a7f4-c45804d2c695",
-                            Email = "ivan.ivanov@abv.bg",
-                            EmailConfirmed = false,
-                            FirstName = "Ivan",
-                            LastName = "Ivanov",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "IVAN.IVANOV@ABV.BG",
-                            NormalizedUserName = "REGULARUSER",
-                            PasswordHash = "AQAAAAEAACcQAAAAEO8G0vGK0KvQgee/C8bcnm60PjuTcvBmfsgvMzgRo/9tg5hFer69pGrVusLKAtj1ZQ==",
-                            PhoneNumber = "+359222222222",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "3a6fcffc-d046-43bf-9ef3-02f6387b7df2",
-                            TwoFactorEnabled = false,
-                            UserName = "regularUser"
-                        });
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Category", b =>
@@ -394,26 +332,31 @@ namespace PersonalFinancer.Data.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Food & Drink"
+                            Name = "Initial Balance"
                         },
                         new
                         {
                             Id = 2,
-                            Name = "Utilities"
+                            Name = "Food & Drink"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Transportation"
+                            Name = "Utilities"
                         },
                         new
                         {
                             Id = 4,
-                            Name = "Housing"
+                            Name = "Transport"
                         },
                         new
                         {
                             Id = 5,
+                            Name = "Housing"
+                        },
+                        new
+                        {
+                            Id = 6,
                             Name = "Medical & Healthcare"
                         });
                 });
@@ -428,6 +371,9 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -487,18 +433,6 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Transactions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            AccountId = 1,
-                            Amount = 25m,
-                            CategoryId = 3,
-                            CreatedOn = new DateTime(2023, 2, 8, 15, 58, 17, 766, DateTimeKind.Utc).AddTicks(4868),
-                            Refference = "My first transport transaction.",
-                            TransactionType = 0
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
