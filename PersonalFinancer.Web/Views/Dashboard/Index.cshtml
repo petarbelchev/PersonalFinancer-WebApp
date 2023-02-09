@@ -1,0 +1,68 @@
+﻿@using PersonalFinancer.Services.Account.Models;
+
+@model DashboardViewModel
+@{
+	ViewData["Title"] = "Dashboard";
+}
+
+@if (Model.Accounts.Any())
+{
+	<div class="row">
+		<div>
+			<h1>Your Accounts</h1>
+			<div style="display: flex;">
+				@foreach (var account in Model.Accounts)
+				{
+					<div class="card text-center" style="width: 18rem;">
+						<div class="card-body">
+							<h5 class="card-title">@account.Name</h5>
+							<p class="card-text">@account.Balance @account.Currency</p>
+							<a href="#" class="btn btn-primary">Details</a>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+		<div>
+			<h1>Last Five Transactions</h1>
+			<table class="table">
+				<thead>
+					<tr>
+						<th scope="col">Date</th>
+						<th scope="col">Category</th>
+						<th scope="col">Type</th>
+						<th scope="col">Amount</th>
+						<th scope="col">Currency</th>
+						<th scope="col">Account</th>
+						<th scope="col">Refference</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var transaction in Model.LastTransactions)
+					{
+						<tr>
+							<td>@transaction.CreatedOn.ToString("dd.MM.yyyy hh:mm")</td>
+							<td>@transaction.Category</td>
+							<td>@transaction.TransactionType</td>
+							<td>@transaction.Amount</td>
+							<td>@transaction.Currency</td>
+							<td>@transaction.Account</td>
+							<td>@transaction.Refference</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+else
+{
+	<div class="text-center">
+		<h1 class="display-4">You do not have any account.</h1>
+		<h2 class="display-6">Create your first account and start record your Financer!</h2>
+	</div>
+}
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}
