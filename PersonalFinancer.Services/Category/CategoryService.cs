@@ -22,5 +22,24 @@ namespace PersonalFinancer.Services.Category
 				})
 				.ToArrayAsync();
 		}
+
+		public async Task<int> CategoryIdByName(string name)
+		{
+			var category = await data.Categories.FirstAsync(c => c.Name == name);
+
+			return category.Id;
+		}
+
+		public async Task<CategoryViewModel> CategoryById(int id)
+		{
+			return await data.Categories
+				.Where(c => c.Id == id)
+				.Select(c => new CategoryViewModel
+				{
+					Id = c.Id,
+					Name = c.Name
+				})
+				.FirstAsync();
+		}
 	}
 }

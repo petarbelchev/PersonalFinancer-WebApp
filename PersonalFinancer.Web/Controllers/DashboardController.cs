@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using PersonalFinancer.Services.Account;
 using PersonalFinancer.Services.Account.Models;
 using PersonalFinancer.Web.Infrastructure;
@@ -11,8 +12,11 @@ namespace PersonalFinancer.Web.Controllers
 	{
 		private readonly IAccountService accountService;
 
-		public DashboardController(IAccountService accountService)
-			=> this.accountService = accountService;
+		public DashboardController(
+			IAccountService accountService)
+		{
+			this.accountService = accountService;
+		}
 
 		[HttpGet]
 		public async Task<IActionResult> Index()

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PersonalFinancer.Data.Models;
+using static PersonalFinancer.Data.DataConstants.Category;
 
 namespace PersonalFinancer.Data.Configurations
 {
@@ -13,7 +14,7 @@ namespace PersonalFinancer.Data.Configurations
 				new Category
 				{
 					Id = 1,
-					Name = "Initial Balance"
+					Name = CategoryInitialBalanceName
 				},
 				new Category
 				{

@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using PersonalFinancer.Services.Account;
 using PersonalFinancer.Services.Account.Models;
 using PersonalFinancer.Services.Currency;
-using System.Security.Claims;
+using PersonalFinancer.Web.Infrastructure;
 
 namespace PersonalFinancer.Web.Controllers
 {
@@ -21,15 +22,11 @@ namespace PersonalFinancer.Web.Controllers
 			this.currencyService = currencyService;
 		}
 
-		public IActionResult Index()
-		{
-			return View();
-		}
-
 		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
-			string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			string userId = User.Id();
+
 			var formModel = new CreateAccountFormModel
 			{
 				AccountTypes = await accountService.AllAccountTypes(userId),
@@ -45,11 +42,9 @@ namespace PersonalFinancer.Web.Controllers
 			if (!ModelState.IsValid)
 				return View(accountFormModel);
 
-			string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
 			try
 			{
-				await accountService.CreateAccount(userId, accountFormModel);
+				await accountService.CreateAccount(User.Id(), accountFormModel);
 			}
 			catch (Exception)
 			{
@@ -57,7 +52,7 @@ namespace PersonalFinancer.Web.Controllers
 			}
 
 			//TODO: Implemend redirect to new Accound Details Page!
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction("Index", "Dashboard");
 		}
 	}
 }

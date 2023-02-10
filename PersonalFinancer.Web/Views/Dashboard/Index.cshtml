@@ -1,6 +1,4 @@
-﻿@using PersonalFinancer.Services.Account.Models;
-
-@model DashboardViewModel
+﻿@model DashboardViewModel
 @{
 	ViewData["Title"] = "Dashboard";
 }
@@ -35,19 +33,31 @@
 						<th scope="col">Currency</th>
 						<th scope="col">Account</th>
 						<th scope="col">Refference</th>
+						<th scope="col"></th>
+						<th scope="col"></th>
 					</tr>
 				</thead>
 				<tbody>
 					@foreach (var transaction in Model.LastTransactions)
 					{
 						<tr>
-							<td>@transaction.CreatedOn.ToString("dd.MM.yyyy hh:mm")</td>
+							<td>@transaction.CreatedOn</td>
 							<td>@transaction.Category</td>
 							<td>@transaction.TransactionType</td>
 							<td>@transaction.Amount</td>
 							<td>@transaction.Currency</td>
 							<td>@transaction.Account</td>
 							<td>@transaction.Refference</td>
+							<td>
+								<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" class="btn btn-primary">
+									Edit
+								</a>
+							</td>
+							<td>
+								<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn btn-primary">
+									Delete
+								</a>
+							</td>
 						</tr>
 					}
 				</tbody>

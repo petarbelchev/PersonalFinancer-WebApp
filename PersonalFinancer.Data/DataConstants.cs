@@ -33,6 +33,8 @@
 		{
 			public const int CategoryNameMaxLength = 50;
 			public const int CategoryNameMinLength = 2;
+
+			public const string CategoryInitialBalanceName = "Initial Balance";
 		}
 
 		public class Transaction

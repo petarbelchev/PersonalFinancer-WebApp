@@ -22,7 +22,7 @@ namespace PersonalFinancer.Data.Models
 
 		public TransactionType TransactionType { get; set; }
 
-		public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+		public DateTime CreatedOn { get; set; }
 
 		[Required]
 		[MaxLength(TransactionRefferenceMaxLength,

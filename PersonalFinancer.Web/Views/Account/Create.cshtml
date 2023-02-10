@@ -1,6 +1,4 @@
-﻿@using PersonalFinancer.Services.Account.Models;
-
-@model CreateAccountFormModel
+﻿@model CreateAccountFormModel
 @{
 	ViewData["Title"] = "Create Account";
 }
@@ -22,7 +20,7 @@
 					<label asp-for="@Model.Balance" class="form-label"></label>
 					<span asp-validation-for="@Model.Balance" class="text-danger"></span>
 				</div>
-				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 shadow w-220px">
+				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0">
 					<label asp-for="@Model.AccountTypeId" class="form-label"></label>
 					<select asp-for="@Model.AccountTypeId">
 						@foreach (var accountType in @Model.AccountTypes)
@@ -31,7 +29,7 @@
 						}
 					</select>
 				</div>
-				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 shadow w-220px">
+				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0">
 					<label asp-for="@Model.CurrencyId" class="form-label"></label>
 					<select asp-for="@Model.CurrencyId">
 						@foreach (var currency in @Model.Currencies)
