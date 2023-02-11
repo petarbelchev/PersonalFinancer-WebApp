@@ -15,7 +15,9 @@
 						<div class="card-body">
 							<h5 class="card-title">@account.Name</h5>
 							<p class="card-text">@account.Balance @account.Currency</p>
-							<a href="#" class="btn btn-primary">Details</a>
+							<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
+								Details
+							</a>
 						</div>
 					</div>
 				}
@@ -68,7 +70,7 @@
 else
 {
 	<div class="text-center">
-		<h1 class="display-4">You do not have any account.</h1>
+		<h1 class="display-4">Your Dashboard is empty.</h1>
 		<h2 class="display-6">Create your first account and start record your Finances!</h2>
 	</div>
 }

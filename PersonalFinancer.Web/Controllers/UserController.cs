@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Web.Models.Account;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Identity;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Models.Account;
+	using Data.Models;
+
 	public class UserController : Controller
 	{
 		private readonly UserManager<ApplicationUser> userManager;
@@ -80,8 +80,8 @@ namespace PersonalFinancer.Web.Controllers
 				return View(loginFormModel);
 
 			var result = await signInManager.PasswordSignInAsync(
-				loginFormModel.Email, 
-				loginFormModel.Password, 
+				loginFormModel.Email,
+				loginFormModel.Password,
 				loginFormModel.RememberMe, false);
 
 			if (result.Succeeded)

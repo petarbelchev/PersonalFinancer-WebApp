@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Account;
-using PersonalFinancer.Services.Account.Models;
-using PersonalFinancer.Web.Infrastructure;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Account;
+	using Services.Account.Models;
+	using Infrastructure;
+
 	[Authorize]
 	public class DashboardController : Controller
 	{

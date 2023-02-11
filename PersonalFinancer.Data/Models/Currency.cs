@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PersonalFinancer.Data.Models
+﻿namespace PersonalFinancer.Data.Models
 {
+	using System.ComponentModel.DataAnnotations;
+
 	public class Currency
 	{
 		[Key]

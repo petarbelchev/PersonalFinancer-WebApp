@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using static PersonalFinancer.Data.DataConstants.User;
-
-namespace PersonalFinancer.Web.Models.Account
+﻿namespace PersonalFinancer.Web.Models.Account
 {
+	using System.ComponentModel.DataAnnotations;
+	
+	using static Data.DataConstants.User;
+
 	public class RegisterFormModel
 	{
 		[Required]

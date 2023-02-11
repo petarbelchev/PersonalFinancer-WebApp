@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PersonalFinancer.Services.Currency.Models;
-using PersonalFinancer.Web.Data;
-
-namespace PersonalFinancer.Services.Currency
+﻿namespace PersonalFinancer.Services.Currency
 {
+	using Microsoft.EntityFrameworkCore;
+
+	using Models;
+	using Data;
+
 	public class CurrencyService : ICurrencyService
 	{
 		private readonly PersonalFinancerDbContext data;
@@ -17,7 +18,7 @@ namespace PersonalFinancer.Services.Currency
 				.Where(c => c.UserId == null || c.UserId == userId)
 				.Select(c => new CurrencyViewModel
 				{
-					Id= c.Id,
+					Id = c.Id,
 					Name = c.Name
 				})
 				.ToArrayAsync();

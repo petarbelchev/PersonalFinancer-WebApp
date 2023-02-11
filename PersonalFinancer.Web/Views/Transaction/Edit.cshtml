@@ -1,4 +1,4 @@
-﻿@model TransactionFormModel
+﻿@model TransactionServiceModel
 @{
 	ViewData["Title"] = "Edit Transaction";
 }
@@ -7,7 +7,7 @@
 <div class="row">
 	<div class="col-md-4">
 		<section>
-			<form asp-controller="Transaction" asp-action="Edit" method="post">
+			<form method="post">
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 				<div class="form-floating">
 					<input asp-for="@Model.Amount" class="form-control" />

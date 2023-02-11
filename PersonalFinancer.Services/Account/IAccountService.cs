@@ -1,9 +1,9 @@
-﻿using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Services.Account.Models;
-
-namespace PersonalFinancer.Services.Account
+﻿namespace PersonalFinancer.Services.Account
 {
-    public interface IAccountService
+	using Models;
+	using Data.Enums;
+
+	public interface IAccountService
 	{
 		Task<IEnumerable<AccountViewModel>> AllAccounts(string userId);
 
@@ -15,16 +15,20 @@ namespace PersonalFinancer.Services.Account
 
 		Task ChangeBalance(int accountId, decimal amount, TransactionType transactionType);
 
-		Task<bool> IsOwner(string userId, int accountId);
+		Task<bool> IsAccountOwner(string userId, int accountId);
 
-		Task Add(TransactionFormModel transactionFormModel);
+		Task CreateTransaction(TransactionServiceModel transactionFormModel);
 
-		Task Delete(int id);
+		Task DeleteTransactionById(int id);
 
-		Task Edit(TransactionFormModel transactionFormModel);
+		Task EditTransaction(TransactionServiceModel transactionFormModel);
 
-		Task<TransactionFormModel?> FindTransactionById(int id);
+		Task<TransactionServiceModel?> GetTransactionById(int id);
+
+		Task<IEnumerable<TransactionViewModel>> GetTransactionsByAccountId(int id);
 
 		Task<IEnumerable<TransactionViewModel>> LastFiveTransactions(string userId);
+
+		Task<AccountViewModelExtended> GetAccountById(int id);
 	}
 }

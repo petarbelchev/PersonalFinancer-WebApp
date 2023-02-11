@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PersonalFinancer.Services.Category.Models;
-using PersonalFinancer.Web.Data;
-
-namespace PersonalFinancer.Services.Category
+﻿namespace PersonalFinancer.Services.Category
 {
+	using Microsoft.EntityFrameworkCore;
+
+	using Models;
+	using Data;
+
 	public class CategoryService : ICategoryService
 	{
 		private readonly PersonalFinancerDbContext data;

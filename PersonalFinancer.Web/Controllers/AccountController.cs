@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Account;
-using PersonalFinancer.Services.Account.Models;
-using PersonalFinancer.Services.Currency;
-using PersonalFinancer.Web.Infrastructure;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Account;
+	using Services.Account.Models;
+	using Services.Currency;
+	using Infrastructure;
+
 	[Authorize]
 	public class AccountController : Controller
 	{
@@ -53,6 +53,23 @@ namespace PersonalFinancer.Web.Controllers
 
 			//TODO: Implemend redirect to new Accound Details Page!
 			return RedirectToAction("Index", "Dashboard");
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> Details(int id)
+		{
+			if (!await accountService.IsAccountOwner(User.Id(), id))
+				return Unauthorized();
+
+			try
+			{
+				var accountDetails = await accountService.GetAccountById(id);
+				return View(accountDetails);
+			}
+			catch (Exception)
+			{
+				return BadRequest();
+			}
 		}
 	}
 }

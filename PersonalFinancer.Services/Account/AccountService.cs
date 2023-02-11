@@ -1,19 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Account.Models;
-using PersonalFinancer.Web.Data;
-using static PersonalFinancer.Data.DataConstants.Category;
-
-namespace PersonalFinancer.Services.Account
+﻿namespace PersonalFinancer.Services.Account
 {
+	using Microsoft.EntityFrameworkCore;
+
+	using Data;
+	using Data.Enums;
+	using Data.Models;
+	using Models;
+	using static Data.DataConstants.Category;
+
 	public class AccountService : IAccountService
 	{
 		private readonly PersonalFinancerDbContext data;
 
-		public AccountService(
-			PersonalFinancerDbContext context)
+		public AccountService(PersonalFinancerDbContext context)
 		{
 			this.data = context;
 		}
@@ -68,7 +67,7 @@ namespace PersonalFinancer.Services.Account
 
 		public async Task CreateAccount(string userId, CreateAccountFormModel accountModel)
 		{
-			var newAccount = new Data.Models.Account()
+			var newAccount = new Account()
 			{
 				Name = accountModel.Name,
 				Balance = accountModel.Balance,
@@ -95,7 +94,7 @@ namespace PersonalFinancer.Services.Account
 			await data.SaveChangesAsync();
 		}
 
-		public async Task<bool> IsOwner(string userId, int accountId)
+		public async Task<bool> IsAccountOwner(string userId, int accountId)
 		{
 			var account = await data.Accounts.FindAsync(accountId);
 
@@ -105,7 +104,7 @@ namespace PersonalFinancer.Services.Account
 			return account.OwnerId == userId;
 		}
 
-		public async Task Add(TransactionFormModel transactionFormModel)
+		public async Task CreateTransaction(TransactionServiceModel transactionFormModel)
 		{
 			var newTransaction = new Transaction()
 			{
@@ -118,19 +117,19 @@ namespace PersonalFinancer.Services.Account
 			};
 
 			await ChangeBalance(newTransaction.AccountId,
-												newTransaction.Amount,
-												newTransaction.TransactionType);
+								newTransaction.Amount,
+								newTransaction.TransactionType);
 
 			await data.Transactions.AddAsync(newTransaction);
 
 			await data.SaveChangesAsync();
 		}
 
-		public async Task<TransactionFormModel?> FindTransactionById(int id)
+		public async Task<TransactionServiceModel?> GetTransactionById(int id)
 		{
 			var transaction = await data.Transactions
 				.Where(t => t.Id == id)
-				.Select(t => new TransactionFormModel
+				.Select(t => new TransactionServiceModel
 				{
 					Id = t.Id,
 					AccountId = t.AccountId,
@@ -147,6 +146,22 @@ namespace PersonalFinancer.Services.Account
 				return null;
 
 			return transaction;
+		}
+
+		public async Task<IEnumerable<TransactionViewModel>> GetTransactionsByAccountId(int id)
+		{
+			return await data.Transactions
+				.Where(t => t.AccountId == id)
+				.Select(t => new TransactionViewModel
+				{
+					Id = t.Id,
+					Amount = t.Amount,
+					Category = t.Category.Name,
+					CreatedOn = t.CreatedOn,
+					Refference = t.Refference,
+					TransactionType = t.TransactionType.ToString()
+				})
+				.ToArrayAsync();
 		}
 
 		public async Task<IEnumerable<TransactionViewModel>> LastFiveTransactions(string userId)
@@ -169,7 +184,7 @@ namespace PersonalFinancer.Services.Account
 				.ToArrayAsync();
 		}
 
-		public async Task Delete(int id)
+		public async Task DeleteTransactionById(int id)
 		{
 			var transaction = await data.Transactions
 				.Where(t => t.Id == id)
@@ -182,20 +197,16 @@ namespace PersonalFinancer.Services.Account
 				transaction.TransactionType = TransactionType.Expense;
 
 			await ChangeBalance(transaction.AccountId,
-												transaction.Amount,
-												transaction.TransactionType);
+								transaction.Amount,
+								transaction.TransactionType);
 
 			await data.SaveChangesAsync();
 		}
 
-		public async Task Edit(TransactionFormModel editedTransaction)
+		public async Task EditTransaction(TransactionServiceModel editedTransaction)
 		{
 			var transaction = await data.Transactions
-				.FindAsync(editedTransaction.Id);
-
-			if (transaction == null)
-				throw new ArgumentNullException(
-					$"Transaction with Id {editedTransaction.Id} does not exist.");
+				.FirstAsync(t => t.Id == editedTransaction.Id);
 
 			bool isAccountOrAmountOrTransactionTypeChanged =
 				editedTransaction.AccountId != transaction.AccountId ||
@@ -210,8 +221,8 @@ namespace PersonalFinancer.Services.Account
 					newTransactionType = TransactionType.Expense;
 
 				await ChangeBalance(transaction.AccountId,
-													transaction.Amount,
-													newTransactionType);
+									transaction.Amount,
+									newTransactionType);
 			}
 
 			transaction.Refference = editedTransaction.Refference;
@@ -224,11 +235,29 @@ namespace PersonalFinancer.Services.Account
 			if (isAccountOrAmountOrTransactionTypeChanged)
 			{
 				await ChangeBalance(transaction.AccountId,
-													transaction.Amount,
-													transaction.TransactionType);
+									transaction.Amount,
+									transaction.TransactionType);
 			}
 
 			await data.SaveChangesAsync();
+		}
+
+		public async Task<AccountViewModelExtended> GetAccountById(int id)
+		{
+			var account = await data.Accounts
+				.Where(a => a.Id == id)
+				.Select(a => new AccountViewModelExtended
+				{
+					Id = a.Id,
+					Balance = a.Balance,
+					Name = a.Name,
+					Currency = a.Currency.Name
+				})
+				.FirstAsync();
+
+			account.Transactions = await GetTransactionsByAccountId(account.Id);
+
+			return account;
 		}
 	}
 }

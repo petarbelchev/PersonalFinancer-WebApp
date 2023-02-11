@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PersonalFinancer.Web.Data;
+using PersonalFinancer.Data;
 
 #nullable disable
 
@@ -193,7 +193,7 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Accounts", (string)null);
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.AccountType", b =>
@@ -216,7 +216,7 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AccountTypes", (string)null);
+                    b.ToTable("AccountTypes");
 
                     b.HasData(
                         new
@@ -326,7 +326,7 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
 
                     b.HasData(
                         new
@@ -378,7 +378,7 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Currencies", (string)null);
+                    b.ToTable("Currencies");
 
                     b.HasData(
                         new
@@ -432,7 +432,7 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

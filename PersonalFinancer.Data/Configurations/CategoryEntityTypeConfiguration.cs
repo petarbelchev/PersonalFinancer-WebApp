@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PersonalFinancer.Data.Models;
-using static PersonalFinancer.Data.DataConstants.Category;
-
-namespace PersonalFinancer.Data.Configurations
+﻿namespace PersonalFinancer.Data.Configurations
 {
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+	using Data.Models;
+	using static Data.DataConstants.Category;
+
 	internal class CategoryEntityTypeConfiguration : IEntityTypeConfiguration<Category>
 	{
 		public void Configure(EntityTypeBuilder<Category> builder)

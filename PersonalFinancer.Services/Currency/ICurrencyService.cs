@@ -1,7 +1,7 @@
-﻿using PersonalFinancer.Services.Currency.Models;
-
-namespace PersonalFinancer.Services.Currency
+﻿namespace PersonalFinancer.Services.Currency
 {
+	using Models;
+
 	public interface ICurrencyService
 	{
 		Task<IEnumerable<CurrencyViewModel>> AllCurrencies(string userId);

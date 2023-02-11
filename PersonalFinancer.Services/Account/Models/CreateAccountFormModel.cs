@@ -1,9 +1,10 @@
-﻿using PersonalFinancer.Services.Currency.Models;
-using System.ComponentModel.DataAnnotations;
-using static PersonalFinancer.Data.DataConstants.Account;
-
-namespace PersonalFinancer.Services.Account.Models
+﻿namespace PersonalFinancer.Services.Account.Models
 {
+	using System.ComponentModel.DataAnnotations;
+	
+	using static Data.DataConstants.Account;
+	using Currency.Models;
+
 	public class CreateAccountFormModel
 	{
 		[Required(ErrorMessage = "Account name is required.")]

@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using static PersonalFinancer.Data.DataConstants.Category;
-
-namespace PersonalFinancer.Data.Models
+﻿namespace PersonalFinancer.Data.Models
 {
+	using System.ComponentModel.DataAnnotations;
+	using System.ComponentModel.DataAnnotations.Schema;
+
+	using static Data.DataConstants.Category;
+
 	public class Category
 	{
 		[Key]

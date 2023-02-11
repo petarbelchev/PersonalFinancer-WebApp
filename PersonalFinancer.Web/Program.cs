@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+
+using PersonalFinancer.Data;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Account;
 using PersonalFinancer.Services.Category;
 using PersonalFinancer.Services.Currency;
 using PersonalFinancer.Services.User;
-using PersonalFinancer.Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

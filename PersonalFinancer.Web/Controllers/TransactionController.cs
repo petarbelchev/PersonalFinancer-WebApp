@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using NuGet.Packaging;
-
-using PersonalFinancer.Services.Account;
-using PersonalFinancer.Services.Account.Models;
-using PersonalFinancer.Services.Category;
-using PersonalFinancer.Web.Infrastructure;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
-    [Authorize]
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+	using NuGet.Packaging;
+
+	using Services.Account;
+	using Services.Account.Models;
+	using Services.Category;
+	using Infrastructure;
+
+	[Authorize]
 	public class TransactionController : Controller
 	{
 		private readonly ICategoryService categoryService;
@@ -31,7 +31,7 @@ namespace PersonalFinancer.Web.Controllers
 		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
-			var formModel = new TransactionFormModel();
+			var formModel = new TransactionServiceModel();
 			formModel.Categories.AddRange(await categoryService.All());
 			formModel.Accounts.AddRange(await accountService.AllAccounts(User.Id()));
 			formModel.CreatedOn = DateTime.Now;
@@ -40,7 +40,7 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(TransactionFormModel transactionFormModel)
+		public async Task<IActionResult> Create(TransactionServiceModel transactionFormModel)
 		{
 			if (!ModelState.IsValid)
 			{
@@ -52,7 +52,7 @@ namespace PersonalFinancer.Web.Controllers
 
 			try
 			{
-				await accountService.Add(transactionFormModel);
+				await accountService.CreateTransaction(transactionFormModel);
 			}
 			catch (Exception)
 			{
@@ -67,7 +67,7 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				await accountService.Delete(id);
+				await accountService.DeleteTransactionById(id);
 			}
 			catch (Exception)
 			{
@@ -78,9 +78,9 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> Edit(int id)
+		public async Task<IActionResult> Edit(int id, string? returnUrl = null)
 		{
-			var transaction = await accountService.FindTransactionById(id);
+			var transaction = await accountService.GetTransactionById(id);
 
 			if (transaction == null)
 				return BadRequest();
@@ -97,11 +97,13 @@ namespace PersonalFinancer.Web.Controllers
 
 			transaction.Accounts.AddRange(await accountService.AllAccounts(userId));
 
+			transaction.ReturnUrl = returnUrl;
+
 			return View(transaction);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Edit(TransactionFormModel transactionFormModel)
+		public async Task<IActionResult> Edit(TransactionServiceModel transactionFormModel)
 		{
 			string userId = User.Id();
 
@@ -113,17 +115,20 @@ namespace PersonalFinancer.Web.Controllers
 				return View(transactionFormModel);
 			}
 
-			if (!await accountService.IsOwner(userId, transactionFormModel.AccountId))
+			if (!await accountService.IsAccountOwner(userId, transactionFormModel.AccountId))
 				return Unauthorized();
 
 			try
 			{
-				await accountService.Edit(transactionFormModel);
+				await accountService.EditTransaction(transactionFormModel);
 			}
 			catch (Exception)
 			{
 				return BadRequest();
 			}
+
+			if (transactionFormModel.ReturnUrl != null)
+				return LocalRedirect(transactionFormModel.ReturnUrl);
 
 			return RedirectToAction("Index", "Dashboard");
 		}

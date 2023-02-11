@@ -1,7 +1,7 @@
-﻿using PersonalFinancer.Web.Data;
-
-namespace PersonalFinancer.Services.User
+﻿namespace PersonalFinancer.Services.User
 {
+	using Data;
+
 	public class UserService : IUserService
 	{
 		private readonly PersonalFinancerDbContext data;
@@ -15,7 +15,7 @@ namespace PersonalFinancer.Services.User
 		{
 			var user = await data.Users.FindAsync(userId);
 
-			if (user == null) 
+			if (user == null)
 				return null;
 
 			return $"{user.FirstName} {user.LastName}";

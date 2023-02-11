@@ -1,10 +1,10 @@
-﻿using System.Security.Claims;
-
-namespace PersonalFinancer.Web.Infrastructure
+﻿namespace PersonalFinancer.Web.Infrastructure
 {
+	using System.Security.Claims;
+
 	public static class ClaimsPrincipalExtensions
 	{
 		public static string Id(this ClaimsPrincipal user)
-            => user.FindFirstValue(ClaimTypes.NameIdentifier);
+			=> user.FindFirstValue(ClaimTypes.NameIdentifier);
 	}
 }

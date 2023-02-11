@@ -1,7 +1,7 @@
-﻿using PersonalFinancer.Services.Category.Models;
-
-namespace PersonalFinancer.Services.Category
+﻿namespace PersonalFinancer.Services.Category
 {
+	using Models;
+
 	public interface ICategoryService
 	{
 		Task<IEnumerable<CategoryViewModel>> All();
