@@ -59,11 +59,11 @@
 				return BadRequest();
 			}
 
-			return RedirectToAction("Index", "Dashboard");
+			return RedirectToAction("Index", "Home");
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> Delete(int id)
+		public async Task<IActionResult> Delete(Guid id)
 		{
 			try
 			{
@@ -74,11 +74,11 @@
 				return BadRequest();
 			}
 
-			return RedirectToAction("Index", "Dashboard");
+			return RedirectToAction("Index", "Home");
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> Edit(int id, string? returnUrl = null)
+		public async Task<IActionResult> Edit(Guid id, string? returnUrl = null)
 		{
 			var transaction = await accountService.GetTransactionById(id);
 
@@ -90,7 +90,7 @@
 			if (transaction.OwnerId != userId)
 				return Unauthorized();
 
-			if (transaction.CategoryId == 1)
+			if (await categoryService.IsInitialBalance(transaction.CategoryId))
 				transaction.Categories.Add(await categoryService.CategoryById(transaction.CategoryId));
 			else
 				transaction.Categories.AddRange(await categoryService.All());
@@ -130,7 +130,7 @@
 			if (transactionFormModel.ReturnUrl != null)
 				return LocalRedirect(transactionFormModel.ReturnUrl);
 
-			return RedirectToAction("Index", "Dashboard");
+			return RedirectToAction("Index", "Home");
 		}
 	}
 }

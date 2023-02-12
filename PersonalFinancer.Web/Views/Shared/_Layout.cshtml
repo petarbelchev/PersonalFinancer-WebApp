@@ -22,9 +22,9 @@
 					<ul class="navbar-nav flex-grow-1">
 						@if (User?.Identity?.IsAuthenticated ?? false)
 						{
-							<li class="nav-item">
+							@*<li class="nav-item">
 								<a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-							</li>
+							</li>*@
 						}
 					</ul>
 					<partial name="_LoginPartial" />

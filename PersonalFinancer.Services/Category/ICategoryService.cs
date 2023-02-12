@@ -6,8 +6,10 @@
 	{
 		Task<IEnumerable<CategoryViewModel>> All();
 
-		Task<int> CategoryIdByName(string name);
+		Task<Guid> CategoryIdByName(string name);
 
-		Task<CategoryViewModel> CategoryById(int id);
+		Task<CategoryViewModel> CategoryById(Guid id);
+
+		Task<bool> IsInitialBalance(Guid id);
 	}
 }

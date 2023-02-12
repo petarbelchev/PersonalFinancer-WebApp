@@ -89,7 +89,7 @@
 				if (loginFormModel.ReturnUrl != null)
 					return LocalRedirect(loginFormModel.ReturnUrl);
 				else
-					return RedirectToAction("Index", "Dashboard");
+					return RedirectToAction("Index", "Home");
 			}
 
 			ModelState.AddModelError(string.Empty, "Invalid login attempt.");

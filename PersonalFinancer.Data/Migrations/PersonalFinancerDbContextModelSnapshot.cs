@@ -161,20 +161,21 @@ namespace PersonalFinancer.Data.Migrations
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Account", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("AccountTypeId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("AccountTypeId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("CurrencyId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CurrencyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -198,11 +199,12 @@ namespace PersonalFinancer.Data.Migrations
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.AccountType", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -221,12 +223,14 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = new Guid("e9fefdbf-b9e3-4924-9df7-1c0e1324b93f"),
+                            IsDeleted = false,
                             Name = "Cash"
                         },
                         new
                         {
-                            Id = 2,
+                            Id = new Guid("976799ef-5cec-4d65-b1bc-e6d0c4eedaa3"),
+                            IsDeleted = false,
                             Name = "Bank Account"
                         });
                 });
@@ -308,11 +312,12 @@ namespace PersonalFinancer.Data.Migrations
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Category", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -331,43 +336,47 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = new Guid("8de5c04c-75b6-469c-8192-87c1c39beda4"),
+                            IsDeleted = false,
                             Name = "Initial Balance"
                         },
                         new
                         {
-                            Id = 2,
+                            Id = new Guid("8f99a43d-24c7-42e1-bfb4-030519393c3f"),
+                            IsDeleted = false,
                             Name = "Food & Drink"
                         },
                         new
                         {
-                            Id = 3,
+                            Id = new Guid("9c9a8b9d-a053-46b8-9e94-a0bd738e360f"),
+                            IsDeleted = false,
                             Name = "Utilities"
                         },
                         new
                         {
-                            Id = 4,
+                            Id = new Guid("602d70b7-5857-4e2c-a32e-cc27e6a77940"),
+                            IsDeleted = false,
                             Name = "Transport"
                         },
                         new
                         {
-                            Id = 5,
+                            Id = new Guid("12af7c5f-1521-4a74-8563-121917b45cad"),
+                            IsDeleted = false,
                             Name = "Housing"
                         },
                         new
                         {
-                            Id = 6,
+                            Id = new Guid("045b8079-068e-4dfa-9da4-9b0e9d0364a3"),
+                            IsDeleted = false,
                             Name = "Medical & Healthcare"
                         });
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Currency", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -383,37 +392,35 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = new Guid("5e3ae38f-ecd9-44a7-9167-f07d4e40b47b"),
                             Name = "BGN"
                         },
                         new
                         {
-                            Id = 2,
+                            Id = new Guid("010fe957-6059-4f39-bb75-575a4ea23e21"),
                             Name = "EUR"
                         },
                         new
                         {
-                            Id = 3,
+                            Id = new Guid("9b7253f8-8110-4fe0-8e18-94a209e52d1b"),
                             Name = "USD"
                         });
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Transaction", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");

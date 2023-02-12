@@ -1,9 +1,14 @@
 ﻿@model AccountViewModelExtended
 
-<h1>Account: @Model.Name  |  Balance: @Model.Balance @Model.Currency</h1>
+<h1 class="display-6">
+	Account: @Model.Name 
+	<a asp-controller="Account" asp-action="ConfirmDelete" asp-route-id="@Model.Id" class="btn" style="background-color: red;">
+		Delete Account
+	</a>
+</h1>
 
 <div>
-	<h1>Transactions</h1>
+	<h1 class="display-6">Transactions:</h1>
 	<table class="table">
 		<thead>
 			<tr>
@@ -26,12 +31,12 @@
 					<td>@transaction.Amount</td>
 					<td>@transaction.Refference</td>
 					<td>
-						<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" asp-route-returnUrl="~/Account/Details/@Model.Id" class="btn btn-primary">
+						<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" asp-route-returnUrl="~/Account/Details/@Model.Id" class="btn" style="background-color: yellow;">
 							Edit
 						</a>
 					</td>
 					<td>
-						<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn btn-primary">
+						<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn" style="background-color: red;">
 							Delete
 						</a>
 					</td>
@@ -40,3 +45,5 @@
 		</tbody>
 	</table>
 </div>
+
+<p class="display-6">Balance: @Model.Balance @Model.Currency</p>

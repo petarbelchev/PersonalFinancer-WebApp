@@ -4,6 +4,7 @@
 
 	using Models;
 	using Data;
+	using static Data.DataConstants.Category;
 
 	public class CategoryService : ICategoryService
 	{
@@ -24,14 +25,14 @@
 				.ToArrayAsync();
 		}
 
-		public async Task<int> CategoryIdByName(string name)
+		public async Task<Guid> CategoryIdByName(string name)
 		{
 			var category = await data.Categories.FirstAsync(c => c.Name == name);
 
 			return category.Id;
 		}
 
-		public async Task<CategoryViewModel> CategoryById(int id)
+		public async Task<CategoryViewModel> CategoryById(Guid id)
 		{
 			return await data.Categories
 				.Where(c => c.Id == id)
@@ -41,6 +42,13 @@
 					Name = c.Name
 				})
 				.FirstAsync();
+		}
+
+		public async Task<bool> IsInitialBalance(Guid id)
+		{
+			var category = await data.Categories.FirstAsync(c => c.Id == id);
+
+			return category.Name == CategoryInitialBalanceName;
 		}
 	}
 }

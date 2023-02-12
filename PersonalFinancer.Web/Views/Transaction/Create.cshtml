@@ -5,7 +5,7 @@
 
 @if (Model.Accounts.Any())
 {
-	<h1>@ViewData["Title"]</h1>
+	<h1 class="display-6">@ViewData["Title"]</h1>
 	<div class="row">
 		<div class="col-md-4">
 			<section>
@@ -51,7 +51,7 @@
 						<span asp-validation-for="@Model.Refference" class="text-danger"></span>
 					</div>
 					<div>
-						<button type="submit" class="w-100 btn btn-lg btn-primary">Create</button>
+						<button type="submit" class="w-100 btn btn-lg" style="background-color: lawngreen;">Create</button>
 					</div>
 				</form>
 			</section>
@@ -62,7 +62,7 @@ else
 {
 	<div class="text-center">
 		<h1 class="display-4">You do not have any created account.</h1>
-		<h2 class="display-6">Please <a asp-controller="Account" asp-action="Create">create</a> your account first before start record your transactions.</h2>
+		<h2 class="display-6"><a asp-controller="Account" asp-action="Create">Create</a> your first account before start record your transactions.</h2>
 	</div>
 }
 

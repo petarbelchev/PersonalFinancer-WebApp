@@ -2,11 +2,28 @@
 {
 	using Microsoft.AspNetCore.Mvc;
 
+	using Infrastructure;
+	using Services.Account;
+	using Services.Account.Models;
+
 	public class HomeController : Controller
 	{
-		public IActionResult Index()
+		private readonly IAccountService accountService;
+
+		public HomeController(IAccountService accountService)
+			=> this.accountService = accountService;
+
+		public async Task<IActionResult> Index()
 		{
-			return View();
+			string userId = User.Id();
+
+			var dashboardModel = new DashboardViewModel
+			{
+				LastTransactions = await accountService.LastFiveTransactions(userId),
+				Accounts = await accountService.AllAccountsWithData(userId)
+			};
+
+			return View(dashboardModel);
 		}
 
 		public IActionResult Privacy()

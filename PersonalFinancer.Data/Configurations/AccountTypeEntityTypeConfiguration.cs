@@ -13,12 +13,12 @@
 			{
 				new AccountType
 				{
-					Id = 1,
+					Id = Guid.NewGuid(),
 					Name = "Cash"
 				},
 				new AccountType
 				{
-					Id = 2,
+					Id = Guid.NewGuid(),
 					Name = "Bank Account"
 				}
 			});

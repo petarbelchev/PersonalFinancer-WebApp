@@ -1,0 +1,12 @@
+﻿@model AccountViewModel
+
+<h1 class="display-6">You are going to delete Account: @Model.Name</h1>
+<h2 class="display-6">You can delete only the account or all of account's transactions.</h2>
+
+<h2 class="display-6">Are you sure?</h2>
+<a asp-controller="Account" asp-action="Delete"
+   asp-route-id="@Model.Id" asp-route-shouldDeleteTransactions="False">Yes, delete account only!</a>
+<a asp-controller="Account" asp-action="Delete"
+   asp-route-id="@Model.Id" asp-route-shouldDeleteTransactions="True">Yes, delete account and transactions!</a>
+<a asp-controller="Account" asp-action="Details"
+   asp-route-id="@Model.Id">No, do not delete this account</a>

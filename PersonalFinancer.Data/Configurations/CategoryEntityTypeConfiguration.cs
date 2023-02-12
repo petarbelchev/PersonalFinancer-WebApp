@@ -14,32 +14,32 @@
 			{
 				new Category
 				{
-					Id = 1,
+					Id = Guid.NewGuid(),
 					Name = CategoryInitialBalanceName
 				},
 				new Category
 				{
-					Id = 2,
+					Id = Guid.NewGuid(),
 					Name = "Food & Drink"
 				},
 				new Category
 				{
-					Id = 3,
+					Id = Guid.NewGuid(),
 					Name = "Utilities"
 				},
 				new Category
 				{
-					Id = 4,
+					Id = Guid.NewGuid(),
 					Name = "Transport"
 				},
 				new Category
 				{
-					Id = 5,
+					Id = Guid.NewGuid(),
 					Name = "Housing"
 				},
 				new Category
 				{
-					Id = 6,
+					Id = Guid.NewGuid(),
 					Name = "Medical & Healthcare"
 				}
 			});

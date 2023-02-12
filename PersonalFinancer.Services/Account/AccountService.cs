@@ -20,7 +20,7 @@
 		public async Task<IEnumerable<AccountViewModel>> AllAccounts(string userId)
 		{
 			return await data.Accounts
-				.Where(a => a.OwnerId == userId)
+				.Where(a => a.OwnerId == userId && !a.IsDeleted)
 				.Select(a => new AccountViewModel
 				{
 					Id = a.Id,
@@ -32,7 +32,7 @@
 		public async Task<IEnumerable<AccountViewModelExtended>> AllAccountsWithData(string userId)
 		{
 			return await data.Accounts
-				.Where(a => a.OwnerId == userId)
+				.Where(a => a.OwnerId == userId && !a.IsDeleted)
 				.Select(a => new AccountViewModelExtended
 				{
 					Id = a.Id,
@@ -46,7 +46,7 @@
 		public async Task<IEnumerable<AccountTypeViewModel>> AllAccountTypes(string userId)
 		{
 			return await data.AccountTypes
-				.Where(a => a.UserId == null || a.UserId == userId)
+				.Where(a => (a.UserId == null || a.UserId == userId) && !a.IsDeleted)
 				.Select(a => new AccountTypeViewModel
 				{
 					Id = a.Id,
@@ -55,7 +55,7 @@
 				.ToArrayAsync();
 		}
 
-		public async Task ChangeBalance(int accountId, decimal amount, TransactionType transactionType)
+		public async Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType)
 		{
 			var account = await data.Accounts.FirstAsync(a => a.Id == accountId);
 
@@ -84,7 +84,7 @@
 				{
 					Amount = newAccount.Balance,
 					Account = newAccount,
-					CategoryId = 1, // Id for initial balance 
+					Category = await data.Categories.FirstAsync(c => c.Name == CategoryInitialBalanceName),
 					Refference = "Initial Balance",
 					CreatedOn = DateTime.Now,
 					TransactionType = TransactionType.Income
@@ -94,7 +94,7 @@
 			await data.SaveChangesAsync();
 		}
 
-		public async Task<bool> IsAccountOwner(string userId, int accountId)
+		public async Task<bool> IsAccountOwner(string userId, Guid accountId)
 		{
 			var account = await data.Accounts.FindAsync(accountId);
 
@@ -125,7 +125,7 @@
 			await data.SaveChangesAsync();
 		}
 
-		public async Task<TransactionServiceModel?> GetTransactionById(int id)
+		public async Task<TransactionServiceModel?> GetTransactionById(Guid id)
 		{
 			var transaction = await data.Transactions
 				.Where(t => t.Id == id)
@@ -148,10 +148,11 @@
 			return transaction;
 		}
 
-		public async Task<IEnumerable<TransactionViewModel>> GetTransactionsByAccountId(int id)
+		public async Task<IEnumerable<TransactionViewModel>> GetTransactionsByAccountId(Guid id)
 		{
 			return await data.Transactions
 				.Where(t => t.AccountId == id)
+				.OrderByDescending(t => t.CreatedOn)
 				.Select(t => new TransactionViewModel
 				{
 					Id = t.Id,
@@ -173,7 +174,7 @@
 				.Select(t => new TransactionViewModel
 				{
 					Id = t.Id,
-					Account = t.Account.Name,
+					Account = t.Account.Name + (t.Account.IsDeleted ? " (Deleted)" : string.Empty),
 					Currency = t.Account.Currency.Name,
 					Amount = t.Amount,
 					TransactionType = t.TransactionType.ToString(),
@@ -184,7 +185,7 @@
 				.ToArrayAsync();
 		}
 
-		public async Task DeleteTransactionById(int id)
+		public async Task DeleteTransactionById(Guid id)
 		{
 			var transaction = await data.Transactions
 				.Where(t => t.Id == id)
@@ -199,6 +200,30 @@
 			await ChangeBalance(transaction.AccountId,
 								transaction.Amount,
 								transaction.TransactionType);
+
+			await data.SaveChangesAsync();
+		}
+
+		public async Task DeleteAccountById(Guid id, bool shouldDeleteTransactions)
+		{
+			var account = await data.Accounts.FirstAsync(a => a.Id == id && !a.IsDeleted);
+
+			if (shouldDeleteTransactions)
+			{
+				data.Accounts.Remove(account);
+
+				// This code is not nessesery because Cascade delete all transactions
+				//
+				//var accountTransactions = await data.Transactions
+				//	.Where(t => t.AccountId == account.Id)
+				//	.ToArrayAsync();
+
+				//data.Transactions.RemoveRange(accountTransactions);
+			}
+			else
+			{
+				account.IsDeleted = true;
+			}
 
 			await data.SaveChangesAsync();
 		}
@@ -242,10 +267,24 @@
 			await data.SaveChangesAsync();
 		}
 
-		public async Task<AccountViewModelExtended> GetAccountById(int id)
+		public async Task<AccountViewModel> GetAccountById(Guid id)
 		{
 			var account = await data.Accounts
-				.Where(a => a.Id == id)
+				.Where(a => a.Id == id && !a.IsDeleted)
+				.Select(a => new AccountViewModel
+				{
+					Id = a.Id,
+					Name = a.Name
+				})
+				.FirstAsync();
+
+			return account;
+		}
+
+		public async Task<AccountViewModelExtended> GetAccountByIdExtended(Guid id)
+		{
+			var account = await data.Accounts
+				.Where(a => a.Id == id && !a.IsDeleted)
 				.Select(a => new AccountViewModelExtended
 				{
 					Id = a.Id,

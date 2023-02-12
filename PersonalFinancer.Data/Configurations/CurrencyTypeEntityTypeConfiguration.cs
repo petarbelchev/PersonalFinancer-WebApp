@@ -13,17 +13,17 @@
 			{
 				new Currency
 				{
-					Id = 1,
+					Id = Guid.NewGuid(),
 					Name = "BGN"
 				},
 				new Currency
 				{
-					Id = 2,
+					Id = Guid.NewGuid(),
 					Name = "EUR"
 				},
 				new Currency
 				{
-					Id = 3,
+					Id = Guid.NewGuid(),
 					Name = "USD"
 				}
 			});

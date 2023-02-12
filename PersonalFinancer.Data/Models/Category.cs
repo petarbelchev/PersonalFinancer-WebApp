@@ -8,7 +8,7 @@
 	public class Category
 	{
 		[Key]
-		public int Id { get; set; }
+		public Guid Id { get; set; }
 
 		[Required]
 		[MaxLength(CategoryNameMaxLength,
@@ -18,5 +18,7 @@
 		[ForeignKey(nameof(User))]
 		public string? UserId { get; set; }
 		public ApplicationUser? User { get; set; }
+
+		public bool IsDeleted { get; set; }
 	}
 }

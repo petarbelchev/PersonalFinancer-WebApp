@@ -19,13 +19,13 @@
 		public decimal Balance { get; set; }
 
 		[Display(Name = "Account Type")]
-		public int AccountTypeId { get; set; }
+		public Guid AccountTypeId { get; set; }
 
 		public IEnumerable<AccountTypeViewModel> AccountTypes { get; set; }
 			= new List<AccountTypeViewModel>();
 
 		[Display(Name = "Currency")]
-		public int CurrencyId { get; set; }
+		public Guid CurrencyId { get; set; }
 
 		public IEnumerable<CurrencyViewModel> Currencies { get; set; }
 			= new List<CurrencyViewModel>();

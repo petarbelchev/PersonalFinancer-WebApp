@@ -1,8 +1,95 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model DashboardViewModel
+
+@if (!User?.Identity?.IsAuthenticated ?? false)
+{
+	ViewData["Title"] = "Home Page";
+
+	<div class="text-center">
+		<h1 class="display-4">Personal Financer</h1>
+		<h2 class="display-6">Your Finances in One Place!</h2>
+	</div>
+}
+else
+{
+	ViewData["Title"] = "Dashboard";
+
+	@if (Model.Accounts.Any())
+	{
+		<div class="row">
+			<div>
+				<h1 class="display-6">Your Accounts</h1>
+				<div style="display: flex;">
+					@foreach (var account in Model.Accounts)
+					{
+						<div class="card text-center" style="width: 18rem;">
+							<div class="card-body">
+								<h5 class="card-title">@account.Name</h5>
+								<p class="card-text">@account.Balance @account.Currency</p>
+								<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
+									Details
+								</a>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+		<p></p>
+	}
+	@if (Model.LastTransactions.Any())
+	{
+		<div>
+			<h1 class="display-6">Last Five Transactions</h1>
+			<table class="table">
+				<thead>
+					<tr>
+						<th scope="col">Date</th>
+						<th scope="col">Category</th>
+						<th scope="col">Type</th>
+						<th scope="col">Amount</th>
+						<th scope="col">Currency</th>
+						<th scope="col">Account</th>
+						<th scope="col">Refference</th>
+						<th scope="col"></th>
+						<th scope="col"></th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var transaction in Model.LastTransactions)
+					{
+						<tr>
+							<td>@transaction.CreatedOn</td>
+							<td>@transaction.Category</td>
+							<td>@transaction.TransactionType</td>
+							<td>@transaction.Amount</td>
+							<td>@transaction.Currency</td>
+							<td>@transaction.Account</td>
+							<td>@transaction.Refference</td>
+							<td>
+								<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" class="btn" style="background-color: yellow;">
+									Edit
+								</a>
+							</td>
+							<td>
+								<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn" style="background-color: red;">
+									Delete
+								</a>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	}
+	@if (!Model.Accounts.Any() && !Model.LastTransactions.Any())
+	{
+		<div class="text-center">
+			<h1 class="display-4">Your Dashboard is empty.</h1>
+			<h2 class="display-6"><a asp-controller="Account" asp-action="Create">Create</a> your first account and start record your Finances!</h2>
+		</div>
+	}
 }
 
-<div class="text-center">
-    <h1 class="display-4">Personal Financer</h1>
-    <h2 class="display-6">Your Finances in One Place!</h2>
-</div>
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

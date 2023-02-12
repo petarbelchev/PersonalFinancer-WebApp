@@ -8,7 +8,7 @@
 	
 	public class TransactionServiceModel
 	{
-		public int? Id { get; set; }
+		public Guid? Id { get; set; }
 
 		[DataType(DataType.Currency)]
 		[Range(TransactionMinValue, TransactionMaxValue,
@@ -16,12 +16,12 @@
 		public decimal Amount { get; set; }
 
 		[Display(Name = "Category")]
-		public int CategoryId { get; set; }
+		public Guid CategoryId { get; set; }
 		public ICollection<CategoryViewModel> Categories { get; set; }
 			= new List<CategoryViewModel>();
 
 		[Display(Name = "Account")]
-		public int AccountId { get; set; }
+		public Guid AccountId { get; set; }
 
 		public string? OwnerId { get; set; }
 

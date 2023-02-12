@@ -54,8 +54,7 @@ namespace PersonalFinancer.Data.Migrations
                 name: "Currencies",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -89,10 +88,10 @@ namespace PersonalFinancer.Data.Migrations
                 name: "AccountTypes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -193,10 +192,10 @@ namespace PersonalFinancer.Data.Migrations
                 name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -212,13 +211,13 @@ namespace PersonalFinancer.Data.Migrations
                 name: "Accounts",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    AccountTypeId = table.Column<int>(type: "int", nullable: false),
-                    CurrencyId = table.Column<int>(type: "int", nullable: false)
+                    AccountTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CurrencyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -247,11 +246,10 @@ namespace PersonalFinancer.Data.Migrations
                 name: "Transactions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    AccountId = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TransactionType = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Refference = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
@@ -275,24 +273,24 @@ namespace PersonalFinancer.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "AccountTypes",
-                columns: new[] { "Id", "Name", "UserId" },
+                columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { 1, "Cash", null },
-                    { 2, "Bank Account", null }
+                    { new Guid("976799ef-5cec-4d65-b1bc-e6d0c4eedaa3"), false, "Bank Account", null },
+                    { new Guid("e9fefdbf-b9e3-4924-9df7-1c0e1324b93f"), false, "Cash", null }
                 });
 
             migrationBuilder.InsertData(
                 table: "Categories",
-                columns: new[] { "Id", "Name", "UserId" },
+                columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { 1, "Initial Balance", null },
-                    { 2, "Food & Drink", null },
-                    { 3, "Utilities", null },
-                    { 4, "Transport", null },
-                    { 5, "Housing", null },
-                    { 6, "Medical & Healthcare", null }
+                    { new Guid("045b8079-068e-4dfa-9da4-9b0e9d0364a3"), false, "Medical & Healthcare", null },
+                    { new Guid("12af7c5f-1521-4a74-8563-121917b45cad"), false, "Housing", null },
+                    { new Guid("602d70b7-5857-4e2c-a32e-cc27e6a77940"), false, "Transport", null },
+                    { new Guid("8de5c04c-75b6-469c-8192-87c1c39beda4"), false, "Initial Balance", null },
+                    { new Guid("8f99a43d-24c7-42e1-bfb4-030519393c3f"), false, "Food & Drink", null },
+                    { new Guid("9c9a8b9d-a053-46b8-9e94-a0bd738e360f"), false, "Utilities", null }
                 });
 
             migrationBuilder.InsertData(
@@ -300,9 +298,9 @@ namespace PersonalFinancer.Data.Migrations
                 columns: new[] { "Id", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { 1, "BGN", null },
-                    { 2, "EUR", null },
-                    { 3, "USD", null }
+                    { new Guid("010fe957-6059-4f39-bb75-575a4ea23e21"), "EUR", null },
+                    { new Guid("5e3ae38f-ecd9-44a7-9167-f07d4e40b47b"), "BGN", null },
+                    { new Guid("9b7253f8-8110-4fe0-8e18-94a209e52d1b"), "USD", null }
                 });
 
             migrationBuilder.CreateIndex(

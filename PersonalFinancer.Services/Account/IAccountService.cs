@@ -13,22 +13,26 @@
 
 		Task CreateAccount(string userId, CreateAccountFormModel accountModel);
 
-		Task ChangeBalance(int accountId, decimal amount, TransactionType transactionType);
+		Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType);
 
-		Task<bool> IsAccountOwner(string userId, int accountId);
+		Task<bool> IsAccountOwner(string userId, Guid accountId);
 
 		Task CreateTransaction(TransactionServiceModel transactionFormModel);
 
-		Task DeleteTransactionById(int id);
+		Task DeleteTransactionById(Guid id);
+		
+		Task DeleteAccountById(Guid id, bool transactionsDelete);
 
 		Task EditTransaction(TransactionServiceModel transactionFormModel);
 
-		Task<TransactionServiceModel?> GetTransactionById(int id);
+		Task<TransactionServiceModel?> GetTransactionById(Guid id);
 
-		Task<IEnumerable<TransactionViewModel>> GetTransactionsByAccountId(int id);
+		Task<IEnumerable<TransactionViewModel>> GetTransactionsByAccountId(Guid id);
 
 		Task<IEnumerable<TransactionViewModel>> LastFiveTransactions(string userId);
 
-		Task<AccountViewModelExtended> GetAccountById(int id);
+		Task<AccountViewModel> GetAccountById(Guid id);
+
+		Task<AccountViewModelExtended> GetAccountByIdExtended(Guid id);
 	}
 }
