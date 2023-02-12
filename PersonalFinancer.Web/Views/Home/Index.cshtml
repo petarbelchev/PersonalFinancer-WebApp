@@ -5,8 +5,8 @@
 	ViewData["Title"] = "Home Page";
 
 	<div class="text-center">
-		<h1 class="display-4">Personal Financer</h1>
-		<h2 class="display-6">Your Finances in One Place!</h2>
+		<p class="display-4">Personal Financer</p>
+		<p class="display-6">Your Finances in One Place!</p>
 	</div>
 }
 else
@@ -15,31 +15,27 @@ else
 
 	@if (Model.Accounts.Any())
 	{
-		<div class="row">
-			<div>
-				<h1 class="display-6">Your Accounts</h1>
-				<div style="display: flex;">
-					@foreach (var account in Model.Accounts)
-					{
-						<div class="card text-center" style="width: 18rem;">
-							<div class="card-body">
-								<h5 class="card-title">@account.Name</h5>
-								<p class="card-text">@account.Balance @account.Currency</p>
-								<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
-									Details
-								</a>
-							</div>
-						</div>
-					}
+		<p class="display-6">Your Accounts</p>
+		<div class="row" style="margin: 20px;">
+			@foreach (var account in Model.Accounts)
+			{
+				<div class="card text-center col-md-3">
+					<div class="card-body">
+						<h5 class="card-title">@account.Name</h5>
+						<p class="card-text">@account.Balance @account.Currency</p>
+						<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
+							Details
+						</a>
+					</div>
 				</div>
-			</div>
+			}
 		</div>
 		<p></p>
 	}
 	@if (Model.LastTransactions.Any())
 	{
+		<p class="display-6">Last Five Transactions</p>
 		<div>
-			<h1 class="display-6">Last Five Transactions</h1>
 			<table class="table">
 				<thead>
 					<tr>
@@ -66,12 +62,12 @@ else
 							<td>@transaction.Account</td>
 							<td>@transaction.Refference</td>
 							<td>
-								<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" class="btn" style="background-color: yellow;">
+								<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" class="btn editBtn">
 									Edit
 								</a>
 							</td>
 							<td>
-								<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn" style="background-color: red;">
+								<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn deleteBtn">
 									Delete
 								</a>
 							</td>
@@ -84,8 +80,8 @@ else
 	@if (!Model.Accounts.Any() && !Model.LastTransactions.Any())
 	{
 		<div class="text-center">
-			<h1 class="display-4">Your Dashboard is empty.</h1>
-			<h2 class="display-6"><a asp-controller="Account" asp-action="Create">Create</a> your first account and start record your Finances!</h2>
+			<p class="display-4" style="font-size: xx-large;">Your Dashboard is empty.</p>
+			<p class="display-6" style="font-size: x-large;"><a asp-controller="Account" asp-action="Create">Create</a> your first account and start record your Finances!</p>
 		</div>
 	}
 }

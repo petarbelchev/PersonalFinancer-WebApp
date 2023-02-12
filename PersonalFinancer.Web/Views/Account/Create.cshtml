@@ -3,24 +3,24 @@
 	ViewData["Title"] = "Create Account";
 }
 
-<h1 class="display-6">@ViewData["Title"]</h1>
+<p class="display-6 text-center">@ViewData["Title"]</p>
 <div class="row">
-	<div class="col-md-4">
+	<div class="offset-md-4 col-md-4">
 		<section>
 			<form method="post">
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-				<div class="form-floating">
+				<div class="form-floating formField">
 					<input asp-for="@Model.Name" class="form-control" />
 					<label asp-for="@Model.Name" class="form-label"></label>
 					<span asp-validation-for="@Model.Name" class="text-danger"></span>
 				</div>
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-				<div class="form-floating">
+				<div class="form-floating formField">
 					<input asp-for="@Model.Balance" class="form-control" />
 					<label asp-for="@Model.Balance" class="form-label"></label>
 					<span asp-validation-for="@Model.Balance" class="text-danger"></span>
 				</div>
-				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0">
+				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 					<label asp-for="@Model.AccountTypeId" class="form-label"></label>
 					<select asp-for="@Model.AccountTypeId">
 						@foreach (var accountType in @Model.AccountTypes)
@@ -29,7 +29,7 @@
 						}
 					</select>
 				</div>
-				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0">
+				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 					<label asp-for="@Model.CurrencyId" class="form-label"></label>
 					<select asp-for="@Model.CurrencyId">
 						@foreach (var currency in @Model.Currencies)
@@ -39,7 +39,7 @@
 					</select>
 				</div>
 				<div>
-					<button type="submit" class="w-100 btn btn-lg" style="background-color: lawngreen;">Create</button>
+					<button type="submit" class="w-100 btn btn-lg createBtn">Create</button>
 				</div>
 			</form>
 		</section>

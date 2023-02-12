@@ -4,35 +4,35 @@
 	ViewData["Title"] = "Register";
 }
 
-<h1>@ViewData["Title"]</h1>
+<h1 class="display-4 text-center">@ViewData["Title"]</h1>
 
 <div class="row">
-	<div class="col-md-4">
+	<div class="offset-md-4 col-md-4">
 		<form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-			<h2>Create a new account.</h2>
+			<h2 class="display-4 text-center" style="font-size: xx-large;">Create a new account.</h2>
 			<hr />
 			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-			<div class="form-floating">
+			<div class="form-floating formField">
 				<input asp-for="@Model.FirstName" class="form-control" autocomplete="First Name" aria-required="true" />
 				<label asp-for="@Model.FirstName"></label>
 				<span asp-validation-for="@Model.FirstName" class="text-danger"></span>
 			</div>
-			<div class="form-floating">
+			<div class="form-floating formField">
 				<input asp-for="@Model.LastName" class="form-control" autocomplete="Last Name" aria-required="true" />
 				<label asp-for="@Model.LastName"></label>
 				<span asp-validation-for="@Model.LastName" class="text-danger"></span>
 			</div>
-			<div class="form-floating">
+			<div class="form-floating formField">
 				<input asp-for="@Model.Email" class="form-control" autocomplete="Email" aria-required="true" />
 				<label asp-for="@Model.Email"></label>
 				<span asp-validation-for="@Model.Email" class="text-danger"></span>
 			</div>
-			<div class="form-floating">
+			<div class="form-floating formField">
 				<input asp-for="@Model.Password" class="form-control" autocomplete="new-password" aria-required="true" />
 				<label asp-for="@Model.Password"></label>
 				<span asp-validation-for="@Model.Password" class="text-danger"></span>
 			</div>
-			<div class="form-floating">
+			<div class="form-floating formField">
 				<input asp-for="@Model.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
 				<label asp-for="@Model.ConfirmPassword"></label>
 				<span asp-validation-for="@Model.ConfirmPassword" class="text-danger"></span>

@@ -16,3 +16,21 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.deleteBtn {
+    background-color: red;
+    color: white;
+}
+
+.editBtn {
+    background-color: yellow;
+}
+
+.createBtn {
+    background-color: limegreen;
+}
+
+.formField {
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
