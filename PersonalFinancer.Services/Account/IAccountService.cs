@@ -34,5 +34,7 @@
 		Task<AccountViewModel> GetAccountById(Guid id);
 
 		Task<AccountViewModelExtended> GetAccountByIdExtended(Guid id);
+
+		Task<Dictionary<string, CashFlowViewModel>> GetCashFlow(string userId);
 	}
 }

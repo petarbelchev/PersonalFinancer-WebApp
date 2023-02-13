@@ -20,7 +20,8 @@
 			var dashboardModel = new DashboardViewModel
 			{
 				LastTransactions = await accountService.LastFiveTransactions(userId),
-				Accounts = await accountService.AllAccountsWithData(userId)
+				Accounts = await accountService.AllAccountsWithData(userId),
+				CurrenciesCashFlow = await accountService.GetCashFlow(userId)
 			};
 
 			return View(dashboardModel);

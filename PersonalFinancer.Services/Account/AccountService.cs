@@ -298,5 +298,36 @@
 
 			return account;
 		}
+
+		public async Task<Dictionary<string, CashFlowViewModel>> GetCashFlow(string userId)
+		{
+			var cashFlow = new Dictionary<string, CashFlowViewModel>();
+
+			await data.Accounts
+				.Where(a => a.OwnerId == userId && a.Transactions.Any())
+				.Include(a => a.Currency)
+				.Include(a => a.Transactions)
+				.ForEachAsync(a =>
+				{
+					if (!cashFlow.ContainsKey(a.Currency.Name))
+						cashFlow[a.Currency.Name] = new CashFlowViewModel();
+
+					var income = a.Transactions?
+						.Where(t => t.TransactionType == TransactionType.Income)
+						.Sum(t => t.Amount);
+
+					if (income != null)
+						cashFlow[a.Currency.Name].Income += (decimal)income;
+
+					var expense = a.Transactions?
+						.Where(t => t.TransactionType == TransactionType.Expense)
+						.Sum(t => t.Amount);
+
+					if (expense != null)
+						cashFlow[a.Currency.Name].Expence += (decimal)expense;
+				});
+
+			return cashFlow;
+		}
 	}
 }

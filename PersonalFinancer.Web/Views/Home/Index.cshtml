@@ -13,75 +13,120 @@ else
 {
 	ViewData["Title"] = "Dashboard";
 
-	@if (Model.Accounts.Any())
+	@if (Model.Accounts.Any() || Model.LastTransactions.Any())
 	{
-		<p class="display-6">Your Accounts</p>
-		<div class="row" style="margin: 20px;">
-			@foreach (var account in Model.Accounts)
-			{
-				<div class="card text-center col-md-3">
-					<div class="card-body">
-						<h5 class="card-title">@account.Name</h5>
-						<p class="card-text">@account.Balance @account.Currency</p>
-						<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
-							Details
-						</a>
+		<div class="row" style="margin-top: 50px;">
+			<div class="col-md-12">
+				<div class="card">
+					<div class="card-header">
+						<h6>Your Accounts</h6>
+					</div>
+					<div class="row">
+						@foreach (var account in Model.Accounts)
+						{
+							<div class="col-sm-3 mb-3 mb-sm-0">
+								<div class="card">
+									<div class="card-body">
+										<h5 class="card-title">@account.Name</h5>
+										<p class="card-text">@account.Balance @account.Currency</p>
+										<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
+											Details
+										</a>
+									</div>
+								</div>
+							</div>
+						}
 					</div>
 				</div>
-			}
+			</div>
 		</div>
-		<p></p>
-	}
-	@if (Model.LastTransactions.Any())
-	{
-		<p class="display-6">Last Five Transactions</p>
-		<div>
-			<table class="table">
-				<thead>
-					<tr>
-						<th scope="col">Date</th>
-						<th scope="col">Category</th>
-						<th scope="col">Type</th>
-						<th scope="col">Amount</th>
-						<th scope="col">Currency</th>
-						<th scope="col">Account</th>
-						<th scope="col">Refference</th>
-						<th scope="col"></th>
-						<th scope="col"></th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach (var transaction in Model.LastTransactions)
-					{
-						<tr>
-							<td>@transaction.CreatedOn</td>
-							<td>@transaction.Category</td>
-							<td>@transaction.TransactionType</td>
-							<td>@transaction.Amount</td>
-							<td>@transaction.Currency</td>
-							<td>@transaction.Account</td>
-							<td>@transaction.Refference</td>
-							<td>
-								<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" class="btn editBtn">
-									Edit
-								</a>
-							</td>
-							<td>
-								<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn deleteBtn">
-									Delete
-								</a>
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
+
+
+		<div class="row" style="margin-top: 50px;">
+			<div class="col-md-9">
+				<div class="card">
+					<div class="card-header">
+						<h6>Last Five Transactions</h6>
+					</div>
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th scope="col">Date</th>
+								<th scope="col">Category</th>
+								<th scope="col">Type</th>
+								<th scope="col">Amount</th>
+								<th scope="col">Currency</th>
+								<th scope="col">Account</th>
+								<th scope="col">Refference</th>
+								<th scope="col"></th>
+								<th scope="col"></th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var transaction in Model.LastTransactions)
+							{
+								<tr>
+									<td>@transaction.CreatedOn</td>
+									<td>@transaction.Category</td>
+									<td>@transaction.TransactionType</td>
+									<td>@transaction.Amount</td>
+									<td>@transaction.Currency</td>
+									<td>@transaction.Account</td>
+									<td>@transaction.Refference</td>
+									<td>
+										<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" class="btn btn-warning">
+											Edit
+										</a>
+									</td>
+									<td>
+										<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn btn-danger">
+											Delete
+										</a>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="card">
+					<div class="card-header">
+						<h6>Cash Flow</h6>
+					</div>
+					<div class="card-body">
+						@foreach (var (key, value) in Model.CurrenciesCashFlow)
+						{
+							decimal cashFlow = value.Income + value.Expence;
+							decimal income = cashFlow != 0 ? Math.Round(value.Income / cashFlow * 100, 2) : 0;
+							decimal expence = cashFlow != 0 ? Math.Round(value.Expence / cashFlow * 100, 2) : 0;
+
+							<div class="card-title">
+								<p class="fs-6">@key</p>
+							</div>
+							<h4 class="small font-weight-bold">Income <span class="float-right">@value.Income (@income%)</span></h4>
+							<div class="progress mb-4">
+								<div class="progress-bar bg-success" role="progressbar" style="width: @income%"></div>
+							</div>
+							<h4 class="small font-weight-bold">Expense <span class="float-right">@value.Expence (@expence%)</span></h4>
+							<div class="progress mb-4">
+								<div class="progress-bar bg-danger" role="progressbar" style="width: @expence%"></div>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
 		</div>
 	}
-	@if (!Model.Accounts.Any() && !Model.LastTransactions.Any())
+	else
 	{
 		<div class="text-center">
-			<p class="display-4" style="font-size: xx-large;">Your Dashboard is empty.</p>
-			<p class="display-6" style="font-size: x-large;"><a asp-controller="Account" asp-action="Create">Create</a> your first account and start record your Finances!</p>
+			<p class="display-4">
+				Your Dashboard is empty.
+			</p>
+			<p class="display-6">
+				<a asp-controller="Account" asp-action="Create">Create</a> your first account and start record your Finances!
+			</p>
 		</div>
 	}
 }

@@ -16,7 +16,7 @@
 		public async Task<IEnumerable<CategoryViewModel>> All()
 		{
 			return await data.Categories
-				.Skip(1) // Skiped the first category which is Initial Balance
+				.Where(c => c.Name != CategoryInitialBalanceName)
 				.Select(c => new CategoryViewModel()
 				{
 					Id = c.Id,

@@ -1,15 +1,15 @@
 ﻿@model AccountViewModel
 
 <div class="row">
-	<div class="offset-md-2 col-md-8">
-		<p class="display-4" style="font-size: xx-large">You are going to delete Account: @Model.Name</h1>
-		<p class="display-4" style="font-size: x-large">What should I delete?</p>
+	<div>
+		<p class="fs-1">You are going to delete Account: @Model.Name</h1>
+		<p class="fs-2">What should I delete?</p>
 
 		<a asp-controller="Account" asp-action="Delete"
-		   asp-route-id="@Model.Id" asp-route-shouldDeleteTransactions="False" class="btn deleteBtn">Yes, delete account only!</a>
+		   asp-route-id="@Model.Id" asp-route-shouldDeleteTransactions="False" class="btn btn-danger">Delete account only!</a>
 		<a asp-controller="Account" asp-action="Delete"
-		   asp-route-id="@Model.Id" asp-route-shouldDeleteTransactions="True" class="btn deleteBtn">Yes, delete account and transactions!</a>
+		   asp-route-id="@Model.Id" asp-route-shouldDeleteTransactions="True" class="btn btn-danger">Delete account and transactions!</a>
 		<a asp-controller="Account" asp-action="Details"
-		   asp-route-id="@Model.Id" class="btn btn-primary">Do not delete anythink.</a>
+		   asp-route-id="@Model.Id" class="btn btn-secondary">Do not delete anythink.</a>
 	</div>
 </div>

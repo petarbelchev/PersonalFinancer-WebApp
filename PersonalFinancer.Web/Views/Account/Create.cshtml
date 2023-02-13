@@ -9,20 +9,20 @@
 		<section>
 			<form method="post">
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-				<div class="form-floating formField">
-					<input asp-for="@Model.Name" class="form-control" />
+				<div class="form-floating formField mb-3">
+					<input asp-for="@Model.Name" class="form-control form-control-lg" type="text" placeholder=".form-control-lg" />
 					<label asp-for="@Model.Name" class="form-label"></label>
 					<span asp-validation-for="@Model.Name" class="text-danger"></span>
 				</div>
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 				<div class="form-floating formField">
-					<input asp-for="@Model.Balance" class="form-control" />
+					<input asp-for="@Model.Balance" class="form-control form-control-lg" type="text" placeholder=".form-control-lg" />
 					<label asp-for="@Model.Balance" class="form-label"></label>
 					<span asp-validation-for="@Model.Balance" class="text-danger"></span>
 				</div>
 				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 					<label asp-for="@Model.AccountTypeId" class="form-label"></label>
-					<select asp-for="@Model.AccountTypeId">
+					<select asp-for="@Model.AccountTypeId" class="form-select">
 						@foreach (var accountType in @Model.AccountTypes)
 						{
 							<option value="@accountType.Id">@accountType.Name</option>
@@ -31,7 +31,7 @@
 				</div>
 				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 					<label asp-for="@Model.CurrencyId" class="form-label"></label>
-					<select asp-for="@Model.CurrencyId">
+					<select asp-for="@Model.CurrencyId" class="form-select">
 						@foreach (var currency in @Model.Currencies)
 						{
 							<option value="@currency.Id">@currency.Name</option>
@@ -39,7 +39,7 @@
 					</select>
 				</div>
 				<div>
-					<button type="submit" class="w-100 btn btn-lg createBtn">Create</button>
+					<button type="submit" class="w-100 btn btn-lg btn-success">Create</button>
 				</div>
 			</form>
 		</section>
@@ -49,5 +49,3 @@
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
 }
-
-
