@@ -26,7 +26,7 @@ else
 						{
 							<div class="col-sm-3 mb-3 mb-sm-0">
 								<div class="card">
-									<div class="card-body">
+									<div class="card-body text-center">
 										<h5 class="card-title">@account.Name</h5>
 										<p class="card-text">@account.Balance @account.Currency</p>
 										<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
@@ -52,13 +52,10 @@ else
 						<thead>
 							<tr>
 								<th scope="col">Date</th>
-								<th scope="col">Category</th>
 								<th scope="col">Type</th>
 								<th scope="col">Amount</th>
 								<th scope="col">Currency</th>
 								<th scope="col">Account</th>
-								<th scope="col">Refference</th>
-								<th scope="col"></th>
 								<th scope="col"></th>
 							</tr>
 						</thead>
@@ -67,20 +64,13 @@ else
 							{
 								<tr>
 									<td>@transaction.CreatedOn</td>
-									<td>@transaction.Category</td>
 									<td>@transaction.TransactionType</td>
 									<td>@transaction.Amount</td>
 									<td>@transaction.Currency</td>
 									<td>@transaction.Account</td>
-									<td>@transaction.Refference</td>
 									<td>
-										<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" class="btn btn-warning">
-											Edit
-										</a>
-									</td>
-									<td>
-										<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn btn-danger">
-											Delete
+										<a asp-controller="Transaction" asp-action="Details" asp-route-id="@transaction.Id" class="btn btn-primary">
+											Details
 										</a>
 									</td>
 								</tr>

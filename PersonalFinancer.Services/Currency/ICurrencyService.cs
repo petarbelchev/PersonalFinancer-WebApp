@@ -4,6 +4,9 @@
 
 	public interface ICurrencyService
 	{
-		Task<IEnumerable<CurrencyViewModel>> AllCurrencies(string userId);
+		/// <summary>
+		/// Returns collection of User's currencies with props: Id and Name.
+		/// </summary>
+		Task<IEnumerable<CurrencyViewModel>> UserCurrencies(string userId);
 	}
 }

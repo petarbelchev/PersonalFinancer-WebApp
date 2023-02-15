@@ -27,31 +27,23 @@
 		{
 			string userId = User.Id();
 
-			var formModel = new CreateAccountFormModel
+			var formModel = new AccountFormModel
 			{
-				AccountTypes = await accountService.AllAccountTypes(userId),
-				Currencies = await currencyService.AllCurrencies(userId)
+				AccountTypes = await accountService.AccountTypesViewModel(userId),
+				Currencies = await currencyService.UserCurrencies(userId)
 			};
 
 			return View(formModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(CreateAccountFormModel accountFormModel)
+		public async Task<IActionResult> Create(AccountFormModel accountFormModel)
 		{
 			if (!ModelState.IsValid)
 				return View(accountFormModel);
 
-			try
-			{
-				await accountService.CreateAccount(User.Id(), accountFormModel);
-			}
-			catch (Exception)
-			{
-				return BadRequest();
-			}
+			await accountService.CreateAccount(User.Id(), accountFormModel);
 
-			//TODO: Implemend redirect to new Accound Details Page!
 			return RedirectToAction("Index", "Home");
 		}
 
@@ -61,15 +53,9 @@
 			if (!await accountService.IsAccountOwner(User.Id(), id))
 				return Unauthorized();
 
-			try
-			{
-				var accountDetails = await accountService.GetAccountByIdExtended(id);
-				return View(accountDetails);
-			}
-			catch (Exception)
-			{
-				return BadRequest();
-			}
+			var accountDetails = await accountService.AccountWithTransactions(id);
+
+			return View(accountDetails);
 		}
 
 		[HttpGet]
@@ -78,15 +64,9 @@
 			if (!await accountService.IsAccountOwner(User.Id(), id))
 				return Unauthorized();
 
-			try
-			{
-				var accountModel = await accountService.GetAccountById(id);
-				return View(accountModel);
-			}
-			catch (Exception)
-			{
-				return BadRequest();
-			}
+			AccountDropdownViewModel accountModel = await accountService.AccountById(id);
+
+			return View(accountModel);
 		}
 
 		[HttpGet]
@@ -95,15 +75,9 @@
 			if (!await accountService.IsAccountOwner(User.Id(), id))
 				return Unauthorized();
 
-			try
-			{
-				await accountService.DeleteAccountById(id, shouldDeleteTransactions);
-				return RedirectToAction("Index", "Home");
-			}
-			catch (Exception)
-			{
-				return BadRequest();
-			}
+			await accountService.DeleteAccountById(id, shouldDeleteTransactions);
+
+			return RedirectToAction("Index", "Home");
 		}
 	}
 }

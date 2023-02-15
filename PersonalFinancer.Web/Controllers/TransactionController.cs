@@ -2,12 +2,12 @@
 {
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
-	using NuGet.Packaging;
 
+	using Infrastructure;
 	using Services.Account;
 	using Services.Account.Models;
 	using Services.Category;
-	using Infrastructure;
+	using Services.Category.Models;
 
 	[Authorize]
 	public class TransactionController : Controller
@@ -23,114 +23,136 @@
 			this.accountService = accountService;
 		}
 
-		//public async Task<IActionResult> All()
-		//{
-		//	return View();
-		//}
+		[HttpGet]
+		public async Task<IActionResult> All()
+		{
+			IEnumerable<TransactionExtendedViewModel> transactions =
+				await accountService.TransactionsViewModelByUserId(User.Id());
+
+			return View(transactions);
+		}
 
 		[HttpGet]
-		public async Task<IActionResult> Create()
+		public async Task<IActionResult> Create(string? returnUrl = null)
 		{
-			var formModel = new TransactionServiceModel();
-			formModel.Categories.AddRange(await categoryService.All());
-			formModel.Accounts.AddRange(await accountService.AllAccounts(User.Id()));
-			formModel.CreatedOn = DateTime.Now;
+			string userId = User.Id();
+
+			var formModel = new TransactionFormModel()
+			{
+				Categories = await categoryService.UserCategories(userId),
+				Accounts = await accountService.AccountsByUserId(userId),
+				CreatedOn = DateTime.Now,
+				ReturnUrl = returnUrl
+			};
 
 			return View(formModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(TransactionServiceModel transactionFormModel)
+		public async Task<IActionResult> Create(TransactionFormModel transactionFormModel)
 		{
+			string userId = User.Id();
+
 			if (!ModelState.IsValid)
 			{
-				transactionFormModel.Categories.AddRange(await categoryService.All());
-				transactionFormModel.Accounts.AddRange(await accountService.AllAccounts(User.Id()));
+				transactionFormModel.Categories = await categoryService.UserCategories(userId);
+				transactionFormModel.Accounts = await accountService.AccountsByUserId(userId);
 
 				return View(transactionFormModel);
 			}
 
-			try
-			{
-				await accountService.CreateTransaction(transactionFormModel);
-			}
-			catch (Exception)
-			{
-				return BadRequest();
-			}
+			await accountService.CreateTransaction(transactionFormModel);
 
-			return RedirectToAction("Index", "Home");
+			if (transactionFormModel.ReturnUrl != null)
+			{
+				return LocalRedirect(transactionFormModel.ReturnUrl);
+			}
+			else
+			{
+				return RedirectToAction("Index", "Home");
+			}
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> Delete(Guid id)
+		public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
 		{
-			try
-			{
-				await accountService.DeleteTransactionById(id);
-			}
-			catch (Exception)
-			{
-				return BadRequest();
-			}
+			await accountService.DeleteTransactionById(id);
 
-			return RedirectToAction("Index", "Home");
+			if (returnUrl != null)
+			{
+				return LocalRedirect(returnUrl);
+			}
+			else
+			{
+				return RedirectToAction("Index", "Home");
+			}
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> Details(Guid id)
+		{
+			TransactionExtendedViewModel transaction =
+				await accountService.TransactionViewModelById(id);
+
+			return View(transaction);
 		}
 
 		[HttpGet]
 		public async Task<IActionResult> Edit(Guid id, string? returnUrl = null)
 		{
-			var transaction = await accountService.GetTransactionById(id);
-
-			if (transaction == null)
-				return BadRequest();
+			TransactionFormModel transaction = await accountService.TransactionFormModelById(id);
 
 			string userId = User.Id();
 
 			if (transaction.OwnerId != userId)
+			{
 				return Unauthorized();
+			}
 
 			if (await categoryService.IsInitialBalance(transaction.CategoryId))
-				transaction.Categories.Add(await categoryService.CategoryById(transaction.CategoryId));
+			{
+				transaction.Categories = new List<CategoryViewModel>()
+				{
+					await categoryService.CategoryById(transaction.CategoryId)
+				};
+			}
 			else
-				transaction.Categories.AddRange(await categoryService.All());
+			{
+				transaction.Categories = await categoryService.UserCategories(userId);
+			}
 
-			transaction.Accounts.AddRange(await accountService.AllAccounts(userId));
-
+			transaction.Accounts = await accountService.AccountsByUserId(userId);
 			transaction.ReturnUrl = returnUrl;
 
 			return View(transaction);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Edit(TransactionServiceModel transactionFormModel)
+		public async Task<IActionResult> Edit(TransactionFormModel transactionFormModel)
 		{
 			string userId = User.Id();
 
 			if (!ModelState.IsValid)
 			{
-				transactionFormModel.Categories.AddRange(await categoryService.All());
-				transactionFormModel.Accounts.AddRange(await accountService.AllAccounts(userId));
+				transactionFormModel.Categories = await categoryService.UserCategories(userId);
+				transactionFormModel.Accounts = await accountService.AccountsByUserId(userId);
 
 				return View(transactionFormModel);
 			}
 
 			if (!await accountService.IsAccountOwner(userId, transactionFormModel.AccountId))
+			{
 				return Unauthorized();
+			}
 
-			try
-			{
-				await accountService.EditTransaction(transactionFormModel);
-			}
-			catch (Exception)
-			{
-				return BadRequest();
-			}
+			await accountService.EditTransaction(transactionFormModel);
 
 			if (transactionFormModel.ReturnUrl != null)
+			{
 				return LocalRedirect(transactionFormModel.ReturnUrl);
+			}
 
-			return RedirectToAction("Index", "Home");
+			return LocalRedirect("~/Transaction/Details/" + transactionFormModel.Id);
 		}
 	}
 }

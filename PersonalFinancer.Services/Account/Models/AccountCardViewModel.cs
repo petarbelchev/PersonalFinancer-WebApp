@@ -1,6 +1,6 @@
 ﻿namespace PersonalFinancer.Services.Account.Models
 {
-	public class AccountViewModelExtended
+	public class AccountCardViewModel
 	{
 		public Guid Id { get; set; }
 
@@ -8,8 +8,8 @@
 
 		public decimal Balance { get; set; }
 
-		public string? Currency { get; set; }
+		public string Currency { get; set; } = null!;
 
-		public IEnumerable<TransactionViewModel>? Transactions { get; set; }
+		public IEnumerable<TransactionExtendedViewModel>? Transactions { get; set; }
 	}
 }

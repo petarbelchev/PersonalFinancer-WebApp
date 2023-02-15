@@ -12,7 +12,10 @@
 		public CurrencyService(PersonalFinancerDbContext data)
 			=> this.data = data;
 
-		public async Task<IEnumerable<CurrencyViewModel>> AllCurrencies(string userId)
+		/// <summary>
+		/// Returns collection of User's currencies with props: Id and Name.
+		/// </summary>
+		public async Task<IEnumerable<CurrencyViewModel>> UserCurrencies(string userId)
 		{
 			return await data.Currencies
 				.Where(c => c.UserId == null || c.UserId == userId)

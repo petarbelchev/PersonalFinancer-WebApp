@@ -1,4 +1,4 @@
-﻿@model AccountViewModelExtended
+﻿@model AccountDetailsViewModel
 
 <div class="row" style="margin-top: 50px;">
 	<h1 class="display-6" >
@@ -25,7 +25,6 @@
 						<th scope="col">Amount</th>
 						<th scope="col">Refference</th>
 						<th scope="col"></th>
-						<th scope="col"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -40,8 +39,6 @@
 							<td>
 								<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
 							   asp-route-returnUrl="~/Account/Details/@Model.Id" class="btn btn-warning">Edit</a>
-							</td>
-							<td>
 								<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn btn-danger">Delete</a>
 							</td>
 						</tr>

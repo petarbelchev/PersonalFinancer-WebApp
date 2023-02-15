@@ -1,6 +1,6 @@
 ﻿namespace PersonalFinancer.Services.Account.Models
 {
-	public class AccountViewModel
+	public class AccountDropdownViewModel
 	{
 		public Guid Id { get; set; }
 

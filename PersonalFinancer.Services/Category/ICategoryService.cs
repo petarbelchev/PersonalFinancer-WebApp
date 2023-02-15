@@ -4,12 +4,24 @@
 
 	public interface ICategoryService
 	{
-		Task<IEnumerable<CategoryViewModel>> All();
+		/// <summary>
+		/// Returns collection of User's categories with Id and Name.
+		/// </summary>
+		Task<IEnumerable<CategoryViewModel>> UserCategories(string userId);
 
-		Task<Guid> CategoryIdByName(string name);
+		//Task<Guid> CategoryId(string categoryName);
 
-		Task<CategoryViewModel> CategoryById(Guid id);
+		/// <summary>
+		/// Returns Category with props: Id and Name, or throws an exception.
+		/// </summary>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
+		Task<CategoryViewModel> CategoryById(Guid categoryId);
 
-		Task<bool> IsInitialBalance(Guid id);
+		/// <summary>
+		/// Checks is the given Category is an initial balance.
+		/// </summary>
+		Task<bool> IsInitialBalance(Guid categoryId);
 	}
 }

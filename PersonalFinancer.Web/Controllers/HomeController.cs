@@ -4,37 +4,26 @@
 
 	using Infrastructure;
 	using Services.Account;
-	using Services.Account.Models;
+	using PersonalFinancer.Services.Account.Models;
 
 	public class HomeController : Controller
 	{
 		private readonly IAccountService accountService;
 
 		public HomeController(IAccountService accountService)
-			=> this.accountService = accountService;
+		{
+			this.accountService = accountService;
+		}
 
 		public async Task<IActionResult> Index()
 		{
-			string userId = User.Id();
+			DashboardViewModel dashboard = await accountService.DashboardViewModel(User.Id());
 
-			var dashboardModel = new DashboardViewModel
-			{
-				LastTransactions = await accountService.LastFiveTransactions(userId),
-				Accounts = await accountService.AllAccountsWithData(userId),
-				CurrenciesCashFlow = await accountService.GetCashFlow(userId)
-			};
-
-			return View(dashboardModel);
+			return View(dashboard);
 		}
 
-		public IActionResult Privacy()
-		{
-			return View();
-		}
+		public IActionResult Privacy() => View();
 
-		public IActionResult Error()
-		{
-			throw new NotImplementedException();
-		}
+		public IActionResult Error() => View();
 	}
 }

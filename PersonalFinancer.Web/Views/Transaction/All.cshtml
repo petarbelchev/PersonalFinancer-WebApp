@@ -1,5 +1,62 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<TransactionExtendedViewModel>
 @{
+	ViewData["Title"] = "All Transactions";
+}
+
+@if (Model.Any())
+{
+	<div class="row" style="margin-top: 50px;">
+		<div class="col-md-12">
+			<div class="card">
+				<div class="card-header">
+					<h6>All Transactions</h6>
+				</div>
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th scope="col">Date</th>
+							<th scope="col">Category</th>
+							<th scope="col">Type</th>
+							<th scope="col">Amount</th>
+							<th scope="col">Currency</th>
+							<th scope="col">Account</th>
+							<th scope="col">Refference</th>
+							<th scope="col"></th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var transaction in Model)
+						{
+							<tr>
+								<td>@transaction.CreatedOn</td>
+								<td>@transaction.Category</td>
+								<td>@transaction.TransactionType</td>
+								<td>@transaction.Amount</td>
+								<td>@transaction.Currency</td>
+								<td>@transaction.Account</td>
+								<td>@transaction.Refference</td>
+								<td>
+									<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
+							   asp-route-returnUrl="~/Transaction/All" class="btn btn-warning">Edit</a>
+									<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id"
+							   asp-route-returnUrl="~/Transaction/All" class="btn btn-danger">Delete</a>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+}
+else
+{
+	<div class="text-center">
+		<p class="display-4">
+			You do not have transactions.
+		</p>
+		<p class="display-6">
+			<a asp-controller="Account" asp-action="Create">Create</a> your first account and start record your Finances!
+		</p>
+	</div>
 }

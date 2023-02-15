@@ -5,7 +5,8 @@
 	using static Data.DataConstants.Account;
 	using Currency.Models;
 
-	public class CreateAccountFormModel
+	// TODO: Edit validation messages on all models that use validation!
+	public class AccountFormModel
 	{
 		[Required(ErrorMessage = "Account name is required.")]
 		[StringLength(AccountNameMaxLength, MinimumLength = AccountNameMinLength,

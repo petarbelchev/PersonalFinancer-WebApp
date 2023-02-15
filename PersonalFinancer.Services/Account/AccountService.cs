@@ -13,37 +13,81 @@
 		private readonly PersonalFinancerDbContext data;
 
 		public AccountService(PersonalFinancerDbContext context)
-		{
-			this.data = context;
-		}
+			=> this.data = context;
 
-		public async Task<IEnumerable<AccountViewModel>> AllAccounts(string userId)
+		/// <summary>
+		/// Returns User's accounts with Id and Name.
+		/// </summary>
+		public async Task<IEnumerable<AccountDropdownViewModel>> AccountsByUserId(string userId)
 		{
-			return await data.Accounts
+			IEnumerable<AccountDropdownViewModel> accounts =  await data.Accounts
 				.Where(a => a.OwnerId == userId && !a.IsDeleted)
-				.Select(a => new AccountViewModel
+				.Select(a => new AccountDropdownViewModel
 				{
 					Id = a.Id,
 					Name = a.Name
 				})
 				.ToArrayAsync();
+
+			return accounts;
 		}
 
-		public async Task<IEnumerable<AccountViewModelExtended>> AllAccountsWithData(string userId)
+		/// <summary>
+		/// Returns Account with Id and Name, or throws an error.
+		/// </summary>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
+		public async Task<AccountDropdownViewModel> AccountById(Guid accountId)
 		{
-			return await data.Accounts
-				.Where(a => a.OwnerId == userId && !a.IsDeleted)
-				.Select(a => new AccountViewModelExtended
+			AccountDropdownViewModel account = await data.Accounts
+				.Where(a => a.Id == accountId && !a.IsDeleted)
+				.Select(a => new AccountDropdownViewModel
+				{
+					Id = a.Id,
+					Name = a.Name
+				})
+				.FirstAsync();
+
+			return account;
+		}
+
+		/// <summary>
+		/// Returns Account with Id, Name, Balance and all Transactions, or throws an exception.
+		/// </summary>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
+		public async Task<AccountDetailsViewModel> AccountWithTransactions(Guid accountId)
+		{
+			var account = await data.Accounts
+				.Where(a => a.Id == accountId && !a.IsDeleted)
+				.Select(a => new AccountDetailsViewModel
 				{
 					Id = a.Id,
 					Name = a.Name,
 					Balance = a.Balance,
-					Currency = a.Currency.Name
+					Currency = a.Currency.Name,
+					Transactions = a.Transactions
+						.Select(t => new TransactionExtendedViewModel
+						{
+							Id = t.Id,
+							Amount = t.Amount,
+							Category = t.Category.Name,
+							CreatedOn = t.CreatedOn,
+							Refference = t.Refference,
+							TransactionType = t.TransactionType.ToString()
+						})
 				})
-				.ToArrayAsync();
+				.FirstAsync();
+
+			return account;
 		}
 
-		public async Task<IEnumerable<AccountTypeViewModel>> AllAccountTypes(string userId)
+		/// <summary>
+		/// Returns collection of Account Types for the current user with Id and Name.
+		/// </summary>
+		public async Task<IEnumerable<AccountTypeViewModel>> AccountTypesViewModel(string userId)
 		{
 			return await data.AccountTypes
 				.Where(a => (a.UserId == null || a.UserId == userId) && !a.IsDeleted)
@@ -55,17 +99,40 @@
 				.ToArrayAsync();
 		}
 
+		/// <summary>
+		/// Changes balance on given Account, or throws an exception.
+		/// </summary>
+		/// <param name="accountId">Account's identifier.</param>
+		/// <param name="amount">Amount that will be applied to balance.</param>
+		/// <param name="transactionType">Defines what will be the change on the balance.</param>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
 		public async Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType)
 		{
 			var account = await data.Accounts.FirstAsync(a => a.Id == accountId);
 
 			if (transactionType == TransactionType.Income)
+			{
 				account.Balance += amount;
+			}
 			else if (transactionType == TransactionType.Expense)
+			{
 				account.Balance -= amount;
+			}
 		}
 
-		public async Task CreateAccount(string userId, CreateAccountFormModel accountModel)
+		/// <summary>
+		/// Creates a new Account and if the new account has initial balance creates new Transaction with given amount.
+		/// </summary>
+		/// <param name="userId">User's identifier</param>
+		/// <param name="accountModel">Model with Name, Balance, AccountTypeId, CurrencyId.</param>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="DbUpdateException"></exception>
+		/// <exception cref="DbUpdateConcurrencyException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
+		public async Task CreateAccount(string userId, AccountFormModel accountModel)
 		{
 			var newAccount = new Account()
 			{
@@ -94,17 +161,33 @@
 			await data.SaveChangesAsync();
 		}
 
+		/// <summary>
+		/// Checks is the given User is owner of the given account
+		/// </summary>
 		public async Task<bool> IsAccountOwner(string userId, Guid accountId)
 		{
 			var account = await data.Accounts.FindAsync(accountId);
 
 			if (account == null)
+			{
 				return false;
+			}
 
 			return account.OwnerId == userId;
 		}
 
-		public async Task CreateTransaction(TransactionServiceModel transactionFormModel)
+		/// <summary>
+		/// Creates a new Transaction and change account's balance.
+		/// </summary>
+		/// <param name="transactionFormModel">
+		/// Model with Amount, AccountId, CategoryId, TransactionType, CreatedOn, Refference.
+		/// </param>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="DbUpdateException"></exception>
+		/// <exception cref="DbUpdateConcurrencyException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
+		public async Task CreateTransaction(TransactionFormModel transactionFormModel)
 		{
 			var newTransaction = new Transaction()
 			{
@@ -125,11 +208,91 @@
 			await data.SaveChangesAsync();
 		}
 
-		public async Task<TransactionServiceModel?> GetTransactionById(Guid id)
+		/// <summary>
+		/// Delete a Transaction and change account's balance, or throws an exception.
+		/// </summary>
+		/// <param name="id">Transaction's identifier.</param>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="DbUpdateException"></exception>
+		/// <exception cref="DbUpdateConcurrencyException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
+		public async Task DeleteTransactionById(Guid transactionId)
 		{
 			var transaction = await data.Transactions
-				.Where(t => t.Id == id)
-				.Select(t => new TransactionServiceModel
+				.Where(t => t.Id == transactionId)
+				.Include(t => t.Category)
+				.FirstAsync();
+
+			data.Transactions.Remove(transaction);
+
+			if (transaction.TransactionType == TransactionType.Income)
+			{
+				transaction.TransactionType = TransactionType.Expense;
+			}
+			else
+			{
+				transaction.TransactionType = TransactionType.Income;
+			}
+
+			await ChangeBalance(transaction.AccountId,
+								transaction.Amount,
+								transaction.TransactionType);
+
+			await data.SaveChangesAsync();
+		}
+
+		/// <summary>
+		/// Delete an Account and give the option to delete all of the account's transactions.
+		/// </summary>
+		/// <param name="accountId">Account's identifier.</param>
+		/// <param name="shouldDeleteTransactions">
+		/// Boolean that defines that should delete account's transactions.
+		/// </param>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="DbUpdateException"></exception>
+		/// <exception cref="DbUpdateConcurrencyException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
+		public async Task DeleteAccountById(Guid accountId, bool shouldDeleteTransactions)
+		{
+			var account = await data.Accounts.FirstAsync(a => a.Id == accountId && !a.IsDeleted);
+
+			if (shouldDeleteTransactions)
+			{
+				data.Accounts.Remove(account);
+			}
+			else
+			{
+				account.IsDeleted = true;
+			}
+
+			await data.SaveChangesAsync();
+		}
+
+		/// <summary>
+		/// Returns Dashboard View Model for current User with Last transactions, Accounts and Currencies Cash Flow.
+		/// </summary>
+		public async Task<DashboardViewModel> DashboardViewModel(string userId)
+		{
+			return new DashboardViewModel
+			{
+				LastTransactions = await LastFiveTransactionsByUserId(userId),
+				Accounts = await AccountsWithBalance(userId),
+				CurrenciesCashFlow = await GetCashFlow(userId)
+			};
+		}
+
+		/// <summary>
+		/// Returns a Transaction with Id, AccountId, Amount, CategoryId, Refference, TransactionType, OwnerId, CreatedOn, or throws an exception.
+		/// </summary>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
+		public async Task<TransactionFormModel> TransactionFormModelById(Guid transactionId)
+		{
+			var transaction = await data.Transactions
+				.Where(t => t.Id == transactionId)
+				.Select(t => new TransactionFormModel
 				{
 					Id = t.Id,
 					AccountId = t.AccountId,
@@ -140,95 +303,74 @@
 					OwnerId = t.Account.OwnerId,
 					CreatedOn = t.CreatedOn
 				})
-				.FirstOrDefaultAsync();
-
-			if (transaction == null)
-				return null;
+				.FirstAsync();
 
 			return transaction;
 		}
 
-		public async Task<IEnumerable<TransactionViewModel>> GetTransactionsByAccountId(Guid id)
-		{
-			return await data.Transactions
-				.Where(t => t.AccountId == id)
-				.OrderByDescending(t => t.CreatedOn)
-				.Select(t => new TransactionViewModel
-				{
-					Id = t.Id,
-					Amount = t.Amount,
-					Category = t.Category.Name,
-					CreatedOn = t.CreatedOn,
-					Refference = t.Refference,
-					TransactionType = t.TransactionType.ToString()
-				})
-				.ToArrayAsync();
-		}
-
-		public async Task<IEnumerable<TransactionViewModel>> LastFiveTransactions(string userId)
-		{
-			return await data.Transactions
-				.Where(t => t.Account.OwnerId == userId)
-				.OrderByDescending(t => t.CreatedOn)
-				.Take(5)
-				.Select(t => new TransactionViewModel
-				{
-					Id = t.Id,
-					Account = t.Account.Name + (t.Account.IsDeleted ? " (Deleted)" : string.Empty),
-					Currency = t.Account.Currency.Name,
-					Amount = t.Amount,
-					TransactionType = t.TransactionType.ToString(),
-					Category = t.Category.Name,
-					CreatedOn = t.CreatedOn,
-					Refference = t.Refference
-				})
-				.ToArrayAsync();
-		}
-
-		public async Task DeleteTransactionById(Guid id)
+		/// <summary>
+		/// Returns Transaction Extended View Model with given Id, or throws an exception.
+		/// </summary>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
+		public async Task<TransactionExtendedViewModel> TransactionViewModelById(Guid transactionId)
 		{
 			var transaction = await data.Transactions
-				.Where(t => t.Id == id)
-				.Include(t => t.Category)
+				.Where(t => t.Id == transactionId)
+				.Select(t => new TransactionExtendedViewModel
+				{
+					Id = t.Id,
+					Account = t.Account.Name,
+					Amount = t.Amount,
+					Currency = t.Account.Currency.Name,
+					Category = t.Category.Name,
+					Refference = t.Refference,
+					TransactionType = t.TransactionType.ToString(),
+					CreatedOn = t.CreatedOn
+				})
 				.FirstAsync();
 
-			data.Transactions.Remove(transaction);
-
-			if (transaction.Category.Name == CategoryInitialBalanceName)
-				transaction.TransactionType = TransactionType.Expense;
-
-			await ChangeBalance(transaction.AccountId,
-								transaction.Amount,
-								transaction.TransactionType);
-
-			await data.SaveChangesAsync();
+			return transaction;
 		}
 
-		public async Task DeleteAccountById(Guid id, bool shouldDeleteTransactions)
+		/// <summary>
+		/// Returns a collection of User's transactions with props: 
+		/// Id, AccountName, Amount, CurrencyName, CategoryName, Refference, TransactionType, CreatedOn.
+		/// </summary>
+		public async Task<IEnumerable<TransactionExtendedViewModel>> TransactionsViewModelByUserId(string userId)
 		{
-			var account = await data.Accounts.FirstAsync(a => a.Id == id && !a.IsDeleted);
+			var transactions = await data.Transactions
+				.Where(t => t.Account.OwnerId == userId)
+				.OrderByDescending(t => t.CreatedOn)
+				.Select(t => new TransactionExtendedViewModel
+				{
+					Id = t.Id,
+					Account = t.Account.Name,
+					Amount = t.Amount,
+					Currency = t.Account.Currency.Name,
+					Category = t.Category.Name,
+					Refference = t.Refference,
+					TransactionType = t.TransactionType.ToString(),
+					CreatedOn = t.CreatedOn
+				})
+				.ToArrayAsync();
 
-			if (shouldDeleteTransactions)
-			{
-				data.Accounts.Remove(account);
-
-				// This code is not nessesery because Cascade delete all transactions
-				//
-				//var accountTransactions = await data.Transactions
-				//	.Where(t => t.AccountId == account.Id)
-				//	.ToArrayAsync();
-
-				//data.Transactions.RemoveRange(accountTransactions);
-			}
-			else
-			{
-				account.IsDeleted = true;
-			}
-
-			await data.SaveChangesAsync();
+			return transactions;
 		}
 
-		public async Task EditTransaction(TransactionServiceModel editedTransaction)
+		/// <summary>
+		/// Edits a Transaction and change account's balance if it's nessesery, or throws an exception.
+		/// </summary>
+		/// <param name="editedTransaction">
+		/// Model with props: Id, AccountId, TransactionType, Amount, Refference, CategoryId, CreatedOn.
+		/// </param>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="DbUpdateException"></exception>
+		/// <exception cref="DbUpdateConcurrencyException"></exception>
+		/// <exception cref="OperationCanceledException"></exception>
+		public async Task EditTransaction(TransactionFormModel editedTransaction)
 		{
 			var transaction = await data.Transactions
 				.FirstAsync(t => t.Id == editedTransaction.Id);
@@ -243,7 +385,9 @@
 				var newTransactionType = TransactionType.Income;
 
 				if (transaction.TransactionType == TransactionType.Income)
+				{
 					newTransactionType = TransactionType.Expense;
+				}
 
 				await ChangeBalance(transaction.AccountId,
 									transaction.Amount,
@@ -267,39 +411,49 @@
 			await data.SaveChangesAsync();
 		}
 
-		public async Task<AccountViewModel> GetAccountById(Guid id)
+		/// <summary>
+		/// Returns collection of User's accounts with props: Id, Name, Balance, Currency.
+		/// </summary>
+		private async Task<IEnumerable<AccountCardViewModel>> AccountsWithBalance(string userId)
 		{
-			var account = await data.Accounts
-				.Where(a => a.Id == id && !a.IsDeleted)
-				.Select(a => new AccountViewModel
+			return await data.Accounts
+				.Where(a => a.OwnerId == userId && !a.IsDeleted)
+				.Select(a => new AccountCardViewModel
 				{
 					Id = a.Id,
-					Name = a.Name
-				})
-				.FirstAsync();
-
-			return account;
-		}
-
-		public async Task<AccountViewModelExtended> GetAccountByIdExtended(Guid id)
-		{
-			var account = await data.Accounts
-				.Where(a => a.Id == id && !a.IsDeleted)
-				.Select(a => new AccountViewModelExtended
-				{
-					Id = a.Id,
-					Balance = a.Balance,
 					Name = a.Name,
+					Balance = a.Balance,
 					Currency = a.Currency.Name
 				})
-				.FirstAsync();
-
-			account.Transactions = await GetTransactionsByAccountId(account.Id);
-
-			return account;
+				.ToArrayAsync();
 		}
 
-		public async Task<Dictionary<string, CashFlowViewModel>> GetCashFlow(string userId)
+		/// <summary>
+		/// Returns collection of last five User's transactions with props: Id, Account, Currency, Amount, Transaction Type, CreatedOn.
+		/// </summary>
+		private async Task<IEnumerable<TransactionShortViewModel>> LastFiveTransactionsByUserId(string userId)
+		{
+			return await data.Transactions
+				.Where(t => t.Account.OwnerId == userId)
+				.OrderByDescending(t => t.CreatedOn)
+				.Take(5)
+				.Select(t => new TransactionShortViewModel
+				{
+					Id = t.Id,
+					Account = t.Account.Name + (t.Account.IsDeleted ? " (Deleted)" : string.Empty),
+					Currency = t.Account.Currency.Name,
+					Amount = t.Amount,
+					TransactionType = t.TransactionType.ToString(),
+					CreatedOn = t.CreatedOn
+				})
+				.ToArrayAsync();
+		}
+
+		/// <summary>
+		/// Returns User account's cash flow
+		/// </summary>
+		/// <returns>Dictionary which key is Currency and value with props: Income and Expense.</returns>
+		private async Task<Dictionary<string, CashFlowViewModel>> GetCashFlow(string userId)
 		{
 			var cashFlow = new Dictionary<string, CashFlowViewModel>();
 
@@ -310,21 +464,27 @@
 				.ForEachAsync(a =>
 				{
 					if (!cashFlow.ContainsKey(a.Currency.Name))
+					{
 						cashFlow[a.Currency.Name] = new CashFlowViewModel();
+					}
 
 					var income = a.Transactions?
 						.Where(t => t.TransactionType == TransactionType.Income)
 						.Sum(t => t.Amount);
 
 					if (income != null)
+					{
 						cashFlow[a.Currency.Name].Income += (decimal)income;
+					}
 
 					var expense = a.Transactions?
 						.Where(t => t.TransactionType == TransactionType.Expense)
 						.Sum(t => t.Amount);
 
 					if (expense != null)
+					{
 						cashFlow[a.Currency.Name].Expence += (decimal)expense;
+					}
 				});
 
 			return cashFlow;

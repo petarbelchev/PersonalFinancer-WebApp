@@ -6,7 +6,7 @@
 	using Data.Enums;
 	using static Data.DataConstants.Transaction;
 	
-	public class TransactionServiceModel
+	public class TransactionFormModel
 	{
 		public Guid? Id { get; set; }
 
@@ -17,7 +17,7 @@
 
 		[Display(Name = "Category")]
 		public Guid CategoryId { get; set; }
-		public ICollection<CategoryViewModel> Categories { get; set; }
+		public IEnumerable<CategoryViewModel> Categories { get; set; }
 			= new List<CategoryViewModel>();
 
 		[Display(Name = "Account")]
@@ -25,8 +25,8 @@
 
 		public string? OwnerId { get; set; }
 
-		public ICollection<AccountViewModel> Accounts { get; set; }
-			= new List<AccountViewModel>();
+		public IEnumerable<AccountDropdownViewModel> Accounts { get; set; }
+			= new List<AccountDropdownViewModel>();
 
 		[Display(Name = "Date")]
 		public DateTime CreatedOn { get; set; }

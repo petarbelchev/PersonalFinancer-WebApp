@@ -26,7 +26,9 @@
 			var model = new RegisterFormModel();
 
 			if (returnUrl != null)
+			{
 				model.ReturnUrl = returnUrl;
+			}
 
 			return View(model);
 		}
@@ -35,7 +37,9 @@
 		public async Task<IActionResult> Register(RegisterFormModel model)
 		{
 			if (!ModelState.IsValid)
+			{
 				return View(model);
+			}
 
 			var newUser = new ApplicationUser
 			{
@@ -52,13 +56,19 @@
 				await signInManager.SignInAsync(newUser, isPersistent: false);
 
 				if (model.ReturnUrl != null)
+				{
 					return LocalRedirect(model.ReturnUrl);
+				}
 				else
+				{
 					return RedirectToAction("Index", "Home");
+				}
 			}
 
 			foreach (var error in result.Errors)
+			{
 				ModelState.AddModelError(string.Empty, error.Description);
+			}
 
 			return View(model);
 		}
@@ -69,7 +79,9 @@
 			var loginFormModel = new LoginFormModel();
 
 			if (returnUrl != null)
+			{
 				loginFormModel.ReturnUrl = returnUrl;
+			}
 
 			return View(loginFormModel);
 		}
@@ -77,7 +89,9 @@
 		public async Task<IActionResult> Login(LoginFormModel loginFormModel)
 		{
 			if (!ModelState.IsValid)
+			{
 				return View(loginFormModel);
+			}
 
 			var result = await signInManager.PasswordSignInAsync(
 				loginFormModel.Email,
@@ -87,9 +101,13 @@
 			if (result.Succeeded)
 			{
 				if (loginFormModel.ReturnUrl != null)
+				{
 					return LocalRedirect(loginFormModel.ReturnUrl);
+				}
 				else
+				{
 					return RedirectToAction("Index", "Home");
+				}
 			}
 
 			ModelState.AddModelError(string.Empty, "Invalid login attempt.");
