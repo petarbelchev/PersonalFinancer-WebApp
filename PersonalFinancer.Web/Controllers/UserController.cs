@@ -55,6 +55,8 @@
 			{
 				await signInManager.SignInAsync(newUser, isPersistent: false);
 
+				TempData["successMsg"] = "Congratulations! Your registration was successful!";
+
 				if (model.ReturnUrl != null)
 				{
 					return LocalRedirect(model.ReturnUrl);

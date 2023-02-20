@@ -1,4 +1,4 @@
-﻿@model DashboardViewModel
+﻿@model DashboardServiceModel
 
 @if (!User?.Identity?.IsAuthenticated ?? false)
 {
@@ -13,7 +13,16 @@ else
 {
 	ViewData["Title"] = "Dashboard";
 
-	@if (Model.Accounts.Any() || Model.LastTransactions.Any())
+	@if (TempData.ContainsKey("successMsg"))
+	{
+		<div class="alert alert-success alert-dismissible fade show" role="alert">
+			<i class="bi bi-check-circle me-1"></i>
+			@TempData["successMsg"]
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	}
+
+	@if (Model.Accounts.Any())
 	{
 		<div class="row" style="margin-top: 50px;">
 			<div class="col-md-12">
@@ -25,7 +34,7 @@ else
 						@foreach (var account in Model.Accounts)
 						{
 							<div class="col-sm-3 mb-3 mb-sm-0">
-								<div class="card">
+								<div class="card formField" style="margin-left: 8px; margin-right: 8px;">
 									<div class="card-body text-center">
 										<h5 class="card-title">@account.Name</h5>
 										<p class="card-text">@account.Balance @account.Currency</p>
@@ -41,72 +50,102 @@ else
 			</div>
 		</div>
 
-
 		<div class="row" style="margin-top: 50px;">
-			<div class="col-md-9">
-				<div class="card">
-					<div class="card-header">
-						<h6>Last Five Transactions</h6>
+			<div class="card offset-md-4 col-md-4">
+				<form method="post">
+					<div class="form-floating formField">
+						<input type="text" name="startDate" value="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+						<label for="startDate" class="form-label">Start Date</label>
+						<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
 					</div>
-					<table class="table table-hover">
-						<thead>
-							<tr>
-								<th scope="col">Date</th>
-								<th scope="col">Type</th>
-								<th scope="col">Amount</th>
-								<th scope="col">Currency</th>
-								<th scope="col">Account</th>
-								<th scope="col"></th>
-							</tr>
-						</thead>
-						<tbody>
-							@foreach (var transaction in Model.LastTransactions)
-							{
-								<tr>
-									<td>@transaction.CreatedOn</td>
-									<td>@transaction.TransactionType</td>
-									<td>@transaction.Amount</td>
-									<td>@transaction.Currency</td>
-									<td>@transaction.Account</td>
-									<td>
-										<a asp-controller="Transaction" asp-action="Details" asp-route-id="@transaction.Id" class="btn btn-primary">
-											Details
-										</a>
-									</td>
-								</tr>
-							}
-						</tbody>
-					</table>
-				</div>
-			</div>
-			<div class="col-md-3">
-				<div class="card">
-					<div class="card-header">
-						<h6>Cash Flow</h6>
+					<div class="form-floating formField">
+						<input type="text" name="endDate" value="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+						<label for="endDate" class="form-label">End Date</label>
+						<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
 					</div>
-					<div class="card-body">
-						@foreach (var (key, value) in Model.CurrenciesCashFlow)
-						{
-							decimal cashFlow = value.Income + value.Expence;
-							decimal income = cashFlow != 0 ? Math.Round(value.Income / cashFlow * 100, 2) : 0;
-							decimal expence = cashFlow != 0 ? Math.Round(value.Expence / cashFlow * 100, 2) : 0;
-
-							<div class="card-title">
-								<p class="fs-6">@key</p>
-							</div>
-							<h4 class="small font-weight-bold">Income <span class="float-right">@value.Income (@income%)</span></h4>
-							<div class="progress mb-4">
-								<div class="progress-bar bg-success" role="progressbar" style="width: @income%"></div>
-							</div>
-							<h4 class="small font-weight-bold">Expense <span class="float-right">@value.Expence (@expence%)</span></h4>
-							<div class="progress mb-4">
-								<div class="progress-bar bg-danger" role="progressbar" style="width: @expence%"></div>
-							</div>
-						}
+					<div>
+						<button type="submit" class="formField w-100 btn btn-lg btn-primary">Filter Dashboard</button>
 					</div>
-				</div>
+				</form>
 			</div>
 		</div>
+		
+		@if (Model.LastTransactions.Any())
+		{
+			<div class="row" style="margin-top: 50px;">
+				<div class="col-md-9">
+					<div class="card">
+						<div class="card-header">
+							<h6>Last Five Transactions</h6>
+						</div>
+						<table class="table table-hover">
+							<thead>
+								<tr>
+									<th scope="col">Date</th>
+									<th scope="col">Type</th>
+									<th scope="col">Amount</th>
+									<th scope="col">Currency</th>
+									<th scope="col">Account</th>
+									<th scope="col"></th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var transaction in Model.LastTransactions)
+								{
+									<tr>
+										<td>@transaction.CreatedOn</td>
+										<td>@transaction.TransactionType</td>
+										<td>@transaction.Amount</td>
+										<td>@transaction.Currency</td>
+										<td>@transaction.Account</td>
+										<td>
+											<a asp-controller="Transaction" asp-action="Details" asp-route-id="@transaction.Id" class="btn btn-primary">
+												Details
+											</a>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="card">
+						<div class="card-header">
+							<h6>Cash Flow</h6>
+						</div>
+						<div class="card-body">
+							@foreach (var (key, value) in Model.CurrenciesCashFlow)
+							{
+								decimal cashFlow = value.Income + value.Expence;
+								decimal income = cashFlow != 0 ? Math.Round(value.Income / cashFlow * 100, 2) : 0;
+								decimal expence = cashFlow != 0 ? Math.Round(value.Expence / cashFlow * 100, 2) : 0;
+
+								<div class="card-title">
+									<p class="fs-6">@key</p>
+								</div>
+								<h4 class="small font-weight-bold">Income <span class="float-right">@value.Income (@income%)</span></h4>
+								<div class="progress mb-4">
+									<div class="progress-bar bg-success" role="progressbar" style="width: @income%"></div>
+								</div>
+								<h4 class="small font-weight-bold">Expense <span class="float-right">@value.Expence (@expence%)</span></h4>
+								<div class="progress mb-4">
+									<div class="progress-bar bg-danger" role="progressbar" style="width: @expence%"></div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+		else
+		{
+			<div class="text-center" style="margin-top: 50px;">
+				<p class="display-6">
+					You do not have any transactions for thar period.
+				</p>
+			</div>
+		}
 	}
 	else
 	{
@@ -123,4 +162,14 @@ else
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
+
+	<script>
+		$(document).ready(function () {
+			$('.datepicker').datepicker({
+				format: "dd.mm.yyyy",
+				todayBtn: "linked",
+				todayHighlight: true
+			});
+		});
+	</script>
 }

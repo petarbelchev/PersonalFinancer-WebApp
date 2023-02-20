@@ -15,11 +15,31 @@
 			this.accountService = accountService;
 		}
 
+		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
-			DashboardViewModel dashboard = await accountService.DashboardViewModel(User.Id());
+			var model = new DashboardServiceModel()
+			{
+				StartDate = DateTime.UtcNow.AddMonths(-1),
+				EndDate = DateTime.UtcNow
+			};
 
-			return View(dashboard);
+			await accountService.DashboardViewModel(User.Id(), model);
+
+			return View(model);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> Index(DashboardServiceModel model)
+		{
+			await accountService.DashboardViewModel(User.Id(), model);
+
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
+
+			return View(model);
 		}
 
 		public IActionResult Privacy() => View();

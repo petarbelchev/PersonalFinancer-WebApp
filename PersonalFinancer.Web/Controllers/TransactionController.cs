@@ -26,8 +26,28 @@
 		[HttpGet]
 		public async Task<IActionResult> All()
 		{
-			IEnumerable<TransactionExtendedViewModel> transactions =
-				await accountService.TransactionsViewModelByUserId(User.Id());
+			var model = new AllTransactionsServiceModel()
+			{
+				StartDate = DateTime.UtcNow.AddMonths(-1),
+				EndDate = DateTime.UtcNow
+			};
+
+			AllTransactionsServiceModel transactions =
+				await accountService.TransactionsViewModelByUserId(User.Id(), model);
+
+			return View(transactions);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> All(AllTransactionsServiceModel model)
+		{
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
+
+			AllTransactionsServiceModel transactions =
+				await accountService.TransactionsViewModelByUserId(User.Id(), model);
 
 			return View(transactions);
 		}
@@ -41,7 +61,7 @@
 			{
 				Categories = await categoryService.UserCategories(userId),
 				Accounts = await accountService.AccountsByUserId(userId),
-				CreatedOn = DateTime.Now,
+				CreatedOn = DateTime.UtcNow,
 				ReturnUrl = returnUrl
 			};
 
@@ -63,6 +83,8 @@
 
 			await accountService.CreateTransaction(transactionFormModel);
 
+			TempData["successMsg"] = "You create a new transaction successfully!";
+
 			if (transactionFormModel.ReturnUrl != null)
 			{
 				return LocalRedirect(transactionFormModel.ReturnUrl);
@@ -77,6 +99,8 @@
 		public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
 		{
 			await accountService.DeleteTransactionById(id);
+
+			TempData["successMsg"] = "Your transaction was successfully deleted!";
 
 			if (returnUrl != null)
 			{
@@ -146,6 +170,8 @@
 			}
 
 			await accountService.EditTransaction(transactionFormModel);
+
+			TempData["successMsg"] = "Your transaction was successfully edited!";
 
 			if (transactionFormModel.ReturnUrl != null)
 			{

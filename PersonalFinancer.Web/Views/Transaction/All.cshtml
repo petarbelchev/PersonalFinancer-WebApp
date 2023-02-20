@@ -1,9 +1,40 @@
-﻿@model IEnumerable<TransactionExtendedViewModel>
+﻿@model AllTransactionsServiceModel
 @{
 	ViewData["Title"] = "All Transactions";
 }
 
-@if (Model.Any())
+@if (TempData.ContainsKey("successMsg"))
+{
+	<div class="alert alert-success alert-dismissible fade show" role="alert">
+		<i class="bi bi-check-circle me-1"></i>
+		@TempData["successMsg"]
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+}
+
+<div class="row">
+	<div class="card offset-md-4 col-md-4">
+		<form method="post">
+			<div class="form-floating formField">
+				<input type="text" name="startDate" value="@Model.StartDate" 
+					class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+				<label for="startDate" class="form-label">Start Date</label>
+				<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
+			</div>
+			<div class="form-floating formField">
+				<input type="text" name="endDate" value="@Model.EndDate" 
+					class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+				<label for="endDate" class="form-label">End Date</label>
+				<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
+			</div>
+			<div>
+				<button type="submit" class="formField w-100 btn btn-lg btn-primary">Filter Transactions</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+@if (Model.Transactions.Any())
 {
 	<div class="row" style="margin-top: 50px;">
 		<div class="col-md-12">
@@ -24,8 +55,8 @@
 							<th scope="col"></th>
 						</tr>
 					</thead>
-					<tbody>
-						@foreach (var transaction in Model)
+					<tbody id="tableBody">
+						@foreach (var transaction in Model.Transactions)
 						{
 							<tr>
 								<td>@transaction.CreatedOn</td>
@@ -36,10 +67,10 @@
 								<td>@transaction.Account</td>
 								<td>@transaction.Refference</td>
 								<td>
-									<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
-							   asp-route-returnUrl="~/Transaction/All" class="btn btn-warning">Edit</a>
-									<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id"
-							   asp-route-returnUrl="~/Transaction/All" class="btn btn-danger">Delete</a>
+									<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" 
+										asp-route-returnUrl="~/Transaction/All" class="btn btn-warning">Edit</a>
+									<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" 
+										asp-route-returnUrl="~/Transaction/All" class="btn btn-danger">Delete</a>
 								</td>
 							</tr>
 						}
@@ -51,12 +82,21 @@
 }
 else
 {
-	<div class="text-center">
-		<p class="display-4">
-			You do not have transactions.
-		</p>
+	<div class="text-center" style="margin-top: 50px;">
 		<p class="display-6">
-			<a asp-controller="Account" asp-action="Create">Create</a> your first account and start record your Finances!
+			You do not have any transactions for thar period.
 		</p>
 	</div>
+}
+
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			$('.datepicker').datepicker({
+				format: "dd.mm.yyyy",
+				todayBtn: "linked",
+				todayHighlight: true
+			});
+		});
+	</script>
 }

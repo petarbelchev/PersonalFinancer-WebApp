@@ -17,7 +17,7 @@
 						<span asp-validation-for="@Model.Amount" class="text-danger"></span>
 					</div>
 					<div class="form-floating formField">
-						<input asp-for="@Model.CreatedOn" type="text" class="form-control form-control-lg" placeholder=".form-control-lg" id="datepicker">
+						<input asp-for="@Model.CreatedOn" type="text" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 						<label asp-for="@Model.CreatedOn" class="form-label"></label>
 					</div>
 					<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
@@ -68,4 +68,13 @@ else
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
+	<script>
+		$(document).ready(function () {
+			$('.datepicker').datepicker({
+				format: "dd.mm.yyyy",
+				todayBtn: "linked",
+				todayHighlight: true
+			});
+		});
+	</script>
 }

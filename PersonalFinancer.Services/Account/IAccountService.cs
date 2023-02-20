@@ -95,7 +95,8 @@
 		/// <summary>
 		/// Returns Dashboard View Model for current User with Last transactions, Accounts and Currencies Cash Flow.
 		/// </summary>
-		Task<DashboardViewModel> DashboardViewModel(string userId);
+		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
+		Task DashboardViewModel(string userId, DashboardServiceModel model);
 
 		/// <summary>
 		/// Edits a Transaction and change account's balance if it's nessesery, or throws an exception.
@@ -126,10 +127,10 @@
 		Task<TransactionExtendedViewModel> TransactionViewModelById(Guid transactionId);
 
 		/// <summary>
-		/// Returns a collection of User's transactions with props: 
-		/// Id, AccountName, Amount, CurrencyName, CategoryName, Refference, TransactionType, CreatedOn.
+		/// Returns a collection of User's transactions for given period.
 		/// </summary>
-		Task<IEnumerable<TransactionExtendedViewModel>> TransactionsViewModelByUserId(string userId);
+		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
+		Task<AllTransactionsServiceModel> TransactionsViewModelByUserId(string userId, AllTransactionsServiceModel model);
 
 		/// <summary>
 		/// Checks is the given User is owner of the given account

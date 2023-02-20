@@ -1,10 +1,9 @@
 ﻿namespace PersonalFinancer.Services.Account
 {
-	using Microsoft.EntityFrameworkCore;
-
 	using Data;
 	using Data.Enums;
 	using Data.Models;
+	using Microsoft.EntityFrameworkCore;
 	using Models;
 	using static Data.DataConstants.Category;
 
@@ -20,7 +19,7 @@
 		/// </summary>
 		public async Task<IEnumerable<AccountDropdownViewModel>> AccountsByUserId(string userId)
 		{
-			IEnumerable<AccountDropdownViewModel> accounts =  await data.Accounts
+			IEnumerable<AccountDropdownViewModel> accounts = await data.Accounts
 				.Where(a => a.OwnerId == userId && !a.IsDeleted)
 				.Select(a => new AccountDropdownViewModel
 				{
@@ -69,6 +68,7 @@
 					Balance = a.Balance,
 					Currency = a.Currency.Name,
 					Transactions = a.Transactions
+						.OrderByDescending(t => t.CreatedOn)
 						.Select(t => new TransactionExtendedViewModel
 						{
 							Id = t.Id,
@@ -153,7 +153,7 @@
 					Account = newAccount,
 					Category = await data.Categories.FirstAsync(c => c.Name == CategoryInitialBalanceName),
 					Refference = "Initial Balance",
-					CreatedOn = DateTime.Now,
+					CreatedOn = DateTime.UtcNow,
 					TransactionType = TransactionType.Income
 				});
 			}
@@ -273,14 +273,12 @@
 		/// <summary>
 		/// Returns Dashboard View Model for current User with Last transactions, Accounts and Currencies Cash Flow.
 		/// </summary>
-		public async Task<DashboardViewModel> DashboardViewModel(string userId)
+		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
+		public async Task DashboardViewModel(string userId, DashboardServiceModel model)
 		{
-			return new DashboardViewModel
-			{
-				LastTransactions = await LastFiveTransactionsByUserId(userId),
-				Accounts = await AccountsWithBalance(userId),
-				CurrenciesCashFlow = await GetCashFlow(userId)
-			};
+			model.LastTransactions = await LastFiveTransactionsByUserId(userId, model.StartDate, model.EndDate);
+			model.Accounts = await AccountsWithBalance(userId);
+			model.CurrenciesCashFlow = await GetCashFlow(userId, model.StartDate, model.EndDate);
 		}
 
 		/// <summary>
@@ -335,13 +333,17 @@
 		}
 
 		/// <summary>
-		/// Returns a collection of User's transactions with props: 
-		/// Id, AccountName, Amount, CurrencyName, CategoryName, Refference, TransactionType, CreatedOn.
+		/// Returns a collection of User's transactions for given period.
 		/// </summary>
-		public async Task<IEnumerable<TransactionExtendedViewModel>> TransactionsViewModelByUserId(string userId)
+		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
+		public async Task<AllTransactionsServiceModel> TransactionsViewModelByUserId(
+			string userId, AllTransactionsServiceModel model)
 		{
 			var transactions = await data.Transactions
-				.Where(t => t.Account.OwnerId == userId)
+				.Where(t =>
+					t.Account.OwnerId == userId &&
+					t.CreatedOn >= model.StartDate &&
+					t.CreatedOn <= model.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
 				.Select(t => new TransactionExtendedViewModel
 				{
@@ -356,7 +358,9 @@
 				})
 				.ToArrayAsync();
 
-			return transactions;
+			model.Transactions = transactions;
+
+			return model;
 		}
 
 		/// <summary>
@@ -431,10 +435,14 @@
 		/// <summary>
 		/// Returns collection of last five User's transactions with props: Id, Account, Currency, Amount, Transaction Type, CreatedOn.
 		/// </summary>
-		private async Task<IEnumerable<TransactionShortViewModel>> LastFiveTransactionsByUserId(string userId)
+		private async Task<IEnumerable<TransactionShortViewModel>> LastFiveTransactionsByUserId(
+			string userId, DateTime? startDate, DateTime? endDate)
 		{
 			return await data.Transactions
-				.Where(t => t.Account.OwnerId == userId)
+				.Where(t =>
+					t.Account.OwnerId == userId &&
+					t.CreatedOn >= startDate &&
+					t.CreatedOn <= endDate)
 				.OrderByDescending(t => t.CreatedOn)
 				.Take(5)
 				.Select(t => new TransactionShortViewModel
@@ -453,14 +461,16 @@
 		/// Returns User account's cash flow
 		/// </summary>
 		/// <returns>Dictionary which key is Currency and value with props: Income and Expense.</returns>
-		private async Task<Dictionary<string, CashFlowViewModel>> GetCashFlow(string userId)
+		private async Task<Dictionary<string, CashFlowViewModel>> GetCashFlow(
+			string userId, DateTime? startDate, DateTime? endDate)
 		{
 			var cashFlow = new Dictionary<string, CashFlowViewModel>();
 
 			await data.Accounts
 				.Where(a => a.OwnerId == userId && a.Transactions.Any())
 				.Include(a => a.Currency)
-				.Include(a => a.Transactions)
+				.Include(a => a.Transactions
+					.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
 				.ForEachAsync(a =>
 				{
 					if (!cashFlow.ContainsKey(a.Currency.Name))

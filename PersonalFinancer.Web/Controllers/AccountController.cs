@@ -44,6 +44,8 @@
 
 			await accountService.CreateAccount(User.Id(), accountFormModel);
 
+			TempData["successMsg"] = "You create a new account successfully!";
+
 			return RedirectToAction("Index", "Home");
 		}
 
@@ -76,6 +78,8 @@
 				return Unauthorized();
 
 			await accountService.DeleteAccountById(id, shouldDeleteTransactions);
+
+			TempData["successMsg"] = "Your account was successfully deleted!";
 
 			return RedirectToAction("Index", "Home");
 		}
