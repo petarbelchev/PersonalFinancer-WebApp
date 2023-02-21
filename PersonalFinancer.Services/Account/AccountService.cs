@@ -1,9 +1,10 @@
 ﻿namespace PersonalFinancer.Services.Account
 {
+	using Microsoft.EntityFrameworkCore;
+
 	using Data;
 	using Data.Enums;
 	using Data.Models;
-	using Microsoft.EntityFrameworkCore;
 	using Models;
 	using static Data.DataConstants.Category;
 
@@ -12,7 +13,9 @@
 		private readonly PersonalFinancerDbContext data;
 
 		public AccountService(PersonalFinancerDbContext context)
-			=> this.data = context;
+		{
+			this.data = context;
+		}
 
 		/// <summary>
 		/// Returns User's accounts with Id and Name.
@@ -322,7 +325,7 @@
 					Account = t.Account.Name,
 					Amount = t.Amount,
 					Currency = t.Account.Currency.Name,
-					Category = t.Category.Name,
+					Category = t.Category.IsDeleted ? t.Category.Name + " (Deleted)" : t.Category.Name,
 					Refference = t.Refference,
 					TransactionType = t.TransactionType.ToString(),
 					CreatedOn = t.CreatedOn
@@ -351,7 +354,7 @@
 					Account = t.Account.Name,
 					Amount = t.Amount,
 					Currency = t.Account.Currency.Name,
-					Category = t.Category.Name,
+					Category = t.Category.IsDeleted ? t.Category.Name + " (Deleted)" : t.Category.Name,
 					Refference = t.Refference,
 					TransactionType = t.TransactionType.ToString(),
 					CreatedOn = t.CreatedOn
