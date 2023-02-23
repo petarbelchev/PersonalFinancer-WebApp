@@ -1,12 +1,8 @@
 ﻿namespace PersonalFinancer.Services.Account.Models
 {
-    public class TransactionExtendedViewModel
+    public class AccountDetailsTransactionViewModel
     {
         public Guid Id { get; set; }
-
-        public string? AccountName { get; init; }
-
-        public string AccountCurrencyName { get; init; } = null!;
 
         public decimal Amount { get; init; }
 

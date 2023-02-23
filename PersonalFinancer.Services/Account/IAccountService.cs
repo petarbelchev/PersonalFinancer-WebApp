@@ -8,7 +8,7 @@
 		/// <summary>
 		/// Returns User's accounts with Id and Name.
 		/// </summary>
-		Task<IEnumerable<AccountDropdownViewModel>> AccountsByUserId(string userId);
+		Task<IEnumerable<AccountDropdownViewModel>> AllAccountsDropdownViewModel(string userId);
 
 		/// <summary>
 		/// Returns collection of Account Types for the current user with Id and Name.
@@ -21,7 +21,7 @@
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
-		Task<AccountDropdownViewModel> AccountById(Guid accountId);
+		Task<AccountDropdownViewModel> AccountDropdownViewModel(Guid accountId);
 
 		/// <summary>
 		/// Returns Account with Id, Name, Balance and all Transactions, or throws an exception.
@@ -29,18 +29,13 @@
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
-		Task<AccountDetailsViewModel> AccountWithTransactions(Guid accountId);
+		Task<AccountDetailsViewModel> AccountDetailsViewModel(Guid accountId);
 
 		/// <summary>
 		/// Creates a new Account and if the new account has initial balance creates new Transaction with given amount.
 		/// </summary>
 		/// <param name="userId">User's identifier</param>
 		/// <param name="accountModel">Model with Name, Balance, AccountTypeId, CurrencyId.</param>
-		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="DbUpdateException"></exception>
-		/// <exception cref="DbUpdateConcurrencyException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
 		Task CreateAccount(string userId, AccountFormModel accountModel);
 
 		/// <summary>
@@ -62,8 +57,6 @@
 		/// </param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="DbUpdateException"></exception>
-		/// <exception cref="DbUpdateConcurrencyException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
 		Task CreateTransaction(TransactionFormModel transactionFormModel);
 
@@ -73,8 +66,6 @@
 		/// <param name="id">Transaction's identifier.</param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="DbUpdateException"></exception>
-		/// <exception cref="DbUpdateConcurrencyException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
 		Task DeleteTransactionById(Guid transactionId);
 		
@@ -87,8 +78,6 @@
 		/// </param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="DbUpdateException"></exception>
-		/// <exception cref="DbUpdateConcurrencyException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
 		Task DeleteAccountById(Guid accountId, bool transactionsDelete);
 
@@ -106,8 +95,6 @@
 		/// </param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="DbUpdateException"></exception>
-		/// <exception cref="DbUpdateConcurrencyException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
 		Task EditTransaction(TransactionFormModel transactionFormModel);
 
@@ -124,13 +111,13 @@
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
-		Task<TransactionExtendedViewModel> TransactionViewModelById(Guid transactionId);
+		Task<TransactionExtendedViewModel> TransactionViewModel(Guid transactionId);
 
 		/// <summary>
 		/// Returns a collection of User's transactions for given period.
 		/// </summary>
 		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
-		Task<AllTransactionsServiceModel> TransactionsViewModelByUserId(string userId, AllTransactionsServiceModel model);
+		Task<AllTransactionsServiceModel> AllTransactionsViewModel(string userId, AllTransactionsServiceModel model);
 
 		/// <summary>
 		/// Checks is the given User is owner of the given account

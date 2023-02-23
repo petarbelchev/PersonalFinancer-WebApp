@@ -1,34 +1,37 @@
 ﻿namespace PersonalFinancer.Services.Account
 {
 	using Microsoft.EntityFrameworkCore;
+	using AutoMapper;
+	using AutoMapper.QueryableExtensions;
 
+	using Models;
 	using Data;
 	using Data.Enums;
 	using Data.Models;
-	using Models;
 	using static Data.DataConstants.Category;
+	using Services.Infrastructure;
 
 	public class AccountService : IAccountService
 	{
 		private readonly PersonalFinancerDbContext data;
+		private readonly IMapper mapper;
 
-		public AccountService(PersonalFinancerDbContext context)
+		public AccountService(
+			PersonalFinancerDbContext context,
+			IMapper mapper)
 		{
 			this.data = context;
+			this.mapper = mapper;
 		}
 
 		/// <summary>
 		/// Returns User's accounts with Id and Name.
 		/// </summary>
-		public async Task<IEnumerable<AccountDropdownViewModel>> AccountsByUserId(string userId)
+		public async Task<IEnumerable<AccountDropdownViewModel>> AllAccountsDropdownViewModel(string userId)
 		{
 			IEnumerable<AccountDropdownViewModel> accounts = await data.Accounts
 				.Where(a => a.OwnerId == userId && !a.IsDeleted)
-				.Select(a => new AccountDropdownViewModel
-				{
-					Id = a.Id,
-					Name = a.Name
-				})
+				.Select(a => mapper.Map<AccountDropdownViewModel>(a))
 				.ToArrayAsync();
 
 			return accounts;
@@ -40,15 +43,11 @@
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
-		public async Task<AccountDropdownViewModel> AccountById(Guid accountId)
+		public async Task<AccountDropdownViewModel> AccountDropdownViewModel(Guid accountId)
 		{
 			AccountDropdownViewModel account = await data.Accounts
 				.Where(a => a.Id == accountId && !a.IsDeleted)
-				.Select(a => new AccountDropdownViewModel
-				{
-					Id = a.Id,
-					Name = a.Name
-				})
+				.Select(a => mapper.Map<AccountDropdownViewModel>(a))
 				.FirstAsync();
 
 			return account;
@@ -60,28 +59,12 @@
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
-		public async Task<AccountDetailsViewModel> AccountWithTransactions(Guid accountId)
+		public async Task<AccountDetailsViewModel> AccountDetailsViewModel(Guid accountId)
 		{
 			var account = await data.Accounts
 				.Where(a => a.Id == accountId && !a.IsDeleted)
-				.Select(a => new AccountDetailsViewModel
-				{
-					Id = a.Id,
-					Name = a.Name,
-					Balance = a.Balance,
-					Currency = a.Currency.Name,
-					Transactions = a.Transactions
-						.OrderByDescending(t => t.CreatedOn)
-						.Select(t => new TransactionExtendedViewModel
-						{
-							Id = t.Id,
-							Amount = t.Amount,
-							Category = t.Category.Name,
-							CreatedOn = t.CreatedOn,
-							Refference = t.Refference,
-							TransactionType = t.TransactionType.ToString()
-						})
-				})
+				.ProjectTo<AccountDetailsViewModel>(new MapperConfiguration(
+					cfg => cfg.AddProfile<ServiceMappingProfile>()))
 				.FirstAsync();
 
 			return account;
@@ -94,11 +77,7 @@
 		{
 			return await data.AccountTypes
 				.Where(a => (a.UserId == null || a.UserId == userId) && !a.IsDeleted)
-				.Select(a => new AccountTypeViewModel
-				{
-					Id = a.Id,
-					Name = a.Name
-				})
+				.Select(a => mapper.Map<AccountTypeViewModel>(a))
 				.ToArrayAsync();
 		}
 
@@ -130,11 +109,6 @@
 		/// </summary>
 		/// <param name="userId">User's identifier</param>
 		/// <param name="accountModel">Model with Name, Balance, AccountTypeId, CurrencyId.</param>
-		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="DbUpdateException"></exception>
-		/// <exception cref="DbUpdateConcurrencyException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
 		public async Task CreateAccount(string userId, AccountFormModel accountModel)
 		{
 			var newAccount = new Account()
@@ -187,8 +161,6 @@
 		/// </param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="DbUpdateException"></exception>
-		/// <exception cref="DbUpdateConcurrencyException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
 		public async Task CreateTransaction(TransactionFormModel transactionFormModel)
 		{
@@ -217,8 +189,6 @@
 		/// <param name="id">Transaction's identifier.</param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="DbUpdateException"></exception>
-		/// <exception cref="DbUpdateConcurrencyException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
 		public async Task DeleteTransactionById(Guid transactionId)
 		{
@@ -254,8 +224,6 @@
 		/// </param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="DbUpdateException"></exception>
-		/// <exception cref="DbUpdateConcurrencyException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
 		public async Task DeleteAccountById(Guid accountId, bool shouldDeleteTransactions)
 		{
@@ -279,9 +247,53 @@
 		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
 		public async Task DashboardViewModel(string userId, DashboardServiceModel model)
 		{
-			model.LastTransactions = await LastFiveTransactionsByUserId(userId, model.StartDate, model.EndDate);
-			model.Accounts = await AccountsWithBalance(userId);
-			model.CurrenciesCashFlow = await GetCashFlow(userId, model.StartDate, model.EndDate);
+			model.LastTransactions = await data.Transactions
+				.Where(t =>
+					t.Account.OwnerId == userId &&
+					t.CreatedOn >= model.StartDate &&
+					t.CreatedOn <= model.EndDate)
+				.OrderByDescending(t => t.CreatedOn)
+				.Take(5)
+				.ProjectTo<TransactionShortViewModel>(new MapperConfiguration(
+					cfg => cfg.AddProfile<ServiceMappingProfile>()))
+				.ToArrayAsync();
+
+			model.Accounts = await data.Accounts
+				.Where(a => a.OwnerId == userId && !a.IsDeleted)
+				.ProjectTo<AccountCardViewModel>(new MapperConfiguration(
+					cfg => cfg.AddProfile<ServiceMappingProfile>()))
+				.ToArrayAsync();
+
+			await data.Accounts
+				.Where(a => a.OwnerId == userId && a.Transactions.Any())
+				.Include(a => a.Currency)
+				.Include(a => a.Transactions
+					.Where(t => t.CreatedOn >= model.StartDate && t.CreatedOn <= model.EndDate))
+				.ForEachAsync(a =>
+				{
+					if (!model.CurrenciesCashFlow.ContainsKey(a.Currency.Name))
+					{
+						model.CurrenciesCashFlow[a.Currency.Name] = new CashFlowViewModel();
+					}
+
+					var income = a.Transactions?
+						.Where(t => t.TransactionType == TransactionType.Income)
+						.Sum(t => t.Amount);
+
+					if (income != null)
+					{
+						model.CurrenciesCashFlow[a.Currency.Name].Income += (decimal)income;
+					}
+
+					var expense = a.Transactions?
+						.Where(t => t.TransactionType == TransactionType.Expense)
+						.Sum(t => t.Amount);
+
+					if (expense != null)
+					{
+						model.CurrenciesCashFlow[a.Currency.Name].Expence += (decimal)expense;
+					}
+				});
 		}
 
 		/// <summary>
@@ -293,17 +305,8 @@
 		{
 			var transaction = await data.Transactions
 				.Where(t => t.Id == transactionId)
-				.Select(t => new TransactionFormModel
-				{
-					Id = t.Id,
-					AccountId = t.AccountId,
-					Amount = t.Amount,
-					CategoryId = t.CategoryId,
-					Refference = t.Refference,
-					TransactionType = t.TransactionType,
-					OwnerId = t.Account.OwnerId,
-					CreatedOn = t.CreatedOn
-				})
+				.ProjectTo<TransactionFormModel>(new MapperConfiguration(
+					cfg => cfg.AddProfile<ServiceMappingProfile>()))
 				.FirstAsync();
 
 			return transaction;
@@ -315,21 +318,12 @@
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
-		public async Task<TransactionExtendedViewModel> TransactionViewModelById(Guid transactionId)
+		public async Task<TransactionExtendedViewModel> TransactionViewModel(Guid transactionId)
 		{
 			var transaction = await data.Transactions
 				.Where(t => t.Id == transactionId)
-				.Select(t => new TransactionExtendedViewModel
-				{
-					Id = t.Id,
-					Account = t.Account.Name,
-					Amount = t.Amount,
-					Currency = t.Account.Currency.Name,
-					Category = t.Category.IsDeleted ? t.Category.Name + " (Deleted)" : t.Category.Name,
-					Refference = t.Refference,
-					TransactionType = t.TransactionType.ToString(),
-					CreatedOn = t.CreatedOn
-				})
+				.ProjectTo<TransactionExtendedViewModel>(new MapperConfiguration(
+					cfg => cfg.AddProfile<ServiceMappingProfile>()))
 				.FirstAsync();
 
 			return transaction;
@@ -339,7 +333,7 @@
 		/// Returns a collection of User's transactions for given period.
 		/// </summary>
 		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
-		public async Task<AllTransactionsServiceModel> TransactionsViewModelByUserId(
+		public async Task<AllTransactionsServiceModel> AllTransactionsViewModel(
 			string userId, AllTransactionsServiceModel model)
 		{
 			var transactions = await data.Transactions
@@ -348,17 +342,8 @@
 					t.CreatedOn >= model.StartDate &&
 					t.CreatedOn <= model.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
-				.Select(t => new TransactionExtendedViewModel
-				{
-					Id = t.Id,
-					Account = t.Account.Name,
-					Amount = t.Amount,
-					Currency = t.Account.Currency.Name,
-					Category = t.Category.IsDeleted ? t.Category.Name + " (Deleted)" : t.Category.Name,
-					Refference = t.Refference,
-					TransactionType = t.TransactionType.ToString(),
-					CreatedOn = t.CreatedOn
-				})
+				.ProjectTo<TransactionExtendedViewModel>(new MapperConfiguration(
+					cfg => cfg.AddProfile<ServiceMappingProfile>()))
 				.ToArrayAsync();
 
 			model.Transactions = transactions;
@@ -374,8 +359,6 @@
 		/// </param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="DbUpdateException"></exception>
-		/// <exception cref="DbUpdateConcurrencyException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
 		public async Task EditTransaction(TransactionFormModel editedTransaction)
 		{
@@ -416,91 +399,6 @@
 			}
 
 			await data.SaveChangesAsync();
-		}
-
-		/// <summary>
-		/// Returns collection of User's accounts with props: Id, Name, Balance, Currency.
-		/// </summary>
-		private async Task<IEnumerable<AccountCardViewModel>> AccountsWithBalance(string userId)
-		{
-			return await data.Accounts
-				.Where(a => a.OwnerId == userId && !a.IsDeleted)
-				.Select(a => new AccountCardViewModel
-				{
-					Id = a.Id,
-					Name = a.Name,
-					Balance = a.Balance,
-					Currency = a.Currency.Name
-				})
-				.ToArrayAsync();
-		}
-
-		/// <summary>
-		/// Returns collection of last five User's transactions with props: Id, Account, Currency, Amount, Transaction Type, CreatedOn.
-		/// </summary>
-		private async Task<IEnumerable<TransactionShortViewModel>> LastFiveTransactionsByUserId(
-			string userId, DateTime? startDate, DateTime? endDate)
-		{
-			return await data.Transactions
-				.Where(t =>
-					t.Account.OwnerId == userId &&
-					t.CreatedOn >= startDate &&
-					t.CreatedOn <= endDate)
-				.OrderByDescending(t => t.CreatedOn)
-				.Take(5)
-				.Select(t => new TransactionShortViewModel
-				{
-					Id = t.Id,
-					Account = t.Account.Name + (t.Account.IsDeleted ? " (Deleted)" : string.Empty),
-					Currency = t.Account.Currency.Name,
-					Amount = t.Amount,
-					TransactionType = t.TransactionType.ToString(),
-					CreatedOn = t.CreatedOn
-				})
-				.ToArrayAsync();
-		}
-
-		/// <summary>
-		/// Returns User account's cash flow
-		/// </summary>
-		/// <returns>Dictionary which key is Currency and value with props: Income and Expense.</returns>
-		private async Task<Dictionary<string, CashFlowViewModel>> GetCashFlow(
-			string userId, DateTime? startDate, DateTime? endDate)
-		{
-			var cashFlow = new Dictionary<string, CashFlowViewModel>();
-
-			await data.Accounts
-				.Where(a => a.OwnerId == userId && a.Transactions.Any())
-				.Include(a => a.Currency)
-				.Include(a => a.Transactions
-					.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
-				.ForEachAsync(a =>
-				{
-					if (!cashFlow.ContainsKey(a.Currency.Name))
-					{
-						cashFlow[a.Currency.Name] = new CashFlowViewModel();
-					}
-
-					var income = a.Transactions?
-						.Where(t => t.TransactionType == TransactionType.Income)
-						.Sum(t => t.Amount);
-
-					if (income != null)
-					{
-						cashFlow[a.Currency.Name].Income += (decimal)income;
-					}
-
-					var expense = a.Transactions?
-						.Where(t => t.TransactionType == TransactionType.Expense)
-						.Sum(t => t.Amount);
-
-					if (expense != null)
-					{
-						cashFlow[a.Currency.Name].Expence += (decimal)expense;
-					}
-				});
-
-			return cashFlow;
 		}
 	}
 }

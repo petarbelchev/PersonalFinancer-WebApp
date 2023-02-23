@@ -1,16 +1,23 @@
 ﻿namespace PersonalFinancer.Services.Currency
 {
 	using Microsoft.EntityFrameworkCore;
+	using AutoMapper;
 
-	using Models;
 	using Data;
+	using Models;
 
 	public class CurrencyService : ICurrencyService
 	{
 		private readonly PersonalFinancerDbContext data;
+		private readonly IMapper mapper;
 
-		public CurrencyService(PersonalFinancerDbContext data)
-			=> this.data = data;
+		public CurrencyService(
+			PersonalFinancerDbContext data,
+			IMapper mapper)
+		{
+			this.data = data;
+			this.mapper = mapper;
+		}
 
 		/// <summary>
 		/// Returns collection of User's currencies with props: Id and Name.
@@ -19,11 +26,7 @@
 		{
 			return await data.Currencies
 				.Where(c => c.UserId == null || c.UserId == userId)
-				.Select(c => new CurrencyViewModel
-				{
-					Id = c.Id,
-					Name = c.Name
-				})
+				.Select(c => mapper.Map<CurrencyViewModel>(c))
 				.ToArrayAsync();
 		}
 	}

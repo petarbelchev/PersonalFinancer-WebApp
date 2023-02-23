@@ -6,6 +6,7 @@ using PersonalFinancer.Services.Account;
 using PersonalFinancer.Services.Category;
 using PersonalFinancer.Services.Currency;
 using PersonalFinancer.Services.User;
+using PersonalFinancer.Web.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,10 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddAutoMapper(
+	typeof(ICategoryService).Assembly,
+	typeof(HomeController).Assembly);
 
 builder.Services.ConfigureApplicationCookie(options =>
 {

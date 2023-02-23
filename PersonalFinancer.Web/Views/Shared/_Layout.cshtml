@@ -16,7 +16,10 @@
 	<header>
 		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
 			<div class="container-fluid">
-				<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Personal Financer</a>
+				<div class="navbar-brand">
+					<img src="~/favicon-32x32.png" />
+					<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Personal Financer</a>
+				</div>
 				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 					<ul class="navbar-nav flex-grow-1">
 						@if (User?.Identity?.IsAuthenticated ?? false)

@@ -23,8 +23,6 @@
 		[Display(Name = "Account")]
 		public Guid AccountId { get; set; }
 
-		public string? OwnerId { get; set; }
-
 		public IEnumerable<AccountDropdownViewModel> Accounts { get; set; }
 			= new List<AccountDropdownViewModel>();
 

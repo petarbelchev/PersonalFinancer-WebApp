@@ -33,7 +33,7 @@
 			};
 
 			AllTransactionsServiceModel transactions =
-				await accountService.TransactionsViewModelByUserId(User.Id(), model);
+				await accountService.AllTransactionsViewModel(User.Id(), model);
 
 			return View(transactions);
 		}
@@ -47,7 +47,7 @@
 			}
 
 			AllTransactionsServiceModel transactions =
-				await accountService.TransactionsViewModelByUserId(User.Id(), model);
+				await accountService.AllTransactionsViewModel(User.Id(), model);
 
 			return View(transactions);
 		}
@@ -60,7 +60,7 @@
 			var formModel = new TransactionFormModel()
 			{
 				Categories = await categoryService.UserCategories(userId),
-				Accounts = await accountService.AccountsByUserId(userId),
+				Accounts = await accountService.AllAccountsDropdownViewModel(userId),
 				CreatedOn = DateTime.UtcNow,
 				ReturnUrl = returnUrl
 			};
@@ -76,7 +76,7 @@
 			if (!ModelState.IsValid)
 			{
 				transactionFormModel.Categories = await categoryService.UserCategories(userId);
-				transactionFormModel.Accounts = await accountService.AccountsByUserId(userId);
+				transactionFormModel.Accounts = await accountService.AllAccountsDropdownViewModel(userId);
 
 				return View(transactionFormModel);
 			}
@@ -116,7 +116,7 @@
 		public async Task<IActionResult> Details(Guid id)
 		{
 			TransactionExtendedViewModel transaction =
-				await accountService.TransactionViewModelById(id);
+				await accountService.TransactionViewModel(id);
 
 			return View(transaction);
 		}
@@ -128,7 +128,7 @@
 
 			string userId = User.Id();
 
-			if (transaction.OwnerId != userId)
+			if (!await accountService.IsAccountOwner(userId, transaction.AccountId))
 			{
 				return Unauthorized();
 			}
@@ -145,7 +145,7 @@
 				transaction.Categories = await categoryService.UserCategories(userId);
 			}
 
-			transaction.Accounts = await accountService.AccountsByUserId(userId);
+			transaction.Accounts = await accountService.AllAccountsDropdownViewModel(userId);
 			transaction.ReturnUrl = returnUrl;
 
 			return View(transaction);
@@ -159,7 +159,7 @@
 			if (!ModelState.IsValid)
 			{
 				transactionFormModel.Categories = await categoryService.UserCategories(userId);
-				transactionFormModel.Accounts = await accountService.AccountsByUserId(userId);
+				transactionFormModel.Accounts = await accountService.AllAccountsDropdownViewModel(userId);
 
 				return View(transactionFormModel);
 			}

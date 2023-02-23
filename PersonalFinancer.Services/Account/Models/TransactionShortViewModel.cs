@@ -4,9 +4,9 @@
     {
         public Guid Id { get; set; }
 
-        public string Account { get; init; } = null!;
+        public string AccountName { get; init; } = null!;
 
-        public string Currency { get; init; } = null!;
+        public string AccountCurrencyName { get; init; } = null!;
 
         public decimal Amount { get; init; }
 

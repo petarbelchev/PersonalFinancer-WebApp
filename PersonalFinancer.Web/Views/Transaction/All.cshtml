@@ -60,11 +60,11 @@
 						{
 							<tr>
 								<td>@transaction.CreatedOn</td>
-								<td>@transaction.Category</td>
+								<td>@transaction.CategoryName</td>
 								<td>@transaction.TransactionType</td>
 								<td>@transaction.Amount</td>
-								<td>@transaction.Currency</td>
-								<td>@transaction.Account</td>
+								<td>@transaction.AccountCurrencyName</td>
+								<td>@transaction.AccountName</td>
 								<td>@transaction.Refference</td>
 								<td>
 									<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" 

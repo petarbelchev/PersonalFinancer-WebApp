@@ -8,8 +8,6 @@
 
 		public decimal Balance { get; set; }
 
-		public string Currency { get; set; } = null!;
-
-		public IEnumerable<TransactionExtendedViewModel>? Transactions { get; set; }
+		public string CurrencyName { get; set; } = null!;
 	}
 }

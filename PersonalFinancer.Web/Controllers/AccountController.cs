@@ -55,7 +55,7 @@
 			if (!await accountService.IsAccountOwner(User.Id(), id))
 				return Unauthorized();
 
-			var accountDetails = await accountService.AccountWithTransactions(id);
+			var accountDetails = await accountService.AccountDetailsViewModel(id);
 
 			return View(accountDetails);
 		}
@@ -66,7 +66,7 @@
 			if (!await accountService.IsAccountOwner(User.Id(), id))
 				return Unauthorized();
 
-			AccountDropdownViewModel accountModel = await accountService.AccountById(id);
+			AccountDropdownViewModel accountModel = await accountService.AccountDropdownViewModel(id);
 
 			return View(accountModel);
 		}

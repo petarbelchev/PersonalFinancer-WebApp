@@ -8,9 +8,9 @@
 
 		public decimal Balance { get; set; }
 
-		public string Currency { get; set; } = null!;
+		public string CurrencyName { get; set; } = null!;
 
-		public IEnumerable<TransactionExtendedViewModel> Transactions { get; set; }
-			= new List<TransactionExtendedViewModel>();
+		public IEnumerable<AccountDetailsTransactionViewModel> Transactions { get; set; }
+			= new List<AccountDetailsTransactionViewModel>();
 	}
 }

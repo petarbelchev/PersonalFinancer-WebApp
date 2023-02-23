@@ -7,7 +7,7 @@
 			Delete Account
 		</a>
 	</h1>
-	<p class="display-4" style="font-size: xx-large;">Balance: @Model.Balance @Model.Currency</p>
+	<p class="display-4" style="font-size: xx-large;">Balance: @Model.Balance @Model.CurrencyName</p>
 </div>
 
 <div class="row" style="margin-top: 50px;">
@@ -32,7 +32,7 @@
 					{
 						<tr>
 							<td>@transaction.CreatedOn</td>
-							<td>@transaction.Category</td>
+							<td>@transaction.CategoryName</td>
 							<td>@transaction.TransactionType</td>
 							<td>@transaction.Amount</td>
 							<td>@transaction.Refference</td>

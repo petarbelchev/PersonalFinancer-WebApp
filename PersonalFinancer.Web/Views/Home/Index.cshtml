@@ -37,7 +37,7 @@ else
 								<div class="card formField" style="margin-left: 8px; margin-right: 8px;">
 									<div class="card-body text-center">
 										<h5 class="card-title">@account.Name</h5>
-										<p class="card-text">@account.Balance @account.Currency</p>
+										<p class="card-text">@account.Balance @account.CurrencyName</p>
 										<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
 											Details
 										</a>
@@ -96,8 +96,8 @@ else
 										<td>@transaction.CreatedOn</td>
 										<td>@transaction.TransactionType</td>
 										<td>@transaction.Amount</td>
-										<td>@transaction.Currency</td>
-										<td>@transaction.Account</td>
+										<td>@transaction.AccountCurrencyName</td>
+										<td>@transaction.AccountName</td>
 										<td>
 											<a asp-controller="Transaction" asp-action="Details" asp-route-id="@transaction.Id" class="btn btn-primary">
 												Details

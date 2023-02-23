@@ -1,6 +1,7 @@
 ﻿namespace PersonalFinancer.Services.Category
 {
 	using Microsoft.EntityFrameworkCore;
+	using AutoMapper;
 
 	using Models;
 	using Data;
@@ -10,10 +11,14 @@
 	public class CategoryService : ICategoryService
 	{
 		private readonly PersonalFinancerDbContext data;
+		private readonly IMapper mapper;
 
-		public CategoryService(PersonalFinancerDbContext context)
+		public CategoryService(
+			PersonalFinancerDbContext context,
+			IMapper mapper)
 		{
 			this.data = context;
+			this.mapper = mapper;
 		}
 
 		/// <summary>
@@ -42,14 +47,12 @@
 		/// <exception cref="OperationCanceledException"></exception>
 		public async Task<CategoryViewModel> CategoryById(Guid categoryId)
 		{
-			return await data.Categories
+			CategoryViewModel category = await data.Categories
 				.Where(c => c.Id == categoryId)
-				.Select(c => new CategoryViewModel
-				{
-					Id = c.Id,
-					Name = c.Name
-				})
+				.Select(c => mapper.Map<CategoryViewModel>(c))
 				.FirstAsync();
+
+			return category;
 		}
 
 		/// <summary>
@@ -84,12 +87,7 @@
 
 			await data.SaveChangesAsync();
 
-			return new CategoryViewModel
-			{
-				Id = category.Id,
-				Name = category.Name,
-				UserId = userId
-			};
+			return mapper.Map<CategoryViewModel>(category);
 		}
 
 		/// <summary>
@@ -112,17 +110,14 @@
 		/// </summary>
 		public async Task<IEnumerable<CategoryViewModel>> UserCategories(string userId)
 		{
-			return await data.Categories
+			IEnumerable<CategoryViewModel> categories = await data.Categories
 				.Where(c =>
 					c.Name != CategoryInitialBalanceName && !c.IsDeleted &&
 					(c.UserId == null || c.UserId == userId))
-				.Select(c => new CategoryViewModel()
-				{
-					Id = c.Id,
-					Name = c.Name,
-					UserId = c.UserId
-				})
+				.Select(c => mapper.Map<CategoryViewModel>(c))
 				.ToArrayAsync();
+
+			return categories;
 		}
 	}
 }
