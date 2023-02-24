@@ -3,27 +3,18 @@
 	ViewData["Title"] = "All Transactions";
 }
 
-@if (TempData.ContainsKey("successMsg"))
-{
-	<div class="alert alert-success alert-dismissible fade show" role="alert">
-		<i class="bi bi-check-circle me-1"></i>
-		@TempData["successMsg"]
-		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-	</div>
-}
-
 <div class="row">
 	<div class="card offset-md-4 col-md-4">
 		<form method="post">
 			<div class="form-floating formField">
-				<input type="text" name="startDate" value="@Model.StartDate" 
-					class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+				<input type="text" name="startDate" value="@Model.StartDate"
+					   class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 				<label for="startDate" class="form-label">Start Date</label>
 				<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
 			</div>
 			<div class="form-floating formField">
-				<input type="text" name="endDate" value="@Model.EndDate" 
-					class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+				<input type="text" name="endDate" value="@Model.EndDate"
+					   class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 				<label for="endDate" class="form-label">End Date</label>
 				<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
 			</div>
@@ -67,10 +58,9 @@
 								<td>@transaction.AccountName</td>
 								<td>@transaction.Refference</td>
 								<td>
-									<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id" 
-										asp-route-returnUrl="~/Transaction/All" class="btn btn-warning">Edit</a>
-									<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" 
-										asp-route-returnUrl="~/Transaction/All" class="btn btn-danger">Delete</a>
+									<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
+							   asp-route-returnUrl="~/Transaction/All" class="btn btn-warning">Edit</a>
+									<button class="btn btn-danger" id="@transaction.Id">Delete</button>
 								</td>
 							</tr>
 						}
@@ -84,19 +74,12 @@ else
 {
 	<div class="text-center" style="margin-top: 50px;">
 		<p class="display-6">
-			You do not have any transactions for thar period.
+			You do not have any transactions for that period.
 		</p>
 	</div>
 }
 
 @section Scripts {
-	<script>
-		$(document).ready(function () {
-			$('.datepicker').datepicker({
-				format: "dd.mm.yyyy",
-				todayBtn: "linked",
-				todayHighlight: true
-			});
-		});
-	</script>
+	<partial name="_DeleteTransactionScriptPartial" />
+	<partial name="_DatePickerScriptPartial" />
 }

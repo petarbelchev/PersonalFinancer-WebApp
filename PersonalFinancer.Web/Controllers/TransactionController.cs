@@ -4,10 +4,12 @@
 	using Microsoft.AspNetCore.Mvc;
 
 	using Infrastructure;
+	using Data.Enums;
 	using Services.Account;
 	using Services.Account.Models;
 	using Services.Category;
-	using Services.Category.Models;
+
+	// TODO: Write summaries for controllers and actions
 
 	[Authorize]
 	public class TransactionController : Controller
@@ -26,7 +28,7 @@
 		[HttpGet]
 		public async Task<IActionResult> All()
 		{
-			var model = new AllTransactionsServiceModel()
+			AllTransactionsServiceModel model = new AllTransactionsServiceModel()
 			{
 				StartDate = DateTime.UtcNow.AddMonths(-1),
 				EndDate = DateTime.UtcNow
@@ -46,24 +48,32 @@
 				return View(model);
 			}
 
-			AllTransactionsServiceModel transactions =
+			try
+			{
+				AllTransactionsServiceModel transactions =
 				await accountService.AllTransactionsViewModel(User.Id(), model);
 
-			return View(transactions);
+				return View(transactions);
+			}
+			catch (ArgumentException ex)
+			{
+				ModelState.AddModelError(nameof(model.EndDate), ex.Message);
+				return View(model);
+			}
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> Create(string? returnUrl = null)
+		public async Task<IActionResult> Create()
 		{
 			string userId = User.Id();
 
-			var formModel = new TransactionFormModel()
+			TransactionFormModel formModel = new TransactionFormModel()
 			{
-				Categories = await categoryService.UserCategories(userId),
-				Accounts = await accountService.AllAccountsDropdownViewModel(userId),
-				CreatedOn = DateTime.UtcNow,
-				ReturnUrl = returnUrl
+				CreatedOn = DateTime.UtcNow
 			};
+
+			formModel.Categories.AddRange(await categoryService.UserCategories(userId));
+			formModel.Accounts.AddRange(await accountService.AllAccountsDropdownViewModel(userId));
 
 			return View(formModel);
 		}
@@ -75,42 +85,35 @@
 
 			if (!ModelState.IsValid)
 			{
-				transactionFormModel.Categories = await categoryService.UserCategories(userId);
-				transactionFormModel.Accounts = await accountService.AllAccountsDropdownViewModel(userId);
+				transactionFormModel.Categories.AddRange(await categoryService.UserCategories(userId));
+				transactionFormModel.Accounts.AddRange(await accountService.AllAccountsDropdownViewModel(userId));
 
 				return View(transactionFormModel);
 			}
 
-			await accountService.CreateTransaction(transactionFormModel);
+			Guid newTransactionId = await accountService.CreateTransaction(transactionFormModel);
 
 			TempData["successMsg"] = "You create a new transaction successfully!";
 
-			if (transactionFormModel.ReturnUrl != null)
-			{
-				return LocalRedirect(transactionFormModel.ReturnUrl);
-			}
-			else
-			{
-				return RedirectToAction("Index", "Home");
-			}
+			return RedirectToAction("Details", "Transaction", new { id = newTransactionId });
 		}
 
-		[HttpGet]
-		public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
-		{
-			await accountService.DeleteTransactionById(id);
+		//[HttpGet]
+		//public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
+		//{
+		//	await accountService.DeleteTransactionById(id);
 
-			TempData["successMsg"] = "Your transaction was successfully deleted!";
+		//	TempData["successMsg"] = "Your transaction was successfully deleted!";
 
-			if (returnUrl != null)
-			{
-				return LocalRedirect(returnUrl);
-			}
-			else
-			{
-				return RedirectToAction("Index", "Home");
-			}
-		}
+		//	if (returnUrl != null)
+		//	{
+		//		return LocalRedirect(returnUrl);
+		//	}
+		//	else
+		//	{
+		//		return RedirectToAction("Index", "Home");
+		//	}
+		//}
 
 		[HttpGet]
 		public async Task<IActionResult> Details(Guid id)
@@ -124,7 +127,7 @@
 		[HttpGet]
 		public async Task<IActionResult> Edit(Guid id, string? returnUrl = null)
 		{
-			TransactionFormModel transaction = await accountService.TransactionFormModelById(id);
+			EditTransactionFormModel transaction = await accountService.EditTransactionFormModelById(id);
 
 			string userId = User.Id();
 
@@ -133,33 +136,42 @@
 				return Unauthorized();
 			}
 
-			if (await categoryService.IsInitialBalance(transaction.CategoryId))
+			bool isInitialBalance = await categoryService.IsInitialBalance(transaction.CategoryId);
+
+			if (isInitialBalance)
 			{
-				transaction.Categories = new List<CategoryViewModel>()
-				{
-					await categoryService.CategoryById(transaction.CategoryId)
-				};
+				transaction.Categories.Add(await categoryService.CategoryById(transaction.CategoryId));
 			}
 			else
 			{
-				transaction.Categories = await categoryService.UserCategories(userId);
+				transaction.Categories.AddRange(await categoryService.UserCategories(userId));
+				transaction.TransactionTypes.Add(TransactionType.Expense);
 			}
 
-			transaction.Accounts = await accountService.AllAccountsDropdownViewModel(userId);
+			if (await accountService.IsAccountDeleted(transaction.AccountId) || isInitialBalance)
+			{
+				transaction.Accounts.Add(await accountService.AccountDropdownViewModel(transaction.AccountId));
+			}
+			else
+			{
+				transaction.Accounts.AddRange(await accountService.AllAccountsDropdownViewModel(userId));
+			}
+
+			transaction.TransactionTypes.Add(TransactionType.Income);
 			transaction.ReturnUrl = returnUrl;
 
 			return View(transaction);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Edit(TransactionFormModel transactionFormModel)
+		public async Task<IActionResult> Edit(EditTransactionFormModel transactionFormModel)
 		{
 			string userId = User.Id();
 
 			if (!ModelState.IsValid)
 			{
-				transactionFormModel.Categories = await categoryService.UserCategories(userId);
-				transactionFormModel.Accounts = await accountService.AllAccountsDropdownViewModel(userId);
+				transactionFormModel.Categories.AddRange(await categoryService.UserCategories(userId));
+				transactionFormModel.Accounts.AddRange(await accountService.AllAccountsDropdownViewModel(userId));
 
 				return View(transactionFormModel);
 			}
@@ -178,7 +190,7 @@
 				return LocalRedirect(transactionFormModel.ReturnUrl);
 			}
 
-			return LocalRedirect("~/Transaction/Details/" + transactionFormModel.Id);
+			return RedirectToAction(nameof(Details), new { id = transactionFormModel.Id });
 		}
 	}
 }

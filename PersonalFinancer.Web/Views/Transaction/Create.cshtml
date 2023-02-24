@@ -76,15 +76,7 @@ else
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
-	<script>
-		$(document).ready(function () {
-			$('.datepicker').datepicker({
-				format: "dd.mm.yyyy",
-				todayBtn: "linked",
-				todayHighlight: true
-			});
-		});
-	</script>
+	<partial name="_DatePickerScriptPartial" />
 
 	<script>
 		const categoriesDropdown = document.getElementById('categoriesField');

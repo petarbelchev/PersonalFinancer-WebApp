@@ -13,15 +13,6 @@ else
 {
 	ViewData["Title"] = "Dashboard";
 
-	@if (TempData.ContainsKey("successMsg"))
-	{
-		<div class="alert alert-success alert-dismissible fade show" role="alert">
-			<i class="bi bi-check-circle me-1"></i>
-			@TempData["successMsg"]
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-		</div>
-	}
-
 	@if (Model.Accounts.Any())
 	{
 		<div class="row" style="margin-top: 50px;">
@@ -162,14 +153,5 @@ else
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
-
-	<script>
-		$(document).ready(function () {
-			$('.datepicker').datepicker({
-				format: "dd.mm.yyyy",
-				todayBtn: "linked",
-				todayHighlight: true
-			});
-		});
-	</script>
+	<partial name="_DatePickerScriptPartial" />
 }

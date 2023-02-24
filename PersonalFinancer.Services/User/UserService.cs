@@ -1,6 +1,7 @@
 ﻿namespace PersonalFinancer.Services.User
 {
 	using Data;
+	using PersonalFinancer.Data.Models;
 
 	public class UserService : IUserService
 	{
@@ -16,7 +17,7 @@
 		/// </summary>
 		public async Task<string?> FullName(string userId)
 		{
-			var user = await data.Users.FindAsync(userId);
+			ApplicationUser? user = await data.Users.FindAsync(userId);
 
 			if (user == null)
 			{

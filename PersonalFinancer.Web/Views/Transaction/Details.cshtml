@@ -1,14 +1,5 @@
 ﻿@model TransactionExtendedViewModel
 
-@if (TempData.ContainsKey("successMsg"))
-{
-	<div class="alert alert-success alert-dismissible fade show" role="alert">
-		<i class="bi bi-check-circle me-1"></i>
-		@TempData["successMsg"]
-		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-	</div>
-}
-
 <p class="display-6 text-center">Transaction Details</p>
 <div class="row">
 	<div class="card offset-md-4 col-md-4">

@@ -27,7 +27,7 @@
 						<th scope="col"></th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody id="tableBody">
 					@foreach (var transaction in Model.Transactions)
 					{
 						<tr>
@@ -39,7 +39,7 @@
 							<td>
 								<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
 							   asp-route-returnUrl="~/Account/Details/@Model.Id" class="btn btn-warning">Edit</a>
-								<a asp-controller="Transaction" asp-action="Delete" asp-route-id="@transaction.Id" class="btn btn-danger">Delete</a>
+								<button class="btn btn-danger" id="@transaction.Id">Delete</button>
 							</td>
 						</tr>
 					}
@@ -48,3 +48,7 @@
 		</div>
 	</div>
 </div>
+
+@section Scripts {
+	<partial name="_DeleteTransactionScriptPartial" />
+}

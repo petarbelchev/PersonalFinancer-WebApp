@@ -27,7 +27,7 @@
 		{
 			string userId = User.Id();
 
-			var formModel = new AccountFormModel
+			AccountFormModel formModel = new AccountFormModel
 			{
 				AccountTypes = await accountService.AccountTypesViewModel(userId),
 				Currencies = await currencyService.UserCurrencies(userId)
@@ -42,11 +42,11 @@
 			if (!ModelState.IsValid)
 				return View(accountFormModel);
 
-			await accountService.CreateAccount(User.Id(), accountFormModel);
+			Guid newAccountId = await accountService.CreateAccount(User.Id(), accountFormModel);
 
 			TempData["successMsg"] = "You create a new account successfully!";
 
-			return RedirectToAction("Index", "Home");
+			return RedirectToAction(nameof(Details), new { id = newAccountId });
 		}
 
 		[HttpGet]
@@ -55,7 +55,7 @@
 			if (!await accountService.IsAccountOwner(User.Id(), id))
 				return Unauthorized();
 
-			var accountDetails = await accountService.AccountDetailsViewModel(id);
+			AccountDetailsViewModel accountDetails = await accountService.AccountDetailsViewModel(id);
 
 			return View(accountDetails);
 		}

@@ -23,7 +23,7 @@
 		[HttpGet]
 		public IActionResult Register(string? returnUrl = null)
 		{
-			var model = new RegisterFormModel();
+			RegisterFormModel model = new RegisterFormModel();
 
 			if (returnUrl != null)
 			{
@@ -41,7 +41,7 @@
 				return View(model);
 			}
 
-			var newUser = new ApplicationUser
+			ApplicationUser newUser = new ApplicationUser
 			{
 				FirstName = model.FirstName,
 				LastName = model.LastName,
@@ -49,7 +49,7 @@
 				UserName = model.Email
 			};
 
-			var result = await userManager.CreateAsync(newUser, model.Password);
+			IdentityResult result = await userManager.CreateAsync(newUser, model.Password);
 
 			if (result.Succeeded)
 			{
@@ -67,7 +67,7 @@
 				}
 			}
 
-			foreach (var error in result.Errors)
+			foreach (IdentityError error in result.Errors)
 			{
 				ModelState.AddModelError(string.Empty, error.Description);
 			}
@@ -78,7 +78,7 @@
 		[HttpGet]
 		public IActionResult Login(string? returnUrl = null)
 		{
-			var loginFormModel = new LoginFormModel();
+			LoginFormModel loginFormModel = new LoginFormModel();
 
 			if (returnUrl != null)
 			{

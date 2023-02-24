@@ -4,7 +4,7 @@
 
 	using Infrastructure;
 	using Services.Account;
-	using PersonalFinancer.Services.Account.Models;
+	using Services.Account.Models;
 
 	public class HomeController : Controller
 	{
@@ -18,7 +18,7 @@
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
-			var model = new DashboardServiceModel()
+			DashboardServiceModel model = new DashboardServiceModel()
 			{
 				StartDate = DateTime.UtcNow.AddMonths(-1),
 				EndDate = DateTime.UtcNow
@@ -32,11 +32,13 @@
 		[HttpPost]
 		public async Task<IActionResult> Index(DashboardServiceModel model)
 		{
-			await accountService.DashboardViewModel(User.Id(), model);
-
-			if (!ModelState.IsValid)
+			try
 			{
-				return View(model);
+				await accountService.DashboardViewModel(User.Id(), model);
+			}
+			catch (ArgumentException ex)
+			{
+				ModelState.AddModelError(nameof(model.EndDate), ex.Message);
 			}
 
 			return View(model);

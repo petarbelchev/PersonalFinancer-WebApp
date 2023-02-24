@@ -33,10 +33,11 @@
 
 		/// <summary>
 		/// Creates a new Account and if the new account has initial balance creates new Transaction with given amount.
+		/// Returns new Account's id.
 		/// </summary>
 		/// <param name="userId">User's identifier</param>
 		/// <param name="accountModel">Model with Name, Balance, AccountTypeId, CurrencyId.</param>
-		Task CreateAccount(string userId, AccountFormModel accountModel);
+		Task<Guid> CreateAccount(string userId, AccountFormModel accountModel);
 
 		/// <summary>
 		/// Changes balance on given Account, or throws an exception.
@@ -50,7 +51,7 @@
 		Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType);		
 
 		/// <summary>
-		/// Creates a new Transaction and change account's balance.
+		/// Creates a new Transaction and change account's balance. Returns new transaction's id.
 		/// </summary>
 		/// <param name="transactionFormModel">
 		/// Model with Amount, AccountId, CategoryId, TransactionType, CreatedOn, Refference.
@@ -58,16 +59,13 @@
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
-		Task CreateTransaction(TransactionFormModel transactionFormModel);
+		Task<Guid> CreateTransaction(TransactionFormModel transactionFormModel);
 
 		/// <summary>
-		/// Delete a Transaction and change account's balance, or throws an exception.
+		/// Delete a Transaction and change account's balance. Returns True or False.
 		/// </summary>
 		/// <param name="id">Transaction's identifier.</param>
-		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
-		Task DeleteTransactionById(Guid transactionId);
+		Task<bool> DeleteTransactionById(Guid transactionId);
 		
 		/// <summary>
 		/// Delete an Account and give the option to delete all of the account's transactions.
@@ -83,8 +81,10 @@
 
 		/// <summary>
 		/// Returns Dashboard View Model for current User with Last transactions, Accounts and Currencies Cash Flow.
+		/// Throws Exception when End Date is before Start Date.
 		/// </summary>
 		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
+		/// <exception cref="ArgumentException"></exception>
 		Task DashboardViewModel(string userId, DashboardServiceModel model);
 
 		/// <summary>
@@ -96,14 +96,14 @@
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
-		Task EditTransaction(TransactionFormModel transactionFormModel);
+		Task EditTransaction(EditTransactionFormModel transactionFormModel);
 
 		/// <summary>
 		/// Returns a Transaction with Id, AccountId, Amount, CategoryId, Refference, TransactionType, OwnerId, CreatedOn, or throws an exception.
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="OperationCanceledException"></exception>
-		Task<TransactionFormModel> TransactionFormModelById(Guid transactionId);
+		Task<EditTransactionFormModel> EditTransactionFormModelById(Guid transactionId);
 
 		/// <summary>
 		/// Returns Transaction Extended View Model with given Id, or throws an exception.
@@ -115,13 +115,22 @@
 
 		/// <summary>
 		/// Returns a collection of User's transactions for given period.
+		/// Throws Exception when End Date is before Start Date.
 		/// </summary>
 		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
+		/// <exception cref="ArgumentException"></exception>
 		Task<AllTransactionsServiceModel> AllTransactionsViewModel(string userId, AllTransactionsServiceModel model);
 
 		/// <summary>
 		/// Checks is the given User is owner of the given account
 		/// </summary>
 		Task<bool> IsAccountOwner(string userId, Guid accountId);
+
+		/// <summary>
+		/// Checks is the given Account deleted, if does not exist, throws an exception.
+		/// </summary>
+		/// <param name="accountId"></param>
+		/// <exception cref="ArgumentNullException"></exception>
+		Task<bool> IsAccountDeleted(Guid accountId);
 	}
 }

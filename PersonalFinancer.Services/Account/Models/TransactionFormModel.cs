@@ -8,8 +8,6 @@
 	
 	public class TransactionFormModel
 	{
-		public Guid? Id { get; set; }
-
 		[DataType(DataType.Currency)]
 		[Range(TransactionMinValue, TransactionMaxValue,
 			ErrorMessage = "Amount must be between {1} and {2}.")]
@@ -17,13 +15,14 @@
 
 		[Display(Name = "Category")]
 		public Guid CategoryId { get; set; }
-		public IEnumerable<CategoryViewModel> Categories { get; set; }
+
+		public List<CategoryViewModel> Categories { get; set; }
 			= new List<CategoryViewModel>();
 
 		[Display(Name = "Account")]
 		public Guid AccountId { get; set; }
 
-		public IEnumerable<AccountDropdownViewModel> Accounts { get; set; }
+		public List<AccountDropdownViewModel> Accounts { get; set; }
 			= new List<AccountDropdownViewModel>();
 
 		[Display(Name = "Date")]
@@ -39,6 +38,7 @@
 		[Display(Name = "Transaction Type")]
 		public TransactionType TransactionType { get; set; }
 
-		public string? ReturnUrl { get; set; }
+		public List<TransactionType> TransactionTypes { get; set; }
+			= new List<TransactionType>();
 	}
 }
