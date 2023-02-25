@@ -10,9 +10,7 @@
 		[Key]
 		public Guid Id { get; set; }
 
-		[Required]
-		[MaxLength(CategoryNameMaxLength,
-			ErrorMessage = "Category's name max length must be {1} characters long.")]
+		[MaxLength(CategoryNameMaxLength, ErrorMessage = "Category's name max length must be {1} characters long.")]
 		public string Name { get; set; } = null!;
 
 		[ForeignKey(nameof(User))]

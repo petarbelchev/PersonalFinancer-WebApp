@@ -1,13 +1,14 @@
-﻿@model AccountDetailsViewModel
+﻿@using static PersonalFinancer.Data.DataConstants.Host;
+@model AccountDetailsViewModel
 
 <div class="row" style="margin-top: 50px;">
-	<h1 class="display-6" >
+	<h1 class="display-6">
 		Account: @Model.Name
 		<a asp-controller="Account" asp-action="ConfirmDelete" asp-route-id="@Model.Id" class="btn btn-danger">
 			Delete Account
 		</a>
 	</h1>
-	<p class="display-4" style="font-size: xx-large;">Balance: @Model.Balance @Model.CurrencyName</p>
+	<p class="display-4" style="font-size: xx-large;" id="balanceField">Balance: @Model.Balance @Model.CurrencyName</p>
 </div>
 
 <div class="row" style="margin-top: 50px;">
@@ -50,5 +51,37 @@
 </div>
 
 @section Scripts {
-	<partial name="_DeleteTransactionScriptPartial" />
+	<script>
+		document.getElementById('tableBody').addEventListener('click', async (e) => {
+			if (e.target.tagName == 'BUTTON') {
+				if (confirm('Are you sure you want to delete this Transaction?')) {
+					let transactionId = e.target.id;
+
+					let response = await fetch(
+						'@ApiTransactionsUrl' + transactionId,
+						{ method: 'DELETE' }
+					);
+
+					if (response.status == 204) {
+						let transactionRow = e.target.parentElement.parentElement;
+						document.getElementById('tableBody').removeChild(transactionRow);
+
+						let transactionAmount = transactionRow.children[3].textContent;
+						let transactionType = transactionRow.children[2].textContent;
+						let newBalance;
+						
+						if (transactionType == 'Income') {
+							newBalance = @Model.Balance - Number(transactionAmount);
+						} else {
+							newBalance = @Model.Balance + Number(transactionAmount);
+						}
+						
+						document.getElementById('balanceField').textContent = `Balance: ${newBalance.toFixed(2)} @(Model.CurrencyName)`;
+					} else {
+						alert('Somethink happened!');
+					}
+				}
+			}
+		})
+	</script>
 }

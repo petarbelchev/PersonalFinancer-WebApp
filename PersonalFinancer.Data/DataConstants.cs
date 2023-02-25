@@ -45,5 +45,13 @@
 			public const double TransactionMaxValue = 100_000.00;
 			public const double TransactionMinValue = 0.01;
 		}
+
+		public static class Host
+		{
+			private const string hostUrl = "https://localhost:7187";
+
+			public const string ApiCategoriesUrl = hostUrl + "/api/categories/";
+			public const string ApiTransactionsUrl = hostUrl + "/api/transactions/";
+		}
 	}
 }

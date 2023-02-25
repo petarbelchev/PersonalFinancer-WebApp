@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PersonalFinancer.Services",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PersonalFinancer.Web", "PersonalFinancer.Web\PersonalFinancer.Web.csproj", "{E8FBA188-C746-4DC6-B435-4A0361FAD6D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinancer.Tests", "PersonalFinancer.Tests\PersonalFinancer.Tests.csproj", "{E0C44061-D6A3-4F65-8E65-D8F092CF2B6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{E8FBA188-C746-4DC6-B435-4A0361FAD6D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8FBA188-C746-4DC6-B435-4A0361FAD6D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8FBA188-C746-4DC6-B435-4A0361FAD6D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0C44061-D6A3-4F65-8E65-D8F092CF2B6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0C44061-D6A3-4F65-8E65-D8F092CF2B6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0C44061-D6A3-4F65-8E65-D8F092CF2B6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0C44061-D6A3-4F65-8E65-D8F092CF2B6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

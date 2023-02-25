@@ -5,7 +5,6 @@
 	using static Data.DataConstants.Account;
 	using Currency.Models;
 
-	// TODO: Edit validation messages on all models that use validation!
 	public class AccountFormModel
 	{
 		[Required(ErrorMessage = "Account name is required.")]

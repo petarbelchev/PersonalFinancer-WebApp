@@ -25,7 +25,7 @@
 		}
 
 		/// <summary>
-		/// Returns User's accounts with Id and Name.
+		/// Returns collection of User's accounts with Id and Name.
 		/// </summary>
 		public async Task<IEnumerable<AccountDropdownViewModel>> AllAccountsDropdownViewModel(string userId)
 		{
@@ -38,34 +38,28 @@
 		}
 
 		/// <summary>
-		/// Returns Account with Id and Name, or throws an error.
+		/// Returns Account with Id and Name or null.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
-		public async Task<AccountDropdownViewModel> AccountDropdownViewModel(Guid accountId)
+		public async Task<AccountDropdownViewModel?> AccountDropdownViewModel(Guid accountId)
 		{
-			AccountDropdownViewModel account = await data.Accounts
+			AccountDropdownViewModel? account = await data.Accounts
 				.Where(a => a.Id == accountId)
 				.Select(a => mapper.Map<AccountDropdownViewModel>(a))
-				.FirstAsync();
+				.FirstOrDefaultAsync();
 
 			return account;
 		}
 
 		/// <summary>
-		/// Returns Account with Id, Name, Balance and all Transactions, or throws an exception.
+		/// Returns Account with Id, Name, Balance and all Transactions or null.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
-		public async Task<AccountDetailsViewModel> AccountDetailsViewModel(Guid accountId)
+		public async Task<AccountDetailsViewModel?> AccountDetailsViewModel(Guid accountId)
 		{
-			AccountDetailsViewModel account = await data.Accounts
+			AccountDetailsViewModel? account = await data.Accounts
 				.Where(a => a.Id == accountId && !a.IsDeleted)
 				.ProjectTo<AccountDetailsViewModel>(new MapperConfiguration(
 					cfg => cfg.AddProfile<ServiceMappingProfile>()))
-				.FirstAsync();
+				.FirstOrDefaultAsync();
 
 			return account;
 		}
@@ -82,17 +76,17 @@
 		}
 
 		/// <summary>
-		/// Changes balance on given Account, or throws an exception.
+		/// Changes balance on given Account or throws exception if Account does not exist.
 		/// </summary>
-		/// <param name="accountId">Account's identifier.</param>
-		/// <param name="amount">Amount that will be applied to balance.</param>
-		/// <param name="transactionType">Defines what will be the change on the balance.</param>
 		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
 		public async Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType)
 		{
-			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
+			Account? account = await data.Accounts.FindAsync(accountId);
+
+			if (account == null)
+			{
+				throw new ArgumentNullException("Account does not exist.");
+			}
 
 			if (transactionType == TransactionType.Income)
 			{
@@ -142,15 +136,16 @@
 		}
 
 		/// <summary>
-		/// Checks is the given User is owner of the given account
+		/// Checks is the given User is owner of the given account, if does not exist, throws an exception.
 		/// </summary>
+		/// <exception cref="ArgumentNullException"></exception>
 		public async Task<bool> IsAccountOwner(string userId, Guid accountId)
 		{
 			Account? account = await data.Accounts.FindAsync(accountId);
 
 			if (account == null)
 			{
-				return false;
+				throw new ArgumentNullException("Account does not exist.");
 			}
 
 			return account.OwnerId == userId;
@@ -176,12 +171,7 @@
 		/// <summary>
 		/// Creates a new Transaction and change account's balance. Returns new transaction's id.
 		/// </summary>
-		/// <param name="transactionFormModel">
-		/// Model with Amount, AccountId, CategoryId, TransactionType, CreatedOn, Refference.
-		/// </param>
 		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
 		public async Task<Guid> CreateTransaction(TransactionFormModel transactionFormModel)
 		{
 			Transaction newTransaction = new Transaction()
@@ -208,55 +198,48 @@
 		/// <summary>
 		/// Delete a Transaction and change account's balance. Returns True or False.
 		/// </summary>
-		/// <param name="id">Transaction's identifier.</param>
 		public async Task<bool> DeleteTransactionById(Guid transactionId)
 		{
-			try
-			{
-				Transaction transaction = await data.Transactions
-				.Where(t => t.Id == transactionId)
-				.Include(t => t.Category)
-				.FirstAsync();
+			Transaction? transaction = await data.Transactions.FindAsync(transactionId);
 
-				data.Transactions.Remove(transaction);
-
-				if (transaction.TransactionType == TransactionType.Income)
-				{
-					transaction.TransactionType = TransactionType.Expense;
-				}
-				else
-				{
-					transaction.TransactionType = TransactionType.Income;
-				}
-
-				await ChangeBalance(transaction.AccountId,
-									transaction.Amount,
-									transaction.TransactionType);
-
-				await data.SaveChangesAsync();
-				
-				return true;
-			}
-			catch (Exception)
+			if (transaction == null)
 			{
 				return false;
 			}
+
+			data.Transactions.Remove(transaction);
+
+			if (transaction.TransactionType == TransactionType.Income)
+			{
+				transaction.TransactionType = TransactionType.Expense;
+			}
+			else
+			{
+				transaction.TransactionType = TransactionType.Income;
+			}
+
+			await ChangeBalance(transaction.AccountId,
+								transaction.Amount,
+								transaction.TransactionType);
+
+			await data.SaveChangesAsync();
+
+			return true;
 		}
 
 		/// <summary>
 		/// Delete an Account and give the option to delete all of the account's transactions.
 		/// </summary>
-		/// <param name="accountId">Account's identifier.</param>
-		/// <param name="shouldDeleteTransactions">
-		/// Boolean that defines that should delete account's transactions.
-		/// </param>
 		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
 		public async Task DeleteAccountById(Guid accountId, bool shouldDeleteTransactions)
 		{
-			Account account = await data.Accounts
-				.FirstAsync(a => a.Id == accountId && !a.IsDeleted);
+			Account? account = await data.Accounts
+				.FirstOrDefaultAsync(a => a.Id == accountId && !a.IsDeleted);
+
+			if (account == null)
+			{
+				throw new ArgumentNullException("Account does not exist.");
+			}
 
 			if (shouldDeleteTransactions)
 			{
@@ -333,34 +316,29 @@
 		}
 
 		/// <summary>
-		/// Returns a Transaction with Id, AccountId, Amount, CategoryId, Refference, TransactionType, OwnerId, CreatedOn, or throws an exception.
+		/// Returns a Transaction with Id, AccountId, Amount, CategoryId, Refference, TransactionType, OwnerId, CreatedOn, or null.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
-		public async Task<EditTransactionFormModel> EditTransactionFormModelById(Guid transactionId)
+		public async Task<EditTransactionFormModel?> EditTransactionFormModelById(Guid transactionId)
 		{
-			EditTransactionFormModel transaction = await data.Transactions
+			EditTransactionFormModel? transaction = await data.Transactions
 				.Where(t => t.Id == transactionId)
 				.ProjectTo<EditTransactionFormModel>(new MapperConfiguration(
 					cfg => cfg.AddProfile<ServiceMappingProfile>()))
-				.FirstAsync();
+				.FirstOrDefaultAsync();
 
 			return transaction;
 		}
 
 		/// <summary>
-		/// Returns Transaction Extended View Model with given Id, or throws an exception.
+		/// Returns Transaction Extended View Model with given Id, or null.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
-		public async Task<TransactionExtendedViewModel> TransactionViewModel(Guid transactionId)
+		public async Task<TransactionExtendedViewModel?> TransactionViewModel(Guid transactionId)
 		{
-			TransactionExtendedViewModel transaction = await data.Transactions
+			TransactionExtendedViewModel? transaction = await data.Transactions
 				.Where(t => t.Id == transactionId)
 				.ProjectTo<TransactionExtendedViewModel>(new MapperConfiguration(
 					cfg => cfg.AddProfile<ServiceMappingProfile>()))
-				.FirstAsync();
+				.FirstOrDefaultAsync();
 
 			return transaction;
 		}
@@ -397,16 +375,16 @@
 		/// <summary>
 		/// Edits a Transaction and change account's balance if it's nessesery, or throws an exception.
 		/// </summary>
-		/// <param name="editedTransaction">
-		/// Model with props: Id, AccountId, TransactionType, Amount, Refference, CategoryId, CreatedOn.
-		/// </param>
 		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
 		public async Task EditTransaction(EditTransactionFormModel editedTransaction)
 		{
-			Transaction transaction = await data.Transactions
-				.FirstAsync(t => t.Id == editedTransaction.Id);
+			Transaction? transaction = await data.Transactions
+				.FindAsync(editedTransaction.Id);
+
+			if (transaction == null)
+			{
+				throw new ArgumentNullException("Transactions does not exist.");
+			}
 
 			bool isAccountOrAmountOrTransactionTypeChanged =
 				editedTransaction.AccountId != transaction.AccountId ||

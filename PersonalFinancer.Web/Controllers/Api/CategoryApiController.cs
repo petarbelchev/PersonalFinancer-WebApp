@@ -18,6 +18,19 @@
 			this.categoryService = categoryService;
 		}
 
+		[HttpGet("{id}")]
+		public async Task<ActionResult<CategoryViewModel>> GetCategory(Guid id)
+		{
+			CategoryViewModel? category = await categoryService.CategoryById(id);
+
+			if (category == null)
+			{
+				return NotFound();
+			}
+
+			return category;
+		}
+
 		[HttpPost]
 		public async Task<ActionResult<CategoryViewModel>> CreateCategory([FromBody] string categoryName)
 		{
@@ -31,7 +44,7 @@
 				CategoryViewModel newCategory = await categoryService
 					.CreateCategory(User.Id(), categoryName);
 
-				return Ok(newCategory);
+				return Created(string.Empty, newCategory);
 			}
 			catch (InvalidOperationException)
 			{
@@ -39,18 +52,19 @@
 			}
 		}
 
-		[HttpGet("{id}")]
-		[Route("delete")]
-		public async Task<ActionResult> DeleteCategory(Guid categoryId)
+		[HttpDelete("{id}")]
+		public async Task<ActionResult> DeleteCategory(Guid id)
 		{
-			bool isDeleted = await categoryService.DeleteCategory(categoryId);
-
-			if (!isDeleted)
+			try
 			{
-				return NotFound();
-			}
+				await categoryService.DeleteCategory(id);
 
-			return Ok(categoryId);
+				return NoContent();
+			}
+			catch (Exception)
+			{
+				return BadRequest();
+			}
 		}
 	}
 }

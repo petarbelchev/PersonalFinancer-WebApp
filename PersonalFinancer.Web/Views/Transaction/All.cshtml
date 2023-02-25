@@ -1,4 +1,5 @@
-﻿@model AllTransactionsServiceModel
+﻿@using static PersonalFinancer.Data.DataConstants.Host;
+@model AllTransactionsServiceModel
 @{
 	ViewData["Title"] = "All Transactions";
 }
@@ -80,6 +81,24 @@ else
 }
 
 @section Scripts {
-	<partial name="_DeleteTransactionScriptPartial" />
 	<partial name="_DatePickerScriptPartial" />
+	<script>
+		document.getElementById('tableBody').addEventListener('click', async (e) => {
+			if (e.target.tagName == 'BUTTON') {
+				if (confirm('Are you sure you want to delete this Transaction?')) {
+					let response = await fetch(
+						'@ApiTransactionsUrl' + e.target.id,
+						{ method: 'DELETE' }
+					);
+
+					if (response.status == 204) {
+						let transactionRow = e.target.parentElement.parentElement;
+						document.getElementById('tableBody').removeChild(transactionRow);
+					} else {
+						alert('Somethink happened!');
+					}
+				}
+			}
+		})
+	</script>
 }

@@ -8,6 +8,9 @@
 	using Services.Currency;
 	using Infrastructure;
 
+	/// <summary>
+	/// Account Controller takes care of everything related to Accounts.
+	/// </summary>
 	[Authorize]
 	public class AccountController : Controller
 	{
@@ -22,6 +25,9 @@
 			this.currencyService = currencyService;
 		}
 
+		/// <summary>
+		/// Returns View with Account Form Model for creating new Account.
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
@@ -36,6 +42,10 @@
 			return View(formModel);
 		}
 
+		/// <summary>
+		/// Handle with Account Form Model and creates new Account. 
+		/// If success redirect to the new Account Details page.
+		/// </summary>
 		[HttpPost]
 		public async Task<IActionResult> Create(AccountFormModel accountFormModel)
 		{
@@ -49,28 +59,47 @@
 			return RedirectToAction(nameof(Details), new { id = newAccountId });
 		}
 
+		/// <summary>
+		/// Returns Account Details View Model for Account Details page. 
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> Details(Guid id)
 		{
 			if (!await accountService.IsAccountOwner(User.Id(), id))
 				return Unauthorized();
 
-			AccountDetailsViewModel accountDetails = await accountService.AccountDetailsViewModel(id);
+			AccountDetailsViewModel? accountDetails = await accountService.AccountDetailsViewModel(id);
+
+			if (accountDetails == null)
+			{
+				return BadRequest();
+			}
 
 			return View(accountDetails);
 		}
 
+		/// <summary>
+		/// Returns Account View Model for Confirm Delete page.
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> ConfirmDelete(Guid id)
 		{
 			if (!await accountService.IsAccountOwner(User.Id(), id))
 				return Unauthorized();
 
-			AccountDropdownViewModel accountModel = await accountService.AccountDropdownViewModel(id);
+			AccountDropdownViewModel? accountModel = await accountService.AccountDropdownViewModel(id);
+
+			if (accountModel == null)
+			{
+				return BadRequest();
+			}
 
 			return View(accountModel);
 		}
 
+		/// <summary>
+		/// Handle with deleting an Account and redirect to Home page.
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> Delete(Guid id, bool shouldDeleteTransactions)
 		{

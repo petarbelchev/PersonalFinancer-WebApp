@@ -15,18 +15,17 @@
 			this.accountService = accountService;
 		}
 
-		[HttpGet("{id}")]
-		[Route("delete")]
-		public async Task<IActionResult> DeleteTransaction(Guid transactionId)
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteTransaction(Guid id)
 		{
-			bool isDeleted = await accountService.DeleteTransactionById(transactionId);
+			bool isDeleted = await accountService.DeleteTransactionById(id);
 
 			if (!isDeleted)
 			{
-				return NotFound();
+				return BadRequest();
 			}
 
-			return Ok(transactionId);
+			return NoContent();
 		}
 	}
 }

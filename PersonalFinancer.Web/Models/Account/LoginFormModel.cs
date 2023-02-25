@@ -6,11 +6,11 @@
 
 	public class LoginFormModel
 	{
-		[Required]
+		[Required(ErrorMessage = "Email address is required.")]
 		[EmailAddress(ErrorMessage = "Please enter a valid email address.")]
 		public string Email { get; set; } = null!;
 
-		[Required]
+		[Required(ErrorMessage = "Password is required.")]
 		[DataType(DataType.Password)]
 		[StringLength(UserPasswordMaxLength, MinimumLength = UserPasswordMinLength,
 			ErrorMessage = "Password must be between {2} and {1} characters long.")]

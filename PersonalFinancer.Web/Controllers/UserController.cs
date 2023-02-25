@@ -7,6 +7,9 @@
 	using Models.Account;
 	using Data.Models;
 
+	/// <summary>
+	/// User Controller takes care of everything related to Users.
+	/// </summary>
 	public class UserController : Controller
 	{
 		private readonly UserManager<ApplicationUser> userManager;
@@ -20,6 +23,9 @@
 			this.signInManager = signInManager;
 		}
 
+		/// <summary>
+		/// Returns Register Form Model for Register page.
+		/// </summary>
 		[HttpGet]
 		public IActionResult Register(string? returnUrl = null)
 		{
@@ -33,6 +39,9 @@
 			return View(model);
 		}
 
+		/// <summary>
+		/// Handle with Register Form Model and register a new User.
+		/// </summary>
 		[HttpPost]
 		public async Task<IActionResult> Register(RegisterFormModel model)
 		{
@@ -75,6 +84,9 @@
 			return View(model);
 		}
 
+		/// <summary>
+		/// Returns Login Form Model for Login page.
+		/// </summary>
 		[HttpGet]
 		public IActionResult Login(string? returnUrl = null)
 		{
@@ -88,6 +100,9 @@
 			return View(loginFormModel);
 		}
 
+		/// <summary>
+		/// Handle with Login Form Model and login a User.
+		/// </summary>
 		public async Task<IActionResult> Login(LoginFormModel loginFormModel)
 		{
 			if (!ModelState.IsValid)
@@ -117,6 +132,9 @@
 			return View(loginFormModel);
 		}
 
+		/// <summary>
+		/// Logout a User.
+		/// </summary>
 		[Authorize]
 		public async Task<IActionResult> Logout()
 		{

@@ -10,9 +10,7 @@
 		[Key]
 		public Guid Id { get; set; }
 
-		[Required]
-		[MaxLength(AccountNameMaxLength,
-			ErrorMessage = "Account name max length must be {1} characters long.")]
+		[MaxLength(AccountNameMaxLength, ErrorMessage = "Account name max length must be {1} characters long.")]
 		public string Name { get; set; } = null!;
 
 		public decimal Balance { get; set; }
@@ -21,7 +19,6 @@
 		public string OwnerId { get; set; } = null!;
 		public ApplicationUser Owner { get; set; } = null!;
 
-		[Required]
 		[ForeignKey(nameof(AccountType))]
 		public Guid AccountTypeId { get; set; }
 		public AccountType AccountType { get; set; } = null!;

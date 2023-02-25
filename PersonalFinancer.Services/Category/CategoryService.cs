@@ -22,35 +22,32 @@
 		}
 
 		/// <summary>
-		/// Delete Category with given Id. Returns True when category was deleted or False when does not.
+		/// Delete Category with given Id or throws exception.
 		/// </summary>
-		public async Task<bool> DeleteCategory(Guid categoryId)
+		/// <exception cref="ArgumentNullException"></exception>
+		public async Task DeleteCategory(Guid categoryId)
 		{
 			Category? category = await data.Categories.FindAsync(categoryId);
 
 			if (category == null)
 			{
-				return false;
+				throw new ArgumentNullException("Category does not exist.");
 			}
 
 			category.IsDeleted = true;
-			await data.SaveChangesAsync();
 
-			return true;
+			await data.SaveChangesAsync();
 		}
 
 		/// <summary>
-		/// Returns Category with props: Id and Name, or throws an exception.
+		/// Returns Category with props: Id and Name or null.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
-		public async Task<CategoryViewModel> CategoryById(Guid categoryId)
+		public async Task<CategoryViewModel?> CategoryById(Guid categoryId)
 		{
-			CategoryViewModel category = await data.Categories
+			CategoryViewModel? category = await data.Categories
 				.Where(c => c.Id == categoryId)
 				.Select(c => mapper.Map<CategoryViewModel>(c))
-				.FirstAsync();
+				.FirstOrDefaultAsync();
 
 			return category;
 		}

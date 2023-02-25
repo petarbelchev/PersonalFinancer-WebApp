@@ -6,6 +6,9 @@
 	using Services.Account;
 	using Services.Account.Models;
 
+	/// <summary>
+	/// Home Controller takes care of everything related to Dashboard page.
+	/// </summary>
 	public class HomeController : Controller
 	{
 		private readonly IAccountService accountService;
@@ -15,6 +18,9 @@
 			this.accountService = accountService;
 		}
 
+		/// <summary>
+		/// Returns Dashboard Model for Dashboard home page.
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
@@ -29,6 +35,9 @@
 			return View(model);
 		}
 
+		/// <summary>
+		/// Handle with Dashboard Model for specific period and returns it for render.
+		/// </summary>
 		[HttpPost]
 		public async Task<IActionResult> Index(DashboardServiceModel model)
 		{

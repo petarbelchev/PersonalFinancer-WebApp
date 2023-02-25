@@ -1,7 +1,7 @@
 ﻿namespace PersonalFinancer.Services.User
 {
 	using Data;
-	using PersonalFinancer.Data.Models;
+	using Data.Models;
 
 	public class UserService : IUserService
 	{
@@ -13,15 +13,16 @@
 		}
 
 		/// <summary>
-		/// Returns User's full name or null when user does not exist.
+		/// Returns User's full name or throws exception when user does not exist.
 		/// </summary>
-		public async Task<string?> FullName(string userId)
+		/// <exception cref="ArgumentNullException"></exception>
+		public async Task<string> FullName(string userId)
 		{
 			ApplicationUser? user = await data.Users.FindAsync(userId);
 
 			if (user == null)
 			{
-				return null;
+				throw new ArgumentNullException("User does not exist.");
 			}
 
 			return $"{user.FirstName} {user.LastName}";

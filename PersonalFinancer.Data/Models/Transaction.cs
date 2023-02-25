@@ -23,11 +23,10 @@
 
 		public TransactionType TransactionType { get; set; }
 
+		[DataType(DataType.DateTime, ErrorMessage = "Plaese enter a valid Date.")]
 		public DateTime CreatedOn { get; set; }
 
-		[Required]
-		[MaxLength(TransactionRefferenceMaxLength,
-			ErrorMessage = "Refference max length must be {1} characters long.")]
+		[MaxLength(TransactionRefferenceMaxLength, ErrorMessage = "Refference max length must be {1} characters long.")]
 		public string Refference { get; set; } = null!;
 	}
 }

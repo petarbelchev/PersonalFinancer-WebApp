@@ -8,9 +8,11 @@
 	using Services.Account;
 	using Services.Account.Models;
 	using Services.Category;
+	using PersonalFinancer.Services.Category.Models;
 
-	// TODO: Write summaries for controllers and actions
-
+	/// <summary>
+	/// Transaction Controller takes care of everything related to Transactions.
+	/// </summary>
 	[Authorize]
 	public class TransactionController : Controller
 	{
@@ -25,6 +27,9 @@
 			this.accountService = accountService;
 		}
 
+		/// <summary>
+		/// Returns View with all user's transactions for specific period.
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> All()
 		{
@@ -40,6 +45,9 @@
 			return View(transactions);
 		}
 
+		/// <summary>
+		/// Returns View with all user's transactions for specific period.
+		/// </summary>
 		[HttpPost]
 		public async Task<IActionResult> All(AllTransactionsServiceModel model)
 		{
@@ -62,6 +70,9 @@
 			}
 		}
 
+		/// <summary>
+		/// Returns View with Transaction Form Model for creating new Transaction.
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> Create()
 		{
@@ -78,6 +89,10 @@
 			return View(formModel);
 		}
 
+		/// <summary>
+		/// Handle with Transaction Form Model and creates new Transaction. 
+		/// If success redirect to the new Transaction Details page.
+		/// </summary>
 		[HttpPost]
 		public async Task<IActionResult> Create(TransactionFormModel transactionFormModel)
 		{
@@ -98,36 +113,55 @@
 			return RedirectToAction("Details", "Transaction", new { id = newTransactionId });
 		}
 
-		//[HttpGet]
-		//public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
-		//{
-		//	await accountService.DeleteTransactionById(id);
+		/// <summary>
+		/// Handle with deleting Transaction.
+		/// </summary>
+		[HttpGet]
+		public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
+		{
+			await accountService.DeleteTransactionById(id);
 
-		//	TempData["successMsg"] = "Your transaction was successfully deleted!";
+			TempData["successMsg"] = "Your transaction was successfully deleted!";
 
-		//	if (returnUrl != null)
-		//	{
-		//		return LocalRedirect(returnUrl);
-		//	}
-		//	else
-		//	{
-		//		return RedirectToAction("Index", "Home");
-		//	}
-		//}
+			if (returnUrl != null)
+			{
+				return LocalRedirect(returnUrl);
+			}
+			else
+			{
+				return RedirectToAction("Index", "Home");
+			}
+		}
 
+		/// <summary>
+		/// Returns Transaction View Model for Transaction Details page. 
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> Details(Guid id)
 		{
-			TransactionExtendedViewModel transaction =
+			TransactionExtendedViewModel? transaction =
 				await accountService.TransactionViewModel(id);
+
+			if (transaction == null)
+			{
+				return BadRequest();
+			}
 
 			return View(transaction);
 		}
 
+		/// <summary>
+		/// Return Edit Transaction Form Model for edit a Transaction.
+		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> Edit(Guid id, string? returnUrl = null)
 		{
-			EditTransactionFormModel transaction = await accountService.EditTransactionFormModelById(id);
+			EditTransactionFormModel? transaction = await accountService.EditTransactionFormModelById(id);
+
+			if (transaction == null)
+			{
+				return BadRequest();
+			}
 
 			string userId = User.Id();
 
@@ -140,7 +174,13 @@
 
 			if (isInitialBalance)
 			{
-				transaction.Categories.Add(await categoryService.CategoryById(transaction.CategoryId));
+				CategoryViewModel? category = await categoryService
+					.CategoryById(transaction.CategoryId);
+
+				if (category != null)
+				{
+					transaction.Categories.Add(category);
+				}
 			}
 			else
 			{
@@ -150,7 +190,13 @@
 
 			if (await accountService.IsAccountDeleted(transaction.AccountId) || isInitialBalance)
 			{
-				transaction.Accounts.Add(await accountService.AccountDropdownViewModel(transaction.AccountId));
+				AccountDropdownViewModel? account = await accountService
+					.AccountDropdownViewModel(transaction.AccountId);
+
+				if (account != null)
+				{
+					transaction.Accounts.Add(account);
+				}
 			}
 			else
 			{
@@ -163,6 +209,9 @@
 			return View(transaction);
 		}
 
+		/// <summary>
+		/// Handle with edited Transaction.
+		/// </summary>
 		[HttpPost]
 		public async Task<IActionResult> Edit(EditTransactionFormModel transactionFormModel)
 		{

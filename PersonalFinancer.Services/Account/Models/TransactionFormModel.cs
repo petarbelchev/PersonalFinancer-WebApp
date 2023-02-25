@@ -8,9 +8,9 @@
 	
 	public class TransactionFormModel
 	{
-		[DataType(DataType.Currency)]
-		[Range(TransactionMinValue, TransactionMaxValue,
-			ErrorMessage = "Amount must be between {1} and {2}.")]
+		[Required(ErrorMessage = "Amount is required.")]
+		[DataType(DataType.Currency, ErrorMessage = "Amount must be a number.")]
+		[Range(TransactionMinValue, TransactionMaxValue, ErrorMessage = "Amount must be between {1} and {2}.")]
 		public decimal Amount { get; set; }
 
 		[Display(Name = "Category")]
@@ -25,12 +25,13 @@
 		public List<AccountDropdownViewModel> Accounts { get; set; }
 			= new List<AccountDropdownViewModel>();
 
+		[Required(ErrorMessage = "Date is required.")]
 		[Display(Name = "Date")]
+		[DataType(DataType.DateTime, ErrorMessage = ("Please enter a valid Date."))]
 		public DateTime CreatedOn { get; set; }
 
-		[Required]
-		[StringLength(TransactionRefferenceMaxLength,
-			MinimumLength = TransactionRefferenceMinLength,
+		[Required(ErrorMessage = "Payment Refference is required.")]
+		[StringLength(TransactionRefferenceMaxLength, MinimumLength = TransactionRefferenceMinLength,
 			ErrorMessage = "Payment Refference must be between {2} and {1} characters long.")]
 		[Display(Name = "Payment Refference")]
 		public string Refference { get; set; } = null!;

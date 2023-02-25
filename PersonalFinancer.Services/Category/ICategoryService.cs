@@ -5,17 +5,15 @@
 	public interface ICategoryService
 	{
 		/// <summary>
-		/// Delete Category with given Id. Returns True when category was deleted or False when does not.
-		/// </summary>
-		Task<bool> DeleteCategory(Guid categoryId);
-
-		/// <summary>
-		/// Returns Category with props: Id and Name, or throws an exception.
+		/// Delete Category with given Id or throws exception.
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		/// <exception cref="OperationCanceledException"></exception>
-		Task<CategoryViewModel> CategoryById(Guid categoryId);
+		Task DeleteCategory(Guid categoryId);
+
+		/// <summary>
+		/// Returns Category with props: Id and Name or null.
+		/// </summary>
+		Task<CategoryViewModel?> CategoryById(Guid categoryId);
 		
 		/// <summary>
 		/// Creates new Category with given Name. Returns View Model with Id and Name.

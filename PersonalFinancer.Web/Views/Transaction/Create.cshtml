@@ -1,4 +1,5 @@
 ﻿@using PersonalFinancer.Web.Infrastructure;
+@using static PersonalFinancer.Data.DataConstants.Host;
 @model TransactionFormModel
 @{
 	ViewData["Title"] = "Create Transaction";
@@ -20,6 +21,7 @@
 					<div class="form-floating formField">
 						<input asp-for="@Model.CreatedOn" type="text" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 						<label asp-for="@Model.CreatedOn" class="form-label"></label>
+						<span asp-validation-for="@Model.CreatedOn" class="text-danger"></span>
 					</div>
 					<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField" id="categoriesSelection">
 						<label asp-for="@Model.CategoryId" class="form-label"></label>
@@ -90,8 +92,8 @@ else
 			} else {
 				let inputField = document.getElementById('newCategoryField');
 
-				let response = await fetch("@Url.Action("CreateCategory", "CategoryApi")", {
-					method: 'post',
+				let response = await fetch('@ApiCategoriesUrl', {
+					method: 'POST',
 					headers: {
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
@@ -99,7 +101,7 @@ else
 					body: JSON.stringify(inputField.value)
 				});
 
-				if (response.status == 200) {
+				if (response.status == 201) {
 					let newCategory = await response.json();
 
 					let optionTag = document.createElement('option');
@@ -141,15 +143,15 @@ else
 				return alert("You can not delete this category!")
 			}
 
-			let response = await fetch(
-				"@Url.Action("DeleteCategory", "CategoryApi")?categoryId=" + categoryId,
-				{ method: 'get' }
-			);
+			let url = '@(ApiCategoriesUrl)' + categoryId;
 
-			if (response.status == 200) {
-				let deletedCategoryId = await response.json();
-				categoriesDropdown.removeChild(document.getElementById(deletedCategoryId));
+			let response = await fetch(url, { method: 'DELETE' });
+
+			if (response.status == 204) {
+				categoriesDropdown.removeChild(document.getElementById(categoryId));
 				deleteBtnController();
+			} else {
+				alert('Somethink happend!')
 			}
 		}
 	</script>
