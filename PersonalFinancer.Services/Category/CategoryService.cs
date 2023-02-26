@@ -22,16 +22,22 @@
 		}
 
 		/// <summary>
-		/// Delete Category with given Id or throws exception.
+		/// Delete Category with given Id or throws exception when Category does not exist or User is not owner.
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		public async Task DeleteCategory(Guid categoryId)
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task DeleteCategory(Guid categoryId, string userId)
 		{
 			Category? category = await data.Categories.FindAsync(categoryId);
 
 			if (category == null)
 			{
 				throw new ArgumentNullException("Category does not exist.");
+			}
+
+			if (category.UserId != userId)
+			{
+				throw new InvalidOperationException("You can't delete someone else category.");
 			}
 
 			category.IsDeleted = true;

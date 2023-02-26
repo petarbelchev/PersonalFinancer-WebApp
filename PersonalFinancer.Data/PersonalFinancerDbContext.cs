@@ -8,9 +8,17 @@
 
 	public class PersonalFinancerDbContext : IdentityDbContext<ApplicationUser>
 	{
-		public PersonalFinancerDbContext(DbContextOptions<PersonalFinancerDbContext> options)
+		private bool seed;
+
+		public PersonalFinancerDbContext(DbContextOptions<PersonalFinancerDbContext> options, bool seed = true)
 			: base(options)
 		{
+			if (!this.Database.IsRelational())
+			{
+				this.Database.EnsureCreated();
+			}
+
+			this.seed = seed;
 		}
 
 		public DbSet<Account> Accounts { get; set; } = null!;
@@ -33,12 +41,15 @@
 				b.Property(p => p.NormalizedUserName).HasMaxLength(50);
 			});
 
-			builder.ApplyConfiguration(new AccountTypeEntityTypeConfiguration());
-			builder.ApplyConfiguration(new CurrencyTypeEntityTypeConfiguration());
-			builder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
-			builder.ApplyConfiguration(new UserEntityTypeConfiguration());
-			builder.ApplyConfiguration(new AccountEntityTypeConfiguration());
-			builder.ApplyConfiguration(new TransactionEntityTypeConfiguration());
+			if (this.seed)
+			{
+				builder.ApplyConfiguration(new AccountTypeEntityTypeConfiguration());
+				builder.ApplyConfiguration(new CurrencyTypeEntityTypeConfiguration());
+				builder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
+				builder.ApplyConfiguration(new UserEntityTypeConfiguration());
+				builder.ApplyConfiguration(new AccountEntityTypeConfiguration());
+				builder.ApplyConfiguration(new TransactionEntityTypeConfiguration());
+			}
 		}
 	}
 }

@@ -98,7 +98,7 @@ else
 						'Accept': 'application/json',
 						'Content-Type': 'application/json'
 					},
-					body: JSON.stringify(inputField.value)
+					body: JSON.stringify({ name: inputField.value })
 				});
 
 				if (response.status == 201) {

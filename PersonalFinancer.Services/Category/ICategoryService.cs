@@ -5,10 +5,11 @@
 	public interface ICategoryService
 	{
 		/// <summary>
-		/// Delete Category with given Id or throws exception.
+		/// Delete Category with given Id or throws exception when Category does not exist or User is not owner.
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		Task DeleteCategory(Guid categoryId);
+		/// <exception cref="InvalidOperationException"></exception>
+		Task DeleteCategory(Guid categoryId, string userId);
 
 		/// <summary>
 		/// Returns Category with props: Id and Name or null.

@@ -32,9 +32,9 @@
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<CategoryViewModel>> CreateCategory([FromBody] string categoryName)
+		public async Task<ActionResult<CategoryViewModel>> CreateCategory(CategoryViewModel category)
 		{
-			if (categoryName.Length < CategoryNameMinLength || categoryName.Length > CategoryNameMaxLength)
+			if (category.Name.Length < CategoryNameMinLength || category.Name.Length > CategoryNameMaxLength)
 			{
 				return BadRequest($"Category name must be between {CategoryNameMinLength} and {CategoryNameMaxLength} characters long.");
 			}
@@ -42,7 +42,7 @@
 			try
 			{
 				CategoryViewModel newCategory = await categoryService
-					.CreateCategory(User.Id(), categoryName);
+					.CreateCategory(User.Id(), category.Name);
 
 				return Created(string.Empty, newCategory);
 			}
@@ -57,13 +57,17 @@
 		{
 			try
 			{
-				await categoryService.DeleteCategory(id);
+				await categoryService.DeleteCategory(id, User.Id());
 
 				return NoContent();
 			}
-			catch (Exception)
+			catch (ArgumentNullException ex)
 			{
-				return BadRequest();
+				return NotFound(ex.Message);
+			}
+			catch (InvalidOperationException ex)
+			{
+				return BadRequest(ex.Message);
 			}
 		}
 	}

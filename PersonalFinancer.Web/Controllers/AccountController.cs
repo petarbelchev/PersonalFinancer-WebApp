@@ -50,7 +50,9 @@
 		public async Task<IActionResult> Create(AccountFormModel accountFormModel)
 		{
 			if (!ModelState.IsValid)
+			{
 				return View(accountFormModel);
+			}
 
 			Guid newAccountId = await accountService.CreateAccount(User.Id(), accountFormModel);
 
@@ -66,7 +68,9 @@
 		public async Task<IActionResult> Details(Guid id)
 		{
 			if (!await accountService.IsAccountOwner(User.Id(), id))
+			{
 				return Unauthorized();
+			}
 
 			AccountDetailsViewModel? accountDetails = await accountService.AccountDetailsViewModel(id);
 
@@ -85,7 +89,9 @@
 		public async Task<IActionResult> ConfirmDelete(Guid id)
 		{
 			if (!await accountService.IsAccountOwner(User.Id(), id))
+			{
 				return Unauthorized();
+			}
 
 			AccountDropdownViewModel? accountModel = await accountService.AccountDropdownViewModel(id);
 
@@ -104,7 +110,9 @@
 		public async Task<IActionResult> Delete(Guid id, bool shouldDeleteTransactions)
 		{
 			if (!await accountService.IsAccountOwner(User.Id(), id))
+			{
 				return Unauthorized();
+			}
 
 			await accountService.DeleteAccountById(id, shouldDeleteTransactions);
 
