@@ -3,7 +3,7 @@
 	using Microsoft.AspNetCore.Identity;
 	using System.ComponentModel.DataAnnotations;
 	
-	using static Data.DataConstants.User;
+	using static Data.DataConstants.UserConstants;
 
 	public class ApplicationUser : IdentityUser
 	{

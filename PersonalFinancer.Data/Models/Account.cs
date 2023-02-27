@@ -3,7 +3,7 @@
 	using System.ComponentModel.DataAnnotations;
 	using System.ComponentModel.DataAnnotations.Schema;
 
-	using static Data.DataConstants.Account;
+	using static Data.DataConstants.AccountConstants;
 
 	public class Account
 	{

@@ -2,9 +2,10 @@ using Microsoft.EntityFrameworkCore;
 
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Account;
+using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Category;
 using PersonalFinancer.Services.Currency;
+using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Web.Controllers;
 
@@ -27,6 +28,7 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITransactionsService, TransactionsService>();
 
 builder.Services.AddAutoMapper(
 	typeof(ICategoryService).Assembly,

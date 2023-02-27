@@ -6,7 +6,7 @@
 	using Models;
 	using Data;
 	using Data.Models;
-	using static Data.DataConstants.Category;
+	using static Data.DataConstants.CategoryConstants;
 
 	public class CategoryService : ICategoryService
 	{
@@ -56,6 +56,17 @@
 				.FirstOrDefaultAsync();
 
 			return category;
+		}
+
+		/// <summary>
+		/// Return Category Id by given name. If category does not exist throw an exception.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<Guid> CategoryIdByName(string categoryName)
+		{
+			Category category = await data.Categories.FirstAsync(c => c.Name == categoryName);
+
+			return category.Id;
 		}
 
 		/// <summary>

@@ -1,13 +1,14 @@
 ﻿namespace PersonalFinancer.Services.Infrastructure
 {
-	using AutoMapper;
+    using AutoMapper;
 
-	using Data.Models;
-	using PersonalFinancer.Services.Account.Models;
-	using PersonalFinancer.Services.Currency.Models;
-	using Services.Category.Models;
+    using Accounts.Models;
+    using Currency.Models;
+    using Category.Models;
+    using Transactions.Models;
+    using Data.Models;
 
-	public class ServiceMappingProfile : Profile
+    public class ServiceMappingProfile : Profile
 	{
 		public ServiceMappingProfile()
 		{

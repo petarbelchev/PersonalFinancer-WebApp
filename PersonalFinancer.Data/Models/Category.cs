@@ -3,7 +3,7 @@
 	using System.ComponentModel.DataAnnotations;
 	using System.ComponentModel.DataAnnotations.Schema;
 
-	using static Data.DataConstants.Category;
+	using static Data.DataConstants.CategoryConstants;
 
 	public class Category
 	{

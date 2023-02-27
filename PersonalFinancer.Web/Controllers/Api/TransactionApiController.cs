@@ -2,23 +2,23 @@
 {
 	using Microsoft.AspNetCore.Mvc;
 
-	using Services.Account;
+	using Services.Transactions;
 
 	[Route("api/transactions")]
 	[ApiController]
 	public class TransactionApiController : ControllerBase
 	{
-		private readonly IAccountService accountService;
+		private readonly ITransactionsService transactionsService;
 
-		public TransactionApiController(IAccountService accountService)
+		public TransactionApiController(ITransactionsService transactionsService)
 		{
-			this.accountService = accountService;
+			this.transactionsService = transactionsService;
 		}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteTransaction(Guid id)
 		{
-			bool isDeleted = await accountService.DeleteTransactionById(id);
+			bool isDeleted = await transactionsService.DeleteTransactionById(id);
 
 			if (!isDeleted)
 			{

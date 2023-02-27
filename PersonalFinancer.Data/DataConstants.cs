@@ -2,7 +2,7 @@
 {
 	public class DataConstants
 	{
-		public class User
+		public class UserConstants
 		{
 			public const int UserFirstNameMaxLength = 50;
 			public const int UserFirstNameMinLength = 2;
@@ -14,7 +14,7 @@
 			public const int UserPasswordMinLength = 6;
 		}
 
-		public class Account
+		public class AccountConstants
 		{
 			public const int AccountNameMaxLength = 50;
 			public const int AccountNameMinLength = 2;
@@ -23,13 +23,13 @@
 			public const double AccountInitialBalanceMinValue = 0.00;
 		}
 
-		public class AccountType
+		public class AccountTypeConstants
 		{
 			public const int AccountTypeNameMaxLength = 50;
 			public const int AccountTypeNameMinLength = 2;
 		}
 
-		public class Category
+		public class CategoryConstants
 		{
 			public const int CategoryNameMaxLength = 50;
 			public const int CategoryNameMinLength = 2;
@@ -37,7 +37,7 @@
 			public const string CategoryInitialBalanceName = "Initial Balance";
 		}
 
-		public class Transaction
+		public class TransactionConstants
 		{
 			public const int TransactionRefferenceMaxLength = 100;
 			public const int TransactionRefferenceMinLength = 4;
@@ -46,7 +46,7 @@
 			public const double TransactionMinValue = 0.01;
 		}
 
-		public static class Host
+		public static class HostConstants
 		{
 			private const string hostUrl = "https://localhost:7187";
 

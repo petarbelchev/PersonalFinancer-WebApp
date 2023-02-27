@@ -1,30 +1,35 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
 
-	using Infrastructure;
-	using Data.Enums;
-	using Services.Account;
-	using Services.Account.Models;
-	using Services.Category;
-	using PersonalFinancer.Services.Category.Models;
+    using Infrastructure;
+    using Data.Enums;
+    using Services.Accounts;
+    using Services.Accounts.Models;
+    using Services.Category;
+    using Services.Category.Models;
+    using Services.Transactions;
+    using Services.Transactions.Models;
 
-	/// <summary>
-	/// Transaction Controller takes care of everything related to Transactions.
-	/// </summary>
-	[Authorize]
+    /// <summary>
+    /// Transaction Controller takes care of everything related to Transactions.
+    /// </summary>
+    [Authorize]
 	public class TransactionController : Controller
 	{
 		private readonly ICategoryService categoryService;
 		private readonly IAccountService accountService;
+		private readonly ITransactionsService transactionsService;
 
 		public TransactionController(
 			ICategoryService categoryService,
-			IAccountService accountService)
+			IAccountService accountService,
+			ITransactionsService transactionsService)
 		{
 			this.categoryService = categoryService;
 			this.accountService = accountService;
+			this.transactionsService = transactionsService;
 		}
 
 		/// <summary>
@@ -40,7 +45,7 @@
 			};
 
 			AllTransactionsServiceModel transactions =
-				await accountService.AllTransactionsViewModel(User.Id(), model);
+				await transactionsService.AllTransactionsViewModel(User.Id(), model);
 
 			return View(transactions);
 		}
@@ -59,7 +64,7 @@
 			try
 			{
 				AllTransactionsServiceModel transactions =
-				await accountService.AllTransactionsViewModel(User.Id(), model);
+				await transactionsService.AllTransactionsViewModel(User.Id(), model);
 
 				return View(transactions);
 			}
@@ -106,7 +111,7 @@
 				return View(transactionFormModel);
 			}
 
-			Guid newTransactionId = await accountService.CreateTransaction(transactionFormModel);
+			Guid newTransactionId = await transactionsService.CreateTransaction(transactionFormModel);
 
 			TempData["successMsg"] = "You create a new transaction successfully!";
 
@@ -119,7 +124,7 @@
 		[HttpGet]
 		public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
 		{
-			await accountService.DeleteTransactionById(id);
+			await transactionsService.DeleteTransactionById(id);
 
 			TempData["successMsg"] = "Your transaction was successfully deleted!";
 
@@ -140,7 +145,7 @@
 		public async Task<IActionResult> Details(Guid id)
 		{
 			TransactionExtendedViewModel? transaction =
-				await accountService.TransactionViewModel(id);
+				await transactionsService.TransactionViewModel(id);
 
 			if (transaction == null)
 			{
@@ -156,7 +161,7 @@
 		[HttpGet]
 		public async Task<IActionResult> Edit(Guid id, string? returnUrl = null)
 		{
-			EditTransactionFormModel? transaction = await accountService.EditTransactionFormModelById(id);
+			EditTransactionFormModel? transaction = await transactionsService.EditTransactionFormModelById(id);
 
 			if (transaction == null)
 			{
@@ -230,7 +235,7 @@
 				return Unauthorized();
 			}
 
-			await accountService.EditTransaction(transactionFormModel);
+			await transactionsService.EditTransaction(transactionFormModel);
 
 			TempData["successMsg"] = "Your transaction was successfully edited!";
 

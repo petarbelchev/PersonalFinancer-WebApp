@@ -4,7 +4,7 @@
 	using System.ComponentModel.DataAnnotations.Schema;
 	
 	using Data.Enums;
-	using static Data.DataConstants.Transaction;
+	using static Data.DataConstants.TransactionConstants;
 
 	public class Transaction
 	{

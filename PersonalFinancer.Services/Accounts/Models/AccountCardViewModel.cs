@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Services.Account.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
 	public class AccountCardViewModel
 	{

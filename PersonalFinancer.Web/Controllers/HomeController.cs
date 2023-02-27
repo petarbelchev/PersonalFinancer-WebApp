@@ -3,8 +3,8 @@
 	using Microsoft.AspNetCore.Mvc;
 
 	using Infrastructure;
-	using Services.Account;
-	using Services.Account.Models;
+	using Services.Accounts;
+	using Services.Accounts.Models;
 
 	/// <summary>
 	/// Home Controller takes care of everything related to Dashboard page.

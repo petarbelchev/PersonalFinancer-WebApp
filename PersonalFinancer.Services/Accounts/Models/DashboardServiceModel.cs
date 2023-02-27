@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PersonalFinancer.Services.Account.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
+	using System.ComponentModel.DataAnnotations;
+
+	using Transactions.Models;
+
 	public class DashboardServiceModel
 	{
 		[Required(ErrorMessage = "Start Date is required.")]

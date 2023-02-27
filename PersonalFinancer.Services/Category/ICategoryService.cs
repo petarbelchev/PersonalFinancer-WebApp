@@ -15,6 +15,12 @@
 		/// Returns Category with props: Id and Name or null.
 		/// </summary>
 		Task<CategoryViewModel?> CategoryById(Guid categoryId);
+
+		/// <summary>
+		/// Return Category Id by given name. If category does not exist throw an exception.
+		/// </summary>
+		/// <exception cref="ArgumentNullException"></exception>
+		Task<Guid> CategoryIdByName(string categoryName);
 		
 		/// <summary>
 		/// Creates new Category with given Name. Returns View Model with Id and Name.

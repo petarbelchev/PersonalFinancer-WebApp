@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Services.Account.Models
+﻿namespace PersonalFinancer.Services.Transactions.Models
 {
     public class TransactionShortViewModel
     {

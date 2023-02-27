@@ -1,27 +1,36 @@
-﻿namespace PersonalFinancer.Services.Account
+﻿namespace PersonalFinancer.Services.Accounts
 {
-	using Microsoft.EntityFrameworkCore;
 	using AutoMapper;
 	using AutoMapper.QueryableExtensions;
+	using Microsoft.EntityFrameworkCore;
 
 	using Models;
 	using Infrastructure;
+	using Category;
+	using Transactions;
+	using Transactions.Models;
 	using Data;
 	using Data.Enums;
 	using Data.Models;
-	using static Data.DataConstants.Category;
+	using static Data.DataConstants.CategoryConstants;
 
 	public class AccountService : IAccountService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
+		private readonly ITransactionsService transactionsService;
+		private readonly ICategoryService categoryService;
 
 		public AccountService(
 			PersonalFinancerDbContext context,
-			IMapper mapper)
+			IMapper mapper,
+			ITransactionsService transactionsService,
+			ICategoryService categoryService)
 		{
 			this.data = context;
 			this.mapper = mapper;
+			this.transactionsService = transactionsService;
+			this.categoryService = categoryService;
 		}
 
 		/// <summary>
@@ -76,29 +85,6 @@
 		}
 
 		/// <summary>
-		/// Changes balance on given Account or throws exception if Account does not exist.
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		public async Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType)
-		{
-			Account? account = await data.Accounts.FindAsync(accountId);
-
-			if (account == null)
-			{
-				throw new ArgumentNullException("Account does not exist.");
-			}
-
-			if (transactionType == TransactionType.Income)
-			{
-				account.Balance += amount;
-			}
-			else if (transactionType == TransactionType.Expense)
-			{
-				account.Balance -= amount;
-			}
-		}
-
-		/// <summary>
 		/// Creates a new Account and if the new account has initial balance creates new Transaction with given amount.
 		/// Returns new Account's id.
 		/// </summary>
@@ -119,15 +105,15 @@
 
 			if (newAccount.Balance != 0)
 			{
-				await data.Transactions.AddAsync(new Transaction()
+				await transactionsService.CreateTransaction(new TransactionFormModel
 				{
 					Amount = newAccount.Balance,
-					Account = newAccount,
-					Category = await data.Categories.FirstAsync(c => c.Name == CategoryInitialBalanceName),
+					AccountId = newAccount.Id,
+					CategoryId = await categoryService.CategoryIdByName(CategoryInitialBalanceName),
 					Refference = "Initial Balance",
 					CreatedOn = DateTime.UtcNow,
 					TransactionType = TransactionType.Income
-				});
+				}, true);
 			}
 
 			await data.SaveChangesAsync();
@@ -166,65 +152,6 @@
 			}
 
 			return account.IsDeleted;
-		}
-
-		/// <summary>
-		/// Creates a new Transaction and change account's balance. Returns new transaction's id.
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		public async Task<Guid> CreateTransaction(TransactionFormModel transactionFormModel)
-		{
-			Transaction newTransaction = new Transaction()
-			{
-				Amount = transactionFormModel.Amount,
-				AccountId = transactionFormModel.AccountId,
-				CategoryId = transactionFormModel.CategoryId,
-				TransactionType = transactionFormModel.TransactionType,
-				CreatedOn = transactionFormModel.CreatedOn,
-				Refference = transactionFormModel.Refference
-			};
-
-			await ChangeBalance(newTransaction.AccountId,
-								newTransaction.Amount,
-								newTransaction.TransactionType);
-
-			await data.Transactions.AddAsync(newTransaction);
-
-			await data.SaveChangesAsync();
-
-			return newTransaction.Id;
-		}
-
-		/// <summary>
-		/// Delete a Transaction and change account's balance. Returns True or False.
-		/// </summary>
-		public async Task<bool> DeleteTransactionById(Guid transactionId)
-		{
-			Transaction? transaction = await data.Transactions.FindAsync(transactionId);
-
-			if (transaction == null)
-			{
-				return false;
-			}
-
-			data.Transactions.Remove(transaction);
-
-			if (transaction.TransactionType == TransactionType.Income)
-			{
-				transaction.TransactionType = TransactionType.Expense;
-			}
-			else
-			{
-				transaction.TransactionType = TransactionType.Income;
-			}
-
-			await ChangeBalance(transaction.AccountId,
-								transaction.Amount,
-								transaction.TransactionType);
-
-			await data.SaveChangesAsync();
-
-			return true;
 		}
 
 		/// <summary>
@@ -313,113 +240,6 @@
 						model.CurrenciesCashFlow[a.Currency.Name].Expence += (decimal)expense;
 					}
 				});
-		}
-
-		/// <summary>
-		/// Returns a Transaction with Id, AccountId, Amount, CategoryId, Refference, TransactionType, OwnerId, CreatedOn, or null.
-		/// </summary>
-		public async Task<EditTransactionFormModel?> EditTransactionFormModelById(Guid transactionId)
-		{
-			EditTransactionFormModel? transaction = await data.Transactions
-				.Where(t => t.Id == transactionId)
-				.ProjectTo<EditTransactionFormModel>(new MapperConfiguration(
-					cfg => cfg.AddProfile<ServiceMappingProfile>()))
-				.FirstOrDefaultAsync();
-
-			return transaction;
-		}
-
-		/// <summary>
-		/// Returns Transaction Extended View Model with given Id, or null.
-		/// </summary>
-		public async Task<TransactionExtendedViewModel?> TransactionViewModel(Guid transactionId)
-		{
-			TransactionExtendedViewModel? transaction = await data.Transactions
-				.Where(t => t.Id == transactionId)
-				.ProjectTo<TransactionExtendedViewModel>(new MapperConfiguration(
-					cfg => cfg.AddProfile<ServiceMappingProfile>()))
-				.FirstOrDefaultAsync();
-
-			return transaction;
-		}
-
-		/// <summary>
-		/// Returns a collection of User's transactions for given period. 
-		/// Throws Exception when End Date is before Start Date.
-		/// </summary>
-		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
-		/// <exception cref="ArgumentException"></exception>
-		public async Task<AllTransactionsServiceModel> AllTransactionsViewModel(
-			string userId, AllTransactionsServiceModel model)
-		{
-			if (model.StartDate > model.EndDate)
-			{
-				throw new ArgumentException("Start Date must be before End Date.");
-			}
-
-			TransactionExtendedViewModel[] transactions = await data.Transactions
-				.Where(t =>
-					t.Account.OwnerId == userId &&
-					t.CreatedOn >= model.StartDate &&
-					t.CreatedOn <= model.EndDate)
-				.OrderByDescending(t => t.CreatedOn)
-				.ProjectTo<TransactionExtendedViewModel>(new MapperConfiguration(
-					cfg => cfg.AddProfile<ServiceMappingProfile>()))
-				.ToArrayAsync();
-
-			model.Transactions = transactions;
-
-			return model;
-		}
-
-		/// <summary>
-		/// Edits a Transaction and change account's balance if it's nessesery, or throws an exception.
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		public async Task EditTransaction(EditTransactionFormModel editedTransaction)
-		{
-			Transaction? transaction = await data.Transactions
-				.FindAsync(editedTransaction.Id);
-
-			if (transaction == null)
-			{
-				throw new ArgumentNullException("Transactions does not exist.");
-			}
-
-			bool isAccountOrAmountOrTransactionTypeChanged =
-				editedTransaction.AccountId != transaction.AccountId ||
-				editedTransaction.TransactionType != transaction.TransactionType ||
-				editedTransaction.Amount != transaction.Amount;
-
-			if (isAccountOrAmountOrTransactionTypeChanged)
-			{
-				TransactionType newTransactionType = TransactionType.Income;
-
-				if (transaction.TransactionType == TransactionType.Income)
-				{
-					newTransactionType = TransactionType.Expense;
-				}
-
-				await ChangeBalance(transaction.AccountId,
-									transaction.Amount,
-									newTransactionType);
-			}
-
-			transaction.Refference = editedTransaction.Refference;
-			transaction.AccountId = editedTransaction.AccountId;
-			transaction.CategoryId = editedTransaction.CategoryId;
-			transaction.Amount = editedTransaction.Amount;
-			transaction.CreatedOn = editedTransaction.CreatedOn;
-			transaction.TransactionType = editedTransaction.TransactionType;
-
-			if (isAccountOrAmountOrTransactionTypeChanged)
-			{
-				await ChangeBalance(transaction.AccountId,
-									transaction.Amount,
-									transaction.TransactionType);
-			}
-
-			await data.SaveChangesAsync();
 		}
 	}
 }

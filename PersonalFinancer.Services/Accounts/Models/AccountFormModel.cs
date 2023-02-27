@@ -1,9 +1,9 @@
-﻿namespace PersonalFinancer.Services.Account.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
 	using System.ComponentModel.DataAnnotations;
 	
-	using static Data.DataConstants.Account;
 	using Currency.Models;
+	using static Data.DataConstants.AccountConstants;
 
 	public class AccountFormModel
 	{

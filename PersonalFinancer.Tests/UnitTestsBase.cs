@@ -7,7 +7,7 @@
 	using Data;
 	using Data.Models;
 	using Data.Enums;
-	using static Data.DataConstants.Category;
+	using static Data.DataConstants.CategoryConstants;
 
 	[TestFixture]
 	abstract class UnitTestsBase
@@ -37,12 +37,14 @@
 
 		protected AccountType AccountType1 { get; private set; } = null!;
 		protected AccountType AccountType2 { get; private set; } = null!;
+		protected AccountType AccountType3 { get; private set; } = null!;
 
 		protected Category Category1 { get; private set; } = null!;
 		protected Category Category2 { get; private set; } = null!;
 		protected Category Category3 { get; private set; } = null!;
 		protected Category Category4 { get; private set; } = null!;
 		protected Category Category5 { get; private set; } = null!;
+		protected Category Category6 { get; private set; } = null!;
 
 		protected Currency Currency1 { get; private set; } = null!;
 		protected Currency Currency2 { get; private set; } = null!;
@@ -88,7 +90,14 @@
 				Id = BankAccTypeId,
 				Name = "Bank"
 			};
-			data.AccountTypes.AddRange(AccountType1, AccountType2);
+			Guid CustomAccTypeId = Guid.NewGuid();
+			AccountType3 = new AccountType
+			{
+				Id = CustomAccTypeId,
+				Name = "Bank",
+				IsDeleted = true
+			};
+			data.AccountTypes.AddRange(AccountType1, AccountType2, AccountType3);
 
 			// Currencies
 			Guid BgnCurrencyId = Guid.NewGuid();
@@ -123,15 +132,17 @@
 				OwnerId = PetarId
 			};
 			Guid petarBankEurAccId = Guid.NewGuid();
-			Account1User1 = new Account
+			Account2User1 = new Account
 			{
 				Id = petarBankEurAccId,
 				Name = "Bank EUR",
 				AccountTypeId = BankAccTypeId,
 				Balance = 900.01m,
 				CurrencyId = EurCurrencyId,
-				OwnerId = PetarId
+				OwnerId = PetarId,
+				IsDeleted = true
 			};
+			data.Accounts.AddRange(Account1User1, Account2User1);
 
 			// Categories
 			Guid initBalanceCatId = Guid.NewGuid();
@@ -165,71 +176,80 @@
 				Name = "Custom Category",
 				UserId = PetarId
 			};
-			data.Categories.AddRange(Category1, Category2, Category3, Category4, Category5);
+			Guid deletedCustomCatId = Guid.NewGuid();
+			Category6 = new Category
+			{
+				Id = deletedCustomCatId,
+				Name = "Custom Category",
+				UserId = PetarId,
+				IsDeleted = true
+			};
+			data.Categories.AddRange(Category1, Category2, Category3, Category4, Category5, Category6);
 
 			// Transactions
 			// Cash BGN
-			new Transaction()
-			{
-				Id = Guid.NewGuid(),
-				AccountId = petarCashBgnAccId,
-				Amount = 200,
-				CategoryId = initBalanceCatId,
-				CreatedOn = DateTime.UtcNow.AddMonths(-3),
-				Refference = CategoryInitialBalanceName,
-				TransactionType = TransactionType.Income
-			};
-			new Transaction()
-			{
-				Id = Guid.NewGuid(),
-				AccountId = petarCashBgnAccId,
-				Amount = 5.65m,
-				CategoryId = foodCatId,
-				CreatedOn = DateTime.UtcNow.AddMonths(-2),
-				Refference = "Lunch",
-				TransactionType = TransactionType.Expense
-			};
-			new Transaction()
-			{
-				Id = Guid.NewGuid(),
-				AccountId = petarCashBgnAccId,
-				Amount = 4.80m,
-				CategoryId = transportCatId,
-				CreatedOn = DateTime.UtcNow.AddMonths(-1),
-				Refference = "Taxi",
-				TransactionType = TransactionType.Expense
-			};
-			// Bank EUR
-			new Transaction()
-			{
-				Id = Guid.NewGuid(),
-				AccountId = petarBankEurAccId,
-				Amount = 200,
-				CategoryId = initBalanceCatId,
-				CreatedOn = DateTime.UtcNow.AddMonths(-3),
-				Refference = CategoryInitialBalanceName,
-				TransactionType = TransactionType.Income
-			};
-			new Transaction()
-			{
-				Id = Guid.NewGuid(),
-				AccountId = petarBankEurAccId,
-				Amount = 750m,
-				CategoryId = salaryCatId,
-				CreatedOn = DateTime.UtcNow.AddMonths(-2),
-				Refference = "Salary",
-				TransactionType = TransactionType.Income
-			};
-			new Transaction()
-			{
-				Id = Guid.NewGuid(),
-				AccountId = petarBankEurAccId,
-				Amount = 49.99m,
-				CategoryId = transportCatId,
-				CreatedOn = DateTime.UtcNow.AddMonths(-2),
-				Refference = "Flight ticket",
-				TransactionType = TransactionType.Expense
-			};
+			data.Transactions.AddRange(
+				new Transaction()
+				{
+					Id = Guid.NewGuid(),
+					AccountId = petarCashBgnAccId,
+					Amount = 200,
+					CategoryId = initBalanceCatId,
+					CreatedOn = DateTime.UtcNow.AddMonths(-3),
+					Refference = CategoryInitialBalanceName,
+					TransactionType = TransactionType.Income
+				},
+				new Transaction()
+				{
+					Id = Guid.NewGuid(),
+					AccountId = petarCashBgnAccId,
+					Amount = 5.65m,
+					CategoryId = foodCatId,
+					CreatedOn = DateTime.UtcNow.AddMonths(-2),
+					Refference = "Lunch",
+					TransactionType = TransactionType.Expense
+				},
+				new Transaction()
+				{
+					Id = Guid.NewGuid(),
+					AccountId = petarCashBgnAccId,
+					Amount = 4.80m,
+					CategoryId = transportCatId,
+					CreatedOn = DateTime.UtcNow.AddDays(-2),
+					Refference = "Taxi",
+					TransactionType = TransactionType.Expense
+				},
+				// Bank EUR
+				new Transaction()
+				{
+					Id = Guid.NewGuid(),
+					AccountId = petarBankEurAccId,
+					Amount = 200,
+					CategoryId = initBalanceCatId,
+					CreatedOn = DateTime.UtcNow.AddMonths(-3),
+					Refference = CategoryInitialBalanceName,
+					TransactionType = TransactionType.Income
+				},
+				new Transaction()
+				{
+					Id = Guid.NewGuid(),
+					AccountId = petarBankEurAccId,
+					Amount = 750m,
+					CategoryId = salaryCatId,
+					CreatedOn = DateTime.UtcNow.AddMonths(-2),
+					Refference = "Salary",
+					TransactionType = TransactionType.Income
+				},
+				new Transaction()
+				{
+					Id = Guid.NewGuid(),
+					AccountId = petarBankEurAccId,
+					Amount = 49.99m,
+					CategoryId = transportCatId,
+					CreatedOn = DateTime.UtcNow.AddMonths(-2),
+					Refference = "Flight ticket",
+					TransactionType = TransactionType.Expense
+				});
 
 			data.SaveChanges();
 		}

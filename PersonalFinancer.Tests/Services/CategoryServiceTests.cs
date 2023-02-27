@@ -3,7 +3,7 @@
 	using NUnit.Framework;
 
 	using Data.Models;
-	using static Data.DataConstants.Category;
+	using static Data.DataConstants.CategoryConstants;
 	using PersonalFinancer.Services.Category;
 	using PersonalFinancer.Services.Category.Models;
 
@@ -216,6 +216,24 @@
 				Assert.That(actualSecondUserCategories.ElementAt(i).Id, 
 					Is.EqualTo(expectedSecondUserCategories.ElementAt(i).Id));
 			}
+		}
+
+		[Test]
+		public async Task CategoryIdByName_ShouldReturnId_WithValidCategoryName()
+		{
+			//Arrange & Act
+			Guid categoryId = await categoryService.CategoryIdByName(this.Category1.Name);
+
+			//Assert
+			Assert.That(categoryId, Is.EqualTo(this.Category1.Id));
+		}
+
+		[Test]
+		public void CategoryIdByName_ShouldThrowException_WithInvalidCategoryName()
+		{
+			//Act & Assert
+			Assert.That(async () => await categoryService.CategoryIdByName("NotExistCategory"),
+				Throws.TypeOf<InvalidOperationException>());
 		}
 	}
 }

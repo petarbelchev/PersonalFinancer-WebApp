@@ -3,10 +3,10 @@
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 
-	using Services.Account;
-	using Services.Account.Models;
-	using Services.Currency;
 	using Infrastructure;
+	using Services.Accounts;
+	using Services.Accounts.Models;
+	using Services.Currency;
 
 	/// <summary>
 	/// Account Controller takes care of everything related to Accounts.
