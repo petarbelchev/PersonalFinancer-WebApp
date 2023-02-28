@@ -52,8 +52,11 @@
 		protected Transaction Transaction1 { get; private set; } = null!;
 		protected Transaction Transaction2 { get; private set; } = null!;
 		protected Transaction Transaction3 { get; private set; } = null!;
+		protected Transaction Transaction4 { get; private set; } = null!;
+		protected Transaction Transaction5 { get; private set; } = null!;
+		protected Transaction Transaction6 { get; private set; } = null!;
 
-		private void SeedDatabase()
+		private async void SeedDatabase()
 		{
 			//Users
 			string PetarId = Guid.NewGuid().ToString();
@@ -188,70 +191,70 @@
 
 			// Transactions
 			// Cash BGN
-			data.Transactions.AddRange(
-				new Transaction()
-				{
-					Id = Guid.NewGuid(),
-					AccountId = petarCashBgnAccId,
-					Amount = 200,
-					CategoryId = initBalanceCatId,
-					CreatedOn = DateTime.UtcNow.AddMonths(-3),
-					Refference = CategoryInitialBalanceName,
-					TransactionType = TransactionType.Income
-				},
-				new Transaction()
-				{
-					Id = Guid.NewGuid(),
-					AccountId = petarCashBgnAccId,
-					Amount = 5.65m,
-					CategoryId = foodCatId,
-					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = "Lunch",
-					TransactionType = TransactionType.Expense
-				},
-				new Transaction()
-				{
-					Id = Guid.NewGuid(),
-					AccountId = petarCashBgnAccId,
-					Amount = 4.80m,
-					CategoryId = transportCatId,
-					CreatedOn = DateTime.UtcNow.AddDays(-2),
-					Refference = "Taxi",
-					TransactionType = TransactionType.Expense
-				},
-				// Bank EUR
-				new Transaction()
-				{
-					Id = Guid.NewGuid(),
-					AccountId = petarBankEurAccId,
-					Amount = 200,
-					CategoryId = initBalanceCatId,
-					CreatedOn = DateTime.UtcNow.AddMonths(-3),
-					Refference = CategoryInitialBalanceName,
-					TransactionType = TransactionType.Income
-				},
-				new Transaction()
-				{
-					Id = Guid.NewGuid(),
-					AccountId = petarBankEurAccId,
-					Amount = 750m,
-					CategoryId = salaryCatId,
-					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = "Salary",
-					TransactionType = TransactionType.Income
-				},
-				new Transaction()
-				{
-					Id = Guid.NewGuid(),
-					AccountId = petarBankEurAccId,
-					Amount = 49.99m,
-					CategoryId = transportCatId,
-					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = "Flight ticket",
-					TransactionType = TransactionType.Expense
-				});
+			Transaction1 = new Transaction()
+			{
+				Id = Guid.NewGuid(),
+				AccountId = petarCashBgnAccId,
+				Amount = 200,
+				CategoryId = initBalanceCatId,
+				CreatedOn = DateTime.UtcNow.AddMonths(-3),
+				Refference = CategoryInitialBalanceName,
+				TransactionType = TransactionType.Income
+			};
+			Transaction2 = new Transaction()
+			{
+				Id = Guid.NewGuid(),
+				AccountId = petarCashBgnAccId,
+				Amount = 5.65m,
+				CategoryId = foodCatId,
+				CreatedOn = DateTime.UtcNow.AddMonths(-2),
+				Refference = "Lunch",
+				TransactionType = TransactionType.Expense
+			};
+			Transaction3 = new Transaction()
+			{
+				Id = Guid.NewGuid(),
+				AccountId = petarCashBgnAccId,
+				Amount = 4.80m,
+				CategoryId = transportCatId,
+				CreatedOn = DateTime.UtcNow.AddDays(-2),
+				Refference = "Taxi",
+				TransactionType = TransactionType.Expense
+			};
+			// Bank EUR
+			Transaction4 = new Transaction()
+			{
+				Id = Guid.NewGuid(),
+				AccountId = petarBankEurAccId,
+				Amount = 200,
+				CategoryId = initBalanceCatId,
+				CreatedOn = DateTime.UtcNow.AddMonths(-3),
+				Refference = CategoryInitialBalanceName,
+				TransactionType = TransactionType.Income
+			};
+			Transaction5 = new Transaction()
+			{
+				Id = Guid.NewGuid(),
+				AccountId = petarBankEurAccId,
+				Amount = 750m,
+				CategoryId = salaryCatId,
+				CreatedOn = DateTime.UtcNow.AddMonths(-2),
+				Refference = "Salary",
+				TransactionType = TransactionType.Income
+			};
+			Transaction6 = new Transaction()
+			{
+				Id = Guid.NewGuid(),
+				AccountId = petarBankEurAccId,
+				Amount = 49.99m,
+				CategoryId = transportCatId,
+				CreatedOn = DateTime.UtcNow.AddMonths(-2),
+				Refference = "Flight ticket",
+				TransactionType = TransactionType.Expense
+			};
 
-			data.SaveChanges();
+			data.Transactions.AddRange(Transaction1, Transaction2, Transaction3, Transaction4, Transaction5, Transaction6);
+			await data.SaveChangesAsync();
 		}
 	}
 }

@@ -40,6 +40,8 @@
 				Refference = transactionFormModel.Refference
 			};
 
+			// TODO: Add Check if account have enough money for transaction!
+
 			await data.Transactions.AddAsync(newTransaction);
 
 			if (!isInitialBalance)
@@ -58,14 +60,9 @@
 		/// Changes balance on given Account or throws exception if Account does not exist.
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		public async Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType)
+		private async Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType)
 		{
-			Account? account = await data.Accounts.FindAsync(accountId);
-
-			if (account == null)
-			{
-				throw new ArgumentNullException("Account does not exist.");
-			}
+			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
 
 			if (transactionType == TransactionType.Income)
 			{
@@ -80,7 +77,7 @@
 		/// <summary>
 		/// Changes balance on given Account.
 		/// </summary>
-		public void ChangeBalance(Account account, decimal amount, TransactionType transactionType)
+		private void ChangeBalance(Account account, decimal amount, TransactionType transactionType)
 		{
 			if (transactionType == TransactionType.Income)
 			{
@@ -155,7 +152,7 @@
 		}
 
 		/// <summary>
-		/// Returns a collection of User's transactions for given period. 
+		/// Returns a collection of User's transactions for given period ordered by descending. 
 		/// Throws Exception when End Date is before Start Date.
 		/// </summary>
 		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
@@ -184,19 +181,13 @@
 		}
 
 		/// <summary>
-		/// Edits a Transaction and change account's balance if it's nessesery, or throws an exception.
+		/// Edits a Transaction and change account's balance if it's nessesery.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
 		public async Task EditTransaction(EditTransactionFormModel editedTransaction)
 		{
-			Transaction? transaction = await data.Transactions
+			Transaction transaction = await data.Transactions
 				.Include(t => t.Account)
-				.FirstOrDefaultAsync(t => t.Id == editedTransaction.Id);
-
-			if (transaction == null)
-			{
-				throw new ArgumentNullException("Transactions does not exist.");
-			}
+				.FirstAsync(t => t.Id == editedTransaction.Id);
 
 			bool isAccountOrAmountOrTransactionTypeChanged =
 				editedTransaction.AccountId != transaction.AccountId ||
@@ -226,9 +217,9 @@
 
 			if (isAccountOrAmountOrTransactionTypeChanged)
 			{
-				ChangeBalance(transaction.Account,
-									transaction.Amount,
-									transaction.TransactionType);
+				await ChangeBalance(editedTransaction.AccountId,
+									editedTransaction.Amount,
+									editedTransaction.TransactionType);
 			}
 
 			await data.SaveChangesAsync();

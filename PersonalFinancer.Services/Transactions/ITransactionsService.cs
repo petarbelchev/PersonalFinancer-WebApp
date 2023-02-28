@@ -14,25 +14,13 @@
 		Task<Guid> CreateTransaction(TransactionFormModel transactionFormModel, bool isInitialBalance = false);
 
 		/// <summary>
-		/// Changes balance on given Account or throws exception if Account does not exist.
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType);	
-
-		/// <summary>
-		/// Changes balance on given Account.
-		/// </summary>
-		void ChangeBalance(Account account, decimal amount, TransactionType transactionType);	
-
-		/// <summary>
 		/// Delete a Transaction and change account's balance. Returns True or False.
 		/// </summary>
 		Task<bool> DeleteTransactionById(Guid transactionId);
 
 		/// <summary>
-		/// Edits a Transaction and change account's balance if it's nessesery, or throws an exception.
+		/// Edits a Transaction and change account's balance if it's nessesery.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
 		Task EditTransaction(EditTransactionFormModel transactionFormModel);
 
 		/// <summary>
@@ -46,7 +34,7 @@
 		Task<TransactionExtendedViewModel?> TransactionViewModel(Guid transactionId);
 
 		/// <summary>
-		/// Returns a collection of User's transactions for given period.
+		/// Returns a collection of User's transactions for given period ordered by descending.
 		/// Throws Exception when End Date is before Start Date.
 		/// </summary>
 		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
