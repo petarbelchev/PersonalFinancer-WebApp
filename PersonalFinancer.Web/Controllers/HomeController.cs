@@ -56,5 +56,7 @@
 		public IActionResult Privacy() => View();
 
 		public IActionResult Error() => View();
+
+		public IActionResult AccessDenied() => View();
 	}
 }
