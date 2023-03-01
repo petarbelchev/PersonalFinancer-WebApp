@@ -12,8 +12,8 @@ using PersonalFinancer.Data;
 namespace PersonalFinancer.Data.Migrations
 {
     [DbContext(typeof(PersonalFinancerDbContext))]
-    [Migration("20230225103743_ChangedDbSeedData")]
-    partial class ChangedDbSeedData
+    [Migration("20230301083503_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -171,6 +171,7 @@ namespace PersonalFinancer.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Balance")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("CurrencyId")
@@ -368,7 +369,7 @@ namespace PersonalFinancer.Data.Migrations
                         {
                             Id = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "7661beaf-3cc7-4ec1-ad93-2ac83cbd1a24",
+                            ConcurrencyStamp = "2967276f-6b14-4c8c-ad88-a76e5e3b918e",
                             Email = "petar@mail.com",
                             EmailConfirmed = false,
                             FirstName = "Petar",
@@ -376,9 +377,9 @@ namespace PersonalFinancer.Data.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "PETAR@MAIL.COM",
                             NormalizedUserName = "PETAR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEMF0M9UNAZiUb8G5SUYJcH6M+yYRnk8dYU1FtZVvtfoo9frhcZMLjKQBI5ny3M+axw==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEI9k5VH8zCiPQNZ+Y1LDSlsgB+DW5L2HVnGnZrJMYf4PII3RofXUj+GCYRW+YWE0fg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "24c415fc-431c-464b-a2b5-2bcb9aab401c",
+                            SecurityStamp = "d9b86a1c-62d8-4ffb-bd9d-7e83b02a8275",
                             TwoFactorEnabled = false,
                             UserName = "petar@mail.com"
                         },
@@ -386,7 +387,7 @@ namespace PersonalFinancer.Data.Migrations
                         {
                             Id = "bcb4f072-ecca-43c9-ab26-c060c6f364e4",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "818bd355-80b0-444b-b7cb-814e9060ec33",
+                            ConcurrencyStamp = "4b1bbc1d-99e2-41e1-8371-8dc160018a0e",
                             Email = "teodor@mail.com",
                             EmailConfirmed = false,
                             FirstName = "Teodor",
@@ -394,9 +395,9 @@ namespace PersonalFinancer.Data.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "TEODOR@MAIL.COM",
                             NormalizedUserName = "TEODOR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEOnBXRGToss+bHzfGUxZiM9y6YVo3kCBfOtBFC9dLF4uXoycKhQq/UsSTnveWi2b6g==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEFDapwAhzuqwd/Hew4GbQDIEKXXwMHdq3XH30lh0zmC2FVt7ZgFfjXl/bDClAXW9BA==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "e47fc12c-5581-472e-b712-c1cad22562c7",
+                            SecurityStamp = "8b4f5eb3-3a67-45f1-8e59-e7da4febaa1d",
                             TwoFactorEnabled = false,
                             UserName = "teodor@mail.com"
                         },
@@ -404,7 +405,7 @@ namespace PersonalFinancer.Data.Migrations
                         {
                             Id = "dea12856-c198-4129-b3f3-b893d8395082",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "06a84cfc-e2f5-4742-ae83-81d6cf94792c",
+                            ConcurrencyStamp = "ceb950c7-285e-48f7-9cae-50b7c61f8a08",
                             Email = "admin@admin.com",
                             EmailConfirmed = false,
                             FirstName = "Great",
@@ -412,9 +413,9 @@ namespace PersonalFinancer.Data.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN@ADMIN.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEF+LD5WxVJT2wjyXNjJbWqE3RkxgxUQJu/Z2GIKsCwRKkjtoAdD8Bf0/VJOInyDKkQ==",
+                            PasswordHash = "AQAAAAEAACcQAAAAENlLQtu94C2r3wF3RQh4N+JAx9WQTzjdNnxDXuSF07rZKZQfHa0LqNGfdOI3mD5djQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "b7c3ffec-e5b5-4109-81ba-8ffcbd080e54",
+                            SecurityStamp = "ea899bcc-a166-44bc-849c-3c1856195267",
                             TwoFactorEnabled = false,
                             UserName = "admin@admin.com"
                         });
@@ -529,6 +530,7 @@ namespace PersonalFinancer.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("CategoryId")
@@ -556,131 +558,131 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("7e650b18-854d-4a07-900e-2178c7694ed4"),
+                            Id = new Guid("e0fdd402-707a-427a-92e2-f8b00422e4ef"),
                             AccountId = new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"),
                             Amount = 200m,
                             CategoryId = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
-                            CreatedOn = new DateTime(2022, 11, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1701),
+                            CreatedOn = new DateTime(2022, 12, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(827),
                             Refference = "Initial Balance",
                             TransactionType = 0
                         },
                         new
                         {
-                            Id = new Guid("233ac3a9-79ad-4189-860e-6b6bd85443c1"),
+                            Id = new Guid("0e613e98-0975-4ae9-b4f8-e44f8ddb51ad"),
                             AccountId = new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"),
                             Amount = 5.65m,
                             CategoryId = new Guid("93cebd34-a9f5-4862-a8c9-3b6eea63e94c"),
-                            CreatedOn = new DateTime(2022, 12, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1713),
+                            CreatedOn = new DateTime(2023, 1, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2591),
                             Refference = "Lunch",
                             TransactionType = 1
                         },
                         new
                         {
-                            Id = new Guid("61a6484c-48f4-4229-b201-aff195604b67"),
+                            Id = new Guid("0e750d8a-eeb9-45cc-bfd4-1221bf6aa651"),
                             AccountId = new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"),
                             Amount = 4.80m,
                             CategoryId = new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"),
-                            CreatedOn = new DateTime(2023, 1, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1718),
+                            CreatedOn = new DateTime(2023, 2, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2619),
                             Refference = "Taxi",
                             TransactionType = 1
                         },
                         new
                         {
-                            Id = new Guid("f4e33e7a-55c7-4e41-8035-e49c185caabf"),
+                            Id = new Guid("627ef639-493c-403c-b3b6-83b581e56e7d"),
                             AccountId = new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"),
                             Amount = 1834.78m,
                             CategoryId = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
-                            CreatedOn = new DateTime(2022, 11, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1721),
+                            CreatedOn = new DateTime(2022, 12, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2628),
                             Refference = "Initial Balance",
                             TransactionType = 0
                         },
                         new
                         {
-                            Id = new Guid("d1214101-8695-4706-9a1d-3770bb499866"),
+                            Id = new Guid("52aaf8b7-e931-4153-b0b1-1a9a38c395ab"),
                             AccountId = new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"),
                             Amount = 100.00m,
                             CategoryId = new Guid("d59cbb57-3b9e-4b37-9b74-a375eecba8c8"),
-                            CreatedOn = new DateTime(2022, 11, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1725),
+                            CreatedOn = new DateTime(2022, 12, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2636),
                             Refference = "Electricity bill",
                             TransactionType = 1
                         },
                         new
                         {
-                            Id = new Guid("716080b0-8430-4110-a3db-2e20f0d89db8"),
+                            Id = new Guid("9e2bbe87-4d69-4230-a4c5-50e5ad9821f9"),
                             AccountId = new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"),
                             Amount = 1000.00m,
                             CategoryId = new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"),
-                            CreatedOn = new DateTime(2022, 12, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1739),
+                            CreatedOn = new DateTime(2023, 1, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2660),
                             Refference = "Salary",
                             TransactionType = 0
                         },
                         new
                         {
-                            Id = new Guid("2161a16a-b825-4669-8706-3f733ec7bd29"),
+                            Id = new Guid("3d782bdc-623f-42dd-954e-3b0a4e5de835"),
                             AccountId = new Guid("70169197-5c32-4430-ab39-34c776533376"),
                             Amount = 600m,
                             CategoryId = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
-                            CreatedOn = new DateTime(2022, 11, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1743),
+                            CreatedOn = new DateTime(2022, 12, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2665),
                             Refference = "Initial Balance",
                             TransactionType = 0
                         },
                         new
                         {
-                            Id = new Guid("8cef1056-5a74-4513-b185-312fe6c00edd"),
+                            Id = new Guid("39809649-b514-445f-8702-de4691eeb9cb"),
                             AccountId = new Guid("70169197-5c32-4430-ab39-34c776533376"),
                             Amount = 24.29m,
                             CategoryId = new Guid("96e441e3-c5a6-427f-bb32-85940242d9ee"),
-                            CreatedOn = new DateTime(2022, 12, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1747),
+                            CreatedOn = new DateTime(2023, 1, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2669),
                             Refference = "Health Insurance",
                             TransactionType = 1
                         },
                         new
                         {
-                            Id = new Guid("4b88a0a7-7ad3-48d0-bb98-c05a07e39d17"),
+                            Id = new Guid("bc1883f4-bf24-4a32-af42-fbf158ea593d"),
                             AccountId = new Guid("70169197-5c32-4430-ab39-34c776533376"),
                             Amount = 250m,
                             CategoryId = new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"),
-                            CreatedOn = new DateTime(2023, 2, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1751),
+                            CreatedOn = new DateTime(2023, 3, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2688),
                             Refference = "Salary",
                             TransactionType = 0
                         },
                         new
                         {
-                            Id = new Guid("ac0c1c0d-3ec1-47aa-8932-4a2e2ad1d32b"),
+                            Id = new Guid("2803fee3-7f4b-49a9-bcf4-f5a2e7cdc2c7"),
                             AccountId = new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"),
                             Amount = 200m,
                             CategoryId = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
-                            CreatedOn = new DateTime(2022, 11, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1755),
+                            CreatedOn = new DateTime(2022, 12, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2694),
                             Refference = "Initial Balance",
                             TransactionType = 0
                         },
                         new
                         {
-                            Id = new Guid("91aa8c08-24f8-4252-9a57-4dfce9c11a4d"),
+                            Id = new Guid("6f9047f6-a2ee-4ea9-8bc0-21df14812c76"),
                             AccountId = new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"),
                             Amount = 750m,
                             CategoryId = new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"),
-                            CreatedOn = new DateTime(2022, 12, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1759),
+                            CreatedOn = new DateTime(2023, 1, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2699),
                             Refference = "Salary",
                             TransactionType = 0
                         },
                         new
                         {
-                            Id = new Guid("aad1b4e1-f9cd-43ed-bed5-abd8431d2f3d"),
+                            Id = new Guid("6767ad5f-ec08-4f8b-a4f7-0497112b8b1a"),
                             AccountId = new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"),
                             Amount = 49.99m,
                             CategoryId = new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"),
-                            CreatedOn = new DateTime(2022, 12, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1762),
+                            CreatedOn = new DateTime(2023, 1, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2703),
                             Refference = "Flight ticket",
                             TransactionType = 1
                         },
                         new
                         {
-                            Id = new Guid("4c7a779c-2bde-47c3-b0ab-6d6b5e336864"),
+                            Id = new Guid("e95fde53-a472-4754-9d9d-34aba479eae9"),
                             AccountId = new Guid("303430dc-63a3-4436-8907-a274ec29f608"),
                             Amount = 1487.23m,
                             CategoryId = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
-                            CreatedOn = new DateTime(2022, 6, 25, 10, 37, 43, 55, DateTimeKind.Utc).AddTicks(1765),
+                            CreatedOn = new DateTime(2022, 7, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2708),
                             Refference = "Initial Balance",
                             TransactionType = 0
                         });

@@ -40,7 +40,7 @@
 				Refference = transactionFormModel.Refference
 			};
 
-			// TODO: Add Check if account have enough money for transaction!
+			// TODO: Add Check if account have enough money for transaction?
 
 			await data.Transactions.AddAsync(newTransaction);
 
