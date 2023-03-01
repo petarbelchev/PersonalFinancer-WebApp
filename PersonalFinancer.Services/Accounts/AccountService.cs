@@ -5,7 +5,6 @@
 	using Microsoft.EntityFrameworkCore;
 
 	using Models;
-	using Infrastructure;
 	using Category;
 	using Transactions;
 	using Transactions.Models;
@@ -66,8 +65,7 @@
 		{
 			AccountDetailsViewModel? account = await data.Accounts
 				.Where(a => a.Id == accountId && !a.IsDeleted)
-				.ProjectTo<AccountDetailsViewModel>(new MapperConfiguration(
-					cfg => cfg.AddProfile<ServiceMappingProfile>()))
+				.ProjectTo<AccountDetailsViewModel>(mapper.ConfigurationProvider)
 				.FirstOrDefaultAsync();
 
 			return account;
@@ -190,8 +188,7 @@
 		{
 			model.Accounts = await data.Accounts
 				.Where(a => a.OwnerId == userId && !a.IsDeleted)
-				.ProjectTo<AccountCardViewModel>(new MapperConfiguration(
-					cfg => cfg.AddProfile<ServiceMappingProfile>()))
+				.ProjectTo<AccountCardViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
 
 			if (model.StartDate > model.EndDate)
@@ -206,8 +203,7 @@
 					t.CreatedOn <= model.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
 				.Take(5)
-				.ProjectTo<TransactionShortViewModel>(new MapperConfiguration(
-					cfg => cfg.AddProfile<ServiceMappingProfile>()))
+				.ProjectTo<TransactionShortViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
 
 			await data.Accounts

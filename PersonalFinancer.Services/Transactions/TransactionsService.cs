@@ -4,7 +4,6 @@
 	using AutoMapper.QueryableExtensions;
 	using Microsoft.EntityFrameworkCore;
 
-	using Infrastructure;
 	using Models;
 	using Data;
 	using Data.Enums;
@@ -130,8 +129,7 @@
 		{
 			EditTransactionFormModel? transaction = await data.Transactions
 				.Where(t => t.Id == transactionId)
-				.ProjectTo<EditTransactionFormModel>(new MapperConfiguration(
-					cfg => cfg.AddProfile<ServiceMappingProfile>()))
+				.ProjectTo<EditTransactionFormModel>(mapper.ConfigurationProvider)
 				.FirstOrDefaultAsync();
 
 			return transaction;
@@ -144,8 +142,7 @@
 		{
 			TransactionExtendedViewModel? transaction = await data.Transactions
 				.Where(t => t.Id == transactionId)
-				.ProjectTo<TransactionExtendedViewModel>(new MapperConfiguration(
-					cfg => cfg.AddProfile<ServiceMappingProfile>()))
+				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
 				.FirstOrDefaultAsync();
 
 			return transaction;
@@ -171,8 +168,7 @@
 					t.CreatedOn >= model.StartDate &&
 					t.CreatedOn <= model.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
-				.ProjectTo<TransactionExtendedViewModel>(new MapperConfiguration(
-					cfg => cfg.AddProfile<ServiceMappingProfile>()))
+				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
 
 			model.Transactions = transactions;
