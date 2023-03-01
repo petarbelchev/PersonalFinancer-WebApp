@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using PersonalFinancer.Data;
@@ -8,6 +9,7 @@ using PersonalFinancer.Services.Currency;
 using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Web.Controllers;
+using PersonalFinancer.Web.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +23,9 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 	options.User.RequireUniqueEmail = true;
 	options.Password.RequireNonAlphanumeric = false;
 })
+	.AddRoles<IdentityRole>()
 	.AddEntityFrameworkStores<PersonalFinancerDbContext>();
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -37,6 +41,7 @@ builder.Services.AddAutoMapper(
 builder.Services.ConfigureApplicationCookie(options =>
 {
 	options.LoginPath = "/User/Login";
+	options.AccessDeniedPath = "/Home/AccessDenied";
 });
 
 var app = builder.Build();
@@ -60,7 +65,18 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapDefaultControllerRoute();
+app.UseEndpoints(endpoints =>
+{
+	endpoints.MapControllerRoute(
+		name: "area",
+		pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+	);
+
+	endpoints.MapDefaultControllerRoute();
+});
+
 app.MapRazorPages();
+
+app.SeedAdmin();
 
 app.Run();

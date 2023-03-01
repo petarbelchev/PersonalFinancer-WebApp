@@ -53,5 +53,10 @@
 			public const string ApiCategoriesUrl = hostUrl + "/api/categories/";
 			public const string ApiTransactionsUrl = hostUrl + "/api/transactions/";
 		}
+
+		public static class RoleConstants
+		{
+			public const string AdminRoleName = "Administrator";
+		}
 	}
 }
