@@ -6,6 +6,6 @@
 	[ApiController]
 	public class CurrencyApiController : ControllerBase
 	{
-		// TODO: Implement adding and deleting currencies
+		// TODO: Implement adding and deleting currencies?
 	}
 }

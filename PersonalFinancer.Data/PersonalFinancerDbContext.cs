@@ -41,6 +41,16 @@
 				b.Property(p => p.NormalizedUserName).HasMaxLength(50);
 			});
 
+			builder.Entity<Account>()
+				.Property(a => a.Balance)
+				.HasColumnType("decimal")
+				.HasPrecision(18,2);
+			
+			builder.Entity<Transaction>()
+				.Property(a => a.Amount)
+				.HasColumnType("decimal")
+				.HasPrecision(18,2);
+
 			if (this.seed)
 			{
 				builder.ApplyConfiguration(new AccountTypeEntityTypeConfiguration());
