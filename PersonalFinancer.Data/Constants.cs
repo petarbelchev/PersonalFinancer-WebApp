@@ -1,6 +1,6 @@
 ﻿namespace PersonalFinancer.Data
 {
-	public class DataConstants
+	public class Constants
 	{
 		public class UserConstants
 		{
@@ -57,6 +57,7 @@
 		public static class RoleConstants
 		{
 			public const string AdminRoleName = "Administrator";
+			public const string UserRoleName = "User";
 		}
 	}
 }

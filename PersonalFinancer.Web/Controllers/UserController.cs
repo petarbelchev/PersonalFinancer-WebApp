@@ -1,11 +1,10 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
+	using Data.Models;
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Identity;
 	using Microsoft.AspNetCore.Mvc;
-
 	using Models.Account;
-	using Data.Models;
 
 	/// <summary>
 	/// User Controller takes care of everything related to Users.
@@ -27,14 +26,9 @@
 		/// Returns Register Form Model for Register page.
 		/// </summary>
 		[HttpGet]
-		public IActionResult Register(string? returnUrl = null)
+		public IActionResult Register()
 		{
 			RegisterFormModel model = new RegisterFormModel();
-
-			if (returnUrl != null)
-			{
-				model.ReturnUrl = returnUrl;
-			}
 
 			return View(model);
 		}
@@ -66,14 +60,7 @@
 
 				TempData["successMsg"] = "Congratulations! Your registration was successful!";
 
-				if (model.ReturnUrl != null)
-				{
-					return LocalRedirect(model.ReturnUrl);
-				}
-				else
-				{
-					return RedirectToAction("Index", "Home");
-				}
+				return RedirectToAction("Index", "Home");
 			}
 
 			foreach (IdentityError error in result.Errors)
@@ -88,14 +75,9 @@
 		/// Returns Login Form Model for Login page.
 		/// </summary>
 		[HttpGet]
-		public IActionResult Login(string? returnUrl = null)
+		public IActionResult Login()
 		{
 			LoginFormModel loginFormModel = new LoginFormModel();
-
-			if (returnUrl != null)
-			{
-				loginFormModel.ReturnUrl = returnUrl;
-			}
 
 			return View(loginFormModel);
 		}
@@ -117,14 +99,7 @@
 
 			if (result.Succeeded)
 			{
-				if (loginFormModel.ReturnUrl != null)
-				{
-					return LocalRedirect(loginFormModel.ReturnUrl);
-				}
-				else
-				{
-					return RedirectToAction("Index", "Home");
-				}
+				return RedirectToAction("Index", "Home");
 			}
 
 			ModelState.AddModelError(string.Empty, "Invalid login attempt.");

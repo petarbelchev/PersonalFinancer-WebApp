@@ -2,7 +2,7 @@
 {
 	using System.ComponentModel.DataAnnotations;
 	
-	using static Data.DataConstants.UserConstants;
+	using static Data.Constants.UserConstants;
 
 	public class RegisterFormModel
 	{
@@ -33,7 +33,5 @@
 		[Compare(nameof(Password), ErrorMessage = "Password do not match.")]
 		[Display(Name = "Confirm Password")]
 		public string ConfirmPassword { get; set; } = null!;
-
-		public string? ReturnUrl { get; set; }
 	}
 }

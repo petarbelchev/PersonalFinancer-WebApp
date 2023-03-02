@@ -24,6 +24,11 @@
 		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
+			if (User.IsAdmin())
+			{
+				return LocalRedirect("/Admin");
+			}
+
 			DashboardServiceModel model = new DashboardServiceModel()
 			{
 				StartDate = DateTime.UtcNow.AddMonths(-1),

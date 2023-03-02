@@ -6,7 +6,7 @@
 	using Models;
 	using Data;
 	using Data.Models;
-	using static Data.DataConstants.CategoryConstants;
+	using static Data.Constants.CategoryConstants;
 
 	public class CategoryService : ICategoryService
 	{

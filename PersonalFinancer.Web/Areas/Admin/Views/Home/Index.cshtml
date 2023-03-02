@@ -1,1 +1,10 @@
-﻿<p>Admin Panel</p>
+﻿@inject IUserService userService
+@{
+	ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+	<p class="display-4">Hello @await userService.FullName(User.Id())!</p>
+	<p class="display-5">Welcome to your Admin Dashboard!</p>
+	<p class="display-6">You can manage User's profiles, their accounts and transactions!</p>
+</div>

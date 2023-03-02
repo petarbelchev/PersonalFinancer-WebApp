@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using PersonalFinancer.Web.Infrastructure;
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -22,9 +24,14 @@
 				</div>
 				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 					<ul class="navbar-nav flex-grow-1">
-						@if (User?.Identity?.IsAuthenticated ?? false)
+						@if ((User?.Identity?.IsAuthenticated ?? false) && !User.IsAdmin())
 						{
 							<a class="nav-link text-dark" asp-area="" asp-controller="Transaction" asp-action="All">All Transactions</a>
+						}
+						else if (User?.IsAdmin() ?? false)
+						{
+							<a class="nav-link text-dark" asp-area="Admin" asp-controller="Users" asp-action="Index">All Users</a>
+							<a class="nav-link text-dark" asp-area="Admin" asp-controller="Statistics" asp-action="Index">Statistics</a>
 						}
 					</ul>
 					<partial name="_LoginPartial" />

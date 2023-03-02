@@ -7,7 +7,7 @@
 	using Data;
 	using Data.Models;
 	using Data.Enums;
-	using static Data.DataConstants.CategoryConstants;
+	using static Data.Constants.CategoryConstants;
 
 	[TestFixture]
 	abstract class UnitTestsBase

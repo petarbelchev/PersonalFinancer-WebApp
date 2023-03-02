@@ -12,7 +12,7 @@
 	using Data;
 	using Data.Enums;
 	using Data.Models;
-	using static Data.DataConstants.CategoryConstants;
+	using static Data.Constants.CategoryConstants;
 
 	public class AccountService : IAccountService
 	{
@@ -88,8 +88,6 @@
 		/// Creates a new Account and if the new account has initial balance creates new Transaction with given amount.
 		/// Returns new Account's id.
 		/// </summary>
-		/// <param name="userId">User's identifier</param>
-		/// <param name="accountModel">Model with Name, Balance, AccountTypeId, CurrencyId.</param>
 		public async Task<Guid> CreateAccount(string userId, AccountFormModel accountModel)
 		{
 			Account newAccount = new Account()
@@ -178,6 +176,19 @@
 			}
 
 			await data.SaveChangesAsync();
+		}
+
+		/// <summary>
+		/// Returns Delete Account View Model.
+		/// </summary>
+		public async Task<DeleteAccountViewModel?> DeleteAccountViewModel(Guid accountId)
+		{
+			DeleteAccountViewModel? account = await data.Accounts
+				.Where(a => a.Id == accountId)
+				.Select(a => mapper.Map<DeleteAccountViewModel>(a))
+				.FirstOrDefaultAsync();
+
+			return account;
 		}
 
 		/// <summary>

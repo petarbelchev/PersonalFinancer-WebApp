@@ -9,6 +9,7 @@
 		<section>
 			<form method="post">
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+				<input asp-for="@Model.AccountOwnerId" type="hidden" />
 				<div class="form-floating formField">
 					<input asp-for="@Model.Amount" class="form-control form-control-lg" type="text" placeholder=".form-control-lg" />
 					<label asp-for="@Model.Amount" class="form-label"></label>
