@@ -5,7 +5,7 @@
     using Accounts.Models;
     using Category.Models;
     using Data.Enums;
-    using static Data.DataConstants.TransactionConstants;
+    using static Data.Constants.TransactionConstants;
 
     public class TransactionFormModel
     {

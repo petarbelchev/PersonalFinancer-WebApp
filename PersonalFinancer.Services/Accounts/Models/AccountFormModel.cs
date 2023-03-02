@@ -3,7 +3,7 @@
 	using System.ComponentModel.DataAnnotations;
 	
 	using Currency.Models;
-	using static Data.DataConstants.AccountConstants;
+	using static Data.Constants.AccountConstants;
 
 	public class AccountFormModel
 	{

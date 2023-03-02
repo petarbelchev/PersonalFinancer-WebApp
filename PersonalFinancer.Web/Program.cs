@@ -77,6 +77,6 @@ app.UseEndpoints(endpoints =>
 
 app.MapRazorPages();
 
-app.SeedAdmin();
+app.SeedUsers();
 
 app.Run();

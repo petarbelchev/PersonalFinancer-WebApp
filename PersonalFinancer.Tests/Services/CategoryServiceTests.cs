@@ -3,7 +3,7 @@
 	using NUnit.Framework;
 
 	using Data.Models;
-	using static Data.DataConstants.CategoryConstants;
+	using static Data.Constants.CategoryConstants;
 	using PersonalFinancer.Services.Category;
 	using PersonalFinancer.Services.Category.Models;
 

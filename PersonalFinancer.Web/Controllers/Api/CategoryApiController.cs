@@ -5,7 +5,7 @@
 	using Infrastructure;
 	using Services.Category.Models;
 	using Services.Category;
-	using static Data.DataConstants.CategoryConstants;
+	using static Data.Constants.CategoryConstants;
 
 	[Route("api/categories")]
 	[ApiController]

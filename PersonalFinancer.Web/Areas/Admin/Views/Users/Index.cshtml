@@ -1,0 +1,36 @@
+﻿@model IEnumerable<UserViewModel>
+@{
+	ViewData["Title"] = "All Users";
+	int row = 1;
+}
+
+<h1 class="display-6 text-center">@ViewData["Title"]</h1>
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<th scope="col">#</th>
+			<th scope="col">First Name</th>
+			<th scope="col">Last Name</th>
+			<th scope="col">Username</th>
+			<th scope="col">Email</th>
+			<th scope="col">Phone Number</th>
+			<th scope="col"></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (UserViewModel user in Model)
+		{
+			<tr>
+				<th scope="row">@(row++)</th>
+				<td>@user.FirstName</td>
+				<td>@user.LastName</td>
+				<td>@user.UserName</td>
+				<td>@user.Email</td>
+				<td>@user.PhoneNumber</td>
+				<td>
+					<a asp-area="Admin" asp-controller="Users" asp-action="Details" asp-route-id="@user.Id" class="btn btn-primary">Details</a>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>

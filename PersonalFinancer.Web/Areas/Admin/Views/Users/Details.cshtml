@@ -1,0 +1,62 @@
+﻿@model UserDetailsViewModel
+@{
+	ViewData["Title"] = "User Details";
+}
+
+<h1 class="display-6 text-center">@ViewData["Title"]</h1>
+<div class="row">
+	<div class="col-md-4">
+		<div class="card">
+			<div class="card-header">
+				<h6>User Information:</h6>
+			</div>
+			<table class="table table-hover">
+				<tbody>
+					<tr>
+						<td>First Name:</td>
+						<td>@Model.FirstName</td>
+					</tr>
+					<tr>
+						<td>Last Name:</td>
+						<td>@Model.LastName</td>
+					</tr>
+					<tr>
+						<td>Username:</td>
+						<td>@Model.UserName</td>
+					</tr>
+					<tr>
+						<td>Email:</td>
+						<td>@Model.Email</td>
+					</tr>
+					<tr>
+						<td>Phone Number:</td>
+						<td>@Model.PhoneNumber</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="col-md-8">
+		<div class="card">
+			<div class="card-header">
+				<h6>User Accounts</h6>
+			</div>
+			<div class="row">
+				@foreach (var account in Model.Accounts)
+				{
+					<div class="col-sm-3 mb-3 mb-sm-0">
+						<div class="card formField" style="margin-left: 8px; margin-right: 8px;">
+							<div class="card-body text-center">
+								<h5 class="card-title">@account.Name</h5>
+								<p class="card-text">@account.Balance @account.CurrencyName</p>
+								<a asp-area="Admin" asp-controller="Users" asp-action="AccountDetails" asp-route-id="@account.Id" class="btn btn-primary">
+									Details
+								</a>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+	</div>
+</div>

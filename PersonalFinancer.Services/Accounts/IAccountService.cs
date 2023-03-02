@@ -28,8 +28,6 @@
 		/// Creates a new Account and if the new account has initial balance creates new Transaction with given amount.
 		/// Returns new Account's id.
 		/// </summary>
-		/// <param name="userId">User's identifier</param>
-		/// <param name="accountModel">Model with Name, Balance, AccountTypeId, CurrencyId.</param>
 		Task<Guid> CreateAccount(string userId, AccountFormModel accountModel);
 				
 		/// <summary>
@@ -37,6 +35,11 @@
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
 		Task DeleteAccountById(Guid accountId, bool transactionsDelete);
+
+		/// <summary>
+		/// Returns Delete Account View Model.
+		/// </summary>
+		Task<DeleteAccountViewModel?> DeleteAccountViewModel(Guid accountId);
 
 		/// <summary>
 		/// Returns Dashboard View Model for current User with Last transactions, Accounts and Currencies Cash Flow.

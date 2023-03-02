@@ -1,15 +1,43 @@
 ﻿namespace PersonalFinancer.Services.User
 {
+	using AutoMapper;
+	using AutoMapper.QueryableExtensions;
+
+	using Models;
 	using Data;
 	using Data.Models;
+	using Microsoft.EntityFrameworkCore;
 
 	public class UserService : IUserService
 	{
 		private readonly PersonalFinancerDbContext data;
+		private readonly IMapper mapper;
 
-		public UserService(PersonalFinancerDbContext context)
+		public UserService(
+			PersonalFinancerDbContext context,
+			IMapper mapper)
 		{
 			this.data = context;
+			this.mapper = mapper;
+		}
+
+		public async Task<IEnumerable<UserViewModel>> All()
+		{
+			IEnumerable<UserViewModel> users = await data.Users
+				.ProjectTo<UserViewModel>(mapper.ConfigurationProvider)
+				.ToListAsync();
+
+			return users;
+		}
+
+		public async Task<UserDetailsViewModel> UserDetails(string userId)
+		{
+			UserDetailsViewModel user = await data.Users
+				.Where(u => u.Id == userId)
+				.ProjectTo<UserDetailsViewModel>(mapper.ConfigurationProvider)
+				.FirstAsync();
+
+			return user;
 		}
 
 		/// <summary>

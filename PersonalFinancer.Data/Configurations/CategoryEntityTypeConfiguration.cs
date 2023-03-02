@@ -4,7 +4,7 @@
 	using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 	using Data.Models;
-	using static Data.DataConstants.CategoryConstants;
+	using static Data.Constants.CategoryConstants;
 
 	internal class CategoryEntityTypeConfiguration : IEntityTypeConfiguration<Category>
 	{

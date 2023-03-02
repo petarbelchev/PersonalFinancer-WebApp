@@ -12,7 +12,7 @@
 		[SetUp] 
 		public void SetUp()
 		{
-			this.userService = new UserService(this.data);
+			this.userService = new UserService(this.data, this.mapper);
 		}
 
 		[Test]

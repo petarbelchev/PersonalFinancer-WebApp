@@ -3,25 +3,21 @@
 	ViewData["Title"] = "All Transactions";
 }
 
-<div class="row" style="margin-top: 50px;">
-	<div class="card offset-md-2 col-md-8">
-		<form method="post" class="row g-3">
-			<div class="col-auto form-floating formField" style="margin-top: 23px;">
-				<input type="text" name="startDate" value="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-				<label for="startDate" class="form-label">Start Date</label>
-				<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
-			</div>
-			<div class="col-auto form-floating formField" style="margin-top: 23px;">
-				<input type="text" name="endDate" value="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-				<label for="endDate" class="form-label">End Date</label>
-				<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
-			</div>
-			<div class="col-auto" style="margin-top: 20px;">
-				<button type="submit" class="formField w-100 btn btn-lg btn-primary">Filter Transactions</button>
-			</div>
-		</form>
+<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 50px;">
+	<div class="col-md-4 form-floating">
+		<input type="text" name="startDate" value="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+		<label for="startDate" class="form-label">Start Date</label>
+		<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
 	</div>
-</div>
+	<div class="col-md-4 form-floating">
+		<input type="text" name="endDate" value="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+		<label for="endDate" class="form-label">End Date</label>
+		<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
+	</div>
+	<div class="col-md-4">
+		<button type="submit" class="btn btn-lg btn-primary form-control form-control-lg" style="padding: 12.5px;">Filter Transactions</button>
+	</div>
+</form>
 
 @if (Model.Transactions.Any())
 {

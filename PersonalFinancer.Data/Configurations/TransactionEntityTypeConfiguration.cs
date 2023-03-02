@@ -5,7 +5,7 @@
 	
 	using Enums;
 	using Models;
-	using static DataConstants.CategoryConstants;
+	using static Constants.CategoryConstants;
 
 	internal class TransactionEntityTypeConfiguration : IEntityTypeConfiguration<Transaction>
 	{

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -31,6 +31,10 @@
   <ItemGroup>
     <ProjectReference Include="..\PersonalFinancer.Data\PersonalFinancer.Data.csproj" />
     <ProjectReference Include="..\PersonalFinancer.Services\PersonalFinancer.Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Areas\Admin\Views\Shared\" />
   </ItemGroup>
 
 </Project>
