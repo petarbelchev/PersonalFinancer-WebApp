@@ -2,17 +2,26 @@
 {
 	using NUnit.Framework;
 
+	using PersonalFinancer.Services.Accounts;
+	using PersonalFinancer.Services.Category;
+	using PersonalFinancer.Services.Transactions;
 	using PersonalFinancer.Services.User;
 
 	[TestFixture]
 	class UserServiceTests : UnitTestsBase
 	{
 		private IUserService userService;
+		private IAccountService accountService;
+		private ITransactionsService transactionsService;
+		private ICategoryService categoryService;
 
 		[SetUp] 
 		public void SetUp()
 		{
-			this.userService = new UserService(this.data, this.mapper);
+			this.categoryService = new CategoryService(this.data, this.mapper);
+			this.transactionsService = new TransactionsService(this.data, this.mapper);
+			this.accountService = new AccountService(this.data, this.mapper, this.transactionsService, this.categoryService);
+			this.userService = new UserService(this.data, this.accountService, this.transactionsService, this.mapper);
 		}
 
 		[Test]

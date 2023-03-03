@@ -1,9 +1,11 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-	using Data.Models;
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Identity;
 	using Microsoft.AspNetCore.Mvc;
+
+	using Data.Models;
+	using static Data.Constants.RoleConstants;
 	using Models.Account;
 
 	/// <summary>
@@ -52,23 +54,37 @@
 				UserName = model.Email
 			};
 
-			IdentityResult result = await userManager.CreateAsync(newUser, model.Password);
+			IdentityResult creationResult = await userManager.CreateAsync(newUser, model.Password);
 
-			if (result.Succeeded)
+			if (!creationResult.Succeeded)
 			{
-				await signInManager.SignInAsync(newUser, isPersistent: false);
+				foreach (IdentityError error in creationResult.Errors)
+				{
+					ModelState.AddModelError(string.Empty, error.Description);
+				}
 
-				TempData["successMsg"] = "Congratulations! Your registration was successful!";
-
-				return RedirectToAction("Index", "Home");
+				return View(model);
 			}
 
-			foreach (IdentityError error in result.Errors)
+			IdentityResult roleResult = await userManager.AddToRoleAsync(newUser, UserRoleName);
+
+			if (!roleResult.Succeeded)
 			{
-				ModelState.AddModelError(string.Empty, error.Description);
+				await userManager.DeleteAsync(newUser);
+
+				foreach (IdentityError error in roleResult.Errors)
+				{
+					ModelState.AddModelError(string.Empty, error.Description);
+				}
+
+				return View(model);
 			}
 
-			return View(model);
+			await signInManager.SignInAsync(newUser, isPersistent: false);
+
+			TempData["successMsg"] = "Congratulations! Your registration was successful!";
+
+			return RedirectToAction("Index", "Home");
 		}
 
 		/// <summary>

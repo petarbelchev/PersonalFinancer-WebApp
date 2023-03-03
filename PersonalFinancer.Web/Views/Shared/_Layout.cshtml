@@ -19,7 +19,7 @@
 		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
 			<div class="container-fluid">
 				<div class="navbar-brand">
-					<img src="~/favicon-32x32.png" />
+					<img src="~/favicon-64x64.png" style="max-height: 50px;" />
 					<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Personal Financer</a>
 				</div>
 				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
@@ -31,7 +31,6 @@
 						else if (User?.IsAdmin() ?? false)
 						{
 							<a class="nav-link text-dark" asp-area="Admin" asp-controller="Users" asp-action="Index">All Users</a>
-							<a class="nav-link text-dark" asp-area="Admin" asp-controller="Statistics" asp-action="Index">Statistics</a>
 						}
 					</ul>
 					<partial name="_LoginPartial" />

@@ -3,7 +3,7 @@
 	ViewData["Title"] = "All Transactions";
 }
 
-<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 50px;">
+<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
 	<div class="col-md-4 form-floating">
 		<input type="text" name="startDate" value="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 		<label for="startDate" class="form-label">Start Date</label>
@@ -21,7 +21,7 @@
 
 @if (Model.Transactions.Any())
 {
-	<div class="row" style="margin-top: 50px;">
+	<div class="row" style="margin-top: 25px;">
 		<div class="col-md-12">
 			<div class="card">
 				<div class="card-header">
@@ -30,6 +30,7 @@
 				<table class="table table-hover">
 					<thead>
 						<tr>
+							<th scope="col"></th>
 							<th scope="col">Date</th>
 							<th scope="col">Category</th>
 							<th scope="col">Type</th>
@@ -40,10 +41,11 @@
 							<th scope="col"></th>
 						</tr>
 					</thead>
-					<tbody id="tableBody">
+					<tbody id="tableBody" style="vertical-align: text-top;">
 						@foreach (var transaction in Model.Transactions)
 						{
 							<tr>
+								<td><img src="/icons/icons8-transaction-64.png" style="max-width: 50px;"></td>
 								<td>@transaction.CreatedOn</td>
 								<td>@transaction.CategoryName</td>
 								<td>@transaction.TransactionType</td>

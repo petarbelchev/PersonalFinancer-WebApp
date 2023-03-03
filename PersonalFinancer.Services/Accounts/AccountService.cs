@@ -33,6 +33,16 @@
 		}
 
 		/// <summary>
+		/// Returns count of all created accounts.
+		/// </summary>
+		public int AccountsCount()
+		{
+			int accountsCount =  data.Accounts.Count(a => !a.IsDeleted);
+
+			return accountsCount;
+		}
+
+		/// <summary>
 		/// Returns collection of User's accounts with Id and Name.
 		/// </summary>
 		public async Task<IEnumerable<AccountDropdownViewModel>> AllAccountsDropdownViewModel(string userId)
@@ -56,6 +66,17 @@
 				.FirstOrDefaultAsync();
 
 			return account;
+		}
+
+		/// <summary>
+		/// Returns a collection of user's accounts with Id, Name, Balance and Currency Name.
+		/// </summary>
+		public async Task<IEnumerable<AccountCardViewModel>> AllAccountsCardViewModel(string userId)
+		{
+			return await data.Accounts
+				.Where(a => a.OwnerId == userId && !a.IsDeleted)
+				.ProjectTo<AccountCardViewModel>(mapper.ConfigurationProvider)
+				.ToArrayAsync();
 		}
 
 		/// <summary>
@@ -116,40 +137,7 @@
 
 			return newAccount.Id;
 		}
-
-		/// <summary>
-		/// Checks is the given User is owner of the given account, if does not exist, throws an exception.
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		public async Task<bool> IsAccountOwner(string userId, Guid accountId)
-		{
-			Account? account = await data.Accounts.FindAsync(accountId);
-
-			if (account == null)
-			{
-				throw new ArgumentNullException("Account does not exist.");
-			}
-
-			return account.OwnerId == userId;
-		}
-
-		/// <summary>
-		/// Checks is the given Account deleted, if does not exist, throws an exception.
-		/// </summary>
-		/// <param name="accountId"></param>
-		/// <exception cref="ArgumentNullException"></exception>
-		public async Task<bool> IsAccountDeleted(Guid accountId)
-		{
-			Account? account = await data.Accounts.FindAsync(accountId);
-
-			if (account == null)
-			{
-				throw new ArgumentNullException("Account does not exist.");
-			}
-
-			return account.IsDeleted;
-		}
-
+		
 		/// <summary>
 		/// Delete an Account and give the option to delete all of the account's transactions.
 		/// </summary>
@@ -190,43 +178,56 @@
 		}
 
 		/// <summary>
-		/// Returns Dashboard View Model for current User with Last transactions, Accounts and Currencies Cash Flow.
-		/// Throws Exception when End Date is before Start Date.
+		/// Checks is the given User is owner of the given account, if does not exist, throws an exception.
 		/// </summary>
-		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
-		/// <exception cref="ArgumentException"></exception>
-		public async Task DashboardViewModel(string userId, DashboardServiceModel model)
+		/// <exception cref="ArgumentNullException"></exception>
+		public async Task<bool> IsAccountOwner(string userId, Guid accountId)
 		{
-			model.Accounts = await data.Accounts
-				.Where(a => a.OwnerId == userId && !a.IsDeleted)
-				.ProjectTo<AccountCardViewModel>(mapper.ConfigurationProvider)
-				.ToArrayAsync();
+			Account? account = await data.Accounts.FindAsync(accountId);
 
-			if (model.StartDate > model.EndDate)
+			if (account == null)
 			{
-				throw new ArgumentException("Start Date must be before End Date.");
+				throw new ArgumentNullException("Account does not exist.");
 			}
 
-			model.LastTransactions = await data.Transactions
-				.Where(t =>
-					t.Account.OwnerId == userId &&
-					t.CreatedOn >= model.StartDate &&
-					t.CreatedOn <= model.EndDate)
-				.OrderByDescending(t => t.CreatedOn)
-				.Take(5)
-				.ProjectTo<TransactionShortViewModel>(mapper.ConfigurationProvider)
-				.ToArrayAsync();
+			return account.OwnerId == userId;
+		}
+
+		/// <summary>
+		/// Checks is the given Account deleted, if does not exist, throws an exception.
+		/// </summary>
+		/// <param name="accountId"></param>
+		/// <exception cref="ArgumentNullException"></exception>
+		public async Task<bool> IsAccountDeleted(Guid accountId)
+		{
+			Account? account = await data.Accounts.FindAsync(accountId);
+
+			if (account == null)
+			{
+				throw new ArgumentNullException("Account does not exist.");
+			}
+
+			return account.IsDeleted;
+		}
+
+		/// <summary>
+		/// Returns User's accounts Cash Flow for a given period.
+		/// </summary>
+		public async Task<Dictionary<string, CashFlowViewModel>> GetUserAccountsCashFlow(
+			string userId, DateTime? startDate, DateTime? endDate)
+		{
+			var result = new Dictionary<string, CashFlowViewModel>();
 
 			await data.Accounts
 				.Where(a => a.OwnerId == userId && a.Transactions.Any())
 				.Include(a => a.Currency)
 				.Include(a => a.Transactions
-					.Where(t => t.CreatedOn >= model.StartDate && t.CreatedOn <= model.EndDate))
+					.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
 				.ForEachAsync(a =>
 				{
-					if (!model.CurrenciesCashFlow.ContainsKey(a.Currency.Name))
+					if (!result.ContainsKey(a.Currency.Name))
 					{
-						model.CurrenciesCashFlow[a.Currency.Name] = new CashFlowViewModel();
+						result[a.Currency.Name] = new CashFlowViewModel();
 					}
 
 					decimal? income = a.Transactions?
@@ -235,7 +236,7 @@
 
 					if (income != null)
 					{
-						model.CurrenciesCashFlow[a.Currency.Name].Income += (decimal)income;
+						result[a.Currency.Name].Income += (decimal)income;
 					}
 
 					decimal? expense = a.Transactions?
@@ -244,9 +245,52 @@
 
 					if (expense != null)
 					{
-						model.CurrenciesCashFlow[a.Currency.Name].Expence += (decimal)expense;
+						result[a.Currency.Name].Expence += (decimal)expense;
 					}
 				});
+
+			return result;
+		}
+
+		/// <summary>
+		/// Returns Cash Flow of all user's accounts.
+		/// </summary>
+		/// <returns></returns>
+		public async Task<Dictionary<string, CashFlowViewModel>> GetAllAccountsCashFlow()
+		{
+			var result = new Dictionary<string, CashFlowViewModel>();
+
+			await data.Accounts
+				.Where(a => a.Transactions.Any())
+				.Include(a => a.Currency)
+				.Include(a => a.Transactions)
+				.ForEachAsync(a =>
+				{
+					if (!result.ContainsKey(a.Currency.Name))
+					{
+						result[a.Currency.Name] = new CashFlowViewModel();
+					}
+
+					decimal? income = a.Transactions?
+						.Where(t => t.TransactionType == TransactionType.Income)
+						.Sum(t => t.Amount);
+
+					if (income != null)
+					{
+						result[a.Currency.Name].Income += (decimal)income;
+					}
+
+					decimal? expense = a.Transactions?
+						.Where(t => t.TransactionType == TransactionType.Expense)
+						.Sum(t => t.Amount);
+
+					if (expense != null)
+					{
+						result[a.Currency.Name].Expence += (decimal)expense;
+					}
+				});
+
+			return result;
 		}
 	}
 }

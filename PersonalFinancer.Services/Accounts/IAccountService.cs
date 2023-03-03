@@ -5,6 +5,11 @@
 	public interface IAccountService
 	{
 		/// <summary>
+		/// Returns count of all created accounts.
+		/// </summary>
+		int AccountsCount();
+
+		/// <summary>
 		/// Returns collection of User's accounts with Id and Name.
 		/// </summary>
 		Task<IEnumerable<AccountDropdownViewModel>> AllAccountsDropdownViewModel(string userId);
@@ -13,6 +18,11 @@
 		/// Returns Account with Id and Name or null.
 		/// </summary>
 		Task<AccountDropdownViewModel?> AccountDropdownViewModel(Guid accountId);
+
+		/// <summary>
+		/// Returns a collection of user's accounts with Id, Name, Balance and Currency Name.
+		/// </summary>
+		Task<IEnumerable<AccountCardViewModel>> AllAccountsCardViewModel(string userId);
 
 		/// <summary>
 		/// Returns collection of Account Types for the current user with Id and Name.
@@ -42,14 +52,6 @@
 		Task<DeleteAccountViewModel?> DeleteAccountViewModel(Guid accountId);
 
 		/// <summary>
-		/// Returns Dashboard View Model for current User with Last transactions, Accounts and Currencies Cash Flow.
-		/// Throws Exception when End Date is before Start Date.
-		/// </summary>
-		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
-		/// <exception cref="ArgumentException"></exception>
-		Task DashboardViewModel(string userId, DashboardServiceModel model);
-
-		/// <summary>
 		/// Checks is the given User is owner of the given account, if does not exist, throws an exception.
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
@@ -61,5 +63,17 @@
 		/// <param name="accountId"></param>
 		/// <exception cref="ArgumentNullException"></exception>
 		Task<bool> IsAccountDeleted(Guid accountId);
+
+		/// <summary>
+		/// Returns User's accounts Cash Flow for a given period.
+		/// </summary>
+		Task<Dictionary<string, CashFlowViewModel>> GetUserAccountsCashFlow(
+			string userId, DateTime? startDate, DateTime? endDate);
+
+		/// <summary>
+		/// Returns Cash Flow of all user's accounts.
+		/// </summary>
+		/// <returns></returns>
+		Task<Dictionary<string, CashFlowViewModel>> GetAllAccountsCashFlow();
 	}
 }

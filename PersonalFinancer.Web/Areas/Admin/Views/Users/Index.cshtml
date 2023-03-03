@@ -8,7 +8,8 @@
 <table class="table table-hover">
 	<thead>
 		<tr>
-			<th scope="col">#</th>
+			<th scope="col"></th>
+			<th scope="col"></th>
 			<th scope="col">First Name</th>
 			<th scope="col">Last Name</th>
 			<th scope="col">Username</th>
@@ -17,11 +18,12 @@
 			<th scope="col"></th>
 		</tr>
 	</thead>
-	<tbody>
+	<tbody style="vertical-align: text-top;">
 		@foreach (UserViewModel user in Model)
 		{
 			<tr>
 				<th scope="row">@(row++)</th>
+				<td><img src="/icons/icons8-budget-64.png" style="max-width: 50px;"></td>
 				<td>@user.FirstName</td>
 				<td>@user.LastName</td>
 				<td>@user.UserName</td>

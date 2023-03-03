@@ -1,49 +1,19 @@
 ﻿@model AccountDetailsViewModel
 
-<div class="row" style="margin-top: 50px;">
-	<h1 class="display-6">
-		Account: @Model.Name
-		<a asp-area="" asp-controller="Account" asp-action="Delete" asp-route-id="@Model.Id" 
-		asp-route-returnUrl="@ViewBag.ReturnUrl" class="btn btn-danger">Delete Account</a>
-	</h1>
-	<p class="display-4" style="font-size: xx-large;" id="balanceField">Balance: @Model.Balance @Model.CurrencyName</p>
-</div>
-
-<div class="row" style="margin-top: 50px;">
-	<div class="col-md-12">
-		<div class="card">
-			<div class="card-header">
-				<h6>Transactions</h6>
-			</div>
-			<table class="table table-hover">
-				<thead>
-					<tr>
-						<th scope="col">Date</th>
-						<th scope="col">Category</th>
-						<th scope="col">Type</th>
-						<th scope="col">Amount</th>
-						<th scope="col">Refference</th>
-						<th scope="col"></th>
-					</tr>
-				</thead>
-				<tbody id="tableBody">
-					@foreach (var transaction in Model.Transactions)
-					{
-						<tr>
-							<td>@transaction.CreatedOn</td>
-							<td>@transaction.CategoryName</td>
-							<td>@transaction.TransactionType</td>
-							<td>@transaction.Amount</td>
-							<td>@transaction.Refference</td>
-							<td>
-								<a asp-area="" asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
-							   asp-route-returnUrl="@ViewBag.ReturnUrl" class="btn btn-warning">Edit</a>
-								<button class="btn btn-danger" id="@transaction.Id">Delete</button>
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-		</div>
+<div class="d-flex bd-highlight" style="margin-top: 25px;">
+	<div class="p-2 bd-highlight">
+		<img src="/icons/icons8-wallet-64.png" style="max-width: fit-content;">
+	</div>
+	<div class="p-2 flex-grow-1 bd-highlight">
+		<h1 class="display-6">
+			@Model.Name
+		</h1>
+		<p class="display-6" style="font-size: xx-large;" id="balanceField">Balance: @Model.Balance @Model.CurrencyName</p>
+	</div>
+	<div class="p-2 bd-highlight" style="margin-top: 25px;">
+		<a asp-area="" asp-controller="Account" asp-action="Delete" asp-route-id="@Model.Id"
+		   asp-route-returnUrl="@ViewBag.ReturnUrl" class="btn btn-danger">Delete Account</a>
 	</div>
 </div>
+
+<partial name ="_TransactionsTablePartial" />

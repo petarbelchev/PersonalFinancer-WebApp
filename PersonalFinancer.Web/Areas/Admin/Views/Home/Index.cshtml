@@ -1,10 +1,67 @@
-﻿@inject IUserService userService
+﻿@using PersonalFinancer.Web.Models.Admin
+@model StatisticsViewModel
 @{
 	ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-	<p class="display-4">Hello @await userService.FullName(User.Id())!</p>
-	<p class="display-5">Welcome to your Admin Dashboard!</p>
+	<p class="display-5">Hello @ViewBag.AdminFullName!</p>
+	<p class="display-6">Welcome to your Admin Dashboard!</p>
 	<p class="display-6">You can manage User's profiles, their accounts and transactions!</p>
+</div>
+
+<div class="container text-center">
+	<div class="row row-cols-auto d-flex justify-content-center">
+		<div class="col formField">
+			<div class="card" style="width: 18rem;">
+				<div class="d-flex justify-content-center">
+					<img src="icons/icons8-budget-64.png" style="max-width: fit-content;">
+				</div>
+				<div class="card-body">
+					<h5 class="card-title">Users</h5>
+					<p class="card-text">There a <b>@Model.RegisteredUsers users</b> currently registered in our Web Application!</p>
+					<a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-primary">Go to All Users</a>
+				</div>
+			</div>
+		</div>
+		<div class="col formField">
+			<div class="card" style="width: 18rem;">
+				<div class="d-flex justify-content-center">
+					<img src="icons/icons8-wallet-64.png" style="max-width: fit-content;">
+				</div>
+				<div class="card-body">
+					<h5 class="card-title">Accounts</h5>
+					<p class="card-text">They have at the moment <b>@Model.CreatedAccounts accounts</b> created!</p>
+					<a href="#" class="btn btn-primary">Go to All Accounts</a>
+				</div>
+			</div>
+		</div>
+		@foreach (var (currency, values) in Model.TotalCashFlow)
+		{
+			<div class="col formField">
+				<div class="card" style="width: 18rem;">
+					<div class="d-flex justify-content-center">
+						<img src="icons/icons8-banknotes-64.png" style="max-width: fit-content;">
+					</div>
+					<div class="card-body">
+						<h5 class="card-title">Total @currency Incomes</h5>
+						<p class="card-text"><b>@values.Income @currency</b> is a total incomes maded by our users!</p>
+						<a href="#" class="btn btn-primary">Go somewhere</a>
+					</div>
+				</div>
+			</div>
+			<div class="col formField">
+				<div class="card" style="width: 18rem;">
+					<div class="d-flex justify-content-center">
+						<img src="icons/icons8-banknotes-64.png" style="max-width: fit-content;">
+					</div>
+					<div class="card-body">
+						<h5 class="card-title">Total @currency Expenses</h5>
+						<p class="card-text"><b>@values.Expence @currency</b> is a total expenses maded by our users!</p>
+						<a href="#" class="btn btn-primary">Go somewhere</a>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
 </div>

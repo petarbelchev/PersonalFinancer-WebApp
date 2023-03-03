@@ -26,6 +26,9 @@ else
 						{
 							<div class="col-sm-3 mb-3 mb-sm-0">
 								<div class="card formField" style="margin-left: 8px; margin-right: 8px;">
+									<div class="d-flex justify-content-center">
+										<img src="/icons/icons8-wallet-64.png" style="max-width: fit-content;">
+									</div>
 									<div class="card-body text-center">
 										<h5 class="card-title">@account.Name</h5>
 										<p class="card-text">@account.Balance @account.CurrencyName</p>
@@ -68,6 +71,7 @@ else
 						<table class="table table-hover">
 							<thead>
 								<tr>
+									<th scope="col"></th>
 									<th scope="col">Date</th>
 									<th scope="col">Type</th>
 									<th scope="col">Amount</th>
@@ -76,10 +80,11 @@ else
 									<th scope="col"></th>
 								</tr>
 							</thead>
-							<tbody>
+							<tbody style="vertical-align: text-top;">
 								@foreach (var transaction in Model.LastTransactions)
 								{
 									<tr>
+										<td><img src="/icons/icons8-transaction-64.png" style="max-width: 50px;"></td>
 										<td>@transaction.CreatedOn</td>
 										<td>@transaction.TransactionType</td>
 										<td>@transaction.Amount</td>
@@ -109,7 +114,12 @@ else
 								decimal expence = cashFlow != 0 ? Math.Round(value.Expence / cashFlow * 100, 2) : 0;
 
 								<div class="card-title">
-									<p class="fs-6">@key</p>
+									<div class="row row-cols-auto">
+										<div class="col">
+											<img src="/icons/icons8-profit-64.png" style="max-width: 50px;">
+										</div>
+										<h4 class="col">@key</h4>
+									</div>
 								</div>
 								<h4 class="small font-weight-bold">Income <span class="float-right">@value.Income (@income%)</span></h4>
 								<div class="progress mb-4">

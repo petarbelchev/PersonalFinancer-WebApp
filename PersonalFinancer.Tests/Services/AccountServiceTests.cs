@@ -9,7 +9,6 @@
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Category;
 	using PersonalFinancer.Services.Transactions;
-	using PersonalFinancer.Services.Transactions.Models;
 
 	[TestFixture]
 	class AccountServiceTests : UnitTestsBase
@@ -363,118 +362,118 @@
 					.EqualTo("Account does not exist."));
 		}
 
-		[Test]
-		public async Task DashboardViewModel_ShouldReturnCorrectData_WithValidInput()
-		{
-			//Arrange
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
-			IEnumerable<AccountCardViewModel> expectedAccounts = data.Accounts
-				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
-				.Select(a => mapper.Map<AccountCardViewModel>(a))
-				.AsEnumerable();
+		//[Test]
+		//public async Task DashboardViewModel_ShouldReturnCorrectData_WithValidInput()
+		//{
+		//	//Arrange
+		//	DateTime startDate = DateTime.UtcNow.AddMonths(-1);
+		//	DateTime endDate = DateTime.UtcNow;
+		//	IEnumerable<AccountCardViewModel> expectedAccounts = data.Accounts
+		//		.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
+		//		.Select(a => mapper.Map<AccountCardViewModel>(a))
+		//		.AsEnumerable();
 
-			IEnumerable<TransactionShortViewModel> expectedLastTransactions = data.Transactions
-				.Where(t =>
-					t.Account.OwnerId == this.User1.Id &&
-					t.CreatedOn >= startDate &&
-					t.CreatedOn <= endDate)
-				.OrderByDescending(t => t.CreatedOn)
-				.Take(5)
-				.Select(t => mapper.Map<TransactionShortViewModel>(t))
-				.AsEnumerable();
+		//	IEnumerable<TransactionShortViewModel> expectedLastTransactions = data.Transactions
+		//		.Where(t =>
+		//			t.Account.OwnerId == this.User1.Id &&
+		//			t.CreatedOn >= startDate &&
+		//			t.CreatedOn <= endDate)
+		//		.OrderByDescending(t => t.CreatedOn)
+		//		.Take(5)
+		//		.Select(t => mapper.Map<TransactionShortViewModel>(t))
+		//		.AsEnumerable();
 
-			var expectedCashFlow = new Dictionary<string, CashFlowViewModel>();
+		//	var expectedCashFlow = new Dictionary<string, CashFlowViewModel>();
 
-			await data.Accounts
-				.Where(a => a.OwnerId == this.User1.Id && a.Transactions.Any())
-				.Include(a => a.Currency)
-				.Include(a => a.Transactions
-					.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
-				.ForEachAsync(a =>
-				{
-					if (!expectedCashFlow.ContainsKey(a.Currency.Name))
-					{
-						expectedCashFlow[a.Currency.Name] = new CashFlowViewModel();
-					}
+		//	await data.Accounts
+		//		.Where(a => a.OwnerId == this.User1.Id && a.Transactions.Any())
+		//		.Include(a => a.Currency)
+		//		.Include(a => a.Transactions
+		//			.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
+		//		.ForEachAsync(a =>
+		//		{
+		//			if (!expectedCashFlow.ContainsKey(a.Currency.Name))
+		//			{
+		//				expectedCashFlow[a.Currency.Name] = new CashFlowViewModel();
+		//			}
 
-					decimal? income = a.Transactions?
-						.Where(t => t.TransactionType == TransactionType.Income)
-						.Sum(t => t.Amount);
+		//			decimal? income = a.Transactions?
+		//				.Where(t => t.TransactionType == TransactionType.Income)
+		//				.Sum(t => t.Amount);
 
-					if (income != null)
-					{
-						expectedCashFlow[a.Currency.Name].Income += (decimal)income;
-					}
+		//			if (income != null)
+		//			{
+		//				expectedCashFlow[a.Currency.Name].Income += (decimal)income;
+		//			}
 
-					decimal? expense = a.Transactions?
-						.Where(t => t.TransactionType == TransactionType.Expense)
-						.Sum(t => t.Amount);
+		//			decimal? expense = a.Transactions?
+		//				.Where(t => t.TransactionType == TransactionType.Expense)
+		//				.Sum(t => t.Amount);
 
-					if (expense != null)
-					{
-						expectedCashFlow[a.Currency.Name].Expence += (decimal)expense;
-					}
-				});
+		//			if (expense != null)
+		//			{
+		//				expectedCashFlow[a.Currency.Name].Expence += (decimal)expense;
+		//			}
+		//		});
 
-			//Act
-			var actualDashboard = new DashboardServiceModel
-			{
-				StartDate = startDate,
-				EndDate = endDate
-			};
+		//	//Act
+		//	var actualDashboard = new DashboardServiceModel
+		//	{
+		//		StartDate = startDate,
+		//		EndDate = endDate
+		//	};
 
-			await accountService.DashboardViewModel(this.User1.Id, actualDashboard);
+		//	await accountService.DashboardViewModel(this.User1.Id, actualDashboard);
 
-			//Assert
-			Assert.That(actualDashboard.Accounts.Count(), Is.EqualTo(expectedAccounts.Count()));
-			for (int i = 0; i < actualDashboard.Accounts.Count(); i++)
-			{
-				Assert.That(actualDashboard.Accounts.ElementAt(i).Id,
-					Is.EqualTo(expectedAccounts.ElementAt(i).Id));
-				Assert.That(actualDashboard.Accounts.ElementAt(i).Name,
-					Is.EqualTo(expectedAccounts.ElementAt(i).Name));
-			}
+		//	//Assert
+		//	Assert.That(actualDashboard.Accounts.Count(), Is.EqualTo(expectedAccounts.Count()));
+		//	for (int i = 0; i < actualDashboard.Accounts.Count(); i++)
+		//	{
+		//		Assert.That(actualDashboard.Accounts.ElementAt(i).Id,
+		//			Is.EqualTo(expectedAccounts.ElementAt(i).Id));
+		//		Assert.That(actualDashboard.Accounts.ElementAt(i).Name,
+		//			Is.EqualTo(expectedAccounts.ElementAt(i).Name));
+		//	}
 
-			Assert.That(actualDashboard.LastTransactions.Count(), 
-				Is.EqualTo(expectedLastTransactions.Count()));
-			for (int i = 0; i < actualDashboard.LastTransactions.Count(); i++)
-			{
-				Assert.That(actualDashboard.LastTransactions.ElementAt(i).Id,
-					Is.EqualTo(expectedLastTransactions.ElementAt(i).Id));
-				Assert.That(actualDashboard.LastTransactions.ElementAt(i).Amount,
-					Is.EqualTo(expectedLastTransactions.ElementAt(i).Amount));
-			}
+		//	Assert.That(actualDashboard.LastTransactions.Count(), 
+		//		Is.EqualTo(expectedLastTransactions.Count()));
+		//	for (int i = 0; i < actualDashboard.LastTransactions.Count(); i++)
+		//	{
+		//		Assert.That(actualDashboard.LastTransactions.ElementAt(i).Id,
+		//			Is.EqualTo(expectedLastTransactions.ElementAt(i).Id));
+		//		Assert.That(actualDashboard.LastTransactions.ElementAt(i).Amount,
+		//			Is.EqualTo(expectedLastTransactions.ElementAt(i).Amount));
+		//	}
 
-			Assert.That(actualDashboard.CurrenciesCashFlow.Count,
-				Is.EqualTo(expectedCashFlow.Count));
+		//	Assert.That(actualDashboard.CurrenciesCashFlow.Count,
+		//		Is.EqualTo(expectedCashFlow.Count));
 
-			foreach (string expectedKey in expectedCashFlow.Keys)
-			{
-				Assert.That(actualDashboard.CurrenciesCashFlow.ContainsKey(expectedKey), Is.True);
+		//	foreach (string expectedKey in expectedCashFlow.Keys)
+		//	{
+		//		Assert.That(actualDashboard.CurrenciesCashFlow.ContainsKey(expectedKey), Is.True);
 
-				Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Income, 
-					Is.EqualTo(expectedCashFlow[expectedKey].Income));
+		//		Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Income, 
+		//			Is.EqualTo(expectedCashFlow[expectedKey].Income));
 
-				Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Expence, 
-					Is.EqualTo(expectedCashFlow[expectedKey].Expence));
-			}
-		}
+		//		Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Expence, 
+		//			Is.EqualTo(expectedCashFlow[expectedKey].Expence));
+		//	}
+		//}
 
-		[Test]
-		public void DashboardViewModel_ShouldThrowException_WithInvalidDates()
-		{
-			//Arrange
-			DashboardServiceModel dashboardModel = new DashboardServiceModel
-			{
-				StartDate = DateTime.UtcNow,
-				EndDate = DateTime.UtcNow.AddMonths(-1)
-			};
+		//[Test]
+		//public void DashboardViewModel_ShouldThrowException_WithInvalidDates()
+		//{
+		//	//Arrange
+		//	DashboardServiceModel dashboardModel = new DashboardServiceModel
+		//	{
+		//		StartDate = DateTime.UtcNow,
+		//		EndDate = DateTime.UtcNow.AddMonths(-1)
+		//	};
 
-			//Act & Assert
-			Assert.That(async () => await accountService.DashboardViewModel(this.User1.Id, dashboardModel),
-				Throws.TypeOf<ArgumentException>().With.Message
-					.EqualTo("Start Date must be before End Date."));
-		}
+		//	//Act & Assert
+		//	Assert.That(async () => await accountService.DashboardViewModel(this.User1.Id, dashboardModel),
+		//		Throws.TypeOf<ArgumentException>().With.Message
+		//			.EqualTo("Start Date must be before End Date."));
+		//}
 	}
 }

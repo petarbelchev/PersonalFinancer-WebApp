@@ -3,19 +3,19 @@
 	using Microsoft.AspNetCore.Mvc;
 
 	using Infrastructure;
-	using Services.Accounts;
 	using Services.Accounts.Models;
+	using Services.User;
 
 	/// <summary>
 	/// Home Controller takes care of everything related to Dashboard page.
 	/// </summary>
 	public class HomeController : Controller
 	{
-		private readonly IAccountService accountService;
+		private readonly IUserService userService;
 
-		public HomeController(IAccountService accountService)
+		public HomeController(IUserService userService)
 		{
-			this.accountService = accountService;
+			this.userService = userService;
 		}
 
 		/// <summary>
@@ -35,7 +35,8 @@
 				EndDate = DateTime.UtcNow
 			};
 
-			await accountService.DashboardViewModel(User.Id(), model);
+
+			await userService.GetUserDashboard(User.Id(), model);
 
 			return View(model);
 		}
@@ -48,7 +49,7 @@
 		{
 			try
 			{
-				await accountService.DashboardViewModel(User.Id(), model);
+				await userService.GetUserDashboard(User.Id(), model);
 			}
 			catch (ArgumentException ex)
 			{
