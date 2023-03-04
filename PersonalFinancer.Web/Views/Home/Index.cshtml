@@ -15,55 +15,49 @@ else
 
 	@if (Model.Accounts.Any())
 	{
-		<div class="row" style="margin-top: 50px;">
-			<div class="col-md-12">
-				<div class="card">
-					<div class="card-header">
-						<h6>Your Accounts</h6>
-					</div>
-					<div class="row">
-						@foreach (var account in Model.Accounts)
-						{
-							<div class="col-sm-3 mb-3 mb-sm-0">
-								<div class="card formField" style="margin-left: 8px; margin-right: 8px;">
-									<div class="d-flex justify-content-center">
-										<img src="/icons/icons8-wallet-64.png" style="max-width: fit-content;">
-									</div>
-									<div class="card-body text-center">
-										<h5 class="card-title">@account.Name</h5>
-										<p class="card-text">@account.Balance @account.CurrencyName</p>
-										<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
-											Details
-										</a>
-									</div>
-								</div>
-							</div>
-						}
+		<!--Accounts-->
+		<p class="display-6 text-center fs-4">Your Accounts</p>
+		<div class="row">
+			@foreach (var account in Model.Accounts)
+			{
+				<div class="col-sm-3 mb-3 mb-sm-0">
+					<div class="card formField" style="margin-left: 8px; margin-right: 8px;">
+						<div class="d-flex justify-content-center">
+							<img src="/icons/icons8-wallet-64.png" style="max-width: fit-content;">
+						</div>
+						<div class="card-body text-center">
+							<h5 class="card-title">@account.Name</h5>
+							<p class="card-text">@account.Balance @account.CurrencyName</p>
+							<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
+								Details
+							</a>
+						</div>
 					</div>
 				</div>
-			</div>
+			}
 		</div>
-
-		<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 50px;">
-			<div class="col-md-4 form-floating">
+		<!--Date Filter Form-->
+		<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
+			<div class="col-lg-5 form-floating">
 				<input type="text" name="startDate" value="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 				<label for="startDate" class="form-label">Start Date</label>
 				<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
 			</div>
-			<div class="col-md-4 form-floating">
+			<div class="col-lg-5 form-floating">
 				<input type="text" name="endDate" value="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 				<label for="endDate" class="form-label">End Date</label>
 				<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
 			</div>
-			<div class="col-md-4">
-				<button type="submit" class="btn btn-lg btn-primary form-control form-control-lg" style="padding: 12.5px;">Filter Dashboard</button>
+			<div class="col-lg-2">
+				<button type="submit" class="btn btn-lg btn-primary form-control form-control-lg" style="padding: 12.5px;">Filter</button>
 			</div>
 		</form>
 
 		@if (Model.LastTransactions.Any())
 		{
-			<div class="row" style="margin-top: 50px;">
-				<div class="col-md-9">
+			<div class="row">
+				<!--Last Five Transactions-->
+				<div class="col-lg-9" style="margin-top: 25px;">
 					<div class="card">
 						<div class="card-header">
 							<h6>Last Five Transactions</h6>
@@ -101,7 +95,8 @@ else
 						</table>
 					</div>
 				</div>
-				<div class="col-md-3">
+				<!--Cash Flow-->
+				<div class="col-lg-3" style="margin-top: 25px;">
 					<div class="card">
 						<div class="card-header">
 							<h6>Cash Flow</h6>

@@ -219,7 +219,8 @@
 			var result = new Dictionary<string, CashFlowViewModel>();
 
 			await data.Accounts
-				.Where(a => a.OwnerId == userId && a.Transactions.Any())
+				.Where(a => a.OwnerId == userId 
+					&& a.Transactions.Any(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
 				.Include(a => a.Currency)
 				.Include(a => a.Transactions
 					.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))

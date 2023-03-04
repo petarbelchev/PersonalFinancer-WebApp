@@ -4,18 +4,18 @@
 }
 
 <form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
-	<div class="col-md-4 form-floating">
+	<div class="col-lg-5 form-floating">
 		<input type="text" name="startDate" value="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 		<label for="startDate" class="form-label">Start Date</label>
 		<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
 	</div>
-	<div class="col-md-4 form-floating">
+	<div class="col-lg-5 form-floating">
 		<input type="text" name="endDate" value="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 		<label for="endDate" class="form-label">End Date</label>
 		<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
 	</div>
-	<div class="col-md-4">
-		<button type="submit" class="btn btn-lg btn-primary form-control form-control-lg" style="padding: 12.5px;">Filter Transactions</button>
+	<div class="col-lg-2">
+		<button type="submit" class="btn btn-lg btn-primary form-control form-control-lg" style="padding: 12.5px;">Filter</button>
 	</div>
 </form>
 

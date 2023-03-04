@@ -29,16 +29,20 @@
 				return LocalRedirect("/Admin");
 			}
 
-			DashboardServiceModel model = new DashboardServiceModel()
+			if (User.Identity?.IsAuthenticated ?? false)
 			{
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
-			};
+				DashboardServiceModel model = new DashboardServiceModel()
+				{
+					StartDate = DateTime.UtcNow.AddMonths(-1),
+					EndDate = DateTime.UtcNow
+				};
 
+				await userService.GetUserDashboard(User.Id(), model);
+				
+				return View(model);
+			}
 
-			await userService.GetUserDashboard(User.Id(), model);
-
-			return View(model);
+			return View();
 		}
 
 		/// <summary>
