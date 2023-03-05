@@ -14,9 +14,11 @@
 		Task<Guid> CreateTransaction(TransactionFormModel transactionFormModel, bool isInitialBalance = false);
 
 		/// <summary>
-		/// Delete a Transaction and change account's balance. Returns True or False.
+		/// Delete a Transaction and change account's balance. 
 		/// </summary>
-		Task<bool> DeleteTransactionById(Guid transactionId);
+		/// <returns>New Account's balance</returns>
+		/// <exception cref="ArgumentNullException">Throws an Exception when Transaction does not exist.</exception>
+		Task<decimal> DeleteTransactionById(Guid transactionId);
 
 		/// <summary>
 		/// Edits a Transaction and change account's balance if it's nessesery.

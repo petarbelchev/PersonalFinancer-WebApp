@@ -66,8 +66,8 @@
 
 			try
 			{
-				AllTransactionsServiceModel transactions =
-				await transactionsService.AllTransactionsViewModel(User.Id(), model);
+				AllTransactionsServiceModel transactions = await transactionsService
+					.AllTransactionsViewModel(User.Id(), model);
 
 				return View(transactions);
 			}
@@ -124,13 +124,20 @@
 		}
 
 		/// <summary>
-		/// Handle with deleting Transaction.
+		/// Handle with deleting a Transaction.
 		/// </summary>
-		[HttpGet]
+		[HttpPost]
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
 		{
-			await transactionsService.DeleteTransactionById(id);
+			try
+			{
+				await transactionsService.DeleteTransactionById(id);
+			}
+			catch (ArgumentNullException)
+			{
+				return NotFound();
+			}
 
 			TempData["successMsg"] = "Your transaction was successfully deleted!";
 

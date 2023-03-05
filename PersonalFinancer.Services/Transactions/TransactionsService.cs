@@ -117,9 +117,11 @@
 		}
 
 		/// <summary>
-		/// Delete a Transaction and change account's balance. Returns True or False.
+		/// Delete a Transaction and change account's balance. 
 		/// </summary>
-		public async Task<bool> DeleteTransactionById(Guid transactionId)
+		/// <returns>New Account's balance</returns>
+		/// <exception cref="ArgumentNullException">Throws an Exception when Transaction does not exist.</exception>
+		public async Task<decimal> DeleteTransactionById(Guid transactionId)
 		{
 			Transaction? transaction = await data.Transactions
 				.Include(t => t.Account)
@@ -127,7 +129,7 @@
 
 			if (transaction == null)
 			{
-				return false;
+				throw new ArgumentNullException(nameof(transactionId), "Transaction does not exist.");
 			}
 
 			data.Transactions.Remove(transaction);
@@ -147,7 +149,7 @@
 
 			await data.SaveChangesAsync();
 
-			return true;
+			return transaction.Account.Balance;
 		}
 
 		/// <summary>

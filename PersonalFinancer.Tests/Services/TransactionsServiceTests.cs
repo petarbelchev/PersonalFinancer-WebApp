@@ -83,7 +83,7 @@
 		}
 
 		[Test]
-		public async Task DeleteTransactionById_ShouldDeleteExpenseTransactionIncreaseBalanceAndReturnTrue_WithValidInput()
+		public async Task DeleteTransactionById_ShouldDeleteExpenseTransactionIncreaseBalanceAndNewBalance_WithValidInput()
 		{
 			//Arrange
 			Guid transactionId = Guid.NewGuid();
@@ -109,17 +109,17 @@
 			Assert.That(transactionInDb, Is.Not.Null);
 
 			//Act
-			bool response = await transactionService.DeleteTransactionById(transactionId);
+			decimal newBalance = await transactionService.DeleteTransactionById(transactionId);
 
 			//Assert
-			Assert.That(response, Is.True);
 			Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
+			Assert.That(this.Account1User1.Balance, Is.EqualTo(newBalance));
 			Assert.That(this.Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
 			Assert.That(await data.Transactions.FindAsync(transactionId), Is.Null);
 		}
 
 		[Test]
-		public async Task DeleteTransactionById_ShouldDeleteIncomeTransactionReductBalanceAndReturnTrue_WithValidInput()
+		public async Task DeleteTransactionById_ShouldDeleteIncomeTransactionReductBalanceAndNewBalance_WithValidInput()
 		{
 			//Arrange
 			Guid transactionId = Guid.NewGuid();
@@ -145,22 +145,24 @@
 			Assert.That(transactionInDb, Is.Not.Null);
 
 			//Act
-			bool response = await transactionService.DeleteTransactionById(transactionId);
+			decimal newBalance = await transactionService.DeleteTransactionById(transactionId);
 
 			//Assert
-			Assert.That(response, Is.True);
 			Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
+			Assert.That(this.Account1User1.Balance, Is.EqualTo(newBalance));
 			Assert.That(this.Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
 			Assert.That(await data.Transactions.FindAsync(transactionId), Is.Null);
 		}
 
 		[Test]
-		public async Task DeleteTransactionById_ShouldReturnFalse_WithInvalidInput()
+		public void DeleteTransactionById_ShouldThrowAnException_WithInvalidInput()
 		{
 			//Arrange
 
 			//Act & Assert
-			Assert.That(await transactionService.DeleteTransactionById(Guid.NewGuid()), Is.False);
+			Assert.That(async () => await transactionService.DeleteTransactionById(Guid.NewGuid()),
+				Throws.TypeOf<ArgumentNullException>().With.Property("Message")
+					.EqualTo("Transaction does not exist. (Parameter 'transactionId')"));
 		}
 
 		[Test]

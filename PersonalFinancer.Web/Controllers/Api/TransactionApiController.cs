@@ -18,14 +18,20 @@
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteTransaction(Guid id)
 		{
-			bool isDeleted = await transactionsService.DeleteTransactionById(id);
-
-			if (!isDeleted)
+			if (!User.Identity?.IsAuthenticated ?? false)
 			{
-				return BadRequest();
+				return Unauthorized();
 			}
 
-			return NoContent();
+			try
+			{
+				decimal newBalance = await transactionsService.DeleteTransactionById(id);
+				return Ok(new { newBalance });
+			}
+			catch (ArgumentNullException)
+			{
+				return NotFound();
+			}
 		}
 	}
 }

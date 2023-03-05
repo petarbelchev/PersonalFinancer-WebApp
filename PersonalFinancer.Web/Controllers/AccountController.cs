@@ -46,7 +46,7 @@
 
 		/// <summary>
 		/// Handle with Account Form Model and creates new Account. 
-		/// If success redirect to the new Account Details page.
+		/// If account was created successfully, redirect to the new Account Details page.
 		/// </summary>
 		[HttpPost]
 		[Authorize(Roles = UserRoleName)]

@@ -3,9 +3,9 @@
 	using Microsoft.AspNetCore.Mvc;
 
 	using Infrastructure;
-	using Services.Category.Models;
-	using Services.Category;
 	using static Data.Constants.CategoryConstants;
+	using Services.Category;
+	using Services.Category.Models;
 
 	[Route("api/categories")]
 	[ApiController]
@@ -21,6 +21,11 @@
 		[HttpGet("{id}")]
 		public async Task<ActionResult<CategoryViewModel>> GetCategory(Guid id)
 		{
+			if (!User.Identity?.IsAuthenticated ?? false)
+			{
+				return Unauthorized();
+			}
+
 			CategoryViewModel? category = await categoryService.CategoryById(id);
 
 			if (category == null)
@@ -34,6 +39,11 @@
 		[HttpPost]
 		public async Task<ActionResult<CategoryViewModel>> CreateCategory(CategoryViewModel category)
 		{
+			if (!User.Identity?.IsAuthenticated ?? false)
+			{
+				return Unauthorized();
+			}
+
 			if (category.Name.Length < CategoryNameMinLength || category.Name.Length > CategoryNameMaxLength)
 			{
 				return BadRequest($"Category name must be between {CategoryNameMinLength} and {CategoryNameMaxLength} characters long.");
@@ -55,6 +65,11 @@
 		[HttpDelete("{id}")]
 		public async Task<ActionResult> DeleteCategory(Guid id)
 		{
+			if (!User.Identity?.IsAuthenticated ?? false)
+			{
+				return Unauthorized();
+			}
+
 			try
 			{
 				await categoryService.DeleteCategory(id, User.Id());

@@ -9,21 +9,11 @@
 					{ method: 'DELETE' }
 				);
 
-				if (response.status == 204) {
+				if (response.status == 200) {
 					let transactionRow = e.target.parentElement.parentElement;
 					document.getElementById('tableBody').removeChild(transactionRow);
-
-					let transactionAmount = transactionRow.children[3].textContent;
-					let transactionType = transactionRow.children[2].textContent;
-					let newBalance;
-
-					if (transactionType == 'Income') {
-						newBalance = @Model.Balance - Number(transactionAmount);
-					} else {
-						newBalance = @Model.Balance + Number(transactionAmount);
-					}
-
-					document.getElementById('balanceField').textContent = `Balance: ${newBalance.toFixed(2)} @(Model.CurrencyName)`;
+					let data = await response.json();
+					document.getElementById('balanceField').textContent = `Balance: ${data.newBalance.toFixed(2)} @(Model.CurrencyName)`;
 				} else {
 					alert('Somethink happened!');
 				}
