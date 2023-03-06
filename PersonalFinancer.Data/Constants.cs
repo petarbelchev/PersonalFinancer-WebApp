@@ -50,12 +50,20 @@
 			public const double TransactionMinValue = 0.01;
 		}
 
+		public class CurrencyConstants
+		{
+			public const int CurrencyNameMaxLength = 10;
+			public const int CurrencyNameMinLength = 2;
+		}
+
 		public static class HostConstants
 		{
 			private const string hostUrl = "https://localhost:7187";
 
 			public const string ApiCategoriesUrl = hostUrl + "/api/categories/";
 			public const string ApiTransactionsUrl = hostUrl + "/api/transactions/";
+			public const string ApiAccountTypesUrl = hostUrl + "/api/accounttypes/";
+			public const string ApiCurrencyUrl = hostUrl + "/api/currencies/";
 		}
 
 		public static class RoleConstants

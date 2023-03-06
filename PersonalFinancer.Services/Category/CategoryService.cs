@@ -77,7 +77,7 @@
 		}
 
 		/// <summary>
-		/// Creates new Category with given Name. Returns View Model with Id and Name.
+		/// Creates new Category with given Name. Returns View Model with Id, Name and User Id.
 		/// If try to create Category with name that other category have, throws exception.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>

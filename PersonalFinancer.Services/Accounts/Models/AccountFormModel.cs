@@ -2,6 +2,7 @@
 {
 	using System.ComponentModel.DataAnnotations;
 	
+	using AccountTypes.Models;
 	using Currency.Models;
 	using static Data.Constants.AccountConstants;
 

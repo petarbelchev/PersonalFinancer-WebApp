@@ -1,4 +1,5 @@
-﻿@model AccountFormModel
+﻿@using PersonalFinancer.Web.Infrastructure;
+@model AccountFormModel
 @{
 	ViewData["Title"] = "Create Account";
 }
@@ -22,21 +23,35 @@
 				</div>
 				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 					<label asp-for="@Model.AccountTypeId" class="form-label"></label>
-					<select asp-for="@Model.AccountTypeId" class="form-select">
+					<select asp-for="@Model.AccountTypeId" class="form-select" id="accountTypesField">
 						@foreach (var accountType in @Model.AccountTypes)
 						{
-							<option value="@accountType.Id">@accountType.Name</option>
+							<option value="@accountType.Id" id="@accountType.Id" userId="@(accountType.UserId ?? "notOwnedCategory")">@accountType.Name</option>
 						}
 					</select>
+					<div id="newAccountTypeDiv" class="form-floating formField" style="display: none;">
+						<input id="newAccountTypeField" class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
+						<label class="form-label">Write New Account Type's name...</label>
+						<p style="color: red;"></p>
+					</div>
+					<a class="btn btn-primary" id="createAccountTypeBtn">Create New Account Type</a>
+					<a class="btn btn-danger" style="display: none;" id="deleteAccountTypeBtn">Delete This Account Type</a>
 				</div>
 				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 					<label asp-for="@Model.CurrencyId" class="form-label"></label>
-					<select asp-for="@Model.CurrencyId" class="form-select">
+					<select asp-for="@Model.CurrencyId" class="form-select" id="currenciesField">
 						@foreach (var currency in @Model.Currencies)
 						{
-							<option value="@currency.Id">@currency.Name</option>
+							<option value="@currency.Id" id="@currency.Id" userId="@(currency.UserId ?? "notOwnedCategory")">@currency.Name</option>
 						}
 					</select>
+					<div id="newCurrencyDiv" class="form-floating formField" style="display: none;">
+						<input id="newCurrencyField" class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
+						<label class="form-label">Write New Currency's name...</label>
+						<p style="color: red;"></p>
+					</div>
+					<a class="btn btn-primary" id="createCurrencyBtn">Create New Currency</a>
+					<a class="btn btn-danger" style="display: none;" id="deleteCurrencyBtn">Delete This Currency</a>
 				</div>
 				<div>
 					<button type="submit" class="w-100 btn btn-lg btn-success">Create</button>
@@ -48,4 +63,115 @@
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
+
+	<script>
+		const createAccountTypeBtn = document.getElementById('createAccountTypeBtn');
+		const deleteAccountTypeBtn = document.getElementById('deleteAccountTypeBtn');
+		const createCurrencyBtn = document.getElementById('createCurrencyBtn');
+		const deleteCurrencyBtn = document.getElementById('deleteCurrencyBtn');
+
+		const accountTypesField = document.getElementById('accountTypesField');
+		const currenciesField = document.getElementById('currenciesField');
+
+		function eventHandler() {
+			createAccountTypeBtn.addEventListener('click', async () => {
+				let newAccountTypeDiv = document.getElementById('newAccountTypeDiv');
+				let inputField = document.getElementById('newAccountTypeField');
+
+				await create(newAccountTypeDiv, inputField, '@ApiAccountTypesUrl', accountTypesField, deleteAccountTypeBtn);
+			});
+
+			deleteAccountTypeBtn.addEventListener('click', async () => {
+				await del(accountTypesField, '@ApiAccountTypesUrl', deleteAccountTypeBtn);
+			});
+
+			createCurrencyBtn.addEventListener('click', async () => {
+				let newCurrencyDiv = document.getElementById('newCurrencyDiv');
+				let inputField = document.getElementById('newCurrencyField');
+
+				await create(newCurrencyDiv, inputField, '@ApiCurrencyUrl', currenciesField, deleteCurrencyBtn);
+			});
+
+			deleteCurrencyBtn.addEventListener('click', async () => {
+				await del(currenciesField, '@ApiCurrencyUrl', deleteCurrencyBtn);
+			});
+
+			accountTypesField.addEventListener('change', () => {
+				deleteBtnController(accountTypesField, deleteAccountTypeBtn);
+			});
+
+			currenciesField.addEventListener('change', () => {
+				deleteBtnController(currenciesField, deleteCurrencyBtn);
+			});
+		}
+
+		function deleteBtnController(dropdownField, deleteBtn) {
+			let ownerId = dropdownField.selectedOptions[0].attributes['userid'].value;
+
+			if (ownerId != 'notOwnedCategory' && ownerId == '@User.Id()') {
+				deleteBtn.style.display = 'block';
+			} else {
+				deleteBtn.style.display = 'none';
+			}
+		}
+
+		deleteBtnController(accountTypesField, deleteAccountTypeBtn);
+		deleteBtnController(currenciesField, deleteCurrencyBtn);
+
+		eventHandler();
+
+		async function create(div, inputField, url, dropdownField, deleteBtn) {
+
+			if (div.style.display == 'none') {
+				div.style.display = 'block';
+			} else {
+				let response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ name: inputField.value })
+				});
+
+				if (response.status == 201) {
+					let data = await response.json();
+
+					let optionTag = document.createElement('option');
+					optionTag.value = data.id;
+					optionTag.setAttribute("userId", data.userId);
+					optionTag.setAttribute("id", data.id);
+					optionTag.textContent = data.name;
+
+					dropdownField.appendChild(optionTag);
+					dropdownField.value = data.id;
+
+					div.style.display = 'none';
+					inputField.value = '';
+					deleteBtn.style.display = 'block';
+				} else if (response.status == 400) {
+					let error = await response.json();
+					div.children[2].textContent = error;
+				}
+			}
+		}
+
+		async function del (dropdownField, url, deleteBtn) {
+			let id = dropdownField.value;
+			let ownerId = dropdownField.selectedOptions[0].attributes['userid'].value;
+
+			if (ownerId == 'notOwnedCategory' || ownerId != '@User.Id()') {
+				return alert("You can not delete this Account Type!")
+			}
+
+			let response = await fetch(url + id, { method: 'DELETE' });
+
+			if (response.status == 204) {
+				dropdownField.removeChild(document.getElementById(id));
+				deleteBtnController(dropdownField, deleteBtn);
+			} else {
+				alert('Somethink happend!')
+			}
+		}
+	</script>
 }

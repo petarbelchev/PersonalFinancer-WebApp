@@ -1,20 +1,20 @@
 ﻿namespace PersonalFinancer.Services.Accounts
 {
-	using AutoMapper;
-	using AutoMapper.QueryableExtensions;
-	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.Caching.Memory;
+    using AutoMapper;
+    using AutoMapper.QueryableExtensions;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Caching.Memory;
 
-	using Models;
-	using Category;
-	using Transactions;
-	using Transactions.Models;
-	using Data;
-	using Data.Enums;
-	using Data.Models;
-	using static Data.Constants;
+    using Models;
+    using Category;
+    using Transactions;
+    using Transactions.Models;
+    using Data;
+    using Data.Enums;
+    using Data.Models;
+    using static Data.Constants;
 
-	public class AccountService : IAccountService
+    public class AccountService : IAccountService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
@@ -101,17 +101,6 @@
 				.FirstOrDefaultAsync();
 
 			return account;
-		}
-
-		/// <summary>
-		/// Returns collection of Account Types for the current user with Id and Name.
-		/// </summary>
-		public async Task<IEnumerable<AccountTypeViewModel>> AccountTypesViewModel(string userId)
-		{
-			return await data.AccountTypes
-				.Where(a => (a.UserId == null || a.UserId == userId) && !a.IsDeleted)
-				.Select(a => mapper.Map<AccountTypeViewModel>(a))
-				.ToArrayAsync();
 		}
 
 		/// <summary>

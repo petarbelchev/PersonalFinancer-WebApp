@@ -3,18 +3,19 @@
     using AutoMapper;
 
     using Accounts.Models;
-    using Currency.Models;
+    using AccountTypes.Models;
     using Category.Models;
-    using Transactions.Models;
+	using Currency.Models;
     using Data.Models;
-	using User.Models;
+    using Transactions.Models;
+    using User.Models;
 
 	public class ServiceMappingProfile : Profile
 	{
 		public ServiceMappingProfile()
 		{
 			CreateMap<Category, CategoryViewModel>();
-			
+
 			CreateMap<Currency, CurrencyViewModel>();
 
 			CreateMap<Account, AccountDropdownViewModel>();

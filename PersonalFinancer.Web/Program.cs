@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Memory;
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.AccountTypes;
 using PersonalFinancer.Services.Category;
 using PersonalFinancer.Services.Currency;
 using PersonalFinancer.Services.Transactions;
@@ -34,6 +35,7 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITransactionsService, TransactionsService>();
+builder.Services.AddScoped<IAccountTypeService, AccountTypeService>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
 
 builder.Services.AddAutoMapper(

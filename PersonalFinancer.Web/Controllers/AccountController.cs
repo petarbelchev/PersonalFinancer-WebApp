@@ -8,6 +8,7 @@
 	using Services.Accounts;
 	using Services.Accounts.Models;
 	using Services.Currency;
+	using Services.AccountTypes;
 
 	/// <summary>
 	/// Account Controller takes care of everything related to Accounts.
@@ -17,13 +18,16 @@
 	{
 		private readonly IAccountService accountService;
 		private readonly ICurrencyService currencyService;
+		private readonly IAccountTypeService accountTypeService;
 
 		public AccountController(
 			IAccountService accountService,
-			ICurrencyService currencyService)
+			ICurrencyService currencyService,
+			IAccountTypeService accountTypeService)
 		{
 			this.accountService = accountService;
 			this.currencyService = currencyService;
+			this.accountTypeService = accountTypeService;
 		}
 
 		/// <summary>
@@ -37,7 +41,7 @@
 
 			AccountFormModel formModel = new AccountFormModel
 			{
-				AccountTypes = await accountService.AccountTypesViewModel(userId),
+				AccountTypes = await accountTypeService.AccountTypesViewModel(userId),
 				Currencies = await currencyService.UserCurrencies(userId)
 			};
 

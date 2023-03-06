@@ -1,8 +1,8 @@
 ﻿namespace PersonalFinancer.Services.Accounts
 {
-	using Models;
+    using Models;
 
-	public interface IAccountService
+    public interface IAccountService
 	{
 		/// <summary>
 		/// Returns count of all created accounts.
@@ -23,11 +23,6 @@
 		/// Returns a collection of user's accounts with Id, Name, Balance and Currency Name.
 		/// </summary>
 		Task<IEnumerable<AccountCardViewModel>> AllAccountsCardViewModel(string userId);
-
-		/// <summary>
-		/// Returns collection of Account Types for the current user with Id and Name.
-		/// </summary>
-		Task<IEnumerable<AccountTypeViewModel>> AccountTypesViewModel(string userId);
 
 		/// <summary>
 		/// Returns Account with Id, Name, Balance and all Transactions or null.
