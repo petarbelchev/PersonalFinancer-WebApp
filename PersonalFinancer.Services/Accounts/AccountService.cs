@@ -3,6 +3,7 @@
 	using AutoMapper;
 	using AutoMapper.QueryableExtensions;
 	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
 
 	using Models;
 	using Category;
@@ -11,7 +12,7 @@
 	using Data;
 	using Data.Enums;
 	using Data.Models;
-	using static Data.Constants.CategoryConstants;
+	using static Data.Constants;
 
 	public class AccountService : IAccountService
 	{
@@ -19,17 +20,20 @@
 		private readonly IMapper mapper;
 		private readonly ITransactionsService transactionsService;
 		private readonly ICategoryService categoryService;
+		private readonly IMemoryCache memoryCache;
 
 		public AccountService(
 			PersonalFinancerDbContext context,
 			IMapper mapper,
 			ITransactionsService transactionsService,
-			ICategoryService categoryService)
+			ICategoryService categoryService,
+			IMemoryCache memoryCache)
 		{
 			this.data = context;
 			this.mapper = mapper;
 			this.transactionsService = transactionsService;
 			this.categoryService = categoryService;
+			this.memoryCache = memoryCache;
 		}
 
 		/// <summary>
@@ -37,7 +41,7 @@
 		/// </summary>
 		public int AccountsCount()
 		{
-			int accountsCount =  data.Accounts.Count(a => !a.IsDeleted);
+			int accountsCount = data.Accounts.Count(a => !a.IsDeleted);
 
 			return accountsCount;
 		}
@@ -47,10 +51,17 @@
 		/// </summary>
 		public async Task<IEnumerable<AccountDropdownViewModel>> AllAccountsDropdownViewModel(string userId)
 		{
-			IEnumerable<AccountDropdownViewModel> accounts = await data.Accounts
-				.Where(a => a.OwnerId == userId && !a.IsDeleted)
-				.Select(a => mapper.Map<AccountDropdownViewModel>(a))
-				.ToArrayAsync();
+			string cacheKey = AccountConstants.CacheKeyValue + userId;
+
+			var accounts = await memoryCache.GetOrCreateAsync<IEnumerable<AccountDropdownViewModel>>(cacheKey, async cacheEntry =>
+			{
+				cacheEntry.SetAbsoluteExpiration(TimeSpan.FromDays(3));
+
+				return await data.Accounts
+					.Where(a => a.OwnerId == userId && !a.IsDeleted)
+					.Select(a => mapper.Map<AccountDropdownViewModel>(a))
+					.ToArrayAsync();
+			});
 
 			return accounts;
 		}
@@ -126,7 +137,7 @@
 				{
 					Amount = newAccount.Balance,
 					AccountId = newAccount.Id,
-					CategoryId = await categoryService.CategoryIdByName(CategoryInitialBalanceName),
+					CategoryId = await categoryService.CategoryIdByName(CategoryConstants.CategoryInitialBalanceName),
 					Refference = "Initial Balance",
 					CreatedOn = DateTime.UtcNow,
 					TransactionType = TransactionType.Income
@@ -135,14 +146,16 @@
 
 			await data.SaveChangesAsync();
 
+			memoryCache.Remove(AccountConstants.CacheKeyValue + userId);
+
 			return newAccount.Id;
 		}
-		
+
 		/// <summary>
 		/// Delete an Account and give the option to delete all of the account's transactions.
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		public async Task DeleteAccountById(Guid accountId, bool shouldDeleteTransactions)
+		public async Task DeleteAccountById(Guid accountId, string userId, bool shouldDeleteTransactions)
 		{
 			Account? account = await data.Accounts
 				.FirstOrDefaultAsync(a => a.Id == accountId && !a.IsDeleted);
@@ -162,6 +175,8 @@
 			}
 
 			await data.SaveChangesAsync();
+			
+			memoryCache.Remove(AccountConstants.CacheKeyValue + userId);
 		}
 
 		/// <summary>
@@ -219,7 +234,7 @@
 			var result = new Dictionary<string, CashFlowViewModel>();
 
 			await data.Accounts
-				.Where(a => a.OwnerId == userId 
+				.Where(a => a.OwnerId == userId
 					&& a.Transactions.Any(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
 				.Include(a => a.Currency)
 				.Include(a => a.Transactions

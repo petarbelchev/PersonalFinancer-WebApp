@@ -1,6 +1,7 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
 	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
 	using NUnit.Framework;
 
 	using PersonalFinancer.Data.Enums;
@@ -20,9 +21,9 @@
 		[SetUp]
 		public void SetUp()
 		{
-			this.categoryService = new CategoryService(this.data, this.mapper);
+			this.categoryService = new CategoryService(this.data, this.mapper, this.memoryCache);
 			this.transactionsService = new TransactionsService(this.data, this.mapper);
-			this.accountService = new AccountService(this.data, this.mapper, this.transactionsService, this.categoryService);
+			this.accountService = new AccountService(this.data, this.mapper, this.transactionsService, this.categoryService, this.memoryCache);
 		}
 
 		[Test]
@@ -299,7 +300,7 @@
 			Assert.That(account.Transactions.Count, Is.EqualTo(1));
 
 			//Act
-			await accountService.DeleteAccountById(accountId, false);
+			await accountService.DeleteAccountById(accountId, this.User1.Id, false);
 
 			//Assert that the Account is deleted but Transactions not
 			Assert.That(account.IsDeleted, Is.True);
@@ -344,7 +345,7 @@
 			int transactionsCountBefore = data.Transactions.Count();
 
 			//Act
-			await accountService.DeleteAccountById(accountId, true);
+			await accountService.DeleteAccountById(accountId, this.User1.Id, true);
 
 			//Assert that the Account is deleted but Transactions not
 			Assert.That(data.Accounts.Count(), Is.EqualTo(accountsCountBefore - 1));
@@ -357,7 +358,7 @@
 			//Arrange & Act
 
 			//Assert
-			Assert.That(async () => await accountService.DeleteAccountById(Guid.NewGuid(), true),
+			Assert.That(async () => await accountService.DeleteAccountById(Guid.NewGuid(), this.User1.Id, true),
 				Throws.TypeOf<ArgumentNullException>().With.Property("ParamName")
 					.EqualTo("Account does not exist."));
 		}

@@ -44,7 +44,7 @@
 		/// Delete an Account and give the option to delete all of the account's transactions.
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
-		Task DeleteAccountById(Guid accountId, bool transactionsDelete);
+		Task DeleteAccountById(Guid accountId, string userId, bool transactionsDelete);
 
 		/// <summary>
 		/// Returns Delete Account View Model.

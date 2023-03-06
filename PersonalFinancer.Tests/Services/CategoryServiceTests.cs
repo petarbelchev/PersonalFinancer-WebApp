@@ -15,7 +15,7 @@
 		[SetUp]
 		public void SetUp()
 		{
-			this.categoryService = new CategoryService(this.data, this.mapper);
+			this.categoryService = new CategoryService(this.data, this.mapper, this.memoryCache);
 		}
 
 		[Test]

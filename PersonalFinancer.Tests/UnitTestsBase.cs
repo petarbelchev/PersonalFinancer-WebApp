@@ -2,6 +2,7 @@
 {
 	using NUnit.Framework;
 	using AutoMapper;
+	using Microsoft.Extensions.Caching.Memory;
 
 	using Mocks;
 	using Data;
@@ -14,12 +15,15 @@
 	{
 		protected PersonalFinancerDbContext data;
 		protected IMapper mapper;
+		protected IMemoryCache memoryCache;
 
 		[OneTimeSetUp]
 		protected void SetUpBase()
 		{
 			data = DatabaseMock.Instance;
 			mapper = MapperMock.Instance;
+			memoryCache = MemoryCacheMock.Instance;
+
 			SeedDatabase();
 		}
 

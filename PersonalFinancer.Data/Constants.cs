@@ -21,6 +21,8 @@
 
 			public const double AccountInitialBalanceMaxValue = 10_000_000;
 			public const double AccountInitialBalanceMinValue = 0.00;
+
+			public const string CacheKeyValue = "accounts/";
 		}
 
 		public class AccountTypeConstants
@@ -35,6 +37,8 @@
 			public const int CategoryNameMinLength = 2;
 
 			public const string CategoryInitialBalanceName = "Initial Balance";
+
+			public const string CacheKeyValue = "categories/";
 		}
 
 		public class TransactionConstants

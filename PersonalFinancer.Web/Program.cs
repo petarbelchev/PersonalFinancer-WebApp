@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Models;
@@ -33,6 +34,7 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITransactionsService, TransactionsService>();
+builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
 
 builder.Services.AddAutoMapper(
 	typeof(ICategoryService).Assembly,

@@ -1,24 +1,29 @@
 ﻿namespace PersonalFinancer.Services.Category
 {
-	using Microsoft.EntityFrameworkCore;
 	using AutoMapper;
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
 
 	using Models;
 	using Data;
 	using Data.Models;
 	using static Data.Constants.CategoryConstants;
+	using System.Collections.Generic;
 
 	public class CategoryService : ICategoryService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
+		private readonly IMemoryCache memoryCache;
 
 		public CategoryService(
 			PersonalFinancerDbContext context,
-			IMapper mapper)
+			IMapper mapper,
+			IMemoryCache memoryCache)
 		{
 			this.data = context;
 			this.mapper = mapper;
+			this.memoryCache = memoryCache;
 		}
 
 		/// <summary>
@@ -43,6 +48,8 @@
 			category.IsDeleted = true;
 
 			await data.SaveChangesAsync();
+
+			memoryCache.Remove(CacheKeyValue + userId);
 		}
 
 		/// <summary>
@@ -101,6 +108,8 @@
 
 			await data.SaveChangesAsync();
 
+			memoryCache.Remove(CacheKeyValue + userId);
+
 			return mapper.Map<CategoryViewModel>(category);
 		}
 
@@ -124,12 +133,19 @@
 		/// </summary>
 		public async Task<IEnumerable<CategoryViewModel>> UserCategories(string userId)
 		{
-			IEnumerable<CategoryViewModel> categories = await data.Categories
-				.Where(c =>
-					c.Name != CategoryInitialBalanceName && !c.IsDeleted &&
-					(c.UserId == null || c.UserId == userId))
-				.Select(c => mapper.Map<CategoryViewModel>(c))
-				.ToArrayAsync();
+			string cacheKey = CacheKeyValue + userId;
+
+			var categories = await memoryCache.GetOrCreateAsync<IEnumerable<CategoryViewModel>>(cacheKey, async cacheEntity =>
+			{
+				cacheEntity.SetAbsoluteExpiration(TimeSpan.FromDays(3));
+
+				return await data.Categories
+					.Where(c =>
+						c.Name != CategoryInitialBalanceName && !c.IsDeleted &&
+						(c.UserId == null || c.UserId == userId))
+					.Select(c => mapper.Map<CategoryViewModel>(c))
+					.ToArrayAsync();
+			});
 
 			return categories;
 		}

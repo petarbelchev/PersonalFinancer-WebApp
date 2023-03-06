@@ -130,7 +130,7 @@
 				return Unauthorized();
 			}
 
-			await accountService.DeleteAccountById(accountModel.Id, accountModel.ShouldDeleteTransactions);
+			await accountService.DeleteAccountById(accountModel.Id, User.Id(), accountModel.ShouldDeleteTransactions);
 
 			if (User.IsAdmin())
 			{

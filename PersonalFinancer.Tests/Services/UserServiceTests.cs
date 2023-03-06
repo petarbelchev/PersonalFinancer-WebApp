@@ -18,9 +18,9 @@
 		[SetUp] 
 		public void SetUp()
 		{
-			this.categoryService = new CategoryService(this.data, this.mapper);
+			this.categoryService = new CategoryService(this.data, this.mapper, this.memoryCache);
 			this.transactionsService = new TransactionsService(this.data, this.mapper);
-			this.accountService = new AccountService(this.data, this.mapper, this.transactionsService, this.categoryService);
+			this.accountService = new AccountService(this.data, this.mapper, this.transactionsService, this.categoryService, this.memoryCache);
 			this.userService = new UserService(this.data, this.accountService, this.transactionsService, this.mapper);
 		}
 
