@@ -18,23 +18,7 @@ else
 		<!--Accounts-->
 		<p class="display-6 text-center fs-4">Your Accounts</p>
 		<div class="row">
-			@foreach (var account in Model.Accounts)
-			{
-				<div class="col-sm-3 mb-3 mb-sm-0">
-					<div class="card formField" style="margin-left: 8px; margin-right: 8px;">
-						<div class="d-flex justify-content-center">
-							<img src="/icons/icons8-wallet-64.png" style="max-width: fit-content;">
-						</div>
-						<div class="card-body text-center">
-							<h5 class="card-title">@account.Name</h5>
-							<p class="card-text">@account.Balance @account.CurrencyName</p>
-							<a asp-controller="Account" asp-action="Details" asp-route-id="@account.Id" class="btn btn-primary">
-								Details
-							</a>
-						</div>
-					</div>
-				</div>
-			}
+			@await Component.InvokeAsync("AccountCardList", new { Model.Accounts, controller = "Account", action = "Details" })
 		</div>
 		<hr />
 		<!--Date Filter Form-->
