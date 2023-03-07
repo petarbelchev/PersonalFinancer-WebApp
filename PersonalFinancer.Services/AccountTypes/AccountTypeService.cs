@@ -1,23 +1,28 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.AccountTypes.Models;
-
-namespace PersonalFinancer.Services.AccountTypes
+﻿namespace PersonalFinancer.Services.AccountTypes
 {
+	using AutoMapper;
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+
+	using Data;
+	using Data.Models;
+	using static Data.Constants.AccountTypeConstants;
+	using Services.AccountTypes.Models;
+
 	public class AccountTypeService : IAccountTypeService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
+		private readonly IMemoryCache memoryCache;
 
 		public AccountTypeService(
-			PersonalFinancerDbContext data, 
-			IMapper mapper)
+			PersonalFinancerDbContext data,
+			IMapper mapper,
+			IMemoryCache memoryCache)
 		{
 			this.data = data;
 			this.mapper = mapper;
+			this.memoryCache = memoryCache;
 		}
 
 		/// <summary>
@@ -25,10 +30,19 @@ namespace PersonalFinancer.Services.AccountTypes
 		/// </summary>
 		public async Task<IEnumerable<AccountTypeViewModel>> AccountTypesViewModel(string userId)
 		{
-			return await data.AccountTypes
-				.Where(a => (a.UserId == null || a.UserId == userId) && !a.IsDeleted)
-				.Select(a => mapper.Map<AccountTypeViewModel>(a))
-				.ToArrayAsync();
+			string cacheKey = CacheKeyValue + userId;
+
+			var accountTypes = await memoryCache.GetOrCreateAsync<IEnumerable<AccountTypeViewModel>>(cacheKey, async cacheEntry =>
+			{
+				cacheEntry.SetAbsoluteExpiration(TimeSpan.FromDays(3));
+
+				return await data.AccountTypes
+					.Where(a => (a.UserId == null || a.UserId == userId) && !a.IsDeleted)
+					.Select(a => mapper.Map<AccountTypeViewModel>(a))
+					.ToArrayAsync();
+			});
+
+			return accountTypes;
 		}
 
 		/// <summary>
@@ -63,7 +77,7 @@ namespace PersonalFinancer.Services.AccountTypes
 
 			await data.SaveChangesAsync();
 
-			//memoryCache.Remove(CacheKeyValue + userId);
+			memoryCache.Remove(CacheKeyValue + userId);
 
 			return mapper.Map<AccountTypeViewModel>(accountType);
 		}
@@ -91,7 +105,7 @@ namespace PersonalFinancer.Services.AccountTypes
 
 			await data.SaveChangesAsync();
 
-			//memoryCache.Remove(CacheKeyValue + userId);
+			memoryCache.Remove(CacheKeyValue + userId);
 		}
 	}
 }

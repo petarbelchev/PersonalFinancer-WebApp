@@ -29,6 +29,8 @@
 		{
 			public const int AccountTypeNameMaxLength = 50;
 			public const int AccountTypeNameMinLength = 2;
+
+			public const string CacheKeyValue = "accountTypes/";
 		}
 
 		public class CategoryConstants
@@ -54,6 +56,8 @@
 		{
 			public const int CurrencyNameMaxLength = 10;
 			public const int CurrencyNameMinLength = 2;
+
+			public const string CacheKeyValue = "currencies/";
 		}
 
 		public static class HostConstants

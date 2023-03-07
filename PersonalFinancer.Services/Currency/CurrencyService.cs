@@ -1,23 +1,29 @@
 ﻿namespace PersonalFinancer.Services.Currency
 {
-	using Microsoft.EntityFrameworkCore;
 	using AutoMapper;
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+	using System.Collections.Generic;
 
 	using Data;
-	using Models;
-	using PersonalFinancer.Data.Models;
+	using Data.Models;
+	using static Data.Constants.CurrencyConstants;
+	using Services.Currency.Models;
 
 	public class CurrencyService : ICurrencyService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
+		private readonly IMemoryCache memoryCache;
 
 		public CurrencyService(
 			PersonalFinancerDbContext data,
-			IMapper mapper)
+			IMapper mapper,
+			IMemoryCache memoryCache)
 		{
 			this.data = data;
 			this.mapper = mapper;
+			this.memoryCache = memoryCache;
 		}
 
 		/// <summary>
@@ -52,7 +58,7 @@
 
 			await data.SaveChangesAsync();
 
-			//memoryCache.Remove(CacheKeyValue + userId);
+			memoryCache.Remove(CacheKeyValue + userId);
 
 			return mapper.Map<CurrencyViewModel>(currency);
 		}
@@ -80,7 +86,7 @@
 
 			await data.SaveChangesAsync();
 
-			//memoryCache.Remove(CacheKeyValue + userId);
+			memoryCache.Remove(CacheKeyValue + userId);
 		}
 
 		/// <summary>
@@ -88,10 +94,19 @@
 		/// </summary>
 		public async Task<IEnumerable<CurrencyViewModel>> UserCurrencies(string userId)
 		{
-			return await data.Currencies
-				.Where(c => c.UserId == null || c.UserId == userId)
-				.Select(c => mapper.Map<CurrencyViewModel>(c))
-				.ToArrayAsync();
+			string cacheKey = CacheKeyValue + userId;
+
+			var currencies = await memoryCache.GetOrCreateAsync<IEnumerable<CurrencyViewModel>>(cacheKey, async cacheEntry =>
+			{
+				cacheEntry.SetAbsoluteExpiration(TimeSpan.FromDays(3));
+
+				return await data.Currencies
+					.Where(c => (c.UserId == null || c.UserId == userId) && !c.IsDeleted)
+					.Select(c => mapper.Map<CurrencyViewModel>(c))
+					.ToArrayAsync();
+			});
+
+			return currencies;
 		}
 	}
 }
