@@ -64,7 +64,7 @@
 				CategoryId = transactionFormModel.CategoryId,
 				TransactionType = transactionFormModel.TransactionType,
 				CreatedOn = transactionFormModel.CreatedOn,
-				Refference = transactionFormModel.Refference
+				Refference = transactionFormModel.Refference.Trim()
 			};
 
 			// TODO: Add Check if account have enough money for transaction?
@@ -193,7 +193,7 @@
 									newTransactionType);
 			}
 
-			transaction.Refference = editedTransaction.Refference;
+			transaction.Refference = editedTransaction.Refference.Trim();
 			transaction.AccountId = editedTransaction.AccountId;
 			transaction.CategoryId = editedTransaction.CategoryId;
 			transaction.Amount = editedTransaction.Amount;

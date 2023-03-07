@@ -111,7 +111,7 @@
 		{
 			Account newAccount = new Account()
 			{
-				Name = accountModel.Name,
+				Name = accountModel.Name.Trim(),
 				Balance = accountModel.Balance,
 				AccountTypeId = accountModel.AccountTypeId,
 				CurrencyId = accountModel.CurrencyId,

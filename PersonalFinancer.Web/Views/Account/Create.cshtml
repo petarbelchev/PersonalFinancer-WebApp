@@ -63,115 +63,33 @@
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
+	<script src="/js/createDeleteBtns.js"></script>
 
 	<script>
 		const createAccountTypeBtn = document.getElementById('createAccountTypeBtn');
 		const deleteAccountTypeBtn = document.getElementById('deleteAccountTypeBtn');
+		const accountTypesField = document.getElementById('accountTypesField');
+		const accountTypesApi = '@ApiAccountTypesUrl';
+		const newAccountTypeDiv = document.getElementById('newAccountTypeDiv');
+		const inputAccountTypeField = document.getElementById('newAccountTypeField');
+
 		const createCurrencyBtn = document.getElementById('createCurrencyBtn');
 		const deleteCurrencyBtn = document.getElementById('deleteCurrencyBtn');
-
-		const accountTypesField = document.getElementById('accountTypesField');
 		const currenciesField = document.getElementById('currenciesField');
+		const currenciesApi = '@ApiCurrencyUrl';
+		const newCurrencyDiv = document.getElementById('newCurrencyDiv');
+		const inputCurrencyField = document.getElementById('newCurrencyField');
 
-		function eventHandler() {
-			createAccountTypeBtn.addEventListener('click', async () => {
-				let newAccountTypeDiv = document.getElementById('newAccountTypeDiv');
-				let inputField = document.getElementById('newAccountTypeField');
+		const userId = '@User.Id()';
 
-				await create(newAccountTypeDiv, inputField, '@ApiAccountTypesUrl', accountTypesField, deleteAccountTypeBtn);
-			});
+		deleteBtnController(accountTypesField, deleteAccountTypeBtn, userId);
+		deleteBtnController(currenciesField, deleteCurrencyBtn, userId);
 
-			deleteAccountTypeBtn.addEventListener('click', async () => {
-				await del(accountTypesField, '@ApiAccountTypesUrl', deleteAccountTypeBtn);
-			});
-
-			createCurrencyBtn.addEventListener('click', async () => {
-				let newCurrencyDiv = document.getElementById('newCurrencyDiv');
-				let inputField = document.getElementById('newCurrencyField');
-
-				await create(newCurrencyDiv, inputField, '@ApiCurrencyUrl', currenciesField, deleteCurrencyBtn);
-			});
-
-			deleteCurrencyBtn.addEventListener('click', async () => {
-				await del(currenciesField, '@ApiCurrencyUrl', deleteCurrencyBtn);
-			});
-
-			accountTypesField.addEventListener('change', () => {
-				deleteBtnController(accountTypesField, deleteAccountTypeBtn);
-			});
-
-			currenciesField.addEventListener('change', () => {
-				deleteBtnController(currenciesField, deleteCurrencyBtn);
-			});
-		}
-
-		function deleteBtnController(dropdownField, deleteBtn) {
-			let ownerId = dropdownField.selectedOptions[0].attributes['userid'].value;
-
-			if (ownerId != 'notOwnedCategory' && ownerId == '@User.Id()') {
-				deleteBtn.style.display = 'block';
-			} else {
-				deleteBtn.style.display = 'none';
-			}
-		}
-
-		deleteBtnController(accountTypesField, deleteAccountTypeBtn);
-		deleteBtnController(currenciesField, deleteCurrencyBtn);
-
-		eventHandler();
-
-		async function create(div, inputField, url, dropdownField, deleteBtn) {
-
-			if (div.style.display == 'none') {
-				div.style.display = 'block';
-			} else {
-				let response = await fetch(url, {
-					method: 'POST',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ name: inputField.value })
-				});
-
-				if (response.status == 201) {
-					let data = await response.json();
-
-					let optionTag = document.createElement('option');
-					optionTag.value = data.id;
-					optionTag.setAttribute("userId", data.userId);
-					optionTag.setAttribute("id", data.id);
-					optionTag.textContent = data.name;
-
-					dropdownField.appendChild(optionTag);
-					dropdownField.value = data.id;
-
-					div.style.display = 'none';
-					inputField.value = '';
-					deleteBtn.style.display = 'block';
-				} else if (response.status == 400) {
-					let error = await response.json();
-					div.children[2].textContent = error;
-				}
-			}
-		}
-
-		async function del (dropdownField, url, deleteBtn) {
-			let id = dropdownField.value;
-			let ownerId = dropdownField.selectedOptions[0].attributes['userid'].value;
-
-			if (ownerId == 'notOwnedCategory' || ownerId != '@User.Id()') {
-				return alert("You can not delete this Account Type!")
-			}
-
-			let response = await fetch(url + id, { method: 'DELETE' });
-
-			if (response.status == 204) {
-				dropdownField.removeChild(document.getElementById(id));
-				deleteBtnController(dropdownField, deleteBtn);
-			} else {
-				alert('Somethink happend!')
-			}
-		}
+		eventSetter(createAccountTypeBtn, newAccountTypeDiv, accountTypesField, inputAccountTypeField, accountTypesApi, userId, deleteAccountTypeBtn);
+		eventSetter(createCurrencyBtn, newCurrencyDiv, currenciesField, inputCurrencyField, currenciesApi, userId, deleteCurrencyBtn);
+		eventSetter(deleteAccountTypeBtn, newAccountTypeDiv, accountTypesField, inputAccountTypeField, accountTypesApi, userId);
+		eventSetter(deleteCurrencyBtn, newCurrencyDiv, currenciesField, inputCurrencyField, currenciesApi, userId);
+		eventSetter(accountTypesField, newAccountTypeDiv, accountTypesField, inputAccountTypeField, accountTypesApi, userId, deleteAccountTypeBtn);
+		eventSetter(currenciesField, newCurrencyDiv, currenciesField, inputCurrencyField, currenciesApi, userId, deleteCurrencyBtn);
 	</script>
 }

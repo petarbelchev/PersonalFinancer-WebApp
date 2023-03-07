@@ -24,7 +24,7 @@
 					</div>
 					<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField" id="categoriesSelection">
 						<label asp-for="@Model.CategoryId" class="form-label"></label>
-						<select asp-for="@Model.CategoryId" class="form-select" onchange="deleteBtnController()" id="categoriesField">
+						<select asp-for="@Model.CategoryId" class="form-select" id="categoriesField">
 							@foreach (var category in @Model.Categories)
 							{
 								<option value="@category.Id" id="@category.Id" userId="@(category.UserId ?? "notOwnedCategory")">@category.Name</option>
@@ -35,8 +35,8 @@
 							<label class="form-label">Write New Category's name...</label>
 							<p id="errorMsg" style="color: red;"></p>
 						</div>
-						<a class="btn btn-primary" onclick="createCategory()">Create New Category</a>
-						<a class="btn btn-danger" onclick="deleteCategory()" style="display: none;" id="deleteBtn">Delete This Category</a>
+						<a class="btn btn-primary" id="createCategoryBtn">Create New Category</a>
+						<a class="btn btn-danger" id="deleteCategoryBtn" style="display: none;">Delete This Category</a>
 					</div>
 					<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 						<label asp-for="@Model.AccountId" class="form-label"></label>
@@ -78,80 +78,21 @@ else
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
 	<partial name="_DatePickerScriptPartial" />
+	<script src="/js/createDeleteBtns.js"></script>
 
 	<script>
-		const categoriesDropdown = document.getElementById('categoriesField');
-		const deleteBtn = document.getElementById('deleteBtn');
+		const createCategoryBtn = document.getElementById('createCategoryBtn');
+		const deleteCategoryBtn = document.getElementById('deleteCategoryBtn');
+		const newCategoryDiv = document.getElementById('newCategoryDiv');
+		const newCategoryField = document.getElementById('newCategoryField');
+		const categoriesField = document.getElementById('categoriesField');
+		const userId = '@User.Id()';
+		const categoriesApi = '@ApiCategoriesUrl';
 
-		async function createCategory() {
-			let newCategoryDiv = document.getElementById('newCategoryDiv');
+		deleteBtnController(categoriesField, deleteCategoryBtn, userId);
 
-			if (newCategoryDiv.style.display == 'none') {
-				newCategoryDiv.style.display = 'block';
-			} else {
-				let inputField = document.getElementById('newCategoryField');
-
-				let response = await fetch('@ApiCategoriesUrl', {
-					method: 'POST',
-					headers: {
-						'Accept': 'application/json',
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ name: inputField.value })
-				});
-
-				if (response.status == 201) {
-					let newCategory = await response.json();
-
-					let optionTag = document.createElement('option');
-					optionTag.value = newCategory.id;
-					optionTag.setAttribute("userId", newCategory.userId);
-					optionTag.setAttribute("id", newCategory.id);
-					optionTag.textContent = newCategory.name;
-
-					categoriesDropdown.appendChild(optionTag);
-					categoriesDropdown.value = newCategory.id;
-
-					newCategoryDiv.style.display = 'none';
-					inputField.value = '';
-					deleteBtn.style.display = 'block';
-				} else if (response.status == 400) {
-					let error = await response.json();
-					document.getElementById('errorMsg').textContent = error;
-				}
-			}
-		}
-
-		function deleteBtnController() {
-			let categoryOwnerId = categoriesDropdown.selectedOptions[0].attributes['userid'].value;
-
-			if (categoryOwnerId != 'notOwnedCategory' && categoryOwnerId == "@User.Id()") {
-				deleteBtn.style.display = 'block';
-			} else {
-				deleteBtn.style.display = 'none';
-			}
-		}
-
-		deleteBtnController();
-
-		async function deleteCategory() {
-			let categoryId = categoriesDropdown.value;
-			let categoryOwnerId = categoriesDropdown.selectedOptions[0].attributes['userid'].value;
-
-			if (categoryOwnerId == 'notOwnedCategory' || categoryOwnerId != "@User.Id()") {
-				return alert("You can not delete this category!")
-			}
-
-			let url = '@(ApiCategoriesUrl)' + categoryId;
-
-			let response = await fetch(url, { method: 'DELETE' });
-
-			if (response.status == 204) {
-				categoriesDropdown.removeChild(document.getElementById(categoryId));
-				deleteBtnController();
-			} else {
-				alert('Somethink happend!')
-			}
-		}
+		eventSetter(createCategoryBtn, newCategoryDiv, categoriesField, newCategoryField, categoriesApi, userId, deleteCategoryBtn);
+		eventSetter(deleteCategoryBtn, newCategoryDiv, categoriesField, newCategoryField, categoriesApi, userId);
+		eventSetter(categoriesField, newCategoryDiv, categoriesField, newCategoryField, categoriesApi, userId, deleteCategoryBtn);
 	</script>
 }
