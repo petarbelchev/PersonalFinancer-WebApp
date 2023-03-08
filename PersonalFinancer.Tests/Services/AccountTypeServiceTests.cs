@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.AccountTypes;
 using PersonalFinancer.Services.AccountTypes.Models;
 
 namespace PersonalFinancer.Tests.Services
 {
+	[TestFixture]
 	internal class AccountTypeServiceTests : UnitTestsBase
 	{
 		private IAccountTypeService accountTypeService;
@@ -120,6 +121,17 @@ namespace PersonalFinancer.Tests.Services
 			//Act & Assert
 			Assert.That(async () => await accountTypeService.CreateAccountType(this.User1.Id, this.AccountType1.Name),
 				Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Account Type with the same name exist!"));
+		}
+
+		[Test]
+		[TestCase("A")]
+		[TestCase("NameWith16Chars!")]
+		public void CreateAccountType_ShouldThrowException_WithInvalidName(string accountTypeName)
+		{
+			//Act & Assert
+			Assert.That(async () => await accountTypeService.CreateAccountType(this.User1.Id, accountTypeName),
+				Throws.TypeOf<InvalidOperationException>().With.Message
+					.EqualTo("Account Type name must be between 2 and 15 characters long."));
 		}
 
 		[Test]

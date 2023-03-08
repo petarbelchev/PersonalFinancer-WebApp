@@ -1,17 +1,17 @@
-﻿namespace PersonalFinancer.Tests.Services
+﻿using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
+
+using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Transactions;
+
+namespace PersonalFinancer.Tests.Services
 {
-	using AutoMapper.QueryableExtensions;
-	using Microsoft.EntityFrameworkCore;
-	using NUnit.Framework;
-
-    using PersonalFinancer.Data.Enums;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.Category;
-    using PersonalFinancer.Services.Transactions;
-
-    [TestFixture]
+	[TestFixture]
 	class AccountServiceTests : UnitTestsBase
 	{
 		private IAccountService accountService;
@@ -26,7 +26,7 @@
 			this.accountService = new AccountService(this.data, this.mapper, this.transactionsService, this.categoryService, this.memoryCache);
 		}
 
-		
+
 		[Test]
 		public void AccountsCount_ShouldReturnAccountsCount()
 		{
@@ -57,11 +57,11 @@
 			Assert.That(actualAccounts.Count(), Is.EqualTo(expectedAccounts.Count));
 			for (int i = 0; i < expectedAccounts.Count; i++)
 			{
-				Assert.That(actualAccounts.ElementAt(i).Id, 
+				Assert.That(actualAccounts.ElementAt(i).Id,
 					Is.EqualTo(expectedAccounts.ElementAt(i).Id));
-				Assert.That(actualAccounts.ElementAt(i).Name, 
+				Assert.That(actualAccounts.ElementAt(i).Name,
 					Is.EqualTo(expectedAccounts.ElementAt(i).Name));
-				Assert.That(actualAccounts.ElementAt(i).Balance, 
+				Assert.That(actualAccounts.ElementAt(i).Balance,
 					Is.EqualTo(expectedAccounts.ElementAt(i).Balance));
 			}
 		}
@@ -377,7 +377,7 @@
 				Throws.TypeOf<ArgumentNullException>().With.Property("ParamName")
 					.EqualTo("Account does not exist."));
 		}
-				
+
 		[Test]
 		public async Task DeleteAccountViewModel_ShouldReturnCorrectViewModel_WithValidId()
 		{
@@ -495,11 +495,11 @@
 			Assert.That(actual.Count, Is.EqualTo(expected.Count));
 			for (int i = 0; i < expected.Count; i++)
 			{
-				Assert.That(actual.ElementAt(i).Key, 
+				Assert.That(actual.ElementAt(i).Key,
 					Is.EqualTo(expected.ElementAt(i).Key));
-				Assert.That(actual.ElementAt(i).Value.Income, 
+				Assert.That(actual.ElementAt(i).Value.Income,
 					Is.EqualTo(expected.ElementAt(i).Value.Income));
-				Assert.That(actual.ElementAt(i).Value.Expence, 
+				Assert.That(actual.ElementAt(i).Value.Expence,
 					Is.EqualTo(expected.ElementAt(i).Value.Expence));
 			}
 		}

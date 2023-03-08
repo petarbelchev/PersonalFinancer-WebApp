@@ -1,12 +1,12 @@
-﻿namespace PersonalFinancer.Tests.Services
+﻿using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
+
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Currencies;
+using PersonalFinancer.Services.Currencies.Models;
+
+namespace PersonalFinancer.Tests.Services
 {
-	using Microsoft.EntityFrameworkCore;
-	using NUnit.Framework;
-
-	using PersonalFinancer.Data.Models;
-	using PersonalFinancer.Services.Currency;
-	using PersonalFinancer.Services.Currency.Models;
-
 	[TestFixture]
 	class CurrencyServiceTests : UnitTestsBase
 	{
@@ -70,7 +70,40 @@
 			Assert.That(data.Currencies.Count(c => c.Name == "NEW2"), Is.EqualTo(2));
 			Assert.That(actualCurrencies, Is.EqualTo(currenciesBefore + 1));
 		}
-		
+
+		[Test]
+		public async Task CreateCurrency_ShouldRecreateDeletedBeforeCurrency_WithValidParams()
+		{
+			//Arrange
+			var deletedCurrency = new Currency
+			{
+				Name = "DeletedCurrency",
+				UserId = this.User1.Id,
+				IsDeleted = true
+			};
+			data.Currencies.Add(deletedCurrency);
+			await data.SaveChangesAsync();
+			int countBefore = data.Currencies.Count();
+
+			//Assert
+			Assert.That(async () =>
+			{
+				var deletedCurr = await data.Currencies.FindAsync(deletedCurrency.Id);
+				Assert.That(deletedCurr, Is.Not.Null);
+				return deletedCurr.IsDeleted;
+			}, Is.True);
+
+			//Act
+			var newCurrency = await currencyService.CreateCurrency(this.User1.Id, deletedCurrency.Name);
+			int countAfter = data.Currencies.Count();
+
+			//Assert
+			Assert.That(newCurrency, Is.Not.Null);
+			Assert.That(countAfter, Is.EqualTo(countBefore));
+			Assert.That(newCurrency.UserId, Is.EqualTo(this.User1.Id));
+			Assert.That(newCurrency.Name, Is.EqualTo(deletedCurrency.Name));
+		}
+
 		[Test]
 		public void CreateCurrency_ShouldThrowException_WithExistingCurrency()
 		{
@@ -78,6 +111,17 @@
 			Assert.That(async () => await currencyService.CreateCurrency(this.User1.Id, this.Currency1.Name),
 				Throws.TypeOf<InvalidOperationException>()
 					.With.Message.EqualTo("Currency with the same name exist!"));
+		}
+
+		[Test]
+		[TestCase("A")]
+		[TestCase("NameWith11!")]
+		public void CreateCurrency_ShouldThrowException_WithInvalidName(string currencyName)
+		{
+			//Act & Assert
+			Assert.That(async () => await currencyService.CreateCurrency(this.User1.Id, currencyName),
+				Throws.TypeOf<InvalidOperationException>().With.Message
+					.EqualTo("Currency name must be between 2 and 10 characters long."));
 		}
 
 		[Test]
@@ -129,7 +173,7 @@
 		{
 			//Arrange
 			var expectedCategories = this.data.Currencies
-				.Where(c => 
+				.Where(c =>
 					(c.UserId == null || c.UserId == this.User1.Id)
 					&& !c.IsDeleted)
 				.Select(c => this.mapper.Map<CurrencyViewModel>(c))

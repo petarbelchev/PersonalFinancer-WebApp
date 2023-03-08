@@ -1,7 +1,7 @@
-﻿namespace PersonalFinancer.Services.Category
-{
-	using Models;
+﻿using PersonalFinancer.Services.Categories.Models;
 
+namespace PersonalFinancer.Services.Categories
+{
 	public interface ICategoryService
 	{
 		/// <summary>
@@ -21,10 +21,10 @@
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>
 		Task<Guid> CategoryIdByName(string categoryName);
-		
+
 		/// <summary>
 		/// Creates new Category with given Name. Returns View Model with Id, Name and User Id.
-		/// If try to create Category with name that other category have, throws exception.
+		/// If try to create Category with name that other category have, or name is invalid, throws exception.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<CategoryViewModel> CreateCategory(string userId, string categoryName);

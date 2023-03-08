@@ -1,8 +1,8 @@
-﻿namespace PersonalFinancer.Services.User
-{
-	using Models;
-	using Accounts.Models;
+﻿using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.User.Models;
 
+namespace PersonalFinancer.Services.User
+{
 	public interface IUserService
 	{
 		/// <summary>

@@ -1,15 +1,15 @@
-﻿namespace PersonalFinancer.Web.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.AccountTypes;
+using PersonalFinancer.Services.Currencies;
+using PersonalFinancer.Web.Infrastructure;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-
-	using Infrastructure;
-	using static Data.Constants.RoleConstants;
-	using Services.Accounts;
-	using Services.Accounts.Models;
-	using Services.Currency;
-	using Services.AccountTypes;
-
 	/// <summary>
 	/// Account Controller takes care of everything related to Accounts.
 	/// </summary>

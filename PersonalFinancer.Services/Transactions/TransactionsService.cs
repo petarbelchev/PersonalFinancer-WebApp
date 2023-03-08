@@ -1,14 +1,14 @@
-﻿namespace PersonalFinancer.Services.Transactions
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+
+using PersonalFinancer.Data;
+using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Transactions.Models;
+
+namespace PersonalFinancer.Services.Transactions
 {
-	using AutoMapper;
-	using AutoMapper.QueryableExtensions;
-	using Microsoft.EntityFrameworkCore;
-
-	using Models;
-	using Data;
-	using Data.Enums;
-	using Data.Models;
-
 	public class TransactionsService : ITransactionsService
 	{
 		private PersonalFinancerDbContext data;
@@ -164,7 +164,7 @@
 
 			return transaction;
 		}
-		
+
 		/// <summary>
 		/// Edits a Transaction and change account's balance if it's nessesery.
 		/// </summary>
@@ -238,6 +238,6 @@
 				.Take(5)
 				.ProjectTo<TransactionShortViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
-		}	
+		}
 	}
 }

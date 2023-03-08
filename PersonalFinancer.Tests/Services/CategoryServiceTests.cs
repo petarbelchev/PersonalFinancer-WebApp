@@ -1,12 +1,12 @@
-﻿namespace PersonalFinancer.Tests.Services
+﻿using NUnit.Framework;
+
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Categories.Models;
+using static PersonalFinancer.Data.Constants.CategoryConstants;
+
+namespace PersonalFinancer.Tests.Services
 {
-	using NUnit.Framework;
-
-	using Data.Models;
-	using static Data.Constants.CategoryConstants;
-	using PersonalFinancer.Services.Category;
-	using PersonalFinancer.Services.Category.Models;
-
 	[TestFixture]
 	class CategoryServiceTests : UnitTestsBase
 	{
@@ -45,7 +45,7 @@
 		public void DeleteCategory_ShouldThrowException_WithInvalidCategoryId()
 		{
 			//Act & Assert
-			Assert.That(async () =>	await categoryService.DeleteCategory(Guid.NewGuid(), this.User1.Id),
+			Assert.That(async () => await categoryService.DeleteCategory(Guid.NewGuid(), this.User1.Id),
 				Throws.TypeOf<ArgumentNullException>().With.Property("ParamName")
 					.EqualTo("Category does not exist."));
 		}
@@ -64,7 +64,7 @@
 			data.SaveChanges();
 
 			//Act & Assert
-			Assert.That(async () =>	await categoryService.DeleteCategory(category.Id, this.User2.Id),
+			Assert.That(async () => await categoryService.DeleteCategory(category.Id, this.User2.Id),
 				Throws.TypeOf<InvalidOperationException>().With.Message
 					.EqualTo("You can't delete someone else category."));
 		}
@@ -98,7 +98,7 @@
 		{
 			//Arrange
 			string newCategoryName = "NewCategory";
-			
+
 			//Act
 			CategoryViewModel newCategory = await categoryService
 				.CreateCategory(this.User1.Id, newCategoryName);
@@ -115,6 +115,17 @@
 			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, this.Category5.Name),
 				Throws.TypeOf<InvalidOperationException>().With.Message
 					.EqualTo("Category with the same name exist!"));
+		}
+
+		[Test]
+		[TestCase("A")]
+		[TestCase("NameWith26CharactersLong!!")]
+		public void CreateAccountType_ShouldThrowException_WithInvalidName(string categoryName)
+		{
+			//Act & Assert
+			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, categoryName),
+				Throws.TypeOf<InvalidOperationException>().With.Message
+					.EqualTo("Category name must be between 2 and 25 characters long."));
 		}
 
 		[Test]
@@ -171,15 +182,15 @@
 		{
 			//Arrange: Get first user's categories where the user has custom category
 			List<CategoryViewModel> expectedFirstUserCategories = data.Categories
-				.Where(c => 
+				.Where(c =>
 					c.Name != CategoryInitialBalanceName && !c.IsDeleted &&
 					(c.UserId == null || c.UserId == this.User1.Id))
 				.Select(c => mapper.Map<CategoryViewModel>(c))
 				.ToList();
-			
+
 			//Arrange: Get second user's categories where the user hasn't custom categories
 			List<CategoryViewModel> expectedSecondUserCategories = data.Categories
-				.Where(c =>  
+				.Where(c =>
 					c.Name != CategoryInitialBalanceName && !c.IsDeleted &&
 					(c.UserId == null || c.UserId == this.User2.Id))
 				.Select(c => mapper.Map<CategoryViewModel>(c))
@@ -193,27 +204,27 @@
 				.UserCategories(this.User2.Id);
 
 			//Assert
-			Assert.That(actualFirstUserCategories, 
+			Assert.That(actualFirstUserCategories,
 				Is.Not.Null);
 
-			Assert.That(actualFirstUserCategories.Count(), 
+			Assert.That(actualFirstUserCategories.Count(),
 				Is.EqualTo(expectedFirstUserCategories.Count));
 
 			for (int i = 0; i < actualFirstUserCategories.Count(); i++)
 			{
-				Assert.That(actualFirstUserCategories.ElementAt(i).Id, 
+				Assert.That(actualFirstUserCategories.ElementAt(i).Id,
 					Is.EqualTo(expectedFirstUserCategories.ElementAt(i).Id));
 			}
 
-			Assert.That(actualSecondUserCategories, 
+			Assert.That(actualSecondUserCategories,
 				Is.Not.Null);
 
-			Assert.That(actualSecondUserCategories.Count(), 
+			Assert.That(actualSecondUserCategories.Count(),
 				Is.EqualTo(expectedSecondUserCategories.Count));
 
 			for (int i = 0; i < actualSecondUserCategories.Count(); i++)
 			{
-				Assert.That(actualSecondUserCategories.ElementAt(i).Id, 
+				Assert.That(actualSecondUserCategories.ElementAt(i).Id,
 					Is.EqualTo(expectedSecondUserCategories.ElementAt(i).Id));
 			}
 		}

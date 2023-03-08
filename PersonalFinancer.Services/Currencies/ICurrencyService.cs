@@ -1,11 +1,12 @@
-﻿namespace PersonalFinancer.Services.Currency
-{
-	using Models;
+﻿using PersonalFinancer.Services.Currencies.Models;
 
+namespace PersonalFinancer.Services.Currencies
+{
 	public interface ICurrencyService
 	{
 		/// <summary>
-		/// Creates new Currency with given Name. If you try to create a new Currency with name that other Currency have, throws exception.
+		/// Creates new Currency with given Name. 
+		/// If you try to create a new Currency with name that other Currency have, or name length is invalid, throws exception.
 		/// </summary>
 		/// <returns>View Model with Id, Name and User Id.</returns>
 		/// <exception cref="InvalidOperationException"></exception>

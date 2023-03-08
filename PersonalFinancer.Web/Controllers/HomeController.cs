@@ -1,11 +1,11 @@
-﻿namespace PersonalFinancer.Web.Controllers
+﻿using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Web.Infrastructure;
+
+namespace PersonalFinancer.Web.Controllers
 {
-	using Microsoft.AspNetCore.Mvc;
-
-	using Infrastructure;
-	using Services.Accounts.Models;
-	using Services.User;
-
 	/// <summary>
 	/// Home Controller takes care of everything related to Dashboard page.
 	/// </summary>
@@ -38,7 +38,7 @@
 				};
 
 				await userService.GetUserDashboard(User.Id(), model);
-				
+
 				return View(model);
 			}
 

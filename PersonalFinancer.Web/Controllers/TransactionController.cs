@@ -1,18 +1,18 @@
-﻿namespace PersonalFinancer.Web.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Categories.Models;
+using PersonalFinancer.Services.Transactions;
+using PersonalFinancer.Services.Transactions.Models;
+using PersonalFinancer.Web.Infrastructure;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-
-	using Data.Enums;
-	using Infrastructure;
-	using Services.Accounts;
-	using Services.Accounts.Models;
-	using Services.Category;
-	using Services.Category.Models;
-	using Services.Transactions;
-	using Services.Transactions.Models;
-	using static Data.Constants.RoleConstants;
-
 	/// <summary>
 	/// Transaction Controller takes care of everything related to Transactions.
 	/// </summary>

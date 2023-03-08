@@ -1,16 +1,16 @@
-﻿namespace PersonalFinancer.Services.User
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+
+using PersonalFinancer.Data;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Transactions;
+using PersonalFinancer.Services.User.Models;
+
+namespace PersonalFinancer.Services.User
 {
-	using Microsoft.EntityFrameworkCore;
-	using AutoMapper;
-	using AutoMapper.QueryableExtensions;
-
-	using Models;
-	using Accounts;
-	using Accounts.Models;
-	using Data;
-	using Data.Models;
-	using Transactions;
-
 	public class UserService : IUserService
 	{
 		private readonly PersonalFinancerDbContext data;
@@ -19,9 +19,9 @@
 		private readonly IMapper mapper;
 
 		public UserService(
-			PersonalFinancerDbContext data, 
-			IAccountService accountService, 
-			ITransactionsService transactionsService, 
+			PersonalFinancerDbContext data,
+			IAccountService accountService,
+			ITransactionsService transactionsService,
 			IMapper mapper)
 		{
 			this.data = data;

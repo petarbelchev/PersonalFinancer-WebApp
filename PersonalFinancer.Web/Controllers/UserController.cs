@@ -1,13 +1,13 @@
-﻿namespace PersonalFinancer.Web.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Web.Models.Account;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Identity;
-	using Microsoft.AspNetCore.Mvc;
-
-	using Data.Models;
-	using static Data.Constants.RoleConstants;
-	using Models.Account;
-
 	/// <summary>
 	/// User Controller takes care of everything related to Users.
 	/// </summary>

@@ -1,15 +1,14 @@
-﻿namespace PersonalFinancer.Services.Currency
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+
+using PersonalFinancer.Data;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Currencies.Models;
+using static PersonalFinancer.Data.Constants.CurrencyConstants;
+
+namespace PersonalFinancer.Services.Currencies
 {
-	using AutoMapper;
-	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.Caching.Memory;
-	using System.Collections.Generic;
-
-	using Data;
-	using Data.Models;
-	using static Data.Constants.CurrencyConstants;
-	using Services.Currency.Models;
-
 	public class CurrencyService : ICurrencyService
 	{
 		private readonly PersonalFinancerDbContext data;
@@ -27,15 +26,16 @@
 		}
 
 		/// <summary>
-		/// Creates new Currency with given Name. If you try to create a new Currency with name that other Currency have, throws exception.
+		/// Creates new Currency with given Name. 
+		/// If you try to create a new Currency with name that other Currency have, or name length is invalid, throws exception.
 		/// </summary>
 		/// <returns>View Model with Id, Name and User Id.</returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<CurrencyViewModel> CreateCurrency(string userId, string currencyName)
 		{
 			Currency? currency = await data.Currencies
-				.FirstOrDefaultAsync(c => 
-					c.Name == currencyName 
+				.FirstOrDefaultAsync(c =>
+					c.Name == currencyName
 					&& (c.UserId == userId || c.UserId == null));
 
 			if (currency != null)
@@ -49,6 +49,11 @@
 			}
 			else
 			{
+				if (currencyName.Length < CurrencyNameMinLength || currencyName.Length > CurrencyNameMaxLength)
+				{
+					throw new InvalidOperationException($"Currency name must be between {CurrencyNameMinLength} and {CurrencyNameMaxLength} characters long.");
+				}
+
 				currency = new Currency
 				{
 					Name = currencyName,

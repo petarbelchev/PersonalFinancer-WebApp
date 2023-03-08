@@ -1,12 +1,11 @@
-﻿namespace PersonalFinancer.Web.Controllers.Api
+﻿using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Services.AccountTypes;
+using PersonalFinancer.Services.AccountTypes.Models;
+using PersonalFinancer.Web.Infrastructure;
+
+namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Mvc;
-	
-	using Infrastructure;
-	using Services.AccountTypes;
-	using Services.AccountTypes.Models;
-	using static Data.Constants.AccountTypeConstants;
-	
 	[Route("api/accounttypes")]
 	[ApiController]
 	public class AccountTypeApiController : ControllerBase
@@ -26,11 +25,6 @@
 				return Unauthorized();
 			}
 
-			if (model.Name.Length < AccountTypeNameMinLength || model.Name.Length > AccountTypeNameMaxLength)
-			{
-				return BadRequest($"Account Type name must be between {AccountTypeNameMinLength} and {AccountTypeNameMaxLength} characters long.");
-			}
-
 			try
 			{
 				AccountTypeViewModel accountType = await accountTypeService
@@ -38,9 +32,9 @@
 
 				return Created(string.Empty, accountType);
 			}
-			catch (InvalidOperationException)
+			catch (InvalidOperationException ex)
 			{
-				return BadRequest("Account Type with the same name exist. Try another one!");
+				return BadRequest(ex.Message);
 			}
 		}
 

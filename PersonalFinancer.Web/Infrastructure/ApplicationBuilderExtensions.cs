@@ -1,10 +1,10 @@
-﻿namespace PersonalFinancer.Web.Infrastructure
+﻿using Microsoft.AspNetCore.Identity;
+
+using PersonalFinancer.Data.Models;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Infrastructure
 {
-	using Microsoft.AspNetCore.Identity;
-
-	using Data.Models;
-	using static Data.Constants.RoleConstants;
-
 	public static class ApplicationBuilderExtensions
 	{
 		public static IApplicationBuilder SeedUsers(this IApplicationBuilder app)

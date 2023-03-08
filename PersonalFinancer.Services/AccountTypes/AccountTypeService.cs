@@ -1,14 +1,14 @@
-﻿namespace PersonalFinancer.Services.AccountTypes
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+
+using PersonalFinancer.Data;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.AccountTypes.Models;
+using static PersonalFinancer.Data.Constants.AccountTypeConstants;
+
+namespace PersonalFinancer.Services.AccountTypes
 {
-	using AutoMapper;
-	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.Caching.Memory;
-
-	using Data;
-	using Data.Models;
-	using static Data.Constants.AccountTypeConstants;
-	using Services.AccountTypes.Models;
-
 	public class AccountTypeService : IAccountTypeService
 	{
 		private readonly PersonalFinancerDbContext data;
@@ -54,8 +54,8 @@
 		public async Task<AccountTypeViewModel> CreateAccountType(string userId, string accountTypeName)
 		{
 			AccountType? accountType = await data.AccountTypes
-				.FirstOrDefaultAsync(c => 
-					c.Name == accountTypeName 
+				.FirstOrDefaultAsync(c =>
+					c.Name == accountTypeName
 					&& (c.UserId == userId || c.UserId == null));
 
 			if (accountType != null)
@@ -69,6 +69,11 @@
 			}
 			else
 			{
+				if (accountTypeName.Length < AccountTypeNameMinLength || accountTypeName.Length > AccountTypeNameMaxLength)
+				{
+					throw new InvalidOperationException($"Account Type name must be between {AccountTypeNameMinLength} and {AccountTypeNameMaxLength} characters long.");
+				}
+
 				accountType = new AccountType
 				{
 					Name = accountTypeName,

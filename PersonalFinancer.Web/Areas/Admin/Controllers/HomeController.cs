@@ -1,15 +1,15 @@
-﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Transactions;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Admin;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-
-	using Infrastructure;
-	using Models.Admin;
-	using Services.Accounts;
-	using Services.Transactions;
-	using Services.User;
-	using static Data.Constants.RoleConstants;
-
 	[Area("Admin")]
 	[Authorize(Roles = AdminRoleName)]
 	public class HomeController : Controller

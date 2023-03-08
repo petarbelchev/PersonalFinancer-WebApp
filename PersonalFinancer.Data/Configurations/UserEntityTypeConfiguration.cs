@@ -1,11 +1,11 @@
-﻿namespace PersonalFinancer.Data.Configurations
-{
-	using Microsoft.AspNetCore.Identity;
-	using Microsoft.EntityFrameworkCore;
-	using Microsoft.EntityFrameworkCore.Metadata.Builders;
-	
-	using Models;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using PersonalFinancer.Data.Models;
+
+namespace PersonalFinancer.Data.Configurations
+{
 	internal class UserEntityTypeConfiguration : IEntityTypeConfiguration<ApplicationUser>
 	{
 		public void Configure(EntityTypeBuilder<ApplicationUser> builder)

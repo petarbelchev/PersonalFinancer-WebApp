@@ -1,15 +1,15 @@
-﻿namespace PersonalFinancer.Services.Infrastructure
+﻿using AutoMapper;
+
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.AccountTypes.Models;
+using PersonalFinancer.Services.Categories.Models;
+using PersonalFinancer.Services.Currencies.Models;
+using PersonalFinancer.Services.Transactions.Models;
+using PersonalFinancer.Services.User.Models;
+
+namespace PersonalFinancer.Services.Infrastructure
 {
-    using AutoMapper;
-
-    using Accounts.Models;
-    using AccountTypes.Models;
-    using Category.Models;
-	using Currency.Models;
-    using Data.Models;
-    using Transactions.Models;
-    using User.Models;
-
 	public class ServiceMappingProfile : Profile
 	{
 		public ServiceMappingProfile()
@@ -26,7 +26,7 @@
 			CreateMap<Account, AccountCardViewModel>();
 
 			CreateMap<AccountType, AccountTypeViewModel>();
-			
+
 			CreateMap<Transaction, AccountDetailsTransactionViewModel>();
 			CreateMap<Transaction, TransactionShortViewModel>()
 				.ForMember(m => m.AccountName, mf => mf

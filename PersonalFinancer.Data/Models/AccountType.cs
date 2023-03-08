@@ -1,10 +1,10 @@
-﻿namespace PersonalFinancer.Data.Models
-{
-	using System.ComponentModel.DataAnnotations;
-	using System.ComponentModel.DataAnnotations.Schema;
-	
-	using static Data.Constants.AccountTypeConstants;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
+using static PersonalFinancer.Data.Constants.AccountTypeConstants;
+
+namespace PersonalFinancer.Data.Models
+{
 	public class AccountType
 	{
 		[Key]

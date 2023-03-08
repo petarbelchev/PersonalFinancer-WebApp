@@ -1,11 +1,11 @@
-﻿namespace PersonalFinancer.Data
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+using PersonalFinancer.Data.Configurations;
+using PersonalFinancer.Data.Models;
+
+namespace PersonalFinancer.Data
 {
-	using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-	using Microsoft.EntityFrameworkCore;
-
-	using Configurations;
-	using Models;
-
 	public class PersonalFinancerDbContext : IdentityDbContext<ApplicationUser>
 	{
 		private bool seed;
@@ -44,12 +44,12 @@
 			builder.Entity<Account>()
 				.Property(a => a.Balance)
 				.HasColumnType("decimal")
-				.HasPrecision(18,2);
-			
+				.HasPrecision(18, 2);
+
 			builder.Entity<Transaction>()
 				.Property(a => a.Amount)
 				.HasColumnType("decimal")
-				.HasPrecision(18,2);
+				.HasPrecision(18, 2);
 
 			if (this.seed)
 			{

@@ -1,9 +1,9 @@
-﻿namespace PersonalFinancer.Web.Controllers.Api
+﻿using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Services.Transactions;
+
+namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Mvc;
-
-	using Services.Transactions;
-
 	[Route("api/transactions")]
 	[ApiController]
 	public class TransactionApiController : ControllerBase

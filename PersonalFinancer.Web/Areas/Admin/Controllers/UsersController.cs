@@ -1,14 +1,14 @@
-﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Services.User.Models;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-
-	using Services.Accounts;
-	using Services.Accounts.Models;
-	using Services.User;
-	using Services.User.Models;
-	using static Data.Constants.RoleConstants;
-
 	/// <summary>
 	/// Users Controller takes care of everything related to Admin's powers over users.
 	/// </summary>

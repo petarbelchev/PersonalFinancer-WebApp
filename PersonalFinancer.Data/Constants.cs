@@ -16,7 +16,7 @@
 
 		public class AccountConstants
 		{
-			public const int AccountNameMaxLength = 50;
+			public const int AccountNameMaxLength = 15;
 			public const int AccountNameMinLength = 2;
 
 			public const double AccountInitialBalanceMaxValue = 10_000_000;
@@ -27,7 +27,7 @@
 
 		public class AccountTypeConstants
 		{
-			public const int AccountTypeNameMaxLength = 50;
+			public const int AccountTypeNameMaxLength = 15;
 			public const int AccountTypeNameMinLength = 2;
 
 			public const string CacheKeyValue = "accountTypes/";
@@ -35,7 +35,7 @@
 
 		public class CategoryConstants
 		{
-			public const int CategoryNameMaxLength = 50;
+			public const int CategoryNameMaxLength = 25;
 			public const int CategoryNameMinLength = 2;
 
 			public const string CategoryInitialBalanceName = "Initial Balance";

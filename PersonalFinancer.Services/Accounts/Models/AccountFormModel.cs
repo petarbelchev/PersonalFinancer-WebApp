@@ -1,11 +1,11 @@
-﻿namespace PersonalFinancer.Services.Accounts.Models
-{
-	using System.ComponentModel.DataAnnotations;
-	
-	using AccountTypes.Models;
-	using Currency.Models;
-	using static Data.Constants.AccountConstants;
+﻿using System.ComponentModel.DataAnnotations;
 
+using PersonalFinancer.Services.AccountTypes.Models;
+using PersonalFinancer.Services.Currencies.Models;
+using static PersonalFinancer.Data.Constants.AccountConstants;
+
+namespace PersonalFinancer.Services.Accounts.Models
+{
 	public class AccountFormModel
 	{
 		[Required(ErrorMessage = "Account name is required.")]

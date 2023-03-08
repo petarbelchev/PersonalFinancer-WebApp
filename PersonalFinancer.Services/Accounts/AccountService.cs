@@ -1,20 +1,20 @@
-﻿namespace PersonalFinancer.Services.Accounts
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+
+using PersonalFinancer.Data;
+using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Transactions;
+using PersonalFinancer.Services.Transactions.Models;
+using static PersonalFinancer.Data.Constants;
+
+namespace PersonalFinancer.Services.Accounts
 {
-    using AutoMapper;
-    using AutoMapper.QueryableExtensions;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Caching.Memory;
-
-    using Models;
-    using Category;
-    using Transactions;
-    using Transactions.Models;
-    using Data;
-    using Data.Enums;
-    using Data.Models;
-    using static Data.Constants;
-
-    public class AccountService : IAccountService
+	public class AccountService : IAccountService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
@@ -164,7 +164,7 @@
 			}
 
 			await data.SaveChangesAsync();
-			
+
 			memoryCache.Remove(AccountConstants.CacheKeyValue + userId);
 		}
 

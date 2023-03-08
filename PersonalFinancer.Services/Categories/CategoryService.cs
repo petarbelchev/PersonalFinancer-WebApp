@@ -1,15 +1,14 @@
-﻿namespace PersonalFinancer.Services.Category
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+
+using PersonalFinancer.Data;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Categories.Models;
+using static PersonalFinancer.Data.Constants.CategoryConstants;
+
+namespace PersonalFinancer.Services.Categories
 {
-	using AutoMapper;
-	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.Caching.Memory;
-
-	using Models;
-	using Data;
-	using Data.Models;
-	using static Data.Constants.CategoryConstants;
-	using System.Collections.Generic;
-
 	public class CategoryService : ICategoryService
 	{
 		private readonly PersonalFinancerDbContext data;
@@ -78,7 +77,7 @@
 
 		/// <summary>
 		/// Creates new Category with given Name. Returns View Model with Id, Name and User Id.
-		/// If try to create Category with name that other category have, throws exception.
+		/// If try to create Category with name that other category have, or name is invalid, throws exception.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<CategoryViewModel> CreateCategory(string userId, string categoryName)
@@ -97,6 +96,11 @@
 			}
 			else
 			{
+				if (categoryName.Length < CategoryNameMinLength || categoryName.Length > CategoryNameMaxLength)
+				{
+					throw new InvalidOperationException($"Category name must be between {CategoryNameMinLength} and {CategoryNameMaxLength} characters long.");
+				}
+
 				category = new Category
 				{
 					Name = categoryName,

@@ -1,12 +1,12 @@
-﻿namespace PersonalFinancer.Data.Configurations
-{
-	using Microsoft.EntityFrameworkCore;
-	using Microsoft.EntityFrameworkCore.Metadata.Builders;
-	
-	using Enums;
-	using Models;
-	using static Constants.CategoryConstants;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Data.Models;
+using static PersonalFinancer.Data.Constants.CategoryConstants;
+
+namespace PersonalFinancer.Data.Configurations
+{
 	internal class TransactionEntityTypeConfiguration : IEntityTypeConfiguration<Transaction>
 	{
 		public void Configure(EntityTypeBuilder<Transaction> builder)

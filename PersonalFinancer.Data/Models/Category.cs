@@ -1,10 +1,10 @@
-﻿namespace PersonalFinancer.Data.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+using static PersonalFinancer.Data.Constants.CategoryConstants;
+
+namespace PersonalFinancer.Data.Models
 {
-	using System.ComponentModel.DataAnnotations;
-	using System.ComponentModel.DataAnnotations.Schema;
-
-	using static Data.Constants.CategoryConstants;
-
 	public class Category
 	{
 		[Key]

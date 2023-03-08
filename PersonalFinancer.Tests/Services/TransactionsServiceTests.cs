@@ -1,13 +1,14 @@
-﻿namespace PersonalFinancer.Tests.Services
+﻿using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
+
+using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Transactions;
+using PersonalFinancer.Services.Transactions.Models;
+
+namespace PersonalFinancer.Tests.Services
 {
-	using Microsoft.EntityFrameworkCore;
-	using NUnit.Framework;
-
-	using PersonalFinancer.Data.Enums;
-	using PersonalFinancer.Data.Models;
-	using PersonalFinancer.Services.Transactions;
-	using PersonalFinancer.Services.Transactions.Models;
-
+	[TestFixture]
 	internal class TransactionsServiceTests : UnitTestsBase
 	{
 		private ITransactionsService transactionService;
@@ -239,17 +240,17 @@
 			Assert.That(transactionFormModel.Transactions.Count(), Is.EqualTo(expectedTransactions.Count()));
 			for (int i = 0; i < expectedTransactions.Count(); i++)
 			{
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).Id, 
+				Assert.That(transactionFormModel.Transactions.ElementAt(i).Id,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Id));
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).AccountName, 
+				Assert.That(transactionFormModel.Transactions.ElementAt(i).AccountName,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Account.Name));
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).Amount, 
+				Assert.That(transactionFormModel.Transactions.ElementAt(i).Amount,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Amount));
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).CategoryName, 
+				Assert.That(transactionFormModel.Transactions.ElementAt(i).CategoryName,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Category.Name));
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).Refference, 
+				Assert.That(transactionFormModel.Transactions.ElementAt(i).Refference,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Refference));
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).TransactionType, 
+				Assert.That(transactionFormModel.Transactions.ElementAt(i).TransactionType,
 					Is.EqualTo(expectedTransactions.ElementAt(i).TransactionType.ToString()));
 			}
 		}
@@ -294,7 +295,7 @@
 				.Where(t => t.Id == transactionId)
 				.Select(t => mapper.Map<EditTransactionFormModel>(t))
 				.FirstAsync();
-			
+
 			//Act
 			transactionEditModel.TransactionType = TransactionType.Expense;
 			await transactionService.EditTransaction(transactionEditModel);

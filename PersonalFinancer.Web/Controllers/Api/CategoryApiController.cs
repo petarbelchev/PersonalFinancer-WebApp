@@ -1,12 +1,11 @@
-﻿namespace PersonalFinancer.Web.Controllers.Api
+﻿using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Categories.Models;
+using PersonalFinancer.Web.Infrastructure;
+
+namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Mvc;
-
-	using Infrastructure;
-	using static Data.Constants.CategoryConstants;
-	using Services.Category;
-	using Services.Category.Models;
-
 	[Route("api/categories")]
 	[ApiController]
 	public class CategoryApiController : ControllerBase
@@ -44,11 +43,6 @@
 				return Unauthorized();
 			}
 
-			if (category.Name.Length < CategoryNameMinLength || category.Name.Length > CategoryNameMaxLength)
-			{
-				return BadRequest($"Category name must be between {CategoryNameMinLength} and {CategoryNameMaxLength} characters long.");
-			}
-
 			try
 			{
 				CategoryViewModel newCategory = await categoryService
@@ -56,9 +50,9 @@
 
 				return Created(string.Empty, newCategory);
 			}
-			catch (InvalidOperationException)
+			catch (InvalidOperationException ex)
 			{
-				return BadRequest("Category with the same name exist. Try another one!");
+				return BadRequest(ex.Message);
 			}
 		}
 

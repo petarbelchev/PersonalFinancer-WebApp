@@ -1,8 +1,8 @@
-﻿namespace PersonalFinancer.Services.Accounts
-{
-    using Models;
+﻿using PersonalFinancer.Services.Accounts.Models;
 
-    public interface IAccountService
+namespace PersonalFinancer.Services.Accounts
+{
+	public interface IAccountService
 	{
 		/// <summary>
 		/// Returns count of all created accounts.
@@ -34,7 +34,7 @@
 		/// Returns new Account's id.
 		/// </summary>
 		Task<Guid> CreateAccount(string userId, AccountFormModel accountModel);
-				
+
 		/// <summary>
 		/// Delete an Account and give the option to delete all of the account's transactions.
 		/// </summary>

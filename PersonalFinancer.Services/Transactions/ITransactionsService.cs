@@ -1,9 +1,7 @@
-﻿namespace PersonalFinancer.Services.Transactions
-{
-	using Models;
-	using Data.Enums;
-	using Data.Models;
+﻿using PersonalFinancer.Services.Transactions.Models;
 
+namespace PersonalFinancer.Services.Transactions
+{
 	public interface ITransactionsService
 	{
 		/// <summary>
@@ -42,7 +40,7 @@
 		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
 		/// <exception cref="ArgumentException"></exception>
 		Task<AllTransactionsServiceModel> AllTransactionsViewModel(string userId, AllTransactionsServiceModel model);
-		
+
 		/// <summary>
 		/// Returns Transaction Short View Model with last five user's transactions for given period.
 		/// </summary>

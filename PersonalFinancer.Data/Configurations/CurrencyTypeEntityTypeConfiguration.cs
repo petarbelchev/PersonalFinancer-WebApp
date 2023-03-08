@@ -1,10 +1,10 @@
-﻿namespace PersonalFinancer.Data.Configurations
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using PersonalFinancer.Data.Models;
+
+namespace PersonalFinancer.Data.Configurations
 {
-	using Microsoft.EntityFrameworkCore;
-	using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-	using Data.Models;
-
 	internal class CurrencyTypeEntityTypeConfiguration : IEntityTypeConfiguration<Currency>
 	{
 		public void Configure(EntityTypeBuilder<Currency> builder)

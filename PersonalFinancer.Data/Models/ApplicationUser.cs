@@ -1,10 +1,10 @@
-﻿namespace PersonalFinancer.Data.Models
-{
-	using Microsoft.AspNetCore.Identity;
-	using System.ComponentModel.DataAnnotations;
-	
-	using static Data.Constants.UserConstants;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
+using static PersonalFinancer.Data.Constants.UserConstants;
+
+namespace PersonalFinancer.Data.Models
+{
 	public class ApplicationUser : IdentityUser
 	{
 		[MaxLength(UserFirstNameMaxLength, ErrorMessage = "First name max length must be {1} characters long.")]

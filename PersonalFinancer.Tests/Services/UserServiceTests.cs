@@ -1,18 +1,18 @@
-﻿namespace PersonalFinancer.Tests.Services
+﻿using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
+
+using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Transactions;
+using PersonalFinancer.Services.Transactions.Models;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Services.User.Models;
+
+namespace PersonalFinancer.Tests.Services
 {
-	using AutoMapper.QueryableExtensions;
-	using Microsoft.EntityFrameworkCore;
-	using NUnit.Framework;
-
-	using PersonalFinancer.Data.Enums;
-	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.Category;
-	using PersonalFinancer.Services.Transactions;
-	using PersonalFinancer.Services.Transactions.Models;
-	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Services.User.Models;
-
 	[TestFixture]
 	class UserServiceTests : UnitTestsBase
 	{

@@ -1,9 +1,9 @@
-﻿namespace PersonalFinancer.Web.ViewComponents
+﻿using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Services.Accounts.Models;
+
+namespace PersonalFinancer.Web.ViewComponents
 {
-	using Microsoft.AspNetCore.Mvc;
-
-	using Services.Accounts.Models;
-
 	public class AccountCardListViewComponent : ViewComponent
 	{
 		public async Task<IViewComponentResult> InvokeAsync(
