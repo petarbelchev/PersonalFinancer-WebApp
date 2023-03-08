@@ -375,5 +375,37 @@
 			Assert.That(transaction.Refference, Is.EqualTo(editTransactionModel.Refference));
 			Assert.That(transaction.CategoryId, Is.EqualTo(categoryIdBefore));
 		}
+
+		[Test]
+		public async Task LastFiveTransactions_ShouldReturnCorrectData_WithValidParams()
+		{
+			//Arrange
+			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
+			DateTime endDate = DateTime.UtcNow;
+
+			IEnumerable<TransactionShortViewModel> expected = await data.Transactions
+			.Where(t =>
+				t.Account.OwnerId == this.User1.Id &&
+				t.CreatedOn >= startDate &&
+				t.CreatedOn <= endDate)
+			.OrderByDescending(t => t.CreatedOn)
+			.Take(5)
+			.Select(t => mapper.Map<TransactionShortViewModel>(t))
+			.ToListAsync();
+
+			//Act
+			var actual = await transactionService.LastFiveTransactions(this.User1.Id, startDate, endDate);
+
+			//Assert
+			Assert.That(actual.Count(),
+			Is.EqualTo(expected.Count()));
+			for (int i = 0; i < actual.Count(); i++)
+			{
+				Assert.That(actual.ElementAt(i).Id,
+					Is.EqualTo(expected.ElementAt(i).Id));
+				Assert.That(actual.ElementAt(i).Amount,
+					Is.EqualTo(expected.ElementAt(i).Amount));
+			}
+		}
 	}
 }

@@ -34,13 +34,15 @@
 		public async Task<CurrencyViewModel> CreateCurrency(string userId, string currencyName)
 		{
 			Currency? currency = await data.Currencies
-				.FirstOrDefaultAsync(c => c.Name == currencyName && c.UserId == userId);
+				.FirstOrDefaultAsync(c => 
+					c.Name == currencyName 
+					&& (c.UserId == userId || c.UserId == null));
 
 			if (currency != null)
 			{
 				if (currency.IsDeleted == false)
 				{
-					throw new InvalidOperationException("Account Type with the same name exist!");
+					throw new InvalidOperationException("Currency with the same name exist!");
 				}
 
 				currency.IsDeleted = false;

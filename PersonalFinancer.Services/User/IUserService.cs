@@ -24,8 +24,10 @@
 		int UsersCount();
 
 		/// <summary>
-		/// Returns User Details View Model used for Admin User Details page
+		/// Returns User Details View Model used for Admin User Details page.
+		/// Throws Exception if the User does not exist.
 		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
 		Task<UserDetailsViewModel> UserDetails(string userId);
 
 		/// <summary>

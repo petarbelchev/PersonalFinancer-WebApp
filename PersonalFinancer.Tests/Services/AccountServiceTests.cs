@@ -1,7 +1,8 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-    using Microsoft.EntityFrameworkCore;
-    using NUnit.Framework;
+	using AutoMapper.QueryableExtensions;
+	using Microsoft.EntityFrameworkCore;
+	using NUnit.Framework;
 
     using PersonalFinancer.Data.Enums;
     using PersonalFinancer.Data.Models;
@@ -23,6 +24,46 @@
 			this.categoryService = new CategoryService(this.data, this.mapper, this.memoryCache);
 			this.transactionsService = new TransactionsService(this.data, this.mapper);
 			this.accountService = new AccountService(this.data, this.mapper, this.transactionsService, this.categoryService, this.memoryCache);
+		}
+
+		
+		[Test]
+		public void AccountsCount_ShouldReturnAccountsCount()
+		{
+			//Arrange
+			int expectedCount = data.Accounts.Count(a => !a.IsDeleted);
+
+			//Act
+			int actualCount = accountService.AccountsCount();
+
+			//Assert
+			Assert.That(actualCount, Is.EqualTo(expectedCount));
+		}
+
+		[Test]
+		public async Task AllAccountsCardViewModel_ShouldReturnUsersAccounts_WithValidId()
+		{
+			//Arrange
+			var expectedAccounts = await data.Accounts
+				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
+				.ProjectTo<AccountCardViewModel>(mapper.ConfigurationProvider)
+				.ToListAsync();
+
+			//Act
+			var actualAccounts = await accountService.AllAccountsCardViewModel(this.User1.Id);
+
+			//Assert
+			Assert.That(actualAccounts, Is.Not.Null);
+			Assert.That(actualAccounts.Count(), Is.EqualTo(expectedAccounts.Count));
+			for (int i = 0; i < expectedAccounts.Count; i++)
+			{
+				Assert.That(actualAccounts.ElementAt(i).Id, 
+					Is.EqualTo(expectedAccounts.ElementAt(i).Id));
+				Assert.That(actualAccounts.ElementAt(i).Name, 
+					Is.EqualTo(expectedAccounts.ElementAt(i).Name));
+				Assert.That(actualAccounts.ElementAt(i).Balance, 
+					Is.EqualTo(expectedAccounts.ElementAt(i).Balance));
+			}
 		}
 
 		[Test]
@@ -336,119 +377,131 @@
 				Throws.TypeOf<ArgumentNullException>().With.Property("ParamName")
 					.EqualTo("Account does not exist."));
 		}
+				
+		[Test]
+		public async Task DeleteAccountViewModel_ShouldReturnCorrectViewModel_WithValidId()
+		{
+			//Act
+			var actualViewModel = await accountService.DeleteAccountViewModel(this.Account1User1.Id);
 
-		//[Test]
-		//public async Task DashboardViewModel_ShouldReturnCorrectData_WithValidInput()
-		//{
-		//	//Arrange
-		//	DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-		//	DateTime endDate = DateTime.UtcNow;
-		//	IEnumerable<AccountCardViewModel> expectedAccounts = data.Accounts
-		//		.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
-		//		.Select(a => mapper.Map<AccountCardViewModel>(a))
-		//		.AsEnumerable();
+			//Assert
+			Assert.That(actualViewModel, Is.Not.Null);
+			Assert.That(actualViewModel.Id, Is.EqualTo(this.Account1User1.Id));
+			Assert.That(actualViewModel.Name, Is.EqualTo(this.Account1User1.Name));
+			Assert.That(actualViewModel.OwnerId, Is.EqualTo(this.Account1User1.OwnerId));
+		}
 
-		//	IEnumerable<TransactionShortViewModel> expectedLastTransactions = data.Transactions
-		//		.Where(t =>
-		//			t.Account.OwnerId == this.User1.Id &&
-		//			t.CreatedOn >= startDate &&
-		//			t.CreatedOn <= endDate)
-		//		.OrderByDescending(t => t.CreatedOn)
-		//		.Take(5)
-		//		.Select(t => mapper.Map<TransactionShortViewModel>(t))
-		//		.AsEnumerable();
+		[Test]
+		public async Task GetUserAccountsCashFlow_ShouldReturnCorrectData_WithValidId()
+		{
+			//Arrange
+			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
+			DateTime endDate = DateTime.UtcNow;
 
-		//	var expectedCashFlow = new Dictionary<string, CashFlowViewModel>();
+			var expectedCashFlow = new Dictionary<string, CashFlowViewModel>();
 
-		//	await data.Accounts
-		//		.Where(a => a.OwnerId == this.User1.Id && a.Transactions.Any())
-		//		.Include(a => a.Currency)
-		//		.Include(a => a.Transactions
-		//			.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
-		//		.ForEachAsync(a =>
-		//		{
-		//			if (!expectedCashFlow.ContainsKey(a.Currency.Name))
-		//			{
-		//				expectedCashFlow[a.Currency.Name] = new CashFlowViewModel();
-		//			}
+			await data.Accounts
+				.Where(a => a.OwnerId == this.User1.Id && a.Transactions
+					.Any(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
+				.Include(a => a.Currency)
+				.Include(a => a.Transactions
+					.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
+				.ForEachAsync(a =>
+				{
+					if (!expectedCashFlow.ContainsKey(a.Currency.Name))
+					{
+						expectedCashFlow[a.Currency.Name] = new CashFlowViewModel();
+					}
 
-		//			decimal? income = a.Transactions?
-		//				.Where(t => t.TransactionType == TransactionType.Income)
-		//				.Sum(t => t.Amount);
+					decimal? income = a.Transactions?
+						.Where(t => t.TransactionType == TransactionType.Income)
+						.Sum(t => t.Amount);
 
-		//			if (income != null)
-		//			{
-		//				expectedCashFlow[a.Currency.Name].Income += (decimal)income;
-		//			}
+					if (income != null)
+					{
+						expectedCashFlow[a.Currency.Name].Income += (decimal)income;
+					}
 
-		//			decimal? expense = a.Transactions?
-		//				.Where(t => t.TransactionType == TransactionType.Expense)
-		//				.Sum(t => t.Amount);
+					decimal? expense = a.Transactions?
+						.Where(t => t.TransactionType == TransactionType.Expense)
+						.Sum(t => t.Amount);
 
-		//			if (expense != null)
-		//			{
-		//				expectedCashFlow[a.Currency.Name].Expence += (decimal)expense;
-		//			}
-		//		});
+					if (expense != null)
+					{
+						expectedCashFlow[a.Currency.Name].Expence += (decimal)expense;
+					}
+				});
 
-		//	//Act
-		//	var actualDashboard = new DashboardServiceModel
-		//	{
-		//		StartDate = startDate,
-		//		EndDate = endDate
-		//	};
+			//Act
+			var actualCashFlow = await accountService
+				.GetUserAccountsCashFlow(this.User1.Id, startDate, endDate);
 
-		//	await accountService.DashboardViewModel(this.User1.Id, actualDashboard);
+			//Assert
+			Assert.That(actualCashFlow.Count,
+			Is.EqualTo(expectedCashFlow.Count));
 
-		//	//Assert
-		//	Assert.That(actualDashboard.Accounts.Count(), Is.EqualTo(expectedAccounts.Count()));
-		//	for (int i = 0; i < actualDashboard.Accounts.Count(); i++)
-		//	{
-		//		Assert.That(actualDashboard.Accounts.ElementAt(i).Id,
-		//			Is.EqualTo(expectedAccounts.ElementAt(i).Id));
-		//		Assert.That(actualDashboard.Accounts.ElementAt(i).Name,
-		//			Is.EqualTo(expectedAccounts.ElementAt(i).Name));
-		//	}
+			foreach (string expectedKey in expectedCashFlow.Keys)
+			{
+				Assert.That(actualCashFlow.ContainsKey(expectedKey), Is.True);
 
-		//	Assert.That(actualDashboard.LastTransactions.Count(), 
-		//		Is.EqualTo(expectedLastTransactions.Count()));
-		//	for (int i = 0; i < actualDashboard.LastTransactions.Count(); i++)
-		//	{
-		//		Assert.That(actualDashboard.LastTransactions.ElementAt(i).Id,
-		//			Is.EqualTo(expectedLastTransactions.ElementAt(i).Id));
-		//		Assert.That(actualDashboard.LastTransactions.ElementAt(i).Amount,
-		//			Is.EqualTo(expectedLastTransactions.ElementAt(i).Amount));
-		//	}
+				Assert.That(actualCashFlow[expectedKey].Income,
+					Is.EqualTo(expectedCashFlow[expectedKey].Income));
 
-		//	Assert.That(actualDashboard.CurrenciesCashFlow.Count,
-		//		Is.EqualTo(expectedCashFlow.Count));
+				Assert.That(actualCashFlow[expectedKey].Expence,
+					Is.EqualTo(expectedCashFlow[expectedKey].Expence));
+			}
+		}
 
-		//	foreach (string expectedKey in expectedCashFlow.Keys)
-		//	{
-		//		Assert.That(actualDashboard.CurrenciesCashFlow.ContainsKey(expectedKey), Is.True);
+		[Test]
+		public async Task GetAllAccountsCashFlow_ShouldReturnCorrectData()
+		{
+			//Arrange
+			var expected = new Dictionary<string, CashFlowViewModel>();
 
-		//		Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Income, 
-		//			Is.EqualTo(expectedCashFlow[expectedKey].Income));
+			await data.Accounts
+				.Where(a => a.Transactions.Any())
+				.Include(a => a.Currency)
+				.Include(a => a.Transactions)
+				.ForEachAsync(a =>
+				{
+					if (!expected.ContainsKey(a.Currency.Name))
+					{
+						expected[a.Currency.Name] = new CashFlowViewModel();
+					}
 
-		//		Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Expence, 
-		//			Is.EqualTo(expectedCashFlow[expectedKey].Expence));
-		//	}
-		//}
+					decimal? income = a.Transactions?
+						.Where(t => t.TransactionType == TransactionType.Income)
+						.Sum(t => t.Amount);
 
-		//[Test]
-		//public void DashboardViewModel_ShouldThrowException_WithInvalidDates()
-		//{
-		//	//Arrange
-		//	DashboardServiceModel dashboardModel = new DashboardServiceModel
-		//	{
-		//		StartDate = DateTime.UtcNow,
-		//		EndDate = DateTime.UtcNow.AddMonths(-1)
-		//	};
+					if (income != null)
+					{
+						expected[a.Currency.Name].Income += (decimal)income;
+					}
 
-		//	//Act & Assert
-		//	Assert.That(async () => await accountService.DashboardViewModel(this.User1.Id, dashboardModel),
-		//		Throws.TypeOf<ArgumentException>().With.Message
-		//			.EqualTo("Start Date must be before End Date."));
-		//}
+					decimal? expense = a.Transactions?
+						.Where(t => t.TransactionType == TransactionType.Expense)
+						.Sum(t => t.Amount);
+
+					if (expense != null)
+					{
+						expected[a.Currency.Name].Expence += (decimal)expense;
+					}
+				});
+
+			//Act
+			var actual = await accountService.GetAllAccountsCashFlow();
+
+			//Assert
+			Assert.That(actual.Count, Is.EqualTo(expected.Count));
+			for (int i = 0; i < expected.Count; i++)
+			{
+				Assert.That(actual.ElementAt(i).Key, 
+					Is.EqualTo(expected.ElementAt(i).Key));
+				Assert.That(actual.ElementAt(i).Value.Income, 
+					Is.EqualTo(expected.ElementAt(i).Value.Income));
+				Assert.That(actual.ElementAt(i).Value.Expence, 
+					Is.EqualTo(expected.ElementAt(i).Value.Expence));
+			}
+		}
 	}
 }

@@ -46,14 +46,17 @@
 		}
 
 		/// <summary>
-		/// Creates new Account Type with given Name. If you try to create a new Account Type with name that other Account Type have, throws exception.
+		/// Creates new Account Type with given Name. 
+		/// If you try to create a new Account Type with name that other Account Type have, throws exception.
 		/// </summary>
 		/// <returns>View Model with Id, Name and User Id.</returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<AccountTypeViewModel> CreateAccountType(string userId, string accountTypeName)
 		{
 			AccountType? accountType = await data.AccountTypes
-				.FirstOrDefaultAsync(c => c.Name == accountTypeName && c.UserId == userId);
+				.FirstOrDefaultAsync(c => 
+					c.Name == accountTypeName 
+					&& (c.UserId == userId || c.UserId == null));
 
 			if (accountType != null)
 			{
