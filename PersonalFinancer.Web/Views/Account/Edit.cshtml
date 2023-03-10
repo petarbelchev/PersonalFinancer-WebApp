@@ -1,7 +1,7 @@
 ﻿@using PersonalFinancer.Web.Infrastructure;
-@model AccountFormModel
+@model EditAccountFormModel
 @{
-	ViewData["Title"] = "Create Account";
+	ViewData["Title"] = "Edit Account";
 }
 
 <p class="display-6 text-center">@ViewData["Title"]</p>
@@ -9,6 +9,7 @@
 	<div class="col-sm-6">
 		<section>
 			<form method="post">
+				<input asp-for="@Model.OwnerId" type="hidden" />
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 				<div class="form-floating formField mb-3">
 					<input asp-for="@Model.Name" class="form-control form-control-lg" type="text" placeholder=".form-control-lg" />
@@ -56,7 +57,7 @@
 					<a class="btn btn-danger" style="display: none;" id="deleteCurrencyBtn">Delete This Currency</a>
 				</div>
 				<div>
-					<button type="submit" class="w-100 btn btn-lg btn-success">Create</button>
+					<button type="submit" class="w-100 btn btn-lg btn-warning">Edit</button>
 				</div>
 			</form>
 		</section>

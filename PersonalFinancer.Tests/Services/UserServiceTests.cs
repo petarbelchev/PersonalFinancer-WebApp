@@ -50,7 +50,6 @@ namespace PersonalFinancer.Tests.Services
 				Assert.That(actual.ElementAt(i).Email, Is.EqualTo(expected.ElementAt(i).Email));
 				Assert.That(actual.ElementAt(i).FirstName, Is.EqualTo(expected.ElementAt(i).FirstName));
 				Assert.That(actual.ElementAt(i).LastName, Is.EqualTo(expected.ElementAt(i).LastName));
-				Assert.That(actual.ElementAt(i).UserName, Is.EqualTo(expected.ElementAt(i).UserName));
 			}
 		}
 

@@ -14,9 +14,13 @@
 		<p class="display-6" style="font-size: xx-large;" id="balanceField">Balance: @Model.Balance @Model.CurrencyName</p>
 	</div>
 	<div class="p-2 bd-highlight" style="margin-top: 25px;">
+		<a asp-area="" asp-controller="Account" asp-action="Edit" asp-route-id="@Model.Id"
+		   asp-route-returnUrl="@ViewBag.ReturnUrl" class="btn btn-warning">Edit Account</a>
+	</div>
+	<div class="p-2 bd-highlight" style="margin-top: 25px;">
 		<a asp-area="" asp-controller="Account" asp-action="Delete" asp-route-id="@Model.Id"
 		   asp-route-returnUrl="@ViewBag.ReturnUrl" class="btn btn-danger">Delete Account</a>
 	</div>
 </div>
 
-<partial name ="_TransactionsTablePartial" />
+<partial name="_TransactionsTablePartial" />

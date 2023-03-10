@@ -9,9 +9,6 @@ using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	/// <summary>
-	/// Users Controller takes care of everything related to Admin's powers over users.
-	/// </summary>
 	[Area("Admin")]
 	[Authorize(Roles = AdminRoleName)]
 	public class UsersController : Controller
@@ -27,9 +24,6 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			this.accountService = accountService;
 		}
 
-		/// <summary>
-		/// Returns collection of UserViewModel with all registered users.
-		/// </summary>
 		public async Task<IActionResult> Index()
 		{
 			IEnumerable<UserViewModel> users = await userService.All();
@@ -37,9 +31,6 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			return View(users);
 		}
 
-		/// <summary>
-		/// Returns UserDetailsViewModel for User Details page.
-		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> Details(string id)
 		{
@@ -55,9 +46,6 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			}
 		}
 
-		/// <summary>
-		/// Returns AccountDetailsViewModel for Account Details page.
-		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> AccountDetails(Guid id)
 		{

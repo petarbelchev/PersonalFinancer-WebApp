@@ -24,6 +24,7 @@ namespace PersonalFinancer.Services.Infrastructure
 				.ForMember(m => m.Transactions, mf => mf
 					.MapFrom(s => s.Transactions.OrderByDescending(t => t.CreatedOn)));
 			CreateMap<Account, AccountCardViewModel>();
+			CreateMap<Account, EditAccountFormModel>();
 
 			CreateMap<AccountType, AccountTypeViewModel>();
 

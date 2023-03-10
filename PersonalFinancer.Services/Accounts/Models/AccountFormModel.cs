@@ -18,13 +18,15 @@ namespace PersonalFinancer.Services.Accounts.Models
 		[Range(AccountInitialBalanceMinValue, AccountInitialBalanceMaxValue,
 			ErrorMessage = "Ballace must be between {1} and {2}")]
 		public decimal Balance { get; set; }
-
+		
+		[Required(ErrorMessage = "Account Type name is required.")]
 		[Display(Name = "Account Type")]
 		public Guid AccountTypeId { get; set; }
 
 		public IEnumerable<AccountTypeViewModel> AccountTypes { get; set; }
 			= new List<AccountTypeViewModel>();
-
+		
+		[Required(ErrorMessage = "Currency name is required.")]
 		[Display(Name = "Currency")]
 		public Guid CurrencyId { get; set; }
 

@@ -29,6 +29,11 @@ namespace PersonalFinancer.Services.Transactions
 		Task<EditTransactionFormModel?> EditTransactionFormModelById(Guid transactionId);
 
 		/// <summary>
+		/// Edit existing Initial Balance transaction or creates new one.
+		/// </summary>
+		Task EditInitialBalanceTransaction(Guid accountId, decimal amountOfChange);
+
+		/// <summary>
 		/// Returns Transaction Extended View Model with given Id, or null.
 		/// </summary>
 		Task<TransactionExtendedViewModel?> TransactionViewModel(Guid transactionId);

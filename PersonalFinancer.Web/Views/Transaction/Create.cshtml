@@ -27,9 +27,10 @@
 						<select asp-for="@Model.CategoryId" class="form-select" id="categoriesField">
 							@foreach (var category in @Model.Categories)
 							{
-								<option value="@category.Id" id="@category.Id" userId="@(category.UserId ?? "notOwnedCategory")">@category.Name</option>
+								<option value="@category.Id" id="@category.Id" userId="@category.UserId">@category.Name</option>
 							}
 						</select>
+						<span asp-validation-for="@Model.CategoryId" class="text-danger"></span>
 						<div id="newCategoryDiv" class="form-floating formField" style="display: none;">
 							<input id="newCategoryField" class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
 							<label class="form-label">Write New Category's name...</label>

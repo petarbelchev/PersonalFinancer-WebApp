@@ -46,6 +46,7 @@ namespace PersonalFinancer.Services.Currencies
 				}
 
 				currency.IsDeleted = false;
+				currency.Name = currencyName.Trim();
 			}
 			else
 			{

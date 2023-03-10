@@ -36,9 +36,6 @@ namespace PersonalFinancer.Services.Accounts
 			this.memoryCache = memoryCache;
 		}
 
-		/// <summary>
-		/// Returns count of all created accounts.
-		/// </summary>
 		public int AccountsCount()
 		{
 			int accountsCount = data.Accounts.Count(a => !a.IsDeleted);
@@ -46,9 +43,6 @@ namespace PersonalFinancer.Services.Accounts
 			return accountsCount;
 		}
 
-		/// <summary>
-		/// Returns collection of User's accounts with Id and Name.
-		/// </summary>
 		public async Task<IEnumerable<AccountDropdownViewModel>> AllAccountsDropdownViewModel(string userId)
 		{
 			string cacheKey = AccountConstants.CacheKeyValue + userId;
@@ -66,9 +60,6 @@ namespace PersonalFinancer.Services.Accounts
 			return accounts;
 		}
 
-		/// <summary>
-		/// Returns Account with Id and Name or null.
-		/// </summary>
 		public async Task<AccountDropdownViewModel?> AccountDropdownViewModel(Guid accountId)
 		{
 			AccountDropdownViewModel? account = await data.Accounts
@@ -79,9 +70,6 @@ namespace PersonalFinancer.Services.Accounts
 			return account;
 		}
 
-		/// <summary>
-		/// Returns a collection of user's accounts with Id, Name, Balance and Currency Name.
-		/// </summary>
 		public async Task<IEnumerable<AccountCardViewModel>> AllAccountsCardViewModel(string userId)
 		{
 			return await data.Accounts
@@ -90,9 +78,6 @@ namespace PersonalFinancer.Services.Accounts
 				.ToArrayAsync();
 		}
 
-		/// <summary>
-		/// Returns Account with Id, Name, Balance and all Transactions or null.
-		/// </summary>
 		public async Task<AccountDetailsViewModel?> AccountDetailsViewModel(Guid accountId)
 		{
 			AccountDetailsViewModel? account = await data.Accounts
@@ -103,12 +88,13 @@ namespace PersonalFinancer.Services.Accounts
 			return account;
 		}
 
-		/// <summary>
-		/// Creates a new Account and if the new account has initial balance creates new Transaction with given amount.
-		/// Returns new Account's id.
-		/// </summary>
 		public async Task<Guid> CreateAccount(string userId, AccountFormModel accountModel)
 		{
+			if (await IsNameExists(accountModel.Name, userId))
+			{
+				throw new InvalidOperationException($"The User already have Account with {accountModel.Name} name.");
+			}
+
 			Account newAccount = new Account()
 			{
 				Name = accountModel.Name.Trim(),
@@ -140,10 +126,6 @@ namespace PersonalFinancer.Services.Accounts
 			return newAccount.Id;
 		}
 
-		/// <summary>
-		/// Delete an Account and give the option to delete all of the account's transactions.
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
 		public async Task DeleteAccountById(Guid accountId, string userId, bool shouldDeleteTransactions)
 		{
 			Account? account = await data.Accounts
@@ -168,9 +150,6 @@ namespace PersonalFinancer.Services.Accounts
 			memoryCache.Remove(AccountConstants.CacheKeyValue + userId);
 		}
 
-		/// <summary>
-		/// Returns Delete Account View Model.
-		/// </summary>
 		public async Task<DeleteAccountViewModel?> DeleteAccountViewModel(Guid accountId)
 		{
 			DeleteAccountViewModel? account = await data.Accounts
@@ -181,10 +160,44 @@ namespace PersonalFinancer.Services.Accounts
 			return account;
 		}
 
-		/// <summary>
-		/// Checks is the given User is owner of the given account, if does not exist, throws an exception.
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
+		public async Task EditAccount(EditAccountFormModel accountModel, string userId)
+		{
+			Account? account = await data.Accounts.FindAsync(accountModel.Id);
+
+			if (account == null)
+			{
+				throw new NullReferenceException("Account does not exist.");
+			}
+
+			if (account.Name != accountModel.Name && await IsNameExists(accountModel.Name, userId))
+			{
+				throw new InvalidOperationException($"The User already have Account with {accountModel.Name} name.");
+			}
+
+			account.Name = accountModel.Name.Trim();
+			account.CurrencyId = accountModel.CurrencyId;
+			account.AccountTypeId = accountModel.AccountTypeId;
+
+			if (account.Balance != accountModel.Balance)
+			{
+				decimal amountOfChange = accountModel.Balance - account.Balance;
+				account.Balance = accountModel.Balance;
+				await transactionsService.EditInitialBalanceTransaction(account.Id, amountOfChange);
+			}
+			else
+			{
+				await data.SaveChangesAsync();
+			}
+		}
+
+		public async Task<EditAccountFormModel> GetEditAccountFormModel(Guid accountId)
+		{
+			return await data.Accounts
+				.Where(a => a.Id == accountId)
+				.ProjectTo<EditAccountFormModel>(mapper.ConfigurationProvider)
+				.FirstAsync();
+		}
+
 		public async Task<bool> IsAccountOwner(string userId, Guid accountId)
 		{
 			Account? account = await data.Accounts.FindAsync(accountId);
@@ -197,11 +210,6 @@ namespace PersonalFinancer.Services.Accounts
 			return account.OwnerId == userId;
 		}
 
-		/// <summary>
-		/// Checks is the given Account deleted, if does not exist, throws an exception.
-		/// </summary>
-		/// <param name="accountId"></param>
-		/// <exception cref="ArgumentNullException"></exception>
 		public async Task<bool> IsAccountDeleted(Guid accountId)
 		{
 			Account? account = await data.Accounts.FindAsync(accountId);
@@ -214,11 +222,7 @@ namespace PersonalFinancer.Services.Accounts
 			return account.IsDeleted;
 		}
 
-		/// <summary>
-		/// Returns User's accounts Cash Flow for a given period.
-		/// </summary>
-		public async Task<Dictionary<string, CashFlowViewModel>> GetUserAccountsCashFlow(
-			string userId, DateTime? startDate, DateTime? endDate)
+		public async Task<Dictionary<string, CashFlowViewModel>> GetUserAccountsCashFlow(string userId, DateTime? startDate, DateTime? endDate)
 		{
 			var result = new Dictionary<string, CashFlowViewModel>();
 
@@ -257,10 +261,6 @@ namespace PersonalFinancer.Services.Accounts
 			return result;
 		}
 
-		/// <summary>
-		/// Returns Cash Flow of all user's accounts.
-		/// </summary>
-		/// <returns></returns>
 		public async Task<Dictionary<string, CashFlowViewModel>> GetAllAccountsCashFlow()
 		{
 			var result = new Dictionary<string, CashFlowViewModel>();
@@ -296,6 +296,16 @@ namespace PersonalFinancer.Services.Accounts
 				});
 
 			return result;
+		}
+
+		private async Task<bool> IsNameExists(string name, string userId)
+		{
+			var names = await data.Accounts
+				.Where(a => a.OwnerId == userId)
+				.Select(a => a.Name.ToLower())
+				.ToArrayAsync();
+
+			return names.Contains(name.ToLower().Trim());
 		}
 	}
 }

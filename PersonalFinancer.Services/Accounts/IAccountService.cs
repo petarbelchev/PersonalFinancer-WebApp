@@ -47,6 +47,20 @@ namespace PersonalFinancer.Services.Accounts
 		Task<DeleteAccountViewModel?> DeleteAccountViewModel(Guid accountId);
 
 		/// <summary>
+		/// Throws NullReferenceException if account does not exist.
+		/// Throws InvalidOperationException if user already have account with the same name.
+		/// </summary>
+		/// <exception cref="NullReferenceException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		Task EditAccount(EditAccountFormModel accountModel, string userId);
+
+		/// <summary>
+		/// Throws InvalidOperationException if account does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		Task<EditAccountFormModel> GetEditAccountFormModel(Guid accountId);
+
+		/// <summary>
 		/// Checks is the given User is owner of the given account, if does not exist, throws an exception.
 		/// </summary>
 		/// <exception cref="ArgumentNullException"></exception>

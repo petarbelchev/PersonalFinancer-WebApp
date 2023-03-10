@@ -10,9 +10,6 @@ using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {
-	/// <summary>
-	/// Account Controller takes care of everything related to Accounts.
-	/// </summary>
 	[Authorize]
 	public class AccountController : Controller
 	{
@@ -30,9 +27,6 @@ namespace PersonalFinancer.Web.Controllers
 			this.accountTypeService = accountTypeService;
 		}
 
-		/// <summary>
-		/// Returns View with Account Form Model for creating new Account.
-		/// </summary>
 		[HttpGet]
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Create()
@@ -48,10 +42,6 @@ namespace PersonalFinancer.Web.Controllers
 			return View(formModel);
 		}
 
-		/// <summary>
-		/// Handle with Account Form Model and creates new Account. 
-		/// If account was created successfully, redirect to the new Account Details page.
-		/// </summary>
 		[HttpPost]
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Create(AccountFormModel accountFormModel)
@@ -61,16 +51,25 @@ namespace PersonalFinancer.Web.Controllers
 				return View(accountFormModel);
 			}
 
-			Guid newAccountId = await accountService.CreateAccount(User.Id(), accountFormModel);
+			try
+			{
+				Guid newAccountId = await accountService.CreateAccount(User.Id(), accountFormModel);
 
-			TempData["successMsg"] = "You create a new account successfully!";
+				TempData["successMsg"] = "You create a new account successfully!";
 
-			return RedirectToAction(nameof(Details), new { id = newAccountId });
+				return RedirectToAction(nameof(Details), new { id = newAccountId });
+			}
+			catch (InvalidOperationException)
+			{
+				ModelState.AddModelError(nameof(accountFormModel.Name), "You already have Account with that name.");
+
+				accountFormModel.AccountTypes = await accountTypeService.AccountTypesViewModel(User.Id());
+				accountFormModel.Currencies = await currencyService.UserCurrencies(User.Id());
+
+				return View(accountFormModel);
+			}
 		}
 
-		/// <summary>
-		/// Returns Account Details View Model for Account Details page. 
-		/// </summary>
 		[HttpGet]
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Details(Guid id)
@@ -92,9 +91,6 @@ namespace PersonalFinancer.Web.Controllers
 			return View(accountDetails);
 		}
 
-		/// <summary>
-		/// Returns Account View Model for Confirm Delete page.
-		/// </summary>
 		[HttpGet]
 		public async Task<IActionResult> Delete(Guid id, string? returnUrl)
 		{
@@ -118,9 +114,6 @@ namespace PersonalFinancer.Web.Controllers
 			return View(accountModel);
 		}
 
-		/// <summary>
-		/// Handle with deleting an Account.
-		/// </summary>
 		[HttpPost]
 		public async Task<IActionResult> Delete(DeleteAccountViewModel accountModel, string confirmButton)
 		{
@@ -146,6 +139,67 @@ namespace PersonalFinancer.Web.Controllers
 			TempData["successMsg"] = "Your account was successfully deleted!";
 
 			return RedirectToAction("Index", "Home");
+		}
+
+		[HttpGet]
+		public async Task<IActionResult> Edit(Guid id, string? returnUrl)
+		{
+			EditAccountFormModel accountModel = await accountService.GetEditAccountFormModel(id);
+
+			if (!User.IsAdmin())
+			{
+				accountModel.Currencies = await currencyService.UserCurrencies(User.Id());
+				accountModel.AccountTypes = await accountTypeService.AccountTypesViewModel(User.Id());
+			}
+			else
+			{
+				accountModel.Currencies = await currencyService.UserCurrencies(accountModel.OwnerId);
+				accountModel.AccountTypes = await accountTypeService.AccountTypesViewModel(accountModel.OwnerId);
+			}
+
+			if (returnUrl != null)
+			{
+				accountModel.ReturnUrl = returnUrl;
+			}
+
+			return View(accountModel);
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> Edit(EditAccountFormModel accountModel)
+		{
+			if (!ModelState.IsValid)
+			{
+				accountModel.Currencies = await currencyService.UserCurrencies(User.Id());
+				accountModel.AccountTypes = await accountTypeService.AccountTypesViewModel(User.Id());
+
+				return View(accountModel);
+			}
+
+			try
+			{
+				await accountService.EditAccount(accountModel, User.Id());
+
+				if (accountModel.ReturnUrl != null)
+				{
+					return LocalRedirect(accountModel.ReturnUrl);
+				}
+
+				return RedirectToAction(nameof(Details), new { id = accountModel.Id });
+			}
+			catch (NullReferenceException)
+			{
+				return BadRequest();
+			}
+			catch (InvalidOperationException)
+			{
+				ModelState.AddModelError(nameof(accountModel.Name), $"You already have Account with {accountModel.Name} name.");
+
+				accountModel.Currencies = await currencyService.UserCurrencies(User.Id());
+				accountModel.AccountTypes = await accountTypeService.AccountTypesViewModel(User.Id());
+
+				return View(accountModel);
+			}
 		}
 	}
 }

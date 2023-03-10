@@ -39,6 +39,12 @@ namespace PersonalFinancer.Data
 			{
 				b.Property(p => p.UserName).HasMaxLength(50);
 				b.Property(p => p.NormalizedUserName).HasMaxLength(50);
+				b.Ignore(p => p.AccessFailedCount);
+				b.Ignore(p => p.EmailConfirmed);
+				b.Ignore(p => p.TwoFactorEnabled);
+				b.Ignore(p => p.PhoneNumberConfirmed);
+				b.Ignore(p => p.LockoutEnabled);
+				b.Ignore(p => p.LockoutEnd);
 			});
 
 			builder.Entity<Account>()
@@ -58,7 +64,6 @@ namespace PersonalFinancer.Data
 				builder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
 				builder.ApplyConfiguration(new UserEntityTypeConfiguration());
 				builder.ApplyConfiguration(new AccountEntityTypeConfiguration());
-				builder.ApplyConfiguration(new TransactionEntityTypeConfiguration());
 			}
 		}
 	}

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using PersonalFinancer.Data.Models;
+using static PersonalFinancer.Data.Constants.SeedConstants;
 
 namespace PersonalFinancer.Data.Configurations
 {
@@ -21,7 +22,7 @@ namespace PersonalFinancer.Data.Configurations
 
 			var user1 = new ApplicationUser()
 			{
-				Id = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e",
+				Id = FirstUserId,
 				FirstName = "Petar",
 				LastName = "Petrov",
 				Email = "petar@mail.com",
@@ -37,7 +38,7 @@ namespace PersonalFinancer.Data.Configurations
 
 			var user2 = new ApplicationUser()
 			{
-				Id = "bcb4f072-ecca-43c9-ab26-c060c6f364e4",
+				Id = SecondUserId,
 				FirstName = "Teodor",
 				LastName = "Lesly",
 				Email = "teodor@mail.com",
@@ -53,7 +54,7 @@ namespace PersonalFinancer.Data.Configurations
 
 			var admin = new ApplicationUser()
 			{
-				Id = "dea12856-c198-4129-b3f3-b893d8395082",
+				Id = AdminId,
 				FirstName = "Great",
 				LastName = "Admin",
 				Email = "admin@admin.com",

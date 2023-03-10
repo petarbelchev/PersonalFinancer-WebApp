@@ -13,7 +13,8 @@ namespace PersonalFinancer.Services.Transactions.Models
 		[DataType(DataType.Currency, ErrorMessage = "Amount must be a number.")]
 		[Range(TransactionMinValue, TransactionMaxValue, ErrorMessage = "Amount must be between {1} and {2}.")]
 		public decimal Amount { get; set; }
-
+		
+		[Required(ErrorMessage = "Category is required.")]
 		[Display(Name = "Category")]
 		public Guid CategoryId { get; set; }
 

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using PersonalFinancer.Data.Models;
 using static PersonalFinancer.Data.Constants.CategoryConstants;
+using static PersonalFinancer.Data.Constants.SeedConstants;
 
 namespace PersonalFinancer.Data.Configurations
 {
@@ -14,33 +15,50 @@ namespace PersonalFinancer.Data.Configurations
 			{
 				new Category
 				{
-					Id = Guid.Parse("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
+					Id = Guid.Parse(InitialBalanceCategoryId),
 					Name = CategoryInitialBalanceName
 				},
 				new Category
 				{
-					Id = Guid.Parse("93cebd34-a9f5-4862-a8c9-3b6eea63e94c"),
-					Name = "Food & Drink"
+					Id = Guid.Parse(FoodDrinkCategoryId),
+					Name = "Food & Drink",
+					UserId = FirstUserId
 				},
 				new Category
 				{
-					Id = Guid.Parse("d59cbb57-3b9e-4b37-9b74-a375eecba8c8"),
-					Name = "Utilities"
+					Id = Guid.Parse(UtilitiesCategoryId),
+					Name = "Utilities",
+					UserId = FirstUserId
 				},
 				new Category
 				{
-					Id = Guid.Parse("b58a7947-eecf-40d0-b84e-c6947fcbfd86"),
-					Name = "Transport"
+					Id = Guid.Parse(TransportCategoryId),
+					Name = "Transport",
+					UserId = FirstUserId
 				},
 				new Category
 				{
-					Id = Guid.Parse("96e441e3-c5a6-427f-bb32-85940242d9ee"),
-					Name = "Medical & Healthcare"
+					Id = Guid.Parse(MedicalHealthcareCategoryId),
+					Name = "Medical & Healthcare",
+					UserId = FirstUserId
 				},
 				new Category
 				{
-					Id = Guid.Parse("081a7be8-15c4-426e-872c-dfaf805e3fec"),
-					Name = "Salary"
+					Id = Guid.Parse(SalaryCategoryId),
+					Name = "Salary",
+					UserId = FirstUserId
+				},
+				new Category
+				{
+					Id = Guid.Parse(MoneyTransferCategoryId),
+					Name = "Money Transfer",
+					UserId = FirstUserId
+				},
+				new Category
+				{
+					Id = Guid.Parse(DividentsCategoryId),
+					Name = "Dividents",
+					UserId = FirstUserId
 				}
 			});
 		}

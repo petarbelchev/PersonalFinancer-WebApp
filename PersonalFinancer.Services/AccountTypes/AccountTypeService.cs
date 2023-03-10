@@ -37,7 +37,7 @@ namespace PersonalFinancer.Services.AccountTypes
 				cacheEntry.SetAbsoluteExpiration(TimeSpan.FromDays(3));
 
 				return await data.AccountTypes
-					.Where(a => (a.UserId == null || a.UserId == userId) && !a.IsDeleted)
+					.Where(a => a.UserId == userId && !a.IsDeleted)
 					.Select(a => mapper.Map<AccountTypeViewModel>(a))
 					.ToArrayAsync();
 			});
@@ -54,9 +54,7 @@ namespace PersonalFinancer.Services.AccountTypes
 		public async Task<AccountTypeViewModel> CreateAccountType(string userId, string accountTypeName)
 		{
 			AccountType? accountType = await data.AccountTypes
-				.FirstOrDefaultAsync(c =>
-					c.Name == accountTypeName
-					&& (c.UserId == userId || c.UserId == null));
+				.FirstOrDefaultAsync(c => c.Name == accountTypeName && c.UserId == userId);
 
 			if (accountType != null)
 			{
@@ -66,6 +64,7 @@ namespace PersonalFinancer.Services.AccountTypes
 				}
 
 				accountType.IsDeleted = false;
+				accountType.Name = accountTypeName.Trim();
 			}
 			else
 			{

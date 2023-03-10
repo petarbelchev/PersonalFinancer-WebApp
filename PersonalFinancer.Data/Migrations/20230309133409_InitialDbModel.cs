@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PersonalFinancer.Data.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class InitialDbModel : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -34,16 +34,10 @@ namespace PersonalFinancer.Data.Migrations
                     NormalizedUserName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -76,7 +70,7 @@ namespace PersonalFinancer.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -180,7 +174,7 @@ namespace PersonalFinancer.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -199,8 +193,9 @@ namespace PersonalFinancer.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -217,7 +212,7 @@ namespace PersonalFinancer.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     Balance = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     AccountTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -277,22 +272,28 @@ namespace PersonalFinancer.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
+                values: new object[,]
+                {
+                    { "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e", "5dd55f78-b3e9-4042-88f9-fa9c1e6eb14e", "petar@mail.com", "Petar", "Petrov", "PETAR@MAIL.COM", "PETAR@MAIL.COM", "AQAAAAEAACcQAAAAEJZz9XhEd3tgCkev/vUvjKovDRGPGgoXwivpM1LH4IAR7ALT6IIVRrt76tJrowoQKA==", "1234567890", "6cf208d4-e138-48d8-af83-8beb3c9427dd", "petar@mail.com" },
+                    { "bcb4f072-ecca-43c9-ab26-c060c6f364e4", "eea5531d-db0d-4dec-a882-6890235d23c0", "teodor@mail.com", "Teodor", "Lesly", "TEODOR@MAIL.COM", "TEODOR@MAIL.COM", "AQAAAAEAACcQAAAAENbNBUyTmbOSTOVMOjoAZQ49CvCJQtWGFJzTsbG3XUzaUnL1O8PP0AFJpLaT+f+RaA==", "1325476980", "5bc1ac6a-6a85-4391-9c58-a08196845512", "teodor@mail.com" },
+                    { "dea12856-c198-4129-b3f3-b893d8395082", "2965142e-8723-4a15-9588-9554844d6244", "admin@admin.com", "Great", "Admin", "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAEAACcQAAAAEFdcr/QSN9PKLvpC7zRcSK9upHjFjqqbjGm2QnW1T1qhalBmL+Q2lxMpSbM+Hz7VNw==", "9876543021", "ee82d86b-a771-4847-a4c0-4ffd77f3426d", "admin@admin.com" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
+                values: new object[] { new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"), false, "Initial Balance", null });
+
+            migrationBuilder.InsertData(
                 table: "AccountTypes",
                 columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("1dfe1780-daed-4198-8360-378aa33c5411"), false, "Bank Account", null },
-                    { new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"), false, "Cash", null }
-                });
-
-            migrationBuilder.InsertData(
-                table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[,]
-                {
-                    { "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e", 0, "2967276f-6b14-4c8c-ad88-a76e5e3b918e", "petar@mail.com", false, "Petar", "Petrov", false, null, "PETAR@MAIL.COM", "PETAR@MAIL.COM", "AQAAAAEAACcQAAAAEI9k5VH8zCiPQNZ+Y1LDSlsgB+DW5L2HVnGnZrJMYf4PII3RofXUj+GCYRW+YWE0fg==", null, false, "d9b86a1c-62d8-4ffb-bd9d-7e83b02a8275", false, "petar@mail.com" },
-                    { "bcb4f072-ecca-43c9-ab26-c060c6f364e4", 0, "4b1bbc1d-99e2-41e1-8371-8dc160018a0e", "teodor@mail.com", false, "Teodor", "Lesly", false, null, "TEODOR@MAIL.COM", "TEODOR@MAIL.COM", "AQAAAAEAACcQAAAAEFDapwAhzuqwd/Hew4GbQDIEKXXwMHdq3XH30lh0zmC2FVt7ZgFfjXl/bDClAXW9BA==", null, false, "8b4f5eb3-3a67-45f1-8e59-e7da4febaa1d", false, "teodor@mail.com" },
-                    { "dea12856-c198-4129-b3f3-b893d8395082", 0, "ceb950c7-285e-48f7-9cae-50b7c61f8a08", "admin@admin.com", false, "Great", "Admin", false, null, "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAEAACcQAAAAENlLQtu94C2r3wF3RQh4N+JAx9WQTzjdNnxDXuSF07rZKZQfHa0LqNGfdOI3mD5djQ==", null, false, "ea899bcc-a166-44bc-849c-3c1856195267", false, "admin@admin.com" }
+                    { new Guid("1dfe1780-daed-4198-8360-378aa33c5411"), false, "Bank", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"), false, "Savings", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"), false, "Cash", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
                 });
 
             migrationBuilder.InsertData(
@@ -300,22 +301,23 @@ namespace PersonalFinancer.Data.Migrations
                 columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"), false, "Salary", null },
-                    { new Guid("93cebd34-a9f5-4862-a8c9-3b6eea63e94c"), false, "Food & Drink", null },
-                    { new Guid("96e441e3-c5a6-427f-bb32-85940242d9ee"), false, "Medical & Healthcare", null },
-                    { new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"), false, "Transport", null },
-                    { new Guid("d59cbb57-3b9e-4b37-9b74-a375eecba8c8"), false, "Utilities", null },
-                    { new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"), false, "Initial Balance", null }
+                    { new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"), false, "Salary", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("459dc945-0d2c-4a07-a2aa-55b4c5e57f9f"), false, "Dividents", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("93cebd34-a9f5-4862-a8c9-3b6eea63e94c"), false, "Food & Drink", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("96e441e3-c5a6-427f-bb32-85940242d9ee"), false, "Medical & Healthcare", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"), false, "Transport", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("d59cbb57-3b9e-4b37-9b74-a375eecba8c8"), false, "Utilities", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("e03634d5-1970-4e01-8568-42756e9ad973"), false, "Money Transfer", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Currencies",
-                columns: new[] { "Id", "Name", "UserId" },
+                columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"), "USD", null },
-                    { new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"), "BGN", null },
-                    { new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"), "EUR", null }
+                    { new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"), false, "USD", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"), false, "BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"), false, "EUR", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
                 });
 
             migrationBuilder.InsertData(
@@ -323,31 +325,10 @@ namespace PersonalFinancer.Data.Migrations
                 columns: new[] { "Id", "AccountTypeId", "Balance", "CurrencyId", "IsDeleted", "Name", "OwnerId" },
                 values: new object[,]
                 {
-                    { new Guid("303430dc-63a3-4436-8907-a274ec29f608"), new Guid("1dfe1780-daed-4198-8360-378aa33c5411"), 1487.23m, new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"), false, "Bank USD", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"), new Guid("1dfe1780-daed-4198-8360-378aa33c5411"), 900.01m, new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"), false, "Bank EUR", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("70169197-5c32-4430-ab39-34c776533376"), new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"), 825.71m, new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"), false, "Cash EUR", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"), new Guid("1dfe1780-daed-4198-8360-378aa33c5411"), 2734.78m, new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"), false, "Bank BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"), new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"), 189.55m, new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"), false, "Cash BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Transactions",
-                columns: new[] { "Id", "AccountId", "Amount", "CategoryId", "CreatedOn", "Refference", "TransactionType" },
-                values: new object[,]
-                {
-                    { new Guid("0e613e98-0975-4ae9-b4f8-e44f8ddb51ad"), new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"), 5.65m, new Guid("93cebd34-a9f5-4862-a8c9-3b6eea63e94c"), new DateTime(2023, 1, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2591), "Lunch", 1 },
-                    { new Guid("0e750d8a-eeb9-45cc-bfd4-1221bf6aa651"), new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"), 4.80m, new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"), new DateTime(2023, 2, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2619), "Taxi", 1 },
-                    { new Guid("2803fee3-7f4b-49a9-bcf4-f5a2e7cdc2c7"), new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"), 200m, new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"), new DateTime(2022, 12, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2694), "Initial Balance", 0 },
-                    { new Guid("39809649-b514-445f-8702-de4691eeb9cb"), new Guid("70169197-5c32-4430-ab39-34c776533376"), 24.29m, new Guid("96e441e3-c5a6-427f-bb32-85940242d9ee"), new DateTime(2023, 1, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2669), "Health Insurance", 1 },
-                    { new Guid("3d782bdc-623f-42dd-954e-3b0a4e5de835"), new Guid("70169197-5c32-4430-ab39-34c776533376"), 600m, new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"), new DateTime(2022, 12, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2665), "Initial Balance", 0 },
-                    { new Guid("52aaf8b7-e931-4153-b0b1-1a9a38c395ab"), new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"), 100.00m, new Guid("d59cbb57-3b9e-4b37-9b74-a375eecba8c8"), new DateTime(2022, 12, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2636), "Electricity bill", 1 },
-                    { new Guid("627ef639-493c-403c-b3b6-83b581e56e7d"), new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"), 1834.78m, new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"), new DateTime(2022, 12, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2628), "Initial Balance", 0 },
-                    { new Guid("6767ad5f-ec08-4f8b-a4f7-0497112b8b1a"), new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"), 49.99m, new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"), new DateTime(2023, 1, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2703), "Flight ticket", 1 },
-                    { new Guid("6f9047f6-a2ee-4ea9-8bc0-21df14812c76"), new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"), 750m, new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"), new DateTime(2023, 1, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2699), "Salary", 0 },
-                    { new Guid("9e2bbe87-4d69-4230-a4c5-50e5ad9821f9"), new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"), 1000.00m, new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"), new DateTime(2023, 1, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2660), "Salary", 0 },
-                    { new Guid("bc1883f4-bf24-4a32-af42-fbf158ea593d"), new Guid("70169197-5c32-4430-ab39-34c776533376"), 250m, new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"), new DateTime(2023, 3, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2688), "Salary", 0 },
-                    { new Guid("e0fdd402-707a-427a-92e2-f8b00422e4ef"), new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"), 200m, new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"), new DateTime(2022, 12, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(827), "Initial Balance", 0 },
-                    { new Guid("e95fde53-a472-4754-9d9d-34aba479eae9"), new Guid("303430dc-63a3-4436-8907-a274ec29f608"), 1487.23m, new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"), new DateTime(2022, 7, 1, 8, 35, 3, 355, DateTimeKind.Utc).AddTicks(2708), "Initial Balance", 0 }
+                    { new Guid("303430dc-63a3-4436-8907-a274ec29f608"), new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"), 3800m, new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"), false, "Dolar Savings", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"), new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"), 2800m, new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"), false, "Euro Savings", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"), new Guid("1dfe1780-daed-4198-8360-378aa33c5411"), 4000m, new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"), false, "Bank BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"), new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"), 2000m, new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"), false, "Cash BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
                 });
 
             migrationBuilder.CreateIndex(

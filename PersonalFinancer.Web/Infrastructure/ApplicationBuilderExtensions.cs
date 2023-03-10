@@ -1,13 +1,20 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.Security.Cryptography;
 
+using PersonalFinancer.Data;
+using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Transactions;
+using PersonalFinancer.Services.Transactions.Models;
+using static PersonalFinancer.Data.Constants.CategoryConstants;
 using static PersonalFinancer.Data.Constants.RoleConstants;
+using static PersonalFinancer.Data.Constants.SeedConstants;
 
 namespace PersonalFinancer.Web.Infrastructure
 {
 	public static class ApplicationBuilderExtensions
 	{
-		public static IApplicationBuilder SeedUsers(this IApplicationBuilder app)
+		public static IApplicationBuilder SeedUserRoles(this IApplicationBuilder app)
 		{
 			using IServiceScope scope = app.ApplicationServices.CreateScope();
 
@@ -27,13 +34,241 @@ namespace PersonalFinancer.Web.Infrastructure
 				await roleManager.CreateAsync(adminRole);
 				await roleManager.CreateAsync(userRole);
 
-				ApplicationUser admin = await userManager.FindByIdAsync("dea12856-c198-4129-b3f3-b893d8395082");
+				ApplicationUser admin = await userManager.FindByIdAsync(AdminId);
 				await userManager.AddToRoleAsync(admin, AdminRoleName);
 
-				ApplicationUser user1 = await userManager.FindByIdAsync("6d5800ce-d726-4fc8-83d9-d6b3ac1f591e");
-				ApplicationUser user2 = await userManager.FindByIdAsync("bcb4f072-ecca-43c9-ab26-c060c6f364e4");
+				ApplicationUser user1 = await userManager.FindByIdAsync(FirstUserId);
+				ApplicationUser user2 = await userManager.FindByIdAsync(SecondUserId);
 				await userManager.AddToRoleAsync(user1, UserRoleName);
 				await userManager.AddToRoleAsync(user2, UserRoleName);
+			})
+				.GetAwaiter()
+				.GetResult();
+
+			return app;
+		}
+
+		public static IApplicationBuilder SeedTransactions(this IApplicationBuilder app)
+		{
+			using IServiceScope scope = app.ApplicationServices.CreateScope();
+			IServiceProvider services = scope.ServiceProvider;
+			var context = services.GetRequiredService<PersonalFinancerDbContext>();
+
+			if (context.Transactions.Any())
+			{
+				return app;
+			}
+
+			ITransactionsService transactionsService = services.GetRequiredService<ITransactionsService>();
+
+			Task.Run(async () =>
+			{
+				await transactionsService.CreateTransaction(new TransactionFormModel 
+				{ 
+					AccountId = Guid.Parse(CashBgnAccountId), 
+					Amount = 2000, 
+					CategoryId = Guid.Parse(InitialBalanceCategoryId), 
+					CreatedOn = DateTime.UtcNow.AddMonths(-2), 
+					Refference = CategoryInitialBalanceName, 
+					TransactionType = TransactionType.Income 
+				}, isInitialBalance: true);
+				await transactionsService.CreateTransaction(new TransactionFormModel 
+				{ 
+					AccountId = Guid.Parse(BankBgnAccountId), 
+					Amount = 4000, 
+					CategoryId = Guid.Parse(InitialBalanceCategoryId), 
+					CreatedOn = DateTime.UtcNow.AddMonths(-2), 
+					Refference = CategoryInitialBalanceName, 
+					TransactionType = TransactionType.Income 
+				}, isInitialBalance: true);
+				await transactionsService.CreateTransaction(new TransactionFormModel 
+				{ 
+					AccountId = Guid.Parse(BankEurAccountId), 
+					Amount = 2800, 
+					CategoryId = Guid.Parse(InitialBalanceCategoryId), 
+					CreatedOn = DateTime.UtcNow.AddMonths(-2), 
+					Refference = CategoryInitialBalanceName, 
+					TransactionType = TransactionType.Income 
+				}, isInitialBalance: true);
+				await transactionsService.CreateTransaction(new TransactionFormModel 
+				{ 
+					AccountId = Guid.Parse(BankUsdAccountId), 
+					Amount = 3800, 
+					CategoryId = Guid.Parse(InitialBalanceCategoryId), 
+					CreatedOn = DateTime.UtcNow.AddMonths(-2), 
+					Refference = CategoryInitialBalanceName, 
+					TransactionType = TransactionType.Income 
+				}, isInitialBalance: true);
+
+				int taxiCounter = 0;
+
+				for (int i = 58; i >= 1; i--)
+				{
+					if (i == 57 || i == 32 || i == 7)
+					{
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(BankBgnAccountId),
+							Amount = 1500m,
+							CategoryId = Guid.Parse(SalaryCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "Salary",
+							TransactionType = TransactionType.Income
+						});
+					}
+
+					if (taxiCounter <= 5)
+					{
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(CashBgnAccountId),
+							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.63, 2),
+							CategoryId = Guid.Parse(TransportCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "Taxi",
+							TransactionType = TransactionType.Expense
+						});
+					}
+
+					if (i == 40 || i == 20)
+					{
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(BankBgnAccountId),
+							Amount = 14.99m,
+							CategoryId = Guid.Parse(MedicalHealthcareCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "Vitamins",
+							TransactionType = TransactionType.Expense
+						});
+					}
+
+					if (i == 38 || i == 18)
+					{
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(BankEurAccountId),
+							Amount = 100,
+							CategoryId = Guid.Parse(DividentsCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "Stocks dividents",
+							TransactionType = TransactionType.Income
+						});
+					}
+
+					if (i == 34 || i == 14)
+					{
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(BankUsdAccountId),
+							Amount = 150,
+							CategoryId = Guid.Parse(DividentsCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "Stocks dividents",
+							TransactionType = TransactionType.Income
+						});
+					}
+
+					if (i == 54 || i == 29 || i == 4)
+					{
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(BankBgnAccountId),
+							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 4.83, 2),
+							CategoryId = Guid.Parse(UtilitiesCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "Electricity bill",
+							TransactionType = TransactionType.Expense
+						});
+					}
+
+					await transactionsService.CreateTransaction(new TransactionFormModel
+					{
+						AccountId = Guid.Parse(CashBgnAccountId),
+						Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.53, 2),
+						CategoryId = Guid.Parse(FoodDrinkCategoryId),
+						CreatedOn = DateTime.UtcNow.AddDays(-i),
+						Refference = "Lunch",
+						TransactionType = TransactionType.Expense
+					});
+
+					if (i == 52 || i == 27 || i == 2)
+					{
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(BankBgnAccountId),
+							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 1.83, 2),
+							CategoryId = Guid.Parse(UtilitiesCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "Water bill",
+							TransactionType = TransactionType.Expense
+						});
+					}
+
+					if (i == 50 || i == 25 || i == 1)
+					{
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(BankBgnAccountId),
+							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 2.83, 2),
+							CategoryId = Guid.Parse(UtilitiesCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "Phone bill",
+							TransactionType = TransactionType.Expense
+						});
+					}
+
+					if (taxiCounter <= 5)
+					{
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(CashBgnAccountId),
+							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.63, 2),
+							CategoryId = Guid.Parse(TransportCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "Taxi",
+							TransactionType = TransactionType.Expense
+						});
+
+						if (taxiCounter == 5)
+						{
+							taxiCounter = 0;
+						}
+					}
+
+					if (i == 48 || i == 21)
+					{
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(BankBgnAccountId),
+							Amount = 500,
+							CategoryId = Guid.Parse(MoneyTransferCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "ATM Withdraw",
+							TransactionType = TransactionType.Expense
+						});
+
+						await transactionsService.CreateTransaction(new TransactionFormModel
+						{
+							AccountId = Guid.Parse(CashBgnAccountId),
+							Amount = 500,
+							CategoryId = Guid.Parse(MoneyTransferCategoryId),
+							CreatedOn = DateTime.UtcNow.AddDays(-i),
+							Refference = "ATM Withdraw",
+							TransactionType = TransactionType.Income
+						});
+					}
+
+					await transactionsService.CreateTransaction(new TransactionFormModel
+					{
+						AccountId = Guid.Parse(BankBgnAccountId),
+						Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.83, 2),
+						CategoryId = Guid.Parse(FoodDrinkCategoryId),
+						CreatedOn = DateTime.UtcNow.AddDays(-i),
+						Refference = "Dinner",
+						TransactionType = TransactionType.Expense
+					});
+				}
 			})
 				.GetAwaiter()
 				.GetResult();

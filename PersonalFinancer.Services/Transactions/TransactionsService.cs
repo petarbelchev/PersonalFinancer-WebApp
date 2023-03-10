@@ -6,6 +6,8 @@ using PersonalFinancer.Data;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Transactions.Models;
+using static PersonalFinancer.Data.Constants.SeedConstants;
+using static PersonalFinancer.Data.Constants.CategoryConstants;
 
 namespace PersonalFinancer.Services.Transactions
 {
@@ -22,14 +24,7 @@ namespace PersonalFinancer.Services.Transactions
 			this.mapper = mapper;
 		}
 
-		/// <summary>
-		/// Returns a collection of User's transactions for given period ordered by descending. 
-		/// Throws Exception when End Date is before Start Date.
-		/// </summary>
-		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
-		/// <exception cref="ArgumentException"></exception>
-		public async Task<AllTransactionsServiceModel> AllTransactionsViewModel(
-			string userId, AllTransactionsServiceModel model)
+		public async Task<AllTransactionsServiceModel> AllTransactionsViewModel(string userId, AllTransactionsServiceModel model)
 		{
 			if (model.StartDate > model.EndDate)
 			{
@@ -50,11 +45,6 @@ namespace PersonalFinancer.Services.Transactions
 			return model;
 		}
 
-		/// <summary>
-		/// Creates a new Transaction and change account's balance if the transaction is not an initial balance transaction. 
-		/// Returns new transaction's id.
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
 		public async Task<Guid> CreateTransaction(TransactionFormModel transactionFormModel, bool isInitialBalance = false)
 		{
 			Transaction newTransaction = new Transaction()
@@ -66,8 +56,6 @@ namespace PersonalFinancer.Services.Transactions
 				CreatedOn = transactionFormModel.CreatedOn,
 				Refference = transactionFormModel.Refference.Trim()
 			};
-
-			// TODO: Add Check if account have enough money for transaction?
 
 			await data.Transactions.AddAsync(newTransaction);
 
@@ -83,10 +71,6 @@ namespace PersonalFinancer.Services.Transactions
 			return newTransaction.Id;
 		}
 
-		/// <summary>
-		/// Changes balance on given Account or throws exception if Account does not exist.
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
 		private async Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType)
 		{
 			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
@@ -101,9 +85,6 @@ namespace PersonalFinancer.Services.Transactions
 			}
 		}
 
-		/// <summary>
-		/// Changes balance on given Account.
-		/// </summary>
 		private void ChangeBalance(Account account, decimal amount, TransactionType transactionType)
 		{
 			if (transactionType == TransactionType.Income)
@@ -116,11 +97,6 @@ namespace PersonalFinancer.Services.Transactions
 			}
 		}
 
-		/// <summary>
-		/// Delete a Transaction and change account's balance. 
-		/// </summary>
-		/// <returns>New Account's balance</returns>
-		/// <exception cref="ArgumentNullException">Throws an Exception when Transaction does not exist.</exception>
 		public async Task<decimal> DeleteTransactionById(Guid transactionId)
 		{
 			Transaction? transaction = await data.Transactions
@@ -152,9 +128,6 @@ namespace PersonalFinancer.Services.Transactions
 			return transaction.Account.Balance;
 		}
 
-		/// <summary>
-		/// Returns a Transaction with Id, AccountId, Amount, CategoryId, Refference, TransactionType, OwnerId, CreatedOn, or null.
-		/// </summary>
 		public async Task<EditTransactionFormModel?> EditTransactionFormModelById(Guid transactionId)
 		{
 			EditTransactionFormModel? transaction = await data.Transactions
@@ -165,9 +138,6 @@ namespace PersonalFinancer.Services.Transactions
 			return transaction;
 		}
 
-		/// <summary>
-		/// Edits a Transaction and change account's balance if it's nessesery.
-		/// </summary>
 		public async Task EditTransaction(EditTransactionFormModel editedTransaction)
 		{
 			Transaction transaction = await data.Transactions
@@ -188,9 +158,7 @@ namespace PersonalFinancer.Services.Transactions
 					newTransactionType = TransactionType.Expense;
 				}
 
-				ChangeBalance(transaction.Account,
-									transaction.Amount,
-									newTransactionType);
+				ChangeBalance(transaction.Account, transaction.Amount, newTransactionType);
 			}
 
 			transaction.Refference = editedTransaction.Refference.Trim();
@@ -210,9 +178,32 @@ namespace PersonalFinancer.Services.Transactions
 			await data.SaveChangesAsync();
 		}
 
-		/// <summary>
-		/// Returns Transaction Extended View Model with given Id, or null.
-		/// </summary>
+		public async Task EditInitialBalanceTransaction(Guid accountId, decimal amountOfChange)
+		{
+			Transaction? transaction = await data.Transactions
+				.FirstOrDefaultAsync(t => t.AccountId == accountId && t.CategoryId == Guid.Parse(InitialBalanceCategoryId));
+
+			if (transaction == null)
+			{
+				await CreateTransaction(new TransactionFormModel
+				{
+					AccountId = accountId,
+					Amount = amountOfChange,
+					CategoryId = Guid.Parse(InitialBalanceCategoryId),
+					CreatedOn = DateTime.UtcNow,
+					Refference = CategoryInitialBalanceName,
+					TransactionType = amountOfChange < 0 ? TransactionType.Expense : TransactionType.Income
+				}, isInitialBalance: true);
+			}
+			else
+			{
+				transaction.Amount += amountOfChange;
+
+			}
+
+			await data.SaveChangesAsync();
+		}
+
 		public async Task<TransactionExtendedViewModel?> TransactionViewModel(Guid transactionId)
 		{
 			TransactionExtendedViewModel? transaction = await data.Transactions
@@ -223,11 +214,7 @@ namespace PersonalFinancer.Services.Transactions
 			return transaction;
 		}
 
-		/// <summary>
-		/// Returns Transaction Short View Model with last five user's transactions for given period.
-		/// </summary>
-		public async Task<IEnumerable<TransactionShortViewModel>> LastFiveTransactions(
-			string userId, DateTime? startDate, DateTime? endDate)
+		public async Task<IEnumerable<TransactionShortViewModel>> LastFiveTransactions(string userId, DateTime? startDate, DateTime? endDate)
 		{
 			return await data.Transactions
 				.Where(t =>

@@ -93,6 +93,7 @@ namespace PersonalFinancer.Services.Categories
 				}
 
 				category.IsDeleted = false;
+				category.Name = categoryName.Trim();
 			}
 			else
 			{
@@ -144,9 +145,7 @@ namespace PersonalFinancer.Services.Categories
 				cacheEntity.SetAbsoluteExpiration(TimeSpan.FromDays(3));
 
 				return await data.Categories
-					.Where(c =>
-						c.Name != CategoryInitialBalanceName && !c.IsDeleted &&
-						(c.UserId == null || c.UserId == userId))
+					.Where(c => c.UserId == userId && !c.IsDeleted)
 					.Select(c => mapper.Map<CategoryViewModel>(c))
 					.ToArrayAsync();
 			});

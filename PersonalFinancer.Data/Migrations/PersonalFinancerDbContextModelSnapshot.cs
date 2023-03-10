@@ -202,7 +202,7 @@ namespace PersonalFinancer.Data.Migrations
                         {
                             Id = new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"),
                             AccountTypeId = new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"),
-                            Balance = 189.55m,
+                            Balance = 2000m,
                             CurrencyId = new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"),
                             IsDeleted = false,
                             Name = "Cash BGN",
@@ -212,7 +212,7 @@ namespace PersonalFinancer.Data.Migrations
                         {
                             Id = new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"),
                             AccountTypeId = new Guid("1dfe1780-daed-4198-8360-378aa33c5411"),
-                            Balance = 2734.78m,
+                            Balance = 4000m,
                             CurrencyId = new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"),
                             IsDeleted = false,
                             Name = "Bank BGN",
@@ -220,32 +220,22 @@ namespace PersonalFinancer.Data.Migrations
                         },
                         new
                         {
-                            Id = new Guid("70169197-5c32-4430-ab39-34c776533376"),
-                            AccountTypeId = new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"),
-                            Balance = 825.71m,
-                            CurrencyId = new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"),
-                            IsDeleted = false,
-                            Name = "Cash EUR",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
                             Id = new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"),
-                            AccountTypeId = new Guid("1dfe1780-daed-4198-8360-378aa33c5411"),
-                            Balance = 900.01m,
+                            AccountTypeId = new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"),
+                            Balance = 2800m,
                             CurrencyId = new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"),
                             IsDeleted = false,
-                            Name = "Bank EUR",
+                            Name = "Euro Savings",
                             OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = new Guid("303430dc-63a3-4436-8907-a274ec29f608"),
-                            AccountTypeId = new Guid("1dfe1780-daed-4198-8360-378aa33c5411"),
-                            Balance = 1487.23m,
+                            AccountTypeId = new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"),
+                            Balance = 3800m,
                             CurrencyId = new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"),
                             IsDeleted = false,
-                            Name = "Bank USD",
+                            Name = "Dolar Savings",
                             OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         });
                 });
@@ -278,13 +268,22 @@ namespace PersonalFinancer.Data.Migrations
                         {
                             Id = new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"),
                             IsDeleted = false,
-                            Name = "Cash"
+                            Name = "Cash",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = new Guid("1dfe1780-daed-4198-8360-378aa33c5411"),
                             IsDeleted = false,
-                            Name = "Bank Account"
+                            Name = "Bank",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                        },
+                        new
+                        {
+                            Id = new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"),
+                            IsDeleted = false,
+                            Name = "Savings",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         });
                 });
 
@@ -293,9 +292,6 @@ namespace PersonalFinancer.Data.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -303,9 +299,6 @@ namespace PersonalFinancer.Data.Migrations
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -316,12 +309,6 @@ namespace PersonalFinancer.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -337,14 +324,8 @@ namespace PersonalFinancer.Data.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(50)
@@ -366,58 +347,43 @@ namespace PersonalFinancer.Data.Migrations
                         new
                         {
                             Id = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "e1909cba-6a0e-4956-a5ed-961608230294",
+                            ConcurrencyStamp = "5dd55f78-b3e9-4042-88f9-fa9c1e6eb14e",
                             Email = "petar@mail.com",
-                            EmailConfirmed = false,
                             FirstName = "Petar",
                             LastName = "Petrov",
-                            LockoutEnabled = false,
                             NormalizedEmail = "PETAR@MAIL.COM",
                             NormalizedUserName = "PETAR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEG99NnwggvkIPSDY2wBYtMT+t8/duvhPkAdZFfXGRxxCNYuOp2P3FKbScDtQ6PUyGg==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEJZz9XhEd3tgCkev/vUvjKovDRGPGgoXwivpM1LH4IAR7ALT6IIVRrt76tJrowoQKA==",
                             PhoneNumber = "1234567890",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "593c7b8c-8d60-4a78-a24e-932670de17bd",
-                            TwoFactorEnabled = false,
+                            SecurityStamp = "6cf208d4-e138-48d8-af83-8beb3c9427dd",
                             UserName = "petar@mail.com"
                         },
                         new
                         {
                             Id = "bcb4f072-ecca-43c9-ab26-c060c6f364e4",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "3e503f98-b332-4998-aeef-2e97d017473f",
+                            ConcurrencyStamp = "eea5531d-db0d-4dec-a882-6890235d23c0",
                             Email = "teodor@mail.com",
-                            EmailConfirmed = false,
                             FirstName = "Teodor",
                             LastName = "Lesly",
-                            LockoutEnabled = false,
                             NormalizedEmail = "TEODOR@MAIL.COM",
                             NormalizedUserName = "TEODOR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEIb4Isv5P5X7s9YPqW+iHWhNG/K/ovLIjbofSv6KZIeYGxaW8XpTyKsDjXQkfblnXA==",
+                            PasswordHash = "AQAAAAEAACcQAAAAENbNBUyTmbOSTOVMOjoAZQ49CvCJQtWGFJzTsbG3XUzaUnL1O8PP0AFJpLaT+f+RaA==",
                             PhoneNumber = "1325476980",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "98d90ce9-de1a-426b-9f9d-b34bbf16df0c",
-                            TwoFactorEnabled = false,
+                            SecurityStamp = "5bc1ac6a-6a85-4391-9c58-a08196845512",
                             UserName = "teodor@mail.com"
                         },
                         new
                         {
                             Id = "dea12856-c198-4129-b3f3-b893d8395082",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "bde8d3fd-30de-4807-92aa-4abbb087fbd3",
+                            ConcurrencyStamp = "2965142e-8723-4a15-9588-9554844d6244",
                             Email = "admin@admin.com",
-                            EmailConfirmed = false,
                             FirstName = "Great",
                             LastName = "Admin",
-                            LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN@ADMIN.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEMVIK90e48owRodrR9m89jaR2BkqxnorXJKYUIpDi52MYiUDk/XXoSVqe7YzMUS+sQ==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEFdcr/QSN9PKLvpC7zRcSK9upHjFjqqbjGm2QnW1T1qhalBmL+Q2lxMpSbM+Hz7VNw==",
                             PhoneNumber = "9876543021",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "bae940df-11d0-4a94-8102-27c5cf37cd42",
-                            TwoFactorEnabled = false,
+                            SecurityStamp = "ee82d86b-a771-4847-a4c0-4ffd77f3426d",
                             UserName = "admin@admin.com"
                         });
                 });
@@ -456,31 +422,50 @@ namespace PersonalFinancer.Data.Migrations
                         {
                             Id = new Guid("93cebd34-a9f5-4862-a8c9-3b6eea63e94c"),
                             IsDeleted = false,
-                            Name = "Food & Drink"
+                            Name = "Food & Drink",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = new Guid("d59cbb57-3b9e-4b37-9b74-a375eecba8c8"),
                             IsDeleted = false,
-                            Name = "Utilities"
+                            Name = "Utilities",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"),
                             IsDeleted = false,
-                            Name = "Transport"
+                            Name = "Transport",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = new Guid("96e441e3-c5a6-427f-bb32-85940242d9ee"),
                             IsDeleted = false,
-                            Name = "Medical & Healthcare"
+                            Name = "Medical & Healthcare",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"),
                             IsDeleted = false,
-                            Name = "Salary"
+                            Name = "Salary",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                        },
+                        new
+                        {
+                            Id = new Guid("e03634d5-1970-4e01-8568-42756e9ad973"),
+                            IsDeleted = false,
+                            Name = "Money Transfer",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                        },
+                        new
+                        {
+                            Id = new Guid("459dc945-0d2c-4a07-a2aa-55b4c5e57f9f"),
+                            IsDeleted = false,
+                            Name = "Dividents",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         });
                 });
 
@@ -512,19 +497,22 @@ namespace PersonalFinancer.Data.Migrations
                         {
                             Id = new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"),
                             IsDeleted = false,
-                            Name = "BGN"
+                            Name = "BGN",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"),
                             IsDeleted = false,
-                            Name = "EUR"
+                            Name = "EUR",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"),
                             IsDeleted = false,
-                            Name = "USD"
+                            Name = "USD",
+                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         });
                 });
 
@@ -562,138 +550,6 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Transactions");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("7661ddfb-257c-4c3a-a02f-89f6541a0c06"),
-                            AccountId = new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"),
-                            Amount = 200m,
-                            CategoryId = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
-                            CreatedOn = new DateTime(2022, 12, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(5463),
-                            Refference = "Initial Balance",
-                            TransactionType = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("2d11697d-b0b9-4b7e-a285-e6968d2415ef"),
-                            AccountId = new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"),
-                            Amount = 5.65m,
-                            CategoryId = new Guid("93cebd34-a9f5-4862-a8c9-3b6eea63e94c"),
-                            CreatedOn = new DateTime(2023, 1, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(6956),
-                            Refference = "Lunch",
-                            TransactionType = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("1f1ea777-03e7-4176-8b65-69f3cb3c779f"),
-                            AccountId = new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"),
-                            Amount = 4.80m,
-                            CategoryId = new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"),
-                            CreatedOn = new DateTime(2023, 2, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(6975),
-                            Refference = "Taxi",
-                            TransactionType = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("481e697e-4b27-4163-92a8-c3d48d943898"),
-                            AccountId = new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"),
-                            Amount = 1834.78m,
-                            CategoryId = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
-                            CreatedOn = new DateTime(2022, 12, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(6980),
-                            Refference = "Initial Balance",
-                            TransactionType = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("ebaa4859-647a-44c5-9630-b9379534cf4b"),
-                            AccountId = new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"),
-                            Amount = 100.00m,
-                            CategoryId = new Guid("d59cbb57-3b9e-4b37-9b74-a375eecba8c8"),
-                            CreatedOn = new DateTime(2022, 12, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(6986),
-                            Refference = "Electricity bill",
-                            TransactionType = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("2ce5f0dd-1bbe-4a44-b12e-485e5a0d7209"),
-                            AccountId = new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"),
-                            Amount = 1000.00m,
-                            CategoryId = new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"),
-                            CreatedOn = new DateTime(2023, 1, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(6999),
-                            Refference = "Salary",
-                            TransactionType = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("1a8faa14-e3e8-4f06-be52-e92c934380d1"),
-                            AccountId = new Guid("70169197-5c32-4430-ab39-34c776533376"),
-                            Amount = 600m,
-                            CategoryId = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
-                            CreatedOn = new DateTime(2022, 12, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(7004),
-                            Refference = "Initial Balance",
-                            TransactionType = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("e9a40bde-668c-44cb-a281-1c990299ed5c"),
-                            AccountId = new Guid("70169197-5c32-4430-ab39-34c776533376"),
-                            Amount = 24.29m,
-                            CategoryId = new Guid("96e441e3-c5a6-427f-bb32-85940242d9ee"),
-                            CreatedOn = new DateTime(2023, 1, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(7027),
-                            Refference = "Health Insurance",
-                            TransactionType = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("96152eaa-c751-417a-880a-8cbea3815fd9"),
-                            AccountId = new Guid("70169197-5c32-4430-ab39-34c776533376"),
-                            Amount = 250m,
-                            CategoryId = new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"),
-                            CreatedOn = new DateTime(2023, 3, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(7032),
-                            Refference = "Salary",
-                            TransactionType = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("56e72652-cb1e-4c80-ba61-74be466a49d6"),
-                            AccountId = new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"),
-                            Amount = 200m,
-                            CategoryId = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
-                            CreatedOn = new DateTime(2022, 12, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(7039),
-                            Refference = "Initial Balance",
-                            TransactionType = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("14895d28-597f-452a-adc6-a03cb817bd30"),
-                            AccountId = new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"),
-                            Amount = 750m,
-                            CategoryId = new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"),
-                            CreatedOn = new DateTime(2023, 1, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(7043),
-                            Refference = "Salary",
-                            TransactionType = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("d243b590-117b-4b04-a831-4d983dfc4302"),
-                            AccountId = new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"),
-                            Amount = 49.99m,
-                            CategoryId = new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"),
-                            CreatedOn = new DateTime(2023, 1, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(7047),
-                            Refference = "Flight ticket",
-                            TransactionType = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("3ee36d75-1c8b-4945-9836-73f90bcf5be7"),
-                            AccountId = new Guid("303430dc-63a3-4436-8907-a274ec29f608"),
-                            Amount = 1487.23m,
-                            CategoryId = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
-                            CreatedOn = new DateTime(2022, 7, 8, 11, 40, 6, 78, DateTimeKind.Utc).AddTicks(7053),
-                            Refference = "Initial Balance",
-                            TransactionType = 0
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

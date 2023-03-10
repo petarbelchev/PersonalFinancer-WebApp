@@ -35,7 +35,6 @@
 							<th scope="col">Category</th>
 							<th scope="col">Type</th>
 							<th scope="col">Amount</th>
-							<th scope="col">Currency</th>
 							<th scope="col">Account</th>
 							<th scope="col">Refference</th>
 							<th scope="col"></th>
@@ -45,12 +44,18 @@
 						@foreach (var transaction in Model.Transactions)
 						{
 							<tr>
-								<td><img src="/icons/icons8-transaction-64.png" style="max-width: 50px;"></td>
+								@if (transaction.TransactionType == TransactionType.Income.ToString())
+								{
+									<td><img src="/icons/greenArrow.png" style="max-width: 38px;"></td>
+								}
+								else
+								{
+									<td><img src="/icons/redArrow.png" style="max-width: 38px;"></td>
+								}
 								<td>@transaction.CreatedOn</td>
 								<td>@transaction.CategoryName</td>
 								<td>@transaction.TransactionType</td>
-								<td>@transaction.Amount</td>
-								<td>@transaction.AccountCurrencyName</td>
+								<td>@transaction.Amount @transaction.AccountCurrencyName</td>
 								<td>@transaction.AccountName</td>
 								<td>@transaction.Refference</td>
 								<td>
