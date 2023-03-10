@@ -47,8 +47,6 @@ namespace PersonalFinancer.Tests
 		protected Category Category2 { get; private set; } = null!;
 		protected Category Category3 { get; private set; } = null!;
 		protected Category Category4 { get; private set; } = null!;
-		protected Category Category5 { get; private set; } = null!;
-		protected Category Category6 { get; private set; } = null!;
 
 		protected Currency Currency1 { get; private set; } = null!;
 		protected Currency Currency2 { get; private set; } = null!;
@@ -89,20 +87,23 @@ namespace PersonalFinancer.Tests
 			AccountType1 = new AccountType
 			{
 				Id = cashAccTypeId,
-				Name = "Cash"
+				Name = "Cash",
+				UserId = PetarId
 			};
 			Guid BankAccTypeId = Guid.NewGuid();
 			AccountType2 = new AccountType
 			{
 				Id = BankAccTypeId,
-				Name = "Bank"
+				Name = "Bank",
+				UserId = PetarId
 			};
 			Guid CustomAccTypeId = Guid.NewGuid();
 			AccountType3 = new AccountType
 			{
 				Id = CustomAccTypeId,
 				Name = "Bank",
-				IsDeleted = true
+				IsDeleted = true,
+				UserId = PetarId
 			};
 			data.AccountTypes.AddRange(AccountType1, AccountType2, AccountType3);
 
@@ -111,13 +112,15 @@ namespace PersonalFinancer.Tests
 			Currency1 = new Currency
 			{
 				Id = BgnCurrencyId,
-				Name = "BGN"
+				Name = "BGN",
+				UserId = PetarId
 			};
 			Guid EurCurrencyId = Guid.NewGuid();
 			Currency2 = new Currency
 			{
 				Id = EurCurrencyId,
-				Name = "EUR"
+				Name = "EUR",
+				UserId = PetarId
 			};
 			//Guid UsdCurrencyId = Guid.NewGuid();
 			//Currency3 = new Currency
@@ -156,42 +159,30 @@ namespace PersonalFinancer.Tests
 			Category1 = new Category
 			{
 				Id = initBalanceCatId,
-				Name = CategoryInitialBalanceName,
+				Name = CategoryInitialBalanceName
 			};
 			Guid foodCatId = Guid.NewGuid();
 			Category2 = new Category
 			{
 				Id = foodCatId,
-				Name = "Food and Drinks"
+				Name = "Food and Drinks",
+				UserId = PetarId
 			};
 			Guid transportCatId = Guid.NewGuid();
 			Category3 = new Category
 			{
 				Id = transportCatId,
-				Name = "Transport"
+				Name = "Transport",
+				UserId = PetarId
 			};
 			Guid salaryCatId = Guid.NewGuid();
 			Category4 = new Category
 			{
 				Id = salaryCatId,
-				Name = "Salary"
-			};
-			Guid customCatId = Guid.NewGuid();
-			Category5 = new Category
-			{
-				Id = customCatId,
-				Name = "Custom Category",
+				Name = "Salary",
 				UserId = PetarId
 			};
-			Guid deletedCustomCatId = Guid.NewGuid();
-			Category6 = new Category
-			{
-				Id = deletedCustomCatId,
-				Name = "Custom Category",
-				UserId = PetarId,
-				IsDeleted = true
-			};
-			data.Categories.AddRange(Category1, Category2, Category3, Category4, Category5, Category6);
+			data.Categories.AddRange(Category1, Category2, Category3, Category4);
 
 			// Transactions
 			// Cash BGN

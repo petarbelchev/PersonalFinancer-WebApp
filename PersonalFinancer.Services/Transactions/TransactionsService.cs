@@ -24,23 +24,29 @@ namespace PersonalFinancer.Services.Transactions
 			this.mapper = mapper;
 		}
 
-		public async Task<AllTransactionsServiceModel> AllTransactionsViewModel(string userId, AllTransactionsServiceModel model)
+		public async Task<AllTransactionsServiceModel> AllTransactionsServiceModel(string userId, AllTransactionsServiceModel model)
 		{
 			if (model.StartDate > model.EndDate)
 			{
 				throw new ArgumentException("Start Date must be before End Date.");
 			}
 
-			TransactionExtendedViewModel[] transactions = await data.Transactions
+			model.TotalTransactions = data.Transactions
+				.Count(t =>
+					t.Account.OwnerId == userId &&
+					t.CreatedOn >= model.StartDate &&
+					t.CreatedOn <= model.EndDate);
+
+			model.Transactions = await data.Transactions
 				.Where(t =>
 					t.Account.OwnerId == userId &&
 					t.CreatedOn >= model.StartDate &&
 					t.CreatedOn <= model.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
+				.Skip(model.Page != 1 ? model.TransactionsPerPage * (model.Page - 1) : 0)
+				.Take(model.TransactionsPerPage)
 				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
-
-			model.Transactions = transactions;
 
 			return model;
 		}

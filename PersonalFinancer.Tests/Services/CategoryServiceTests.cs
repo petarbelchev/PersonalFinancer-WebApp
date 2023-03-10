@@ -3,7 +3,6 @@
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Categories;
 using PersonalFinancer.Services.Categories.Models;
-using static PersonalFinancer.Data.Constants.CategoryConstants;
 
 namespace PersonalFinancer.Tests.Services
 {
@@ -112,7 +111,7 @@ namespace PersonalFinancer.Tests.Services
 		public void CreateCategory_ShouldThrowException_WithExistingName()
 		{
 			//Act & Assert
-			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, this.Category5.Name),
+			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, this.Category2.Name),
 				Throws.TypeOf<InvalidOperationException>().With.Message
 					.EqualTo("Category with the same name exist!"));
 		}
@@ -182,17 +181,13 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange: Get first user's categories where the user has custom category
 			List<CategoryViewModel> expectedFirstUserCategories = data.Categories
-				.Where(c =>
-					c.Name != CategoryInitialBalanceName && !c.IsDeleted &&
-					(c.UserId == null || c.UserId == this.User1.Id))
+				.Where(c => c.UserId == this.User1.Id && !c.IsDeleted)
 				.Select(c => mapper.Map<CategoryViewModel>(c))
 				.ToList();
 
 			//Arrange: Get second user's categories where the user hasn't custom categories
 			List<CategoryViewModel> expectedSecondUserCategories = data.Categories
-				.Where(c =>
-					c.Name != CategoryInitialBalanceName && !c.IsDeleted &&
-					(c.UserId == null || c.UserId == this.User2.Id))
+				.Where(c => c.UserId == this.User2.Id && !c.IsDeleted)
 				.Select(c => mapper.Map<CategoryViewModel>(c))
 				.ToList();
 

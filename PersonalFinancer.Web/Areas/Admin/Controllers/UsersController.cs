@@ -47,18 +47,32 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> AccountDetails(Guid id)
+		public async Task<IActionResult> AccountDetails(Guid id, string? startDate, string? endDate, int page = 1)
 		{
-			AccountDetailsViewModel? accountModel = await accountService.AccountDetailsViewModel(id);
-
-			if (accountModel == null)
+			try
 			{
-				return NotFound();
+				AccountDetailsViewModel model;
+
+				if (startDate == null || endDate == null)
+				{
+					model = await accountService.AccountDetailsViewModel(id, DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, page);
+				}
+				else
+				{
+					model = await accountService.AccountDetailsViewModel(id, DateTime.Parse(startDate), DateTime.Parse(endDate), page);
+				}
+
+				ViewBag.Area = "Admin";
+				ViewBag.Controller = "Users";
+				ViewBag.Action = "AccountDetails";
+				ViewBag.ReturnUrl = "~/Admin/Users/AccountDetails/" + id;
+
+				return View(model);
 			}
-
-			ViewBag.ReturnUrl = "~/Admin/Users/AccountDetails/" + id;
-
-			return View(accountModel);
+			catch (NullReferenceException)
+			{
+				return BadRequest();
+			}
 		}
 	}
 }

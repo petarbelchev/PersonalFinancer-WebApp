@@ -38,19 +38,30 @@ namespace PersonalFinancer.Web.Controllers
 		/// </summary>
 		[HttpGet]
 		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> All()
+		public async Task<IActionResult> All(string? startDate, string? endDate, int page = 1)
 		{
 			AllTransactionsServiceModel model = new AllTransactionsServiceModel()
 			{
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
+				Page = page
 			};
 
+			if (startDate == null || endDate == null)
+			{
+				model.StartDate = DateTime.UtcNow.AddMonths(-1);
+				model.EndDate = DateTime.UtcNow;
+			}
+			else
+			{
+				model.StartDate = DateTime.Parse(startDate);
+				model.EndDate = DateTime.Parse(endDate);
+			}
+
+
 			AllTransactionsServiceModel transactions =
-				await transactionsService.AllTransactionsViewModel(User.Id(), model);
+				await transactionsService.AllTransactionsServiceModel(User.Id(), model);
 
 			return View(transactions);
-		}
+		     }
 
 		/// <summary>
 		/// Returns View with all user's transactions for specific period.
@@ -67,7 +78,7 @@ namespace PersonalFinancer.Web.Controllers
 			try
 			{
 				AllTransactionsServiceModel transactions = await transactionsService
-					.AllTransactionsViewModel(User.Id(), model);
+					.AllTransactionsServiceModel(User.Id(), model);
 
 				return View(transactions);
 			}

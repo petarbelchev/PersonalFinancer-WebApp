@@ -72,23 +72,64 @@ namespace PersonalFinancer.Web.Controllers
 
 		[HttpGet]
 		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Details(Guid id)
+		public async Task<IActionResult> Details(Guid id, string? startDate, string? endDate, int page = 1)
 		{
 			if (!await accountService.IsAccountOwner(User.Id(), id))
 			{
 				return Unauthorized();
 			}
 
-			AccountDetailsViewModel? accountDetails = await accountService.AccountDetailsViewModel(id);
+			try
+			{
+				AccountDetailsViewModel model;
 
-			if (accountDetails == null)
+				if (startDate == null || endDate == null)
+				{
+					model = await accountService.AccountDetailsViewModel(id, DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, page);
+				}
+				else
+				{
+					model = await accountService.AccountDetailsViewModel(id, DateTime.Parse(startDate), DateTime.Parse(endDate), page);
+				}
+
+				ViewBag.Area = "";
+				ViewBag.Controller = "Account";
+				ViewBag.Action = "Details";
+				ViewBag.ReturnUrl = "~/Account/Details/" + id;
+
+				return View(model);
+			}
+			catch (NullReferenceException)
 			{
 				return BadRequest();
 			}
+		}
 
-			ViewBag.ReturnUrl = "~/Account/Details/" + id;
+		[HttpPost]
+		[Authorize(Roles = UserRoleName)]
+		public async Task<IActionResult> Details(AccountDetailsViewModel accountModel)
+		{
+			if (!ModelState.IsValid)
+			{
+				return View(accountModel);
+			}
 
-			return View(accountDetails);
+			try
+			{
+				AccountDetailsViewModel accountDetails = await accountService
+					.AccountDetailsViewModel(accountModel.Id, accountModel.StartDate, accountModel.EndDate);
+
+				ViewBag.Area = "";
+				ViewBag.Controller = "Account";
+				ViewBag.Action = "Details";
+				ViewBag.ReturnUrl = "~/Account/Details/" + accountDetails.Id;
+
+				return View(accountDetails);
+			}
+			catch (Exception)
+			{
+				return BadRequest();
+			}
 		}
 
 		[HttpGet]

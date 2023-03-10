@@ -25,9 +25,10 @@ namespace PersonalFinancer.Services.Accounts
 		Task<IEnumerable<AccountCardViewModel>> AllAccountsCardViewModel(string userId);
 
 		/// <summary>
-		/// Returns Account with Id, Name, Balance and all Transactions or null.
+		/// If Account does not exist, throws NullReferenceException.
 		/// </summary>
-		Task<AccountDetailsViewModel?> AccountDetailsViewModel(Guid accountId);
+		/// <exception cref="NullReferenceException"></exception>
+		Task<AccountDetailsViewModel> AccountDetailsViewModel(Guid id, DateTime startDate, DateTime endDate, int page = 1);
 
 		/// <summary>
 		/// Creates a new Account and if the new account has initial balance creates new Transaction with given amount.

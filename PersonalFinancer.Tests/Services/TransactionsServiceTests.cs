@@ -233,7 +233,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act
 			AllTransactionsServiceModel? transactionFormModel = await transactionService
-				.AllTransactionsViewModel(this.User1.Id, model);
+				.AllTransactionsServiceModel(this.User1.Id, model);
 
 			//Assert
 			Assert.That(transactionFormModel, Is.Not.Null);
@@ -266,7 +266,7 @@ namespace PersonalFinancer.Tests.Services
 			};
 
 			//Assert
-			Assert.That(async () => await transactionService.AllTransactionsViewModel(this.User1.Id, model),
+			Assert.That(async () => await transactionService.AllTransactionsServiceModel(this.User1.Id, model),
 				Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Start Date must be before End Date."));
 		}
 

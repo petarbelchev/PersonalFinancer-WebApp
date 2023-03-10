@@ -20,15 +20,14 @@ namespace PersonalFinancer.Services.Infrastructure
 
 			CreateMap<Account, AccountDropdownViewModel>();
 			CreateMap<Account, DeleteAccountViewModel>();
-			CreateMap<Account, AccountDetailsViewModel>()
-				.ForMember(m => m.Transactions, mf => mf
-					.MapFrom(s => s.Transactions.OrderByDescending(t => t.CreatedOn)));
+			//CreateMap<Account, AccountDetailsViewModel>()
+			//	.ForMember(m => m.Transactions, mf => mf
+			//		.MapFrom(s => s.Transactions.OrderByDescending(t => t.CreatedOn)));
 			CreateMap<Account, AccountCardViewModel>();
 			CreateMap<Account, EditAccountFormModel>();
 
 			CreateMap<AccountType, AccountTypeViewModel>();
 
-			CreateMap<Transaction, AccountDetailsTransactionViewModel>();
 			CreateMap<Transaction, TransactionShortViewModel>()
 				.ForMember(m => m.AccountName, mf => mf
 					.MapFrom(s => s.Account.Name + (s.Account.IsDeleted ? " (Deleted)" : string.Empty)));

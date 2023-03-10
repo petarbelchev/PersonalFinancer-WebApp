@@ -78,14 +78,44 @@ namespace PersonalFinancer.Services.Accounts
 				.ToArrayAsync();
 		}
 
-		public async Task<AccountDetailsViewModel?> AccountDetailsViewModel(Guid accountId)
+		public async Task<AccountDetailsViewModel> AccountDetailsViewModel(Guid accountId, DateTime startDate, DateTime endDate, int page = 1)
 		{
-			AccountDetailsViewModel? account = await data.Accounts
+			var model = await data.Accounts
 				.Where(a => a.Id == accountId && !a.IsDeleted)
-				.ProjectTo<AccountDetailsViewModel>(mapper.ConfigurationProvider)
+				.Select(a => new AccountDetailsViewModel
+				{
+					Id = a.Id,
+					Name = a.Name,
+					Balance = a.Balance,
+					CurrencyName = a.Currency.Name,
+					StartDate = startDate,
+					EndDate = endDate,
+					Page = page,
+					TotalTransactions = a.Transactions.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+					Transactions = a.Transactions
+						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.OrderByDescending(t => t.CreatedOn)
+						.Skip(page != 1 ? 10 * (page - 1) : 0)
+						.Take(10)
+						.Select(t => new AccountDetailsTransactionViewModel
+						{
+							Id = t.Id,
+							Amount = t.Amount,
+							CreatedOn = t.CreatedOn,
+							CategoryName = t.Category.Name,
+							TransactionType = t.TransactionType.ToString(),
+							Refference = t.Refference
+						})
+						.AsEnumerable()
+				})
 				.FirstOrDefaultAsync();
 
-			return account;
+			if (model == null)
+			{
+				throw new NullReferenceException("Account does not exist.");
+			}
+
+			return model;
 		}
 
 		public async Task<Guid> CreateAccount(string userId, AccountFormModel accountModel)
