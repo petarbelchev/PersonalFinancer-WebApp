@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PersonalFinancer.Services.Shared.Models;
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class AccountDetailsViewModel
+	public class AccountDetailsViewModel : DateFilterModel
 	{
-		public Guid Id { get; set; }
-
 		public string? Name { get; set; }
 
 		public decimal Balance { get; set; }
@@ -14,16 +12,6 @@ namespace PersonalFinancer.Services.Accounts.Models
 
 		public IEnumerable<AccountDetailsTransactionViewModel> Transactions { get; set; }
 			= new List<AccountDetailsTransactionViewModel>();
-		
-		[Required(ErrorMessage = "Start Date is required.")]
-		[DataType(DataType.DateTime)]
-		[Display(Name = "Start Date")]
-		public DateTime StartDate { get; set; }
-
-		[Required(ErrorMessage = "End Date is required.")]
-		[DataType(DataType.DateTime)]
-		[Display(Name = "End Date")]
-		public DateTime EndDate { get; set; }
 
 		public int TransactionsPerPage { get; set; } = 10;
 

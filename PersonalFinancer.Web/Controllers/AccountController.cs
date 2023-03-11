@@ -95,7 +95,8 @@ namespace PersonalFinancer.Web.Controllers
 				ViewBag.Area = "";
 				ViewBag.Controller = "Account";
 				ViewBag.Action = "Details";
-				ViewBag.ReturnUrl = "~/Account/Details/" + id;
+				ViewBag.ReturnUrl = "~/Account/Details/" + model.Id;
+				ViewBag.ModelId = model.Id;
 
 				return View(model);
 			}
@@ -107,24 +108,24 @@ namespace PersonalFinancer.Web.Controllers
 
 		[HttpPost]
 		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Details(AccountDetailsViewModel accountModel)
+		public async Task<IActionResult> Details(AccountDetailsViewModel model)
 		{
 			if (!ModelState.IsValid)
 			{
-				return View(accountModel);
+				return View(model);
 			}
 
 			try
 			{
-				AccountDetailsViewModel accountDetails = await accountService
-					.AccountDetailsViewModel(accountModel.Id, accountModel.StartDate, accountModel.EndDate);
+				model = await accountService.AccountDetailsViewModel(model.Id, model.StartDate, model.EndDate);
 
 				ViewBag.Area = "";
 				ViewBag.Controller = "Account";
 				ViewBag.Action = "Details";
-				ViewBag.ReturnUrl = "~/Account/Details/" + accountDetails.Id;
+				ViewBag.ReturnUrl = "~/Account/Details/" + model.Id;
+				ViewBag.ModelId = model.Id;
 
-				return View(accountDetails);
+				return View(model);
 			}
 			catch (Exception)
 			{

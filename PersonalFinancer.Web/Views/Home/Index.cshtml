@@ -1,4 +1,5 @@
-﻿@model DashboardServiceModel
+﻿@using PersonalFinancer.Services.Shared.Models;
+@model DashboardServiceModel
 
 @if (!User?.Identity?.IsAuthenticated ?? false)
 {
@@ -21,23 +22,9 @@ else
 			@await Component.InvokeAsync("AccountCardList", new { Model.Accounts, controller = "Account", action = "Details" })
 		</div>
 		<hr />
+
 		<!--Date Picker-->
-		//TODO: Make Component! Use it in All.cshtml view
-		<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
-			<div class="col-lg-5 form-floating">
-				<input type="text" asp-for="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-				<label asp-for="@Model.StartDate" class="form-label">Start Date</label>
-				<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
-			</div>
-			<div class="col-lg-5 form-floating">
-				<input type="text" asp-for="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-				<label asp-for="@Model.EndDate" class="form-label">End Date</label>
-				<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
-			</div>
-			<div class="col-lg-2">
-				<button type="submit" class="btn btn-lg btn-primary form-control form-control-lg" style="padding: 12.5px;">Filter</button>
-			</div>
-		</form>
+		<partial name="_DatePickerFormPartial" model="new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }"/>
 
 		@if (Model.LastTransactions.Any())
 		{

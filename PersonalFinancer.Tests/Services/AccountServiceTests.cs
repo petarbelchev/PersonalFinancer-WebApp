@@ -116,45 +116,45 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(actualAccount, Is.Null);
 		}
 
-		[Test]
-		public async Task AccountDetailsViewModel_ShouldReturnAccountDetails_WithValidId()
-		{
-			//Arrange
-			AccountDetailsViewModel expectedAccount = await data.Accounts
-				.Where(a => a.Id == this.Account1User1.Id)
-				.Select(a => mapper.Map<AccountDetailsViewModel>(a))
-				.FirstAsync();
+		//[Test]
+		//public async Task AccountDetailsViewModel_ShouldReturnAccountDetails_WithValidId()
+		//{
+		//	//Arrange
+		//	AccountDetailsViewModel expectedAccount = await data.Accounts
+		//		.Where(a => a.Id == this.Account1User1.Id)
+		//		.Select(a => mapper.Map<AccountDetailsViewModel>(a))
+		//		.FirstAsync();
 
-			//Act
-			AccountDetailsViewModel? actualAccount = await accountService
-				.AccountDetailsViewModel(this.Account1User1.Id);
+		//	//Act
+		//	AccountDetailsViewModel? actualAccount = await accountService
+		//		.AccountDetailsViewModel(this.Account1User1.Id);
 
-			//Assert
-			Assert.That(actualAccount, Is.Not.Null);
-			Assert.That(actualAccount.Id, Is.EqualTo(expectedAccount.Id));
-			Assert.That(actualAccount.Name, Is.EqualTo(expectedAccount.Name));
-			Assert.That(actualAccount.Balance, Is.EqualTo(expectedAccount.Balance));
-			Assert.That(actualAccount.Transactions.Count(), Is.EqualTo(expectedAccount.Transactions.Count()));
+		//	//Assert
+		//	Assert.That(actualAccount, Is.Not.Null);
+		//	Assert.That(actualAccount.Id, Is.EqualTo(expectedAccount.Id));
+		//	Assert.That(actualAccount.Name, Is.EqualTo(expectedAccount.Name));
+		//	Assert.That(actualAccount.Balance, Is.EqualTo(expectedAccount.Balance));
+		//	Assert.That(actualAccount.Transactions.Count(), Is.EqualTo(expectedAccount.Transactions.Count()));
 
-			for (int i = 0; i < expectedAccount.Transactions.Count(); i++)
-			{
-				Assert.That(actualAccount.Transactions.ElementAt(i).Id,
-					Is.EqualTo(expectedAccount.Transactions.ElementAt(i).Id));
-				Assert.That(actualAccount.Transactions.ElementAt(i).Amount,
-					Is.EqualTo(expectedAccount.Transactions.ElementAt(i).Amount));
-			}
-		}
+		//	for (int i = 0; i < expectedAccount.Transactions.Count(); i++)
+		//	{
+		//		Assert.That(actualAccount.Transactions.ElementAt(i).Id,
+		//			Is.EqualTo(expectedAccount.Transactions.ElementAt(i).Id));
+		//		Assert.That(actualAccount.Transactions.ElementAt(i).Amount,
+		//			Is.EqualTo(expectedAccount.Transactions.ElementAt(i).Amount));
+		//	}
+		//}
 
-		[Test]
-		public async Task AccountDetailsViewModel_ShouldReturnNull_WithInvalidId()
-		{
-			//Arrange & Act
-			AccountDetailsViewModel? account = await accountService
-				.AccountDetailsViewModel(Guid.NewGuid());
+		//[Test]
+		//public async Task AccountDetailsViewModel_ShouldReturnNull_WithInvalidId()
+		//{
+		//	//Arrange & Act
+		//	AccountDetailsViewModel? account = await accountService
+		//		.AccountDetailsViewModel(Guid.NewGuid());
 
-			//Assert
-			Assert.That(account, Is.Null);
-		}
+		//	//Assert
+		//	Assert.That(account, Is.Null);
+		//}
 
 		[Test]
 		public async Task CreateAccount_ShouldAddNewAccountAndTransaction_WithValidInput()

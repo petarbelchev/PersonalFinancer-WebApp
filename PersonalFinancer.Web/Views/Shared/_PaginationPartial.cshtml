@@ -1,0 +1,42 @@
+﻿<div class="d-flex justify-content-between align-items-center">
+	<p>@Model.FirstTransaction to @Model.LastTransaction from @Model.TotalTransactions transactions</p>
+	<ul class="pagination" style="margin-top: 25px;">
+		<li class="page-item @(Model.Page == 1 ? "disabled" : string.Empty)">
+			<a class="page-link" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@(Model.Page - 1)"
+			   asp-route-id="@ViewBag.ModelId" asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">Previous</a>
+		</li>
+		<li class="page-item @(Model.Page == 1 ? "active" : string.Empty)">
+			<a class="page-link" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="1"
+			   asp-route-id="@ViewBag.ModelId" asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">1</a>
+		</li>
+		@if (Model.Page - 3 > 1)
+		{
+			<li class="page-item"><p class="page-link">...</p></li>
+		}
+		@for (int i = Model.Page - 2; i <= Model.Page + 2; i++)
+		{
+			if (i > 1 && i < Model.Pages)
+			{
+				<li class="page-item @(Model.Page == i ? "active" : string.Empty)">
+					<a class="page-link" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@i"
+			   asp-route-id="@ViewBag.ModelId" asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">@i</a>
+				</li>
+			}
+		}
+		@if (Model.Page + 3 < Model.Pages)
+		{
+			<li class="page-item"><p class="page-link">...</p></li>
+		}
+		@if (Model.Pages > 1)
+		{
+			<li class="page-item @(Model.Page == Model.Pages ? "active" : string.Empty)">
+				<a class="page-link" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@Model.Pages"
+			   asp-route-id="@ViewBag.ModelId" asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">@Model.Pages</a>
+			</li>
+		}
+		<li class="page-item @(Model.Page == Model.Pages ? "disabled" : string.Empty)">
+			<a class="page-link" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@(Model.Page + 1)"
+			   asp-route-id="@ViewBag.ModelId" asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">Next</a>
+		</li>
+	</ul>
+</div>

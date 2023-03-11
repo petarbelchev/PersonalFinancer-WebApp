@@ -1,167 +1,22 @@
-﻿@model AllTransactionsServiceModel
+﻿@using PersonalFinancer.Services.Shared.Models;
+@model AllTransactionsServiceModel
 @{
 	ViewData["Title"] = "All Transactions";
 }
 
 <!--DatePicker-->
-<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
-	<div class="col-lg-5 form-floating">
-		<input type="text" asp-for="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-		<label asp-for="@Model.StartDate" class="form-label">Start Date</label>
-		<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
-	</div>
-	<div class="col-lg-5 form-floating">
-		<input type="text" asp-for="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-		<label asp-for="@Model.EndDate" class="form-label">End Date</label>
-		<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
-	</div>
-	<div class="col-lg-2">
-		<button type="submit" class="btn btn-lg btn-primary form-control form-control-lg" style="padding: 12.5px;">Filter</button>
-	</div>
-</form>
+<partial name="_DatePickerFormPartial" model="new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }" />
 
 @if (Model.Transactions.Any())
 {
-	//TODO: Make Table Component!
-
 	<!--Pagination-->
-	<div class="d-flex justify-content-between align-items-center">
-		<p>@Model.FirstTransaction to @Model.LastTransaction from @Model.TotalTransactions transactions</p>
-		<ul class="pagination" style="margin-top: 25px;">
-			<li class="page-item @(Model.Page == 1 ? "disabled" : string.Empty)">
-				<a class="page-link" asp-controller="Transaction" asp-action="All" asp-route-page="@(Model.Page - 1)"
-			   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">Previous</a>
-			</li>
-			<li class="page-item @(Model.Page == 1 ? "active" : string.Empty)">
-				<a class="page-link" asp-controller="Transaction" asp-action="All" asp-route-page="1"
-			   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">1</a>
-			</li>
-			@if (Model.Page - 3 > 1)
-			{
-				<li class="page-item"><p class="page-link">...</p></li>
-			}
-			@for (int i = Model.Page - 2; i <= Model.Page + 2; i++)
-			{
+	<partial name="_PaginationPartial" />
 
-				if (i > 1 && i < Model.Pages)
-				{
-					<li class="page-item @(Model.Page == i ? "active" : string.Empty)">
-						<a class="page-link" asp-controller="Transaction" asp-action="All" asp-route-page="@i"
-			   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">@i</a>
-					</li>
-				}
-			}
-			@if (Model.Page + 3 < Model.Pages)
-			{
-				<li class="page-item"><p class="page-link">...</p></li>
-			}
-			@if (Model.Pages > 1)
-			{
-				<li class="page-item @(Model.Page == Model.Pages ? "active" : string.Empty)">
-					<a class="page-link" asp-controller="Transaction" asp-action="All" asp-route-page="@Model.Pages"
-			   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">@Model.Pages</a>
-				</li>
-			}
-			<li class="page-item @(Model.Page == Model.Pages ? "disabled" : string.Empty)">
-				<a class="page-link" asp-controller="Transaction" asp-action="All" asp-route-page="@(Model.Page + 1)"
-			   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">Next</a>
-			</li>
-		</ul>
-	</div>
 	<!--Table-->
-	<div class="row">
-		<div class="col-md-12">
-			<div class="card">
-				<div class="card-header">
-					<h6>All Transactions</h6>
-				</div>
-				<table class="table table-hover">
-					<thead>
-						<tr>
-							<th scope="col"></th>
-							<th scope="col">Date</th>
-							<th scope="col">Category</th>
-							<th scope="col">Type</th>
-							<th scope="col">Amount</th>
-							<th scope="col">Account</th>
-							<th scope="col">Refference</th>
-							<th scope="col"></th>
-						</tr>
-					</thead>
-					<tbody id="tableBody" style="vertical-align: text-top;">
-						@foreach (var transaction in Model.Transactions)
-						{
-							<tr>
-								@if (transaction.TransactionType == TransactionType.Income.ToString())
-								{
-									<td><img src="/icons/greenArrow.png" style="max-width: 38px;"></td>
-								}
-								else
-								{
-									<td><img src="/icons/redArrow.png" style="max-width: 38px;"></td>
-								}
-								<td>@transaction.CreatedOn</td>
-								<td>@transaction.CategoryName</td>
-								<td>@transaction.TransactionType</td>
-								<td>@transaction.Amount @transaction.AccountCurrencyName</td>
-								<td>@transaction.AccountName</td>
-								<td>@transaction.Refference</td>
-								<td>
-									<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
-							   asp-route-returnUrl="~/Transaction/All" class="btn btn-warning">Edit</a>
-									<button class="btn btn-danger" id="@transaction.Id">Delete</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-	<!--Pagination-->
-	<div class="d-flex justify-content-between align-items-center">
-		<p>@Model.FirstTransaction to @Model.LastTransaction from @Model.TotalTransactions transactions</p>
-		<ul class="pagination" style="margin-top: 25px;">
-			<li class="page-item @(Model.Page == 1 ? "disabled" : string.Empty)">
-				<a class="page-link" asp-controller="Transaction" asp-action="All" asp-route-page="@(Model.Page - 1)"
-			   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">Previous</a>
-			</li>
-			<li class="page-item @(Model.Page == 1 ? "active" : string.Empty)">
-				<a class="page-link" asp-controller="Transaction" asp-action="All" asp-route-page="1"
-			   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">1</a>
-			</li>
-			@if (Model.Page - 3 > 1)
-			{
-				<li class="page-item"><p class="page-link">...</p></li>
-			}
-			@for (int i = Model.Page - 2; i <= Model.Page + 2; i++)
-			{
+	<partial name="_TransactionsTablePartial" model='new TransactionsTableModel { Name = "All Transactions", UserTransactions = Model.Transactions }' />
 
-				if (i > 1 && i < Model.Pages)
-				{
-					<li class="page-item @(Model.Page == i ? "active" : string.Empty)">
-						<a class="page-link" asp-controller="Transaction" asp-action="All" asp-route-page="@i"
-			   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">@i</a>
-					</li>
-				}
-			}
-			@if (Model.Page + 3 < Model.Pages)
-			{
-				<li class="page-item"><p class="page-link">...</p></li>
-			}
-			@if (Model.Pages > 1)
-			{
-				<li class="page-item @(Model.Page == Model.Pages ? "active" : string.Empty)">
-					<a class="page-link" asp-controller="Transaction" asp-action="All" asp-route-page="@Model.Pages"
-			   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">@Model.Pages</a>
-				</li>
-			}
-			<li class="page-item @(Model.Page == Model.Pages ? "disabled" : string.Empty)">
-				<a class="page-link" asp-controller="Transaction" asp-action="All" asp-route-page="@(Model.Page + 1)"
-			   asp-route-startDate="@Model.StartDate" asp-route-endDate="@Model.EndDate">Next</a>
-			</li>
-		</ul>
-	</div>
+	<!--Pagination-->
+	<partial name="_PaginationPartial" />
 }
 else
 {
@@ -174,6 +29,7 @@ else
 
 @section Scripts {
 	<partial name="_DatePickerScriptPartial" />
+	<partial name="_ValidationScriptsPartial" />
 	<script>
 		document.getElementById('tableBody').addEventListener('click', async (e) => {
 			if (e.target.tagName == 'BUTTON') {

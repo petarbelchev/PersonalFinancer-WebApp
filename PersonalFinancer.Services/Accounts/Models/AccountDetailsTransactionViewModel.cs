@@ -6,6 +6,8 @@
 
         public decimal Amount { get; init; }
 
+        public string CurrencyName { get; set; } = null!;
+
         public string CategoryName { get; init; } = null!;
 
         public string TransactionType { get; init; } = null!;

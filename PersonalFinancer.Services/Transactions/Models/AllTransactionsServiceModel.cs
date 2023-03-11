@@ -1,19 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using PersonalFinancer.Services.Shared.Models;
 
 namespace PersonalFinancer.Services.Transactions.Models
 {
-	public class AllTransactionsServiceModel
+	public class AllTransactionsServiceModel : DateFilterModel
 	{
-		[Required(ErrorMessage = "Start Date is required.")]
-		[DataType(DataType.DateTime)]
-		[Display(Name = "Start Date")]
-		public DateTime? StartDate { get; set; }
-
-		[Required(ErrorMessage = "End Date is required.")]
-		[DataType(DataType.DateTime)]
-		[Display(Name = "End Date")]
-		public DateTime? EndDate { get; set; }
-
 		public IEnumerable<TransactionExtendedViewModel> Transactions { get; set; }
 			= new List<TransactionExtendedViewModel>();
 

@@ -66,6 +66,33 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 				ViewBag.Controller = "Users";
 				ViewBag.Action = "AccountDetails";
 				ViewBag.ReturnUrl = "~/Admin/Users/AccountDetails/" + id;
+				ViewBag.ModelId = model.Id;
+
+				return View(model);
+			}
+			catch (NullReferenceException)
+			{
+				return BadRequest();
+			}
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> AccountDetails(AccountDetailsViewModel model)
+		{
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
+
+			try
+			{
+				model = await accountService.AccountDetailsViewModel(model.Id, model.StartDate, model.EndDate);
+
+				ViewBag.Area = "Admin";
+				ViewBag.Controller = "Users";
+				ViewBag.Action = "AccountDetails";
+				ViewBag.ReturnUrl = "~/Admin/Users/AccountDetails/" + model.Id;
+				ViewBag.ModelId = model.Id;
 
 				return View(model);
 			}

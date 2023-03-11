@@ -1,0 +1,79 @@
+﻿@using PersonalFinancer.Services.Shared.Models;
+@model TransactionsTableModel
+
+<div class="row">
+	<div class="col-md-12">
+		<div class="card">
+			<div class="card-header">
+				<h6>@Model.Name</h6>
+			</div>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th scope="col"></th>
+						@foreach (var head in Model.Heads)
+						{
+							<th scope="col">@head</th>
+						}
+						<th scope="col"></th>
+					</tr>
+				</thead>
+				<tbody id="tableBody" style="vertical-align: text-top;">
+					@if (Model.UserTransactions != null)
+					{
+						@foreach (var transaction in Model.UserTransactions)
+						{
+							<tr>
+								@if (transaction.TransactionType == TransactionType.Income.ToString())
+								{
+									<td><img src="/icons/greenArrow.png" style="max-width: 38px;"></td>
+								}
+								else
+								{
+									<td><img src="/icons/redArrow.png" style="max-width: 38px;"></td>
+								}
+								<td>@transaction.CreatedOn</td>
+								<td>@transaction.CategoryName</td>
+								<td>@transaction.TransactionType</td>
+								<td>@transaction.Amount @transaction.AccountCurrencyName</td>
+								<td>@transaction.AccountName</td>
+								<td>@transaction.Refference</td>
+								<td>
+									<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
+							   asp-route-returnUrl="~/Transaction/All" class="btn btn-warning">Edit</a>
+									<button class="btn btn-danger" id="@transaction.Id">Delete</button>
+								</td>
+							</tr>
+						}
+					}
+					else if (Model.AccountTransactions != null)
+					{
+						@foreach (var transaction in Model.AccountTransactions)
+						{
+							<tr>
+								@if (transaction.TransactionType == TransactionType.Income.ToString())
+								{
+									<td><img src="/icons/greenArrow.png" style="max-width: 38px;"></td>
+								}
+								else
+								{
+									<td><img src="/icons/redArrow.png" style="max-width: 38px;"></td>
+								}
+								<td>@transaction.CreatedOn</td>
+								<td>@transaction.CategoryName</td>
+								<td>@transaction.TransactionType</td>
+								<td>@transaction.Amount @transaction.CurrencyName</td>
+								<td>@transaction.Refference</td>
+								<td>
+									<a asp-area="" asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
+							   asp-route-returnUrl="@ViewBag.ReturnUrl" class="btn btn-warning">Edit</a>
+									<button class="btn btn-danger" id="@transaction.Id">Delete</button>
+								</td>
+							</tr>
+						}
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,22 @@
+﻿@using PersonalFinancer.Services.Shared.Models
+@model DateFilterModel
+
+<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
+	@if (Model.Id == Guid.Empty)
+	{
+		<input type="hidden" name="Id" asp-for="@Model.Id" />
+	}
+	<div class="col-lg-5 form-floating">
+		<input type="text" name="StartDate" asp-for="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+		<label asp-for="@Model.StartDate" class="form-label">Start Date</label>
+		<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
+	</div>
+	<div class="col-lg-5 form-floating">
+		<input type="text" name="EndDate" asp-for="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+		<label asp-for="@Model.EndDate" class="form-label">End Date</label>
+		<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
+	</div>
+	<div class="col-lg-2">
+		<button type="submit" class="btn btn-lg btn-primary form-control form-control-lg" style="padding: 12.5px;">Filter</button>
+	</div>
+</form>

@@ -101,6 +101,7 @@ namespace PersonalFinancer.Services.Accounts
 						{
 							Id = t.Id,
 							Amount = t.Amount,
+							CurrencyName = a.Currency.Name,
 							CreatedOn = t.CreatedOn,
 							CategoryName = t.Category.Name,
 							TransactionType = t.TransactionType.ToString(),

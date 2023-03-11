@@ -60,8 +60,11 @@ namespace PersonalFinancer.Web.Controllers
 			AllTransactionsServiceModel transactions =
 				await transactionsService.AllTransactionsServiceModel(User.Id(), model);
 
+			ViewBag.Controller = "Transaction";
+			ViewBag.Action = "All";
+
 			return View(transactions);
-		     }
+		}
 
 		/// <summary>
 		/// Returns View with all user's transactions for specific period.
@@ -79,6 +82,9 @@ namespace PersonalFinancer.Web.Controllers
 			{
 				AllTransactionsServiceModel transactions = await transactionsService
 					.AllTransactionsServiceModel(User.Id(), model);
+
+				ViewBag.Controller = "Transaction";
+				ViewBag.Action = "All";
 
 				return View(transactions);
 			}
