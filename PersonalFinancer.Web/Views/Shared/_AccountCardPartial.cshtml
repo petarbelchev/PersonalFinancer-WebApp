@@ -1,0 +1,20 @@
+﻿@model IEnumerable<AccountCardViewModel>
+
+@foreach (var account in Model)
+{
+	<div class="col-sm-3 mb-3 mb-sm-0">
+		<div class="card formField align-items-center" style="margin-left: 2px; margin-right: 2px;">
+			<div class="d-flex flex-row align-items-center mb-2">
+				<div class="p-2">
+					<img src="/icons/icons8-wallet-64.png">
+				</div>
+				<div class="card-body p-2 flex-grow-1">
+					<h5 class="card-title">@account.Name</h5>
+					<p class="card-text">@account.Balance @account.CurrencyName</p>
+				</div>
+			</div>
+			<a asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action"
+		   asp-route-id="@account.Id" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Details</a>
+		</div>
+	</div>
+}

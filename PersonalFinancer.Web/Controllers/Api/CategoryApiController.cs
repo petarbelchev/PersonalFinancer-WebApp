@@ -25,18 +25,18 @@ namespace PersonalFinancer.Web.Controllers.Api
 				return Unauthorized();
 			}
 
-			CategoryViewModel? category = await categoryService.CategoryById(id);
-
-			if (category == null)
+			try
 			{
-				return NotFound();
+				return await categoryService.GetCategoryViewModel(id);
 			}
-
-			return category;
+			catch (InvalidOperationException)
+			{
+				return BadRequest();
+			}
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<CategoryViewModel>> CreateCategory(CategoryViewModel category)
+		public async Task<ActionResult<CategoryViewModel>> CreateCategory(CategoryViewModel model)
 		{
 			if (!User.Identity?.IsAuthenticated ?? false)
 			{
@@ -45,12 +45,11 @@ namespace PersonalFinancer.Web.Controllers.Api
 
 			try
 			{
-				CategoryViewModel newCategory = await categoryService
-					.CreateCategory(User.Id(), category.Name);
+				await categoryService.CreateCategory(User.Id(), model);
 
-				return Created(string.Empty, newCategory);
+				return Created(string.Empty, model);
 			}
-			catch (InvalidOperationException ex)
+			catch (ArgumentException ex)
 			{
 				return BadRequest(ex.Message);
 			}
@@ -70,13 +69,9 @@ namespace PersonalFinancer.Web.Controllers.Api
 
 				return NoContent();
 			}
-			catch (ArgumentNullException ex)
+			catch (InvalidOperationException)
 			{
-				return NotFound(ex.Message);
-			}
-			catch (InvalidOperationException ex)
-			{
-				return BadRequest(ex.Message);
+				return BadRequest();
 			}
 		}
 	}

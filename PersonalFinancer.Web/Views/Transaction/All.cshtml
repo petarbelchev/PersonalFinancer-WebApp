@@ -1,5 +1,5 @@
 ﻿@using PersonalFinancer.Services.Shared.Models;
-@model AllTransactionsServiceModel
+@model UserTransactionsExtendedViewModel
 @{
 	ViewData["Title"] = "All Transactions";
 }
@@ -28,7 +28,6 @@ else
 }
 
 @section Scripts {
-	<partial name="_DatePickerScriptPartial" />
 	<partial name="_ValidationScriptsPartial" />
 	<script>
 		document.getElementById('tableBody').addEventListener('click', async (e) => {

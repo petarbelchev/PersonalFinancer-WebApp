@@ -73,7 +73,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange & Act
 			CategoryViewModel? category = await categoryService
-				.CategoryById(this.Category1.Id);
+				.GetCategoryViewModel(this.Category1.Id);
 
 			//Assert
 			Assert.That(category, Is.Not.Null);
@@ -86,7 +86,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange & Act
 			CategoryViewModel? category = await categoryService
-				.CategoryById(Guid.NewGuid());
+				.GetCategoryViewModel(Guid.NewGuid());
 
 			//Assert
 			Assert.That(category, Is.Null);
@@ -96,22 +96,26 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateCategory_ShouldAddNewCategory_WithValidData()
 		{
 			//Arrange
-			string newCategoryName = "NewCategory";
+			var newCategoryName = "NewCategory";
+			var model = new CategoryViewModel { Name = newCategoryName };
 
 			//Act
-			CategoryViewModel newCategory = await categoryService
-				.CreateCategory(this.User1.Id, newCategoryName);
+			await categoryService.CreateCategory(this.User1.Id, model);
 
 			//Assert
-			Assert.That(newCategory.Name, Is.EqualTo(newCategoryName));
-			Assert.That(newCategory.UserId, Is.EqualTo(this.User1.Id));
+			Assert.That(model.Name, Is.EqualTo(newCategoryName));
+			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
+			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
 		}
 
 		[Test]
 		public void CreateCategory_ShouldThrowException_WithExistingName()
 		{
+			//Arrange
+			var model = new CategoryViewModel { Name = this.Category2.Name };
+
 			//Act & Assert
-			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, this.Category2.Name),
+			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, model),
 				Throws.TypeOf<InvalidOperationException>().With.Message
 					.EqualTo("Category with the same name exist!"));
 		}
@@ -121,8 +125,11 @@ namespace PersonalFinancer.Tests.Services
 		[TestCase("NameWith26CharactersLong!!")]
 		public void CreateAccountType_ShouldThrowException_WithInvalidName(string categoryName)
 		{
+			//Arrange
+			var model = new CategoryViewModel { Name = categoryName };
+
 			//Act & Assert
-			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, categoryName),
+			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, model),
 				Throws.TypeOf<InvalidOperationException>().With.Message
 					.EqualTo("Category name must be between 2 and 25 characters long."));
 		}
@@ -141,18 +148,19 @@ namespace PersonalFinancer.Tests.Services
 			data.Categories.Add(category);
 			data.SaveChanges();
 
+			var model = new CategoryViewModel { Name = category.Name };
+
 			//Assert: The Category is deleted
 			Assert.That(category.IsDeleted, Is.True);
 
 			//Act: Recreate deleted Category
-			CategoryViewModel recreatedCategory = await categoryService
-				.CreateCategory(this.User1.Id, category.Name);
+			await categoryService.CreateCategory(this.User1.Id, model);
 
 			//Assert: The Category is not deleted anymore and the data is correct
 			Assert.That(category.IsDeleted, Is.False);
-			Assert.That(recreatedCategory.Id, Is.EqualTo(category.Id));
-			Assert.That(recreatedCategory.Name, Is.EqualTo(category.Name));
-			Assert.That(recreatedCategory.UserId, Is.EqualTo(category.UserId));
+			Assert.That(model.Id, Is.EqualTo(category.Id));
+			Assert.That(model.Name, Is.EqualTo(category.Name));
+			Assert.That(model.UserId, Is.EqualTo(category.UserId));
 		}
 
 		[Test]
@@ -193,10 +201,10 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act: Get actual users categories
 			IEnumerable<CategoryViewModel> actualFirstUserCategories = await categoryService
-				.UserCategories(this.User1.Id);
+				.GetUserCategories(this.User1.Id);
 
 			IEnumerable<CategoryViewModel> actualSecondUserCategories = await categoryService
-				.UserCategories(this.User2.Id);
+				.GetUserCategories(this.User2.Id);
 
 			//Assert
 			Assert.That(actualFirstUserCategories,
@@ -228,7 +236,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CategoryIdByName_ShouldReturnId_WithValidCategoryName()
 		{
 			//Arrange & Act
-			Guid categoryId = await categoryService.CategoryIdByName(this.Category1.Name);
+			Guid categoryId = await categoryService.GetCategoryIdByName(this.Category1.Name);
 
 			//Assert
 			Assert.That(categoryId, Is.EqualTo(this.Category1.Id));
@@ -238,7 +246,7 @@ namespace PersonalFinancer.Tests.Services
 		public void CategoryIdByName_ShouldThrowException_WithInvalidCategoryName()
 		{
 			//Act & Assert
-			Assert.That(async () => await categoryService.CategoryIdByName("NotExistCategory"),
+			Assert.That(async () => await categoryService.GetCategoryIdByName("NotExistCategory"),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 	}

@@ -8,9 +8,6 @@ using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {
-	/// <summary>
-	/// User Controller takes care of everything related to Users.
-	/// </summary>
 	public class UserController : Controller
 	{
 		private readonly UserManager<ApplicationUser> userManager;
@@ -24,20 +21,8 @@ namespace PersonalFinancer.Web.Controllers
 			this.signInManager = signInManager;
 		}
 
-		/// <summary>
-		/// Returns Register Form Model for Register page.
-		/// </summary>
-		[HttpGet]
-		public IActionResult Register()
-		{
-			RegisterFormModel model = new RegisterFormModel();
+		public IActionResult Register() => View(new RegisterFormModel());
 
-			return View(model);
-		}
-
-		/// <summary>
-		/// Handle with Register Form Model and register a new User.
-		/// </summary>
 		[HttpPost]
 		public async Task<IActionResult> Register(RegisterFormModel model)
 		{
@@ -87,31 +72,21 @@ namespace PersonalFinancer.Web.Controllers
 			return RedirectToAction("Index", "Home");
 		}
 
-		/// <summary>
-		/// Returns Login Form Model for Login page.
-		/// </summary>
-		[HttpGet]
-		public IActionResult Login()
-		{
-			LoginFormModel loginFormModel = new LoginFormModel();
-
-			return View(loginFormModel);
-		}
-
-		/// <summary>
-		/// Handle with Login Form Model and login a User.
-		/// </summary>
-		public async Task<IActionResult> Login(LoginFormModel loginFormModel)
+		public IActionResult Login() => View(new LoginFormModel());
+		
+		[HttpPost]
+		public async Task<IActionResult> Login(LoginFormModel model)
 		{
 			if (!ModelState.IsValid)
 			{
-				return View(loginFormModel);
+				return View(model);
 			}
 
 			var result = await signInManager.PasswordSignInAsync(
-				loginFormModel.Email,
-				loginFormModel.Password,
-				loginFormModel.RememberMe, false);
+												model.Email,
+												model.Password,
+												model.RememberMe,
+												lockoutOnFailure: false);
 
 			if (result.Succeeded)
 			{
@@ -120,12 +95,9 @@ namespace PersonalFinancer.Web.Controllers
 
 			ModelState.AddModelError(string.Empty, "Invalid login attempt.");
 
-			return View(loginFormModel);
+			return View(model);
 		}
 
-		/// <summary>
-		/// Logout a User.
-		/// </summary>
 		[Authorize]
 		public async Task<IActionResult> Logout()
 		{

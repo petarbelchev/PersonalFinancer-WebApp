@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.User;
-using PersonalFinancer.Services.User.Models;
+using System;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
@@ -25,55 +25,38 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		}
 
 		public async Task<IActionResult> Index()
-		{
-			IEnumerable<UserViewModel> users = await userService.All();
+			=> View(await userService.All());
 
-			return View(users);
-		}
-
-		[HttpGet]
 		public async Task<IActionResult> Details(string id)
 		{
-			try
-			{
-				UserDetailsViewModel user = await userService.UserDetails(id);
+			ViewBag.Area = "Admin";
+			ViewBag.Controller = "Users";
+			ViewBag.Action = "AccountDetails";
 
-				return View(user);
-			}
-			catch (NullReferenceException)
-			{
-				return NotFound();
-			}
+			return View(await userService.UserDetails(id));
 		}
 
-		[HttpGet]
-		public async Task<IActionResult> AccountDetails(Guid id, string? startDate, string? endDate, int page = 1)
+		public async Task<IActionResult> AccountDetails
+			(Guid id, string? startDate, string? endDate, int page = 1)
 		{
-			try
+			AccountDetailsViewModel model;
+
+			if (startDate == null || endDate == null)
 			{
-				AccountDetailsViewModel model;
-
-				if (startDate == null || endDate == null)
-				{
-					model = await accountService.AccountDetailsViewModel(id, DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, page);
-				}
-				else
-				{
-					model = await accountService.AccountDetailsViewModel(id, DateTime.Parse(startDate), DateTime.Parse(endDate), page);
-				}
-
-				ViewBag.Area = "Admin";
-				ViewBag.Controller = "Users";
-				ViewBag.Action = "AccountDetails";
-				ViewBag.ReturnUrl = "~/Admin/Users/AccountDetails/" + id;
-				ViewBag.ModelId = model.Id;
-
-				return View(model);
+				model = await accountService.GetAccountDetailsViewModel(id, DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, page);
 			}
-			catch (NullReferenceException)
+			else
 			{
-				return BadRequest();
+				model = await accountService.GetAccountDetailsViewModel(id, DateTime.Parse(startDate), DateTime.Parse(endDate), page);
 			}
+
+			ViewBag.Area = "Admin";
+			ViewBag.Controller = "Users";
+			ViewBag.Action = "AccountDetails";
+			ViewBag.ReturnUrl = "~/Admin/Users/AccountDetails/" + id;
+			ViewBag.ModelId = model.Id;
+
+			return View(model);
 		}
 
 		[HttpPost]
@@ -84,22 +67,15 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 				return View(model);
 			}
 
-			try
-			{
-				model = await accountService.AccountDetailsViewModel(model.Id, model.StartDate, model.EndDate);
+			model = await accountService.GetAccountDetailsViewModel(model.Id, model.StartDate, model.EndDate);
 
-				ViewBag.Area = "Admin";
-				ViewBag.Controller = "Users";
-				ViewBag.Action = "AccountDetails";
-				ViewBag.ReturnUrl = "~/Admin/Users/AccountDetails/" + model.Id;
-				ViewBag.ModelId = model.Id;
+			ViewBag.Area = "Admin";
+			ViewBag.Controller = "Users";
+			ViewBag.Action = "AccountDetails";
+			ViewBag.ReturnUrl = "~/Admin/Users/AccountDetails/" + model.Id;
+			ViewBag.ModelId = model.Id;
 
-				return View(model);
-			}
-			catch (NullReferenceException)
-			{
-				return BadRequest();
-			}
+			return View(model);
 		}
 	}
 }

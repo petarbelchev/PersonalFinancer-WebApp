@@ -1,5 +1,5 @@
 ﻿@using PersonalFinancer.Web.Infrastructure;
-@model AccountFormModel
+@model CreateAccountFormModel
 @{
 	ViewData["Title"] = "Create Account";
 }
@@ -35,7 +35,7 @@
 						<label class="form-label">Write New Account Type's name...</label>
 						<p style="color: red;"></p>
 					</div>
-					<a class="btn btn-primary" id="createAccountTypeBtn">Create New Account Type</a>
+					<a class="btn btn-secondary" id="createAccountTypeBtn">Create New Account Type</a>
 					<a class="btn btn-danger" style="display: none;" id="deleteAccountTypeBtn">Delete This Account Type</a>
 				</div>
 				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
@@ -52,7 +52,7 @@
 						<label class="form-label">Write New Currency's name...</label>
 						<p style="color: red;"></p>
 					</div>
-					<a class="btn btn-primary" id="createCurrencyBtn">Create New Currency</a>
+					<a class="btn btn-secondary" id="createCurrencyBtn">Create New Currency</a>
 					<a class="btn btn-danger" style="display: none;" id="deleteCurrencyBtn">Delete This Currency</a>
 				</div>
 				<div>

@@ -1,6 +1,6 @@
 ﻿namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class EditAccountFormModel : AccountFormModel
+	public class EditAccountFormModel : CreateAccountFormModel
 	{
         public Guid Id { get; set; }
 

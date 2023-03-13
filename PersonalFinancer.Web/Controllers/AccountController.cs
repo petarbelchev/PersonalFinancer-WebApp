@@ -27,16 +27,15 @@ namespace PersonalFinancer.Web.Controllers
 			this.accountTypeService = accountTypeService;
 		}
 
-		[HttpGet]
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Create()
 		{
 			string userId = User.Id();
 
-			AccountFormModel formModel = new AccountFormModel
+			CreateAccountFormModel formModel = new CreateAccountFormModel
 			{
-				AccountTypes = await accountTypeService.AccountTypesViewModel(userId),
-				Currencies = await currencyService.UserCurrencies(userId)
+				AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(userId),
+				Currencies = await currencyService.GetUserCurrencies(userId)
 			};
 
 			return View(formModel);
@@ -44,66 +43,65 @@ namespace PersonalFinancer.Web.Controllers
 
 		[HttpPost]
 		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Create(AccountFormModel accountFormModel)
+		public async Task<IActionResult> Create(CreateAccountFormModel model)
 		{
 			if (!ModelState.IsValid)
 			{
-				return View(accountFormModel);
+				return View(model);
 			}
 
 			try
 			{
-				Guid newAccountId = await accountService.CreateAccount(User.Id(), accountFormModel);
+				Guid newAccountId = await accountService.CreateAccount(User.Id(), model);
 
 				TempData["successMsg"] = "You create a new account successfully!";
 
 				return RedirectToAction(nameof(Details), new { id = newAccountId });
 			}
-			catch (InvalidOperationException)
+			catch (ArgumentException)
 			{
-				ModelState.AddModelError(nameof(accountFormModel.Name), "You already have Account with that name.");
+				ModelState.AddModelError(nameof(model.Name), "You already have Account with that name.");
 
-				accountFormModel.AccountTypes = await accountTypeService.AccountTypesViewModel(User.Id());
-				accountFormModel.Currencies = await currencyService.UserCurrencies(User.Id());
-
-				return View(accountFormModel);
-			}
-		}
-
-		[HttpGet]
-		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Details(Guid id, string? startDate, string? endDate, int page = 1)
-		{
-			if (!await accountService.IsAccountOwner(User.Id(), id))
-			{
-				return Unauthorized();
-			}
-
-			try
-			{
-				AccountDetailsViewModel model;
-
-				if (startDate == null || endDate == null)
-				{
-					model = await accountService.AccountDetailsViewModel(id, DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, page);
-				}
-				else
-				{
-					model = await accountService.AccountDetailsViewModel(id, DateTime.Parse(startDate), DateTime.Parse(endDate), page);
-				}
-
-				ViewBag.Area = "";
-				ViewBag.Controller = "Account";
-				ViewBag.Action = "Details";
-				ViewBag.ReturnUrl = "~/Account/Details/" + model.Id;
-				ViewBag.ModelId = model.Id;
+				model.AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(User.Id());
+				model.Currencies = await currencyService.GetUserCurrencies(User.Id());
 
 				return View(model);
 			}
-			catch (NullReferenceException)
+		}
+
+		[Authorize(Roles = UserRoleName)]
+		public async Task<IActionResult> Details(Guid id, string? startDate, string? endDate, int page = 1)
+		{
+			AccountDetailsViewModel model;
+
+			try
+			{
+				if (!await accountService.IsAccountOwner(User.Id(), id))
+				{
+					return Unauthorized();
+				}
+
+				if (startDate == null || endDate == null)
+				{
+					model = await accountService.GetAccountDetailsViewModel(id, DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, page);
+				}
+				else
+				{
+					model = await accountService.GetAccountDetailsViewModel(id, DateTime.Parse(startDate), DateTime.Parse(endDate), page);
+				}
+			}
+			catch (InvalidOperationException)
 			{
 				return BadRequest();
 			}
+
+			ViewBag.Area = "";
+			ViewBag.Controller = "Account";
+			ViewBag.Action = "Details";
+			ViewBag.ReturnUrl = "~/Account/Details/" + model.Id;
+			ViewBag.ModelId = model.Id;
+
+			return View(model);
 		}
 
 		[HttpPost]
@@ -117,65 +115,73 @@ namespace PersonalFinancer.Web.Controllers
 
 			try
 			{
-				model = await accountService.AccountDetailsViewModel(model.Id, model.StartDate, model.EndDate);
+				model = await accountService.GetAccountDetailsViewModel(model.Id, model.StartDate, model.EndDate);
+			}
+			catch (InvalidOperationException)
+			{
+				return BadRequest();
+			}
 
-				ViewBag.Area = "";
-				ViewBag.Controller = "Account";
-				ViewBag.Action = "Details";
-				ViewBag.ReturnUrl = "~/Account/Details/" + model.Id;
-				ViewBag.ModelId = model.Id;
+			ViewBag.Area = "";
+			ViewBag.Controller = "Account";
+			ViewBag.Action = "Details";
+			ViewBag.ReturnUrl = "~/Account/Details/" + model.Id;
+			ViewBag.ModelId = model.Id;
+
+			return View(model);
+		}
+
+		public async Task<IActionResult> Delete(Guid id, string? returnUrl)
+		{
+			try
+			{
+				if (!await accountService.IsAccountOwner(User.Id(), id) && !User.IsAdmin())
+				{
+					return Unauthorized();
+				}
+
+				DeleteAccountViewModel model = await accountService.GetDeleteAccountViewModel(id);
+
+				if (returnUrl != null)
+				{
+					model.ReturnUrl = returnUrl;
+				}
 
 				return View(model);
 			}
-			catch (Exception)
+			catch (InvalidOperationException)
 			{
 				return BadRequest();
 			}
-		}
-
-		[HttpGet]
-		public async Task<IActionResult> Delete(Guid id, string? returnUrl)
-		{
-			if (!await accountService.IsAccountOwner(User.Id(), id) && !User.IsAdmin())
-			{
-				return Unauthorized();
-			}
-
-			DeleteAccountViewModel? accountModel = await accountService.DeleteAccountViewModel(id);
-
-			if (accountModel == null)
-			{
-				return BadRequest();
-			}
-
-			if (returnUrl != null)
-			{
-				accountModel.ReturnUrl = returnUrl;
-			}
-
-			return View(accountModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Delete(DeleteAccountViewModel accountModel, string confirmButton)
+		public async Task<IActionResult> Delete(DeleteAccountViewModel model, string confirmButton)
 		{
 			if (confirmButton == "reject")
 			{
-				return LocalRedirect(accountModel.ReturnUrl);
+				return LocalRedirect(model.ReturnUrl);
 			}
 
-			if (!await accountService.IsAccountOwner(User.Id(), accountModel.Id) && !User.IsAdmin())
+			try
 			{
-				return Unauthorized();
-			}
+				if (!await accountService.IsAccountOwner(User.Id(), model.Id) && !User.IsAdmin())
+				{
+					return Unauthorized();
+				}
 
-			await accountService.DeleteAccountById(accountModel.Id, User.Id(), accountModel.ShouldDeleteTransactions);
+				await accountService.DeleteAccount(model.Id, User.Id(), model.ShouldDeleteTransactions);
+			}
+			catch (InvalidOperationException)
+			{
+				return BadRequest();
+			}
 
 			if (User.IsAdmin())
 			{
 				TempData["successMsg"] = "You successfully delete user's account!";
 
-				return LocalRedirect("~/Admin/Users/Details/" + accountModel.OwnerId);
+				return LocalRedirect("~/Admin/Users/Details/" + model.OwnerId);
 			}
 
 			TempData["successMsg"] = "Your account was successfully deleted!";
@@ -183,65 +189,71 @@ namespace PersonalFinancer.Web.Controllers
 			return RedirectToAction("Index", "Home");
 		}
 
-		[HttpGet]
 		public async Task<IActionResult> Edit(Guid id, string? returnUrl)
 		{
-			EditAccountFormModel accountModel = await accountService.GetEditAccountFormModel(id);
-
-			if (!User.IsAdmin())
+			try
 			{
-				accountModel.Currencies = await currencyService.UserCurrencies(User.Id());
-				accountModel.AccountTypes = await accountTypeService.AccountTypesViewModel(User.Id());
-			}
-			else
-			{
-				accountModel.Currencies = await currencyService.UserCurrencies(accountModel.OwnerId);
-				accountModel.AccountTypes = await accountTypeService.AccountTypesViewModel(accountModel.OwnerId);
-			}
+				EditAccountFormModel model = await accountService.GetEditAccountFormModel(id);
 
-			if (returnUrl != null)
-			{
-				accountModel.ReturnUrl = returnUrl;
-			}
+				if (!User.IsAdmin())
+				{
+					model.Currencies = await currencyService.GetUserCurrencies(User.Id());
+					model.AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(User.Id());
+				}
+				else
+				{
+					model.Currencies = await currencyService.GetUserCurrencies(model.OwnerId);
+					model.AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(model.OwnerId);
+				}
 
-			return View(accountModel);
+				if (returnUrl != null)
+				{
+					model.ReturnUrl = returnUrl;
+				}
+
+				return View(model);
+			}
+			catch (InvalidOperationException)
+			{
+				return BadRequest();
+			}
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Edit(EditAccountFormModel accountModel)
+		public async Task<IActionResult> Edit(EditAccountFormModel model)
 		{
 			if (!ModelState.IsValid)
 			{
-				accountModel.Currencies = await currencyService.UserCurrencies(User.Id());
-				accountModel.AccountTypes = await accountTypeService.AccountTypesViewModel(User.Id());
+				model.Currencies = await currencyService.GetUserCurrencies(User.Id());
+				model.AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(User.Id());
 
-				return View(accountModel);
+				return View(model);
 			}
 
 			try
 			{
-				await accountService.EditAccount(accountModel, User.Id());
-
-				if (accountModel.ReturnUrl != null)
-				{
-					return LocalRedirect(accountModel.ReturnUrl);
-				}
-
-				return RedirectToAction(nameof(Details), new { id = accountModel.Id });
+				await accountService.EditAccount(model, User.Id());
 			}
-			catch (NullReferenceException)
+			catch (ArgumentException)
 			{
-				return BadRequest();
+				ModelState.AddModelError(nameof(model.Name), $"You already have Account with {model.Name} name.");
+
+				model.Currencies = await currencyService.GetUserCurrencies(User.Id());
+				model.AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(User.Id());
+
+				return View(model);
 			}
 			catch (InvalidOperationException)
 			{
-				ModelState.AddModelError(nameof(accountModel.Name), $"You already have Account with {accountModel.Name} name.");
-
-				accountModel.Currencies = await currencyService.UserCurrencies(User.Id());
-				accountModel.AccountTypes = await accountTypeService.AccountTypesViewModel(User.Id());
-
-				return View(accountModel);
+				return BadRequest();
 			}
+
+			if (model.ReturnUrl != null)
+			{
+				return LocalRedirect(model.ReturnUrl);
+			}
+
+			return RedirectToAction(nameof(Details), new { id = model.Id });
 		}
 	}
 }

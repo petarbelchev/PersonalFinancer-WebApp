@@ -5,7 +5,7 @@
 
 <h1 class="display-6 text-center">@ViewData["Title"]</h1>
 <div class="row">
-	<div class="col-md-4">
+	<div class="col-md-3">
 		<div class="card">
 			<div class="card-header">
 				<h6>User Information:</h6>
@@ -32,13 +32,13 @@
 			</table>
 		</div>
 	</div>
-	<div class="col-md-8">
+	<div class="col-md-9">
 		<div class="card">
 			<div class="card-header">
 				<h6>User Accounts</h6>
 			</div>
 			<div class="row">
-				@await Component.InvokeAsync("AccountCardList", new { Model.Accounts, area = "Admin", controller = "Users", action = "AccountDetails" })
+				<partial name="_AccountCardPartial" for="Accounts" />
 			</div>
 		</div>
 	</div>

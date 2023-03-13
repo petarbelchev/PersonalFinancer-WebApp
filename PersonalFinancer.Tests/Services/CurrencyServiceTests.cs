@@ -23,25 +23,23 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange
 			int currenciesBefore = data.Currencies
-				.Count(c => (c.UserId == this.User1.Id
-							|| c.UserId == null)
-							&& !c.IsDeleted);
+				.Count(c => c.UserId == this.User1.Id && !c.IsDeleted);
+
+			var model = new CurrencyViewModel { Name = "NEW" };
 
 			//Assert
-			Assert.That(await data.Currencies.FirstOrDefaultAsync(c => c.Name == "NEW"),
+			Assert.That(await data.Currencies.FirstOrDefaultAsync(c => c.Name == model.Name),
 				Is.Null);
 
 			//Act
-			var actual = await currencyService.CreateCurrency(this.User1.Id, "NEW");
+			await currencyService.CreateCurrency(this.User1.Id, model);
 			int actualCurrencies = data.Currencies
-				.Count(c => (c.UserId == this.User1.Id
-							|| c.UserId == null)
-							&& !c.IsDeleted);
+				.Count(c => c.UserId == this.User1.Id && !c.IsDeleted);
 
 			//Assert
-			Assert.That(actual, Is.Not.Null);
-			Assert.That(actual.Name, Is.EqualTo("NEW"));
-			Assert.That(actual.UserId, Is.EqualTo(this.User1.Id));
+			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
+			Assert.That(model.Name, Is.EqualTo("NEW"));
+			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
 			Assert.That(await data.Currencies.FirstOrDefaultAsync(c => c.Name == "NEW"), Is.Not.Null);
 			Assert.That(actualCurrencies, Is.EqualTo(currenciesBefore + 1));
 		}
@@ -55,18 +53,19 @@ namespace PersonalFinancer.Tests.Services
 			await data.SaveChangesAsync();
 
 			int currenciesBefore = data.Currencies.Count();
+			var model = new CurrencyViewModel { Name = user2Currency.Name };
 
 			//Assert
 			Assert.That(await data.Currencies.FindAsync(user2Currency.Id), Is.Not.Null);
 
 			//Act
-			var user1AccType = await currencyService.CreateCurrency(this.User1.Id, user2Currency.Name);
+			await currencyService.CreateCurrency(this.User1.Id, model);
 			int actualCurrencies = data.Currencies.Count();
 
 			//Assert
-			Assert.That(user1AccType, Is.Not.Null);
-			Assert.That(user1AccType.Name, Is.EqualTo(user2Currency.Name));
-			Assert.That(user1AccType.UserId, Is.EqualTo(this.User1.Id));
+			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
+			Assert.That(model.Name, Is.EqualTo(user2Currency.Name));
+			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
 			Assert.That(data.Currencies.Count(c => c.Name == "NEW2"), Is.EqualTo(2));
 			Assert.That(actualCurrencies, Is.EqualTo(currenciesBefore + 1));
 		}
@@ -84,6 +83,7 @@ namespace PersonalFinancer.Tests.Services
 			data.Currencies.Add(deletedCurrency);
 			await data.SaveChangesAsync();
 			int countBefore = data.Currencies.Count();
+			var model = new CurrencyViewModel { Name = deletedCurrency.Name };
 
 			//Assert
 			Assert.That(async () =>
@@ -94,21 +94,24 @@ namespace PersonalFinancer.Tests.Services
 			}, Is.True);
 
 			//Act
-			var newCurrency = await currencyService.CreateCurrency(this.User1.Id, deletedCurrency.Name);
+			await currencyService.CreateCurrency(this.User1.Id, model);
 			int countAfter = data.Currencies.Count();
 
 			//Assert
-			Assert.That(newCurrency, Is.Not.Null);
+			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
 			Assert.That(countAfter, Is.EqualTo(countBefore));
-			Assert.That(newCurrency.UserId, Is.EqualTo(this.User1.Id));
-			Assert.That(newCurrency.Name, Is.EqualTo(deletedCurrency.Name));
+			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
+			Assert.That(model.Name, Is.EqualTo(deletedCurrency.Name));
 		}
 
 		[Test]
 		public void CreateCurrency_ShouldThrowException_WithExistingCurrency()
 		{
+			//Arrange
+			var model = new CurrencyViewModel { Name = this.Currency1.Name };
+
 			//Act & Assert
-			Assert.That(async () => await currencyService.CreateCurrency(this.User1.Id, this.Currency1.Name),
+			Assert.That(async () => await currencyService.CreateCurrency(this.User1.Id, model),
 				Throws.TypeOf<InvalidOperationException>()
 					.With.Message.EqualTo("Currency with the same name exist!"));
 		}
@@ -118,8 +121,11 @@ namespace PersonalFinancer.Tests.Services
 		[TestCase("NameWith11!")]
 		public void CreateCurrency_ShouldThrowException_WithInvalidName(string currencyName)
 		{
+			//Arrange
+			var model = new CurrencyViewModel { Name = currencyName };
+
 			//Act & Assert
-			Assert.That(async () => await currencyService.CreateCurrency(this.User1.Id, currencyName),
+			Assert.That(async () => await currencyService.CreateCurrency(this.User1.Id, model),
 				Throws.TypeOf<InvalidOperationException>().With.Message
 					.EqualTo("Currency name must be between 2 and 10 characters long."));
 		}
@@ -173,14 +179,12 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange
 			var expectedCategories = this.data.Currencies
-				.Where(c =>
-					(c.UserId == null || c.UserId == this.User1.Id)
-					&& !c.IsDeleted)
+				.Where(c => c.UserId == this.User1.Id && !c.IsDeleted)
 				.Select(c => this.mapper.Map<CurrencyViewModel>(c))
 				.ToList();
 
 			//Act
-			var actualCategories = await this.currencyService.UserCurrencies(this.User1.Id);
+			var actualCategories = await this.currencyService.GetUserCurrencies(this.User1.Id);
 
 			//Assert
 			Assert.That(actualCategories, Is.Not.Null);

@@ -6,7 +6,7 @@ namespace PersonalFinancer.Services.Currencies.Models
 {
 	public class CurrencyViewModel
 	{
-		public Guid Id { get; init; }
+		public Guid Id { get; set; }
 
 		[StringLength(CurrencyNameMaxLength, MinimumLength = CurrencyNameMinLength,
 			ErrorMessage = "Currency name must be between {2} and {1} characters long.")]

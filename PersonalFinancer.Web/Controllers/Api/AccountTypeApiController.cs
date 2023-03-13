@@ -27,12 +27,11 @@ namespace PersonalFinancer.Web.Controllers.Api
 
 			try
 			{
-				AccountTypeViewModel accountType = await accountTypeService
-					.CreateAccountType(User.Id(), model.Name);
+				await accountTypeService.CreateAccountType(User.Id(), model);
 
-				return Created(string.Empty, accountType);
+				return Created(string.Empty, model);
 			}
-			catch (InvalidOperationException ex)
+			catch (ArgumentException ex)
 			{
 				return BadRequest(ex.Message);
 			}
@@ -52,13 +51,9 @@ namespace PersonalFinancer.Web.Controllers.Api
 
 				return NoContent();
 			}
-			catch (ArgumentNullException ex)
+			catch (InvalidOperationException)
 			{
-				return NotFound(ex.Message);
-			}
-			catch (InvalidOperationException ex)
-			{
-				return BadRequest(ex.Message);
+				return BadRequest();
 			}
 		}
 	}

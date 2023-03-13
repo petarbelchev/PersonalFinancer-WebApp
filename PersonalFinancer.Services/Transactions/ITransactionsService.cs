@@ -4,51 +4,40 @@ namespace PersonalFinancer.Services.Transactions
 {
 	public interface ITransactionsService
 	{
+		Task<Guid> CreateTransaction(CreateTransactionFormModel transactionFormModel, bool isInitialBalance = false);
+		
 		/// <summary>
-		/// Creates a new Transaction and change account's balance if the transaction is not an initial balance transaction. 
-		/// Returns new transaction's id.
+		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
-		Task<Guid> CreateTransaction(TransactionFormModel transactionFormModel, bool isInitialBalance = false);
-
+		/// <exception cref="InvalidOperationException"></exception>
+		Task<decimal> DeleteTransaction(Guid transactionId);
+		
 		/// <summary>
-		/// Delete a Transaction and change account's balance. 
+		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
-		/// <returns>New Account's balance</returns>
-		/// <exception cref="ArgumentNullException">Throws an Exception when Transaction does not exist.</exception>
-		Task<decimal> DeleteTransactionById(Guid transactionId);
-
-		/// <summary>
-		/// Edits a Transaction and change account's balance if it's nessesery.
-		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
 		Task EditTransaction(EditTransactionFormModel transactionFormModel);
-
+		
 		/// <summary>
-		/// Returns a Transaction with Id, AccountId, Amount, CategoryId, Refference, TransactionType, OwnerId, CreatedOn, or null.
+		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
-		Task<EditTransactionFormModel?> EditTransactionFormModelById(Guid transactionId);
+		/// <exception cref="InvalidOperationException"></exception>
+		Task<EditTransactionFormModel> GetEditTransactionFormModel(Guid transactionId);
 
+		Task EditOrCreateInitialBalanceTransaction(Guid accountId, decimal amountOfChange);
+		
 		/// <summary>
-		/// Edit existing Initial Balance transaction or creates new one.
+		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
-		Task EditInitialBalanceTransaction(Guid accountId, decimal amountOfChange);
+		/// <exception cref="InvalidOperationException"></exception>
+		Task<TransactionExtendedViewModel> GetTransactionViewModel(Guid transactionId);
 
 		/// <summary>
-		/// Returns Transaction Extended View Model with given Id, or null.
-		/// </summary>
-		Task<TransactionExtendedViewModel?> TransactionViewModel(Guid transactionId);
-
-		/// <summary>
-		/// Returns a collection of User's transactions for given period ordered by descending.
 		/// Throws Exception when End Date is before Start Date.
 		/// </summary>
-		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
 		/// <exception cref="ArgumentException"></exception>
-		Task<AllTransactionsServiceModel> AllTransactionsServiceModel(string userId, AllTransactionsServiceModel model);
+		Task GetUserTransactionsExtendedViewModel(string userId, UserTransactionsExtendedViewModel model);
 
-		/// <summary>
-		/// Returns Transaction Short View Model with last five user's transactions for given period.
-		/// </summary>
-		Task<IEnumerable<TransactionShortViewModel>> LastFiveTransactions(string userId, DateTime? startDate, DateTime? endDate);
+		Task<IEnumerable<TransactionShortViewModel>> GetUserLastFiveTransactions(string userId, DateTime? startDate, DateTime? endDate);
 	}
 }

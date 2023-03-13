@@ -27,11 +27,11 @@ namespace PersonalFinancer.Web.Controllers.Api
 
 			try
 			{
-				CurrencyViewModel currency = await currencyService.CreateCurrency(User.Id(), model.Name);
+				await currencyService.CreateCurrency(User.Id(), model);
 
-				return Created(string.Empty, currency);
+				return Created(string.Empty, model);
 			}
-			catch (InvalidOperationException ex)
+			catch (ArgumentException ex)
 			{
 				return BadRequest(ex.Message);
 			}
@@ -51,13 +51,9 @@ namespace PersonalFinancer.Web.Controllers.Api
 
 				return NoContent();
 			}
-			catch (ArgumentNullException ex)
+			catch (InvalidOperationException)
 			{
-				return NotFound(ex.Message);
-			}
-			catch (InvalidOperationException ex)
-			{
-				return BadRequest(ex.Message);
+				return BadRequest();
 			}
 		}
 	}

@@ -24,34 +24,8 @@ namespace PersonalFinancer.Services.Transactions
 			this.mapper = mapper;
 		}
 
-		public async Task<AllTransactionsServiceModel> AllTransactionsServiceModel(string userId, AllTransactionsServiceModel model)
-		{
-			if (model.StartDate > model.EndDate)
-			{
-				throw new ArgumentException("Start Date must be before End Date.");
-			}
-
-			model.TotalTransactions = data.Transactions
-				.Count(t =>
-					t.Account.OwnerId == userId &&
-					t.CreatedOn >= model.StartDate &&
-					t.CreatedOn <= model.EndDate);
-
-			model.Transactions = await data.Transactions
-				.Where(t =>
-					t.Account.OwnerId == userId &&
-					t.CreatedOn >= model.StartDate &&
-					t.CreatedOn <= model.EndDate)
-				.OrderByDescending(t => t.CreatedOn)
-				.Skip(model.Page != 1 ? model.TransactionsPerPage * (model.Page - 1) : 0)
-				.Take(model.TransactionsPerPage)
-				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
-				.ToArrayAsync();
-
-			return model;
-		}
-
-		public async Task<Guid> CreateTransaction(TransactionFormModel transactionFormModel, bool isInitialBalance = false)
+		public async Task<Guid> CreateTransaction
+			(CreateTransactionFormModel transactionFormModel, bool isInitialBalance = false)
 		{
 			Transaction newTransaction = new Transaction()
 			{
@@ -77,9 +51,19 @@ namespace PersonalFinancer.Services.Transactions
 			return newTransaction.Id;
 		}
 
-		private async Task ChangeBalance(Guid accountId, decimal amount, TransactionType transactionType)
+		/// <summary>
+		/// Throws InvalidOperationException if Account does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		private async Task ChangeBalance
+			(Guid accountId, decimal amount, TransactionType transactionType)
 		{
-			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
+			Account? account = await data.Accounts.FindAsync(accountId);
+
+			if (account == null)
+			{
+				throw new InvalidOperationException("Account does not exist.");
+			}
 
 			if (transactionType == TransactionType.Income)
 			{
@@ -103,16 +87,15 @@ namespace PersonalFinancer.Services.Transactions
 			}
 		}
 
-		public async Task<decimal> DeleteTransactionById(Guid transactionId)
+		/// <summary>
+		/// Throws InvalidOperationException when Transaction does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<decimal> DeleteTransaction(Guid transactionId)
 		{
-			Transaction? transaction = await data.Transactions
+			Transaction transaction = await data.Transactions
 				.Include(t => t.Account)
-				.FirstOrDefaultAsync(t => t.Id == transactionId);
-
-			if (transaction == null)
-			{
-				throw new ArgumentNullException(nameof(transactionId), "Transaction does not exist.");
-			}
+				.FirstAsync(t => t.Id == transactionId);
 
 			data.Transactions.Remove(transaction);
 
@@ -133,17 +116,11 @@ namespace PersonalFinancer.Services.Transactions
 
 			return transaction.Account.Balance;
 		}
-
-		public async Task<EditTransactionFormModel?> EditTransactionFormModelById(Guid transactionId)
-		{
-			EditTransactionFormModel? transaction = await data.Transactions
-				.Where(t => t.Id == transactionId)
-				.ProjectTo<EditTransactionFormModel>(mapper.ConfigurationProvider)
-				.FirstOrDefaultAsync();
-
-			return transaction;
-		}
-
+		
+		/// <summary>
+		/// Throws InvalidOperationException when Transaction does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
 		public async Task EditTransaction(EditTransactionFormModel editedTransaction)
 		{
 			Transaction transaction = await data.Transactions
@@ -184,14 +161,14 @@ namespace PersonalFinancer.Services.Transactions
 			await data.SaveChangesAsync();
 		}
 
-		public async Task EditInitialBalanceTransaction(Guid accountId, decimal amountOfChange)
+		public async Task EditOrCreateInitialBalanceTransaction(Guid accountId, decimal amountOfChange)
 		{
 			Transaction? transaction = await data.Transactions
 				.FirstOrDefaultAsync(t => t.AccountId == accountId && t.CategoryId == Guid.Parse(InitialBalanceCategoryId));
 
 			if (transaction == null)
 			{
-				await CreateTransaction(new TransactionFormModel
+				await CreateTransaction(new CreateTransactionFormModel
 				{
 					AccountId = accountId,
 					Amount = amountOfChange,
@@ -204,23 +181,67 @@ namespace PersonalFinancer.Services.Transactions
 			else
 			{
 				transaction.Amount += amountOfChange;
-
 			}
 
 			await data.SaveChangesAsync();
 		}
-
-		public async Task<TransactionExtendedViewModel?> TransactionViewModel(Guid transactionId)
+		
+		/// <summary>
+		/// Throws Exception when End Date is before Start Date.
+		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
+		public async Task GetUserTransactionsExtendedViewModel
+			(string userId, UserTransactionsExtendedViewModel model)
 		{
-			TransactionExtendedViewModel? transaction = await data.Transactions
+			if (model.StartDate > model.EndDate)
+			{
+				throw new ArgumentException("Start Date must be before End Date.");
+			}
+
+			model.TotalTransactions = data.Transactions
+				.Count(t =>
+					t.Account.OwnerId == userId &&
+					t.CreatedOn >= model.StartDate &&
+					t.CreatedOn <= model.EndDate);
+
+			model.Transactions = await data.Transactions
+				.Where(t =>
+					t.Account.OwnerId == userId &&
+					t.CreatedOn >= model.StartDate &&
+					t.CreatedOn <= model.EndDate)
+				.OrderByDescending(t => t.CreatedOn)
+				.Skip(model.Page != 1 ? model.TransactionsPerPage * (model.Page - 1) : 0)
+				.Take(model.TransactionsPerPage)
+				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
+				.ToArrayAsync();
+		}
+		
+		/// <summary>
+		/// Throws InvalidOperationException when Transaction does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<EditTransactionFormModel> GetEditTransactionFormModel(Guid transactionId)
+		{
+			return await data.Transactions
+				.Where(t => t.Id == transactionId)
+				.ProjectTo<EditTransactionFormModel>(mapper.ConfigurationProvider)
+				.FirstAsync();
+		}
+		
+		/// <summary>
+		/// Throws InvalidOperationException when Transaction does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<TransactionExtendedViewModel> GetTransactionViewModel(Guid transactionId)
+		{
+			return await data.Transactions
 				.Where(t => t.Id == transactionId)
 				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
-				.FirstOrDefaultAsync();
-
-			return transaction;
+				.FirstAsync();
 		}
 
-		public async Task<IEnumerable<TransactionShortViewModel>> LastFiveTransactions(string userId, DateTime? startDate, DateTime? endDate)
+		public async Task<IEnumerable<TransactionShortViewModel>> GetUserLastFiveTransactions
+			(string userId, DateTime? startDate, DateTime? endDate)
 		{
 			return await data.Transactions
 				.Where(t =>

@@ -28,7 +28,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act
 			IEnumerable<AccountTypeViewModel> actualAccountTypes = await accountTypeService
-				.AccountTypesViewModel(this.User1.Id);
+				.GetUserAccountTypesViewModel(this.User1.Id);
 
 			//Assert
 			Assert.That(actualAccountTypes, Is.Not.Null);
@@ -46,17 +46,19 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateAccountType_ShouldAddNewAccountType_WithValidParams()
 		{
 			//Arrange
+			var newAccountTypeName = "NewAccountType";
+			var model = new AccountTypeViewModel { Name = newAccountTypeName };
 			int countBefore = data.AccountTypes.Count();
 
 			//Act
-			var newAccType = await accountTypeService.CreateAccountType(this.User1.Id, "NewAccountType");
+			await accountTypeService.CreateAccountType(this.User1.Id, model);
 			int countAfter = data.AccountTypes.Count();
 
 			//Assert
-			Assert.That(newAccType, Is.Not.Null);
+			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
 			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
-			Assert.That(newAccType.UserId, Is.EqualTo(this.User1.Id));
-			Assert.That(newAccType.Name, Is.EqualTo("NewAccountType"));
+			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
+			Assert.That(model.Name, Is.EqualTo(newAccountTypeName));
 		}
 
 		[Test]
@@ -72,6 +74,7 @@ namespace PersonalFinancer.Tests.Services
 			data.AccountTypes.Add(deletedAccType);
 			await data.SaveChangesAsync();
 			int countBefore = data.AccountTypes.Count();
+			var model = new AccountTypeViewModel { Name = deletedAccType.Name };
 
 			//Assert
 			Assert.That(async () =>
@@ -82,14 +85,14 @@ namespace PersonalFinancer.Tests.Services
 			}, Is.True);
 
 			//Act
-			var newAccType = await accountTypeService.CreateAccountType(this.User1.Id, "DeletedAccType");
+			await accountTypeService.CreateAccountType(this.User1.Id, model);
 			int countAfter = data.AccountTypes.Count();
 
 			//Assert
-			Assert.That(newAccType, Is.Not.Null);
+			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
 			Assert.That(countAfter, Is.EqualTo(countBefore));
-			Assert.That(newAccType.UserId, Is.EqualTo(this.User1.Id));
-			Assert.That(newAccType.Name, Is.EqualTo(deletedAccType.Name));
+			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
+			Assert.That(model.Name, Is.EqualTo(deletedAccType.Name));
 		}
 
 		[Test]
@@ -100,26 +103,30 @@ namespace PersonalFinancer.Tests.Services
 			data.AccountTypes.Add(user2AccType);
 			await data.SaveChangesAsync();
 			int countBefore = data.AccountTypes.Count();
+			var model = new AccountTypeViewModel { Name = user2AccType.Name };
 
 			//Assert
 			Assert.That(await data.AccountTypes.FindAsync(user2AccType.Id), Is.Not.Null);
 
 			//Act
-			var newAccType = await accountTypeService.CreateAccountType(this.User1.Id, "User2AccType");
+			await accountTypeService.CreateAccountType(this.User1.Id, model);
 			int countAfter = data.AccountTypes.Count();
 
 			//Assert
-			Assert.That(newAccType, Is.Not.Null);
+			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
 			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
-			Assert.That(newAccType.UserId, Is.EqualTo(this.User1.Id));
-			Assert.That(newAccType.Name, Is.EqualTo("User2AccType"));
+			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
+			Assert.That(model.Name, Is.EqualTo("User2AccType"));
 		}
 
 		[Test]
 		public void CreateAccountType_ShouldThrowException_WhenAccTypeExist()
 		{
+			//Arrange
+			var model = new AccountTypeViewModel { Name = this.AccountType1.Name };
+
 			//Act & Assert
-			Assert.That(async () => await accountTypeService.CreateAccountType(this.User1.Id, this.AccountType1.Name),
+			Assert.That(async () => await accountTypeService.CreateAccountType(this.User1.Id, model),
 				Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Account Type with the same name exist!"));
 		}
 
@@ -128,8 +135,10 @@ namespace PersonalFinancer.Tests.Services
 		[TestCase("NameWith16Chars!")]
 		public void CreateAccountType_ShouldThrowException_WithInvalidName(string accountTypeName)
 		{
+			//Arrange
+			var model = new AccountTypeViewModel { Name = accountTypeName };
 			//Act & Assert
-			Assert.That(async () => await accountTypeService.CreateAccountType(this.User1.Id, accountTypeName),
+			Assert.That(async () => await accountTypeService.CreateAccountType(this.User1.Id, model),
 				Throws.TypeOf<InvalidOperationException>().With.Message
 					.EqualTo("Account Type name must be between 2 and 15 characters long."));
 		}

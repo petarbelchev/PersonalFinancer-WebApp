@@ -6,7 +6,7 @@ using static PersonalFinancer.Data.Constants.AccountConstants;
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class AccountFormModel
+	public class CreateAccountFormModel
 	{
 		[Required(ErrorMessage = "Account name is required.")]
 		[StringLength(AccountNameMaxLength, MinimumLength = AccountNameMinLength,

@@ -4,22 +4,17 @@ namespace PersonalFinancer.Services.AccountTypes
 {
 	public interface IAccountTypeService
 	{
+		Task<IEnumerable<AccountTypeViewModel>> GetUserAccountTypesViewModel(string userId);
+		
 		/// <summary>
-		/// Returns collection of Account Types for the current user with Id and Name.
+		/// Throws ArgumentException if given name already exists or name length is invalid.
 		/// </summary>
-		Task<IEnumerable<AccountTypeViewModel>> AccountTypesViewModel(string userId);
-
+		/// <exception cref="ArgumentException"></exception>
+		Task CreateAccountType(string userId, AccountTypeViewModel model);
+		
 		/// <summary>
-		/// Creates new Account Type with given Name. If you try to create a new Account Type with name that other Account Type have, throws exception.
+		/// Throws exception when Account Type does not exist or User is not owner.
 		/// </summary>
-		/// <returns>View Model with Id, Name and User Id.</returns>
-		/// <exception cref="InvalidOperationException"></exception>
-		Task<AccountTypeViewModel> CreateAccountType(string userId, string accountTypeName);
-
-		/// <summary>
-		/// Delete Account Type with given Id or throws exception when Account Type does not exist or User is not owner.
-		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task DeleteAccountType(Guid categoryId, string userId);
 	}

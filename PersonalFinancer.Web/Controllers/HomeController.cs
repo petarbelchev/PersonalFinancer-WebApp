@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.User;
+using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Infrastructure;
+using System;
 
 namespace PersonalFinancer.Web.Controllers
 {
-	/// <summary>
-	/// Home Controller takes care of everything related to Dashboard page.
-	/// </summary>
 	public class HomeController : Controller
 	{
 		private readonly IUserService userService;
@@ -18,10 +16,6 @@ namespace PersonalFinancer.Web.Controllers
 			this.userService = userService;
 		}
 
-		/// <summary>
-		/// Returns Dashboard Model for Dashboard home page.
-		/// </summary>
-		[HttpGet]
 		public async Task<IActionResult> Index()
 		{
 			if (User.IsAdmin())
@@ -31,7 +25,7 @@ namespace PersonalFinancer.Web.Controllers
 
 			if (User.Identity?.IsAuthenticated ?? false)
 			{
-				DashboardServiceModel model = new DashboardServiceModel()
+				var model = new HomeIndexViewModel()
 				{
 					StartDate = DateTime.UtcNow.AddMonths(-1),
 					EndDate = DateTime.UtcNow
@@ -39,18 +33,24 @@ namespace PersonalFinancer.Web.Controllers
 
 				await userService.GetUserDashboard(User.Id(), model);
 
+				ViewBag.Area = "";
+				ViewBag.Controller = "Account";
+				ViewBag.Action = "Details";
+
 				return View(model);
 			}
 
 			return View();
 		}
 
-		/// <summary>
-		/// Handle with Dashboard Model for specific period and returns it for render.
-		/// </summary>
 		[HttpPost]
-		public async Task<IActionResult> Index(DashboardServiceModel model)
+		public async Task<IActionResult> Index(HomeIndexViewModel model)
 		{
+			if (!ModelState.IsValid)
+			{
+				return View(model);
+			}
+
 			try
 			{
 				await userService.GetUserDashboard(User.Id(), model);
@@ -60,10 +60,26 @@ namespace PersonalFinancer.Web.Controllers
 				ModelState.AddModelError(nameof(model.EndDate), ex.Message);
 			}
 
+			ViewBag.Area = "";
+			ViewBag.Controller = "Account";
+			ViewBag.Action = "Details";
+
 			return View(model);
 		}
 
-		public IActionResult Error() => View();
+		public IActionResult Error(int statusCode)
+		{
+			if (statusCode == 400)
+			{
+				ViewBag.ImgUrl = "/400-Bad-Request-Error.webp";
+			}
+			else
+			{
+				ViewBag.ImgUrl = "/internal-server-error-status-code-500-.webp";
+			}
+
+			return View();
+		}
 
 		public IActionResult AccessDenied() => View();
 	}

@@ -1,5 +1,6 @@
-﻿@using PersonalFinancer.Services.Shared.Models;
-@model DashboardServiceModel
+﻿@using PersonalFinancer.Services.Shared.Models
+@using PersonalFinancer.Services.User.Models
+@model HomeIndexViewModel
 
 @if (!User?.Identity?.IsAuthenticated ?? false)
 {
@@ -19,7 +20,7 @@ else
 		<!--Accounts-->
 		<p class="display-6 text-center fs-4">Your Accounts</p>
 		<div class="row">
-			@await Component.InvokeAsync("AccountCardList", new { Model.Accounts, controller = "Account", action = "Details" })
+			<partial name="_AccountCardPartial" for="Accounts" />
 		</div>
 		<hr />
 
@@ -63,7 +64,7 @@ else
 										<td>@transaction.Amount @transaction.AccountCurrencyName</td>
 										<td>@transaction.AccountName</td>
 										<td>
-											<a asp-controller="Transaction" asp-action="Details" asp-route-id="@transaction.Id" class="btn btn-primary">
+											<a asp-controller="Transaction" asp-action="Details" asp-route-id="@transaction.Id" class="btn btn-secondary">
 												Details
 											</a>
 										</td>
@@ -132,5 +133,4 @@ else
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
-	<partial name="_DatePickerScriptPartial" />
 }

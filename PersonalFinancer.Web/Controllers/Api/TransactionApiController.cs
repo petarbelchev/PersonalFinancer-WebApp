@@ -25,12 +25,13 @@ namespace PersonalFinancer.Web.Controllers.Api
 
 			try
 			{
-				decimal newBalance = await transactionsService.DeleteTransactionById(id);
+				decimal newBalance = await transactionsService.DeleteTransaction(id);
+
 				return Ok(new { newBalance });
 			}
-			catch (ArgumentNullException)
+			catch (InvalidOperationException)
 			{
-				return NotFound();
+				return BadRequest();
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 ﻿@using PersonalFinancer.Web.Infrastructure;
-@model TransactionFormModel
+@model CreateTransactionFormModel
 @{
 	ViewData["Title"] = "Create Transaction";
 }
@@ -36,7 +36,7 @@
 							<label class="form-label">Write New Category's name...</label>
 							<p id="errorMsg" style="color: red;"></p>
 						</div>
-						<a class="btn btn-primary" id="createCategoryBtn">Create New Category</a>
+						<a class="btn btn-secondary" id="createCategoryBtn">Create New Category</a>
 						<a class="btn btn-danger" id="deleteCategoryBtn" style="display: none;">Delete This Category</a>
 					</div>
 					<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
@@ -78,7 +78,6 @@ else
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
-	<partial name="_DatePickerScriptPartial" />
 	<script src="/js/createDeleteBtns.js"></script>
 
 	<script>

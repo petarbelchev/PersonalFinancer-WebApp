@@ -5,13 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Services.User
 {
-	public class UserService : IUserService
+    public class UserService : IUserService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IAccountService accountService;
@@ -30,76 +29,58 @@ namespace PersonalFinancer.Services.User
 			this.mapper = mapper;
 		}
 
-		/// <summary>
-		/// Returns collection of all users 
-		/// </summary>
 		public async Task<IEnumerable<UserViewModel>> All()
 		{
-			IEnumerable<UserViewModel> users = await data.Users
+			return await data.Users
 				.ProjectTo<UserViewModel>(mapper.ConfigurationProvider)
 				.ToListAsync();
-
-			return users;
 		}
-
+		
 		/// <summary>
-		/// Returns Dashboard View Model for current User with Last transactions, Accounts and Currencies Cash Flow.
 		/// Throws Exception when End Date is before Start Date.
 		/// </summary>
-		/// <param name="model">Model with Start and End Date which are selected period of transactions.</param>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task GetUserDashboard(string userId, DashboardServiceModel model)
+		public async Task GetUserDashboard(string userId, HomeIndexViewModel model)
 		{
-			model.Accounts = await accountService.AllAccountsCardViewModel(userId);
-
 			if (model.StartDate > model.EndDate)
 			{
 				throw new ArgumentException("Start Date must be before End Date.");
 			}
 
+			model.Accounts = await accountService.GetUserAccountCardsViewModel(userId);
+
 			model.LastTransactions = await transactionsService
-				.LastFiveTransactions(userId, model.StartDate, model.EndDate);
+				.GetUserLastFiveTransactions(userId, model.StartDate, model.EndDate);
 
 			model.CurrenciesCashFlow = await accountService
 				.GetUserAccountsCashFlow(userId, model.StartDate, model.EndDate);
 		}
 
-		/// <summary>
-		/// Returns count of all registered users.
-		/// </summary>
-		public int UsersCount()
-		{
-			int usersCount = data.Users.Count();
-
-			return usersCount;
-		}
+		public int UsersCount() => data.Users.Count();
 
 		/// <summary>
-		/// Returns User Details View Model used for Admin User Details page.
-		/// Throws Exception if the User does not exist.
+		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<UserDetailsViewModel> UserDetails(string userId)
 		{
-			UserDetailsViewModel user = await data.Users
+			return await data.Users
 				.Where(u => u.Id == userId)
 				.ProjectTo<UserDetailsViewModel>(mapper.ConfigurationProvider)
 				.FirstAsync();
-
-			return user;
 		}
-
+		
 		/// <summary>
-		/// Returns User's full name or throws exception when user does not exist.
+		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> FullName(string userId)
 		{
 			ApplicationUser? user = await data.Users.FindAsync(userId);
 
 			if (user == null)
 			{
-				throw new ArgumentNullException("User does not exist.");
+				throw new InvalidOperationException("User does not exist.");
 			}
 
 			return $"{user.FirstName} {user.LastName}";

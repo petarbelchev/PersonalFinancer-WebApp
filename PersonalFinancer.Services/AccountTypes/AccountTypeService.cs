@@ -25,10 +25,7 @@ namespace PersonalFinancer.Services.AccountTypes
 			this.memoryCache = memoryCache;
 		}
 
-		/// <summary>
-		/// Returns collection of Account Types for the current user with Id and Name.
-		/// </summary>
-		public async Task<IEnumerable<AccountTypeViewModel>> AccountTypesViewModel(string userId)
+		public async Task<IEnumerable<AccountTypeViewModel>> GetUserAccountTypesViewModel(string userId)
 		{
 			string cacheKey = CacheKeyValue + userId;
 
@@ -46,36 +43,34 @@ namespace PersonalFinancer.Services.AccountTypes
 		}
 
 		/// <summary>
-		/// Creates new Account Type with given Name. 
-		/// If you try to create a new Account Type with name that other Account Type have, throws exception.
+		/// Throws ArgumentException if given name already exists or name length is invalid.
 		/// </summary>
-		/// <returns>View Model with Id, Name and User Id.</returns>
-		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<AccountTypeViewModel> CreateAccountType(string userId, string accountTypeName)
+		/// <exception cref="ArgumentException"></exception>
+		public async Task CreateAccountType(string userId, AccountTypeViewModel model)
 		{
 			AccountType? accountType = await data.AccountTypes
-				.FirstOrDefaultAsync(c => c.Name == accountTypeName && c.UserId == userId);
+				.FirstOrDefaultAsync(c => c.Name == model.Name && c.UserId == userId);
 
 			if (accountType != null)
 			{
 				if (accountType.IsDeleted == false)
 				{
-					throw new InvalidOperationException("Account Type with the same name exist!");
+					throw new ArgumentException("Account Type with the same name exist!");
 				}
 
 				accountType.IsDeleted = false;
-				accountType.Name = accountTypeName.Trim();
+				accountType.Name = model.Name.Trim();
 			}
 			else
 			{
-				if (accountTypeName.Length < AccountTypeNameMinLength || accountTypeName.Length > AccountTypeNameMaxLength)
+				if (model.Name.Length < AccountTypeNameMinLength || model.Name.Length > AccountTypeNameMaxLength)
 				{
-					throw new InvalidOperationException($"Account Type name must be between {AccountTypeNameMinLength} and {AccountTypeNameMaxLength} characters long.");
+					throw new ArgumentException($"Account Type name must be between {AccountTypeNameMinLength} and {AccountTypeNameMaxLength} characters long.");
 				}
 
 				accountType = new AccountType
 				{
-					Name = accountTypeName,
+					Name = model.Name,
 					UserId = userId
 				};
 
@@ -84,15 +79,15 @@ namespace PersonalFinancer.Services.AccountTypes
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(CacheKeyValue + userId);
+			model.UserId = userId;
+			model.Id = accountType.Id;
 
-			return mapper.Map<AccountTypeViewModel>(accountType);
+			memoryCache.Remove(CacheKeyValue + userId);
 		}
 
 		/// <summary>
-		/// Delete Account Type with given Id or throws exception when Account Type does not exist or User is not owner.
+		/// Throws exception when Account Type does not exist or User is not owner.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task DeleteAccountType(Guid accountTypeId, string userId)
 		{
@@ -100,7 +95,7 @@ namespace PersonalFinancer.Services.AccountTypes
 
 			if (accountType == null)
 			{
-				throw new ArgumentNullException("Account Type does not exist.");
+				throw new InvalidOperationException("Account Type does not exist.");
 			}
 
 			if (accountType.UserId != userId)

@@ -23,7 +23,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateTransaction_ShouldAddNewTransaction_AndChangeAccountBalance()
 		{
 			//Arrange
-			TransactionFormModel transactionModel = new TransactionFormModel()
+			CreateTransactionFormModel transactionModel = new CreateTransactionFormModel()
 			{
 				Amount = 100,
 				AccountId = this.Account1User1.Id,
@@ -55,7 +55,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateTransaction_ShouldAddNewTransaction_WithoutChangeAccountBalance()
 		{
 			//Arrange
-			TransactionFormModel transactionModel = new TransactionFormModel()
+			CreateTransactionFormModel transactionModel = new CreateTransactionFormModel()
 			{
 				Amount = 100,
 				AccountId = this.Account1User1.Id,
@@ -110,7 +110,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(transactionInDb, Is.Not.Null);
 
 			//Act
-			decimal newBalance = await transactionService.DeleteTransactionById(transactionId);
+			decimal newBalance = await transactionService.DeleteTransaction(transactionId);
 
 			//Assert
 			Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
@@ -146,7 +146,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(transactionInDb, Is.Not.Null);
 
 			//Act
-			decimal newBalance = await transactionService.DeleteTransactionById(transactionId);
+			decimal newBalance = await transactionService.DeleteTransaction(transactionId);
 
 			//Assert
 			Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
@@ -161,7 +161,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange
 
 			//Act & Assert
-			Assert.That(async () => await transactionService.DeleteTransactionById(Guid.NewGuid()),
+			Assert.That(async () => await transactionService.DeleteTransaction(Guid.NewGuid()),
 				Throws.TypeOf<ArgumentNullException>().With.Property("Message")
 					.EqualTo("Transaction does not exist. (Parameter 'transactionId')"));
 		}
@@ -171,7 +171,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Act
 			EditTransactionFormModel? transactionFormModel = await transactionService
-				.EditTransactionFormModelById(this.Transaction1.Id);
+				.GetEditTransactionFormModel(this.Transaction1.Id);
 
 			//Assert
 			Assert.That(transactionFormModel, Is.Not.Null);
@@ -187,7 +187,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task EditTransactionFormModelById_ShouldReturnNull_WithInValidInput()
 		{
 			//Act & Assert
-			Assert.That(await transactionService.EditTransactionFormModelById(Guid.NewGuid()), Is.Null);
+			Assert.That(await transactionService.GetEditTransactionFormModel(Guid.NewGuid()), Is.Null);
 		}
 
 		[Test]
@@ -195,7 +195,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Act
 			TransactionExtendedViewModel? transactionFormModel = await transactionService
-				.TransactionViewModel(this.Transaction1.Id);
+				.GetTransactionViewModel(this.Transaction1.Id);
 
 			//Assert
 			Assert.That(transactionFormModel, Is.Not.Null);
@@ -211,14 +211,14 @@ namespace PersonalFinancer.Tests.Services
 		public async Task TransactionViewModel_ShouldReturnNull_WithInValidInput()
 		{
 			//Act & Assert
-			Assert.That(await transactionService.TransactionViewModel(Guid.NewGuid()), Is.Null);
+			Assert.That(await transactionService.GetTransactionViewModel(Guid.NewGuid()), Is.Null);
 		}
 
 		[Test]
 		public async Task AllTransactionsViewModel_ShouldReturnCorrectDTO_WithValidInput()
 		{
 			//Arrange
-			AllTransactionsServiceModel model = new AllTransactionsServiceModel
+			UserTransactionsExtendedViewModel model = new UserTransactionsExtendedViewModel
 			{
 				StartDate = DateTime.Now.AddMonths(-1),
 				EndDate = DateTime.Now
@@ -232,25 +232,24 @@ namespace PersonalFinancer.Tests.Services
 				.ToListAsync();
 
 			//Act
-			AllTransactionsServiceModel? transactionFormModel = await transactionService
-				.AllTransactionsServiceModel(this.User1.Id, model);
+			await transactionService.GetUserTransactionsExtendedViewModel(this.User1.Id, model);
 
 			//Assert
-			Assert.That(transactionFormModel, Is.Not.Null);
-			Assert.That(transactionFormModel.Transactions.Count(), Is.EqualTo(expectedTransactions.Count()));
+			Assert.That(model, Is.Not.Null);
+			Assert.That(model.Transactions.Count(), Is.EqualTo(expectedTransactions.Count()));
 			for (int i = 0; i < expectedTransactions.Count(); i++)
 			{
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).Id,
+				Assert.That(model.Transactions.ElementAt(i).Id,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Id));
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).AccountName,
+				Assert.That(model.Transactions.ElementAt(i).AccountName,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Account.Name));
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).Amount,
+				Assert.That(model.Transactions.ElementAt(i).Amount,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Amount));
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).CategoryName,
+				Assert.That(model.Transactions.ElementAt(i).CategoryName,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Category.Name));
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).Refference,
+				Assert.That(model.Transactions.ElementAt(i).Refference,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Refference));
-				Assert.That(transactionFormModel.Transactions.ElementAt(i).TransactionType,
+				Assert.That(model.Transactions.ElementAt(i).TransactionType,
 					Is.EqualTo(expectedTransactions.ElementAt(i).TransactionType.ToString()));
 			}
 		}
@@ -259,14 +258,14 @@ namespace PersonalFinancer.Tests.Services
 		public void AllTransactionsViewModel_ShouldThrowException_WithInValidInput()
 		{
 			//Arrange
-			AllTransactionsServiceModel model = new AllTransactionsServiceModel
+			UserTransactionsExtendedViewModel model = new UserTransactionsExtendedViewModel
 			{
 				StartDate = DateTime.Now,
 				EndDate = DateTime.Now.AddMonths(-1),
 			};
 
 			//Assert
-			Assert.That(async () => await transactionService.AllTransactionsServiceModel(this.User1.Id, model),
+			Assert.That(async () => await transactionService.GetUserTransactionsExtendedViewModel(this.User1.Id, model),
 				Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Start Date must be before End Date."));
 		}
 
@@ -395,7 +394,7 @@ namespace PersonalFinancer.Tests.Services
 			.ToListAsync();
 
 			//Act
-			var actual = await transactionService.LastFiveTransactions(this.User1.Id, startDate, endDate);
+			var actual = await transactionService.GetUserLastFiveTransactions(this.User1.Id, startDate, endDate);
 
 			//Assert
 			Assert.That(actual.Count(),

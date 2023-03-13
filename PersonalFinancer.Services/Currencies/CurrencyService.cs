@@ -26,38 +26,34 @@ namespace PersonalFinancer.Services.Currencies
 		}
 
 		/// <summary>
-		/// Creates new Currency with given Name. 
-		/// If you try to create a new Currency with name that other Currency have, or name length is invalid, throws exception.
+		/// Throws ArgumentException if given name exists or lenght is invalid.
 		/// </summary>
-		/// <returns>View Model with Id, Name and User Id.</returns>
-		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<CurrencyViewModel> CreateCurrency(string userId, string currencyName)
+		/// <exception cref="ArgumentException"></exception>
+		public async Task CreateCurrency(string userId, CurrencyViewModel model)
 		{
 			Currency? currency = await data.Currencies
-				.FirstOrDefaultAsync(c =>
-					c.Name == currencyName
-					&& (c.UserId == userId || c.UserId == null));
+				.FirstOrDefaultAsync(c => c.Name == model.Name && c.UserId == userId);
 
 			if (currency != null)
 			{
 				if (currency.IsDeleted == false)
 				{
-					throw new InvalidOperationException("Currency with the same name exist!");
+					throw new ArgumentException("Currency with the same name exist!");
 				}
 
 				currency.IsDeleted = false;
-				currency.Name = currencyName.Trim();
+				currency.Name = model.Name.Trim();
 			}
 			else
 			{
-				if (currencyName.Length < CurrencyNameMinLength || currencyName.Length > CurrencyNameMaxLength)
+				if (model.Name.Length < CurrencyNameMinLength || model.Name.Length > CurrencyNameMaxLength)
 				{
-					throw new InvalidOperationException($"Currency name must be between {CurrencyNameMinLength} and {CurrencyNameMaxLength} characters long.");
+					throw new ArgumentException($"Currency name must be between {CurrencyNameMinLength} and {CurrencyNameMaxLength} characters long.");
 				}
 
 				currency = new Currency
 				{
-					Name = currencyName,
+					Name = model.Name,
 					UserId = userId
 				};
 
@@ -66,15 +62,15 @@ namespace PersonalFinancer.Services.Currencies
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(CacheKeyValue + userId);
+			model.Id = currency.Id;
+			model.UserId = currency.UserId;
 
-			return mapper.Map<CurrencyViewModel>(currency);
+			memoryCache.Remove(CacheKeyValue + userId);
 		}
 
 		/// <summary>
-		/// Delete Currency with given Id or throws exception when Currency does not exist or User is not owner.
+		/// Throws InvalidOperationException when Currency does not exist or User is not owner.
 		/// </summary>
-		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task DeleteCurrency(Guid currencyId, string userId)
 		{
@@ -82,12 +78,12 @@ namespace PersonalFinancer.Services.Currencies
 
 			if (currency == null)
 			{
-				throw new ArgumentNullException("Currency does not exist.");
+				throw new InvalidOperationException("Currency does not exist.");
 			}
 
 			if (currency.UserId != userId)
 			{
-				throw new InvalidOperationException("You can't delete someone else Currency.");
+				throw new InvalidOperationException("Can't delete someone else Currency.");
 			}
 
 			currency.IsDeleted = true;
@@ -97,10 +93,7 @@ namespace PersonalFinancer.Services.Currencies
 			memoryCache.Remove(CacheKeyValue + userId);
 		}
 
-		/// <summary>
-		/// Returns collection of User's currencies with props: Id and Name.
-		/// </summary>
-		public async Task<IEnumerable<CurrencyViewModel>> UserCurrencies(string userId)
+		public async Task<IEnumerable<CurrencyViewModel>> GetUserCurrencies(string userId)
 		{
 			string cacheKey = CacheKeyValue + userId;
 

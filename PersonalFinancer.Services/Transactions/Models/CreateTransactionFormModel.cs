@@ -7,7 +7,7 @@ using static PersonalFinancer.Data.Constants.TransactionConstants;
 
 namespace PersonalFinancer.Services.Transactions.Models
 {
-	public class TransactionFormModel
+	public class CreateTransactionFormModel
 	{
 		[Required(ErrorMessage = "Amount is required.")]
 		[DataType(DataType.Currency, ErrorMessage = "Amount must be a number.")]

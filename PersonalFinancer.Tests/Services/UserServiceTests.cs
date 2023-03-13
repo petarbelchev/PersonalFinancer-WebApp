@@ -13,7 +13,7 @@ using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Tests.Services
 {
-	[TestFixture]
+    [TestFixture]
 	class UserServiceTests : UnitTestsBase
 	{
 		private IUserService userService;
@@ -57,7 +57,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetUserDashboard_ShouldReturnCorrectData_WithValidParams()
 		{
 			//Arrange
-			var actualDashboard = new DashboardServiceModel()
+			var actualDashboard = new HomeIndexViewModel()
 			{
 				StartDate = DateTime.UtcNow.AddMonths(-1),
 				EndDate = DateTime.UtcNow
@@ -154,7 +154,7 @@ namespace PersonalFinancer.Tests.Services
 		public void GetUserDashboard_ShouldThrowException_WithInvalidDates()
 		{
 			//Arrange
-			DashboardServiceModel dashboardModel = new DashboardServiceModel
+			HomeIndexViewModel dashboardModel = new HomeIndexViewModel
 			{
 				StartDate = DateTime.UtcNow,
 				EndDate = DateTime.UtcNow.AddMonths(-1)

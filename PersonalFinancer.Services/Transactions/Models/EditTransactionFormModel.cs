@@ -1,6 +1,6 @@
 ﻿namespace PersonalFinancer.Services.Transactions.Models
 {
-    public class EditTransactionFormModel : TransactionFormModel
+    public class EditTransactionFormModel : CreateTransactionFormModel
     {
         public Guid Id { get; set; }
 

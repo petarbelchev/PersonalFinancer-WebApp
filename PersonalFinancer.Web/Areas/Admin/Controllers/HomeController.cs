@@ -33,7 +33,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			var statistics = new StatisticsViewModel
 			{
 				RegisteredUsers = userService.UsersCount(),
-				CreatedAccounts = accountService.AccountsCount(),
+				CreatedAccounts = accountService.GetUsersAccountsCount(),
 				TotalCashFlow = await accountService.GetAllAccountsCashFlow()
 			};
 

@@ -28,7 +28,7 @@ namespace PersonalFinancer.Services.Infrastructure
 			CreateMap<Transaction, TransactionShortViewModel>()
 				.ForMember(m => m.AccountName, mf => mf
 					.MapFrom(s => s.Account.Name + (s.Account.IsDeleted ? " (Deleted)" : string.Empty)));
-			CreateMap<Transaction, TransactionFormModel>();
+			CreateMap<Transaction, CreateTransactionFormModel>();
 			CreateMap<Transaction, EditTransactionFormModel>();
 			CreateMap<Transaction, TransactionExtendedViewModel>()
 				.ForMember(m => m.CategoryName, mf => mf

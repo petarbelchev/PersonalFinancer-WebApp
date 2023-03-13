@@ -34,7 +34,7 @@ namespace PersonalFinancer.Tests.Services
 			int expectedCount = data.Accounts.Count(a => !a.IsDeleted);
 
 			//Act
-			int actualCount = accountService.AccountsCount();
+			int actualCount = accountService.GetUsersAccountsCount();
 
 			//Assert
 			Assert.That(actualCount, Is.EqualTo(expectedCount));
@@ -50,7 +50,7 @@ namespace PersonalFinancer.Tests.Services
 				.ToListAsync();
 
 			//Act
-			var actualAccounts = await accountService.AllAccountsCardViewModel(this.User1.Id);
+			var actualAccounts = await accountService.GetUserAccountCardsViewModel(this.User1.Id);
 
 			//Assert
 			Assert.That(actualAccounts, Is.Not.Null);
@@ -77,7 +77,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act
 			IEnumerable<AccountDropdownViewModel> actualAccounts = await accountService
-				.AllAccountsDropdownViewModel(this.User1.Id);
+				.GetUserAccountsDropdownViewModel(this.User1.Id);
 
 			//Assert
 			Assert.That(actualAccounts, Is.Not.Null);
@@ -97,7 +97,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Act
 			AccountDropdownViewModel? actualAccount = await accountService
-				.AccountDropdownViewModel(this.Account1User1.Id);
+				.GetAccountDropdownViewModel(this.Account1User1.Id);
 
 			//Assert
 			Assert.That(actualAccount, Is.Not.Null);
@@ -110,57 +110,91 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Act
 			AccountDropdownViewModel? actualAccount = await accountService
-				.AccountDropdownViewModel(Guid.NewGuid());
+				.GetAccountDropdownViewModel(Guid.NewGuid());
 
 			//Assert
 			Assert.That(actualAccount, Is.Null);
 		}
 
-		//[Test]
-		//public async Task AccountDetailsViewModel_ShouldReturnAccountDetails_WithValidId()
-		//{
-		//	//Arrange
-		//	AccountDetailsViewModel expectedAccount = await data.Accounts
-		//		.Where(a => a.Id == this.Account1User1.Id)
-		//		.Select(a => mapper.Map<AccountDetailsViewModel>(a))
-		//		.FirstAsync();
+		[Test]
+		public async Task AccountDetailsViewModel_ShouldReturnAccountDetails_WithValidId()
+		{
+			//Arrange
+			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
+			DateTime endDate = DateTime.UtcNow;
+			int page = 1;
 
-		//	//Act
-		//	AccountDetailsViewModel? actualAccount = await accountService
-		//		.AccountDetailsViewModel(this.Account1User1.Id);
+			AccountDetailsViewModel? expected = await data.Accounts
+				.Where(a => a.Id == this.Account1User1.Id && !a.IsDeleted)
+				.Select(a => new AccountDetailsViewModel
+				{
+					Id = a.Id,
+					Name = a.Name,
+					Balance = a.Balance,
+					CurrencyName = a.Currency.Name,
+					StartDate = startDate,
+					EndDate = endDate,
+					Page = page,
+					TotalTransactions = a.Transactions.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+					Transactions = a.Transactions
+						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.OrderByDescending(t => t.CreatedOn)
+						.Skip(page != 1 ? 10 * (page - 1) : 0)
+						.Take(10)
+						.Select(t => new AccountDetailsTransactionViewModel
+						{
+							Id = t.Id,
+							Amount = t.Amount,
+							CurrencyName = a.Currency.Name,
+							CreatedOn = t.CreatedOn,
+							CategoryName = t.Category.Name,
+							TransactionType = t.TransactionType.ToString(),
+							Refference = t.Refference
+						})
+						.AsEnumerable()
+				})
+				.FirstOrDefaultAsync();
 
-		//	//Assert
-		//	Assert.That(actualAccount, Is.Not.Null);
-		//	Assert.That(actualAccount.Id, Is.EqualTo(expectedAccount.Id));
-		//	Assert.That(actualAccount.Name, Is.EqualTo(expectedAccount.Name));
-		//	Assert.That(actualAccount.Balance, Is.EqualTo(expectedAccount.Balance));
-		//	Assert.That(actualAccount.Transactions.Count(), Is.EqualTo(expectedAccount.Transactions.Count()));
+			//Aseert
+			Assert.That(expected, Is.Not.Null);
 
-		//	for (int i = 0; i < expectedAccount.Transactions.Count(); i++)
-		//	{
-		//		Assert.That(actualAccount.Transactions.ElementAt(i).Id,
-		//			Is.EqualTo(expectedAccount.Transactions.ElementAt(i).Id));
-		//		Assert.That(actualAccount.Transactions.ElementAt(i).Amount,
-		//			Is.EqualTo(expectedAccount.Transactions.ElementAt(i).Amount));
-		//	}
-		//}
+			//Act
+			AccountDetailsViewModel? actual = await accountService
+				.GetAccountDetailsViewModel(this.Account1User1.Id, startDate, endDate);
 
-		//[Test]
-		//public async Task AccountDetailsViewModel_ShouldReturnNull_WithInvalidId()
-		//{
-		//	//Arrange & Act
-		//	AccountDetailsViewModel? account = await accountService
-		//		.AccountDetailsViewModel(Guid.NewGuid());
+			//Assert
+			Assert.That(actual, Is.Not.Null);
+			Assert.That(actual.Id, Is.EqualTo(expected.Id));
+			Assert.That(actual.Name, Is.EqualTo(expected.Name));
+			Assert.That(actual.Balance, Is.EqualTo(expected.Balance));
+			Assert.That(actual.Transactions.Count(), Is.EqualTo(expected.Transactions.Count()));
 
-		//	//Assert
-		//	Assert.That(account, Is.Null);
-		//}
+			for (int i = 0; i < expected.Transactions.Count(); i++)
+			{
+				Assert.That(actual.Transactions.ElementAt(i).Id,
+					Is.EqualTo(expected.Transactions.ElementAt(i).Id));
+				Assert.That(actual.Transactions.ElementAt(i).Amount,
+					Is.EqualTo(expected.Transactions.ElementAt(i).Amount));
+			}
+		}
+
+		[Test]
+		public void AccountDetailsViewModel_ShouldReturnNull_WithInvalidId()
+		{
+			//Arrange
+			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
+			DateTime endDate = DateTime.UtcNow;
+
+			//Act & Assert
+			Assert.That(async () => await accountService.GetAccountDetailsViewModel(Guid.NewGuid(), startDate, endDate),
+				Throws.TypeOf<NullReferenceException>().With.Message.EqualTo("Account does not exist."));
+		}
 
 		[Test]
 		public async Task CreateAccount_ShouldAddNewAccountAndTransaction_WithValidInput()
 		{
 			//Arrange
-			AccountFormModel newAccountModel = new AccountFormModel
+			CreateAccountFormModel newAccountModel = new CreateAccountFormModel
 			{
 				Name = "AccountWithNonZeroBalance",
 				AccountTypeId = this.AccountType1.Id,
@@ -192,7 +226,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateAccount_ShouldAddNewAccountWithoutTransaction_WithValidInput()
 		{
 			//Arrange
-			AccountFormModel newAccountModel = new AccountFormModel
+			CreateAccountFormModel newAccountModel = new CreateAccountFormModel
 			{
 				Name = "AccountWithZeroBalance",
 				AccountTypeId = this.AccountType1.Id,
@@ -315,7 +349,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(account.Transactions.Count, Is.EqualTo(1));
 
 			//Act
-			await accountService.DeleteAccountById(accountId, this.User1.Id, false);
+			await accountService.DeleteAccount(accountId, this.User1.Id, false);
 
 			//Assert that the Account is deleted but Transactions not
 			Assert.That(account.IsDeleted, Is.True);
@@ -360,7 +394,7 @@ namespace PersonalFinancer.Tests.Services
 			int transactionsCountBefore = data.Transactions.Count();
 
 			//Act
-			await accountService.DeleteAccountById(accountId, this.User1.Id, true);
+			await accountService.DeleteAccount(accountId, this.User1.Id, true);
 
 			//Assert that the Account is deleted but Transactions not
 			Assert.That(data.Accounts.Count(), Is.EqualTo(accountsCountBefore - 1));
@@ -373,7 +407,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange & Act
 
 			//Assert
-			Assert.That(async () => await accountService.DeleteAccountById(Guid.NewGuid(), this.User1.Id, true),
+			Assert.That(async () => await accountService.DeleteAccount(Guid.NewGuid(), this.User1.Id, true),
 				Throws.TypeOf<ArgumentNullException>().With.Property("ParamName")
 					.EqualTo("Account does not exist."));
 		}
@@ -382,7 +416,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task DeleteAccountViewModel_ShouldReturnCorrectViewModel_WithValidId()
 		{
 			//Act
-			var actualViewModel = await accountService.DeleteAccountViewModel(this.Account1User1.Id);
+			var actualViewModel = await accountService.GetDeleteAccountViewModel(this.Account1User1.Id);
 
 			//Assert
 			Assert.That(actualViewModel, Is.Not.Null);

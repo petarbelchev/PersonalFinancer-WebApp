@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Categories;
-using PersonalFinancer.Services.Categories.Models;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.Transactions.Models;
 using PersonalFinancer.Web.Infrastructure;
@@ -13,9 +12,6 @@ using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {
-	/// <summary>
-	/// Transaction Controller takes care of everything related to Transactions.
-	/// </summary>
 	[Authorize]
 	public class TransactionController : Controller
 	{
@@ -33,14 +29,10 @@ namespace PersonalFinancer.Web.Controllers
 			this.transactionsService = transactionsService;
 		}
 
-		/// <summary>
-		/// Returns View with all user's transactions for specific period.
-		/// </summary>
-		[HttpGet]
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> All(string? startDate, string? endDate, int page = 1)
 		{
-			AllTransactionsServiceModel model = new AllTransactionsServiceModel()
+			var model = new UserTransactionsExtendedViewModel()
 			{
 				Page = page
 			};
@@ -56,104 +48,103 @@ namespace PersonalFinancer.Web.Controllers
 				model.EndDate = DateTime.Parse(endDate);
 			}
 
-
-			AllTransactionsServiceModel transactions =
-				await transactionsService.AllTransactionsServiceModel(User.Id(), model);
-
-			ViewBag.Controller = "Transaction";
-			ViewBag.Action = "All";
-
-			return View(transactions);
-		}
-
-		/// <summary>
-		/// Returns View with all user's transactions for specific period.
-		/// </summary>
-		[HttpPost]
-		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> All(AllTransactionsServiceModel model)
-		{
-			if (!ModelState.IsValid)
-			{
-				return View(model);
-			}
-
 			try
 			{
-				AllTransactionsServiceModel transactions = await transactionsService
-					.AllTransactionsServiceModel(User.Id(), model);
+				await transactionsService.GetUserTransactionsExtendedViewModel(User.Id(), model);
 
 				ViewBag.Controller = "Transaction";
 				ViewBag.Action = "All";
 
-				return View(transactions);
+				return View(model);
 			}
 			catch (ArgumentException ex)
 			{
 				ModelState.AddModelError(nameof(model.EndDate), ex.Message);
+
 				return View(model);
 			}
 		}
 
-		/// <summary>
-		/// Returns View with Transaction Form Model for creating new Transaction.
-		/// </summary>
-		[HttpGet]
+		[HttpPost]
+		[Authorize(Roles = UserRoleName)]
+		public async Task<IActionResult> All(DateFilterModel dateModel)
+		{
+			if (!ModelState.IsValid)
+			{
+				return View(dateModel);
+			}
+
+			var viewModel = new UserTransactionsExtendedViewModel
+			{
+				StartDate = dateModel.StartDate,
+				EndDate = dateModel.EndDate
+			};
+
+			try
+			{
+				await transactionsService.GetUserTransactionsExtendedViewModel(User.Id(), viewModel);
+
+				ViewBag.Controller = "Transaction";
+				ViewBag.Action = "All";
+
+				return View(viewModel);
+			}
+			catch (ArgumentException ex)
+			{
+				ModelState.AddModelError(nameof(viewModel.EndDate), ex.Message);
+
+				return View(viewModel);
+			}
+		}
+
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Create()
 		{
 			string userId = User.Id();
 
-			TransactionFormModel formModel = new TransactionFormModel()
+			var model = new CreateTransactionFormModel()
 			{
 				CreatedOn = DateTime.UtcNow
 			};
 
-			formModel.Categories.AddRange(await categoryService.UserCategories(userId));
-			formModel.Accounts.AddRange(await accountService.AllAccountsDropdownViewModel(userId));
+			model.Categories.AddRange(await categoryService.GetUserCategories(userId));
+			model.Accounts.AddRange(await accountService.GetUserAccountsDropdownViewModel(userId));
 
-			return View(formModel);
+			return View(model);
 		}
 
-		/// <summary>
-		/// Handle with Transaction Form Model and creates new Transaction. 
-		/// If success redirect to the new Transaction Details page.
-		/// </summary>
 		[HttpPost]
 		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Create(TransactionFormModel transactionFormModel)
+		public async Task<IActionResult> Create(CreateTransactionFormModel model)
 		{
 			string userId = User.Id();
 
 			if (!ModelState.IsValid)
 			{
-				transactionFormModel.Categories.AddRange(await categoryService.UserCategories(userId));
-				transactionFormModel.Accounts.AddRange(await accountService.AllAccountsDropdownViewModel(userId));
+				model.Categories.AddRange(await categoryService.GetUserCategories(userId));
+				model.Accounts.AddRange(await accountService.GetUserAccountsDropdownViewModel(userId));
 
-				return View(transactionFormModel);
+				return View(model);
 			}
 
-			Guid newTransactionId = await transactionsService.CreateTransaction(transactionFormModel);
+			Guid newTransactionId = await transactionsService.CreateTransaction(model);
 
 			TempData["successMsg"] = "You create a new transaction successfully!";
 
-			return RedirectToAction("Details", "Transaction", new { id = newTransactionId });
+			return RedirectToAction(nameof(Details), new { id = newTransactionId });
 		}
 
-		/// <summary>
-		/// Handle with deleting a Transaction.
-		/// </summary>
 		[HttpPost]
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
 		{
 			try
 			{
-				await transactionsService.DeleteTransactionById(id);
+				await transactionsService.DeleteTransaction(id);
 			}
-			catch (ArgumentNullException)
+			catch (InvalidOperationException)
 			{
-				return NotFound();
+				return BadRequest();
 			}
 
 			TempData["successMsg"] = "Your transaction was successfully deleted!";
@@ -168,101 +159,86 @@ namespace PersonalFinancer.Web.Controllers
 			}
 		}
 
-		/// <summary>
-		/// Returns Transaction View Model for Transaction Details page. 
-		/// </summary>
-		[HttpGet]
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Details(Guid id)
 		{
-			TransactionExtendedViewModel? transaction =
-				await transactionsService.TransactionViewModel(id);
-
-			if (transaction == null)
+			try
+			{
+				return View(await transactionsService.GetTransactionViewModel(id));
+			}
+			catch (InvalidOperationException)
 			{
 				return BadRequest();
 			}
-
-			return View(transaction);
 		}
 
-		/// <summary>
-		/// Return Edit Transaction Form Model for editing a Transaction.
-		/// </summary>
-		[HttpGet]
 		public async Task<IActionResult> Edit(Guid id, string? returnUrl = null)
 		{
-			EditTransactionFormModel? transaction = await transactionsService.EditTransactionFormModelById(id);
+			try
+			{
+				EditTransactionFormModel model = await transactionsService.GetEditTransactionFormModel(id);
 
-			if (transaction == null)
+				if (User.Id() != model.AccountOwnerId && !User.IsAdmin())
+				{
+					return Unauthorized();
+				}
+
+				bool isInitialBalance = await categoryService.IsInitialBalance(model.CategoryId);
+
+				if (isInitialBalance)
+				{
+					model.Categories.Add(await categoryService.GetCategoryViewModel(model.CategoryId));
+				}
+				else
+				{
+					model.Categories.AddRange(await categoryService.GetUserCategories(model.AccountOwnerId));
+					model.TransactionTypes.Add(TransactionType.Expense);
+				}
+
+				if (await accountService.IsAccountDeleted(model.AccountId) || isInitialBalance)
+				{
+					model.Accounts.Add(await accountService.GetAccountDropdownViewModel(model.AccountId));
+				}
+				else
+				{
+					model.Accounts.AddRange(await accountService.GetUserAccountsDropdownViewModel(model.AccountOwnerId));
+				}
+
+				model.TransactionTypes.Add(TransactionType.Income);
+				model.ReturnUrl = returnUrl;
+
+				return View(model);
+			}
+			catch (InvalidOperationException)
 			{
 				return BadRequest();
 			}
-
-			if (User.Id() != transaction.AccountOwnerId && !User.IsAdmin())
-			{
-				return Unauthorized();
-			}
-
-			bool isInitialBalance = await categoryService.IsInitialBalance(transaction.CategoryId);
-
-			if (isInitialBalance)
-			{
-				CategoryViewModel? category = await categoryService
-					.CategoryById(transaction.CategoryId);
-
-				if (category != null)
-				{
-					transaction.Categories.Add(category);
-				}
-			}
-			else
-			{
-				transaction.Categories.AddRange(await categoryService.UserCategories(transaction.AccountOwnerId));
-				transaction.TransactionTypes.Add(TransactionType.Expense);
-			}
-
-			if (await accountService.IsAccountDeleted(transaction.AccountId) || isInitialBalance)
-			{
-				AccountDropdownViewModel? account = await accountService
-					.AccountDropdownViewModel(transaction.AccountId);
-
-				if (account != null)
-				{
-					transaction.Accounts.Add(account);
-				}
-			}
-			else
-			{
-				transaction.Accounts.AddRange(await accountService.AllAccountsDropdownViewModel(transaction.AccountOwnerId));
-			}
-
-			transaction.TransactionTypes.Add(TransactionType.Income);
-			transaction.ReturnUrl = returnUrl;
-
-			return View(transaction);
 		}
 
-		/// <summary>
-		/// Handle with edited Transaction.
-		/// </summary>
 		[HttpPost]
-		public async Task<IActionResult> Edit(EditTransactionFormModel transactionFormModel)
+		public async Task<IActionResult> Edit(EditTransactionFormModel model)
 		{
 			if (!ModelState.IsValid)
 			{
-				transactionFormModel.Categories.AddRange(await categoryService.UserCategories(transactionFormModel.AccountOwnerId));
-				transactionFormModel.Accounts.AddRange(await accountService.AllAccountsDropdownViewModel(transactionFormModel.AccountOwnerId));
+				model.Categories.AddRange(await categoryService.GetUserCategories(model.AccountOwnerId));
+				model.Accounts.AddRange(await accountService.GetUserAccountsDropdownViewModel(model.AccountOwnerId));
 
-				return View(transactionFormModel);
+				return View(model);
 			}
 
-			if (User.Id() != transactionFormModel.AccountOwnerId && !User.IsAdmin())
+			if (User.Id() != model.AccountOwnerId && !User.IsAdmin())
 			{
 				return Unauthorized();
 			}
 
-			await transactionsService.EditTransaction(transactionFormModel);
+			try
+			{
+				await transactionsService.EditTransaction(model);
+			}
+			catch (InvalidOperationException)
+			{
+				return BadRequest();
+			}
 
 			if (User.IsAdmin())
 			{
@@ -273,12 +249,12 @@ namespace PersonalFinancer.Web.Controllers
 				TempData["successMsg"] = "Your transaction was successfully edited!";
 			}
 
-			if (transactionFormModel.ReturnUrl != null)
+			if (model.ReturnUrl != null)
 			{
-				return LocalRedirect(transactionFormModel.ReturnUrl);
+				return LocalRedirect(model.ReturnUrl);
 			}
 
-			return RedirectToAction(nameof(Details), new { id = transactionFormModel.Id });
+			return RedirectToAction(nameof(Details), new { id = model.Id });
 		}
 	}
 }
