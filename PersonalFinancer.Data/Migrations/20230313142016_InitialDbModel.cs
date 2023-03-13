@@ -276,9 +276,9 @@ namespace PersonalFinancer.Data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
                 values: new object[,]
                 {
-                    { "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e", "5dd55f78-b3e9-4042-88f9-fa9c1e6eb14e", "petar@mail.com", "Petar", "Petrov", "PETAR@MAIL.COM", "PETAR@MAIL.COM", "AQAAAAEAACcQAAAAEJZz9XhEd3tgCkev/vUvjKovDRGPGgoXwivpM1LH4IAR7ALT6IIVRrt76tJrowoQKA==", "1234567890", "6cf208d4-e138-48d8-af83-8beb3c9427dd", "petar@mail.com" },
-                    { "bcb4f072-ecca-43c9-ab26-c060c6f364e4", "eea5531d-db0d-4dec-a882-6890235d23c0", "teodor@mail.com", "Teodor", "Lesly", "TEODOR@MAIL.COM", "TEODOR@MAIL.COM", "AQAAAAEAACcQAAAAENbNBUyTmbOSTOVMOjoAZQ49CvCJQtWGFJzTsbG3XUzaUnL1O8PP0AFJpLaT+f+RaA==", "1325476980", "5bc1ac6a-6a85-4391-9c58-a08196845512", "teodor@mail.com" },
-                    { "dea12856-c198-4129-b3f3-b893d8395082", "2965142e-8723-4a15-9588-9554844d6244", "admin@admin.com", "Great", "Admin", "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAEAACcQAAAAEFdcr/QSN9PKLvpC7zRcSK9upHjFjqqbjGm2QnW1T1qhalBmL+Q2lxMpSbM+Hz7VNw==", "9876543021", "ee82d86b-a771-4847-a4c0-4ffd77f3426d", "admin@admin.com" }
+                    { "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e", "f48611a3-bd93-40e7-bc2f-d7d7309b7b82", "petar@mail.com", "Petar", "Petrov", "PETAR@MAIL.COM", "PETAR@MAIL.COM", "AQAAAAEAACcQAAAAEOJhfupvC4qRjDgQvSVAvRBOUWK3P7xgI0lqS27qiuntlHScn2jTdRW+OyXvSGFiWQ==", "1234567890", "3653abd9-3123-4cd0-ad53-da04d4a74cf7", "petar@mail.com" },
+                    { "bcb4f072-ecca-43c9-ab26-c060c6f364e4", "cf4db9d0-60cc-4614-b2e5-28e7a80c751d", "teodor@mail.com", "Teodor", "Lesly", "TEODOR@MAIL.COM", "TEODOR@MAIL.COM", "AQAAAAEAACcQAAAAEI4IJPgigoQv5UkxZkTY7NCPYZcpjGQff0Rfj/R41GEvJyipxR3+ee4uYpidfUQgvA==", "1325476980", "82d658bb-f54d-4fa0-b8b8-951796f5b367", "teodor@mail.com" },
+                    { "dea12856-c198-4129-b3f3-b893d8395082", "1c392097-4fae-4a6b-a4ff-8a662fa7ea15", "admin@admin.com", "Great", "Admin", "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAEAACcQAAAAECzsSpd/HQAwGCQfKQSw2XCKQnF9bbVNqrcZ4JhhFgLdjF+POaViDFuQt47um+gFkg==", "9876543021", "55e72ba4-28c0-4321-9d80-1700dadd7888", "admin@admin.com" }
                 });
 
             migrationBuilder.InsertData(
@@ -318,17 +318,6 @@ namespace PersonalFinancer.Data.Migrations
                     { new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"), false, "USD", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
                     { new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"), false, "BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
                     { new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"), false, "EUR", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Accounts",
-                columns: new[] { "Id", "AccountTypeId", "Balance", "CurrencyId", "IsDeleted", "Name", "OwnerId" },
-                values: new object[,]
-                {
-                    { new Guid("303430dc-63a3-4436-8907-a274ec29f608"), new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"), 3800m, new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"), false, "Dolar Savings", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"), new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"), 2800m, new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"), false, "Euro Savings", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"), new Guid("1dfe1780-daed-4198-8360-378aa33c5411"), 4000m, new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"), false, "Bank BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"), new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"), 2000m, new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"), false, "Cash BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
                 });
 
             migrationBuilder.CreateIndex(

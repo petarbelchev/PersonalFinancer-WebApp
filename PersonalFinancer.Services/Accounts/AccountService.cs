@@ -109,7 +109,7 @@ namespace PersonalFinancer.Services.Accounts
 							Amount = t.Amount,
 							CurrencyName = a.Currency.Name,
 							CreatedOn = t.CreatedOn,
-							CategoryName = t.Category.Name,
+							CategoryName = t.Category.Name + (t.Category.IsDeleted ? " (Deleted)" : string.Empty),
 							TransactionType = t.TransactionType.ToString(),
 							Refference = t.Refference
 						})

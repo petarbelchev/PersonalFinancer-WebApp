@@ -59,11 +59,10 @@ namespace PersonalFinancer.Data
 
 			if (this.seed)
 			{
+				builder.ApplyConfiguration(new UserEntityTypeConfiguration());
 				builder.ApplyConfiguration(new AccountTypeEntityTypeConfiguration());
 				builder.ApplyConfiguration(new CurrencyTypeEntityTypeConfiguration());
 				builder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
-				builder.ApplyConfiguration(new UserEntityTypeConfiguration());
-				builder.ApplyConfiguration(new AccountEntityTypeConfiguration());
 			}
 		}
 	}

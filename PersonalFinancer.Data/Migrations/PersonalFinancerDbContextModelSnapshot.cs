@@ -196,48 +196,6 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Accounts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("ca5f67dd-78d7-4bb6-b42e-6a73dd79e805"),
-                            AccountTypeId = new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"),
-                            Balance = 2000m,
-                            CurrencyId = new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"),
-                            IsDeleted = false,
-                            Name = "Cash BGN",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = new Guid("ba7def5d-b00c-4e05-8d0b-5df2c47273b5"),
-                            AccountTypeId = new Guid("1dfe1780-daed-4198-8360-378aa33c5411"),
-                            Balance = 4000m,
-                            CurrencyId = new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"),
-                            IsDeleted = false,
-                            Name = "Bank BGN",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = new Guid("44c67e3a-2dfe-491c-b7fc-eb78fe8b8946"),
-                            AccountTypeId = new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"),
-                            Balance = 2800m,
-                            CurrencyId = new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"),
-                            IsDeleted = false,
-                            Name = "Euro Savings",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = new Guid("303430dc-63a3-4436-8907-a274ec29f608"),
-                            AccountTypeId = new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"),
-                            Balance = 3800m,
-                            CurrencyId = new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"),
-                            IsDeleted = false,
-                            Name = "Dolar Savings",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        });
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.AccountType", b =>
@@ -347,43 +305,43 @@ namespace PersonalFinancer.Data.Migrations
                         new
                         {
                             Id = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e",
-                            ConcurrencyStamp = "5dd55f78-b3e9-4042-88f9-fa9c1e6eb14e",
+                            ConcurrencyStamp = "f48611a3-bd93-40e7-bc2f-d7d7309b7b82",
                             Email = "petar@mail.com",
                             FirstName = "Petar",
                             LastName = "Petrov",
                             NormalizedEmail = "PETAR@MAIL.COM",
                             NormalizedUserName = "PETAR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEJZz9XhEd3tgCkev/vUvjKovDRGPGgoXwivpM1LH4IAR7ALT6IIVRrt76tJrowoQKA==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEOJhfupvC4qRjDgQvSVAvRBOUWK3P7xgI0lqS27qiuntlHScn2jTdRW+OyXvSGFiWQ==",
                             PhoneNumber = "1234567890",
-                            SecurityStamp = "6cf208d4-e138-48d8-af83-8beb3c9427dd",
+                            SecurityStamp = "3653abd9-3123-4cd0-ad53-da04d4a74cf7",
                             UserName = "petar@mail.com"
                         },
                         new
                         {
                             Id = "bcb4f072-ecca-43c9-ab26-c060c6f364e4",
-                            ConcurrencyStamp = "eea5531d-db0d-4dec-a882-6890235d23c0",
+                            ConcurrencyStamp = "cf4db9d0-60cc-4614-b2e5-28e7a80c751d",
                             Email = "teodor@mail.com",
                             FirstName = "Teodor",
                             LastName = "Lesly",
                             NormalizedEmail = "TEODOR@MAIL.COM",
                             NormalizedUserName = "TEODOR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAENbNBUyTmbOSTOVMOjoAZQ49CvCJQtWGFJzTsbG3XUzaUnL1O8PP0AFJpLaT+f+RaA==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEI4IJPgigoQv5UkxZkTY7NCPYZcpjGQff0Rfj/R41GEvJyipxR3+ee4uYpidfUQgvA==",
                             PhoneNumber = "1325476980",
-                            SecurityStamp = "5bc1ac6a-6a85-4391-9c58-a08196845512",
+                            SecurityStamp = "82d658bb-f54d-4fa0-b8b8-951796f5b367",
                             UserName = "teodor@mail.com"
                         },
                         new
                         {
                             Id = "dea12856-c198-4129-b3f3-b893d8395082",
-                            ConcurrencyStamp = "2965142e-8723-4a15-9588-9554844d6244",
+                            ConcurrencyStamp = "1c392097-4fae-4a6b-a4ff-8a662fa7ea15",
                             Email = "admin@admin.com",
                             FirstName = "Great",
                             LastName = "Admin",
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN@ADMIN.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEFdcr/QSN9PKLvpC7zRcSK9upHjFjqqbjGm2QnW1T1qhalBmL+Q2lxMpSbM+Hz7VNw==",
+                            PasswordHash = "AQAAAAEAACcQAAAAECzsSpd/HQAwGCQfKQSw2XCKQnF9bbVNqrcZ4JhhFgLdjF+POaViDFuQt47um+gFkg==",
                             PhoneNumber = "9876543021",
-                            SecurityStamp = "ee82d86b-a771-4847-a4c0-4ffd77f3426d",
+                            SecurityStamp = "55e72ba4-28c0-4321-9d80-1700dadd7888",
                             UserName = "admin@admin.com"
                         });
                 });
