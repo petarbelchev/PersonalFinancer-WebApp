@@ -106,14 +106,11 @@ namespace PersonalFinancer.Tests.Services
 		}
 
 		[Test]
-		public async Task AccountDropdownViewModel_ShouldReturnNull_WithInvalidId()
+		public void AccountDropdownViewModel_ShouldReturnNull_WithInvalidId()
 		{
-			//Act
-			AccountDropdownViewModel? actualAccount = await accountService
-				.GetAccountDropdownViewModel(Guid.NewGuid());
-
-			//Assert
-			Assert.That(actualAccount, Is.Null);
+			//Act & Assert
+			Assert.That(async () => await accountService.GetAccountDropdownViewModel(Guid.NewGuid()), 
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -187,7 +184,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act & Assert
 			Assert.That(async () => await accountService.GetAccountDetailsViewModel(Guid.NewGuid(), startDate, endDate),
-				Throws.TypeOf<NullReferenceException>().With.Message.EqualTo("Account does not exist."));
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -276,12 +273,9 @@ namespace PersonalFinancer.Tests.Services
 		[Test]
 		public void IsAccountOwner_ShouldThrowException_WhenAccountDoesNotExist()
 		{
-			//Arrange & Act
-
 			//Assert
 			Assert.That(async () => await accountService.IsAccountOwner(this.User1.Id, Guid.NewGuid()),
-				Throws.TypeOf<ArgumentNullException>().With.Property("ParamName")
-					.EqualTo("Account does not exist."));
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -311,8 +305,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(async () => await accountService.IsAccountDeleted(Guid.NewGuid()),
-				Throws.TypeOf<ArgumentNullException>().With.Property("ParamName")
-					.EqualTo("Account does not exist."));
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -408,8 +401,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(async () => await accountService.DeleteAccount(Guid.NewGuid(), this.User1.Id, true),
-				Throws.TypeOf<ArgumentNullException>().With.Property("ParamName")
-					.EqualTo("Account does not exist."));
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]

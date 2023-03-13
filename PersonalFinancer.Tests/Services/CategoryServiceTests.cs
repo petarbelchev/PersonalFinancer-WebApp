@@ -45,8 +45,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Act & Assert
 			Assert.That(async () => await categoryService.DeleteCategory(Guid.NewGuid(), this.User1.Id),
-				Throws.TypeOf<ArgumentNullException>().With.Property("ParamName")
-					.EqualTo("Category does not exist."));
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -82,14 +81,13 @@ namespace PersonalFinancer.Tests.Services
 		}
 
 		[Test]
-		public async Task CategoryById_ShouldReturnNull_WithInvalidId()
+		public void CategoryById_ShouldReturnNull_WithInvalidId()
 		{
 			//Arrange & Act
-			CategoryViewModel? category = await categoryService
-				.GetCategoryViewModel(Guid.NewGuid());
 
 			//Assert
-			Assert.That(category, Is.Null);
+			Assert.That(async () => await categoryService.GetCategoryViewModel(Guid.NewGuid()), 
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -116,7 +114,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act & Assert
 			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, model),
-				Throws.TypeOf<InvalidOperationException>().With.Message
+				Throws.TypeOf<ArgumentException>().With.Message
 					.EqualTo("Category with the same name exist!"));
 		}
 
@@ -130,7 +128,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act & Assert
 			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, model),
-				Throws.TypeOf<InvalidOperationException>().With.Message
+				Throws.TypeOf<ArgumentException>().With.Message
 					.EqualTo("Category name must be between 2 and 25 characters long."));
 		}
 
@@ -178,10 +176,11 @@ namespace PersonalFinancer.Tests.Services
 		}
 
 		[Test]
-		public async Task IsInitialBalance_ShouldReturnFalse_WithNotExistingCategoryId()
+		public void IsInitialBalance_ShouldReturnFalse_WithNotExistingCategoryId()
 		{
 			//Act & Assert
-			Assert.That(await categoryService.IsInitialBalance(Guid.NewGuid()), Is.False);
+			Assert.That(async () => await categoryService.IsInitialBalance(Guid.NewGuid()), 
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]

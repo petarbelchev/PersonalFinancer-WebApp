@@ -225,8 +225,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Act & Assert
 			Assert.That(async () => await userService.FullName(Guid.NewGuid().ToString()),
-				Throws.TypeOf<ArgumentNullException>().With.Property("ParamName")
-				.EqualTo("User does not exist."));
+				Throws.TypeOf<InvalidOperationException>());
 		}
 	}
 }

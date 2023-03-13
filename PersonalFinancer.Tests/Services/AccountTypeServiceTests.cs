@@ -127,7 +127,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act & Assert
 			Assert.That(async () => await accountTypeService.CreateAccountType(this.User1.Id, model),
-				Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Account Type with the same name exist!"));
+				Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Account Type with the same name exist!"));
 		}
 
 		[Test]
@@ -139,7 +139,7 @@ namespace PersonalFinancer.Tests.Services
 			var model = new AccountTypeViewModel { Name = accountTypeName };
 			//Act & Assert
 			Assert.That(async () => await accountTypeService.CreateAccountType(this.User1.Id, model),
-				Throws.TypeOf<InvalidOperationException>().With.Message
+				Throws.TypeOf<ArgumentException>().With.Message
 					.EqualTo("Account Type name must be between 2 and 15 characters long."));
 		}
 
@@ -166,10 +166,8 @@ namespace PersonalFinancer.Tests.Services
 		public void DeleteAccountType_ShouldThrowException_WhenAccTypeNotExist()
 		{
 			//Act & Assert
-			Assert.That(async () => await accountTypeService
-					.DeleteAccountType(Guid.NewGuid(), this.User1.Id),
-				Throws.TypeOf<ArgumentNullException>()
-					.With.Property("ParamName").EqualTo("Account Type does not exist."));
+			Assert.That(async () => await accountTypeService.DeleteAccountType(Guid.NewGuid(), this.User1.Id),
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]

@@ -112,7 +112,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act & Assert
 			Assert.That(async () => await currencyService.CreateCurrency(this.User1.Id, model),
-				Throws.TypeOf<InvalidOperationException>()
+				Throws.TypeOf<ArgumentException>()
 					.With.Message.EqualTo("Currency with the same name exist!"));
 		}
 
@@ -126,7 +126,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act & Assert
 			Assert.That(async () => await currencyService.CreateCurrency(this.User1.Id, model),
-				Throws.TypeOf<InvalidOperationException>().With.Message
+				Throws.TypeOf<ArgumentException>().With.Message
 					.EqualTo("Currency name must be between 2 and 10 characters long."));
 		}
 
@@ -156,8 +156,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act & Assert
 			Assert.That(async () => await currencyService.DeleteCurrency(Guid.NewGuid(), this.User1.Id),
-				Throws.TypeOf<ArgumentNullException>()
-					.With.Property("ParamName").EqualTo("Currency does not exist."));
+				Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Currency does not exist."));
 		}
 
 		[Test]
@@ -171,7 +170,7 @@ namespace PersonalFinancer.Tests.Services
 			//Act & Assert
 			Assert.That(async () => await currencyService.DeleteCurrency(newCurrency.Id, this.User1.Id),
 				Throws.TypeOf<InvalidOperationException>()
-					.With.Message.EqualTo("You can't delete someone else Currency."));
+					.With.Message.EqualTo("Can't delete someone else Currency."));
 		}
 
 		[Test]

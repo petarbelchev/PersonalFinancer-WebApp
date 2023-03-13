@@ -162,8 +162,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act & Assert
 			Assert.That(async () => await transactionService.DeleteTransaction(Guid.NewGuid()),
-				Throws.TypeOf<ArgumentNullException>().With.Property("Message")
-					.EqualTo("Transaction does not exist. (Parameter 'transactionId')"));
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -184,10 +183,11 @@ namespace PersonalFinancer.Tests.Services
 		}
 
 		[Test]
-		public async Task EditTransactionFormModelById_ShouldReturnNull_WithInValidInput()
+		public void EditTransactionFormModelById_ShouldReturnNull_WithInValidInput()
 		{
 			//Act & Assert
-			Assert.That(await transactionService.GetEditTransactionFormModel(Guid.NewGuid()), Is.Null);
+			Assert.That(async () => await transactionService.GetEditTransactionFormModel(Guid.NewGuid()), 
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -208,10 +208,11 @@ namespace PersonalFinancer.Tests.Services
 		}
 
 		[Test]
-		public async Task TransactionViewModel_ShouldReturnNull_WithInValidInput()
+		public void TransactionViewModel_ShouldReturnNull_WithInValidInput()
 		{
 			//Act & Assert
-			Assert.That(await transactionService.GetTransactionViewModel(Guid.NewGuid()), Is.Null);
+			Assert.That(async () => await transactionService.GetTransactionViewModel(Guid.NewGuid()), 
+				Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
