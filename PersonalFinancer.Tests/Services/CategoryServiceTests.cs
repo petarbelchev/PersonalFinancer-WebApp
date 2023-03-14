@@ -186,15 +186,17 @@ namespace PersonalFinancer.Tests.Services
 		[Test]
 		public async Task UserCategories_ShouldWorkCorrectly()
 		{
-			//Arrange: Get first user's categories where the user has custom category
+			//Arrange: Get first user categories where the user has custom category
 			List<CategoryViewModel> expectedFirstUserCategories = data.Categories
 				.Where(c => c.UserId == this.User1.Id && !c.IsDeleted)
+				.OrderBy(c => c.Name)
 				.Select(c => mapper.Map<CategoryViewModel>(c))
 				.ToList();
 
-			//Arrange: Get second user's categories where the user hasn't custom categories
+			//Arrange: Get second user categories where the user hasn't custom categories
 			List<CategoryViewModel> expectedSecondUserCategories = data.Categories
 				.Where(c => c.UserId == this.User2.Id && !c.IsDeleted)
+				.OrderBy(c => c.Name)
 				.Select(c => mapper.Map<CategoryViewModel>(c))
 				.ToList();
 

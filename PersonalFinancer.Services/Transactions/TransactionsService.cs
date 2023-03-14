@@ -193,25 +193,25 @@ namespace PersonalFinancer.Services.Transactions
 		public async Task GetUserTransactionsExtendedViewModel
 			(string userId, UserTransactionsExtendedViewModel model)
 		{
-			if (model.StartDate > model.EndDate)
+			if (model.Dates.StartDate > model.Dates.EndDate)
 			{
 				throw new ArgumentException("Start Date must be before End Date.");
 			}
 
-			model.TotalTransactions = data.Transactions
+			model.Pagination.TotalElements = data.Transactions
 				.Count(t =>
 					t.Account.OwnerId == userId &&
-					t.CreatedOn >= model.StartDate &&
-					t.CreatedOn <= model.EndDate);
+					t.CreatedOn >= model.Dates.StartDate &&
+					t.CreatedOn <= model.Dates.EndDate);
 
 			model.Transactions = await data.Transactions
 				.Where(t =>
 					t.Account.OwnerId == userId &&
-					t.CreatedOn >= model.StartDate &&
-					t.CreatedOn <= model.EndDate)
+					t.CreatedOn >= model.Dates.StartDate &&
+					t.CreatedOn <= model.Dates.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
-				.Skip(model.Page != 1 ? model.TransactionsPerPage * (model.Page - 1) : 0)
-				.Take(model.TransactionsPerPage)
+				.Skip(model.Pagination.Page != 1 ? model.Pagination.ElementsPerPage * (model.Pagination.Page - 1) : 0)
+				.Take(model.Pagination.ElementsPerPage)
 				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
 		}

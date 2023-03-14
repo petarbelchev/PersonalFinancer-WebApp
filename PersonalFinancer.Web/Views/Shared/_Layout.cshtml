@@ -30,6 +30,7 @@
 						else if (User?.IsAdmin() ?? false)
 						{
 							<a class="nav-link text-light" asp-area="Admin" asp-controller="Users" asp-action="Index">All Users</a>
+							<a class="nav-link text-light" asp-area="Admin" asp-controller="Account" asp-action="Index">All Accounts</a>
 						}
 					</ul>
 					<partial name="_LoginPartial" />

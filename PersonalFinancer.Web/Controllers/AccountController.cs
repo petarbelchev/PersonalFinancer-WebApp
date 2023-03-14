@@ -5,6 +5,7 @@ using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.AccountTypes;
 using PersonalFinancer.Services.Currencies;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Web.Infrastructure;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
@@ -98,24 +99,25 @@ namespace PersonalFinancer.Web.Controllers
 			ViewBag.Area = "";
 			ViewBag.Controller = "Account";
 			ViewBag.Action = "Details";
-			ViewBag.ReturnUrl = "~/Account/Details/" + model.Id;
-			ViewBag.ModelId = model.Id;
+			ViewBag.ReturnUrl = "~/Account/Details/" + model.Dates.Id;
+			ViewBag.ModelId = model.Dates.Id;
 
 			return View(model);
 		}
 
 		[HttpPost]
 		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Details(AccountDetailsViewModel model)
+		public async Task<IActionResult> Details(DateFilterModel dateModel)
 		{
 			if (!ModelState.IsValid)
 			{
-				return View(model);
+				return View(dateModel);
 			}
 
+			AccountDetailsViewModel model;
 			try
 			{
-				model = await accountService.GetAccountDetailsViewModel(model.Id, model.StartDate, model.EndDate);
+				model = await accountService.GetAccountDetailsViewModel(dateModel.Id, dateModel.StartDate, dateModel.EndDate);
 			}
 			catch (InvalidOperationException)
 			{
@@ -125,8 +127,8 @@ namespace PersonalFinancer.Web.Controllers
 			ViewBag.Area = "";
 			ViewBag.Controller = "Account";
 			ViewBag.Action = "Details";
-			ViewBag.ReturnUrl = "~/Account/Details/" + model.Id;
-			ViewBag.ModelId = model.Id;
+			ViewBag.ReturnUrl = "~/Account/Details/" + model.Dates.Id;
+			ViewBag.ModelId = model.Dates.Id;
 
 			return View(model);
 		}

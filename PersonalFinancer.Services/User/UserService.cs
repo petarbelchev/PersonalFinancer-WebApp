@@ -29,7 +29,7 @@ namespace PersonalFinancer.Services.User
 			this.mapper = mapper;
 		}
 
-		public async Task<IEnumerable<UserViewModel>> All()
+		public async Task<IEnumerable<UserViewModel>> GetAllUsers()
 		{
 			return await data.Users
 				.ProjectTo<UserViewModel>(mapper.ConfigurationProvider)
@@ -42,7 +42,7 @@ namespace PersonalFinancer.Services.User
 		/// <exception cref="ArgumentException"></exception>
 		public async Task GetUserDashboard(string userId, HomeIndexViewModel model)
 		{
-			if (model.StartDate > model.EndDate)
+			if (model.Dates.StartDate > model.Dates.EndDate)
 			{
 				throw new ArgumentException("Start Date must be before End Date.");
 			}
@@ -50,10 +50,10 @@ namespace PersonalFinancer.Services.User
 			model.Accounts = await accountService.GetUserAccountCardsViewModel(userId);
 
 			model.LastTransactions = await transactionsService
-				.GetUserLastFiveTransactions(userId, model.StartDate, model.EndDate);
+				.GetUserLastFiveTransactions(userId, model.Dates.StartDate, model.Dates.EndDate);
 
 			model.CurrenciesCashFlow = await accountService
-				.GetUserAccountsCashFlow(userId, model.StartDate, model.EndDate);
+				.GetUserAccountsCashFlow(userId, model.Dates.StartDate, model.Dates.EndDate);
 		}
 
 		public int UsersCount() => data.Users.Count();

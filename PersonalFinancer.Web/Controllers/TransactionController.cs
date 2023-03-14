@@ -32,20 +32,25 @@ namespace PersonalFinancer.Web.Controllers
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> All(string? startDate, string? endDate, int page = 1)
 		{
-			var model = new UserTransactionsExtendedViewModel()
-			{
-				Page = page
-			};
+			var model = new UserTransactionsExtendedViewModel();
+
+			model.Pagination.Page = page;
 
 			if (startDate == null || endDate == null)
 			{
-				model.StartDate = DateTime.UtcNow.AddMonths(-1);
-				model.EndDate = DateTime.UtcNow;
+				model.Dates = new DateFilterModel
+				{
+					StartDate = DateTime.UtcNow.AddMonths(-1),
+					EndDate = DateTime.UtcNow
+				};
 			}
 			else
 			{
-				model.StartDate = DateTime.Parse(startDate);
-				model.EndDate = DateTime.Parse(endDate);
+				model.Dates = new DateFilterModel
+				{
+					StartDate = DateTime.Parse(startDate),
+					EndDate = DateTime.Parse(endDate)
+				};
 			}
 
 			try
@@ -59,7 +64,7 @@ namespace PersonalFinancer.Web.Controllers
 			}
 			catch (ArgumentException ex)
 			{
-				ModelState.AddModelError(nameof(model.EndDate), ex.Message);
+				ModelState.AddModelError(nameof(model.Dates.EndDate), ex.Message);
 
 				return View(model);
 			}
@@ -76,8 +81,7 @@ namespace PersonalFinancer.Web.Controllers
 
 			var viewModel = new UserTransactionsExtendedViewModel
 			{
-				StartDate = dateModel.StartDate,
-				EndDate = dateModel.EndDate
+				Dates = dateModel
 			};
 
 			try
@@ -91,7 +95,7 @@ namespace PersonalFinancer.Web.Controllers
 			}
 			catch (ArgumentException ex)
 			{
-				ModelState.AddModelError(nameof(viewModel.EndDate), ex.Message);
+				ModelState.AddModelError(nameof(viewModel.Dates.EndDate), ex.Message);
 
 				return View(viewModel);
 			}

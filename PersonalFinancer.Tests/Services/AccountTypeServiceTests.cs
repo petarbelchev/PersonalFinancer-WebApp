@@ -22,8 +22,9 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange
 			IEnumerable<AccountTypeViewModel> accountTypesInDb = data.AccountTypes
-				.Where(a => (a.UserId == null || a.UserId == this.User1.Id) && !a.IsDeleted)
-			.Select(a => mapper.Map<AccountTypeViewModel>(a))
+				.Where(a => a.UserId == this.User1.Id && !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.Select(a => mapper.Map<AccountTypeViewModel>(a))
 				.AsEnumerable();
 
 			//Act

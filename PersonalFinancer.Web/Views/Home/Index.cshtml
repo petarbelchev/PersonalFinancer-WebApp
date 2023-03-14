@@ -33,7 +33,7 @@ else
 								<p class="card-text">@account.Balance @account.CurrencyName</p>
 							</div>
 						</div>
-						<a asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action"
+						<a asp-area="" asp-controller="Account" asp-action="Details"
 							asp-route-id="@account.Id" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Details</a>
 					</div>
 				</div>
@@ -42,7 +42,7 @@ else
 		<hr />
 
 		<!--Date Picker-->
-		<partial name="_DatePickerFormPartial" model="new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }" />
+		<partial name="_DatePickerFormPartial" for="@Model.Dates" />
 
 		@if (Model.LastTransactions.Any())
 		{

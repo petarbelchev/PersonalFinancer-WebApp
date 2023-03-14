@@ -16,17 +16,17 @@
 		<p class="display-6" style="font-size: xx-large;" id="balanceField">Balance: @Model.Balance @Model.CurrencyName</p>
 	</div>
 	<div class="p-2 bd-highlight" style="margin-top: 25px;">
-		<a asp-area="" asp-controller="Account" asp-action="Edit" asp-route-id="@Model.Id"
+		<a asp-area="" asp-controller="Account" asp-action="Edit" asp-route-id="@ViewBag.ModelId"
 		   asp-route-returnUrl="@ViewBag.ReturnUrl" class="btn btn-warning">Edit Account</a>
 	</div>
 	<div class="p-2 bd-highlight" style="margin-top: 25px;">
-		<a asp-area="" asp-controller="Account" asp-action="Delete" asp-route-id="@Model.Id"
+		<a asp-area="" asp-controller="Account" asp-action="Delete" asp-route-id="@ViewBag.ModelId"
 		   asp-route-returnUrl="@ViewBag.ReturnUrl" class="btn btn-danger">Delete Account</a>
 	</div>
 </div>
 
 <!--DatePicker-->
-<partial name="_DatePickerFormPartial" model="new DateFilterModel { Id = Model.Id, StartDate = Model.StartDate, EndDate = Model.EndDate }" />
+<partial name="_DatePickerFormPartial" for="@Model.Dates" />
 
 @if (Model.Transactions.Any())
 {

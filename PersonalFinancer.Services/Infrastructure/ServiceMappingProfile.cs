@@ -21,6 +21,7 @@ namespace PersonalFinancer.Services.Infrastructure
 			CreateMap<Account, AccountDropdownViewModel>();
 			CreateMap<Account, DeleteAccountViewModel>();
 			CreateMap<Account, AccountCardViewModel>();
+			CreateMap<Account, AccountCardExtendedViewModel>();
 			CreateMap<Account, EditAccountFormModel>();
 
 			CreateMap<AccountType, AccountTypeViewModel>();

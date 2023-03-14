@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Infrastructure;
-using System;
 
 namespace PersonalFinancer.Web.Controllers
 {
@@ -27,15 +27,14 @@ namespace PersonalFinancer.Web.Controllers
 			{
 				var model = new HomeIndexViewModel()
 				{
-					StartDate = DateTime.UtcNow.AddMonths(-1),
-					EndDate = DateTime.UtcNow
+					Dates = new DateFilterModel
+					{
+						StartDate = DateTime.UtcNow.AddMonths(-1),
+						EndDate = DateTime.UtcNow
+					}
 				};
 
 				await userService.GetUserDashboard(User.Id(), model);
-
-				ViewBag.Area = "";
-				ViewBag.Controller = "Account";
-				ViewBag.Action = "Details";
 
 				return View(model);
 			}
@@ -44,12 +43,17 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Index(HomeIndexViewModel model)
+		public async Task<IActionResult> Index(DateFilterModel dateModel)
 		{
 			if (!ModelState.IsValid)
 			{
-				return View(model);
+				return View(dateModel);
 			}
+
+			var model = new HomeIndexViewModel
+			{
+				Dates = dateModel
+			};
 
 			try
 			{
@@ -57,12 +61,8 @@ namespace PersonalFinancer.Web.Controllers
 			}
 			catch (ArgumentException ex)
 			{
-				ModelState.AddModelError(nameof(model.EndDate), ex.Message);
+				ModelState.AddModelError(nameof(model.Dates.EndDate), ex.Message);
 			}
-
-			ViewBag.Area = "";
-			ViewBag.Controller = "Account";
-			ViewBag.Action = "Details";
 
 			return View(model);
 		}

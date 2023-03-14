@@ -7,6 +7,7 @@ using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions;
 
 namespace PersonalFinancer.Tests.Services
@@ -109,7 +110,7 @@ namespace PersonalFinancer.Tests.Services
 		public void AccountDropdownViewModel_ShouldReturnNull_WithInvalidId()
 		{
 			//Act & Assert
-			Assert.That(async () => await accountService.GetAccountDropdownViewModel(Guid.NewGuid()), 
+			Assert.That(async () => await accountService.GetAccountDropdownViewModel(Guid.NewGuid()),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -125,14 +126,20 @@ namespace PersonalFinancer.Tests.Services
 				.Where(a => a.Id == this.Account1User1.Id && !a.IsDeleted)
 				.Select(a => new AccountDetailsViewModel
 				{
-					Id = a.Id,
 					Name = a.Name,
 					Balance = a.Balance,
 					CurrencyName = a.Currency.Name,
-					StartDate = startDate,
-					EndDate = endDate,
-					Page = page,
-					TotalTransactions = a.Transactions.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+					Dates = new DateFilterModel
+					{
+						Id = a.Id,
+						StartDate = startDate,
+						EndDate = endDate
+					},
+					Pagination = new PaginationModel
+					{
+						Page = page,
+						TotalElements = a.Transactions.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+					},
 					Transactions = a.Transactions
 						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 						.OrderByDescending(t => t.CreatedOn)
@@ -161,7 +168,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(actual, Is.Not.Null);
-			Assert.That(actual.Id, Is.EqualTo(expected.Id));
+			Assert.That(actual.Dates.Id, Is.EqualTo(expected.Dates.Id));
 			Assert.That(actual.Name, Is.EqualTo(expected.Name));
 			Assert.That(actual.Balance, Is.EqualTo(expected.Balance));
 			Assert.That(actual.Transactions.Count(), Is.EqualTo(expected.Transactions.Count()));

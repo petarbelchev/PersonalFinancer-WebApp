@@ -179,6 +179,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange
 			var expectedCategories = this.data.Currencies
 				.Where(c => c.UserId == this.User1.Id && !c.IsDeleted)
+				.OrderBy(c => c.Name)
 				.Select(c => this.mapper.Map<CurrencyViewModel>(c))
 				.ToList();
 

@@ -1,0 +1,76 @@
+﻿@model AllUsersAccountCardsViewModel
+@{
+	ViewData["Title"] = "All Accounts";
+
+	//TODO: Use partial view or component for pagination! Now used it like this because of StartDate and EndDate...
+}
+
+<h1 class="display-6 text-center">@ViewData["Title"]</h1>
+<div class="row">
+
+	@*Pagination*@
+	<div class="d-flex justify-content-between align-items-center">
+		<p>@Model.Pagination.FirstElement to @Model.Pagination.LastElement from @Model.Pagination.TotalElements transactions</p>
+		<ul class="pagination" style="margin-top: 25px;">
+			<li class="page-item @(Model.Pagination.Page == 1 ? "disabled" : string.Empty)">
+				<a class="page-link" style="color: black;" asp-area="Admin" asp-controller="Account" asp-action="Index" 
+				asp-route-page="@(Model.Pagination.Page - 1)">Previous</a>
+			</li>
+			<li class="page-item @(Model.Pagination.Page == 1 ? "active" : string.Empty)">
+				<a class="page-link" style="color: black; @(Model.Pagination.Page == 1 ? "background-color: gray; border-color: gray;" : string.Empty)"
+				   asp-area="Admin" asp-controller="Account" asp-action="Index" asp-route-page="1">1</a>
+			</li>
+			@if (Model.Pagination.Page - 3 > 1)
+			{
+				<li class="page-item"><p class="page-link" style="color: black">...</p></li>
+			}
+			@for (int i = Model.Pagination.Page - 2; i <= Model.Pagination.Page + 2; i++)
+			{
+				if (i > 1 && i < Model.Pagination.Pages)
+				{
+					<li class="page-item @(Model.Pagination.Page == i ? "active" : string.Empty)">
+						<a class="page-link" style="color: black; @(Model.Pagination.Page == i ? "background-color: gray; border-color: gray;" : string.Empty)"
+				   asp-area="Admin" asp-controller="Account" asp-action="Index" asp-route-page="@i">@i</a>
+					</li>
+				}
+			}
+			@if (Model.Pagination.Page + 3 < Model.Pagination.Pages)
+			{
+				<li class="page-item"><p class="page-link" style="color: black;">...</p></li>
+			}
+			@if (Model.Pagination.Pages > 1)
+			{
+				<li class="page-item @(Model.Pagination.Page == Model.Pagination.Pages ? "active" : string.Empty)">
+					<a class="page-link" style="color: black; @(Model.Pagination.Page == Model.Pagination.Pages ? "background-color: gray; border-color: gray;" : string.Empty)"
+				   asp-area="Admin" asp-controller="Account" asp-action="Index" asp-route-page="@Model.Pagination.Pages">@Model.Pagination.Pages</a>
+				</li>
+			}
+			<li class="page-item @(Model.Pagination.Page == Model.Pagination.Pages ? "disabled" : string.Empty)">
+				<a class="page-link" style="color: black;" asp-area="Admin" asp-controller="Account" asp-action="Index" 
+				asp-route-page="@(Model.Pagination.Page + 1)">Next</a>
+			</li>
+		</ul>
+	</div>
+
+	@*Account Cards*@
+	@foreach (AccountCardExtendedViewModel account in Model.Accounts)
+	{
+		<div class="col-xl-3 col-lg-4 col-md-6">
+			<div class="card formField align-items-center">
+				<div class="d-flex flex-row align-items-center mb-2">
+					<div class="p-2">
+						<img src="/icons/icons8-wallet-64.png">
+					</div>
+					<div class="card-body p-2 flex-grow-1">
+						<h5 class="card-title">@account.Name</h5>
+						<p class="card-text">@account.Balance @account.CurrencyName</p>
+					</div>
+				</div>
+				<a asp-area="Admin" asp-controller="Account" asp-action="Details"
+			   asp-route-id="@account.Id" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Details</a>
+				<a asp-area="Admin" asp-controller="Users" asp-action="Details"
+			   asp-route-id="@account.OwnerId" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Owner</a>
+			</div>
+		</div>
+	}
+</div>

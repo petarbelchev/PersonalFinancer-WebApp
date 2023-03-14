@@ -4,8 +4,10 @@ using PersonalFinancer.Services.Transactions.Models;
 
 namespace PersonalFinancer.Services.User.Models
 {
-    public class HomeIndexViewModel : DateFilterModel
+    public class HomeIndexViewModel
     {
+        public DateFilterModel Dates { get; set; } = null!;
+
         public IEnumerable<TransactionShortViewModel> LastTransactions { get; set; }
             = new List<TransactionShortViewModel>();
 

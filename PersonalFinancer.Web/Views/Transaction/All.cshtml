@@ -5,7 +5,7 @@
 }
 
 <!--DatePicker-->
-<partial name="_DatePickerFormPartial" model="new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }" />
+<partial name="_DatePickerFormPartial" for="@Model.Dates" />
 
 @if (Model.Transactions.Any())
 {

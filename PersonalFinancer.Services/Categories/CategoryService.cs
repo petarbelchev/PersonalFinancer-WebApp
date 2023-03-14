@@ -142,6 +142,7 @@ namespace PersonalFinancer.Services.Categories
 
 				return await data.Categories
 					.Where(c => c.UserId == userId && !c.IsDeleted)
+					.OrderBy(c => c.Name)
 					.Select(c => mapper.Map<CategoryViewModel>(c))
 					.ToArrayAsync();
 			});

@@ -1,25 +1,25 @@
 ﻿namespace PersonalFinancer.Services.Shared.Models
 {
-	public class PaginationModel : DateFilterModel
+	public class PaginationModel
 	{
-		public int TransactionsPerPage { get; set; } = 10;
+		public int ElementsPerPage { get; set; } = 10;
 
 		public int Page { get; set; } = 1;
 
-		public int TotalTransactions { get; set; }
+		public int TotalElements { get; set; }
 
-		public int FirstTransaction 
-			=> TransactionsPerPage * (Page - 1) + 1;
+		public int FirstElement 
+			=> ElementsPerPage * (Page - 1) + 1;
 
-		public int LastTransaction
+		public int LastElement
 		{
 			get
 			{
-				int result = TransactionsPerPage * Page;
+				int result = ElementsPerPage * Page;
 
-				if (result > TotalTransactions)
+				if (result > TotalElements)
 				{
-					result = TotalTransactions;
+					result = TotalElements;
 				}
 
 				return result;
@@ -30,9 +30,9 @@
 		{
 			get
 			{
-				int result = TotalTransactions / TransactionsPerPage;
+				int result = TotalElements / ElementsPerPage;
 
-				if (TotalTransactions % TransactionsPerPage != 0)
+				if (TotalElements % ElementsPerPage != 0)
 				{
 					result++;
 				}

@@ -2,7 +2,7 @@
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class AccountDetailsViewModel : PaginationModel
+	public class AccountDetailsViewModel
 	{
 		public string? Name { get; set; }
 
@@ -10,7 +10,12 @@ namespace PersonalFinancer.Services.Accounts.Models
 
 		public string? CurrencyName { get; set; }
 
-		public IEnumerable<AccountDetailsTransactionViewModel> Transactions { get; set; }
+        public DateFilterModel Dates { get; set; } = null!;
+
+        public PaginationModel Pagination { get; set; } 
+			= new PaginationModel();
+
+        public IEnumerable<AccountDetailsTransactionViewModel> Transactions { get; set; }
 			= new List<AccountDetailsTransactionViewModel>();
 	}
 }

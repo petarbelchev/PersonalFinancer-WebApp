@@ -8,6 +8,7 @@ using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.Transactions.Models;
 using static PersonalFinancer.Data.Constants;
@@ -53,13 +54,14 @@ namespace PersonalFinancer.Services.Accounts
 
 				return await data.Accounts
 					.Where(a => a.OwnerId == userId && !a.IsDeleted)
+					.OrderBy(a => a.Name)
 					.Select(a => mapper.Map<AccountDropdownViewModel>(a))
 					.ToArrayAsync();
 			});
 
 			return accounts;
 		}
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
@@ -72,10 +74,27 @@ namespace PersonalFinancer.Services.Accounts
 				.FirstAsync();
 		}
 
+		public async Task<AllUsersAccountCardsViewModel> GetAllUsersAccountCardsViewModel(int page)
+		{
+			var model = new AllUsersAccountCardsViewModel();
+			model.Pagination.Page = page;
+			model.Pagination.TotalElements = data.Accounts.Count(a => !a.IsDeleted);
+			model.Accounts = await data.Accounts
+				.Where(a => !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.Skip(model.Pagination.ElementsPerPage * (page - 1))
+				.Take(model.Pagination.ElementsPerPage)
+				.ProjectTo<AccountCardExtendedViewModel>(mapper.ConfigurationProvider)
+				.ToArrayAsync();
+
+			return model;
+		}
+
 		public async Task<IEnumerable<AccountCardViewModel>> GetUserAccountCardsViewModel(string userId)
 		{
 			return await data.Accounts
 				.Where(a => a.OwnerId == userId && !a.IsDeleted)
+				.OrderBy(a => a.Name)
 				.ProjectTo<AccountCardViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
 		}
@@ -90,14 +109,20 @@ namespace PersonalFinancer.Services.Accounts
 				.Where(a => a.Id == accountId && !a.IsDeleted)
 				.Select(a => new AccountDetailsViewModel
 				{
-					Id = a.Id,
 					Name = a.Name,
 					Balance = a.Balance,
 					CurrencyName = a.Currency.Name,
-					StartDate = startDate,
-					EndDate = endDate,
-					Page = page,
-					TotalTransactions = a.Transactions.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+					Dates = new DateFilterModel
+					{
+						Id = a.Id,
+						StartDate = startDate,
+						EndDate = endDate
+					},
+					Pagination = new PaginationModel
+					{
+						Page = page,
+						TotalElements = a.Transactions.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+					},
 					Transactions = a.Transactions
 						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 						.OrderByDescending(t => t.CreatedOn)
@@ -183,7 +208,7 @@ namespace PersonalFinancer.Services.Accounts
 
 			memoryCache.Remove(AccountConstants.CacheKeyValue + userId);
 		}
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
@@ -259,7 +284,7 @@ namespace PersonalFinancer.Services.Accounts
 
 			return account.OwnerId == userId;
 		}
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>

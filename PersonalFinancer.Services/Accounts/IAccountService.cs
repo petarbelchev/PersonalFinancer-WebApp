@@ -14,6 +14,8 @@ namespace PersonalFinancer.Services.Accounts
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<AccountDropdownViewModel> GetAccountDropdownViewModel(Guid accountId);
 
+		Task<AllUsersAccountCardsViewModel> GetAllUsersAccountCardsViewModel(int page);
+
 		Task<IEnumerable<AccountCardViewModel>> GetUserAccountCardsViewModel(string userId);
 		
 		/// <summary>

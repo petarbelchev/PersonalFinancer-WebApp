@@ -3,6 +3,7 @@ using NUnit.Framework;
 
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.Transactions.Models;
 
@@ -186,7 +187,7 @@ namespace PersonalFinancer.Tests.Services
 		public void EditTransactionFormModelById_ShouldReturnNull_WithInValidInput()
 		{
 			//Act & Assert
-			Assert.That(async () => await transactionService.GetEditTransactionFormModel(Guid.NewGuid()), 
+			Assert.That(async () => await transactionService.GetEditTransactionFormModel(Guid.NewGuid()),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -211,7 +212,7 @@ namespace PersonalFinancer.Tests.Services
 		public void TransactionViewModel_ShouldReturnNull_WithInValidInput()
 		{
 			//Act & Assert
-			Assert.That(async () => await transactionService.GetTransactionViewModel(Guid.NewGuid()), 
+			Assert.That(async () => await transactionService.GetTransactionViewModel(Guid.NewGuid()),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -219,16 +220,19 @@ namespace PersonalFinancer.Tests.Services
 		public async Task AllTransactionsViewModel_ShouldReturnCorrectDTO_WithValidInput()
 		{
 			//Arrange
-			UserTransactionsExtendedViewModel model = new UserTransactionsExtendedViewModel
+			var model = new UserTransactionsExtendedViewModel
 			{
-				StartDate = DateTime.Now.AddMonths(-1),
-				EndDate = DateTime.Now
+				Dates = new DateFilterModel
+				{
+					StartDate = DateTime.Now.AddMonths(-1),
+					EndDate = DateTime.Now
+				}
 			};
 
 			IEnumerable<Transaction> expectedTransactions = await data.Transactions
 				.Where(t => t.Account.OwnerId == this.User1.Id &&
-					t.CreatedOn >= model.StartDate &&
-					t.CreatedOn <= model.EndDate)
+					t.CreatedOn >= model.Dates.StartDate &&
+					t.CreatedOn <= model.Dates.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
 				.ToListAsync();
 
@@ -259,10 +263,13 @@ namespace PersonalFinancer.Tests.Services
 		public void AllTransactionsViewModel_ShouldThrowException_WithInValidInput()
 		{
 			//Arrange
-			UserTransactionsExtendedViewModel model = new UserTransactionsExtendedViewModel
+			var model = new UserTransactionsExtendedViewModel
 			{
-				StartDate = DateTime.Now,
-				EndDate = DateTime.Now.AddMonths(-1),
+				Dates = new DateFilterModel
+				{
+					StartDate = DateTime.Now,
+					EndDate = DateTime.Now.AddMonths(-1)
+				}
 			};
 
 			//Assert

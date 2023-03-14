@@ -6,6 +6,7 @@ using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.Transactions.Models;
 using PersonalFinancer.Services.User;
@@ -13,7 +14,7 @@ using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Tests.Services
 {
-    [TestFixture]
+	[TestFixture]
 	class UserServiceTests : UnitTestsBase
 	{
 		private IUserService userService;
@@ -39,7 +40,7 @@ namespace PersonalFinancer.Tests.Services
 				.ToListAsync();
 
 			//Act
-			var actual = await userService.All();
+			var actual = await userService.GetAllUsers();
 
 			//Assert
 			Assert.That(actual, Is.Not.Null);
@@ -59,8 +60,11 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange
 			var actualDashboard = new HomeIndexViewModel()
 			{
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
+				Dates = new DateFilterModel
+				{
+					StartDate = DateTime.UtcNow.AddMonths(-1),
+					EndDate = DateTime.UtcNow
+				}
 			};
 
 			IEnumerable<AccountCardViewModel> expectedAccounts = await data.Accounts
@@ -72,10 +76,10 @@ namespace PersonalFinancer.Tests.Services
 
 			await data.Accounts
 				.Where(a => a.OwnerId == this.User1.Id && a.Transactions
-					.Any(t => t.CreatedOn >= actualDashboard.StartDate && t.CreatedOn <= actualDashboard.EndDate))
+					.Any(t => t.CreatedOn >= actualDashboard.Dates.StartDate && t.CreatedOn <= actualDashboard.Dates.EndDate))
 				.Include(a => a.Currency)
 				.Include(a => a.Transactions
-					.Where(t => t.CreatedOn >= actualDashboard.StartDate && t.CreatedOn <= actualDashboard.EndDate))
+					.Where(t => t.CreatedOn >= actualDashboard.Dates.StartDate && t.CreatedOn <= actualDashboard.Dates.EndDate))
 				.ForEachAsync(a =>
 				{
 					if (!expectedCashFlow.ContainsKey(a.Currency.Name))
@@ -105,8 +109,8 @@ namespace PersonalFinancer.Tests.Services
 			var expectedLastFiveTransaction = await data.Transactions
 				.Where(t =>
 					t.Account.OwnerId == this.User1.Id &&
-					t.CreatedOn >= actualDashboard.StartDate &&
-					t.CreatedOn <= actualDashboard.EndDate)
+					t.CreatedOn >= actualDashboard.Dates.StartDate &&
+					t.CreatedOn <= actualDashboard.Dates.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
 				.Take(5)
 				.Select(t => mapper.Map<TransactionShortViewModel>(t))
@@ -156,8 +160,11 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange
 			HomeIndexViewModel dashboardModel = new HomeIndexViewModel
 			{
-				StartDate = DateTime.UtcNow,
-				EndDate = DateTime.UtcNow.AddMonths(-1)
+				Dates = new DateFilterModel
+				{
+					StartDate = DateTime.UtcNow,
+					EndDate = DateTime.UtcNow.AddMonths(-1)
+				}
 			};
 
 			//Act & Assert

@@ -35,6 +35,7 @@ namespace PersonalFinancer.Services.AccountTypes
 
 				return await data.AccountTypes
 					.Where(a => a.UserId == userId && !a.IsDeleted)
+					.OrderBy(a => a.Name)
 					.Select(a => mapper.Map<AccountTypeViewModel>(a))
 					.ToArrayAsync();
 			});

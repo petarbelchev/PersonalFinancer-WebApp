@@ -103,6 +103,7 @@ namespace PersonalFinancer.Services.Currencies
 
 				return await data.Currencies
 					.Where(c => (c.UserId == null || c.UserId == userId) && !c.IsDeleted)
+					.OrderBy(c => c.Name)
 					.Select(c => mapper.Map<CurrencyViewModel>(c))
 					.ToArrayAsync();
 			});
