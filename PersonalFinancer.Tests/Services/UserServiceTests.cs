@@ -35,22 +35,28 @@ namespace PersonalFinancer.Tests.Services
 		public async Task All_ShouldReturnCollectionOfAllUsers()
 		{
 			//Arrange
+			var actual = new AllUsersViewModel();
+
 			var expected = await data.Users
+				.OrderBy(u => u.FirstName)
+				.ThenBy(u => u.LastName)
+				.Skip(actual.Pagination.ElementsPerPage * (actual.Pagination.Page - 1))
+				.Take(actual.Pagination.ElementsPerPage)
 				.ProjectTo<UserViewModel>(mapper.ConfigurationProvider)
 				.ToListAsync();
 
 			//Act
-			var actual = await userService.GetAllUsers();
+			actual = await userService.GetAllUsers();
 
 			//Assert
 			Assert.That(actual, Is.Not.Null);
-			Assert.That(actual.Count(), Is.EqualTo(expected.Count));
+			Assert.That(actual.Users.Count(), Is.EqualTo(expected.Count));
 			for (int i = 0; i < expected.Count; i++)
 			{
-				Assert.That(actual.ElementAt(i).Id, Is.EqualTo(expected.ElementAt(i).Id));
-				Assert.That(actual.ElementAt(i).Email, Is.EqualTo(expected.ElementAt(i).Email));
-				Assert.That(actual.ElementAt(i).FirstName, Is.EqualTo(expected.ElementAt(i).FirstName));
-				Assert.That(actual.ElementAt(i).LastName, Is.EqualTo(expected.ElementAt(i).LastName));
+				Assert.That(actual.Users.ElementAt(i).Id, Is.EqualTo(expected.ElementAt(i).Id));
+				Assert.That(actual.Users.ElementAt(i).Email, Is.EqualTo(expected.ElementAt(i).Email));
+				Assert.That(actual.Users.ElementAt(i).FirstName, Is.EqualTo(expected.ElementAt(i).FirstName));
+				Assert.That(actual.Users.ElementAt(i).LastName, Is.EqualTo(expected.ElementAt(i).LastName));
 			}
 		}
 
@@ -93,7 +99,7 @@ namespace PersonalFinancer.Tests.Services
 
 					if (income != null)
 					{
-						expectedCashFlow[a.Currency.Name].Income += (decimal)income;
+						expectedCashFlow[a.Currency.Name].Incomes += (decimal)income;
 					}
 
 					decimal? expense = a.Transactions?
@@ -102,7 +108,7 @@ namespace PersonalFinancer.Tests.Services
 
 					if (expense != null)
 					{
-						expectedCashFlow[a.Currency.Name].Expence += (decimal)expense;
+						expectedCashFlow[a.Currency.Name].Expenses += (decimal)expense;
 					}
 				});
 
@@ -146,11 +152,11 @@ namespace PersonalFinancer.Tests.Services
 			{
 				Assert.That(actualDashboard.CurrenciesCashFlow.ContainsKey(expectedKey), Is.True);
 
-				Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Income,
-					Is.EqualTo(expectedCashFlow[expectedKey].Income));
+				Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Incomes,
+					Is.EqualTo(expectedCashFlow[expectedKey].Incomes));
 
-				Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Expence,
-					Is.EqualTo(expectedCashFlow[expectedKey].Expence));
+				Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Expenses,
+					Is.EqualTo(expectedCashFlow[expectedKey].Expenses));
 			}
 		}
 

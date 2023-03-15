@@ -1,16 +1,17 @@
 ﻿@using PersonalFinancer.Web.Models.Admin
+@using static PersonalFinancer.Data.Constants.HostConstants;
 @model StatisticsViewModel
 @{
 	ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="text-center">
+<div class="text-center" style="margin-top: 50px;">
 	<p class="display-5">Hello @ViewBag.AdminFullName!</p>
 	<p class="display-6">Welcome to your Admin Dashboard!</p>
 	<p class="display-6">Here are the statistics at the moment!</p>
 </div>
 
-<div class="container text-center">
+<div class="container text-center" style="margin-top: 50px; margin-bottom: 50px;">
 	<div class="row row-cols-auto d-flex justify-content-center">
 		<div class="col formField">
 			<div class="card" style="width: 18rem;">
@@ -36,32 +37,12 @@
 				</div>
 			</div>
 		</div>
-		@foreach (var (currency, values) in Model.TotalCashFlow)
-		{
-			<div class="col formField">
-				<div class="card" style="width: 18rem;">
-					<div class="d-flex justify-content-center">
-						<img src="icons/icons8-banknotes-64.png" style="max-width: fit-content;">
-					</div>
-					<div class="card-body">
-						<h5 class="card-title">Total @currency Incomes</h5>
-						<p class="card-text"><b>@values.Income @currency</b> is a total incomes maded by our users!</p>
-						<a href="#" class="btn btn-secondary">Go somewhere</a>
-					</div>
-				</div>
-			</div>
-			<div class="col formField">
-				<div class="card" style="width: 18rem;">
-					<div class="d-flex justify-content-center">
-						<img src="icons/icons8-banknotes-64.png" style="max-width: fit-content;">
-					</div>
-					<div class="card-body">
-						<h5 class="card-title">Total @currency Expenses</h5>
-						<p class="card-text"><b>@values.Expence @currency</b> is a total expenses maded by our users!</p>
-						<a href="#" class="btn btn-secondary">Go somewhere</a>
-					</div>
-				</div>
-			</div>
-		}
+	</div>
+	<button class="btn btn-secondary" style="margin-top: 50px;" onclick="moreStatistics('@ApiAccountsUrl')">More statistics...</button>
+	<div id="statistics" style="margin-top: 50px;">
 	</div>
 </div>
+
+@section Scripts {
+	<script src="/js/moreStatistics.js"></script>
+}

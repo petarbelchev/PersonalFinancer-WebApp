@@ -10,13 +10,13 @@
 @if (Model.Transactions.Any())
 {
 	<!--Pagination-->
-	<partial name="_PaginationPartial" />
+	<partial name="_PaginationWithDateFilterPartial" />
 
 	<!--Table-->
 	<partial name="_TransactionsTablePartial" model='new TransactionsTableModel { Name = "All Transactions", UserTransactions = Model.Transactions }' />
 
 	<!--Pagination-->
-	<partial name="_PaginationPartial" />
+	<partial name="_PaginationWithDateFilterPartial" />
 }
 else
 {

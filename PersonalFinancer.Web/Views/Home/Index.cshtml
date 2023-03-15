@@ -6,7 +6,7 @@
 {
 	ViewData["Title"] = "Home Page";
 
-	<div class="text-center">
+	<div class="text-center" style="margin-top: 50px;">
 		<p class="display-4">Personal Financer</p>
 		<p class="display-6">Your Finances in One Place!</p>
 	</div>
@@ -100,9 +100,9 @@ else
 						<div class="card-body">
 							@foreach (var (key, value) in Model.CurrenciesCashFlow)
 							{
-								decimal cashFlow = value.Income + value.Expence;
-								decimal income = cashFlow != 0 ? Math.Round(value.Income / cashFlow * 100, 2) : 0;
-								decimal expence = cashFlow != 0 ? Math.Round(value.Expence / cashFlow * 100, 2) : 0;
+								decimal cashFlow = value.Incomes + value.Expenses;
+								decimal income = cashFlow != 0 ? Math.Round(value.Incomes / cashFlow * 100, 2) : 0;
+								decimal expence = cashFlow != 0 ? Math.Round(value.Expenses / cashFlow * 100, 2) : 0;
 
 								<div class="card-title">
 									<div class="row row-cols-auto">
@@ -112,11 +112,11 @@ else
 										<h4 class="col">@key</h4>
 									</div>
 								</div>
-								<h4 class="small font-weight-bold">Income <span class="float-right">@value.Income (@income%)</span></h4>
+								<h4 class="small font-weight-bold">Income <span class="float-right">@value.Incomes (@income%)</span></h4>
 								<div class="progress mb-4">
 									<div class="progress-bar bg-success" role="progressbar" style="width: @income%"></div>
 								</div>
-								<h4 class="small font-weight-bold">Expense <span class="float-right">@value.Expence (@expence%)</span></h4>
+								<h4 class="small font-weight-bold">Expense <span class="float-right">@value.Expenses (@expence%)</span></h4>
 								<div class="progress mb-4">
 									<div class="progress-bar bg-danger" role="progressbar" style="width: @expence%"></div>
 								</div>
@@ -137,7 +137,7 @@ else
 	}
 	else
 	{
-		<div class="text-center">
+		<div class="text-center" style="margin-top: 50px;">
 			<p class="display-4">
 				Your Dashboard is empty.
 			</p>

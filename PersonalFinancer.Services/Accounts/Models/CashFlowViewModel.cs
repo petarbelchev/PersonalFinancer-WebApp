@@ -2,8 +2,8 @@
 {
 	public class CashFlowViewModel
 	{
-		public decimal Income { get; set; }
+		public decimal Incomes { get; set; }
 
-		public decimal Expence { get; set; }
+		public decimal Expenses { get; set; }
 	}
 }

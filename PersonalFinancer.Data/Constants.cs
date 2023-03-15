@@ -68,6 +68,7 @@
 			public const string ApiTransactionsUrl = hostUrl + "/api/transactions/";
 			public const string ApiAccountTypesUrl = hostUrl + "/api/accounttypes/";
 			public const string ApiCurrencyUrl = hostUrl + "/api/currencies/";
+			public const string ApiAccountsUrl = hostUrl + "/api/accounts/";
 		}
 
 		public static class RoleConstants

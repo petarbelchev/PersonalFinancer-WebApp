@@ -452,7 +452,7 @@ namespace PersonalFinancer.Tests.Services
 
 					if (income != null)
 					{
-						expectedCashFlow[a.Currency.Name].Income += (decimal)income;
+						expectedCashFlow[a.Currency.Name].Incomes += (decimal)income;
 					}
 
 					decimal? expense = a.Transactions?
@@ -461,7 +461,7 @@ namespace PersonalFinancer.Tests.Services
 
 					if (expense != null)
 					{
-						expectedCashFlow[a.Currency.Name].Expence += (decimal)expense;
+						expectedCashFlow[a.Currency.Name].Expenses += (decimal)expense;
 					}
 				});
 
@@ -477,11 +477,11 @@ namespace PersonalFinancer.Tests.Services
 			{
 				Assert.That(actualCashFlow.ContainsKey(expectedKey), Is.True);
 
-				Assert.That(actualCashFlow[expectedKey].Income,
-					Is.EqualTo(expectedCashFlow[expectedKey].Income));
+				Assert.That(actualCashFlow[expectedKey].Incomes,
+					Is.EqualTo(expectedCashFlow[expectedKey].Incomes));
 
-				Assert.That(actualCashFlow[expectedKey].Expence,
-					Is.EqualTo(expectedCashFlow[expectedKey].Expence));
+				Assert.That(actualCashFlow[expectedKey].Expenses,
+					Is.EqualTo(expectedCashFlow[expectedKey].Expenses));
 			}
 		}
 
@@ -508,7 +508,7 @@ namespace PersonalFinancer.Tests.Services
 
 					if (income != null)
 					{
-						expected[a.Currency.Name].Income += (decimal)income;
+						expected[a.Currency.Name].Incomes += (decimal)income;
 					}
 
 					decimal? expense = a.Transactions?
@@ -517,7 +517,7 @@ namespace PersonalFinancer.Tests.Services
 
 					if (expense != null)
 					{
-						expected[a.Currency.Name].Expence += (decimal)expense;
+						expected[a.Currency.Name].Expenses += (decimal)expense;
 					}
 				});
 
@@ -530,10 +530,10 @@ namespace PersonalFinancer.Tests.Services
 			{
 				Assert.That(actual.ElementAt(i).Key,
 					Is.EqualTo(expected.ElementAt(i).Key));
-				Assert.That(actual.ElementAt(i).Value.Income,
-					Is.EqualTo(expected.ElementAt(i).Value.Income));
-				Assert.That(actual.ElementAt(i).Value.Expence,
-					Is.EqualTo(expected.ElementAt(i).Value.Expence));
+				Assert.That(actual.ElementAt(i).Value.Incomes,
+					Is.EqualTo(expected.ElementAt(i).Value.Incomes));
+				Assert.That(actual.ElementAt(i).Value.Expenses,
+					Is.EqualTo(expected.ElementAt(i).Value.Expenses));
 			}
 		}
 	}

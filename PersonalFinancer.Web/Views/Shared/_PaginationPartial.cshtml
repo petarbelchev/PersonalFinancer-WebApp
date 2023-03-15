@@ -1,14 +1,13 @@
 ﻿<div class="d-flex justify-content-between align-items-center">
-	<p>@Model.Pagination.FirstElement to @Model.Pagination.LastElement from @Model.Pagination.TotalElements transactions</p>
+	<p>@Model.Pagination.FirstElement to @Model.Pagination.LastElement from @Model.Pagination.TotalElements @ViewBag.NameOfElements</p>
 	<ul class="pagination" style="margin-top: 25px;">
 		<li class="page-item @(Model.Pagination.Page == 1 ? "disabled" : string.Empty)">
-			<a class="page-link" style="color: black;" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@(Model.Pagination.Page - 1)"
-			   asp-route-id="@ViewBag.ModelId" asp-route-startDate="@Model.Dates.StartDate" asp-route-endDate="@Model.Dates.EndDate">Previous</a>
+			<a class="page-link" style="color: black;" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action"
+			   asp-route-page="@(Model.Pagination.Page - 1)">Previous</a>
 		</li>
 		<li class="page-item @(Model.Pagination.Page == 1 ? "active" : string.Empty)">
 			<a class="page-link" style="color: black; @(Model.Pagination.Page == 1 ? "background-color: gray; border-color: gray;" : string.Empty)"
-			   asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="1"
-			   asp-route-id="@ViewBag.ModelId" asp-route-startDate="@Model.Dates.StartDate" asp-route-endDate="@Model.Dates.EndDate">1</a>
+			   asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="1">1</a>
 		</li>
 		@if (Model.Pagination.Page - 3 > 1)
 		{
@@ -20,8 +19,7 @@
 			{
 				<li class="page-item @(Model.Pagination.Page == i ? "active" : string.Empty)">
 					<a class="page-link" style="color: black; @(Model.Pagination.Page == i ? "background-color: gray; border-color: gray;" : string.Empty)"
-			   asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@i"
-					   asp-route-id="@ViewBag.ModelId" asp-route-startDate="@Model.Dates.StartDate" asp-route-endDate="@Model.Dates.EndDate">@i</a>
+			   asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@i">@i</a>
 				</li>
 			}
 		}
@@ -33,13 +31,12 @@
 		{
 			<li class="page-item @(Model.Pagination.Page == Model.Pagination.Pages ? "active" : string.Empty)">
 				<a class="page-link" style="color: black; @(Model.Pagination.Page == Model.Pagination.Pages ? "background-color: gray; border-color: gray;" : string.Empty)"
-			   asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@Model.Pagination.Pages"
-			   asp-route-id="@ViewBag.ModelId" asp-route-startDate="@Model.Dates.StartDate" asp-route-endDate="@Model.Dates.EndDate">@Model.Pagination.Pages</a>
+			   asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@Model.Pagination.Pages">@Model.Pagination.Pages</a>
 			</li>
 		}
 		<li class="page-item @(Model.Pagination.Page == Model.Pagination.Pages ? "disabled" : string.Empty)">
-			<a class="page-link" style="color: black;" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@(Model.Pagination.Page + 1)"
-			   asp-route-id="@ViewBag.ModelId" asp-route-startDate="@Model.Dates.StartDate" asp-route-endDate="@Model.Dates.EndDate">Next</a>
+			<a class="page-link" style="color: black;" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action"
+			   asp-route-page="@(Model.Pagination.Page + 1)">Next</a>
 		</li>
 	</ul>
 </div>

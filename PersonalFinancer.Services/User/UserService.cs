@@ -29,11 +29,20 @@ namespace PersonalFinancer.Services.User
 			this.mapper = mapper;
 		}
 
-		public async Task<IEnumerable<UserViewModel>> GetAllUsers()
+		public async Task<AllUsersViewModel> GetAllUsers(int page)
 		{
-			return await data.Users
+			var model = new AllUsersViewModel();
+			model.Pagination.Page = page;
+			model.Pagination.TotalElements = data.Users.Count();
+			model.Users = await data.Users
+				.OrderBy(u => u.FirstName)
+				.ThenBy(u => u.LastName)
+				.Skip(model.Pagination.ElementsPerPage * (model.Pagination.Page - 1))
+				.Take(model.Pagination.ElementsPerPage)
 				.ProjectTo<UserViewModel>(mapper.ConfigurationProvider)
 				.ToListAsync();
+
+			return model;
 		}
 		
 		/// <summary>

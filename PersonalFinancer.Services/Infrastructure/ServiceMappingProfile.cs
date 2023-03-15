@@ -34,11 +34,13 @@ namespace PersonalFinancer.Services.Infrastructure
 			CreateMap<Transaction, TransactionExtendedViewModel>()
 				.ForMember(m => m.CategoryName, mf => mf
 					.MapFrom(s => s.Category.Name + (s.Category.IsDeleted ? " (Deleted)" : string.Empty)))
-				.ForMember(m => m.AccountName, mf => mf.MapFrom(s => s.Account.Name + (s.Account.IsDeleted ? " (Deleted)" : string.Empty)));
+				.ForMember(m => m.AccountName, mf => mf
+					.MapFrom(s => s.Account.Name + (s.Account.IsDeleted ? " (Deleted)" : string.Empty)));
 
 			CreateMap<ApplicationUser, UserViewModel>();
 			CreateMap<ApplicationUser, UserDetailsViewModel>()
-				.ForMember(m => m.Accounts, mf => mf.MapFrom(s => s.Accounts.Where(a => !a.IsDeleted)));
+				.ForMember(m => m.Accounts, mf => mf
+					.MapFrom(s => s.Accounts.Where(a => !a.IsDeleted).OrderBy(a => a.Name)));
 		}
 	}
 }

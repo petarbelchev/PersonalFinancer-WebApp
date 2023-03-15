@@ -4,7 +4,7 @@ namespace PersonalFinancer.Services.User
 {
     public interface IUserService
 	{
-		Task<IEnumerable<UserViewModel>> GetAllUsers();
+		Task<AllUsersViewModel> GetAllUsers(int page = 1);
 
 		/// <summary>
 		/// Throws Exception when End Date is before Start Date.

@@ -1,10 +1,13 @@
-﻿@model IEnumerable<UserViewModel>
+﻿@model AllUsersViewModel
 @{
 	ViewData["Title"] = "All Users";
 	int row = 1;
 }
 
 <h1 class="display-6 text-center">@ViewData["Title"]</h1>
+
+<partial name="_PaginationPartial" />
+
 <table class="table table-hover">
 	<thead>
 		<tr>
@@ -17,7 +20,7 @@
 		</tr>
 	</thead>
 	<tbody style="vertical-align: text-top;">
-		@foreach (UserViewModel user in Model)
+		@foreach (UserViewModel user in Model.Users)
 		{
 			<tr>
 				<th scope="row">@(row++)</th>
@@ -32,3 +35,5 @@
 		}
 	</tbody>
 </table>
+
+<partial name="_PaginationPartial" />

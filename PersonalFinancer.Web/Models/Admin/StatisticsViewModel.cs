@@ -7,7 +7,5 @@ namespace PersonalFinancer.Web.Models.Admin
 		public int RegisteredUsers { get; set; }
 
 		public int CreatedAccounts { get; set; }
-
-		public Dictionary<string, CashFlowViewModel> TotalCashFlow { get; set; } = null!;
 	}
 }

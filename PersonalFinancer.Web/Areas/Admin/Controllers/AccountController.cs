@@ -21,9 +21,12 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 		public async Task<IActionResult> Index(int page = 1)
 		{
-			AllUsersAccountCardsViewModel model = await accountService.GetAllUsersAccountCardsViewModel(page);
+			ViewBag.Area = "Admin";
+			ViewBag.Controller = "Account";
+			ViewBag.Action = "Index";
+			ViewBag.NameOfElements = "accounts";
 
-			return View(model);
+			return View(await accountService.GetAllUsersAccountCardsViewModel(page));
 		}
 
 		public async Task<IActionResult> Details

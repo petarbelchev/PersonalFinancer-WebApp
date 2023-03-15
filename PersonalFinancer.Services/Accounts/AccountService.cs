@@ -325,7 +325,7 @@ namespace PersonalFinancer.Services.Accounts
 
 					if (income != null)
 					{
-						result[a.Currency.Name].Income += (decimal)income;
+						result[a.Currency.Name].Incomes += (decimal)income;
 					}
 
 					decimal? expense = a.Transactions?
@@ -334,7 +334,7 @@ namespace PersonalFinancer.Services.Accounts
 
 					if (expense != null)
 					{
-						result[a.Currency.Name].Expence += (decimal)expense;
+						result[a.Currency.Name].Expenses += (decimal)expense;
 					}
 				});
 
@@ -362,7 +362,7 @@ namespace PersonalFinancer.Services.Accounts
 
 					if (income != null)
 					{
-						result[a.Currency.Name].Income += (decimal)income;
+						result[a.Currency.Name].Incomes += (decimal)income;
 					}
 
 					decimal? expense = a.Transactions?
@@ -371,7 +371,7 @@ namespace PersonalFinancer.Services.Accounts
 
 					if (expense != null)
 					{
-						result[a.Currency.Name].Expence += (decimal)expense;
+						result[a.Currency.Name].Expenses += (decimal)expense;
 					}
 				});
 

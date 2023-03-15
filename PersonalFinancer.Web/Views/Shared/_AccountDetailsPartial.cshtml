@@ -31,13 +31,13 @@
 @if (Model.Transactions.Any())
 {
 	<!--Pagination-->
-	<partial name="_PaginationPartial" />
+	<partial name="_PaginationWithDateFilterPartial" />
 
 	<!--Table-->
 	<partial name="_TransactionsTablePartial" model='new TransactionsTableModel { Name = "Transactions", AccountTransactions = Model.Transactions }' />
 
 	<!--Pagination-->
-	<partial name="_PaginationPartial" />
+	<partial name="_PaginationWithDateFilterPartial" />
 }
 else
 {
