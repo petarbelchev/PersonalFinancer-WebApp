@@ -6,7 +6,7 @@ using static PersonalFinancer.Data.Constants.AccountConstants;
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class CreateAccountFormModel
+	public class AccountFormModel
 	{
 		[Required(ErrorMessage = "Account name is required.")]
 		[StringLength(AccountNameMaxLength, MinimumLength = AccountNameMinLength,
@@ -21,14 +21,14 @@ namespace PersonalFinancer.Services.Accounts.Models
 		
 		[Required(ErrorMessage = "Account Type name is required.")]
 		[Display(Name = "Account Type")]
-		public Guid AccountTypeId { get; set; }
+		public string AccountTypeId { get; set; } = null!;
 
 		public IEnumerable<AccountTypeViewModel> AccountTypes { get; set; }
 			= new List<AccountTypeViewModel>();
 		
 		[Required(ErrorMessage = "Currency name is required.")]
 		[Display(Name = "Currency")]
-		public Guid CurrencyId { get; set; }
+		public string CurrencyId { get; set; }  = null!;
 
 		public IEnumerable<CurrencyViewModel> Currencies { get; set; }
 			= new List<CurrencyViewModel>();

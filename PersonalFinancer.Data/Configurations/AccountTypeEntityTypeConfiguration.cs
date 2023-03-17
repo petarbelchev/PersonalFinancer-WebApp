@@ -14,19 +14,19 @@ namespace PersonalFinancer.Data.Configurations
 			{
 				new AccountType
 				{
-					Id = Guid.Parse(CashAccountTypeId),
+					Id = CashAccountTypeId,
 					Name = "Cash",
 					UserId = FirstUserId
 				},
 				new AccountType
 				{
-					Id = Guid.Parse(BankAccountTypeId),
+					Id = BankAccountTypeId,
 					Name = "Bank",
 					UserId = FirstUserId
 				},
 				new AccountType
 				{
-					Id = Guid.Parse(SavingAccountTypeId),
+					Id = SavingAccountTypeId,
 					Name = "Savings",
 					UserId = FirstUserId
 				}

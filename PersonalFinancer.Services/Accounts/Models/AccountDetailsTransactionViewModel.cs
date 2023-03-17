@@ -2,7 +2,7 @@
 {
     public class AccountDetailsTransactionViewModel
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; } = null!;
 
         public decimal Amount { get; init; }
 

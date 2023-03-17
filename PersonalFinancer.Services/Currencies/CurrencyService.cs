@@ -37,9 +37,7 @@ namespace PersonalFinancer.Services.Currencies
 			if (currency != null)
 			{
 				if (currency.IsDeleted == false)
-				{
 					throw new ArgumentException("Currency with the same name exist!");
-				}
 
 				currency.IsDeleted = false;
 				currency.Name = model.Name.Trim();
@@ -47,12 +45,11 @@ namespace PersonalFinancer.Services.Currencies
 			else
 			{
 				if (model.Name.Length < CurrencyNameMinLength || model.Name.Length > CurrencyNameMaxLength)
-				{
 					throw new ArgumentException($"Currency name must be between {CurrencyNameMinLength} and {CurrencyNameMaxLength} characters long.");
-				}
 
 				currency = new Currency
 				{
+					Id = Guid.NewGuid().ToString(),
 					Name = model.Name,
 					UserId = userId
 				};
@@ -72,19 +69,15 @@ namespace PersonalFinancer.Services.Currencies
 		/// Throws InvalidOperationException when Currency does not exist or User is not owner.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteCurrency(Guid currencyId, string userId)
+		public async Task DeleteCurrency(string currencyId, string userId)
 		{
 			Currency? currency = await data.Currencies.FindAsync(currencyId);
 
 			if (currency == null)
-			{
 				throw new InvalidOperationException("Currency does not exist.");
-			}
 
 			if (currency.UserId != userId)
-			{
 				throw new InvalidOperationException("Can't delete someone else Currency.");
-			}
 
 			currency.IsDeleted = true;
 

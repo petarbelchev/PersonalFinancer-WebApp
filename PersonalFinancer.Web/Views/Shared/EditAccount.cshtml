@@ -1,5 +1,5 @@
-﻿@using PersonalFinancer.Web.Infrastructure;
-@model EditAccountFormModel
+﻿@using PersonalFinancer.Web.Infrastructure
+@model AccountFormModel
 @{
 	ViewData["Title"] = "Edit Account";
 }
@@ -9,7 +9,6 @@
 	<div class="col-sm-6">
 		<section>
 			<form method="post">
-				<input asp-for="@Model.OwnerId" type="hidden" />
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 				<div class="form-floating formField mb-3">
 					<input asp-for="@Model.Name" class="form-control form-control-lg" type="text" placeholder=".form-control-lg" />

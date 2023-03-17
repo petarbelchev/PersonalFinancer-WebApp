@@ -16,12 +16,10 @@ namespace PersonalFinancer.Web.Controllers.Api
 		}
 
 		[HttpDelete("{id}")]
-		public async Task<IActionResult> DeleteTransaction(Guid id)
+		public async Task<IActionResult> DeleteTransaction(string id)
 		{
 			if (!User.Identity?.IsAuthenticated ?? false)
-			{
 				return Unauthorized();
-			}
 
 			try
 			{

@@ -2,7 +2,7 @@
 {
     public class TransactionShortViewModel
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; } = null!;
 
         public string AccountName { get; init; } = null!;
 

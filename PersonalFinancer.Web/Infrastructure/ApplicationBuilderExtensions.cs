@@ -66,70 +66,70 @@ namespace PersonalFinancer.Web.Infrastructure
 
 			Task.Run(async () =>
 			{
-				Guid cashBgnAccId = await accountService.CreateAccount(FirstUserId, new CreateAccountFormModel
+				string cashBgnAccId = await accountService.CreateAccount(FirstUserId, new AccountFormModel
 				{
 					Name = "Cash BGN",
-					AccountTypeId = Guid.Parse(CashAccountTypeId),
+					AccountTypeId = CashAccountTypeId,
 					Balance = 0,
-					CurrencyId = Guid.Parse(BgnCurrencyId)
+					CurrencyId = BgnCurrencyId
 				});
 
-				Guid bankBgnAccId = await accountService.CreateAccount(FirstUserId, new CreateAccountFormModel
+				string bankBgnAccId = await accountService.CreateAccount(FirstUserId, new AccountFormModel
 				{
 					Name = "Bank BGN",
-					AccountTypeId = Guid.Parse(BankAccountTypeId),
+					AccountTypeId = BankAccountTypeId,
 					Balance = 0,
-					CurrencyId = Guid.Parse(BgnCurrencyId)
+					CurrencyId = BgnCurrencyId
 				});
 
-				Guid euroSavingsAccId = await accountService.CreateAccount(FirstUserId, new CreateAccountFormModel
+				string euroSavingsAccId = await accountService.CreateAccount(FirstUserId, new AccountFormModel
 				{
 					Name = "Euro Savings",
-					AccountTypeId = Guid.Parse(SavingAccountTypeId),
+					AccountTypeId = SavingAccountTypeId,
 					Balance = 0,
-					CurrencyId = Guid.Parse(EurCurrencyId)
+					CurrencyId = EurCurrencyId
 				});
 
-				Guid usdSavingsAccId = await accountService.CreateAccount(FirstUserId, new CreateAccountFormModel
+				string usdSavingsAccId = await accountService.CreateAccount(FirstUserId, new AccountFormModel
 				{
 					Name = "Dolar Savings",
-					AccountTypeId = Guid.Parse(SavingAccountTypeId),
+					AccountTypeId = SavingAccountTypeId,
 					Balance = 0,
-					CurrencyId = Guid.Parse(UsdCurrencyId)
+					CurrencyId = UsdCurrencyId
 				});
 
-				await transactionsService.CreateTransaction(new CreateTransactionFormModel
+				await transactionsService.CreateTransaction(new TransactionFormModel
 				{
 					AccountId = cashBgnAccId,
 					Amount = 2000,
-					CategoryId = Guid.Parse(InitialBalanceCategoryId),
+					CategoryId = InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income
 				});
-				await transactionsService.CreateTransaction(new CreateTransactionFormModel
+				await transactionsService.CreateTransaction(new TransactionFormModel
 				{
 					AccountId = bankBgnAccId,
 					Amount = 4000,
-					CategoryId = Guid.Parse(InitialBalanceCategoryId),
+					CategoryId = InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income
 				});
-				await transactionsService.CreateTransaction(new CreateTransactionFormModel
+				await transactionsService.CreateTransaction(new TransactionFormModel
 				{
 					AccountId = euroSavingsAccId,
 					Amount = 2800,
-					CategoryId = Guid.Parse(InitialBalanceCategoryId),
+					CategoryId = InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income
 				});
-				await transactionsService.CreateTransaction(new CreateTransactionFormModel
+				await transactionsService.CreateTransaction(new TransactionFormModel
 				{
 					AccountId = usdSavingsAccId,
 					Amount = 3800,
-					CategoryId = Guid.Parse(InitialBalanceCategoryId),
+					CategoryId = InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income
@@ -141,11 +141,11 @@ namespace PersonalFinancer.Web.Infrastructure
 				{
 					if (i == 57 || i == 32 || i == 7)
 					{
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = 1500m,
-							CategoryId = Guid.Parse(SalaryCategoryId),
+							CategoryId = SalaryCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Salary",
 							TransactionType = TransactionType.Income
@@ -154,11 +154,11 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (taxiCounter <= 5)
 					{
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = cashBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.63, 2),
-							CategoryId = Guid.Parse(TransportCategoryId),
+							CategoryId = TransportCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Taxi",
 							TransactionType = TransactionType.Expense
@@ -167,11 +167,11 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 40 || i == 20)
 					{
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = 14.99m,
-							CategoryId = Guid.Parse(MedicalHealthcareCategoryId),
+							CategoryId = MedicalHealthcareCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Vitamins",
 							TransactionType = TransactionType.Expense
@@ -180,11 +180,11 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 38 || i == 18)
 					{
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = euroSavingsAccId,
 							Amount = 100,
-							CategoryId = Guid.Parse(DividentsCategoryId),
+							CategoryId = DividentsCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Stocks dividents",
 							TransactionType = TransactionType.Income
@@ -193,11 +193,11 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 34 || i == 14)
 					{
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = usdSavingsAccId,
 							Amount = 150,
-							CategoryId = Guid.Parse(DividentsCategoryId),
+							CategoryId = DividentsCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Stocks dividents",
 							TransactionType = TransactionType.Income
@@ -206,22 +206,22 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 54 || i == 29 || i == 4)
 					{
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 4.83, 2),
-							CategoryId = Guid.Parse(UtilitiesCategoryId),
+							CategoryId = UtilitiesCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Electricity bill",
 							TransactionType = TransactionType.Expense
 						});
 					}
 
-					await transactionsService.CreateTransaction(new CreateTransactionFormModel
+					await transactionsService.CreateTransaction(new TransactionFormModel
 					{
 						AccountId = cashBgnAccId,
 						Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.53, 2),
-						CategoryId = Guid.Parse(FoodDrinkCategoryId),
+						CategoryId = FoodDrinkCategoryId,
 						CreatedOn = DateTime.UtcNow.AddDays(-i),
 						Refference = "Lunch",
 						TransactionType = TransactionType.Expense
@@ -229,11 +229,11 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 52 || i == 27 || i == 2)
 					{
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 1.83, 2),
-							CategoryId = Guid.Parse(UtilitiesCategoryId),
+							CategoryId = UtilitiesCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Water bill",
 							TransactionType = TransactionType.Expense
@@ -242,11 +242,11 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 50 || i == 25 || i == 1)
 					{
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 2.83, 2),
-							CategoryId = Guid.Parse(UtilitiesCategoryId),
+							CategoryId = UtilitiesCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Phone bill",
 							TransactionType = TransactionType.Expense
@@ -255,11 +255,11 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (taxiCounter <= 5)
 					{
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = cashBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.63, 2),
-							CategoryId = Guid.Parse(TransportCategoryId),
+							CategoryId = TransportCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Taxi",
 							TransactionType = TransactionType.Expense
@@ -273,32 +273,32 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 48 || i == 21)
 					{
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = 500,
-							CategoryId = Guid.Parse(MoneyTransferCategoryId),
+							CategoryId = MoneyTransferCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "ATM Withdraw",
 							TransactionType = TransactionType.Expense
 						});
 
-						await transactionsService.CreateTransaction(new CreateTransactionFormModel
+						await transactionsService.CreateTransaction(new TransactionFormModel
 						{
 							AccountId = cashBgnAccId,
 							Amount = 500,
-							CategoryId = Guid.Parse(MoneyTransferCategoryId),
+							CategoryId = MoneyTransferCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "ATM Withdraw",
 							TransactionType = TransactionType.Income
 						});
 					}
 
-					await transactionsService.CreateTransaction(new CreateTransactionFormModel
+					await transactionsService.CreateTransaction(new TransactionFormModel
 					{
 						AccountId = bankBgnAccId,
 						Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.83, 2),
-						CategoryId = Guid.Parse(FoodDrinkCategoryId),
+						CategoryId = FoodDrinkCategoryId,
 						CreatedOn = DateTime.UtcNow.AddDays(-i),
 						Refference = "Dinner",
 						TransactionType = TransactionType.Expense

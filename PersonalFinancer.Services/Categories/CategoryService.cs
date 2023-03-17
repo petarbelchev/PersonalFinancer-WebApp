@@ -29,19 +29,15 @@ namespace PersonalFinancer.Services.Categories
 		/// Throws InvalidOperationException when Category does not exist or User is not owner.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteCategory(Guid categoryId, string userId)
+		public async Task DeleteCategory(string categoryId, string userId)
 		{
 			Category? category = await data.Categories.FindAsync(categoryId);
 
 			if (category == null)
-			{
 				throw new InvalidOperationException("Category does not exist.");
-			}
 
 			if (category.UserId != userId)
-			{
 				throw new InvalidOperationException("You can't delete someone else category.");
-			}
 
 			category.IsDeleted = true;
 
@@ -54,7 +50,7 @@ namespace PersonalFinancer.Services.Categories
 		/// Throws InvalidOperationException when Category does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<CategoryViewModel> GetCategoryViewModel(Guid categoryId)
+		public async Task<CategoryViewModel> GetCategoryViewModel(string categoryId)
 		{
 			return await data.Categories
 				.Where(c => c.Id == categoryId)
@@ -66,7 +62,7 @@ namespace PersonalFinancer.Services.Categories
 		/// Throws InvalidOperationException if category does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<Guid> GetCategoryIdByName(string categoryName)
+		public async Task<string> GetCategoryIdByName(string categoryName)
 		{
 			Category category = await data.Categories.FirstAsync(c => c.Name == categoryName);
 
@@ -85,9 +81,7 @@ namespace PersonalFinancer.Services.Categories
 			if (category != null)
 			{
 				if (category.IsDeleted == false)
-				{
 					throw new ArgumentException("Category with the same name exist!");
-				}
 
 				category.IsDeleted = false;
 				category.Name = model.Name.Trim();
@@ -95,12 +89,12 @@ namespace PersonalFinancer.Services.Categories
 			else
 			{
 				if (model.Name.Length < CategoryNameMinLength || model.Name.Length > CategoryNameMaxLength)
-				{
-					throw new ArgumentException($"Category name must be between {CategoryNameMinLength} and {CategoryNameMaxLength} characters long.");
-				}
+					throw new ArgumentException(
+						$"Category name must be between {CategoryNameMinLength} and {CategoryNameMaxLength} characters long.");
 
 				category = new Category
 				{
+					Id = Guid.NewGuid().ToString(),
 					Name = model.Name,
 					UserId = userId
 				};
@@ -120,14 +114,12 @@ namespace PersonalFinancer.Services.Categories
 		/// Throws InvalidOperationException if category does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<bool> IsInitialBalance(Guid categoryId)
+		public async Task<bool> IsInitialBalance(string categoryId)
 		{
 			Category? category = await data.Categories.FindAsync(categoryId);
 
 			if (category == null)
-			{
 				throw new InvalidOperationException("Category does not exist.");
-			}
 
 			return category.Name == CategoryInitialBalanceName;
 		}

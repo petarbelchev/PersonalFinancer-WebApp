@@ -5,13 +5,9 @@
 		<p class="fs-2">You are going to delete @Model.Name account!</p>
 
 		<form method="post">
-			<input asp-for="@Model.Id" type="hidden" />
-			<input asp-for="@Model.Name" type="hidden" />
-			<input asp-for="@Model.OwnerId" type="hidden" />
-			<input asp-for="@Model.ReturnUrl" type="hidden" />
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" asp-for="@Model.ShouldDeleteTransactions">
-				<label class="form-check-label" for="flexCheckDefault">Also delete all transactions!</label>
+				<label class="form-check-label" asp-for="@Model.ShouldDeleteTransactions">Also delete all transactions!</label>
 			</div>
 			<button type="submit" name="confirmButton" value="accept" class="btn btn-danger" style="margin-top: 15px;">Delete @Model.Name!</button>
 			<button type="submit" name="confirmButton" value="reject" class="btn btn-secondary" style="margin-top: 15px;">Do Not Delete @Model.Name!</button>

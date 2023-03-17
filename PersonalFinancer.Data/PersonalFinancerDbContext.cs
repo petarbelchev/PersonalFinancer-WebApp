@@ -17,6 +17,10 @@ namespace PersonalFinancer.Data
 			{
 				this.Database.EnsureCreated();
 			}
+			else
+			{
+				this.Database.Migrate();
+			}
 
 			this.seed = seed;
 		}
@@ -45,17 +49,21 @@ namespace PersonalFinancer.Data
 				b.Ignore(p => p.PhoneNumberConfirmed);
 				b.Ignore(p => p.LockoutEnabled);
 				b.Ignore(p => p.LockoutEnd);
+
+				b.HasMany(a => a.Accounts).WithOne(a => a.Owner).OnDelete(DeleteBehavior.NoAction);
 			});
 
-			builder.Entity<Account>()
-				.Property(a => a.Balance)
-				.HasColumnType("decimal")
-				.HasPrecision(18, 2);
+			builder.Entity<Account>(b =>
+			{
+				b.Property(a => a.Balance).HasColumnType("decimal").HasPrecision(18, 2);
+				b.HasOne(a => a.Currency).WithMany().OnDelete(DeleteBehavior.NoAction);
+			});
 
-			builder.Entity<Transaction>()
-				.Property(a => a.Amount)
-				.HasColumnType("decimal")
-				.HasPrecision(18, 2);
+			builder.Entity<Transaction>(b =>
+			{
+				b.Property(a => a.Amount).HasColumnType("decimal").HasPrecision(18, 2);
+				b.HasOne(t => t.Category).WithMany().OnDelete(DeleteBehavior.NoAction);
+			});
 
 			if (this.seed)
 			{

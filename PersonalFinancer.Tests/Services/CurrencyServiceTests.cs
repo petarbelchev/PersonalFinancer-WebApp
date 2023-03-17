@@ -37,7 +37,7 @@ namespace PersonalFinancer.Tests.Services
 				.Count(c => c.UserId == this.User1.Id && !c.IsDeleted);
 
 			//Assert
-			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
+			Assert.That(model.Id, Is.Not.Null);
 			Assert.That(model.Name, Is.EqualTo("NEW"));
 			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
 			Assert.That(await data.Currencies.FirstOrDefaultAsync(c => c.Name == "NEW"), Is.Not.Null);
@@ -63,7 +63,7 @@ namespace PersonalFinancer.Tests.Services
 			int actualCurrencies = data.Currencies.Count();
 
 			//Assert
-			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
+			Assert.That(model.Id, Is.Not.Null);
 			Assert.That(model.Name, Is.EqualTo(user2Currency.Name));
 			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
 			Assert.That(data.Currencies.Count(c => c.Name == "NEW2"), Is.EqualTo(2));
@@ -98,7 +98,7 @@ namespace PersonalFinancer.Tests.Services
 			int countAfter = data.Currencies.Count();
 
 			//Assert
-			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
+			Assert.That(model.Id, Is.Not.Null);
 			Assert.That(countAfter, Is.EqualTo(countBefore));
 			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
 			Assert.That(model.Name, Is.EqualTo(deletedCurrency.Name));
@@ -155,7 +155,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange
 
 			//Act & Assert
-			Assert.That(async () => await currencyService.DeleteCurrency(Guid.NewGuid(), this.User1.Id),
+			Assert.That(async () => await currencyService.DeleteCurrency(Guid.NewGuid().ToString(), this.User1.Id),
 				Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Currency does not exist."));
 		}
 

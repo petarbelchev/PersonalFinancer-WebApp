@@ -110,7 +110,7 @@ namespace PersonalFinancer.Tests.Services
 		public void AccountDropdownViewModel_ShouldReturnNull_WithInvalidId()
 		{
 			//Act & Assert
-			Assert.That(async () => await accountService.GetAccountDropdownViewModel(Guid.NewGuid()),
+			Assert.That(async () => await accountService.GetAccountDropdownViewModel(Guid.NewGuid().ToString()),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -122,16 +122,16 @@ namespace PersonalFinancer.Tests.Services
 			DateTime endDate = DateTime.UtcNow;
 			int page = 1;
 
-			AccountDetailsViewModel? expected = await data.Accounts
+			DetailsAccountViewModel? expected = await data.Accounts
 				.Where(a => a.Id == this.Account1User1.Id && !a.IsDeleted)
-				.Select(a => new AccountDetailsViewModel
+				.Select(a => new DetailsAccountViewModel
 				{
 					Name = a.Name,
 					Balance = a.Balance,
 					CurrencyName = a.Currency.Name,
 					Dates = new DateFilterModel
 					{
-						Id = a.Id,
+						//Id = a.Id,
 						StartDate = startDate,
 						EndDate = endDate
 					},
@@ -163,12 +163,12 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(expected, Is.Not.Null);
 
 			//Act
-			AccountDetailsViewModel? actual = await accountService
+			DetailsAccountViewModel? actual = await accountService
 				.GetAccountDetailsViewModel(this.Account1User1.Id, startDate, endDate);
 
 			//Assert
 			Assert.That(actual, Is.Not.Null);
-			Assert.That(actual.Dates.Id, Is.EqualTo(expected.Dates.Id));
+			//Assert.That(actual.Dates.Id, Is.EqualTo(expected.Dates.Id));
 			Assert.That(actual.Name, Is.EqualTo(expected.Name));
 			Assert.That(actual.Balance, Is.EqualTo(expected.Balance));
 			Assert.That(actual.Transactions.Count(), Is.EqualTo(expected.Transactions.Count()));
@@ -190,7 +190,7 @@ namespace PersonalFinancer.Tests.Services
 			DateTime endDate = DateTime.UtcNow;
 
 			//Act & Assert
-			Assert.That(async () => await accountService.GetAccountDetailsViewModel(Guid.NewGuid(), startDate, endDate),
+			Assert.That(async () => await accountService.GetAccountDetailsViewModel(Guid.NewGuid().ToString(), startDate, endDate),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -198,7 +198,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateAccount_ShouldAddNewAccountAndTransaction_WithValidInput()
 		{
 			//Arrange
-			CreateAccountFormModel newAccountModel = new CreateAccountFormModel
+			AccountFormModel newAccountModel = new AccountFormModel
 			{
 				Name = "AccountWithNonZeroBalance",
 				AccountTypeId = this.AccountType1.Id,
@@ -209,7 +209,7 @@ namespace PersonalFinancer.Tests.Services
 			int accountsCountBefore = data.Accounts.Count();
 
 			//Act
-			Guid newAccountId = await accountService.CreateAccount(this.User1.Id, newAccountModel);
+			string newAccountId = await accountService.CreateAccount(this.User1.Id, newAccountModel);
 			Account? newAccount = data.Accounts
 				.Where(a => a.Id == newAccountId)
 				.Include(a => a.Transactions)
@@ -230,7 +230,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateAccount_ShouldAddNewAccountWithoutTransaction_WithValidInput()
 		{
 			//Arrange
-			CreateAccountFormModel newAccountModel = new CreateAccountFormModel
+			AccountFormModel newAccountModel = new AccountFormModel
 			{
 				Name = "AccountWithZeroBalance",
 				AccountTypeId = this.AccountType1.Id,
@@ -241,7 +241,7 @@ namespace PersonalFinancer.Tests.Services
 			int accountsCountBefore = data.Accounts.Count();
 
 			//Act
-			Guid newAccountId = await accountService.CreateAccount(this.User1.Id, newAccountModel);
+			string newAccountId = await accountService.CreateAccount(this.User1.Id, newAccountModel);
 			Account? newAccount = data.Accounts
 				.Where(a => a.Id == newAccountId)
 				.Include(a => a.Transactions)
@@ -281,7 +281,7 @@ namespace PersonalFinancer.Tests.Services
 		public void IsAccountOwner_ShouldThrowException_WhenAccountDoesNotExist()
 		{
 			//Assert
-			Assert.That(async () => await accountService.IsAccountOwner(this.User1.Id, Guid.NewGuid()),
+			Assert.That(async () => await accountService.IsAccountOwner(this.User1.Id, Guid.NewGuid().ToString()),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -311,7 +311,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange & Act
 
 			//Assert
-			Assert.That(async () => await accountService.IsAccountDeleted(Guid.NewGuid()),
+			Assert.That(async () => await accountService.IsAccountDeleted(Guid.NewGuid().ToString()),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -319,7 +319,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task DeleteAccountById_ShouldDeleteAccountWithoutTransactions_WithValidId()
 		{
 			//Arrange
-			Guid accountId = Guid.NewGuid();
+			string accountId = Guid.NewGuid().ToString();
 			Account account = new Account
 			{
 				Id = accountId,
@@ -329,7 +329,7 @@ namespace PersonalFinancer.Tests.Services
 				CurrencyId = this.Currency1.Id,
 				OwnerId = this.User1.Id
 			};
-			Guid transactionId = Guid.NewGuid();
+			string transactionId = Guid.NewGuid().ToString();
 			Transaction transaction = new Transaction
 			{
 				Id = transactionId,
@@ -360,7 +360,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task DeleteAccountById_ShouldDeleteAccountAndTransactions_WithValidId()
 		{
 			//Arrange
-			Guid accountId = Guid.NewGuid();
+			string accountId = Guid.NewGuid().ToString();
 			Account account = new Account
 			{
 				Id = accountId,
@@ -370,7 +370,7 @@ namespace PersonalFinancer.Tests.Services
 				CurrencyId = this.Currency1.Id,
 				OwnerId = this.User1.Id
 			};
-			Guid transactionId = Guid.NewGuid();
+			string transactionId = Guid.NewGuid().ToString();
 			Transaction transaction = new Transaction
 			{
 				Id = transactionId,
@@ -407,7 +407,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange & Act
 
 			//Assert
-			Assert.That(async () => await accountService.DeleteAccount(Guid.NewGuid(), this.User1.Id, true),
+			Assert.That(async () => await accountService.DeleteAccount(Guid.NewGuid().ToString(), this.User1.Id, true),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -419,9 +419,9 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(actualViewModel, Is.Not.Null);
-			Assert.That(actualViewModel.Id, Is.EqualTo(this.Account1User1.Id));
+			//Assert.That(actualViewModel.Id, Is.EqualTo(this.Account1User1.Id));
 			Assert.That(actualViewModel.Name, Is.EqualTo(this.Account1User1.Name));
-			Assert.That(actualViewModel.OwnerId, Is.EqualTo(this.Account1User1.OwnerId));
+			//Assert.That(actualViewModel.OwnerId, Is.EqualTo(this.Account1User1.OwnerId));
 		}
 
 		[Test]

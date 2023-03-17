@@ -15,48 +15,49 @@ namespace PersonalFinancer.Data.Configurations
 			{
 				new Category
 				{
-					Id = Guid.Parse(InitialBalanceCategoryId),
-					Name = CategoryInitialBalanceName
+					Id = InitialBalanceCategoryId,
+					Name = CategoryInitialBalanceName,
+					UserId = AdminId
 				},
 				new Category
 				{
-					Id = Guid.Parse(FoodDrinkCategoryId),
+					Id = FoodDrinkCategoryId,
 					Name = "Food & Drink",
 					UserId = FirstUserId
 				},
 				new Category
 				{
-					Id = Guid.Parse(UtilitiesCategoryId),
+					Id = UtilitiesCategoryId,
 					Name = "Utilities",
 					UserId = FirstUserId
 				},
 				new Category
 				{
-					Id = Guid.Parse(TransportCategoryId),
+					Id = TransportCategoryId,
 					Name = "Transport",
 					UserId = FirstUserId
 				},
 				new Category
 				{
-					Id = Guid.Parse(MedicalHealthcareCategoryId),
+					Id = MedicalHealthcareCategoryId,
 					Name = "Medical & Healthcare",
 					UserId = FirstUserId
 				},
 				new Category
 				{
-					Id = Guid.Parse(SalaryCategoryId),
+					Id = SalaryCategoryId,
 					Name = "Salary",
 					UserId = FirstUserId
 				},
 				new Category
 				{
-					Id = Guid.Parse(MoneyTransferCategoryId),
+					Id = MoneyTransferCategoryId,
 					Name = "Money Transfer",
 					UserId = FirstUserId
 				},
 				new Category
 				{
-					Id = Guid.Parse(DividentsCategoryId),
+					Id = DividentsCategoryId,
 					Name = "Dividents",
 					UserId = FirstUserId
 				}

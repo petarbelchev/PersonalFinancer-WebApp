@@ -55,9 +55,7 @@ namespace PersonalFinancer.Services.AccountTypes
 			if (accountType != null)
 			{
 				if (accountType.IsDeleted == false)
-				{
 					throw new ArgumentException("Account Type with the same name exist!");
-				}
 
 				accountType.IsDeleted = false;
 				accountType.Name = model.Name.Trim();
@@ -65,12 +63,12 @@ namespace PersonalFinancer.Services.AccountTypes
 			else
 			{
 				if (model.Name.Length < AccountTypeNameMinLength || model.Name.Length > AccountTypeNameMaxLength)
-				{
-					throw new ArgumentException($"Account Type name must be between {AccountTypeNameMinLength} and {AccountTypeNameMaxLength} characters long.");
-				}
+					throw new ArgumentException(
+						$"Account Type name must be between {AccountTypeNameMinLength} and {AccountTypeNameMaxLength} characters long.");
 
 				accountType = new AccountType
 				{
+					Id = Guid.NewGuid().ToString(),
 					Name = model.Name,
 					UserId = userId
 				};
@@ -90,19 +88,15 @@ namespace PersonalFinancer.Services.AccountTypes
 		/// Throws exception when Account Type does not exist or User is not owner.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteAccountType(Guid accountTypeId, string userId)
+		public async Task DeleteAccountType(string accountTypeId, string userId)
 		{
 			AccountType? accountType = await data.AccountTypes.FindAsync(accountTypeId);
 
 			if (accountType == null)
-			{
 				throw new InvalidOperationException("Account Type does not exist.");
-			}
 
 			if (accountType.UserId != userId)
-			{
 				throw new InvalidOperationException("You can't delete someone else Account Type.");
-			}
 
 			accountType.IsDeleted = true;
 

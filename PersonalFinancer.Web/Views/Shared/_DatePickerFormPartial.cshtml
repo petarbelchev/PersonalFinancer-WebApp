@@ -2,10 +2,6 @@
 @model DateFilterModel
 
 <form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
-	@if (Model.Id == Guid.Empty)
-	{
-		<input type="hidden" name="Id" asp-for="@Model.Id" />
-	}
 	<div class="col-lg-5 form-floating">
 		<input textmode="Date" name="StartDate" asp-for="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 		<label asp-for="@Model.StartDate" class="form-label">Start Date</label>

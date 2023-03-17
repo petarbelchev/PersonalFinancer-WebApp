@@ -1,5 +1,5 @@
 ﻿<div class="d-flex justify-content-between align-items-center">
-	<p>@Model.Pagination.FirstElement to @Model.Pagination.LastElement from @Model.Pagination.TotalElements @ViewBag.NameOfElements</p>
+	<p>@Model.Pagination.FirstElement to @Model.Pagination.LastElement from @Model.Pagination.TotalElements @Model.Pagination.ElementsName</p>
 	<ul class="pagination" style="margin-top: 25px;">
 		<li class="page-item @(Model.Pagination.Page == 1 ? "disabled" : string.Empty)">
 			<a class="page-link" style="color: black;" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action"

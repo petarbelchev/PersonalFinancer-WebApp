@@ -14,19 +14,19 @@ namespace PersonalFinancer.Data.Configurations
 			{
 				new Currency
 				{
-					Id = Guid.Parse(BgnCurrencyId),
+					Id = BgnCurrencyId,
 					Name = "BGN",
 					UserId = FirstUserId
 				},
 				new Currency
 				{
-					Id = Guid.Parse(EurCurrencyId),
+					Id = EurCurrencyId,
 					Name = "EUR",
 					UserId = FirstUserId
 				},
 				new Currency
 				{
-					Id = Guid.Parse(UsdCurrencyId),
+					Id = UsdCurrencyId,
 					Name = "USD",
 					UserId = FirstUserId
 				}

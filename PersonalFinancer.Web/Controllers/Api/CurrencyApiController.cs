@@ -21,9 +21,7 @@ namespace PersonalFinancer.Web.Controllers.Api
 		public async Task<IActionResult> Create(CurrencyViewModel model)
 		{
 			if (!User.Identity?.IsAuthenticated ?? false)
-			{
 				return Unauthorized();
-			}
 
 			try
 			{
@@ -38,12 +36,10 @@ namespace PersonalFinancer.Web.Controllers.Api
 		}
 
 		[HttpDelete("{id}")]
-		public async Task<ActionResult> Delete(Guid id)
+		public async Task<ActionResult> Delete(string id)
 		{
 			if (!User.Identity?.IsAuthenticated ?? false)
-			{
 				return Unauthorized();
-			}
 
 			try
 			{

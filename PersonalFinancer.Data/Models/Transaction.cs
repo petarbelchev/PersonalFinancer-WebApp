@@ -9,16 +9,16 @@ namespace PersonalFinancer.Data.Models
 	public class Transaction
 	{
 		[Key]
-		public Guid Id { get; set; }
+		public string Id { get; set; } = null!;
 
 		[ForeignKey(nameof(Account))]
-		public Guid AccountId { get; set; }
+		public string AccountId { get; set; } = null!;
 		public Account Account { get; set; } = null!;
 
 		public decimal Amount { get; set; }
 
 		[ForeignKey(nameof(Category))]
-		public Guid CategoryId { get; set; }
+		public string CategoryId { get; set; } = null!;
 		public Category Category { get; set; } = null!;
 
 		public TransactionType TransactionType { get; set; }

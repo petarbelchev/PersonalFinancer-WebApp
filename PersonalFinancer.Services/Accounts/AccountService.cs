@@ -44,6 +44,17 @@ namespace PersonalFinancer.Services.Accounts
 			return accountsCount;
 		}
 
+		/// <summary>
+		/// Throws InvalidOperationException if Account does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<string> GetOwnerId(string accountId)
+		{
+			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
+
+			return account.OwnerId;
+		}
+
 		public async Task<IEnumerable<AccountDropdownViewModel>> GetUserAccountsDropdownViewModel(string userId)
 		{
 			string cacheKey = AccountConstants.CacheKeyValue + userId;
@@ -66,7 +77,7 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<AccountDropdownViewModel> GetAccountDropdownViewModel(Guid accountId)
+		public async Task<AccountDropdownViewModel> GetAccountDropdownViewModel(string accountId)
 		{
 			return await data.Accounts
 				.Where(a => a.Id == accountId)
@@ -103,25 +114,25 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<AccountDetailsViewModel> GetAccountDetailsViewModel(Guid accountId, DateTime startDate, DateTime endDate, int page = 1)
+		public async Task<DetailsAccountViewModel> GetAccountDetailsViewModel(string accountId, DateTime startDate, DateTime endDate, int page = 1)
 		{
 			return await data.Accounts
 				.Where(a => a.Id == accountId && !a.IsDeleted)
-				.Select(a => new AccountDetailsViewModel
+				.Select(a => new DetailsAccountViewModel
 				{
 					Name = a.Name,
 					Balance = a.Balance,
 					CurrencyName = a.Currency.Name,
 					Dates = new DateFilterModel
 					{
-						Id = a.Id,
 						StartDate = startDate,
 						EndDate = endDate
 					},
 					Pagination = new PaginationModel
 					{
 						Page = page,
-						TotalElements = a.Transactions.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+						TotalElements = a.Transactions.Count(t => 
+							t.CreatedOn >= startDate && t.CreatedOn <= endDate),
 					},
 					Transactions = a.Transactions
 						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
@@ -134,7 +145,9 @@ namespace PersonalFinancer.Services.Accounts
 							Amount = t.Amount,
 							CurrencyName = a.Currency.Name,
 							CreatedOn = t.CreatedOn,
-							CategoryName = t.Category.Name + (t.Category.IsDeleted ? " (Deleted)" : string.Empty),
+							CategoryName = t.Category.Name + (t.Category.IsDeleted ? 
+								" (Deleted)" 
+								: string.Empty),
 							TransactionType = t.TransactionType.ToString(),
 							Refference = t.Refference
 						})
@@ -148,15 +161,15 @@ namespace PersonalFinancer.Services.Accounts
 		/// </summary>
 		/// <returns>New Account Id.</returns>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<Guid> CreateAccount(string userId, CreateAccountFormModel accountModel)
+		public async Task<string> CreateAccount(string userId, AccountFormModel accountModel)
 		{
 			if (await IsNameExists(accountModel.Name, userId))
-			{
-				throw new ArgumentException($"The User already have Account with {accountModel.Name} name.");
-			}
+				throw new ArgumentException(
+					$"The User already have Account with {accountModel.Name} name.");
 
 			Account newAccount = new Account()
 			{
+				Id = Guid.NewGuid().ToString(),
 				Name = accountModel.Name.Trim(),
 				Balance = accountModel.Balance,
 				AccountTypeId = accountModel.AccountTypeId,
@@ -168,11 +181,12 @@ namespace PersonalFinancer.Services.Accounts
 
 			if (newAccount.Balance != 0)
 			{
-				await transactionsService.CreateTransaction(new CreateTransactionFormModel
+				await transactionsService.CreateTransaction(new TransactionFormModel
 				{
 					Amount = newAccount.Balance,
 					AccountId = newAccount.Id,
-					CategoryId = await categoryService.GetCategoryIdByName(CategoryConstants.CategoryInitialBalanceName),
+					CategoryId = await categoryService
+						.GetCategoryIdByName(CategoryConstants.CategoryInitialBalanceName),
 					Refference = "Initial Balance",
 					CreatedOn = DateTime.UtcNow,
 					TransactionType = TransactionType.Income
@@ -190,7 +204,8 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteAccount(Guid accountId, string userId, bool shouldDeleteTransactions)
+		public async Task DeleteAccount(
+			string accountId, string userId, bool shouldDeleteTransactions)
 		{
 			Account? account = await data.Accounts
 				.FirstAsync(a => a.Id == accountId && !a.IsDeleted);
@@ -213,7 +228,7 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<DeleteAccountViewModel> GetDeleteAccountViewModel(Guid accountId)
+		public async Task<DeleteAccountViewModel> GetDeleteAccountViewModel(string accountId)
 		{
 			return await data.Accounts
 				.Where(a => a.Id == accountId)
@@ -227,28 +242,25 @@ namespace PersonalFinancer.Services.Accounts
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task EditAccount(EditAccountFormModel accountModel, string userId)
+		public async Task EditAccount(string accountId, AccountFormModel model, string userId)
 		{
-			Account? account = await data.Accounts.FindAsync(accountModel.Id);
+			Account? account = await data.Accounts.FindAsync(accountId);
 
 			if (account == null)
-			{
 				throw new InvalidOperationException("Account does not exist.");
-			}
 
-			if (account.Name != accountModel.Name && await IsNameExists(accountModel.Name, userId))
+			if (account.Name != model.Name && await IsNameExists(model.Name, userId))
+				throw new ArgumentException(
+					$"The User already have Account with {model.Name} name.");
+
+			account.Name = model.Name.Trim();
+			account.CurrencyId = model.CurrencyId;
+			account.AccountTypeId = model.AccountTypeId;
+
+			if (account.Balance != model.Balance)
 			{
-				throw new ArgumentException($"The User already have Account with {accountModel.Name} name.");
-			}
-
-			account.Name = accountModel.Name.Trim();
-			account.CurrencyId = accountModel.CurrencyId;
-			account.AccountTypeId = accountModel.AccountTypeId;
-
-			if (account.Balance != accountModel.Balance)
-			{
-				decimal amountOfChange = accountModel.Balance - account.Balance;
-				account.Balance = accountModel.Balance;
+				decimal amountOfChange = model.Balance - account.Balance;
+				account.Balance = model.Balance;
 				await transactionsService.EditOrCreateInitialBalanceTransaction(account.Id, amountOfChange);
 			}
 			else
@@ -261,11 +273,11 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<EditAccountFormModel> GetEditAccountFormModel(Guid accountId)
+		public async Task<AccountFormModel> GetEditAccountModel(string accountId)
 		{
 			return await data.Accounts
 				.Where(a => a.Id == accountId)
-				.ProjectTo<EditAccountFormModel>(mapper.ConfigurationProvider)
+				.ProjectTo<AccountFormModel>(mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
@@ -273,14 +285,12 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws ArgumentNullException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<bool> IsAccountOwner(string userId, Guid accountId)
+		public async Task<bool> IsAccountOwner(string userId, string accountId)
 		{
 			Account? account = await data.Accounts.FindAsync(accountId);
 
 			if (account == null)
-			{
 				throw new InvalidOperationException("Account does not exist.");
-			}
 
 			return account.OwnerId == userId;
 		}
@@ -289,14 +299,12 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<bool> IsAccountDeleted(Guid accountId)
+		public async Task<bool> IsAccountDeleted(string accountId)
 		{
 			Account? account = await data.Accounts.FindAsync(accountId);
 
 			if (account == null)
-			{
 				throw new InvalidOperationException("Account does not exist.");
-			}
 
 			return account.IsDeleted;
 		}

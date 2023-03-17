@@ -8,7 +8,7 @@ namespace PersonalFinancer.Data.Models
 	public class Account
 	{
 		[Key]
-		public Guid Id { get; set; }
+		public string Id { get; set; } = null!;
 
 		[MaxLength(AccountNameMaxLength, ErrorMessage = "Account name max length must be {1} characters long.")]
 		public string Name { get; set; } = null!;
@@ -20,11 +20,11 @@ namespace PersonalFinancer.Data.Models
 		public ApplicationUser Owner { get; set; } = null!;
 
 		[ForeignKey(nameof(AccountType))]
-		public Guid AccountTypeId { get; set; }
+		public string AccountTypeId { get; set; } = null!;
 		public AccountType AccountType { get; set; } = null!;
 
 		[ForeignKey(nameof(Currency))]
-		public Guid CurrencyId { get; set; }
+		public string CurrencyId { get; set; } = null!;
 		public Currency Currency { get; set; } = null!;
 
 		public ICollection<Transaction> Transactions { get; set; } = null!;

@@ -83,21 +83,21 @@ namespace PersonalFinancer.Tests
 			data.Users.Add(User2);
 
 			// Account Types
-			Guid cashAccTypeId = Guid.NewGuid();
+			string cashAccTypeId = Guid.NewGuid().ToString();
 			AccountType1 = new AccountType
 			{
 				Id = cashAccTypeId,
 				Name = "Cash",
 				UserId = PetarId
 			};
-			Guid BankAccTypeId = Guid.NewGuid();
+			string BankAccTypeId = Guid.NewGuid().ToString();
 			AccountType2 = new AccountType
 			{
 				Id = BankAccTypeId,
 				Name = "Bank",
 				UserId = PetarId
 			};
-			Guid CustomAccTypeId = Guid.NewGuid();
+			string CustomAccTypeId = Guid.NewGuid().ToString();
 			AccountType3 = new AccountType
 			{
 				Id = CustomAccTypeId,
@@ -108,14 +108,14 @@ namespace PersonalFinancer.Tests
 			data.AccountTypes.AddRange(AccountType1, AccountType2, AccountType3);
 
 			// Currencies
-			Guid BgnCurrencyId = Guid.NewGuid();
+			string BgnCurrencyId = Guid.NewGuid().ToString();
 			Currency1 = new Currency
 			{
 				Id = BgnCurrencyId,
 				Name = "BGN",
 				UserId = PetarId
 			};
-			Guid EurCurrencyId = Guid.NewGuid();
+			string EurCurrencyId = Guid.NewGuid().ToString();
 			Currency2 = new Currency
 			{
 				Id = EurCurrencyId,
@@ -131,7 +131,7 @@ namespace PersonalFinancer.Tests
 			data.Currencies.AddRange(Currency1, Currency2/*, Currency3*/);
 
 			// Accounts
-			Guid petarCashBgnAccId = Guid.NewGuid();
+			string petarCashBgnAccId = Guid.NewGuid().ToString();
 			Account1User1 = new Account
 			{
 				Id = petarCashBgnAccId,
@@ -141,7 +141,7 @@ namespace PersonalFinancer.Tests
 				CurrencyId = BgnCurrencyId,
 				OwnerId = PetarId
 			};
-			Guid petarBankEurAccId = Guid.NewGuid();
+			string petarBankEurAccId = Guid.NewGuid().ToString();
 			Account2User1 = new Account
 			{
 				Id = petarBankEurAccId,
@@ -155,27 +155,27 @@ namespace PersonalFinancer.Tests
 			data.Accounts.AddRange(Account1User1, Account2User1);
 
 			// Categories
-			Guid initBalanceCatId = Guid.NewGuid();
+			string initBalanceCatId = Guid.NewGuid().ToString();
 			Category1 = new Category
 			{
 				Id = initBalanceCatId,
 				Name = CategoryInitialBalanceName
 			};
-			Guid foodCatId = Guid.NewGuid();
+			string foodCatId = Guid.NewGuid().ToString();
 			Category2 = new Category
 			{
 				Id = foodCatId,
 				Name = "Food and Drinks",
 				UserId = PetarId
 			};
-			Guid transportCatId = Guid.NewGuid();
+			string transportCatId = Guid.NewGuid().ToString();
 			Category3 = new Category
 			{
 				Id = transportCatId,
 				Name = "Transport",
 				UserId = PetarId
 			};
-			Guid salaryCatId = Guid.NewGuid();
+			string salaryCatId = Guid.NewGuid().ToString();
 			Category4 = new Category
 			{
 				Id = salaryCatId,
@@ -188,7 +188,7 @@ namespace PersonalFinancer.Tests
 			// Cash BGN
 			Transaction1 = new Transaction()
 			{
-				Id = Guid.NewGuid(),
+				Id = Guid.NewGuid().ToString(),
 				AccountId = petarCashBgnAccId,
 				Amount = 200,
 				CategoryId = initBalanceCatId,
@@ -198,7 +198,7 @@ namespace PersonalFinancer.Tests
 			};
 			Transaction2 = new Transaction()
 			{
-				Id = Guid.NewGuid(),
+				Id = Guid.NewGuid().ToString(),
 				AccountId = petarCashBgnAccId,
 				Amount = 5.65m,
 				CategoryId = foodCatId,
@@ -208,7 +208,7 @@ namespace PersonalFinancer.Tests
 			};
 			Transaction3 = new Transaction()
 			{
-				Id = Guid.NewGuid(),
+				Id = Guid.NewGuid().ToString(),
 				AccountId = petarCashBgnAccId,
 				Amount = 4.80m,
 				CategoryId = transportCatId,
@@ -219,7 +219,7 @@ namespace PersonalFinancer.Tests
 			// Bank EUR
 			Transaction4 = new Transaction()
 			{
-				Id = Guid.NewGuid(),
+				Id = Guid.NewGuid().ToString(),
 				AccountId = petarBankEurAccId,
 				Amount = 200,
 				CategoryId = initBalanceCatId,
@@ -229,7 +229,7 @@ namespace PersonalFinancer.Tests
 			};
 			Transaction5 = new Transaction()
 			{
-				Id = Guid.NewGuid(),
+				Id = Guid.NewGuid().ToString(),
 				AccountId = petarBankEurAccId,
 				Amount = 750m,
 				CategoryId = salaryCatId,
@@ -239,7 +239,7 @@ namespace PersonalFinancer.Tests
 			};
 			Transaction6 = new Transaction()
 			{
-				Id = Guid.NewGuid(),
+				Id = Guid.NewGuid().ToString(),
 				AccountId = petarBankEurAccId,
 				Amount = 49.99m,
 				CategoryId = transportCatId,

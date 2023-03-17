@@ -11,7 +11,7 @@ using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {
-	[Authorize]
+	[Authorize(Roles = UserRoleName)]
 	public class AccountController : Controller
 	{
 		private readonly IAccountService accountService;
@@ -28,32 +28,32 @@ namespace PersonalFinancer.Web.Controllers
 			this.accountTypeService = accountTypeService;
 		}
 
-		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Create()
 		{
-			string userId = User.Id();
-
-			CreateAccountFormModel formModel = new CreateAccountFormModel
+			return View(new AccountFormModel
 			{
-				AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(userId),
-				Currencies = await currencyService.GetUserCurrencies(userId)
-			};
-
-			return View(formModel);
+				AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(User.Id()),
+				Currencies = await currencyService.GetUserCurrencies(User.Id())
+			});
 		}
 
 		[HttpPost]
-		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Create(CreateAccountFormModel model)
+		public async Task<IActionResult> Create(AccountFormModel inputModel)
 		{
 			if (!ModelState.IsValid)
 			{
-				return View(model);
+				inputModel.AccountTypes = await accountTypeService
+					.GetUserAccountTypesViewModel(User.Id());
+
+				inputModel.Currencies = await currencyService
+					.GetUserCurrencies(User.Id());
+
+				return View(inputModel);
 			}
 
 			try
 			{
-				Guid newAccountId = await accountService.CreateAccount(User.Id(), model);
+				string newAccountId = await accountService.CreateAccount(User.Id(), inputModel);
 
 				TempData["successMsg"] = "You create a new account successfully!";
 
@@ -61,34 +61,42 @@ namespace PersonalFinancer.Web.Controllers
 			}
 			catch (ArgumentException)
 			{
-				ModelState.AddModelError(nameof(model.Name), "You already have Account with that name.");
+				ModelState.AddModelError(
+					nameof(inputModel.Name),
+					"You already have Account with that name.");
 
-				model.AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(User.Id());
-				model.Currencies = await currencyService.GetUserCurrencies(User.Id());
+				inputModel.AccountTypes = await accountTypeService
+					.GetUserAccountTypesViewModel(User.Id());
 
-				return View(model);
+				inputModel.Currencies = await currencyService
+					.GetUserCurrencies(User.Id());
+
+				return View(inputModel);
 			}
 		}
 
-		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Details(Guid id, string? startDate, string? endDate, int page = 1)
+		public async Task<IActionResult> Details(
+			string id, string? startDate, string? endDate, int page = 1)
 		{
-			AccountDetailsViewModel model;
+			if (!ModelState.IsValid)
+				return BadRequest();
+
+			DetailsAccountViewModel viewModel;
 
 			try
 			{
 				if (!await accountService.IsAccountOwner(User.Id(), id))
-				{
 					return Unauthorized();
-				}
 
 				if (startDate == null || endDate == null)
 				{
-					model = await accountService.GetAccountDetailsViewModel(id, DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, page);
+					viewModel = await accountService.GetAccountDetailsViewModel(
+						id, DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, page);
 				}
 				else
 				{
-					model = await accountService.GetAccountDetailsViewModel(id, DateTime.Parse(startDate), DateTime.Parse(endDate), page);
+					viewModel = await accountService.GetAccountDetailsViewModel(
+						id, DateTime.Parse(startDate), DateTime.Parse(endDate), page);
 				}
 			}
 			catch (InvalidOperationException)
@@ -96,60 +104,50 @@ namespace PersonalFinancer.Web.Controllers
 				return BadRequest();
 			}
 
-			ViewBag.Area = "";
-			ViewBag.Controller = "Account";
-			ViewBag.Action = "Details";
-			ViewBag.ReturnUrl = "~/Account/Details/" + model.Dates.Id;
-			ViewBag.ModelId = model.Dates.Id;
+			viewModel.Routing.ReturnUrl = "/Account/Details/" + id;
+			ViewBag.ModelId = id;
 
-			return View(model);
+			return View(viewModel);
 		}
 
 		[HttpPost]
-		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Details(DateFilterModel dateModel)
+		public async Task<IActionResult> Details(string id, DateFilterModel dateModel)
 		{
 			if (!ModelState.IsValid)
-			{
 				return View(dateModel);
-			}
 
-			AccountDetailsViewModel model;
+			DetailsAccountViewModel viewModel;
+
 			try
 			{
-				model = await accountService.GetAccountDetailsViewModel(dateModel.Id, dateModel.StartDate, dateModel.EndDate);
+				viewModel = await accountService.GetAccountDetailsViewModel(
+					id, dateModel.StartDate, dateModel.EndDate);
 			}
 			catch (InvalidOperationException)
 			{
 				return BadRequest();
 			}
 
-			ViewBag.Area = "";
-			ViewBag.Controller = "Account";
-			ViewBag.Action = "Details";
-			ViewBag.ReturnUrl = "~/Account/Details/" + model.Dates.Id;
-			ViewBag.ModelId = model.Dates.Id;
+			viewModel.Routing.ReturnUrl = "/Account/Details/" + id;
+			ViewBag.ModelId = id;
 
-			return View(model);
+			return View(viewModel);
 		}
 
-		public async Task<IActionResult> Delete(Guid id, string? returnUrl)
+		public async Task<IActionResult> Delete(string id)
 		{
+			if (!ModelState.IsValid)
+				return BadRequest();
+
 			try
 			{
-				if (!await accountService.IsAccountOwner(User.Id(), id) && !User.IsAdmin())
-				{
+				if (!await accountService.IsAccountOwner(User.Id(), id))
 					return Unauthorized();
-				}
 
-				DeleteAccountViewModel model = await accountService.GetDeleteAccountViewModel(id);
+				DeleteAccountViewModel viewModel = await accountService
+					.GetDeleteAccountViewModel(id);
 
-				if (returnUrl != null)
-				{
-					model.ReturnUrl = returnUrl;
-				}
-
-				return View(model);
+				return View(viewModel);
 			}
 			catch (InvalidOperationException)
 			{
@@ -158,32 +156,26 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Delete(DeleteAccountViewModel model, string confirmButton)
+		public async Task<IActionResult> Delete(DeleteAccountInputModel inputModel, string returnUrl)
 		{
-			if (confirmButton == "reject")
-			{
-				return LocalRedirect(model.ReturnUrl);
-			}
+			if (!ModelState.IsValid)
+				return BadRequest();
+
+			if (inputModel.ConfirmButton == "reject")
+				return LocalRedirect(returnUrl);
 
 			try
 			{
-				if (!await accountService.IsAccountOwner(User.Id(), model.Id) && !User.IsAdmin())
-				{
+				if (!await accountService.IsAccountOwner(User.Id(), inputModel.Id))
 					return Unauthorized();
-				}
 
-				await accountService.DeleteAccount(model.Id, User.Id(), model.ShouldDeleteTransactions);
+				await accountService.DeleteAccount(
+					inputModel.Id, User.Id(),
+					inputModel.ShouldDeleteTransactions ?? false);
 			}
 			catch (InvalidOperationException)
 			{
 				return BadRequest();
-			}
-
-			if (User.IsAdmin())
-			{
-				TempData["successMsg"] = "You successfully delete user's account!";
-
-				return LocalRedirect("~/Admin/Users/Details/" + model.OwnerId);
 			}
 
 			TempData["successMsg"] = "Your account was successfully deleted!";
@@ -191,29 +183,20 @@ namespace PersonalFinancer.Web.Controllers
 			return RedirectToAction("Index", "Home");
 		}
 
-		public async Task<IActionResult> Edit(Guid id, string? returnUrl)
+		public async Task<IActionResult> EditAccount(string id)
 		{
 			try
 			{
-				EditAccountFormModel model = await accountService.GetEditAccountFormModel(id);
+				AccountFormModel viewModel = await accountService
+					.GetEditAccountModel(id);
 
-				if (!User.IsAdmin())
-				{
-					model.Currencies = await currencyService.GetUserCurrencies(User.Id());
-					model.AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(User.Id());
-				}
-				else
-				{
-					model.Currencies = await currencyService.GetUserCurrencies(model.OwnerId);
-					model.AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(model.OwnerId);
-				}
+				viewModel.Currencies = await currencyService
+					.GetUserCurrencies(User.Id());
 
-				if (returnUrl != null)
-				{
-					model.ReturnUrl = returnUrl;
-				}
+				viewModel.AccountTypes = await accountTypeService
+					.GetUserAccountTypesViewModel(User.Id());
 
-				return View(model);
+				return View(viewModel);
 			}
 			catch (InvalidOperationException)
 			{
@@ -222,40 +205,46 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Edit(EditAccountFormModel model)
+		public async Task<IActionResult> EditAccount(
+			string id, AccountFormModel inputModel, string returnUrl)
 		{
 			if (!ModelState.IsValid)
 			{
-				model.Currencies = await currencyService.GetUserCurrencies(User.Id());
-				model.AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(User.Id());
+				inputModel.Currencies = await currencyService
+					.GetUserCurrencies(User.Id());
 
-				return View(model);
+				inputModel.AccountTypes = await accountTypeService
+					.GetUserAccountTypesViewModel(User.Id());
+
+				return View(inputModel);
 			}
 
 			try
 			{
-				await accountService.EditAccount(model, User.Id());
+				await accountService.EditAccount(id, inputModel, User.Id());
+
+				TempData["successMsg"] = "Your account was successfully edited!";
+
+				return LocalRedirect(returnUrl);
 			}
 			catch (ArgumentException)
 			{
-				ModelState.AddModelError(nameof(model.Name), $"You already have Account with {model.Name} name.");
+				ModelState.AddModelError(
+					nameof(inputModel.Name),
+					$"You already have Account with {inputModel.Name} name.");
 
-				model.Currencies = await currencyService.GetUserCurrencies(User.Id());
-				model.AccountTypes = await accountTypeService.GetUserAccountTypesViewModel(User.Id());
+				inputModel.Currencies = await currencyService
+					.GetUserCurrencies(User.Id());
 
-				return View(model);
+				inputModel.AccountTypes = await accountTypeService
+					.GetUserAccountTypesViewModel(User.Id());
+
+				return View(inputModel);
 			}
 			catch (InvalidOperationException)
 			{
 				return BadRequest();
 			}
-
-			if (model.ReturnUrl != null)
-			{
-				return LocalRedirect(model.ReturnUrl);
-			}
-
-			return RedirectToAction(nameof(Details), new { id = model.Id });
 		}
 	}
 }

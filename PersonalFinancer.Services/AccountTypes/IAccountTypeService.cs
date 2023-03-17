@@ -16,6 +16,6 @@ namespace PersonalFinancer.Services.AccountTypes
 		/// Throws exception when Account Type does not exist or User is not owner.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task DeleteAccountType(Guid categoryId, string userId);
+		Task DeleteAccountType(string categoryId, string userId);
 	}
 }

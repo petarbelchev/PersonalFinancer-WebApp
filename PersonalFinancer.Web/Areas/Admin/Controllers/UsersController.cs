@@ -23,14 +23,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		}
 
 		public async Task<IActionResult> Index(int page = 1)
-		{
-			ViewBag.Area = "Admin";
-			ViewBag.Controller = "Users";
-			ViewBag.Action = "Index";
-			ViewBag.NameOfElements = "users";
-
-			return View(await userService.GetAllUsers(page));
-		}
+			=> View(await userService.GetAllUsers(page));
 
 		public async Task<IActionResult> Details(string id)
 			=> View(await userService.UserDetails(id));

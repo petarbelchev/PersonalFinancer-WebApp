@@ -18,12 +18,10 @@ namespace PersonalFinancer.Web.Controllers.Api
 		}
 
 		[HttpGet("{id}")]
-		public async Task<ActionResult<CategoryViewModel>> GetCategory(Guid id)
+		public async Task<ActionResult<CategoryViewModel>> GetCategory(string id)
 		{
 			if (!User.Identity?.IsAuthenticated ?? false)
-			{
 				return Unauthorized();
-			}
 
 			try
 			{
@@ -39,9 +37,7 @@ namespace PersonalFinancer.Web.Controllers.Api
 		public async Task<ActionResult<CategoryViewModel>> CreateCategory(CategoryViewModel model)
 		{
 			if (!User.Identity?.IsAuthenticated ?? false)
-			{
 				return Unauthorized();
-			}
 
 			try
 			{
@@ -56,12 +52,10 @@ namespace PersonalFinancer.Web.Controllers.Api
 		}
 
 		[HttpDelete("{id}")]
-		public async Task<ActionResult> DeleteCategory(Guid id)
+		public async Task<ActionResult> DeleteCategory(string id)
 		{
 			if (!User.Identity?.IsAuthenticated ?? false)
-			{
 				return Unauthorized();
-			}
 
 			try
 			{

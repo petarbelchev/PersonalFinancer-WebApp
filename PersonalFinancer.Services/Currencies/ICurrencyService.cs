@@ -14,7 +14,7 @@ namespace PersonalFinancer.Services.Currencies
 		/// Throws InvalidOperationException when Currency does not exist or User is not owner.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task DeleteCurrency(Guid currencyId, string userId);
+		Task DeleteCurrency(string currencyId, string userId);
 
 		Task<IEnumerable<CurrencyViewModel>> GetUserCurrencies(string userId);
 	}

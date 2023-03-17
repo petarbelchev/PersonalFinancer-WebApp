@@ -24,7 +24,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateTransaction_ShouldAddNewTransaction_AndChangeAccountBalance()
 		{
 			//Arrange
-			CreateTransactionFormModel transactionModel = new CreateTransactionFormModel()
+			TransactionFormModel transactionModel = new TransactionFormModel()
 			{
 				Amount = 100,
 				AccountId = this.Account1User1.Id,
@@ -37,7 +37,7 @@ namespace PersonalFinancer.Tests.Services
 			decimal balanceBefore = this.Account1User1.Balance;
 
 			//Act
-			Guid id = await transactionService.CreateTransaction(transactionModel);
+			string id = await transactionService.CreateTransaction(transactionModel);
 			Transaction? transaction = await data.Transactions.FindAsync(id);
 
 			//Assert
@@ -56,7 +56,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateTransaction_ShouldAddNewTransaction_WithoutChangeAccountBalance()
 		{
 			//Arrange
-			CreateTransactionFormModel transactionModel = new CreateTransactionFormModel()
+			TransactionFormModel transactionModel = new TransactionFormModel()
 			{
 				Amount = 100,
 				AccountId = this.Account1User1.Id,
@@ -69,7 +69,7 @@ namespace PersonalFinancer.Tests.Services
 			decimal balanceBefore = this.Account1User1.Balance;
 
 			//Act
-			Guid id = await transactionService.CreateTransaction(transactionModel, true);
+			string id = await transactionService.CreateTransaction(transactionModel, true);
 			Transaction? transaction = await data.Transactions.FindAsync(id);
 
 			//Assert
@@ -88,7 +88,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task DeleteTransactionById_ShouldDeleteExpenseTransactionIncreaseBalanceAndNewBalance_WithValidInput()
 		{
 			//Arrange
-			Guid transactionId = Guid.NewGuid();
+			string transactionId = Guid.NewGuid().ToString();
 			Transaction transaction = new Transaction
 			{
 				Id = transactionId,
@@ -124,7 +124,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task DeleteTransactionById_ShouldDeleteIncomeTransactionReductBalanceAndNewBalance_WithValidInput()
 		{
 			//Arrange
-			Guid transactionId = Guid.NewGuid();
+			string transactionId = Guid.NewGuid().ToString();
 			Transaction transaction = new Transaction
 			{
 				Id = transactionId,
@@ -162,7 +162,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange
 
 			//Act & Assert
-			Assert.That(async () => await transactionService.DeleteTransaction(Guid.NewGuid()),
+			Assert.That(async () => await transactionService.DeleteTransaction(Guid.NewGuid().ToString()),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -170,12 +170,12 @@ namespace PersonalFinancer.Tests.Services
 		public async Task EditTransactionFormModelById_ShouldReturnCorrectDTO_WithValidInput()
 		{
 			//Act
-			EditTransactionFormModel? transactionFormModel = await transactionService
-				.GetEditTransactionFormModel(this.Transaction1.Id);
+			TransactionFormModel? transactionFormModel = await transactionService
+				.GetTransactionFormModel(this.Transaction1.Id);
 
 			//Assert
 			Assert.That(transactionFormModel, Is.Not.Null);
-			Assert.That(transactionFormModel.Id, Is.EqualTo(this.Transaction1.Id));
+			//Assert.That(transactionFormModel.Id, Is.EqualTo(this.Transaction1.Id));
 			Assert.That(transactionFormModel.AccountId, Is.EqualTo(this.Transaction1.AccountId));
 			Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction1.Amount));
 			Assert.That(transactionFormModel.CategoryId, Is.EqualTo(this.Transaction1.CategoryId));
@@ -187,7 +187,7 @@ namespace PersonalFinancer.Tests.Services
 		public void EditTransactionFormModelById_ShouldReturnNull_WithInValidInput()
 		{
 			//Act & Assert
-			Assert.That(async () => await transactionService.GetEditTransactionFormModel(Guid.NewGuid()),
+			Assert.That(async () => await transactionService.GetTransactionFormModel(Guid.NewGuid().ToString()),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -212,7 +212,7 @@ namespace PersonalFinancer.Tests.Services
 		public void TransactionViewModel_ShouldReturnNull_WithInValidInput()
 		{
 			//Act & Assert
-			Assert.That(async () => await transactionService.GetTransactionViewModel(Guid.NewGuid()),
+			Assert.That(async () => await transactionService.GetTransactionViewModel(Guid.NewGuid().ToString()),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -281,7 +281,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task EditTransaction_ShouldEditTransactionAndChangeBalance_WhenTransactionTypeIsChanged()
 		{
 			//Arrange
-			Guid transactionId = Guid.NewGuid();
+			string transactionId = Guid.NewGuid().ToString();
 			Transaction transaction = new Transaction
 			{
 				Id = transactionId,
@@ -298,14 +298,14 @@ namespace PersonalFinancer.Tests.Services
 			await data.SaveChangesAsync();
 			decimal balanceBefore = this.Account1User1.Balance;
 
-			EditTransactionFormModel transactionEditModel = await data.Transactions
+			TransactionFormModel transactionEditModel = await data.Transactions
 				.Where(t => t.Id == transactionId)
-				.Select(t => mapper.Map<EditTransactionFormModel>(t))
+				.Select(t => mapper.Map<TransactionFormModel>(t))
 				.FirstAsync();
 
 			//Act
 			transactionEditModel.TransactionType = TransactionType.Expense;
-			await transactionService.EditTransaction(transactionEditModel);
+			await transactionService.EditTransaction(transactionId.ToString(), transactionEditModel);
 
 			//Assert
 			Assert.That(transaction.TransactionType, Is.EqualTo(TransactionType.Expense));
@@ -316,7 +316,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task EditTransaction_ShouldEditTransactionAndChangeBalanceOnTwoAccounts_WhenAccountIsChanged()
 		{
 			//Arrange
-			Guid transactionId = Guid.NewGuid();
+			string transactionId = Guid.NewGuid().ToString();
 			Transaction transaction = new Transaction
 			{
 				Id = transactionId,
@@ -335,12 +335,13 @@ namespace PersonalFinancer.Tests.Services
 			decimal secondAccBalanceBefore = this.Account1User1.Balance;
 
 			//Act
-			EditTransactionFormModel editTransactionModel = await data.Transactions
+			TransactionFormModel editTransactionModel = await data.Transactions
 				.Where(t => t.Id == transactionId)
-				.Select(t => mapper.Map<EditTransactionFormModel>(t))
+				.Select(t => mapper.Map<TransactionFormModel>(t))
 				.FirstAsync();
+
 			editTransactionModel.AccountId = this.Account1User1.Id;
-			await transactionService.EditTransaction(editTransactionModel);
+			await transactionService.EditTransaction(transactionId.ToString(), editTransactionModel);
 
 			//Assert
 			Assert.That(transaction.AccountId, Is.EqualTo(this.Account1User1.Id));
@@ -352,7 +353,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task EditTransaction_ShouldEditTransaction_WhenPaymentRefferenceIsChanged()
 		{
 			//Arrange
-			Guid transactionId = Guid.NewGuid();
+			string transactionId = Guid.NewGuid().ToString();
 			Transaction transaction = new Transaction
 			{
 				Id = transactionId,
@@ -368,15 +369,15 @@ namespace PersonalFinancer.Tests.Services
 			this.Account1User1.Balance += transaction.Amount;
 			await data.SaveChangesAsync();
 			decimal balanceBefore = this.Account1User1.Balance;
-			Guid categoryIdBefore = transaction.CategoryId;
+			string categoryIdBefore = transaction.CategoryId;
 
 			//Act
-			EditTransactionFormModel editTransactionModel = await data.Transactions
+			TransactionFormModel editTransactionModel = await data.Transactions
 				.Where(t => t.Id == transactionId)
-				.Select(t => mapper.Map<EditTransactionFormModel>(t))
+				.Select(t => mapper.Map<TransactionFormModel>(t))
 				.FirstAsync();
 			editTransactionModel.Refference = "Second Refference";
-			await transactionService.EditTransaction(editTransactionModel);
+			await transactionService.EditTransaction(transactionId.ToString(), editTransactionModel);
 
 			//Assert that only transaction refference is changed
 			Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore));

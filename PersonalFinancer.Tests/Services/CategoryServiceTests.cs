@@ -23,7 +23,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange
 			Category category = new Category
 			{
-				Id = Guid.NewGuid(),
+				Id = Guid.NewGuid().ToString(),
 				Name = "TestCategory",
 				UserId = this.User1.Id
 			};
@@ -44,7 +44,7 @@ namespace PersonalFinancer.Tests.Services
 		public void DeleteCategory_ShouldThrowException_WithInvalidCategoryId()
 		{
 			//Act & Assert
-			Assert.That(async () => await categoryService.DeleteCategory(Guid.NewGuid(), this.User1.Id),
+			Assert.That(async () => await categoryService.DeleteCategory(Guid.NewGuid().ToString(), this.User1.Id),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -54,7 +54,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange
 			Category category = new Category
 			{
-				Id = Guid.NewGuid(),
+				Id = Guid.NewGuid().ToString(),
 				Name = "TestCategory",
 				UserId = this.User1.Id
 			};
@@ -86,7 +86,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange & Act
 
 			//Assert
-			Assert.That(async () => await categoryService.GetCategoryViewModel(Guid.NewGuid()), 
+			Assert.That(async () => await categoryService.GetCategoryViewModel(Guid.NewGuid().ToString()), 
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -102,7 +102,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(model.Name, Is.EqualTo(newCategoryName));
-			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
+			Assert.That(model.Id, Is.Not.Null);
 			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
 		}
 
@@ -138,7 +138,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange: Add deleted Category to database
 			Category category = new Category
 			{
-				Id = Guid.NewGuid(),
+				Id = Guid.NewGuid().ToString(),
 				Name = "DeletedCategory",
 				UserId = this.User1.Id,
 				IsDeleted = true
@@ -179,7 +179,7 @@ namespace PersonalFinancer.Tests.Services
 		public void IsInitialBalance_ShouldReturnFalse_WithNotExistingCategoryId()
 		{
 			//Act & Assert
-			Assert.That(async () => await categoryService.IsInitialBalance(Guid.NewGuid()), 
+			Assert.That(async () => await categoryService.IsInitialBalance(Guid.NewGuid().ToString()), 
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -237,7 +237,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CategoryIdByName_ShouldReturnId_WithValidCategoryName()
 		{
 			//Arrange & Act
-			Guid categoryId = await categoryService.GetCategoryIdByName(this.Category1.Name);
+			string categoryId = await categoryService.GetCategoryIdByName(this.Category1.Name);
 
 			//Assert
 			Assert.That(categoryId, Is.EqualTo(this.Category1.Id));

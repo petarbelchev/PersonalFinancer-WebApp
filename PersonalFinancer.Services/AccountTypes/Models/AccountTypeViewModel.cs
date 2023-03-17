@@ -6,7 +6,7 @@ namespace PersonalFinancer.Services.AccountTypes.Models
 {
 	public class AccountTypeViewModel
 	{
-		public Guid Id { get; set; }
+		public string Id { get; set; } = null!;
 
 		[StringLength(AccountTypeNameMaxLength, MinimumLength = AccountTypeNameMinLength,
 			ErrorMessage = "Account Type name must be between {2} and {1} characters long.")]

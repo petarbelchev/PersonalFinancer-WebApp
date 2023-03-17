@@ -12,8 +12,8 @@ using PersonalFinancer.Data;
 namespace PersonalFinancer.Data.Migrations
 {
     [DbContext(typeof(PersonalFinancerDbContext))]
-    [Migration("20230313142016_InitialDbModel")]
-    partial class InitialDbModel
+    [Migration("20230317105341_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -163,19 +163,20 @@ namespace PersonalFinancer.Data.Migrations
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Account", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid>("AccountTypeId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("AccountTypeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("Balance")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("CurrencyId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("CurrencyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -202,9 +203,8 @@ namespace PersonalFinancer.Data.Migrations
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.AccountType", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -215,6 +215,7 @@ namespace PersonalFinancer.Data.Migrations
                         .HasColumnType("nvarchar(15)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -226,21 +227,21 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"),
+                            Id = "f4c3803a-7ed5-4d78-9038-7b21bf08a040",
                             IsDeleted = false,
                             Name = "Cash",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
-                            Id = new Guid("1dfe1780-daed-4198-8360-378aa33c5411"),
+                            Id = "1dfe1780-daed-4198-8360-378aa33c5411",
                             IsDeleted = false,
                             Name = "Bank",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
-                            Id = new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"),
+                            Id = "daef2351-e2e9-43b9-b908-8d7d00bf3df6",
                             IsDeleted = false,
                             Name = "Savings",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
@@ -307,52 +308,51 @@ namespace PersonalFinancer.Data.Migrations
                         new
                         {
                             Id = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e",
-                            ConcurrencyStamp = "f48611a3-bd93-40e7-bc2f-d7d7309b7b82",
+                            ConcurrencyStamp = "dfa7bf16-5467-415f-9943-2f741fe10270",
                             Email = "petar@mail.com",
                             FirstName = "Petar",
                             LastName = "Petrov",
                             NormalizedEmail = "PETAR@MAIL.COM",
                             NormalizedUserName = "PETAR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEOJhfupvC4qRjDgQvSVAvRBOUWK3P7xgI0lqS27qiuntlHScn2jTdRW+OyXvSGFiWQ==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEMkHwYeeqTFFm6HLewSHBTIofZmfXJieFCOg0PWD0D8Q8/Mhl/2pdShO7FwXwoPspQ==",
                             PhoneNumber = "1234567890",
-                            SecurityStamp = "3653abd9-3123-4cd0-ad53-da04d4a74cf7",
+                            SecurityStamp = "90284804-287b-4509-8f87-687fe5466eac",
                             UserName = "petar@mail.com"
                         },
                         new
                         {
                             Id = "bcb4f072-ecca-43c9-ab26-c060c6f364e4",
-                            ConcurrencyStamp = "cf4db9d0-60cc-4614-b2e5-28e7a80c751d",
+                            ConcurrencyStamp = "1a8559a4-6cd1-44fd-815e-11f67ac77dee",
                             Email = "teodor@mail.com",
                             FirstName = "Teodor",
                             LastName = "Lesly",
                             NormalizedEmail = "TEODOR@MAIL.COM",
                             NormalizedUserName = "TEODOR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEI4IJPgigoQv5UkxZkTY7NCPYZcpjGQff0Rfj/R41GEvJyipxR3+ee4uYpidfUQgvA==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEH+vdU6zrCZwuX+KwYHbQ50PNoLF+N+hPFL3CjkZW7S9701ftxdG13g/iRHzNUz0hQ==",
                             PhoneNumber = "1325476980",
-                            SecurityStamp = "82d658bb-f54d-4fa0-b8b8-951796f5b367",
+                            SecurityStamp = "6439c181-69ae-44a2-9039-4997d019111a",
                             UserName = "teodor@mail.com"
                         },
                         new
                         {
                             Id = "dea12856-c198-4129-b3f3-b893d8395082",
-                            ConcurrencyStamp = "1c392097-4fae-4a6b-a4ff-8a662fa7ea15",
+                            ConcurrencyStamp = "553ba7f5-f31e-4a6c-8fe3-a0f22976d52e",
                             Email = "admin@admin.com",
                             FirstName = "Great",
                             LastName = "Admin",
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN@ADMIN.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAECzsSpd/HQAwGCQfKQSw2XCKQnF9bbVNqrcZ4JhhFgLdjF+POaViDFuQt47um+gFkg==",
+                            PasswordHash = "AQAAAAEAACcQAAAAECU74sTJQfDM3myNEvFA61rIxyjld7c3Yzj8cEuMwVWx/bAVyVWvJu6ahAnbZerfZQ==",
                             PhoneNumber = "9876543021",
-                            SecurityStamp = "55e72ba4-28c0-4321-9d80-1700dadd7888",
+                            SecurityStamp = "bea224f8-80d5-4af4-af3f-46b5fc88d1e5",
                             UserName = "admin@admin.com"
                         });
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Category", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -363,6 +363,7 @@ namespace PersonalFinancer.Data.Migrations
                         .HasColumnType("nvarchar(25)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -374,55 +375,56 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"),
+                            Id = "e241b89f-b094-4f79-bb09-efc6f47c2cb3",
                             IsDeleted = false,
-                            Name = "Initial Balance"
+                            Name = "Initial Balance",
+                            UserId = "dea12856-c198-4129-b3f3-b893d8395082"
                         },
                         new
                         {
-                            Id = new Guid("93cebd34-a9f5-4862-a8c9-3b6eea63e94c"),
+                            Id = "93cebd34-a9f5-4862-a8c9-3b6eea63e94c",
                             IsDeleted = false,
                             Name = "Food & Drink",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
-                            Id = new Guid("d59cbb57-3b9e-4b37-9b74-a375eecba8c8"),
+                            Id = "d59cbb57-3b9e-4b37-9b74-a375eecba8c8",
                             IsDeleted = false,
                             Name = "Utilities",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
-                            Id = new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"),
+                            Id = "b58a7947-eecf-40d0-b84e-c6947fcbfd86",
                             IsDeleted = false,
                             Name = "Transport",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
-                            Id = new Guid("96e441e3-c5a6-427f-bb32-85940242d9ee"),
+                            Id = "96e441e3-c5a6-427f-bb32-85940242d9ee",
                             IsDeleted = false,
                             Name = "Medical & Healthcare",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
-                            Id = new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"),
+                            Id = "081a7be8-15c4-426e-872c-dfaf805e3fec",
                             IsDeleted = false,
                             Name = "Salary",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
-                            Id = new Guid("e03634d5-1970-4e01-8568-42756e9ad973"),
+                            Id = "e03634d5-1970-4e01-8568-42756e9ad973",
                             IsDeleted = false,
                             Name = "Money Transfer",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
-                            Id = new Guid("459dc945-0d2c-4a07-a2aa-55b4c5e57f9f"),
+                            Id = "459dc945-0d2c-4a07-a2aa-55b4c5e57f9f",
                             IsDeleted = false,
                             Name = "Dividents",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
@@ -431,9 +433,8 @@ namespace PersonalFinancer.Data.Migrations
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Currency", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -444,6 +445,7 @@ namespace PersonalFinancer.Data.Migrations
                         .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -455,21 +457,21 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"),
+                            Id = "3bf454ad-941b-4ab6-a1ad-c212bfc46e7d",
                             IsDeleted = false,
                             Name = "BGN",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
-                            Id = new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"),
+                            Id = "dab2761d-acb1-43bc-b56b-0d9c241c8882",
                             IsDeleted = false,
                             Name = "EUR",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
-                            Id = new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"),
+                            Id = "2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f",
                             IsDeleted = false,
                             Name = "USD",
                             UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
@@ -478,19 +480,20 @@ namespace PersonalFinancer.Data.Migrations
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Transaction", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid>("AccountId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("CategoryId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
@@ -574,13 +577,13 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasOne("PersonalFinancer.Data.Models.Currency", "Currency")
                         .WithMany()
                         .HasForeignKey("CurrencyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "Owner")
                         .WithMany("Accounts")
                         .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("AccountType");
@@ -594,7 +597,9 @@ namespace PersonalFinancer.Data.Migrations
                 {
                     b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -603,7 +608,9 @@ namespace PersonalFinancer.Data.Migrations
                 {
                     b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -612,7 +619,9 @@ namespace PersonalFinancer.Data.Migrations
                 {
                     b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -628,7 +637,7 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasOne("PersonalFinancer.Data.Models.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Account");

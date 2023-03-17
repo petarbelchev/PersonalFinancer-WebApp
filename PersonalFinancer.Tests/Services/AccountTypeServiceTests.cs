@@ -56,7 +56,7 @@ namespace PersonalFinancer.Tests.Services
 			int countAfter = data.AccountTypes.Count();
 
 			//Assert
-			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
+			Assert.That(model.Id, Is.Not.Null);
 			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
 			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
 			Assert.That(model.Name, Is.EqualTo(newAccountTypeName));
@@ -90,7 +90,7 @@ namespace PersonalFinancer.Tests.Services
 			int countAfter = data.AccountTypes.Count();
 
 			//Assert
-			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
+			Assert.That(model.Id, Is.Not.Null);
 			Assert.That(countAfter, Is.EqualTo(countBefore));
 			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
 			Assert.That(model.Name, Is.EqualTo(deletedAccType.Name));
@@ -114,7 +114,7 @@ namespace PersonalFinancer.Tests.Services
 			int countAfter = data.AccountTypes.Count();
 
 			//Assert
-			Assert.That(model.Id, Is.Not.EqualTo(Guid.Empty));
+			Assert.That(model.Id, Is.Not.Null);
 			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
 			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
 			Assert.That(model.Name, Is.EqualTo("User2AccType"));
@@ -167,7 +167,7 @@ namespace PersonalFinancer.Tests.Services
 		public void DeleteAccountType_ShouldThrowException_WhenAccTypeNotExist()
 		{
 			//Act & Assert
-			Assert.That(async () => await accountTypeService.DeleteAccountType(Guid.NewGuid(), this.User1.Id),
+			Assert.That(async () => await accountTypeService.DeleteAccountType(Guid.NewGuid().ToString(), this.User1.Id),
 				Throws.TypeOf<InvalidOperationException>());
 		}
 

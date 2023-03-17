@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PersonalFinancer.Data.Migrations
 {
-    public partial class InitialDbModel : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -69,9 +69,9 @@ namespace PersonalFinancer.Data.Migrations
                 name: "AccountTypes",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -81,7 +81,8 @@ namespace PersonalFinancer.Data.Migrations
                         name: "FK_AccountTypes_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -173,9 +174,9 @@ namespace PersonalFinancer.Data.Migrations
                 name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -185,16 +186,17 @@ namespace PersonalFinancer.Data.Migrations
                         name: "FK_Categories_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Currencies",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -204,19 +206,20 @@ namespace PersonalFinancer.Data.Migrations
                         name: "FK_Currencies_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Accounts",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     Balance = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    AccountTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CurrencyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountTypeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CurrencyId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -232,24 +235,22 @@ namespace PersonalFinancer.Data.Migrations
                         name: "FK_Accounts_AspNetUsers_OwnerId",
                         column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Accounts_Currencies_CurrencyId",
                         column: x => x.CurrencyId,
                         principalTable: "Currencies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "Transactions",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AccountId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CategoryId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     TransactionType = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Refference = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
@@ -267,33 +268,32 @@ namespace PersonalFinancer.Data.Migrations
                         name: "FK_Transactions_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
-                values: new object[,]
-                {
-                    { "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e", "f48611a3-bd93-40e7-bc2f-d7d7309b7b82", "petar@mail.com", "Petar", "Petrov", "PETAR@MAIL.COM", "PETAR@MAIL.COM", "AQAAAAEAACcQAAAAEOJhfupvC4qRjDgQvSVAvRBOUWK3P7xgI0lqS27qiuntlHScn2jTdRW+OyXvSGFiWQ==", "1234567890", "3653abd9-3123-4cd0-ad53-da04d4a74cf7", "petar@mail.com" },
-                    { "bcb4f072-ecca-43c9-ab26-c060c6f364e4", "cf4db9d0-60cc-4614-b2e5-28e7a80c751d", "teodor@mail.com", "Teodor", "Lesly", "TEODOR@MAIL.COM", "TEODOR@MAIL.COM", "AQAAAAEAACcQAAAAEI4IJPgigoQv5UkxZkTY7NCPYZcpjGQff0Rfj/R41GEvJyipxR3+ee4uYpidfUQgvA==", "1325476980", "82d658bb-f54d-4fa0-b8b8-951796f5b367", "teodor@mail.com" },
-                    { "dea12856-c198-4129-b3f3-b893d8395082", "1c392097-4fae-4a6b-a4ff-8a662fa7ea15", "admin@admin.com", "Great", "Admin", "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAEAACcQAAAAECzsSpd/HQAwGCQfKQSw2XCKQnF9bbVNqrcZ4JhhFgLdjF+POaViDFuQt47um+gFkg==", "9876543021", "55e72ba4-28c0-4321-9d80-1700dadd7888", "admin@admin.com" }
-                });
+                values: new object[] { "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e", "dfa7bf16-5467-415f-9943-2f741fe10270", "petar@mail.com", "Petar", "Petrov", "PETAR@MAIL.COM", "PETAR@MAIL.COM", "AQAAAAEAACcQAAAAEMkHwYeeqTFFm6HLewSHBTIofZmfXJieFCOg0PWD0D8Q8/Mhl/2pdShO7FwXwoPspQ==", "1234567890", "90284804-287b-4509-8f87-687fe5466eac", "petar@mail.com" });
 
             migrationBuilder.InsertData(
-                table: "Categories",
-                columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
-                values: new object[] { new Guid("e241b89f-b094-4f79-bb09-efc6f47c2cb3"), false, "Initial Balance", null });
+                table: "AspNetUsers",
+                columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
+                values: new object[] { "bcb4f072-ecca-43c9-ab26-c060c6f364e4", "1a8559a4-6cd1-44fd-815e-11f67ac77dee", "teodor@mail.com", "Teodor", "Lesly", "TEODOR@MAIL.COM", "TEODOR@MAIL.COM", "AQAAAAEAACcQAAAAEH+vdU6zrCZwuX+KwYHbQ50PNoLF+N+hPFL3CjkZW7S9701ftxdG13g/iRHzNUz0hQ==", "1325476980", "6439c181-69ae-44a2-9039-4997d019111a", "teodor@mail.com" });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
+                values: new object[] { "dea12856-c198-4129-b3f3-b893d8395082", "553ba7f5-f31e-4a6c-8fe3-a0f22976d52e", "admin@admin.com", "Great", "Admin", "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAEAACcQAAAAECU74sTJQfDM3myNEvFA61rIxyjld7c3Yzj8cEuMwVWx/bAVyVWvJu6ahAnbZerfZQ==", "9876543021", "bea224f8-80d5-4af4-af3f-46b5fc88d1e5", "admin@admin.com" });
 
             migrationBuilder.InsertData(
                 table: "AccountTypes",
                 columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("1dfe1780-daed-4198-8360-378aa33c5411"), false, "Bank", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("daef2351-e2e9-43b9-b908-8d7d00bf3df6"), false, "Savings", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("f4c3803a-7ed5-4d78-9038-7b21bf08a040"), false, "Cash", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
+                    { "1dfe1780-daed-4198-8360-378aa33c5411", false, "Bank", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "daef2351-e2e9-43b9-b908-8d7d00bf3df6", false, "Savings", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "f4c3803a-7ed5-4d78-9038-7b21bf08a040", false, "Cash", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
                 });
 
             migrationBuilder.InsertData(
@@ -301,13 +301,14 @@ namespace PersonalFinancer.Data.Migrations
                 columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("081a7be8-15c4-426e-872c-dfaf805e3fec"), false, "Salary", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("459dc945-0d2c-4a07-a2aa-55b4c5e57f9f"), false, "Dividents", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("93cebd34-a9f5-4862-a8c9-3b6eea63e94c"), false, "Food & Drink", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("96e441e3-c5a6-427f-bb32-85940242d9ee"), false, "Medical & Healthcare", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("b58a7947-eecf-40d0-b84e-c6947fcbfd86"), false, "Transport", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("d59cbb57-3b9e-4b37-9b74-a375eecba8c8"), false, "Utilities", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("e03634d5-1970-4e01-8568-42756e9ad973"), false, "Money Transfer", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
+                    { "081a7be8-15c4-426e-872c-dfaf805e3fec", false, "Salary", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "459dc945-0d2c-4a07-a2aa-55b4c5e57f9f", false, "Dividents", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "93cebd34-a9f5-4862-a8c9-3b6eea63e94c", false, "Food & Drink", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "96e441e3-c5a6-427f-bb32-85940242d9ee", false, "Medical & Healthcare", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "b58a7947-eecf-40d0-b84e-c6947fcbfd86", false, "Transport", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "d59cbb57-3b9e-4b37-9b74-a375eecba8c8", false, "Utilities", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "e03634d5-1970-4e01-8568-42756e9ad973", false, "Money Transfer", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "e241b89f-b094-4f79-bb09-efc6f47c2cb3", false, "Initial Balance", "dea12856-c198-4129-b3f3-b893d8395082" }
                 });
 
             migrationBuilder.InsertData(
@@ -315,9 +316,9 @@ namespace PersonalFinancer.Data.Migrations
                 columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
                 values: new object[,]
                 {
-                    { new Guid("2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f"), false, "USD", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("3bf454ad-941b-4ab6-a1ad-c212bfc46e7d"), false, "BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
-                    { new Guid("dab2761d-acb1-43bc-b56b-0d9c241c8882"), false, "EUR", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
+                    { "2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f", false, "USD", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "3bf454ad-941b-4ab6-a1ad-c212bfc46e7d", false, "BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "dab2761d-acb1-43bc-b56b-0d9c241c8882", false, "EUR", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
                 });
 
             migrationBuilder.CreateIndex(

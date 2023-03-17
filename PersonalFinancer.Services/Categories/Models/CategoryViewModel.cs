@@ -6,7 +6,7 @@ namespace PersonalFinancer.Services.Categories.Models
 {
 	public class CategoryViewModel
 	{
-		public Guid Id { get; set; }
+		public string Id { get; set; } = null!;
 
 		[StringLength(CategoryNameMaxLength, MinimumLength = CategoryNameMinLength,
 			ErrorMessage = "Category name must be between {2} and {1} characters long.")]

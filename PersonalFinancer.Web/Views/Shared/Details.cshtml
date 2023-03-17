@@ -1,8 +1,29 @@
 ﻿@using PersonalFinancer.Services.Shared.Models;
-@model UserTransactionsExtendedViewModel
+@model DetailsAccountViewModel
 @{
-	ViewData["Title"] = "All Transactions";
+	ViewData["Title"] = "Account Details";
 }
+
+<!--Account Details-->
+<div class="d-flex bd-highlight" style="margin-top: 25px;">
+	<div class="p-2 bd-highlight">
+		<img src="/icons/icons8-wallet-64.png" style="max-width: fit-content;">
+	</div>
+	<div class="p-2 flex-grow-1 bd-highlight">
+		<h1 class="display-6">
+			@Model.Name
+		</h1>
+		<p class="display-6" style="font-size: xx-large;" id="balanceField">Balance: @Model.Balance @Model.CurrencyName</p>
+	</div>
+	<div class="p-2 bd-highlight" style="margin-top: 25px;">
+		<a asp-area="@Model.Routing.Area" asp-controller="Account" asp-action="EditAccount" asp-route-id="@ViewBag.ModelId"
+		   asp-route-returnUrl="@Model.Routing.ReturnUrl" class="btn btn-warning">Edit Account</a>
+	</div>
+	<div class="p-2 bd-highlight" style="margin-top: 25px;">
+		<a asp-area="@Model.Routing.Area" asp-controller="Account" asp-action="Delete" asp-route-id="@ViewBag.ModelId"
+		   asp-route-returnUrl="@Model.Routing.ReturnUrl" class="btn btn-danger">Delete Account</a>
+	</div>
+</div>
 
 @*DatePicker*@
 <partial name="_DatePickerFormPartial" for="@Model.Dates" />
@@ -17,7 +38,7 @@
 		<div class="col-md-12">
 			<div class="card">
 				<div class="card-header">
-					<h6>All Transactions</h6>
+					<h6>Transactions</h6>
 				</div>
 				<table class="table table-hover">
 					<thead>
@@ -27,7 +48,6 @@
 							<th scope="col">Category</th>
 							<th scope="col">Type</th>
 							<th scope="col">Amount</th>
-							<th scope="col">Account</th>
 							<th scope="col">Refference</th>
 							<th scope="col"></th>
 						</tr>
@@ -47,12 +67,11 @@
 								<td>@transaction.CreatedOn</td>
 								<td>@transaction.CategoryName</td>
 								<td>@transaction.TransactionType</td>
-								<td>@transaction.Amount @transaction.AccountCurrencyName</td>
-								<td>@transaction.AccountName</td>
+								<td>@transaction.Amount @transaction.CurrencyName</td>
 								<td>@transaction.Refference</td>
 								<td>
-									<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
-							   asp-route-returnUrl="~/Transaction/All" class="btn btn-warning">Edit</a>
+									<a asp-area="@Model.Routing.Area" asp-controller="Transaction" asp-action="EditTransaction" asp-route-id="@transaction.Id"
+							   asp-route-returnUrl="@Model.Routing.ReturnUrl" class="btn btn-warning">Edit</a>
 									<button class="btn btn-danger" id="@transaction.Id">Delete</button>
 								</td>
 							</tr>
@@ -81,14 +100,18 @@ else
 		document.getElementById('tableBody').addEventListener('click', async (e) => {
 			if (e.target.tagName == 'BUTTON') {
 				if (confirm('Are you sure you want to delete this Transaction?')) {
+					let transactionId = e.target.id;
+
 					let response = await fetch(
-						'@ApiTransactionsUrl' + e.target.id,
+						'@ApiTransactionsUrl' + transactionId,
 						{ method: 'DELETE' }
 					);
 
-					if (response.status == 204) {
+					if (response.status == 200) {
 						let transactionRow = e.target.parentElement.parentElement;
 						document.getElementById('tableBody').removeChild(transactionRow);
+						let data = await response.json();
+						document.getElementById('balanceField').textContent = `Balance: ${data.newBalance.toFixed(2)} @(Model.CurrencyName)`;
 					} else {
 						alert('Somethink happened!');
 					}
