@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.Accounts;
+using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
+	[Authorize(Roles = AdminRoleName)]
 	[Route("api/accounts")]
 	[ApiController]
 	public class AccountApiController : ControllerBase

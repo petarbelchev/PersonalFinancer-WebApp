@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Categories;
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.Transactions.Models;
@@ -15,41 +12,29 @@ namespace PersonalFinancer.Web.Controllers
 	[Authorize(Roles = UserRoleName)]
 	public class TransactionController : Controller
 	{
-		private readonly ICategoryService categoryService;
-		private readonly IAccountService accountService;
 		private readonly ITransactionsService transactionsService;
 
-		public TransactionController(
-			ICategoryService categoryService,
-			IAccountService accountService,
-			ITransactionsService transactionsService)
+		public TransactionController(ITransactionsService transactionsService)
 		{
-			this.categoryService = categoryService;
-			this.accountService = accountService;
 			this.transactionsService = transactionsService;
 		}
 
+		//TODO: Use DateFilterModel!
 		public async Task<IActionResult> All(string? startDate, string? endDate, int page = 1)
 		{
 			var viewModel = new UserTransactionsExtendedViewModel();
 
-			viewModel.Pagination.Page = page;
+			viewModel.Page = page;
 
 			if (startDate == null || endDate == null)
 			{
-				viewModel.Dates = new DateFilterModel
-				{
-					StartDate = DateTime.UtcNow.AddMonths(-1),
-					EndDate = DateTime.UtcNow
-				};
+				viewModel.StartDate = DateTime.UtcNow.AddMonths(-1);
+				viewModel.EndDate = DateTime.UtcNow;
 			}
 			else
 			{
-				viewModel.Dates = new DateFilterModel
-				{
-					StartDate = DateTime.Parse(startDate),
-					EndDate = DateTime.Parse(endDate)
-				};
+				viewModel.StartDate = DateTime.Parse(startDate);
+				viewModel.EndDate = DateTime.Parse(endDate);
 			}
 
 			try
@@ -60,7 +45,7 @@ namespace PersonalFinancer.Web.Controllers
 			}
 			catch (ArgumentException ex)
 			{
-				ModelState.AddModelError(nameof(viewModel.Dates.EndDate), ex.Message);
+				ModelState.AddModelError(nameof(viewModel.EndDate), ex.Message);
 
 				return View(viewModel);
 			}
@@ -72,9 +57,10 @@ namespace PersonalFinancer.Web.Controllers
 			if (!ModelState.IsValid)
 				return View(dateModel);
 
-			var viewModel = new UserTransactionsExtendedViewModel
-			{
-				Dates = dateModel
+			var viewModel = new UserTransactionsExtendedViewModel 
+			{ 
+				StartDate = dateModel.StartDate,
+				EndDate = dateModel.EndDate
 			};
 
 			try
@@ -85,7 +71,7 @@ namespace PersonalFinancer.Web.Controllers
 			}
 			catch (ArgumentException ex)
 			{
-				ModelState.AddModelError(nameof(viewModel.Dates.EndDate), ex.Message);
+				ModelState.AddModelError(nameof(viewModel.EndDate), ex.Message);
 
 				return View(viewModel);
 			}
@@ -93,15 +79,8 @@ namespace PersonalFinancer.Web.Controllers
 
 		public async Task<IActionResult> Create()
 		{
-			string userId = User.Id();
-
-			var viewModel = new TransactionFormModel()
-			{
-				CreatedOn = DateTime.UtcNow
-			};
-
-			viewModel.Categories.AddRange(await categoryService.GetUserCategories(userId));
-			viewModel.Accounts.AddRange(await accountService.GetUserAccountsDropdownViewModel(userId));
+			TransactionFormModel viewModel =
+				await transactionsService.GetEmptyTransactionFormModel(User.Id());
 
 			return View(viewModel);
 		}
@@ -111,18 +90,15 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				inputModel.Categories.AddRange(
-					await categoryService.GetUserCategories(User.Id()));
-
-				inputModel.Accounts.AddRange(
-					await accountService.GetUserAccountsDropdownViewModel(User.Id()));
+				await PrepareModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
 
 			try
 			{
-				string newTransactionId = await transactionsService.CreateTransaction(inputModel);
+				string newTransactionId =
+					await transactionsService.CreateTransaction(User.Id(), inputModel);
 
 				TempData["successMsg"] = "You create a new transaction successfully!";
 
@@ -139,7 +115,11 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				await transactionsService.DeleteTransaction(id);
+				await transactionsService.DeleteTransaction(id, User.Id());
+			}
+			catch (ArgumentException)
+			{
+				return Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{
@@ -170,39 +150,11 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				TransactionFormModel viewModel = await transactionsService
-					.GetTransactionFormModel(id);
+				TransactionFormModel viewModel =
+					await transactionsService.GetFulfilledTransactionFormModel(id);
 
-				if (!await accountService.IsAccountOwner(User.Id(), viewModel.AccountId))
+				if (User.Id() != viewModel.OwnerId)
 					return Unauthorized();
-
-				bool isInitialBalance = await categoryService.IsInitialBalance(viewModel.CategoryId);
-
-				if (isInitialBalance)
-				{
-					viewModel.Categories.Add(await categoryService
-						.GetCategoryViewModel(viewModel.CategoryId));
-				}
-				else
-				{
-					viewModel.Categories.AddRange(await categoryService
-						.GetUserCategories(User.Id()));
-
-					viewModel.TransactionTypes.Add(TransactionType.Expense);
-				}
-
-				if (await accountService.IsAccountDeleted(viewModel.AccountId) || isInitialBalance)
-				{
-					viewModel.Accounts.Add(await accountService
-						.GetAccountDropdownViewModel(viewModel.AccountId));
-				}
-				else
-				{
-					viewModel.Accounts.AddRange(await accountService
-						.GetUserAccountsDropdownViewModel(User.Id()));
-				}
-
-				viewModel.TransactionTypes.Add(TransactionType.Income);
 
 				return View(viewModel);
 			}
@@ -216,16 +168,12 @@ namespace PersonalFinancer.Web.Controllers
 		public async Task<IActionResult> EditTransaction(
 			string id, TransactionFormModel inputModel, string? returnUrl)
 		{
-			if (!await accountService.IsAccountOwner(User.Id(), inputModel.AccountId))
+			if (User.Id() != inputModel.OwnerId)
 				return Unauthorized();
 
 			if (!ModelState.IsValid)
 			{
-				inputModel.Categories.AddRange(await categoryService
-					.GetUserCategories(User.Id()));
-
-				inputModel.Accounts.AddRange(await accountService
-					.GetUserAccountsDropdownViewModel(User.Id()));
+				await PrepareModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -245,6 +193,15 @@ namespace PersonalFinancer.Web.Controllers
 				return LocalRedirect(returnUrl);
 
 			return RedirectToAction(nameof(Details), new { id });
+		}
+
+		private async Task PrepareModelForReturn(TransactionFormModel model)
+		{
+			TransactionFormModel emptyFormModel =
+				await transactionsService.GetEmptyTransactionFormModel(User.Id());
+
+			model.Categories = emptyFormModel.Categories;
+			model.Accounts = emptyFormModel.Accounts;
 		}
 	}
 }

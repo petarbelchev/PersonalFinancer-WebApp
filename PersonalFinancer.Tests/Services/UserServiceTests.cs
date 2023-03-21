@@ -27,8 +27,8 @@ namespace PersonalFinancer.Tests.Services
 		{
 			this.categoryService = new CategoryService(this.data, this.mapper, this.memoryCache);
 			this.transactionsService = new TransactionsService(this.data, this.mapper);
-			this.accountService = new AccountService(this.data, this.mapper, this.transactionsService, this.categoryService, this.memoryCache);
-			this.userService = new UserService(this.data, this.accountService, this.transactionsService, this.mapper);
+			this.accountService = new AccountService(this.data, this.mapper, this.transactionsService, this.memoryCache);
+			this.userService = new UserService(this.data, this.mapper);
 		}
 
 		[Test]
@@ -64,13 +64,10 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetUserDashboard_ShouldReturnCorrectData_WithValidParams()
 		{
 			//Arrange
-			var actualDashboard = new HomeIndexViewModel()
+			var actualDashboard = new UserDashboardViewModel()
 			{
-				Dates = new DateFilterModel
-				{
-					StartDate = DateTime.UtcNow.AddMonths(-1),
-					EndDate = DateTime.UtcNow
-				}
+				StartDate = DateTime.UtcNow.AddMonths(-1),
+				EndDate = DateTime.UtcNow
 			};
 
 			IEnumerable<AccountCardViewModel> expectedAccounts = await data.Accounts
@@ -82,10 +79,10 @@ namespace PersonalFinancer.Tests.Services
 
 			await data.Accounts
 				.Where(a => a.OwnerId == this.User1.Id && a.Transactions
-					.Any(t => t.CreatedOn >= actualDashboard.Dates.StartDate && t.CreatedOn <= actualDashboard.Dates.EndDate))
+					.Any(t => t.CreatedOn >= actualDashboard.StartDate && t.CreatedOn <= actualDashboard.EndDate))
 				.Include(a => a.Currency)
 				.Include(a => a.Transactions
-					.Where(t => t.CreatedOn >= actualDashboard.Dates.StartDate && t.CreatedOn <= actualDashboard.Dates.EndDate))
+					.Where(t => t.CreatedOn >= actualDashboard.StartDate && t.CreatedOn <= actualDashboard.EndDate))
 				.ForEachAsync(a =>
 				{
 					if (!expectedCashFlow.ContainsKey(a.Currency.Name))
@@ -115,15 +112,15 @@ namespace PersonalFinancer.Tests.Services
 			var expectedLastFiveTransaction = await data.Transactions
 				.Where(t =>
 					t.Account.OwnerId == this.User1.Id &&
-					t.CreatedOn >= actualDashboard.Dates.StartDate &&
-					t.CreatedOn <= actualDashboard.Dates.EndDate)
+					t.CreatedOn >= actualDashboard.StartDate &&
+					t.CreatedOn <= actualDashboard.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
 				.Take(5)
 				.Select(t => mapper.Map<TransactionShortViewModel>(t))
 				.ToListAsync();
 
 			//Act
-			await userService.GetUserDashboard(this.User1.Id, actualDashboard);
+			await userService.SetUserDashboard(this.User1.Id, actualDashboard);
 
 			//Assert
 			Assert.That(actualDashboard.Accounts.Count(), Is.EqualTo(expectedAccounts.Count()));
@@ -164,7 +161,7 @@ namespace PersonalFinancer.Tests.Services
 		public void GetUserDashboard_ShouldThrowException_WithInvalidDates()
 		{
 			//Arrange
-			HomeIndexViewModel dashboardModel = new HomeIndexViewModel
+			UserDashboardViewModel dashboardModel = new UserDashboardViewModel
 			{
 				Dates = new DateFilterModel
 				{
@@ -174,7 +171,7 @@ namespace PersonalFinancer.Tests.Services
 			};
 
 			//Act & Assert
-			Assert.That(async () => await userService.GetUserDashboard(this.User1.Id, dashboardModel),
+			Assert.That(async () => await userService.SetUserDashboard(this.User1.Id, dashboardModel),
 				Throws.TypeOf<ArgumentException>().With.Message
 					.EqualTo("Start Date must be before End Date."));
 		}

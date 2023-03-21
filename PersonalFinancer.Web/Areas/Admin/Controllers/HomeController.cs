@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.User;
+using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Infrastructure;
-using PersonalFinancer.Web.Models.Admin;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
@@ -15,30 +13,18 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 	public class HomeController : Controller
 	{
 		private readonly IUserService userService;
-		private readonly IAccountService accountService;
-		private readonly ITransactionsService transactionsService;
 
-		public HomeController(
-			IUserService userService,
-			IAccountService accountService,
-			ITransactionsService transactionsService)
-		{
-			this.userService = userService;
-			this.accountService = accountService;
-			this.transactionsService = transactionsService;
-		}
+		public HomeController(IUserService userService)
+			=> this.userService = userService;
 
 		public async Task<IActionResult> Index()
 		{
-			var statistics = new StatisticsViewModel
+			return View(new AdminDashboardViewModel
 			{
 				RegisteredUsers = userService.UsersCount(),
-				CreatedAccounts = accountService.GetUsersAccountsCount()
-			};
-
-			ViewBag.AdminFullName = await userService.FullName(User.Id());
-
-			return View(statistics);
+				CreatedAccounts = userService.GetUsersAccountsCount(),
+				AdminFullName = await userService.FullName(User.Id())
+			});
 		}
 	}
 }

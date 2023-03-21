@@ -16,19 +16,19 @@ namespace PersonalFinancer.Data.Configurations
 				{
 					Id = CashAccountTypeId,
 					Name = "Cash",
-					UserId = FirstUserId
+					OwnerId = FirstUserId
 				},
 				new AccountType
 				{
 					Id = BankAccountTypeId,
 					Name = "Bank",
-					UserId = FirstUserId
+					OwnerId = FirstUserId
 				},
 				new AccountType
 				{
 					Id = SavingAccountTypeId,
 					Name = "Savings",
-					UserId = FirstUserId
+					OwnerId = FirstUserId
 				}
 			});
 		}

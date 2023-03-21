@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.Currencies;
 using PersonalFinancer.Services.Currencies.Models;
 using PersonalFinancer.Web.Infrastructure;
+using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
+	[Authorize(Roles = UserRoleName)]
 	[Route("api/currencies")]
 	[ApiController]
 	public class CurrencyApiController : ControllerBase
@@ -18,16 +21,14 @@ namespace PersonalFinancer.Web.Controllers.Api
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(CurrencyViewModel model)
+		public async Task<ActionResult<CurrencyViewModel>> Create(CurrencyInputModel inputModel)
 		{
-			if (!User.Identity?.IsAuthenticated ?? false)
-				return Unauthorized();
-
 			try
 			{
-				await currencyService.CreateCurrency(User.Id(), model);
+				CurrencyViewModel viewModel = await currencyService
+					.CreateCurrency(User.Id(), inputModel.Name.Trim());
 
-				return Created(string.Empty, model);
+				return Created(string.Empty, viewModel);
 			}
 			catch (ArgumentException ex)
 			{
@@ -38,14 +39,15 @@ namespace PersonalFinancer.Web.Controllers.Api
 		[HttpDelete("{id}")]
 		public async Task<ActionResult> Delete(string id)
 		{
-			if (!User.Identity?.IsAuthenticated ?? false)
-				return Unauthorized();
-
 			try
 			{
 				await currencyService.DeleteCurrency(id, User.Id());
 
 				return NoContent();
+			}
+			catch (ArgumentException)
+			{
+				return Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{

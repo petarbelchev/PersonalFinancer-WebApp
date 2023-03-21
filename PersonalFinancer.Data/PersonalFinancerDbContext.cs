@@ -17,10 +17,6 @@ namespace PersonalFinancer.Data
 			{
 				this.Database.EnsureCreated();
 			}
-			else
-			{
-				this.Database.Migrate();
-			}
 
 			this.seed = seed;
 		}
@@ -50,19 +46,22 @@ namespace PersonalFinancer.Data
 				b.Ignore(p => p.LockoutEnabled);
 				b.Ignore(p => p.LockoutEnd);
 
-				b.HasMany(a => a.Accounts).WithOne(a => a.Owner).OnDelete(DeleteBehavior.NoAction);
+				b.HasMany(a => a.Transactions).WithOne(a => a.Owner).OnDelete(DeleteBehavior.Restrict);
 			});
 
-			builder.Entity<Account>(b =>
+			builder.Entity<Currency>(b =>
 			{
-				b.Property(a => a.Balance).HasColumnType("decimal").HasPrecision(18, 2);
-				b.HasOne(a => a.Currency).WithMany().OnDelete(DeleteBehavior.NoAction);
+				b.HasMany(c => c.Accounts).WithOne(a => a.Currency).OnDelete(DeleteBehavior.Restrict);
 			});
 
-			builder.Entity<Transaction>(b =>
+			builder.Entity<AccountType>(b =>
 			{
-				b.Property(a => a.Amount).HasColumnType("decimal").HasPrecision(18, 2);
-				b.HasOne(t => t.Category).WithMany().OnDelete(DeleteBehavior.NoAction);
+				b.HasMany(a => a.Accounts).WithOne(a => a.AccountType).OnDelete(DeleteBehavior.Restrict);
+			});
+
+			builder.Entity<Category>(b =>
+			{
+				b.HasMany(c => c.Transactions).WithOne(t => t.Category).OnDelete(DeleteBehavior.Restrict);
 			});
 
 			if (this.seed)

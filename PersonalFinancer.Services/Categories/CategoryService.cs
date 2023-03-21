@@ -26,34 +26,36 @@ namespace PersonalFinancer.Services.Categories
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Category does not exist or User is not owner.
+		/// Throws InvalidOperationException when Category does not exist
+		/// and ArgumentException when User is not owner.
 		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteCategory(string categoryId, string userId)
+		public async Task DeleteCategory(string categoryId, string ownerId)
 		{
 			Category? category = await data.Categories.FindAsync(categoryId);
 
 			if (category == null)
 				throw new InvalidOperationException("Category does not exist.");
 
-			if (category.UserId != userId)
-				throw new InvalidOperationException("You can't delete someone else category.");
+			if (category.OwnerId != ownerId)
+				throw new ArgumentException("Can't delete someone else category.");
 
 			category.IsDeleted = true;
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(CacheKeyValue + userId);
+			memoryCache.Remove(CacheKeyValue + ownerId);
 		}
 		
 		/// <summary>
 		/// Throws InvalidOperationException when Category does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<CategoryViewModel> GetCategoryViewModel(string categoryId)
+		public async Task<CategoryViewModel> GetCategoryViewModel(string categoryId, string ownerId)
 		{
 			return await data.Categories
-				.Where(c => c.Id == categoryId)
+				.Where(c => c.Id == categoryId && c.OwnerId == ownerId)
 				.Select(c => mapper.Map<CategoryViewModel>(c))
 				.FirstAsync();
 		}
@@ -70,13 +72,13 @@ namespace PersonalFinancer.Services.Categories
 		}
 
 		/// <summary>
-		/// Throws ArgumentException if try to create Category with existing or invalid name.
+		/// Throws ArgumentException if try to create Category with existing name.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task CreateCategory(string userId, CategoryViewModel model)
+		public async Task<CategoryViewModel> CreateCategory(string userId, string categoryName)
 		{
 			Category? category = await data.Categories
-				.FirstOrDefaultAsync(c => c.Name == model.Name && c.UserId == userId);
+				.FirstOrDefaultAsync(c => c.Name == categoryName && c.OwnerId == userId);
 
 			if (category != null)
 			{
@@ -84,19 +86,15 @@ namespace PersonalFinancer.Services.Categories
 					throw new ArgumentException("Category with the same name exist!");
 
 				category.IsDeleted = false;
-				category.Name = model.Name.Trim();
+				category.Name = categoryName;
 			}
 			else
 			{
-				if (model.Name.Length < CategoryNameMinLength || model.Name.Length > CategoryNameMaxLength)
-					throw new ArgumentException(
-						$"Category name must be between {CategoryNameMinLength} and {CategoryNameMaxLength} characters long.");
-
 				category = new Category
 				{
 					Id = Guid.NewGuid().ToString(),
-					Name = model.Name,
-					UserId = userId
+					Name = categoryName,
+					OwnerId = userId
 				};
 
 				data.Categories.Add(category);
@@ -104,10 +102,9 @@ namespace PersonalFinancer.Services.Categories
 
 			await data.SaveChangesAsync();
 
-			model.Id = category.Id;
-			model.UserId = category.UserId;
-
 			memoryCache.Remove(CacheKeyValue + userId);
+
+			return mapper.Map<CategoryViewModel>(category);
 		}
 		
 		/// <summary>
@@ -133,7 +130,7 @@ namespace PersonalFinancer.Services.Categories
 				cacheEntity.SetAbsoluteExpiration(TimeSpan.FromDays(3));
 
 				return await data.Categories
-					.Where(c => c.UserId == userId && !c.IsDeleted)
+					.Where(c => c.OwnerId == userId && !c.IsDeleted)
 					.OrderBy(c => c.Name)
 					.Select(c => mapper.Map<CategoryViewModel>(c))
 					.ToArrayAsync();

@@ -8,13 +8,15 @@ namespace PersonalFinancer.Services.Transactions
 		/// Throws InvalidOperationException if Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<string> CreateTransaction(TransactionFormModel transactionFormModel, bool isInitialBalance = false);
+		Task<string> CreateTransaction(string userId, TransactionFormModel transactionFormModel);
 		
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction does not exist.
+		/// Throws InvalidOperationException when Transaction does not exist
+		/// and ArgumentException when Owner Id is passed and User is not owner.
 		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<decimal> DeleteTransaction(string transactionId);
+		Task<decimal> DeleteTransaction(string transactionId, string? ownerId = null);
 		
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist.
@@ -26,9 +28,9 @@ namespace PersonalFinancer.Services.Transactions
 		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<TransactionFormModel> GetTransactionFormModel(string transactionId);
+		Task<TransactionFormModel> GetFulfilledTransactionFormModel(string transactionId);
 
-		Task EditOrCreateInitialBalanceTransaction(string accountId, decimal amountOfChange);
+		Task EditOrCreateInitialBalanceTransaction(string ownerId, string accountId, decimal amountOfChange);
 		
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist.
@@ -43,5 +45,7 @@ namespace PersonalFinancer.Services.Transactions
 		Task GetUserTransactionsExtendedViewModel(string userId, UserTransactionsExtendedViewModel model);
 
 		Task<IEnumerable<TransactionShortViewModel>> GetUserLastFiveTransactions(string userId, DateTime? startDate, DateTime? endDate);
+
+		Task<TransactionFormModel> GetEmptyTransactionFormModel(string userId);
 	}
 }

@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Categories.Models;
+using PersonalFinancer.Services.Infrastructure;
 using static PersonalFinancer.Data.Constants.TransactionConstants;
 
 namespace PersonalFinancer.Services.Transactions.Models
@@ -12,10 +14,13 @@ namespace PersonalFinancer.Services.Transactions.Models
 		[Required(ErrorMessage = "Amount is required.")]
 		[DataType(DataType.Currency, ErrorMessage = "Amount must be a number.")]
 		[Range(TransactionMinValue, TransactionMaxValue, 
-			ErrorMessage = "Amount must be between {1} and {2}.")]
+			ErrorMessage = "Amount must be a number between {1} and {2}.")]
+		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		public decimal Amount { get; set; }
-		
-		[Required(ErrorMessage = "Category is required.")]
+
+        public string OwnerId { get; set; } = null!;
+
+        [Required(ErrorMessage = "Category is required.")]
 		[Display(Name = "Category")]
 		public string CategoryId { get; set; } = null!;
 
@@ -43,7 +48,13 @@ namespace PersonalFinancer.Services.Transactions.Models
 		[Display(Name = "Transaction Type")]
 		public TransactionType TransactionType { get; set; }
 
-		public List<TransactionType> TransactionTypes { get; set; }
-			= new List<TransactionType>();
-	}
+		public TransactionType[] TransactionTypes { get; set; }
+			= new TransactionType[]
+			{
+				TransactionType.Income,
+				TransactionType.Expense
+			};
+
+        public bool IsInitialBalance { get; set; }
+    }
 }

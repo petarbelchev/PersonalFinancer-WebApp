@@ -5,8 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Categories.Models;
 using PersonalFinancer.Services.Transactions.Models;
-using static PersonalFinancer.Data.Constants.SeedConstants;
 using static PersonalFinancer.Data.Constants.CategoryConstants;
 
 namespace PersonalFinancer.Services.Transactions
@@ -29,30 +30,29 @@ namespace PersonalFinancer.Services.Transactions
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> CreateTransaction(
-			TransactionFormModel transactionFormModel, bool isInitialBalance = false)
+			string userId, TransactionFormModel transactionFormModel)
 		{
 			Transaction newTransaction = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
 				Amount = transactionFormModel.Amount,
 				AccountId = transactionFormModel.AccountId,
+				OwnerId = userId,
 				CategoryId = transactionFormModel.CategoryId,
 				TransactionType = transactionFormModel.TransactionType,
 				CreatedOn = transactionFormModel.CreatedOn,
-				Refference = transactionFormModel.Refference.Trim()
+				Refference = transactionFormModel.Refference.Trim(),
+				IsInitialBalance = transactionFormModel.IsInitialBalance
 			};
 
 			await data.Transactions.AddAsync(newTransaction);
 
-			if (!isInitialBalance)
-			{
-				await ChangeBalance(
-					newTransaction.AccountId,
-					newTransaction.Amount,
-					newTransaction.TransactionType);
+			await ChangeBalance(
+				newTransaction.AccountId,
+				newTransaction.Amount,
+				newTransaction.TransactionType);
 
-				await data.SaveChangesAsync();
-			}
+			await data.SaveChangesAsync();
 
 			return newTransaction.Id;
 		}
@@ -84,14 +84,19 @@ namespace PersonalFinancer.Services.Transactions
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction does not exist.
+		/// Throws InvalidOperationException when Transaction does not exist
+		/// and ArgumentException when Owner Id is passed and User is not owner.
 		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<decimal> DeleteTransaction(string transactionId)
+		public async Task<decimal> DeleteTransaction(string transactionId, string? ownerId = null)
 		{
 			Transaction transaction = await data.Transactions
 				.Include(t => t.Account)
 				.FirstAsync(t => t.Id == transactionId);
+
+			if (ownerId != null && transaction.OwnerId != ownerId)
+				throw new ArgumentException("User is now transaction's owner");
 
 			data.Transactions.Remove(transaction);
 
@@ -149,22 +154,25 @@ namespace PersonalFinancer.Services.Transactions
 			await data.SaveChangesAsync();
 		}
 
-		public async Task EditOrCreateInitialBalanceTransaction(string accountId, decimal amountOfChange)
+		public async Task EditOrCreateInitialBalanceTransaction(string ownerId, string accountId, decimal amountOfChange)
 		{
-			Transaction? transaction = await data.Transactions
-				.FirstOrDefaultAsync(t => t.AccountId == accountId && t.CategoryId == InitialBalanceCategoryId);
+			Transaction? transaction = await data.Transactions.FirstOrDefaultAsync(t =>
+				t.AccountId == accountId && t.IsInitialBalance);
 
 			if (transaction == null)
 			{
-				await CreateTransaction(new TransactionFormModel
+				await CreateTransaction(ownerId, new TransactionFormModel
 				{
 					AccountId = accountId,
 					Amount = amountOfChange,
 					CategoryId = InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow,
 					Refference = CategoryInitialBalanceName,
-					TransactionType = amountOfChange < 0 ? TransactionType.Expense : TransactionType.Income
-				}, isInitialBalance: true);
+					TransactionType = amountOfChange < 0 ?
+						TransactionType.Expense
+						: TransactionType.Income,
+					IsInitialBalance = true
+				});
 			}
 			else
 			{
@@ -181,25 +189,27 @@ namespace PersonalFinancer.Services.Transactions
 		public async Task GetUserTransactionsExtendedViewModel
 			(string userId, UserTransactionsExtendedViewModel model)
 		{
-			if (model.Dates.StartDate > model.Dates.EndDate)
+			//TODO: Make Validation on DateFilterModel!
+			if (model.StartDate > model.EndDate)
 			{
 				throw new ArgumentException("Start Date must be before End Date.");
 			}
 
-			model.Pagination.TotalElements = data.Transactions
-				.Count(t =>
-					t.Account.OwnerId == userId &&
-					t.CreatedOn >= model.Dates.StartDate &&
-					t.CreatedOn <= model.Dates.EndDate);
+			model.TotalElements = data.Transactions.Count(t =>
+				t.Account.OwnerId == userId
+				&& t.CreatedOn >= model.StartDate
+				&& t.CreatedOn <= model.EndDate);
 
 			model.Transactions = await data.Transactions
 				.Where(t =>
-					t.Account.OwnerId == userId &&
-					t.CreatedOn >= model.Dates.StartDate &&
-					t.CreatedOn <= model.Dates.EndDate)
+					t.Account.OwnerId == userId
+					&& t.CreatedOn >= model.StartDate
+					&& t.CreatedOn <= model.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
-				.Skip(model.Pagination.Page != 1 ? model.Pagination.ElementsPerPage * (model.Pagination.Page - 1) : 0)
-				.Take(model.Pagination.ElementsPerPage)
+				.Skip(model.Page != 1 ?
+					model.ElementsPerPage * (model.Page - 1)
+					: 0)
+				.Take(model.ElementsPerPage)
 				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
 		}
@@ -208,11 +218,39 @@ namespace PersonalFinancer.Services.Transactions
 		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<TransactionFormModel> GetTransactionFormModel(string transactionId)
+		public async Task<TransactionFormModel> GetFulfilledTransactionFormModel(string transactionId)
 		{
-			return await data.Transactions
-				.Where(t => t.Id == transactionId)
-				.ProjectTo<TransactionFormModel>(mapper.ConfigurationProvider)
+			return await data.Transactions.Where(t => t.Id == transactionId)
+				.Select(t => new TransactionFormModel
+				{
+					OwnerId = t.OwnerId,
+					AccountId = t.AccountId,
+					CategoryId = t.CategoryId,
+					Amount = t.Amount,
+					CreatedOn = t.CreatedOn,
+					TransactionType = t.TransactionType,
+					Refference = t.Refference,
+					Accounts = t.Account.IsDeleted ?
+						new List<AccountDropdownViewModel>()
+						{
+							new AccountDropdownViewModel { Id = t.AccountId, Name = t.Account.Name }
+						}
+						: t.Owner.Accounts.Select(a => new AccountDropdownViewModel
+						{
+							Id = a.Id,
+							Name = a.Name
+						}).ToList(),
+					Categories = t.IsInitialBalance ?
+						new List<CategoryViewModel>()
+						{
+							new CategoryViewModel { Id = t.CategoryId, Name = t.Category.Name }
+						}
+						: t.Owner.Categories.Select(c => new CategoryViewModel
+						{
+							Id = c.Id,
+							Name = c.Name
+						}).ToList()
+				})
 				.FirstAsync();
 		}
 
@@ -240,6 +278,27 @@ namespace PersonalFinancer.Services.Transactions
 				.Take(5)
 				.ProjectTo<TransactionShortViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
+		}
+
+		public async Task<TransactionFormModel> GetEmptyTransactionFormModel(string userId)
+		{
+			return await data.Users.Where(u => u.Id == userId)
+				.Select(u => new TransactionFormModel
+				{
+					OwnerId = u.Id,
+					CreatedOn = DateTime.UtcNow,
+					Categories = u.Categories.Select(c => new CategoryViewModel
+					{
+						Id = c.Id,
+						Name = c.Name
+					}).ToList(),
+					Accounts = u.Accounts.Select(a => new AccountDropdownViewModel
+					{
+						Id = a.Id,
+						Name = a.Name
+					}).ToList()
+				})
+				.FirstAsync();
 		}
 	}
 }

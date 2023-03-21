@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.AccountTypes;
-using PersonalFinancer.Services.Currencies;
-using PersonalFinancer.Services.Shared.Models;
+using PersonalFinancer.Web.Infrastructure;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
@@ -15,24 +13,15 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 	public class AccountController : Controller
 	{
 		private readonly IAccountService accountService;
-		private readonly ICurrencyService currencyService;
-		private readonly IAccountTypeService accountTypeService;
 
-		public AccountController(
-			IAccountService accountService,
-			ICurrencyService currencyService,
-			IAccountTypeService accountTypeService)
-		{
-			this.accountService = accountService;
-			this.currencyService = currencyService;
-			this.accountTypeService = accountTypeService;
-		}
+		public AccountController(IAccountService accountService)
+			=> this.accountService = accountService;
 
 		public async Task<IActionResult> Index(int page = 1)
 			=> View(await accountService.GetAllUsersAccountCardsViewModel(page));
 
-		public async Task<IActionResult> Details
-			(string id, string? startDate, string? endDate, int page = 1)
+		public async Task<IActionResult> Details(
+			string id, string? startDate, string? endDate, int page = 1)
 		{
 			DetailsAccountViewModel viewModel;
 
@@ -62,17 +51,31 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Details(string id, DateFilterModel dateModel)
+		public async Task<IActionResult> Details(
+			string id, [Bind("StartDate,EndDate")] DetailsAccountViewModel inputModel)
 		{
 			if (!ModelState.IsValid)
-				return View(dateModel);
+			{
+				try
+				{
+					await accountService.SetAccountDetailsViewModelForReturn(id, inputModel);
+
+					return View(inputModel);
+				}
+				catch (Exception)
+				{
+					return BadRequest();
+				}
+			}
 
 			DetailsAccountViewModel viewModel;
 
 			try
 			{
-				viewModel = await accountService.GetAccountDetailsViewModel(
-					id, dateModel.StartDate, dateModel.EndDate);
+				//Not supposed to have null values!
+				viewModel = await accountService.GetAccountDetailsViewModel(id,
+					inputModel.StartDate ?? DateTime.UtcNow.AddMonths(-1),
+					inputModel.EndDate ?? DateTime.UtcNow);
 			}
 			catch (InvalidOperationException)
 			{
@@ -93,8 +96,8 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 			try
 			{
-				DeleteAccountViewModel viewModel = await accountService
-					.GetDeleteAccountViewModel(id);
+				DeleteAccountViewModel viewModel =
+					await accountService.GetDeleteAccountViewModel(id);
 
 				return View(viewModel);
 			}
@@ -118,7 +121,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 				string ownerId = await accountService.GetOwnerId(inputModel.Id);
 
 				await accountService.DeleteAccount(
-					inputModel.Id, ownerId,
+					inputModel.Id,
 					inputModel.ShouldDeleteTransactions ?? false);
 
 				TempData["successMsg"] = "You successfully delete user's account!";
@@ -133,18 +136,11 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 		public async Task<IActionResult> EditAccount(string id)
 		{
+			//TODO: Remove Create and delete buttons for admin
 			try
 			{
-				AccountFormModel viewModel = await accountService
-					.GetEditAccountModel(id);
-
-				string ownerId = await accountService.GetOwnerId(id);
-
-				viewModel.Currencies = await currencyService
-					.GetUserCurrencies(ownerId);
-
-				viewModel.AccountTypes = await accountTypeService
-					.GetUserAccountTypesViewModel(ownerId);
+				AccountFormModel viewModel =
+					await accountService.GetAccountFormModel(id);
 
 				return View(viewModel);
 			}
@@ -158,22 +154,16 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		public async Task<IActionResult> EditAccount(
 			string id, AccountFormModel inputModel, string returnUrl)
 		{
-			string ownerId = string.Empty;
+			if (!ModelState.IsValid)
+			{
+				await PrepareModelForReturn(inputModel);
+
+				return View(inputModel);
+			}
 
 			try
 			{
-				ownerId = await accountService.GetOwnerId(id);
-
-				if (!ModelState.IsValid)
-				{
-					inputModel.Currencies = await currencyService
-						.GetUserCurrencies(ownerId);
-
-					inputModel.AccountTypes = await accountTypeService
-						.GetUserAccountTypesViewModel(ownerId);
-
-					return View(inputModel);
-				}
+				string ownerId = await accountService.GetOwnerId(id);
 
 				await accountService.EditAccount(id, inputModel, ownerId);
 
@@ -183,13 +173,11 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			}
 			catch (ArgumentException)
 			{
-				ModelState.AddModelError(nameof(inputModel.Name), $"You already have Account with {inputModel.Name} name.");
+				ModelState.AddModelError(
+					nameof(inputModel.Name), 
+					$"You already have Account with {inputModel.Name} name.");
 
-				inputModel.Currencies = await currencyService
-					.GetUserCurrencies(ownerId);
-
-				inputModel.AccountTypes = await accountTypeService
-					.GetUserAccountTypesViewModel(ownerId);
+				await PrepareModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -197,6 +185,15 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				return BadRequest();
 			}
+		}
+
+		private async Task PrepareModelForReturn(AccountFormModel model)
+		{
+			AccountFormModel emptyFormModel =
+				await accountService.GetEmptyAccountFormModel(this.User.Id());
+
+			model.AccountTypes = emptyFormModel.AccountTypes;
+			model.Currencies = emptyFormModel.Currencies;
 		}
 	}
 }

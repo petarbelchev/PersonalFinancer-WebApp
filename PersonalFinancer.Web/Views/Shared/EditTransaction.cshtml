@@ -10,7 +10,7 @@
 			<form method="post">
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 				<div class="form-floating formField">
-					<input asp-for="@Model.Amount" class="form-control form-control-lg" type="text" placeholder=".form-control-lg" />
+					<input type="number" asp-for="@Model.Amount" class="form-control form-control-lg" type="text" placeholder=".form-control-lg" />
 					<label asp-for="@Model.Amount" class="form-label"></label>
 					<span asp-validation-for="@Model.Amount" class="text-danger"></span>
 				</div>
@@ -53,6 +53,7 @@
 				<div>
 					<button type="submit" class="w-100 btn btn-lg btn-warning">Edit</button>
 				</div>
+				<input asp-for="@Model.OwnerId" type="hidden" />
 			</form>
 		</section>
 	</div>

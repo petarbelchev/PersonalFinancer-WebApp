@@ -25,7 +25,7 @@ namespace PersonalFinancer.Tests.Services
 			{
 				Id = Guid.NewGuid().ToString(),
 				Name = "TestCategory",
-				UserId = this.User1.Id
+				OwnerId = this.User1.Id
 			};
 			data.Categories.Add(category);
 			data.SaveChanges();
@@ -56,7 +56,7 @@ namespace PersonalFinancer.Tests.Services
 			{
 				Id = Guid.NewGuid().ToString(),
 				Name = "TestCategory",
-				UserId = this.User1.Id
+				OwnerId = this.User1.Id
 			};
 			data.Categories.Add(category);
 			data.SaveChanges();
@@ -72,7 +72,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange & Act
 			CategoryViewModel? category = await categoryService
-				.GetCategoryViewModel(this.Category1.Id);
+				.GetCategoryViewModel(this.Category1.Id, this.User1.Id);
 
 			//Assert
 			Assert.That(category, Is.Not.Null);
@@ -86,7 +86,7 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange & Act
 
 			//Assert
-			Assert.That(async () => await categoryService.GetCategoryViewModel(Guid.NewGuid().ToString()), 
+			Assert.That(async () => await categoryService.GetCategoryViewModel(Guid.NewGuid().ToString(), this.User1.Id), 
 				Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -95,25 +95,22 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange
 			var newCategoryName = "NewCategory";
-			var model = new CategoryViewModel { Name = newCategoryName };
 
 			//Act
-			await categoryService.CreateCategory(this.User1.Id, model);
+			CategoryViewModel model = await categoryService.CreateCategory(this.User1.Id, newCategoryName);
 
 			//Assert
-			Assert.That(model.Name, Is.EqualTo(newCategoryName));
 			Assert.That(model.Id, Is.Not.Null);
-			Assert.That(model.UserId, Is.EqualTo(this.User1.Id));
+			Assert.That(model.Name, Is.EqualTo(newCategoryName));
 		}
 
 		[Test]
 		public void CreateCategory_ShouldThrowException_WithExistingName()
 		{
 			//Arrange
-			var model = new CategoryViewModel { Name = this.Category2.Name };
 
 			//Act & Assert
-			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, model),
+			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, this.Category2.Name),
 				Throws.TypeOf<ArgumentException>().With.Message
 					.EqualTo("Category with the same name exist!"));
 		}
@@ -124,10 +121,9 @@ namespace PersonalFinancer.Tests.Services
 		public void CreateAccountType_ShouldThrowException_WithInvalidName(string categoryName)
 		{
 			//Arrange
-			var model = new CategoryViewModel { Name = categoryName };
 
 			//Act & Assert
-			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, model),
+			Assert.That(async () => await categoryService.CreateCategory(this.User1.Id, categoryName),
 				Throws.TypeOf<ArgumentException>().With.Message
 					.EqualTo("Category name must be between 2 and 25 characters long."));
 		}
@@ -140,25 +136,23 @@ namespace PersonalFinancer.Tests.Services
 			{
 				Id = Guid.NewGuid().ToString(),
 				Name = "DeletedCategory",
-				UserId = this.User1.Id,
+				OwnerId = this.User1.Id,
 				IsDeleted = true
 			};
 			data.Categories.Add(category);
 			data.SaveChanges();
 
-			var model = new CategoryViewModel { Name = category.Name };
-
 			//Assert: The Category is deleted
 			Assert.That(category.IsDeleted, Is.True);
 
 			//Act: Recreate deleted Category
-			await categoryService.CreateCategory(this.User1.Id, model);
+			CategoryViewModel newCategory = await categoryService
+				.CreateCategory(this.User1.Id, category.Name);
 
 			//Assert: The Category is not deleted anymore and the data is correct
 			Assert.That(category.IsDeleted, Is.False);
-			Assert.That(model.Id, Is.EqualTo(category.Id));
-			Assert.That(model.Name, Is.EqualTo(category.Name));
-			Assert.That(model.UserId, Is.EqualTo(category.UserId));
+			Assert.That(newCategory.Id, Is.EqualTo(category.Id));
+			Assert.That(newCategory.Name, Is.EqualTo(category.Name));
 		}
 
 		[Test]
@@ -188,14 +182,14 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange: Get first user categories where the user has custom category
 			List<CategoryViewModel> expectedFirstUserCategories = data.Categories
-				.Where(c => c.UserId == this.User1.Id && !c.IsDeleted)
+				.Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
 				.OrderBy(c => c.Name)
 				.Select(c => mapper.Map<CategoryViewModel>(c))
 				.ToList();
 
 			//Arrange: Get second user categories where the user hasn't custom categories
 			List<CategoryViewModel> expectedSecondUserCategories = data.Categories
-				.Where(c => c.UserId == this.User2.Id && !c.IsDeleted)
+				.Where(c => c.OwnerId == this.User2.Id && !c.IsDeleted)
 				.OrderBy(c => c.Name)
 				.Select(c => mapper.Map<CategoryViewModel>(c))
 				.ToList();

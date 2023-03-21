@@ -5,7 +5,21 @@
 }
 
 @*DatePicker*@
-<partial name="_DatePickerFormPartial" for="@Model.Dates" />
+<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
+	<div class="col-lg-5 form-floating">
+		<input type="datetime-local" name="StartDate" asp-for="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+		<label asp-for="@Model.StartDate" class="form-label">Start Date</label>
+		<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
+	</div>
+	<div class="col-lg-5 form-floating">
+		<input type="datetime-local" name="EndDate" asp-for="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+		<label asp-for="@Model.EndDate" class="form-label">End Date</label>
+		<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
+	</div>
+	<div class="col-lg-2">
+		<button type="submit" class="btn btn-lg btn-secondary form-control form-control-lg" style="padding: 12.5px;">Filter</button>
+	</div>
+</form>
 
 @if (Model.Transactions.Any())
 {
@@ -65,17 +79,8 @@
 
 	@*Pagination*@
 	<partial name="_PaginationWithDateFilterPartial" />
-}
-else
-{
-	<div class="text-center" style="margin-top: 50px;">
-		<p class="display-6">
-			You do not have any transactions for that period.
-		</p>
-	</div>
-}
 
-@section Scripts {
+	@section Scripts {
 	<partial name="_ValidationScriptsPartial" />
 	<script>
 		document.getElementById('tableBody').addEventListener('click', async (e) => {
@@ -86,9 +91,11 @@ else
 						{ method: 'DELETE' }
 					);
 
-					if (response.status == 204) {
+					if (response.status == 200) {
 						let transactionRow = e.target.parentElement.parentElement;
 						document.getElementById('tableBody').removeChild(transactionRow);
+					} else if (response.status == 401) {
+						alert("You can't delete someone else transaction!");
 					} else {
 						alert('Somethink happened!');
 					}
@@ -96,4 +103,13 @@ else
 			}
 		})
 	</script>
+	}
+}
+else
+{
+	<div class="text-center" style="margin-top: 50px;">
+		<p class="display-6">
+			You do not have any transactions for that period.
+		</p>
+	</div>
 }

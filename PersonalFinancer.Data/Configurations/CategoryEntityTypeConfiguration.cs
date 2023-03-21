@@ -17,49 +17,49 @@ namespace PersonalFinancer.Data.Configurations
 				{
 					Id = InitialBalanceCategoryId,
 					Name = CategoryInitialBalanceName,
-					UserId = AdminId
+					OwnerId = AdminId
 				},
 				new Category
 				{
 					Id = FoodDrinkCategoryId,
 					Name = "Food & Drink",
-					UserId = FirstUserId
+					OwnerId = FirstUserId
 				},
 				new Category
 				{
 					Id = UtilitiesCategoryId,
 					Name = "Utilities",
-					UserId = FirstUserId
+					OwnerId = FirstUserId
 				},
 				new Category
 				{
 					Id = TransportCategoryId,
 					Name = "Transport",
-					UserId = FirstUserId
+					OwnerId = FirstUserId
 				},
 				new Category
 				{
 					Id = MedicalHealthcareCategoryId,
 					Name = "Medical & Healthcare",
-					UserId = FirstUserId
+					OwnerId = FirstUserId
 				},
 				new Category
 				{
 					Id = SalaryCategoryId,
 					Name = "Salary",
-					UserId = FirstUserId
+					OwnerId = FirstUserId
 				},
 				new Category
 				{
 					Id = MoneyTransferCategoryId,
 					Name = "Money Transfer",
-					UserId = FirstUserId
+					OwnerId = FirstUserId
 				},
 				new Category
 				{
 					Id = DividentsCategoryId,
 					Name = "Dividents",
-					UserId = FirstUserId
+					OwnerId = FirstUserId
 				}
 			});
 		}

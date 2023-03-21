@@ -37,6 +37,7 @@ namespace PersonalFinancer.Services.Infrastructure
 					.MapFrom(s => s.Account.Name + (s.Account.IsDeleted ? " (Deleted)" : string.Empty)));
 
 			CreateMap<ApplicationUser, UserViewModel>();
+			CreateMap<ApplicationUser, AccountFormModel>();
 			CreateMap<ApplicationUser, UserDetailsViewModel>()
 				.ForMember(m => m.Accounts, mf => mf
 					.MapFrom(s => s.Accounts.Where(a => !a.IsDeleted).OrderBy(a => a.Name)));

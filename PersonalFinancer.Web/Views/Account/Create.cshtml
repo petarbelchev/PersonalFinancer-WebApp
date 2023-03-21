@@ -26,7 +26,7 @@
 					<select asp-for="@Model.AccountTypeId" class="form-select" id="accountTypesField">
 						@foreach (var accountType in @Model.AccountTypes)
 						{
-							<option value="@accountType.Id" id="@accountType.Id" userId="@accountType.UserId">@accountType.Name</option>
+							<option value="@accountType.Id" id="@accountType.Id">@accountType.Name</option>
 						}
 					</select>
 					<span asp-validation-for="@Model.AccountTypeId" class="text-danger"></span>
@@ -43,7 +43,7 @@
 					<select asp-for="@Model.CurrencyId" class="form-select" id="currenciesField">
 						@foreach (var currency in @Model.Currencies)
 						{
-							<option value="@currency.Id" id="@currency.Id" userId="@currency.UserId">@currency.Name</option>
+							<option value="@currency.Id" id="@currency.Id">@currency.Name</option>
 						}
 					</select>
 					<span asp-validation-for="@Model.CurrencyId" class="text-danger"></span>

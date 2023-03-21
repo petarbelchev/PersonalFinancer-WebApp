@@ -26,13 +26,13 @@ namespace PersonalFinancer.Services.Currencies
 		}
 
 		/// <summary>
-		/// Throws ArgumentException if given name exists or lenght is invalid.
+		/// Throws ArgumentException if given name exists.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task CreateCurrency(string userId, CurrencyViewModel model)
+		public async Task<CurrencyViewModel> CreateCurrency(string userId, string currencyName)
 		{
 			Currency? currency = await data.Currencies
-				.FirstOrDefaultAsync(c => c.Name == model.Name && c.UserId == userId);
+				.FirstOrDefaultAsync(c => c.Name == currencyName && c.OwnerId == userId);
 
 			if (currency != null)
 			{
@@ -40,18 +40,15 @@ namespace PersonalFinancer.Services.Currencies
 					throw new ArgumentException("Currency with the same name exist!");
 
 				currency.IsDeleted = false;
-				currency.Name = model.Name.Trim();
+				currency.Name = currencyName.Trim();
 			}
 			else
 			{
-				if (model.Name.Length < CurrencyNameMinLength || model.Name.Length > CurrencyNameMaxLength)
-					throw new ArgumentException($"Currency name must be between {CurrencyNameMinLength} and {CurrencyNameMaxLength} characters long.");
-
 				currency = new Currency
 				{
 					Id = Guid.NewGuid().ToString(),
-					Name = model.Name,
-					UserId = userId
+					Name = currencyName,
+					OwnerId = userId
 				};
 
 				data.Currencies.Add(currency);
@@ -59,43 +56,44 @@ namespace PersonalFinancer.Services.Currencies
 
 			await data.SaveChangesAsync();
 
-			model.Id = currency.Id;
-			model.UserId = currency.UserId;
-
 			memoryCache.Remove(CacheKeyValue + userId);
+
+			return mapper.Map<CurrencyViewModel>(currency);
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Currency does not exist or User is not owner.
+		/// Throws InvalidOperationException when Currency does not exist
+		/// and ArgumentException when User is not owner.
 		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteCurrency(string currencyId, string userId)
+		public async Task DeleteCurrency(string currencyId, string ownerId)
 		{
 			Currency? currency = await data.Currencies.FindAsync(currencyId);
 
 			if (currency == null)
 				throw new InvalidOperationException("Currency does not exist.");
 
-			if (currency.UserId != userId)
-				throw new InvalidOperationException("Can't delete someone else Currency.");
+			if (currency.OwnerId != ownerId)
+				throw new ArgumentException("Can't delete someone else Currency.");
 
 			currency.IsDeleted = true;
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(CacheKeyValue + userId);
+			memoryCache.Remove(CacheKeyValue + ownerId);
 		}
 
-		public async Task<IEnumerable<CurrencyViewModel>> GetUserCurrencies(string userId)
+		public async Task<IEnumerable<CurrencyViewModel>> GetUserCurrencies(string ownerId)
 		{
-			string cacheKey = CacheKeyValue + userId;
+			string cacheKey = CacheKeyValue + ownerId;
 
 			var currencies = await memoryCache.GetOrCreateAsync<IEnumerable<CurrencyViewModel>>(cacheKey, async cacheEntry =>
 			{
 				cacheEntry.SetAbsoluteExpiration(TimeSpan.FromDays(3));
 
 				return await data.Currencies
-					.Where(c => (c.UserId == null || c.UserId == userId) && !c.IsDeleted)
+					.Where(c => c.OwnerId == ownerId && !c.IsDeleted)
 					.OrderBy(c => c.Name)
 					.Select(c => mapper.Map<CurrencyViewModel>(c))
 					.ToArrayAsync();

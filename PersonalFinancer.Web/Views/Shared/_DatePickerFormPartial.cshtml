@@ -3,12 +3,12 @@
 
 <form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
 	<div class="col-lg-5 form-floating">
-		<input textmode="Date" name="StartDate" asp-for="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+		<input type="Date" name="StartDate" asp-for="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 		<label asp-for="@Model.StartDate" class="form-label">Start Date</label>
 		<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
 	</div>
 	<div class="col-lg-5 form-floating">
-		<input textmode="Date" name="EndDate" asp-for="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+		<input type="Date" name="EndDate" asp-for="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 		<label asp-for="@Model.EndDate" class="form-label">End Date</label>
 		<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
 	</div>

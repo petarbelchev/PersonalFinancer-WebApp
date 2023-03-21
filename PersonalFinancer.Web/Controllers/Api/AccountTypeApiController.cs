@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.AccountTypes;
 using PersonalFinancer.Services.AccountTypes.Models;
 using PersonalFinancer.Web.Infrastructure;
+using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
+	[Authorize(Roles = UserRoleName)]
 	[Route("api/accounttypes")]
 	[ApiController]
 	public class AccountTypeApiController : ControllerBase
@@ -18,16 +21,14 @@ namespace PersonalFinancer.Web.Controllers.Api
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(AccountTypeViewModel model)
+		public async Task<ActionResult<AccountTypeViewModel>> Create(AccountTypeInputModel inputModel)
 		{
-			if (!User.Identity?.IsAuthenticated ?? false)
-				return Unauthorized();
-
 			try
 			{
-				await accountTypeService.CreateAccountType(User.Id(), model);
+				AccountTypeViewModel viewModel = await accountTypeService
+					.CreateAccountType(User.Id(), inputModel.Name.Trim());
 
-				return Created(string.Empty, model);
+				return Created(string.Empty, viewModel);
 			}
 			catch (ArgumentException ex)
 			{
@@ -38,14 +39,15 @@ namespace PersonalFinancer.Web.Controllers.Api
 		[HttpDelete("{id}")]
 		public async Task<ActionResult> Delete(string id)
 		{
-			if (!User.Identity?.IsAuthenticated ?? false)
-				return Unauthorized();
-
 			try
 			{
 				await accountTypeService.DeleteAccountType(id, User.Id());
 
 				return NoContent();
+			}
+			catch (ArgumentException)
+			{
+				return Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{

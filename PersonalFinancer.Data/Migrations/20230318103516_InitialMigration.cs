@@ -71,15 +71,15 @@ namespace PersonalFinancer.Data.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AccountTypes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AccountTypes_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_AccountTypes_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -176,15 +176,15 @@ namespace PersonalFinancer.Data.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Categories_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Categories_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -196,15 +196,15 @@ namespace PersonalFinancer.Data.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Currencies", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Currencies_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Currencies_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -216,7 +216,7 @@ namespace PersonalFinancer.Data.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
-                    Balance = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     AccountTypeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CurrencyId = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -230,17 +230,19 @@ namespace PersonalFinancer.Data.Migrations
                         column: x => x.AccountTypeId,
                         principalTable: "AccountTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Accounts_AspNetUsers_OwnerId",
                         column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Accounts_Currencies_CurrencyId",
                         column: x => x.CurrencyId,
                         principalTable: "Currencies",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -248,8 +250,9 @@ namespace PersonalFinancer.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     AccountId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CategoryId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     TransactionType = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -265,30 +268,37 @@ namespace PersonalFinancer.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_Transactions_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Transactions_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
-                values: new object[] { "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e", "dfa7bf16-5467-415f-9943-2f741fe10270", "petar@mail.com", "Petar", "Petrov", "PETAR@MAIL.COM", "PETAR@MAIL.COM", "AQAAAAEAACcQAAAAEMkHwYeeqTFFm6HLewSHBTIofZmfXJieFCOg0PWD0D8Q8/Mhl/2pdShO7FwXwoPspQ==", "1234567890", "90284804-287b-4509-8f87-687fe5466eac", "petar@mail.com" });
+                values: new object[] { "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e", "114af31f-a596-420f-9617-7e7408dd0588", "petar@mail.com", "Petar", "Petrov", "PETAR@MAIL.COM", "PETAR@MAIL.COM", "AQAAAAEAACcQAAAAEFhKQl+SeJMcQoUiwuYpGd/B19vinbTwpvbgs31MRu9yFm3bFQpq1f6WYzZWDfdClQ==", "1234567890", "239b553c-d6c2-4f02-86d1-2c008e8facfb", "petar@mail.com" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
-                values: new object[] { "bcb4f072-ecca-43c9-ab26-c060c6f364e4", "1a8559a4-6cd1-44fd-815e-11f67ac77dee", "teodor@mail.com", "Teodor", "Lesly", "TEODOR@MAIL.COM", "TEODOR@MAIL.COM", "AQAAAAEAACcQAAAAEH+vdU6zrCZwuX+KwYHbQ50PNoLF+N+hPFL3CjkZW7S9701ftxdG13g/iRHzNUz0hQ==", "1325476980", "6439c181-69ae-44a2-9039-4997d019111a", "teodor@mail.com" });
+                values: new object[] { "bcb4f072-ecca-43c9-ab26-c060c6f364e4", "8c34b5c2-2b9e-488f-adf6-6195b4ace5fe", "teodor@mail.com", "Teodor", "Lesly", "TEODOR@MAIL.COM", "TEODOR@MAIL.COM", "AQAAAAEAACcQAAAAEAscUNLE32Xa5P/zJ9ELf3KnsUjrhkcgqNLlDw8VV52cJ54fL7rOrot5sVGv18me1w==", "1325476980", "8fdeaf27-21c4-43a7-8971-9a2db7b91caa", "teodor@mail.com" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
-                values: new object[] { "dea12856-c198-4129-b3f3-b893d8395082", "553ba7f5-f31e-4a6c-8fe3-a0f22976d52e", "admin@admin.com", "Great", "Admin", "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAEAACcQAAAAECU74sTJQfDM3myNEvFA61rIxyjld7c3Yzj8cEuMwVWx/bAVyVWvJu6ahAnbZerfZQ==", "9876543021", "bea224f8-80d5-4af4-af3f-46b5fc88d1e5", "admin@admin.com" });
+                values: new object[] { "dea12856-c198-4129-b3f3-b893d8395082", "8b6eb14c-8f3d-49e2-951f-e0240dfa68f0", "admin@admin.com", "Great", "Admin", "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAEAACcQAAAAEMyJ+2Z18z8GN+mT4Q3KCqx4ADbUduWm7fvUhx46gkQgNgCnAiWGIbkORbGxXDAMtQ==", "9876543021", "e99955e6-fb2a-44f2-a082-740a7187eff2", "admin@admin.com" });
 
             migrationBuilder.InsertData(
                 table: "AccountTypes",
-                columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
+                columns: new[] { "Id", "IsDeleted", "Name", "OwnerId" },
                 values: new object[,]
                 {
                     { "1dfe1780-daed-4198-8360-378aa33c5411", false, "Bank", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
@@ -298,7 +308,7 @@ namespace PersonalFinancer.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Categories",
-                columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
+                columns: new[] { "Id", "IsDeleted", "Name", "OwnerId" },
                 values: new object[,]
                 {
                     { "081a7be8-15c4-426e-872c-dfaf805e3fec", false, "Salary", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
@@ -313,7 +323,7 @@ namespace PersonalFinancer.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Currencies",
-                columns: new[] { "Id", "IsDeleted", "Name", "UserId" },
+                columns: new[] { "Id", "IsDeleted", "Name", "OwnerId" },
                 values: new object[,]
                 {
                     { "2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f", false, "USD", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
@@ -337,9 +347,9 @@ namespace PersonalFinancer.Data.Migrations
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AccountTypes_UserId",
+                name: "IX_AccountTypes_OwnerId",
                 table: "AccountTypes",
-                column: "UserId");
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -381,14 +391,14 @@ namespace PersonalFinancer.Data.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Categories_UserId",
+                name: "IX_Categories_OwnerId",
                 table: "Categories",
-                column: "UserId");
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Currencies_UserId",
+                name: "IX_Currencies_OwnerId",
                 table: "Currencies",
-                column: "UserId");
+                column: "OwnerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_AccountId",
@@ -399,6 +409,11 @@ namespace PersonalFinancer.Data.Migrations
                 name: "IX_Transactions_CategoryId",
                 table: "Transactions",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_OwnerId",
+                table: "Transactions",
+                column: "OwnerId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

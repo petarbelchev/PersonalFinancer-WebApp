@@ -88,14 +88,14 @@ namespace PersonalFinancer.Tests
 			{
 				Id = cashAccTypeId,
 				Name = "Cash",
-				UserId = PetarId
+				OwnerId = PetarId
 			};
 			string BankAccTypeId = Guid.NewGuid().ToString();
 			AccountType2 = new AccountType
 			{
 				Id = BankAccTypeId,
 				Name = "Bank",
-				UserId = PetarId
+				OwnerId = PetarId
 			};
 			string CustomAccTypeId = Guid.NewGuid().ToString();
 			AccountType3 = new AccountType
@@ -103,7 +103,7 @@ namespace PersonalFinancer.Tests
 				Id = CustomAccTypeId,
 				Name = "Bank",
 				IsDeleted = true,
-				UserId = PetarId
+				OwnerId = PetarId
 			};
 			data.AccountTypes.AddRange(AccountType1, AccountType2, AccountType3);
 
@@ -113,14 +113,14 @@ namespace PersonalFinancer.Tests
 			{
 				Id = BgnCurrencyId,
 				Name = "BGN",
-				UserId = PetarId
+				OwnerId = PetarId
 			};
 			string EurCurrencyId = Guid.NewGuid().ToString();
 			Currency2 = new Currency
 			{
 				Id = EurCurrencyId,
 				Name = "EUR",
-				UserId = PetarId
+				OwnerId = PetarId
 			};
 			//Guid UsdCurrencyId = Guid.NewGuid();
 			//Currency3 = new Currency
@@ -166,21 +166,21 @@ namespace PersonalFinancer.Tests
 			{
 				Id = foodCatId,
 				Name = "Food and Drinks",
-				UserId = PetarId
+				OwnerId = PetarId
 			};
 			string transportCatId = Guid.NewGuid().ToString();
 			Category3 = new Category
 			{
 				Id = transportCatId,
 				Name = "Transport",
-				UserId = PetarId
+				OwnerId = PetarId
 			};
 			string salaryCatId = Guid.NewGuid().ToString();
 			Category4 = new Category
 			{
 				Id = salaryCatId,
 				Name = "Salary",
-				UserId = PetarId
+				OwnerId = PetarId
 			};
 			data.Categories.AddRange(Category1, Category2, Category3, Category4);
 

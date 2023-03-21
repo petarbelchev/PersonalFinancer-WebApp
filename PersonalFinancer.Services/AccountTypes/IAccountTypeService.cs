@@ -7,14 +7,16 @@ namespace PersonalFinancer.Services.AccountTypes
 		Task<IEnumerable<AccountTypeViewModel>> GetUserAccountTypesViewModel(string userId);
 		
 		/// <summary>
-		/// Throws ArgumentException if given name already exists or name length is invalid.
+		/// Throws ArgumentException if given name already exists.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		Task CreateAccountType(string userId, AccountTypeViewModel model);
+		Task<AccountTypeViewModel> CreateAccountType(string userId, string accountTypeName);
 		
 		/// <summary>
-		/// Throws exception when Account Type does not exist or User is not owner.
+		/// Throws exception when Account Type does not exist
+		/// and ArgumentException when User is not owner.
 		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task DeleteAccountType(string categoryId, string userId);
 	}

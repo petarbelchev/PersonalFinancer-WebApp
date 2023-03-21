@@ -98,41 +98,45 @@ namespace PersonalFinancer.Web.Infrastructure
 					CurrencyId = UsdCurrencyId
 				});
 
-				await transactionsService.CreateTransaction(new TransactionFormModel
+				await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 				{
 					AccountId = cashBgnAccId,
 					Amount = 2000,
 					CategoryId = InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = CategoryInitialBalanceName,
-					TransactionType = TransactionType.Income
+					TransactionType = TransactionType.Income,
+					IsInitialBalance = true
 				});
-				await transactionsService.CreateTransaction(new TransactionFormModel
+				await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 				{
 					AccountId = bankBgnAccId,
 					Amount = 4000,
 					CategoryId = InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = CategoryInitialBalanceName,
-					TransactionType = TransactionType.Income
+					TransactionType = TransactionType.Income,
+					IsInitialBalance = true
 				});
-				await transactionsService.CreateTransaction(new TransactionFormModel
+				await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 				{
 					AccountId = euroSavingsAccId,
 					Amount = 2800,
 					CategoryId = InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = CategoryInitialBalanceName,
-					TransactionType = TransactionType.Income
+					TransactionType = TransactionType.Income,
+					IsInitialBalance = true
 				});
-				await transactionsService.CreateTransaction(new TransactionFormModel
+				await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 				{
 					AccountId = usdSavingsAccId,
 					Amount = 3800,
 					CategoryId = InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = CategoryInitialBalanceName,
-					TransactionType = TransactionType.Income
+					TransactionType = TransactionType.Income,
+					IsInitialBalance = true
 				});
 
 				int taxiCounter = 0;
@@ -141,7 +145,7 @@ namespace PersonalFinancer.Web.Infrastructure
 				{
 					if (i == 57 || i == 32 || i == 7)
 					{
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = 1500m,
@@ -154,7 +158,7 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (taxiCounter <= 5)
 					{
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = cashBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.63, 2),
@@ -167,7 +171,7 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 40 || i == 20)
 					{
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = 14.99m,
@@ -180,7 +184,7 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 38 || i == 18)
 					{
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = euroSavingsAccId,
 							Amount = 100,
@@ -193,7 +197,7 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 34 || i == 14)
 					{
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = usdSavingsAccId,
 							Amount = 150,
@@ -206,7 +210,7 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 54 || i == 29 || i == 4)
 					{
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 4.83, 2),
@@ -217,7 +221,7 @@ namespace PersonalFinancer.Web.Infrastructure
 						});
 					}
 
-					await transactionsService.CreateTransaction(new TransactionFormModel
+					await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 					{
 						AccountId = cashBgnAccId,
 						Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.53, 2),
@@ -229,7 +233,7 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 52 || i == 27 || i == 2)
 					{
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 1.83, 2),
@@ -242,7 +246,7 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 50 || i == 25 || i == 1)
 					{
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 2.83, 2),
@@ -255,7 +259,7 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (taxiCounter <= 5)
 					{
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = cashBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.63, 2),
@@ -273,7 +277,7 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 48 || i == 21)
 					{
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = 500,
@@ -283,7 +287,7 @@ namespace PersonalFinancer.Web.Infrastructure
 							TransactionType = TransactionType.Expense
 						});
 
-						await transactionsService.CreateTransaction(new TransactionFormModel
+						await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 						{
 							AccountId = cashBgnAccId,
 							Amount = 500,
@@ -294,7 +298,7 @@ namespace PersonalFinancer.Web.Infrastructure
 						});
 					}
 
-					await transactionsService.CreateTransaction(new TransactionFormModel
+					await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel
 					{
 						AccountId = bankBgnAccId,
 						Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.83, 2),

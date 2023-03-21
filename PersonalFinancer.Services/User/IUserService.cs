@@ -1,4 +1,5 @@
-﻿using PersonalFinancer.Services.User.Models;
+﻿using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Services.User
 {
@@ -6,11 +7,9 @@ namespace PersonalFinancer.Services.User
 	{
 		Task<AllUsersViewModel> GetAllUsers(int page = 1);
 
-		/// <summary>
-		/// Throws Exception when End Date is before Start Date.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		Task GetUserDashboard(string userId, HomeIndexViewModel model);
+		Task SetUserDashboard(string userId, UserDashboardViewModel model);
+
+		Task<IEnumerable<AccountCardViewModel>> GetUserAccounts(string userId);
 
 		int UsersCount();
 		
@@ -25,5 +24,7 @@ namespace PersonalFinancer.Services.User
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<string> FullName(string userId);
+				
+		int GetUsersAccountsCount();
 	}
 }

@@ -12,7 +12,7 @@ using PersonalFinancer.Data;
 namespace PersonalFinancer.Data.Migrations
 {
     [DbContext(typeof(PersonalFinancerDbContext))]
-    [Migration("20230317105341_InitialMigration")]
+    [Migration("20230318103516_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -171,7 +171,6 @@ namespace PersonalFinancer.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("Balance")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CurrencyId")
@@ -214,13 +213,13 @@ namespace PersonalFinancer.Data.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("OwnerId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("AccountTypes");
 
@@ -230,21 +229,21 @@ namespace PersonalFinancer.Data.Migrations
                             Id = "f4c3803a-7ed5-4d78-9038-7b21bf08a040",
                             IsDeleted = false,
                             Name = "Cash",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = "1dfe1780-daed-4198-8360-378aa33c5411",
                             IsDeleted = false,
                             Name = "Bank",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = "daef2351-e2e9-43b9-b908-8d7d00bf3df6",
                             IsDeleted = false,
                             Name = "Savings",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         });
                 });
 
@@ -308,43 +307,43 @@ namespace PersonalFinancer.Data.Migrations
                         new
                         {
                             Id = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e",
-                            ConcurrencyStamp = "dfa7bf16-5467-415f-9943-2f741fe10270",
+                            ConcurrencyStamp = "114af31f-a596-420f-9617-7e7408dd0588",
                             Email = "petar@mail.com",
                             FirstName = "Petar",
                             LastName = "Petrov",
                             NormalizedEmail = "PETAR@MAIL.COM",
                             NormalizedUserName = "PETAR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEMkHwYeeqTFFm6HLewSHBTIofZmfXJieFCOg0PWD0D8Q8/Mhl/2pdShO7FwXwoPspQ==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEFhKQl+SeJMcQoUiwuYpGd/B19vinbTwpvbgs31MRu9yFm3bFQpq1f6WYzZWDfdClQ==",
                             PhoneNumber = "1234567890",
-                            SecurityStamp = "90284804-287b-4509-8f87-687fe5466eac",
+                            SecurityStamp = "239b553c-d6c2-4f02-86d1-2c008e8facfb",
                             UserName = "petar@mail.com"
                         },
                         new
                         {
                             Id = "bcb4f072-ecca-43c9-ab26-c060c6f364e4",
-                            ConcurrencyStamp = "1a8559a4-6cd1-44fd-815e-11f67ac77dee",
+                            ConcurrencyStamp = "8c34b5c2-2b9e-488f-adf6-6195b4ace5fe",
                             Email = "teodor@mail.com",
                             FirstName = "Teodor",
                             LastName = "Lesly",
                             NormalizedEmail = "TEODOR@MAIL.COM",
                             NormalizedUserName = "TEODOR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEH+vdU6zrCZwuX+KwYHbQ50PNoLF+N+hPFL3CjkZW7S9701ftxdG13g/iRHzNUz0hQ==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEAscUNLE32Xa5P/zJ9ELf3KnsUjrhkcgqNLlDw8VV52cJ54fL7rOrot5sVGv18me1w==",
                             PhoneNumber = "1325476980",
-                            SecurityStamp = "6439c181-69ae-44a2-9039-4997d019111a",
+                            SecurityStamp = "8fdeaf27-21c4-43a7-8971-9a2db7b91caa",
                             UserName = "teodor@mail.com"
                         },
                         new
                         {
                             Id = "dea12856-c198-4129-b3f3-b893d8395082",
-                            ConcurrencyStamp = "553ba7f5-f31e-4a6c-8fe3-a0f22976d52e",
+                            ConcurrencyStamp = "8b6eb14c-8f3d-49e2-951f-e0240dfa68f0",
                             Email = "admin@admin.com",
                             FirstName = "Great",
                             LastName = "Admin",
                             NormalizedEmail = "ADMIN@ADMIN.COM",
                             NormalizedUserName = "ADMIN@ADMIN.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAECU74sTJQfDM3myNEvFA61rIxyjld7c3Yzj8cEuMwVWx/bAVyVWvJu6ahAnbZerfZQ==",
+                            PasswordHash = "AQAAAAEAACcQAAAAEMyJ+2Z18z8GN+mT4Q3KCqx4ADbUduWm7fvUhx46gkQgNgCnAiWGIbkORbGxXDAMtQ==",
                             PhoneNumber = "9876543021",
-                            SecurityStamp = "bea224f8-80d5-4af4-af3f-46b5fc88d1e5",
+                            SecurityStamp = "e99955e6-fb2a-44f2-a082-740a7187eff2",
                             UserName = "admin@admin.com"
                         });
                 });
@@ -362,13 +361,13 @@ namespace PersonalFinancer.Data.Migrations
                         .HasMaxLength(25)
                         .HasColumnType("nvarchar(25)");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("OwnerId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Categories");
 
@@ -378,56 +377,56 @@ namespace PersonalFinancer.Data.Migrations
                             Id = "e241b89f-b094-4f79-bb09-efc6f47c2cb3",
                             IsDeleted = false,
                             Name = "Initial Balance",
-                            UserId = "dea12856-c198-4129-b3f3-b893d8395082"
+                            OwnerId = "dea12856-c198-4129-b3f3-b893d8395082"
                         },
                         new
                         {
                             Id = "93cebd34-a9f5-4862-a8c9-3b6eea63e94c",
                             IsDeleted = false,
                             Name = "Food & Drink",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = "d59cbb57-3b9e-4b37-9b74-a375eecba8c8",
                             IsDeleted = false,
                             Name = "Utilities",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = "b58a7947-eecf-40d0-b84e-c6947fcbfd86",
                             IsDeleted = false,
                             Name = "Transport",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = "96e441e3-c5a6-427f-bb32-85940242d9ee",
                             IsDeleted = false,
                             Name = "Medical & Healthcare",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = "081a7be8-15c4-426e-872c-dfaf805e3fec",
                             IsDeleted = false,
                             Name = "Salary",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = "e03634d5-1970-4e01-8568-42756e9ad973",
                             IsDeleted = false,
                             Name = "Money Transfer",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = "459dc945-0d2c-4a07-a2aa-55b4c5e57f9f",
                             IsDeleted = false,
                             Name = "Dividents",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         });
                 });
 
@@ -444,13 +443,13 @@ namespace PersonalFinancer.Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("OwnerId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Currencies");
 
@@ -460,21 +459,21 @@ namespace PersonalFinancer.Data.Migrations
                             Id = "3bf454ad-941b-4ab6-a1ad-c212bfc46e7d",
                             IsDeleted = false,
                             Name = "BGN",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = "dab2761d-acb1-43bc-b56b-0d9c241c8882",
                             IsDeleted = false,
                             Name = "EUR",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         },
                         new
                         {
                             Id = "2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f",
                             IsDeleted = false,
                             Name = "USD",
-                            UserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
+                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
                         });
                 });
 
@@ -488,7 +487,6 @@ namespace PersonalFinancer.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CategoryId")
@@ -497,6 +495,10 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Refference")
                         .IsRequired()
@@ -511,6 +513,8 @@ namespace PersonalFinancer.Data.Migrations
                     b.HasIndex("AccountId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Transactions");
                 });
@@ -569,21 +573,21 @@ namespace PersonalFinancer.Data.Migrations
             modelBuilder.Entity("PersonalFinancer.Data.Models.Account", b =>
                 {
                     b.HasOne("PersonalFinancer.Data.Models.AccountType", "AccountType")
-                        .WithMany()
+                        .WithMany("Accounts")
                         .HasForeignKey("AccountTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PersonalFinancer.Data.Models.Currency", "Currency")
-                        .WithMany()
+                        .WithMany("Accounts")
                         .HasForeignKey("CurrencyId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "Owner")
                         .WithMany("Accounts")
                         .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("AccountType");
@@ -595,35 +599,35 @@ namespace PersonalFinancer.Data.Migrations
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.AccountType", b =>
                 {
-                    b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                    b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "Owner")
+                        .WithMany("AccountTypes")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Category", b =>
                 {
-                    b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                    b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "Owner")
+                        .WithMany("Categories")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Currency", b =>
                 {
-                    b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                    b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "Owner")
+                        .WithMany("Currencies")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Transaction", b =>
@@ -635,14 +639,22 @@ namespace PersonalFinancer.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("PersonalFinancer.Data.Models.Category", "Category")
-                        .WithMany()
+                        .WithMany("Transactions")
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", "Owner")
+                        .WithMany("Transactions")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Account");
 
                     b.Navigation("Category");
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Account", b =>
@@ -650,7 +662,30 @@ namespace PersonalFinancer.Data.Migrations
                     b.Navigation("Transactions");
                 });
 
+            modelBuilder.Entity("PersonalFinancer.Data.Models.AccountType", b =>
+                {
+                    b.Navigation("Accounts");
+                });
+
             modelBuilder.Entity("PersonalFinancer.Data.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("AccountTypes");
+
+                    b.Navigation("Accounts");
+
+                    b.Navigation("Categories");
+
+                    b.Navigation("Currencies");
+
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("PersonalFinancer.Data.Models.Category", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("PersonalFinancer.Data.Models.Currency", b =>
                 {
                     b.Navigation("Accounts");
                 });

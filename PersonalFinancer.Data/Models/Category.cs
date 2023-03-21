@@ -10,13 +10,16 @@ namespace PersonalFinancer.Data.Models
 		[Key]
 		public string Id { get; set; } = null!;
 
-		[MaxLength(CategoryNameMaxLength, ErrorMessage = "Category's name max length must be {1} characters long.")]
+		[MaxLength(CategoryNameMaxLength, 
+			ErrorMessage = "Category's name max length must be {1} characters long.")]
 		public string Name { get; set; } = null!;
 
-		[ForeignKey(nameof(User))]
-		public string UserId { get; set; } = null!;
-		public ApplicationUser User { get; set; } = null!;
+		[ForeignKey(nameof(Owner))]
+		public string OwnerId { get; set; } = null!;
+		public ApplicationUser Owner { get; set; } = null!;
 
 		public bool IsDeleted { get; set; }
-	}
+
+        public ICollection<Transaction> Transactions { get; set; } = null!;
+    }
 }

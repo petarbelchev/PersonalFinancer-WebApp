@@ -10,9 +10,11 @@ namespace PersonalFinancer.Data.Models
 		[Key]
 		public string Id { get; set; } = null!;
 
-		[MaxLength(AccountNameMaxLength, ErrorMessage = "Account name max length must be {1} characters long.")]
+		[MaxLength(AccountNameMaxLength, 
+			ErrorMessage = "Account name max length must be {1} characters long.")]
 		public string Name { get; set; } = null!;
 
+		[Column(TypeName = "decimal(18,2)")]
 		public decimal Balance { get; set; }
 
 		[ForeignKey(nameof(Owner))]

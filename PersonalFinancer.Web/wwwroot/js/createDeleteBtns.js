@@ -1,4 +1,4 @@
-function eventSetter(elToListen, newElemDiv, selectField, inputField, url, userId, deleteBtn) {
+function eventSetter(elToListen, newElemDiv, selectField, inputField, url/*, userId*/, deleteBtn) {
     if (elToListen.id.includes('create')) {
         elToListen.addEventListener('click', async () => {
             if (newElemDiv.style.display == 'none') {
@@ -10,12 +10,12 @@ function eventSetter(elToListen, newElemDiv, selectField, inputField, url, userI
     } else if (elToListen.id.includes('delete')) {
         elToListen.addEventListener('click', async () => {
             if (confirm('Are you sure you want to delete this?')) {
-                await remove(selectField, url, userId, elToListen);
+                await remove(selectField, url/*, userId*/, elToListen);
             }
         });
     } else if (elToListen.id.includes('Field')) {
         elToListen.addEventListener('change', () => {
-            deleteBtnController(selectField, deleteBtn, userId);
+            deleteBtnController(selectField, deleteBtn/*, userId*/);
         });
     }
 }
@@ -42,7 +42,7 @@ async function add(newElemDiv, inputField, url, selectField, deleteBtn) {
 
         let optionTag = document.createElement('option');
         optionTag.value = data.id;
-        optionTag.setAttribute("userId", data.userId);
+        //optionTag.setAttribute("userId", data.ownerId);
         optionTag.setAttribute("id", data.id);
         optionTag.textContent = data.name;
 
@@ -58,13 +58,13 @@ async function add(newElemDiv, inputField, url, selectField, deleteBtn) {
     }
 }
 
-async function remove(selectField, url, userId, deleteBtn) {
+async function remove(selectField, url/*, userId*/, deleteBtn) {
     let elemId = selectField.value;
-    let ownerId = selectField.selectedOptions[0].attributes['userid'].value;
+    //let ownerId = selectField.selectedOptions[0].attributes['userid'].value;
 
-    if (ownerId != userId) {
-        return alert("You can't delete this!")
-    }
+    //if (ownerId != userId) {
+    //    return alert("You can't delete this!")
+    //}
 
     let response = await fetch(url + elemId, { method: 'DELETE' });
 

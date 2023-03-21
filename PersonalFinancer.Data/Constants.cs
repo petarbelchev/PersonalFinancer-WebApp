@@ -39,6 +39,7 @@
 			public const int CategoryNameMinLength = 2;
 
 			public const string CategoryInitialBalanceName = "Initial Balance";
+			public const string InitialBalanceCategoryId = "e241b89f-b094-4f79-bb09-efc6f47c2cb3";
 
 			public const string CacheKeyValue = "categories/";
 		}
@@ -87,7 +88,6 @@
 			public const string BankAccountTypeId = "1dfe1780-daed-4198-8360-378aa33c5411";
 			public const string SavingAccountTypeId = "daef2351-e2e9-43b9-b908-8d7d00bf3df6";
 
-			public const string InitialBalanceCategoryId = "e241b89f-b094-4f79-bb09-efc6f47c2cb3";
 			public const string FoodDrinkCategoryId = "93cebd34-a9f5-4862-a8c9-3b6eea63e94c";
 			public const string UtilitiesCategoryId = "d59cbb57-3b9e-4b37-9b74-a375eecba8c8";
 			public const string TransportCategoryId = "b58a7947-eecf-40d0-b84e-c6947fcbfd86";

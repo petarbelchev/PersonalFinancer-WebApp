@@ -27,7 +27,7 @@
 						<select asp-for="@Model.CategoryId" class="form-select" id="categoriesField">
 							@foreach (var category in @Model.Categories)
 							{
-								<option value="@category.Id" id="@category.Id" userId="@category.UserId">@category.Name</option>
+								<option value="@category.Id" id="@category.Id">@category.Name</option>
 							}
 						</select>
 						<span asp-validation-for="@Model.CategoryId" class="text-danger"></span>
@@ -50,16 +50,14 @@
 					</div>
 					<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 						<label asp-for="@Model.TransactionType" class="form-label"></label>
-						<select asp-for="@Model.TransactionType" class="form-select">
-							<option value="@TransactionType.Income">@TransactionType.Income</option>
-							<option value="@TransactionType.Expense">@TransactionType.Expense</option>
-						</select>
+						<select asp-for="@Model.TransactionType" asp-items="@Html.GetEnumSelectList<TransactionType>()" class="form-select"></select>
 					</div>
 					<div class="form-floating formField">
 						<input type="text" asp-for="@Model.Refference" class="form-control form-control-lg" placeholder=".form-control-lg" />
 						<label asp-for="@Model.Refference" class="form-lebel"></label>
 						<span asp-validation-for="@Model.Refference" class="text-danger"></span>
 					</div>
+					<input type="hidden" asp-for="@Model.OwnerId" />
 					<div>
 						<button type="submit" class="w-100 btn btn-lg btn-success">Create</button>
 					</div>
