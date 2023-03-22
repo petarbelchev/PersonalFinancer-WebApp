@@ -1,10 +1,10 @@
-function eventSetter(elToListen, newElemDiv, selectField, inputField, url/*, userId*/, deleteBtn) {
+function eventSetter(elToListen, newElemDiv, selectField, inputField, url, ownerId, deleteBtn) {
     if (elToListen.id.includes('create')) {
         elToListen.addEventListener('click', async () => {
             if (newElemDiv.style.display == 'none') {
                 newElemDiv.style.display = 'block';
             } else {
-                await add(newElemDiv, inputField, url, selectField, deleteBtn);
+                await add(newElemDiv, inputField, url, selectField, deleteBtn, ownerId);
             }
         });
     } else if (elToListen.id.includes('delete')) {
@@ -20,7 +20,7 @@ function eventSetter(elToListen, newElemDiv, selectField, inputField, url/*, use
     }
 }
 
-async function add(newElemDiv, inputField, url, selectField, deleteBtn) {
+async function add(newElemDiv, inputField, url, selectField, deleteBtn, ownerId) {
     for (let elem of selectField.children) {
         if (elem.innerText.toLowerCase() == inputField.value.toLowerCase().trim()) {
             newElemDiv.children[2].textContent = 'You already have this. Try another one!';
@@ -34,7 +34,7 @@ async function add(newElemDiv, inputField, url, selectField, deleteBtn) {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name: inputField.value.trim() })
+        body: JSON.stringify({ name: inputField.value.trim(), ownerId })
     });
 
     if (response.status == 201) {

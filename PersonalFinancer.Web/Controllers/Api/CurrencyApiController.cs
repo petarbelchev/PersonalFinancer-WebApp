@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.Currencies;
 using PersonalFinancer.Services.Currencies.Models;
 using PersonalFinancer.Web.Infrastructure;
-using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-	[Authorize(Roles = UserRoleName)]
+	[Authorize]
 	[Route("api/currencies")]
 	[ApiController]
 	public class CurrencyApiController : ControllerBase
@@ -16,17 +15,15 @@ namespace PersonalFinancer.Web.Controllers.Api
 		private readonly ICurrencyService currencyService;
 
 		public CurrencyApiController(ICurrencyService currencyService)
-		{
-			this.currencyService = currencyService;
-		}
+			=> this.currencyService = currencyService;
 
 		[HttpPost]
 		public async Task<ActionResult<CurrencyViewModel>> Create(CurrencyInputModel inputModel)
 		{
 			try
 			{
-				CurrencyViewModel viewModel = await currencyService
-					.CreateCurrency(User.Id(), inputModel.Name.Trim());
+				CurrencyViewModel viewModel = 
+					await currencyService.CreateCurrency(inputModel);
 
 				return Created(string.Empty, viewModel);
 			}

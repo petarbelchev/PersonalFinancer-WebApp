@@ -58,7 +58,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				try
 				{
-					await accountService.SetAccountDetailsViewModelForReturn(id, inputModel);
+					await accountService.PrepareAccountDetailsViewModelForReturn(id, inputModel);
 
 					return View(inputModel);
 				}
@@ -72,10 +72,9 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 			try
 			{
-				//Not supposed to have null values!
 				viewModel = await accountService.GetAccountDetailsViewModel(id,
-					inputModel.StartDate ?? DateTime.UtcNow.AddMonths(-1),
-					inputModel.EndDate ?? DateTime.UtcNow);
+					inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."),
+					inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null."));
 			}
 			catch (InvalidOperationException)
 			{
@@ -136,7 +135,6 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 		public async Task<IActionResult> EditAccount(string id)
 		{
-			//TODO: Remove Create and delete buttons for admin
 			try
 			{
 				AccountFormModel viewModel =
@@ -163,9 +161,8 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 			try
 			{
-				string ownerId = await accountService.GetOwnerId(id);
 
-				await accountService.EditAccount(id, inputModel, ownerId);
+				await accountService.EditAccount(id, inputModel);
 
 				TempData["successMsg"] = "You successfully edited user's account!";
 
@@ -174,7 +171,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			catch (ArgumentException)
 			{
 				ModelState.AddModelError(
-					nameof(inputModel.Name), 
+					nameof(inputModel.Name),
 					$"You already have Account with {inputModel.Name} name.");
 
 				await PrepareModelForReturn(inputModel);
@@ -190,7 +187,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		private async Task PrepareModelForReturn(AccountFormModel model)
 		{
 			AccountFormModel emptyFormModel =
-				await accountService.GetEmptyAccountFormModel(this.User.Id());
+				await accountService.GetEmptyAccountFormModel(model.OwnerId);
 
 			model.AccountTypes = emptyFormModel.AccountTypes;
 			model.Currencies = emptyFormModel.Currencies;

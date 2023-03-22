@@ -20,7 +20,9 @@ namespace PersonalFinancer.Services.Infrastructure
 
 			CreateMap<Account, AccountDropdownViewModel>();
 			CreateMap<Account, DeleteAccountViewModel>();
-			CreateMap<Account, AccountCardViewModel>();
+			CreateMap<Account, AccountCardViewModel>()
+				/*.ForMember(m => m.CurrencyName, mf => mf
+					.MapFrom(s => s.Currency.Name))*/;
 			CreateMap<Account, AccountCardExtendedViewModel>();
 			CreateMap<Account, AccountFormModel>();
 

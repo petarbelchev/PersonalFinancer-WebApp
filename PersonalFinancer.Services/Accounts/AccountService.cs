@@ -9,6 +9,7 @@ using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.AccountTypes.Models;
 using PersonalFinancer.Services.Currencies.Models;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions;
 using static PersonalFinancer.Data.Constants;
 
@@ -56,6 +57,7 @@ namespace PersonalFinancer.Services.Accounts
 				.FirstAsync();
 		}
 
+		//TODO: Move it to User Service?
 		public async Task<AllUsersAccountCardsViewModel> GetAllUsersAccountCardsViewModel(int page)
 		{
 			var model = new AllUsersAccountCardsViewModel();
@@ -96,9 +98,12 @@ namespace PersonalFinancer.Services.Accounts
 					CurrencyName = a.Currency.Name,
 					StartDate = startDate,
 					EndDate = endDate,
-					Page = page,
-					TotalElements = a.Transactions.Count(t =>
-						t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+					Pagination = new PaginationModel
+					{
+						Page = page,
+						TotalElements = a.Transactions.Count(t =>
+							t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+					},
 					Transactions = a.Transactions
 						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 						.OrderByDescending(t => t.CreatedOn)
@@ -125,7 +130,8 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task SetAccountDetailsViewModelForReturn(string accountId, DetailsAccountViewModel model)
+		public async Task PrepareAccountDetailsViewModelForReturn(
+			string accountId, DetailsAccountViewModel model)
 		{
 			var dto = await data.Accounts
 				.Where(a => a.Id == accountId)
@@ -157,7 +163,7 @@ namespace PersonalFinancer.Services.Accounts
 			{
 				Id = Guid.NewGuid().ToString(),
 				Name = accountModel.Name.Trim(),
-				Balance = accountModel.Balance,
+				Balance = accountModel.Balance ?? throw new InvalidOperationException("Account balance cannot be null."),
 				AccountTypeId = accountModel.AccountTypeId,
 				CurrencyId = accountModel.CurrencyId,
 				OwnerId = userId
@@ -238,32 +244,49 @@ namespace PersonalFinancer.Services.Accounts
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task EditAccount(string accountId, AccountFormModel model, string ownerId)
+		public async Task EditAccount(string accountId, AccountFormModel model)
 		{
-			Account? account = await data.Accounts.FindAsync(accountId);
+			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
 
-			if (account == null)
-				throw new InvalidOperationException("Account does not exist.");
-
-			if (account.Name != model.Name && await IsNameExists(model.Name, ownerId))
-				throw new ArgumentException(
-					$"The User already have Account with {model.Name} name.");
+			if (account.Name != model.Name && await IsNameExists(model.Name, model.OwnerId))
+				throw new ArgumentException($"The User already have Account with {model.Name} name.");
 
 			account.Name = model.Name.Trim();
 			account.CurrencyId = model.CurrencyId;
 			account.AccountTypeId = model.AccountTypeId;
 
-			//TODO: Use Account Service for that
 			if (account.Balance != model.Balance)
 			{
-				decimal amountOfChange = model.Balance - account.Balance;
-				account.Balance = model.Balance;
-				await transactionsService.EditOrCreateInitialBalanceTransaction(ownerId, account.Id, amountOfChange);
+				decimal amountOfChange = (model.Balance ?? throw new InvalidOperationException("Account balance cannot be null.")) - account.Balance;
+				account.Balance = model.Balance ?? throw new InvalidOperationException("Account balance cannot be null.");
+
+				Transaction? transaction = await data.Transactions
+					.FirstOrDefaultAsync(t => t.AccountId == account.Id && t.IsInitialBalance);
+
+				if (transaction == null)
+				{
+					var initialBalance = new Transaction
+					{
+						Id = Guid.NewGuid().ToString(),
+						OwnerId = account.OwnerId,
+						AccountId = account.Id,
+						Amount = amountOfChange,
+						CategoryId = CategoryConstants.InitialBalanceCategoryId,
+						CreatedOn = DateTime.UtcNow,
+						Refference = CategoryConstants.CategoryInitialBalanceName,
+						TransactionType = amountOfChange < 0 ? TransactionType.Expense : TransactionType.Income,
+						IsInitialBalance = true
+					};
+
+					await data.Transactions.AddAsync(initialBalance);
+				}
+				else
+				{
+					transaction.Amount += amountOfChange;
+				}
 			}
-			else
-			{
-				await data.SaveChangesAsync();
-			}
+
+			await data.SaveChangesAsync();
 		}
 
 		/// <summary>
@@ -284,6 +307,7 @@ namespace PersonalFinancer.Services.Accounts
 				.Select(a => new AccountFormModel
 				{
 					Name = a.Name,
+					OwnerId = a.OwnerId,
 					CurrencyId = a.CurrencyId,
 					AccountTypeId = a.AccountTypeId,
 					Balance = a.Balance,

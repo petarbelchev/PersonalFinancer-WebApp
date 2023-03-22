@@ -6,7 +6,6 @@ using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Categories;
-using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.Transactions.Models;
 using PersonalFinancer.Services.User;
@@ -163,11 +162,8 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange
 			UserDashboardViewModel dashboardModel = new UserDashboardViewModel
 			{
-				Dates = new DateFilterModel
-				{
-					StartDate = DateTime.UtcNow,
-					EndDate = DateTime.UtcNow.AddMonths(-1)
-				}
+				StartDate = DateTime.UtcNow,
+				EndDate = DateTime.UtcNow.AddMonths(-1)
 			};
 
 			//Act & Assert

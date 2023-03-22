@@ -14,9 +14,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		private readonly ITransactionsService transactionsService;
 
 		public TransactionController(ITransactionsService transactionsService)
-		{
-			this.transactionsService = transactionsService;
-		}
+			=> this.transactionsService = transactionsService;
 
 		public async Task<IActionResult> EditTransaction(string id)
 		{
@@ -66,8 +64,8 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			TransactionFormModel emptyFormModel =
 				await transactionsService.GetEmptyTransactionFormModel(model.OwnerId);
 
-			model.Categories = emptyFormModel.Categories;
-			model.Accounts = emptyFormModel.Accounts;
+			model.UserCategories = emptyFormModel.UserCategories;
+			model.UserAccounts = emptyFormModel.UserAccounts;
 		}
 	}
 }

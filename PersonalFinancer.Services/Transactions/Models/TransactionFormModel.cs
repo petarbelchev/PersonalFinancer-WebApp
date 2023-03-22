@@ -11,11 +11,9 @@ namespace PersonalFinancer.Services.Transactions.Models
 {
 	public class TransactionFormModel
 	{
-		[Required(ErrorMessage = "Amount is required.")]
-		[DataType(DataType.Currency, ErrorMessage = "Amount must be a number.")]
+		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		[Range(TransactionMinValue, TransactionMaxValue, 
 			ErrorMessage = "Amount must be a number between {1} and {2}.")]
-		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		public decimal Amount { get; set; }
 
         public string OwnerId { get; set; } = null!;
@@ -24,13 +22,13 @@ namespace PersonalFinancer.Services.Transactions.Models
 		[Display(Name = "Category")]
 		public string CategoryId { get; set; } = null!;
 
-		public List<CategoryViewModel> Categories { get; set; }
+		public IEnumerable<CategoryViewModel> UserCategories { get; set; }
 			= new List<CategoryViewModel>();
 
 		[Display(Name = "Account")]
 		public string AccountId { get; set; } = null!;
 
-		public List<AccountDropdownViewModel> Accounts { get; set; }
+		public IEnumerable<AccountDropdownViewModel> UserAccounts { get; set; }
 			= new List<AccountDropdownViewModel>();
 
 		[Required(ErrorMessage = "Date is required.")]

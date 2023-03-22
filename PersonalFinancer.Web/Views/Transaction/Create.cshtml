@@ -4,7 +4,7 @@
 	ViewData["Title"] = "Create Transaction";
 }
 
-@if (Model.Accounts.Any())
+@if (Model.UserAccounts.Any())
 {
 	<p class="display-6 text-center">@ViewData["Title"]</p>
 	<div class="row justify-content-center">
@@ -25,7 +25,7 @@
 					<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField" id="categoriesSelection">
 						<label asp-for="@Model.CategoryId" class="form-label"></label>
 						<select asp-for="@Model.CategoryId" class="form-select" id="categoriesField">
-							@foreach (var category in @Model.Categories)
+							@foreach (var category in @Model.UserCategories)
 							{
 								<option value="@category.Id" id="@category.Id">@category.Name</option>
 							}
@@ -42,7 +42,7 @@
 					<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 						<label asp-for="@Model.AccountId" class="form-label"></label>
 						<select asp-for="@Model.AccountId" class="form-select">
-							@foreach (var account in @Model.Accounts)
+							@foreach (var account in @Model.UserAccounts)
 							{
 								<option value="@account.Id">@account.Name</option>
 							}
@@ -65,19 +65,10 @@
 			</section>
 		</div>
 	</div>
-}
-else
-{
-	<div class="text-center" style="margin-top: 50px;">
-		<p class="display-4">You do not have any created account.</p>
-		<p class="display-6"><a asp-controller="Account" asp-action="Create">Create</a> your first account before start record your transactions.</p>
-	</div>
-}
 
-@section Scripts {
-	<partial name="_ValidationScriptsPartial" />
+	@section Scripts {
+	@*<partial name="_ValidationScriptsPartial" />*@
 	<script src="/js/createDeleteBtns.js"></script>
-
 	<script>
 		const createCategoryBtn = document.getElementById('createCategoryBtn');
 		const deleteCategoryBtn = document.getElementById('deleteCategoryBtn');
@@ -93,4 +84,12 @@ else
 		eventSetter(deleteCategoryBtn, newCategoryDiv, categoriesField, newCategoryField, categoriesApi, userId);
 		eventSetter(categoriesField, newCategoryDiv, categoriesField, newCategoryField, categoriesApi, userId, deleteCategoryBtn);
 	</script>
+	}
+}
+else
+{
+	<div class="text-center" style="margin-top: 50px;">
+		<p class="display-4">You do not have any created account.</p>
+		<p class="display-6"><a asp-controller="Account" asp-action="Create">Create</a> your first account before start record your transactions.</p>
+	</div>
 }

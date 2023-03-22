@@ -25,12 +25,33 @@ namespace PersonalFinancer.Services.Transactions
 			this.mapper = mapper;
 		}
 
+		private void ChangeAccountBalance(Account account, decimal amount, TransactionType transactionType)
+		{
+			if (transactionType == TransactionType.Income)
+				account.Balance += amount;
+			else if (transactionType == TransactionType.Expense)
+				account.Balance -= amount;
+		}
+
 		/// <summary>
 		/// Throws InvalidOperationException if Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<string> CreateTransaction(
-			string userId, TransactionFormModel transactionFormModel)
+		private async Task ChangeAccountBalanceAsync(string accountId, decimal amount, TransactionType transactionType)
+		{
+			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
+
+			if (transactionType == TransactionType.Income)
+				account.Balance += amount;
+			else if (transactionType == TransactionType.Expense)
+				account.Balance -= amount;
+		}
+
+		/// <summary>
+		/// Throws InvalidOperationException if Account does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<string> CreateTransaction(string userId, TransactionFormModel transactionFormModel)
 		{
 			Transaction newTransaction = new Transaction()
 			{
@@ -47,40 +68,14 @@ namespace PersonalFinancer.Services.Transactions
 
 			await data.Transactions.AddAsync(newTransaction);
 
-			await ChangeBalance(
-				newTransaction.AccountId,
-				newTransaction.Amount,
+			await ChangeAccountBalanceAsync(
+				newTransaction.AccountId, 
+				newTransaction.Amount, 
 				newTransaction.TransactionType);
 
 			await data.SaveChangesAsync();
 
 			return newTransaction.Id;
-		}
-
-		/// <summary>
-		/// Throws InvalidOperationException if Account does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
-		private async Task ChangeBalance(
-			string accountId, decimal amount, TransactionType transactionType)
-		{
-			Account? account = await data.Accounts.FindAsync(accountId);
-
-			if (account == null)
-				throw new InvalidOperationException("Account does not exist.");
-
-			if (transactionType == TransactionType.Income)
-				account.Balance += amount;
-			else if (transactionType == TransactionType.Expense)
-				account.Balance -= amount;
-		}
-
-		private void ChangeBalance(Account account, decimal amount, TransactionType transactionType)
-		{
-			if (transactionType == TransactionType.Income)
-				account.Balance += amount;
-			else if (transactionType == TransactionType.Expense)
-				account.Balance -= amount;
 		}
 
 		/// <summary>
@@ -105,7 +100,7 @@ namespace PersonalFinancer.Services.Transactions
 			else
 				transaction.TransactionType = TransactionType.Income;
 
-			ChangeBalance(transaction.Account, transaction.Amount, transaction.TransactionType);
+			ChangeAccountBalance(transaction.Account, transaction.Amount, transaction.TransactionType);
 
 			await data.SaveChangesAsync();
 
@@ -113,89 +108,48 @@ namespace PersonalFinancer.Services.Transactions
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction does not exist.
+		/// Throws InvalidOperationException when Transaction or Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task EditTransaction(string id, TransactionFormModel formModel)
+		public async Task EditTransaction(string id, TransactionFormModel editedTransaction)
 		{
-			Transaction transaction = await data.Transactions
+			Transaction transactionInDb = await data.Transactions
 				.Include(t => t.Account)
 				.FirstAsync(t => t.Id == id);
 
-			bool isAccountOrAmountOrTransactionTypeChanged =
-				formModel.AccountId != transaction.AccountId ||
-				formModel.TransactionType != transaction.TransactionType ||
-				formModel.Amount != transaction.Amount;
-
-			if (isAccountOrAmountOrTransactionTypeChanged)
+			if (editedTransaction.AccountId != transactionInDb.AccountId
+				|| editedTransaction.TransactionType != transactionInDb.TransactionType
+				|| editedTransaction.Amount != transactionInDb.Amount)
 			{
-				TransactionType newTransactionType = TransactionType.Income;
+				TransactionType opositeTransactionType = TransactionType.Income;
 
-				if (transaction.TransactionType == TransactionType.Income)
-					newTransactionType = TransactionType.Expense;
+				if (transactionInDb.TransactionType == TransactionType.Income)
+					opositeTransactionType = TransactionType.Expense;
 
-				ChangeBalance(transaction.Account, transaction.Amount, newTransactionType);
-			}
+				ChangeAccountBalance(transactionInDb.Account, transactionInDb.Amount, opositeTransactionType);
 
-			transaction.Refference = formModel.Refference.Trim();
-			transaction.AccountId = formModel.AccountId;
-			transaction.CategoryId = formModel.CategoryId;
-			transaction.Amount = formModel.Amount;
-			transaction.CreatedOn = formModel.CreatedOn;
-			transaction.TransactionType = formModel.TransactionType;
-
-			if (isAccountOrAmountOrTransactionTypeChanged)
-			{
-				await ChangeBalance(formModel.AccountId,
-									formModel.Amount,
-									formModel.TransactionType);
-			}
-
-			await data.SaveChangesAsync();
-		}
-
-		public async Task EditOrCreateInitialBalanceTransaction(string ownerId, string accountId, decimal amountOfChange)
-		{
-			Transaction? transaction = await data.Transactions.FirstOrDefaultAsync(t =>
-				t.AccountId == accountId && t.IsInitialBalance);
-
-			if (transaction == null)
-			{
-				await CreateTransaction(ownerId, new TransactionFormModel
+				if (editedTransaction.AccountId != transactionInDb.AccountId)
 				{
-					AccountId = accountId,
-					Amount = amountOfChange,
-					CategoryId = InitialBalanceCategoryId,
-					CreatedOn = DateTime.UtcNow,
-					Refference = CategoryInitialBalanceName,
-					TransactionType = amountOfChange < 0 ?
-						TransactionType.Expense
-						: TransactionType.Income,
-					IsInitialBalance = true
-				});
+					Account newAccount = await data.Accounts.FirstAsync(a => a.Id == editedTransaction.AccountId);
+					transactionInDb.Account = newAccount;
+				}
+
+				ChangeAccountBalance(transactionInDb.Account, editedTransaction.Amount, editedTransaction.TransactionType);
 			}
-			else
-			{
-				transaction.Amount += amountOfChange;
-			}
+
+			transactionInDb.Refference = editedTransaction.Refference.Trim();
+			transactionInDb.AccountId = editedTransaction.AccountId;
+			transactionInDb.CategoryId = editedTransaction.CategoryId;
+			transactionInDb.Amount = editedTransaction.Amount;
+			transactionInDb.CreatedOn = editedTransaction.CreatedOn;
+			transactionInDb.TransactionType = editedTransaction.TransactionType;
 
 			await data.SaveChangesAsync();
 		}
 
-		/// <summary>
-		/// Throws Exception when End Date is before Start Date.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		public async Task GetUserTransactionsExtendedViewModel
-			(string userId, UserTransactionsExtendedViewModel model)
+		public async Task GetAllUserTransactions(string userId, UserTransactionsExtendedViewModel model)
 		{
-			//TODO: Make Validation on DateFilterModel!
-			if (model.StartDate > model.EndDate)
-			{
-				throw new ArgumentException("Start Date must be before End Date.");
-			}
-
-			model.TotalElements = data.Transactions.Count(t =>
+			model.Pagination.TotalElements = data.Transactions.Count(t =>
 				t.Account.OwnerId == userId
 				&& t.CreatedOn >= model.StartDate
 				&& t.CreatedOn <= model.EndDate);
@@ -206,13 +160,29 @@ namespace PersonalFinancer.Services.Transactions
 					&& t.CreatedOn >= model.StartDate
 					&& t.CreatedOn <= model.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
-				.Skip(model.Page != 1 ?
-					model.ElementsPerPage * (model.Page - 1)
+				.Skip(model.Pagination.Page != 1 ?
+					model.Pagination.ElementsPerPage * (model.Pagination.Page - 1)
 					: 0)
-				.Take(model.ElementsPerPage)
+				.Take(model.Pagination.ElementsPerPage)
 				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
 		}
+
+		public async Task<TransactionFormModel> GetEmptyTransactionFormModel(string userId)
+		{
+			return await data.Users.Where(u => u.Id == userId)
+				.Select(u => new TransactionFormModel
+				{
+					OwnerId = u.Id,
+					CreatedOn = DateTime.UtcNow,
+					UserAccounts = u.Accounts
+						.Where(a => !a.IsDeleted)
+						.Select(a => mapper.Map<AccountDropdownViewModel>(a)),
+					UserCategories = u.Categories
+						.Select(c => mapper.Map<CategoryViewModel>(c))
+				})
+				.FirstAsync();
+		}	
 
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist.
@@ -230,26 +200,20 @@ namespace PersonalFinancer.Services.Transactions
 					CreatedOn = t.CreatedOn,
 					TransactionType = t.TransactionType,
 					Refference = t.Refference,
-					Accounts = t.Account.IsDeleted ?
+					UserAccounts = t.Account.IsDeleted ?
 						new List<AccountDropdownViewModel>()
 						{
 							new AccountDropdownViewModel { Id = t.AccountId, Name = t.Account.Name }
 						}
-						: t.Owner.Accounts.Select(a => new AccountDropdownViewModel
-						{
-							Id = a.Id,
-							Name = a.Name
-						}).ToList(),
-					Categories = t.IsInitialBalance ?
+						: t.Owner.Accounts
+							.Where(a => !a.IsDeleted)
+							.Select(a => mapper.Map<AccountDropdownViewModel>(a)),
+					UserCategories = t.IsInitialBalance ?
 						new List<CategoryViewModel>()
 						{
 							new CategoryViewModel { Id = t.CategoryId, Name = t.Category.Name }
 						}
-						: t.Owner.Categories.Select(c => new CategoryViewModel
-						{
-							Id = c.Id,
-							Name = c.Name
-						}).ToList()
+						: t.Owner.Categories.Select(c => mapper.Map<CategoryViewModel>(c))
 				})
 				.FirstAsync();
 		}
@@ -263,41 +227,6 @@ namespace PersonalFinancer.Services.Transactions
 			return await data.Transactions
 				.Where(t => t.Id == transactionId)
 				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
-				.FirstAsync();
-		}
-
-		public async Task<IEnumerable<TransactionShortViewModel>> GetUserLastFiveTransactions
-			(string userId, DateTime? startDate, DateTime? endDate)
-		{
-			return await data.Transactions
-				.Where(t =>
-					t.Account.OwnerId == userId &&
-					t.CreatedOn >= startDate &&
-					t.CreatedOn <= endDate)
-				.OrderByDescending(t => t.CreatedOn)
-				.Take(5)
-				.ProjectTo<TransactionShortViewModel>(mapper.ConfigurationProvider)
-				.ToArrayAsync();
-		}
-
-		public async Task<TransactionFormModel> GetEmptyTransactionFormModel(string userId)
-		{
-			return await data.Users.Where(u => u.Id == userId)
-				.Select(u => new TransactionFormModel
-				{
-					OwnerId = u.Id,
-					CreatedOn = DateTime.UtcNow,
-					Categories = u.Categories.Select(c => new CategoryViewModel
-					{
-						Id = c.Id,
-						Name = c.Name
-					}).ToList(),
-					Accounts = u.Accounts.Select(a => new AccountDropdownViewModel
-					{
-						Id = a.Id,
-						Name = a.Name
-					}).ToList()
-				})
 				.FirstAsync();
 		}
 	}

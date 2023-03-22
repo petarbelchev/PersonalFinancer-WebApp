@@ -34,7 +34,7 @@ namespace PersonalFinancer.Services.User
 				.ThenBy(u => u.LastName)
 				.Skip(model.Pagination.ElementsPerPage * (model.Pagination.Page - 1))
 				.Take(model.Pagination.ElementsPerPage)
-				.Select(u => mapper.Map<UserViewModel>(u))
+				.ProjectTo<UserViewModel>(mapper.ConfigurationProvider)
 				.ToListAsync();
 
 			return model;
@@ -48,7 +48,13 @@ namespace PersonalFinancer.Services.User
 				{
 					Accounts = u.Accounts.Where(a => !a.IsDeleted)
 						.OrderBy(a => a.Name)
-						.Select(a => mapper.Map<AccountCardViewModel>(a)),
+						.Select(a => new AccountCardViewModel
+						{
+							Id = a.Id,
+							Name = a.Name,
+							Balance = a.Balance,
+							CurrencyName = a.Currency.Name
+						}),
 					LastTransactions = u.Transactions
 						.Where(t => t.CreatedOn >= model.StartDate
 									&& t.CreatedOn <= model.EndDate)

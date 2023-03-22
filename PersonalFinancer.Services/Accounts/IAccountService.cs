@@ -23,7 +23,7 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task SetAccountDetailsViewModelForReturn(string accountId, DetailsAccountViewModel model);
+		Task PrepareAccountDetailsViewModelForReturn(string accountId, DetailsAccountViewModel model);
 
 		/// <summary>
 		/// Throws ArgumentException when User already have Account with given name.
@@ -53,7 +53,7 @@ namespace PersonalFinancer.Services.Accounts
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task EditAccount(string accountId, AccountFormModel model, string ownerId);
+		Task EditAccount(string accountId, AccountFormModel model);
 		
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist 

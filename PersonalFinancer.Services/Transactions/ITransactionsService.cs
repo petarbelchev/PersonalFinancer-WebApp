@@ -19,33 +19,25 @@ namespace PersonalFinancer.Services.Transactions
 		Task<decimal> DeleteTransaction(string transactionId, string? ownerId = null);
 		
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction does not exist.
+		/// Throws InvalidOperationException when Transaction or Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task EditTransaction(string id, TransactionFormModel formModel);
+		Task EditTransaction(string id, TransactionFormModel editedTransaction);
+
+		Task GetAllUserTransactions(string userId, UserTransactionsExtendedViewModel model);
+
+		Task<TransactionFormModel> GetEmptyTransactionFormModel(string userId);
 		
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<TransactionFormModel> GetFulfilledTransactionFormModel(string transactionId);
-
-		Task EditOrCreateInitialBalanceTransaction(string ownerId, string accountId, decimal amountOfChange);
 		
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<TransactionExtendedViewModel> GetTransactionViewModel(string transactionId);
-
-		/// <summary>
-		/// Throws Exception when End Date is before Start Date.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		Task GetUserTransactionsExtendedViewModel(string userId, UserTransactionsExtendedViewModel model);
-
-		Task<IEnumerable<TransactionShortViewModel>> GetUserLastFiveTransactions(string userId, DateTime? startDate, DateTime? endDate);
-
-		Task<TransactionFormModel> GetEmptyTransactionFormModel(string userId);
 	}
 }

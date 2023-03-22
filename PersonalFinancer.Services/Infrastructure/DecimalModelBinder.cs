@@ -6,14 +6,19 @@ namespace PersonalFinancer.Services.Infrastructure
 	{
 		public Task BindModelAsync(ModelBindingContext bindingContext)
 		{
-			if (decimal.TryParse(bindingContext.ValueProvider.GetValue("Amount").FirstValue,
-				out decimal amountValue))
+			var fieldValue = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;
+
+			if (decimal.TryParse(fieldValue, out decimal resultValue))
 			{
-				bindingContext.Result = ModelBindingResult.Success(amountValue);
+				bindingContext.Result = ModelBindingResult.Success(resultValue);
 			}
 			else
 			{
 				bindingContext.Result = ModelBindingResult.Failed();
+
+				bindingContext.ModelState.AddModelError(
+					bindingContext.FieldName, 
+					$"{bindingContext.FieldName} is required and must be a number.");
 			}
 
 			return Task.CompletedTask;

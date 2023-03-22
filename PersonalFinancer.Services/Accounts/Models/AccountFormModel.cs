@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.AccountTypes.Models;
 using PersonalFinancer.Services.Currencies.Models;
+using PersonalFinancer.Services.Infrastructure;
 using static PersonalFinancer.Data.Constants.AccountConstants;
 
 namespace PersonalFinancer.Services.Accounts.Models
@@ -13,13 +15,14 @@ namespace PersonalFinancer.Services.Accounts.Models
 			ErrorMessage = "Account name must be between {2} and {1} characters long.")]
 		public string Name { get; set; } = null!;
 
-		[Required(ErrorMessage = "You need to set some balance.")]
-		[DataType(DataType.Currency, ErrorMessage = "Balance must be a number.")]
+		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		[Range(AccountInitialBalanceMinValue, AccountInitialBalanceMaxValue,
-			ErrorMessage = "Ballace must be between {1} and {2}")]
-		public decimal Balance { get; set; }
-		
-		[Required(ErrorMessage = "Account Type name is required.")]
+			ErrorMessage = "Ballace must be a number between {1} and {2}")]
+		public decimal? Balance { get; set; }
+
+        public string OwnerId { get; set; } = null!;
+
+        [Required(ErrorMessage = "Account Type name is required.")]
 		[Display(Name = "Account Type")]
 		public string AccountTypeId { get; set; } = null!;
 

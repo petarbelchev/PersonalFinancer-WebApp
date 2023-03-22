@@ -24,7 +24,7 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				await PrepareModelForReturn(inputModel);
+				await PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -43,7 +43,7 @@ namespace PersonalFinancer.Web.Controllers
 					nameof(inputModel.Name),
 					"You already have Account with that name.");
 
-				await PrepareModelForReturn(inputModel);
+				await PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -86,7 +86,7 @@ namespace PersonalFinancer.Web.Controllers
 			{
 				try
 				{
-					await accountService.SetAccountDetailsViewModelForReturn(id, inputModel);
+					await accountService.PrepareAccountDetailsViewModelForReturn(id, inputModel);
 
 					return View(inputModel);
 				}
@@ -100,10 +100,9 @@ namespace PersonalFinancer.Web.Controllers
 
 			try
 			{
-				//Not supposed to have null values!
 				viewModel = await accountService.GetAccountDetailsViewModel(id,
-					inputModel.StartDate ?? DateTime.UtcNow.AddMonths(-1),
-					inputModel.EndDate ?? DateTime.UtcNow);
+					inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."),
+					inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null."));
 			}
 			catch (InvalidOperationException)
 			{
@@ -185,14 +184,14 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				await PrepareModelForReturn(inputModel);
+				await PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
 
 			try
 			{
-				await accountService.EditAccount(id, inputModel, User.Id());
+				await accountService.EditAccount(id, inputModel);
 
 				TempData["successMsg"] = "Your account was successfully edited!";
 
@@ -204,7 +203,7 @@ namespace PersonalFinancer.Web.Controllers
 					nameof(inputModel.Name),
 					$"You already have Account with {inputModel.Name} name.");
 
-				await PrepareModelForReturn(inputModel);
+				await PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -214,7 +213,7 @@ namespace PersonalFinancer.Web.Controllers
 			}
 		}
 
-		private async Task PrepareModelForReturn(AccountFormModel model)
+		private async Task PrepareAccountFormModelForReturn(AccountFormModel model)
 		{
 			AccountFormModel emptyFormModel =
 				await accountService.GetEmptyAccountFormModel(this.User.Id());

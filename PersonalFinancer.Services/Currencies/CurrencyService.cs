@@ -29,10 +29,10 @@ namespace PersonalFinancer.Services.Currencies
 		/// Throws ArgumentException if given name exists.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<CurrencyViewModel> CreateCurrency(string userId, string currencyName)
+		public async Task<CurrencyViewModel> CreateCurrency(CurrencyInputModel model)
 		{
 			Currency? currency = await data.Currencies
-				.FirstOrDefaultAsync(c => c.Name == currencyName && c.OwnerId == userId);
+				.FirstOrDefaultAsync(c => c.Name == model.Name && c.OwnerId == model.OwnerId);
 
 			if (currency != null)
 			{
@@ -40,23 +40,23 @@ namespace PersonalFinancer.Services.Currencies
 					throw new ArgumentException("Currency with the same name exist!");
 
 				currency.IsDeleted = false;
-				currency.Name = currencyName.Trim();
+				currency.Name = model.Name.Trim();
 			}
 			else
 			{
 				currency = new Currency
 				{
 					Id = Guid.NewGuid().ToString(),
-					Name = currencyName,
-					OwnerId = userId
+					Name = model.Name.Trim(),
+					OwnerId = model.OwnerId
 				};
 
-				data.Currencies.Add(currency);
+				await data.Currencies.AddAsync(currency);
 			}
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(CacheKeyValue + userId);
+			memoryCache.Remove(CacheKeyValue + model.OwnerId);
 
 			return mapper.Map<CurrencyViewModel>(currency);
 		}

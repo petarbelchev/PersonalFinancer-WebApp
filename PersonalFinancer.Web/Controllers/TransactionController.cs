@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.Transactions.Models;
 using PersonalFinancer.Web.Infrastructure;
@@ -15,16 +14,13 @@ namespace PersonalFinancer.Web.Controllers
 		private readonly ITransactionsService transactionsService;
 
 		public TransactionController(ITransactionsService transactionsService)
-		{
-			this.transactionsService = transactionsService;
-		}
+			=> this.transactionsService = transactionsService;
 
-		//TODO: Use DateFilterModel!
 		public async Task<IActionResult> All(string? startDate, string? endDate, int page = 1)
 		{
 			var viewModel = new UserTransactionsExtendedViewModel();
 
-			viewModel.Page = page;
+			viewModel.Pagination.Page = page;
 
 			if (startDate == null || endDate == null)
 			{
@@ -37,44 +33,21 @@ namespace PersonalFinancer.Web.Controllers
 				viewModel.EndDate = DateTime.Parse(endDate);
 			}
 
-			try
-			{
-				await transactionsService.GetUserTransactionsExtendedViewModel(User.Id(), viewModel);
+			await transactionsService.GetAllUserTransactions(User.Id(), viewModel);
 
-				return View(viewModel);
-			}
-			catch (ArgumentException ex)
-			{
-				ModelState.AddModelError(nameof(viewModel.EndDate), ex.Message);
-
-				return View(viewModel);
-			}
+			return View(viewModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> All(DateFilterModel dateModel)
+		public async Task<IActionResult> All(
+			[Bind("StartDate,EndDate")] UserTransactionsExtendedViewModel inputModel)
 		{
 			if (!ModelState.IsValid)
-				return View(dateModel);
+				return View(inputModel);
 
-			var viewModel = new UserTransactionsExtendedViewModel 
-			{ 
-				StartDate = dateModel.StartDate,
-				EndDate = dateModel.EndDate
-			};
+			await transactionsService.GetAllUserTransactions(User.Id(), inputModel);
 
-			try
-			{
-				await transactionsService.GetUserTransactionsExtendedViewModel(User.Id(), viewModel);
-
-				return View(viewModel);
-			}
-			catch (ArgumentException ex)
-			{
-				ModelState.AddModelError(nameof(viewModel.EndDate), ex.Message);
-
-				return View(viewModel);
-			}
+			return View(inputModel);
 		}
 
 		public async Task<IActionResult> Create()
@@ -200,8 +173,8 @@ namespace PersonalFinancer.Web.Controllers
 			TransactionFormModel emptyFormModel =
 				await transactionsService.GetEmptyTransactionFormModel(User.Id());
 
-			model.Categories = emptyFormModel.Categories;
-			model.Accounts = emptyFormModel.Accounts;
+			model.UserCategories = emptyFormModel.UserCategories;
+			model.UserAccounts = emptyFormModel.UserAccounts;
 		}
 	}
 }
