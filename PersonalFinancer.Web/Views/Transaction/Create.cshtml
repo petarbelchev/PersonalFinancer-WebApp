@@ -1,4 +1,7 @@
-﻿@using PersonalFinancer.Web.Infrastructure;
+﻿@using PersonalFinancer.Data.Enums
+@using PersonalFinancer.Services.Transactions.Models
+@using PersonalFinancer.Web.Infrastructure;
+@using static PersonalFinancer.Data.Constants.HostConstants
 @model TransactionFormModel
 @{
 	ViewData["Title"] = "Create Transaction";
@@ -33,7 +36,7 @@
 						<span asp-validation-for="@Model.CategoryId" class="text-danger"></span>
 						<div id="newCategoryDiv" class="form-floating formField" style="display: none;">
 							<input id="newCategoryField" class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
-							<label class="form-label">Write New Category's name...</label>
+							<label class="form-label">Write new Category name...</label>
 							<p id="errorMsg" style="color: red;"></p>
 						</div>
 						<a class="btn btn-secondary" id="createCategoryBtn">Create New Category</a>

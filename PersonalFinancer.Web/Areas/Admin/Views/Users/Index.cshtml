@@ -1,39 +1,40 @@
-﻿@model AllUsersViewModel
+﻿@using PersonalFinancer.Services.User.Models;
+@model AllUsersViewModel
 @{
 	ViewData["Title"] = "All Users";
 	int row = 1;
 }
 
-<h1 class="display-6 text-center">@ViewData["Title"]</h1>
+<div class="row">
+	<div class="offset-lg-2 col-lg-8">
+		<h1 class="display-6 text-center">@ViewData["Title"]</h1>
 
-<partial name="_PaginationPartial" />
+		<partial name="_PaginationPartial" />
 
-<table class="table table-hover">
-	<thead>
-		<tr>
-			<th scope="col"></th>
-			<th scope="col"></th>
-			<th scope="col">Name</th>
-			<th scope="col">Email</th>
-			<th scope="col">Phone Number</th>
-			<th scope="col"></th>
-		</tr>
-	</thead>
-	<tbody style="vertical-align: text-top;">
-		@foreach (UserViewModel user in Model.Users)
-		{
-			<tr>
-				<th scope="row">@(row++)</th>
-				<td><img src="/icons/icons8-budget-64.png" style="max-width: 50px;"></td>
-				<td>@user.FirstName @user.LastName</td>
-				<td>@user.Email</td>
-				<td>@user.PhoneNumber</td>
-				<td>
-					<a asp-area="Admin" asp-controller="Users" asp-action="Details" asp-route-id="@user.Id" class="btn btn-secondary">Details</a>
-				</td>
-			</tr>
-		}
-	</tbody>
-</table>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th scope="col"></th>
+					<th scope="col"></th>
+					<th scope="col">Name</th>
+					<th scope="col">Email</th>
+					<th scope="col">Phone Number</th>
+				</tr>
+			</thead>
+			<tbody style="vertical-align: text-top;">
+				@foreach (UserViewModel user in Model.Users)
+				{
+					<tr role="button" onclick="location.href='@Url.Action("Details", "Users", new { id = user.Id })'">
+						<th scope="row">@(row++)</th>
+						<td><img src="/icons/icons8-budget-64.png" style="max-width: 50px;"></td>
+						<td>@user.FirstName @user.LastName</td>
+						<td>@user.Email</td>
+						<td>@user.PhoneNumber</td>
+					</tr>
+				}
+			</tbody>
+		</table>
 
-<partial name="_PaginationPartial" />
+		<partial name="_PaginationPartial" />
+	</div>
+</div>

@@ -17,15 +17,34 @@
 	<header>
 		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-secondary border-bottom box-shadow mb-3">
 			<div class="container-fluid">
+
 				<div class="navbar-brand">
 					<img src="~/favicon-64x64.png" style="max-height: 50px;" />
 					<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Personal Financer</a>
 				</div>
-				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse" id="navbarNav">
 					<ul class="navbar-nav flex-grow-1">
 						@if ((User?.Identity?.IsAuthenticated ?? false) && !User.IsAdmin())
 						{
 							<a class="nav-link text-light" asp-area="" asp-controller="Transaction" asp-action="All">All Transactions</a>
+							<li class="nav-item dropdown">
+								<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+									Create
+								</a>
+								<ul class="dropdown-menu dropdown-menu-end">
+									<li class="dropdown-item">
+										<a class="nav-link text-dark" asp-area="" asp-controller="Transaction" asp-action="Create">Transaction</a>
+									</li>
+									<li class="dropdown-item">
+										<a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Create">Account</a>
+									</li>
+								</ul>
+							</li>
 						}
 						else if (User?.IsAdmin() ?? false)
 						{
@@ -35,6 +54,7 @@
 					</ul>
 					<partial name="_LoginPartial" />
 				</div>
+
 			</div>
 		</nav>
 	</header>
@@ -57,7 +77,7 @@
 
 	<footer class="border-top footer text-muted bg-secondary">
 		<div class="container text-light">
-			&copy; @DateTime.UtcNow.Year - Personal Financer
+			&copy; @DateTime.UtcNow.Year - Personal Financer - All rights reserved
 		</div>
 	</footer>
 

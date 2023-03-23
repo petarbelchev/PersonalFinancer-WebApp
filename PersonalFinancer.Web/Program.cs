@@ -5,9 +5,6 @@ using Microsoft.Extensions.Caching.Memory;
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.AccountTypes;
-using PersonalFinancer.Services.Categories;
-using PersonalFinancer.Services.Currencies;
 using PersonalFinancer.Services.Transactions;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Web.Controllers;
@@ -30,16 +27,13 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITransactionsService, TransactionsService>();
-builder.Services.AddScoped<IAccountTypeService, AccountTypeService>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
 
 builder.Services.AddAutoMapper(
-	typeof(ICategoryService).Assembly,
+	typeof(IAccountService).Assembly,
 	typeof(HomeController).Assembly);
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -74,7 +68,7 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
 	endpoints.MapControllerRoute(
-		name: "area",
+		name: "Admin",
 		pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
 	);
 

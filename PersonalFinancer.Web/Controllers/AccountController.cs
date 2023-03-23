@@ -35,7 +35,7 @@ namespace PersonalFinancer.Web.Controllers
 
 				TempData["successMsg"] = "You create a new account successfully!";
 
-				return RedirectToAction(nameof(Details), new { id = newAccountId });
+				return RedirectToAction(nameof(AccountDetails), new { id = newAccountId });
 			}
 			catch (ArgumentException)
 			{
@@ -49,7 +49,7 @@ namespace PersonalFinancer.Web.Controllers
 			}
 		}
 
-		public async Task<IActionResult> Details(
+		public async Task<IActionResult> AccountDetails(
 			string id, string? startDate, string? endDate, int page = 1)
 		{
 			DetailsAccountViewModel viewModel;
@@ -72,14 +72,14 @@ namespace PersonalFinancer.Web.Controllers
 				return BadRequest();
 			}
 
-			viewModel.Routing.ReturnUrl = "/Account/Details/" + id;
+			viewModel.Routing.ReturnUrl = "/Account/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
 			return View(viewModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Details(
+		public async Task<IActionResult> AccountDetails(
 			string id, [Bind("StartDate,EndDate")] DetailsAccountViewModel inputModel)
 		{
 			if (!ModelState.IsValid)
@@ -109,7 +109,7 @@ namespace PersonalFinancer.Web.Controllers
 				return BadRequest();
 			}
 
-			viewModel.Routing.ReturnUrl = "/Account/Details/" + id;
+			viewModel.Routing.ReturnUrl = "/Account/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
 			return View(viewModel);

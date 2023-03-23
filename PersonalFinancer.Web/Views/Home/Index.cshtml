@@ -1,9 +1,10 @@
-﻿@using PersonalFinancer.Services.Shared.Models
-@using PersonalFinancer.Services.User.Models
+﻿@using PersonalFinancer.Services.Shared.Models;
+@using PersonalFinancer.Services.User.Models;
 @model UserDashboardViewModel
 
 @if (!User?.Identity?.IsAuthenticated ?? false)
 {
+	@*Guest Home Page*@
 	ViewData["Title"] = "Home Page";
 
 	<div class="text-center" style="margin-top: 50px;">
@@ -13,100 +14,54 @@
 }
 else
 {
+	@*User Home Page*@
 	ViewData["Title"] = "Dashboard";
 
 	@if (Model.Accounts.Any())
 	{
-		<!--Accounts-->
-		<p class="display-6 text-center fs-4">Your Accounts</p>
-		<div class="row">
-			@foreach (var account in Model.Accounts)
-			{
-				<div class="col-xl-3 col-lg-4 col-md-6">
-					<div class="card formField align-items-center">
-						<div class="d-flex flex-row align-items-center mb-2">
-							<div class="p-2">
-								<img src="/icons/icons8-wallet-64.png">
-							</div>
-							<div class="card-body p-2 flex-grow-1">
-								<h5 class="card-title">@account.Name</h5>
-								<p class="card-text">@account.Balance @account.CurrencyName</p>
+		@*User Accounts*@
+		<div style="margin-top: 25px;">
+			<p class="display-6 text-center fs-4"><b>Your Accounts</b></p>
+			<div class="row" style="margin-top: 25px;">
+				@foreach (var account in Model.Accounts)
+				{
+					<div class="col-xl-3 col-lg-4 col-md-6" role="button" onclick="location.href='@Url.Action("AccountDetails", "Account", new { id = account.Id })'">
+						<div class="card formField align-items-center">
+							<div class="d-flex flex-row align-items-center mb-2">
+								<div class="p-2">
+									<img src="/icons/icons8-wallet-64.png">
+								</div>
+								<div class="card-body p-2 flex-grow-1">
+									<h5 class="card-title display-6 fs-4"><b>@account.Name</b></h5>
+									<p class="card-text display-6 fs-5">@account.Balance @account.CurrencyName</p>
+								</div>
 							</div>
 						</div>
-						<a asp-area="" asp-controller="Account" asp-action="Details"
-							asp-route-id="@account.Id" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Details</a>
 					</div>
-				</div>
-			}
+				}
+			</div>
+			<hr />
 		</div>
-		<hr />
 
-		<!--Date Picker-->
-		<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
-			<div class="col-lg-5 form-floating">
-				<input type="datetime-local" name="StartDate" asp-for="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-				<label asp-for="@Model.StartDate" class="form-label">Start Date</label>
-				<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
-			</div>
-			<div class="col-lg-5 form-floating">
-				<input type="datetime-local" name="EndDate" asp-for="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-				<label asp-for="@Model.EndDate" class="form-label">End Date</label>
-				<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
-			</div>
-			<div class="col-lg-2">
-				<button type="submit" class="btn btn-lg btn-secondary form-control form-control-lg" style="padding: 12.5px;">Filter</button>
-			</div>
-		</form>
+		@*Date Picker*@
+		<partial name="_DatePickerFormPartial" model='new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }' />
 
-		@if (Model.LastTransactions.Any())
+		@if (Model.Transactions.Any())
 		{
 			<div class="row">
-				<!--Last Five Transactions-->
-				<div class="col-lg-9" style="margin-top: 25px;">
+
+				@*Last Five Transactions*@
+				<div class="col-lg-8" style="margin-top: 25px;">
 					<div class="card">
 						<div class="card-header">
 							<h6>Last Five Transactions</h6>
 						</div>
-						<table class="table table-hover">
-							<thead>
-								<tr>
-									<th scope="col"></th>
-									<th scope="col">Date</th>
-									<th scope="col">Type</th>
-									<th scope="col">Amount</th>
-									<th scope="col">Account</th>
-									<th scope="col"></th>
-								</tr>
-							</thead>
-							<tbody style="vertical-align: text-top;">
-								@foreach (var transaction in Model.LastTransactions)
-								{
-									<tr>
-										@if (transaction.TransactionType == TransactionType.Income.ToString())
-										{
-											<td><img src="/icons/greenArrow.png" style="max-width: 38px;"></td>
-										}
-										else
-										{
-											<td><img src="/icons/redArrow.png" style="max-width: 38px;"></td>
-										}
-										<td>@transaction.CreatedOn</td>
-										<td>@transaction.TransactionType</td>
-										<td>@transaction.Amount @transaction.AccountCurrencyName</td>
-										<td>@transaction.AccountName</td>
-										<td>
-											<a asp-controller="Transaction" asp-action="Details" asp-route-id="@transaction.Id" class="btn btn-secondary">
-												Details
-											</a>
-										</td>
-									</tr>
-								}
-							</tbody>
-						</table>
+						<partial name="_TransactionsTablePartial" />
 					</div>
 				</div>
-				<!--Cash Flow-->
-				<div class="col-lg-3" style="margin-top: 25px;">
+
+				@*Cash Flow*@
+				<div class="col-lg-4" style="margin-top: 25px;">
 					<div class="card">
 						<div class="card-header">
 							<h6>Cash Flow</h6>
@@ -138,10 +93,12 @@ else
 						</div>
 					</div>
 				</div>
+
 			</div>
 		}
 		else
 		{
+			@*No Transactions Page*@
 			<div class="text-center" style="margin-top: 50px;">
 				<p class="display-6">
 					You do not have any transactions for thar period.
@@ -151,6 +108,7 @@ else
 	}
 	else
 	{
+		@*Empty Dashboard Page*@
 		<div class="text-center" style="margin-top: 50px;">
 			<p class="display-4">
 				Your Dashboard is empty.

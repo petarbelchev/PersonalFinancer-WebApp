@@ -1,4 +1,6 @@
 ﻿@using PersonalFinancer.Web.Infrastructure;
+@using PersonalFinancer.Services.Accounts.Models;
+@using static PersonalFinancer.Data.Constants.HostConstants;
 @model AccountFormModel
 @{
 	ViewData["Title"] = "Create Account";
@@ -32,7 +34,7 @@
 					<span asp-validation-for="@Model.AccountTypeId" class="text-danger"></span>
 					<div id="newAccountTypeDiv" class="form-floating formField" style="display: none;">
 						<input id="newAccountTypeField" class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
-						<label class="form-label">Write New Account Type's name...</label>
+						<label class="form-label">Write new Account Type name...</label>
 						<p style="color: red;"></p>
 					</div>
 					<a class="btn btn-secondary" id="createAccountTypeBtn">Create New Account Type</a>
@@ -49,7 +51,7 @@
 					<span asp-validation-for="@Model.CurrencyId" class="text-danger"></span>
 					<div id="newCurrencyDiv" class="form-floating formField" style="display: none;">
 						<input id="newCurrencyField" class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
-						<label class="form-label">Write New Currency's name...</label>
+						<label class="form-label">Write new Currency name...</label>
 						<p style="color: red;"></p>
 					</div>
 					<a class="btn btn-secondary" id="createCurrencyBtn">Create New Currency</a>

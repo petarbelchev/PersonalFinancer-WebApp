@@ -19,46 +19,35 @@
 			public const int AccountNameMaxLength = 15;
 			public const int AccountNameMinLength = 2;
 
-			public const double AccountInitialBalanceMaxValue = 10_000_000;
-			public const double AccountInitialBalanceMinValue = 0.00;
-
-			public const string CacheKeyValue = "accounts/";
-		}
-
-		public class AccountTypeConstants
-		{
 			public const int AccountTypeNameMaxLength = 15;
 			public const int AccountTypeNameMinLength = 2;
 
-			public const string CacheKeyValue = "accountTypes/";
-		}
+			public const int CurrencyNameMaxLength = 10;
+			public const int CurrencyNameMinLength = 2;
 
-		public class CategoryConstants
-		{
-			public const int CategoryNameMaxLength = 25;
-			public const int CategoryNameMinLength = 2;
-
-			public const string CategoryInitialBalanceName = "Initial Balance";
-			public const string InitialBalanceCategoryId = "e241b89f-b094-4f79-bb09-efc6f47c2cb3";
-
-			public const string CacheKeyValue = "categories/";
+			public const double AccountInitialBalanceMaxValue = 10_000_000;
+			public const double AccountInitialBalanceMinValue = 0.00;
+			
+			public const string CacheKeyValue = "accounts/";
+			public const string AccTypeCacheKeyValue = "accountTypes/";
+			public const string CurrencyCacheKeyValue = "currencies/";
 		}
 
 		public class TransactionConstants
 		{
 			public const int TransactionRefferenceMaxLength = 100;
 			public const int TransactionRefferenceMinLength = 4;
+			
+			public const int CategoryNameMaxLength = 25;
+			public const int CategoryNameMinLength = 2;
 
 			public const double TransactionMaxValue = 100_000.00;
 			public const double TransactionMinValue = 0.01;
-		}
 
-		public class CurrencyConstants
-		{
-			public const int CurrencyNameMaxLength = 10;
-			public const int CurrencyNameMinLength = 2;
+			public const string CategoryInitialBalanceName = "Initial Balance";
+			public const string InitialBalanceCategoryId = "e241b89f-b094-4f79-bb09-efc6f47c2cb3";
 
-			public const string CacheKeyValue = "currencies/";
+			public const string CategoryCacheKeyValue = "categories/";
 		}
 
 		public static class HostConstants

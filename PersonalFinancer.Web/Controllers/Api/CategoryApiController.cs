@@ -1,21 +1,22 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using PersonalFinancer.Services.Categories;
-using PersonalFinancer.Services.Categories.Models;
+using PersonalFinancer.Services.Shared.Models;
+using PersonalFinancer.Services.Transactions;
+using PersonalFinancer.Services.Transactions.Models;
 using PersonalFinancer.Web.Infrastructure;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-	[Authorize]
+    [Authorize]
 	[Route("api/categories")]
 	[ApiController]
 	public class CategoryApiController : ControllerBase
 	{
-		private readonly ICategoryService categoryService;
+		private readonly ITransactionsService transactionsService;
 
-		public CategoryApiController(ICategoryService categoryService)
-			=> this.categoryService = categoryService;
+		public CategoryApiController(ITransactionsService transactionsService)
+			=> this.transactionsService = transactionsService;
 
 		[HttpPost]
 		public async Task<ActionResult<CategoryViewModel>> CreateCategory(CategoryInputModel inputModel)
@@ -23,7 +24,7 @@ namespace PersonalFinancer.Web.Controllers.Api
 			try
 			{
 				CategoryViewModel viewModel = 
-					await categoryService.CreateCategory(inputModel);
+					await transactionsService.CreateCategory(inputModel);
 
 				return Created(string.Empty, viewModel);
 			}
@@ -39,9 +40,9 @@ namespace PersonalFinancer.Web.Controllers.Api
 			try
 			{
 				if (User.IsAdmin())
-					await categoryService.DeleteCategory(id);
+					await transactionsService.DeleteCategory(id);
 				else
-					await categoryService.DeleteCategory(id, User.Id());
+					await transactionsService.DeleteCategory(id, User.Id());
 
 				return NoContent();
 			}

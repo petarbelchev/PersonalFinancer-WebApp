@@ -1,115 +1,45 @@
 ﻿@using PersonalFinancer.Services.Shared.Models;
-@model UserTransactionsExtendedViewModel
+@using PersonalFinancer.Services.Transactions.Models;
+@model UserTransactionsViewModel
 @{
 	ViewData["Title"] = "All Transactions";
 }
 
 @*DatePicker*@
-<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
-	<div class="col-lg-5 form-floating">
-		<input type="datetime-local" name="StartDate" asp-for="@Model.StartDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-		<label asp-for="@Model.StartDate" class="form-label">Start Date</label>
-		<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
-	</div>
-	<div class="col-lg-5 form-floating">
-		<input type="datetime-local" name="EndDate" asp-for="@Model.EndDate" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-		<label asp-for="@Model.EndDate" class="form-label">End Date</label>
-		<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
-	</div>
-	<div class="col-lg-2">
-		<button type="submit" class="btn btn-lg btn-secondary form-control form-control-lg" style="padding: 12.5px;">Filter</button>
-	</div>
-</form>
+<partial name="_DatePickerFormPartial" model='new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }' />
 
 @if (Model.Transactions.Any())
 {
-	@*Pagination*@
-	<partial name="_PaginationWithDateFilterPartial" />
-
-	@*Table*@
 	<div class="row">
-		<div class="col-md-12">
+		<div class="offset-md-1 col-md-10">
+
+			@*Pagination*@
+			<partial name="_PaginationWithDateFilterPartial" />
+
+			@*Transactions Table*@
 			<div class="card">
 				<div class="card-header">
 					<h6>All Transactions</h6>
 				</div>
-				<table class="table table-hover">
-					<thead>
-						<tr>
-							<th scope="col"></th>
-							<th scope="col">Date</th>
-							<th scope="col">Category</th>
-							<th scope="col">Type</th>
-							<th scope="col">Amount</th>
-							<th scope="col">Account</th>
-							<th scope="col">Refference</th>
-							<th scope="col"></th>
-						</tr>
-					</thead>
-					<tbody id="tableBody" style="vertical-align: text-top;">
-						@foreach (var transaction in Model.Transactions)
-						{
-							<tr>
-								@if (transaction.TransactionType == TransactionType.Income.ToString())
-								{
-									<td><img src="/icons/greenArrow.png" style="max-width: 38px;"></td>
-								}
-								else
-								{
-									<td><img src="/icons/redArrow.png" style="max-width: 38px;"></td>
-								}
-								<td>@transaction.CreatedOn</td>
-								<td>@transaction.CategoryName</td>
-								<td>@transaction.TransactionType</td>
-								<td>@transaction.Amount @transaction.AccountCurrencyName</td>
-								<td>@transaction.AccountName</td>
-								<td>@transaction.Refference</td>
-								<td>
-									<a asp-controller="Transaction" asp-action="Edit" asp-route-id="@transaction.Id"
-							   asp-route-returnUrl="~/Transaction/All" class="btn btn-warning">Edit</a>
-									<button class="btn btn-danger" id="@transaction.Id">Delete</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
+				<partial name="_TransactionsTablePartial" />
 			</div>
+
+			@*Pagination*@
+			<partial name="_PaginationWithDateFilterPartial" />
+
 		</div>
 	</div>
-
-	@*Pagination*@
-	<partial name="_PaginationWithDateFilterPartial" />
-
-	@section Scripts {
-	<partial name="_ValidationScriptsPartial" />
-	<script>
-		document.getElementById('tableBody').addEventListener('click', async (e) => {
-			if (e.target.tagName == 'BUTTON') {
-				if (confirm('Are you sure you want to delete this Transaction?')) {
-					let response = await fetch(
-						'@ApiTransactionsUrl' + e.target.id,
-						{ method: 'DELETE' }
-					);
-
-					if (response.status == 200) {
-						let transactionRow = e.target.parentElement.parentElement;
-						document.getElementById('tableBody').removeChild(transactionRow);
-					} else if (response.status == 401) {
-						alert("You can't delete someone else transaction!");
-					} else {
-						alert('Somethink happened!');
-					}
-				}
-			}
-		})
-	</script>
-	}
 }
 else
 {
+	@*No Transactions Page*@
 	<div class="text-center" style="margin-top: 50px;">
 		<p class="display-6">
 			You do not have any transactions for that period.
 		</p>
 	</div>
+}
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
 }

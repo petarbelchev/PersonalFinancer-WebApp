@@ -2,14 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Categories.Models;
 using PersonalFinancer.Services.Infrastructure;
+using PersonalFinancer.Services.Shared.Models;
 using static PersonalFinancer.Data.Constants.TransactionConstants;
 
 namespace PersonalFinancer.Services.Transactions.Models
 {
-	public class TransactionFormModel
+    public class TransactionFormModel
 	{
 		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		[Range(TransactionMinValue, TransactionMaxValue, 

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Web.Infrastructure;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
@@ -20,7 +19,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		public async Task<IActionResult> Index(int page = 1)
 			=> View(await accountService.GetAllUsersAccountCardsViewModel(page));
 
-		public async Task<IActionResult> Details(
+		public async Task<IActionResult> AccountDetails(
 			string id, string? startDate, string? endDate, int page = 1)
 		{
 			DetailsAccountViewModel viewModel;
@@ -44,14 +43,14 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			}
 
 			viewModel.Routing.Area = "Admin";
-			viewModel.Routing.ReturnUrl = "/Admin/Account/Details/" + id;
+			viewModel.Routing.ReturnUrl = "/Admin/Account/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
 			return View(viewModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Details(
+		public async Task<IActionResult> AccountDetails(
 			string id, [Bind("StartDate,EndDate")] DetailsAccountViewModel inputModel)
 		{
 			if (!ModelState.IsValid)
@@ -82,7 +81,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			}
 
 			viewModel.Routing.Area = "Admin";
-			viewModel.Routing.ReturnUrl = "/Admin/Account/Details/" + id;
+			viewModel.Routing.ReturnUrl = "/Admin/Account/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
 			return View(viewModel);
