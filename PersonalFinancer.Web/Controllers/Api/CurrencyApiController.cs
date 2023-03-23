@@ -1,21 +1,21 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Currencies;
-using PersonalFinancer.Services.Currencies.Models;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Web.Infrastructure;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-	[Authorize]
+    [Authorize]
 	[Route("api/currencies")]
 	[ApiController]
 	public class CurrencyApiController : ControllerBase
 	{
-		private readonly ICurrencyService currencyService;
+		private readonly IAccountService accountService;
 
-		public CurrencyApiController(ICurrencyService currencyService)
-			=> this.currencyService = currencyService;
+		public CurrencyApiController(IAccountService accountService)
+			=> this.accountService = accountService;
 
 		[HttpPost]
 		public async Task<ActionResult<CurrencyViewModel>> Create(CurrencyInputModel inputModel)
@@ -23,7 +23,7 @@ namespace PersonalFinancer.Web.Controllers.Api
 			try
 			{
 				CurrencyViewModel viewModel = 
-					await currencyService.CreateCurrency(inputModel);
+					await accountService.CreateCurrency(inputModel);
 
 				return Created(string.Empty, viewModel);
 			}
@@ -39,9 +39,9 @@ namespace PersonalFinancer.Web.Controllers.Api
 			try
 			{
 				if (User.IsAdmin())
-					await currencyService.DeleteCurrency(id);
+					await accountService.DeleteCurrency(id);
 				else
-					await currencyService.DeleteCurrency(id, User.Id());
+					await accountService.DeleteCurrency(id, User.Id());
 
 				return NoContent();
 			}

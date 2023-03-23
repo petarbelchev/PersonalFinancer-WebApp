@@ -18,7 +18,7 @@ namespace PersonalFinancer.Web.Controllers
 
 		public async Task<IActionResult> All(string? startDate, string? endDate, int page = 1)
 		{
-			var viewModel = new UserTransactionsExtendedViewModel();
+			var viewModel = new UserTransactionsViewModel();
 
 			viewModel.Pagination.Page = page;
 
@@ -40,7 +40,7 @@ namespace PersonalFinancer.Web.Controllers
 
 		[HttpPost]
 		public async Task<IActionResult> All(
-			[Bind("StartDate,EndDate")] UserTransactionsExtendedViewModel inputModel)
+			[Bind("StartDate,EndDate")] UserTransactionsViewModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return View(inputModel);
@@ -75,7 +75,7 @@ namespace PersonalFinancer.Web.Controllers
 
 				TempData["successMsg"] = "You create a new transaction successfully!";
 
-				return RedirectToAction(nameof(Details), new { id = newTransactionId });
+				return RedirectToAction(nameof(TransactionDetails), new { id = newTransactionId });
 			}
 			catch (InvalidOperationException)
 			{
@@ -107,7 +107,7 @@ namespace PersonalFinancer.Web.Controllers
 				return RedirectToAction("Index", "Home");
 		}
 
-		public async Task<IActionResult> Details(string id)
+		public async Task<IActionResult> TransactionDetails(string id)
 		{
 			try
 			{
@@ -165,7 +165,7 @@ namespace PersonalFinancer.Web.Controllers
 			if (returnUrl != null)
 				return LocalRedirect(returnUrl);
 
-			return RedirectToAction(nameof(Details), new { id });
+			return RedirectToAction(nameof(TransactionDetails), new { id });
 		}
 
 		private async Task PrepareModelForReturn(TransactionFormModel model)

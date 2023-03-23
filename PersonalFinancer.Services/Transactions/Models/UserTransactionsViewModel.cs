@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PersonalFinancer.Services.Transactions.Models
 {
-	public class UserTransactionsExtendedViewModel : IValidatableObject
+    public class UserTransactionsViewModel : IValidatableObject
 	{
 		[Required(ErrorMessage = "Start Date is required.")]
 		[DataType(DataType.DateTime)]
@@ -15,8 +15,8 @@ namespace PersonalFinancer.Services.Transactions.Models
 		[Display(Name = "End Date")]
 		public DateTime? EndDate { get; set; }
         
-		public IEnumerable<TransactionExtendedViewModel> Transactions { get; set; }
-			= new List<TransactionExtendedViewModel>();
+		public IEnumerable<TransactionTableViewModel> Transactions { get; set; }
+			= new List<TransactionTableViewModel>();
 
         public RoutingModel Routing { get; set; } = new RoutingModel
 		{

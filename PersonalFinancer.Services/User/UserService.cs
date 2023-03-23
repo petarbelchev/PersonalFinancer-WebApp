@@ -5,13 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Transactions.Models;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Services.User
 {
-	public class UserService : IUserService
+    public class UserService : IUserService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
@@ -22,6 +21,20 @@ namespace PersonalFinancer.Services.User
 		{
 			this.data = data;
 			this.mapper = mapper;
+		}
+
+		/// <summary>
+		/// Throws InvalidOperationException if User does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<string> FullName(string userId)
+		{
+			ApplicationUser? user = await data.Users.FindAsync(userId);
+
+			if (user == null)
+				throw new InvalidOperationException("User does not exist.");
+
+			return $"{user.FirstName} {user.LastName}";
 		}
 
 		public async Task<AllUsersViewModel> GetAllUsers(int page)
@@ -38,6 +51,22 @@ namespace PersonalFinancer.Services.User
 				.ToListAsync();
 
 			return model;
+		}
+
+		public async Task<IEnumerable<AccountCardViewModel>> GetUserAccounts(string userId)
+		{
+			return await data.Accounts
+				.Where(a => a.OwnerId == userId && !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.Select(a => mapper.Map<AccountCardViewModel>(a))
+				.ToArrayAsync();
+		}
+
+		public int GetUsersAccountsCount()
+		{
+			int accountsCount = data.Accounts.Count(a => !a.IsDeleted);
+
+			return accountsCount;
 		}
 
 		public async Task SetUserDashboard(string userId, UserDashboardViewModel model)
@@ -60,20 +89,21 @@ namespace PersonalFinancer.Services.User
 									&& t.CreatedOn <= model.EndDate)
 						.OrderByDescending(t => t.CreatedOn)
 						.Take(5)
-						.Select(t => new TransactionShortViewModel
+						.Select(t => new TransactionTableViewModel
 						{
 							Id = t.Id,
 							Amount = t.Amount,
 							AccountCurrencyName = t.Account.Currency.Name,
-							AccountName = t.Account.Name + (t.Account.IsDeleted ? " (Deleted)" : string.Empty),
 							CreatedOn = t.CreatedOn,
-							TransactionType = t.TransactionType.ToString()
+							TransactionType = t.TransactionType.ToString(),
+							Refference = t.Refference,
+							CategoryName = t.Category.Name
 						}),
 					CurrenciesCashFlow = u.Transactions
 						.Where(t =>
 							t.CreatedOn >= model.StartDate
 							&& t.CreatedOn <= model.EndDate)
-						.Select(t => new TransactionServiceModel
+						.Select(t => new TransactionDTO
 						{
 							Amount = t.Amount,
 							CurrencyName = t.Account.Currency.Name,
@@ -83,7 +113,7 @@ namespace PersonalFinancer.Services.User
 				.FirstAsync();
 
 			model.Accounts = dto.Accounts;
-			model.LastTransactions = dto.LastTransactions;
+			model.Transactions = dto.LastTransactions;
 
 			foreach (var t in dto.CurrenciesCashFlow)
 			{
@@ -111,36 +141,6 @@ namespace PersonalFinancer.Services.User
 			return result;
 		}
 
-		/// <summary>
-		/// Throws InvalidOperationException if User does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<string> FullName(string userId)
-		{
-			ApplicationUser? user = await data.Users.FindAsync(userId);
-
-			if (user == null)
-				throw new InvalidOperationException("User does not exist.");
-
-			return $"{user.FirstName} {user.LastName}";
-		}
-
 		public int UsersCount() => data.Users.Count();
-
-		public async Task<IEnumerable<AccountCardViewModel>> GetUserAccounts(string userId)
-		{
-			return await data.Accounts
-				.Where(a => a.OwnerId == userId && !a.IsDeleted)
-				.OrderBy(a => a.Name)
-				.Select(a => mapper.Map<AccountCardViewModel>(a))
-				.ToArrayAsync();
-		}
-
-		public int GetUsersAccountsCount()
-		{
-			int accountsCount = data.Accounts.Count(a => !a.IsDeleted);
-
-			return accountsCount;
-		}
 	}
 }

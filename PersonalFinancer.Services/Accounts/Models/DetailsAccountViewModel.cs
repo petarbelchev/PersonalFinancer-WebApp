@@ -4,7 +4,7 @@ using PersonalFinancer.Services.Shared.Models;
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class DetailsAccountViewModel : IValidatableObject
+    public class DetailsAccountViewModel : IValidatableObject
 	{
 		[Required(ErrorMessage = "Start Date is required.")]
 		[Display(Name = "Start Date")]
@@ -20,13 +20,13 @@ namespace PersonalFinancer.Services.Accounts.Models
 
 		public string? CurrencyName { get; set; }
 
-		public IEnumerable<AccountDetailsTransactionViewModel> Transactions { get; set; }
-			= new List<AccountDetailsTransactionViewModel>();
+		public IEnumerable<TransactionTableViewModel> Transactions { get; set; }
+			= new List<TransactionTableViewModel>();
 
 		public RoutingModel Routing { get; set; } = new RoutingModel
 		{
 			Controller = "Account",
-			Action = "Details"
+			Action = "AccountDetails"
 		};
 
         public PaginationModel Pagination { get; set; }

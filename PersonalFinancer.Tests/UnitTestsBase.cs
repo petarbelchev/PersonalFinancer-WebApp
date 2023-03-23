@@ -6,7 +6,7 @@ using PersonalFinancer.Data;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Tests.Mocks;
-using static PersonalFinancer.Data.Constants.CategoryConstants;
+using static PersonalFinancer.Data.Constants.TransactionConstants;
 
 namespace PersonalFinancer.Tests
 {
@@ -155,11 +155,11 @@ namespace PersonalFinancer.Tests
 			data.Accounts.AddRange(Account1User1, Account2User1);
 
 			// Categories
-			string initBalanceCatId = Guid.NewGuid().ToString();
 			Category1 = new Category
 			{
-				Id = initBalanceCatId,
-				Name = CategoryInitialBalanceName
+				Id = InitialBalanceCategoryId,
+				Name = CategoryInitialBalanceName,
+				OwnerId = "adminId"
 			};
 			string foodCatId = Guid.NewGuid().ToString();
 			Category2 = new Category
@@ -189,9 +189,10 @@ namespace PersonalFinancer.Tests
 			Transaction1 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
+				OwnerId = PetarId,
 				AccountId = petarCashBgnAccId,
 				Amount = 200,
-				CategoryId = initBalanceCatId,
+				CategoryId = InitialBalanceCategoryId,
 				CreatedOn = DateTime.UtcNow.AddMonths(-3),
 				Refference = CategoryInitialBalanceName,
 				TransactionType = TransactionType.Income
@@ -199,6 +200,7 @@ namespace PersonalFinancer.Tests
 			Transaction2 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
+				OwnerId = PetarId,
 				AccountId = petarCashBgnAccId,
 				Amount = 5.65m,
 				CategoryId = foodCatId,
@@ -209,6 +211,7 @@ namespace PersonalFinancer.Tests
 			Transaction3 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
+				OwnerId = PetarId,
 				AccountId = petarCashBgnAccId,
 				Amount = 4.80m,
 				CategoryId = transportCatId,
@@ -220,9 +223,10 @@ namespace PersonalFinancer.Tests
 			Transaction4 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
+				OwnerId = PetarId,
 				AccountId = petarBankEurAccId,
 				Amount = 200,
-				CategoryId = initBalanceCatId,
+				CategoryId = InitialBalanceCategoryId,
 				CreatedOn = DateTime.UtcNow.AddMonths(-3),
 				Refference = CategoryInitialBalanceName,
 				TransactionType = TransactionType.Income
@@ -230,6 +234,7 @@ namespace PersonalFinancer.Tests
 			Transaction5 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
+				OwnerId = PetarId,
 				AccountId = petarBankEurAccId,
 				Amount = 750m,
 				CategoryId = salaryCatId,
@@ -240,6 +245,7 @@ namespace PersonalFinancer.Tests
 			Transaction6 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
+				OwnerId = PetarId,
 				AccountId = petarBankEurAccId,
 				Amount = 49.99m,
 				CategoryId = transportCatId,

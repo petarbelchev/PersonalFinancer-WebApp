@@ -15,6 +15,18 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 		public TransactionController(ITransactionsService transactionsService)
 			=> this.transactionsService = transactionsService;
+		
+		public async Task<IActionResult> TransactionDetails(string id)
+		{
+			try
+			{
+				return View(await transactionsService.GetTransactionViewModel(id));
+			}
+			catch (InvalidOperationException)
+			{
+				return BadRequest();
+			}
+		}
 
 		public async Task<IActionResult> EditTransaction(string id)
 		{
@@ -56,7 +68,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			if (returnUrl != null)
 				return LocalRedirect(returnUrl);
 
-			return RedirectToAction("Details", "Account", new { id = inputModel.AccountId });
+			return RedirectToAction("AccountDetails", "Account", new { id = inputModel.AccountId });
 		}
 
 		private async Task PrepareModelForReturn(TransactionFormModel model)

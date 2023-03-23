@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-using static PersonalFinancer.Data.Constants.AccountTypeConstants;
+using static PersonalFinancer.Data.Constants.AccountConstants;
 
 namespace PersonalFinancer.Data.Models
 {

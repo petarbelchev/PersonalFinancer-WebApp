@@ -1,0 +1,32 @@
+﻿@using PersonalFinancer.Data.Enums;
+
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<th scope="col"></th>
+			<th scope="col">Date</th>
+			<th scope="col">Category</th>
+			<th scope="col">Amount</th>
+			<th scope="col">Refference</th>
+		</tr>
+	</thead>
+	<tbody style="vertical-align: text-top;">
+		@foreach (var transaction in Model.Transactions)
+		{
+			<tr role="button" onclick="location.href='@Url.Action("TransactionDetails", "Transaction", new { id = transaction.Id })'">
+				@if (transaction.TransactionType == TransactionType.Income.ToString())
+				{
+					<td><img src="/icons/greenArrow.png" style="max-width: 38px;"></td>
+				}
+				else
+				{
+					<td><img src="/icons/redArrow.png" style="max-width: 38px;"></td>
+				}
+				<td>@transaction.CreatedOn</td>
+				<td>@transaction.CategoryName</td>
+				<td>@transaction.Amount @transaction.AccountCurrencyName</td>
+				<td>@transaction.Refference</td>
+			</tr>
+		}
+	</tbody>
+</table>

@@ -1,30 +1,33 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Categories.Models;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions.Models;
-using static PersonalFinancer.Data.Constants.CategoryConstants;
+using static PersonalFinancer.Data.Constants.TransactionConstants;
 
 namespace PersonalFinancer.Services.Transactions
 {
-	public class TransactionsService : ITransactionsService
+    public class TransactionsService : ITransactionsService
 	{
 		private PersonalFinancerDbContext data;
 		private IMapper mapper;
+		private IMemoryCache memoryCache;
 
 		public TransactionsService(
 			PersonalFinancerDbContext data,
-			IMapper mapper)
+			IMapper mapper,
+			IMemoryCache memoryCache)
 		{
 			this.data = data;
 			this.mapper = mapper;
+			this.memoryCache = memoryCache;
 		}
-
+		
 		private void ChangeAccountBalance(Account account, decimal amount, TransactionType transactionType)
 		{
 			if (transactionType == TransactionType.Income)
@@ -34,17 +37,38 @@ namespace PersonalFinancer.Services.Transactions
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException if Account does not exist.
+		/// Throws ArgumentException if try to create Category with existing name.
 		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
-		private async Task ChangeAccountBalanceAsync(string accountId, decimal amount, TransactionType transactionType)
+		/// <exception cref="ArgumentException"></exception>
+		public async Task<CategoryViewModel> CreateCategory(CategoryInputModel model)
 		{
-			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
+			Category? category = await data.Categories
+				.FirstOrDefaultAsync(c => c.Name == model.Name && c.OwnerId == model.OwnerId);
 
-			if (transactionType == TransactionType.Income)
-				account.Balance += amount;
-			else if (transactionType == TransactionType.Expense)
-				account.Balance -= amount;
+			if (category != null)
+			{
+				if (category.IsDeleted == false)
+					throw new ArgumentException("Category with the same name exist!");
+
+				category.IsDeleted = false;
+				category.Name = model.Name.Trim();
+			}
+			else
+			{
+				category = new Category
+				{
+					Id = Guid.NewGuid().ToString(),
+					Name = model.Name.Trim(),
+					OwnerId = model.OwnerId
+				};
+
+				data.Categories.Add(category);
+			}
+			await data.SaveChangesAsync();
+
+			memoryCache.Remove(CategoryCacheKeyValue + model.OwnerId);
+
+			return mapper.Map<CategoryViewModel>(category);
 		}
 
 		/// <summary>
@@ -67,17 +91,41 @@ namespace PersonalFinancer.Services.Transactions
 			};
 
 			await data.Transactions.AddAsync(newTransaction);
+						
+			Account account = await data.Accounts.FirstAsync(a => a.Id == newTransaction.AccountId);
 
-			await ChangeAccountBalanceAsync(
-				newTransaction.AccountId, 
-				newTransaction.Amount, 
-				newTransaction.TransactionType);
+			if (newTransaction.TransactionType == TransactionType.Income)
+				account.Balance += newTransaction.Amount;
+			else if (newTransaction.TransactionType == TransactionType.Expense)
+				account.Balance -= newTransaction.Amount;
 
 			await data.SaveChangesAsync();
 
 			return newTransaction.Id;
 		}
+		
+		/// <summary>
+		/// Throws InvalidOperationException when Category does not exist
+		/// and ArgumentException when User is not owner or Administrator.
+		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task DeleteCategory(string categoryId, string? ownerId = null)
+		{
+			Category? category = await data.Categories.FindAsync(categoryId);
 
+			if (category == null)
+				throw new InvalidOperationException("Category does not exist.");
+
+			if (ownerId != null && category.OwnerId != ownerId)
+				throw new ArgumentException("Can't delete someone else category.");
+
+			category.IsDeleted = true;
+			await data.SaveChangesAsync();
+
+			memoryCache.Remove(CategoryCacheKeyValue + ownerId);
+		}
+	
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist
 		/// and ArgumentException when Owner Id is passed and User is not owner.
@@ -147,7 +195,7 @@ namespace PersonalFinancer.Services.Transactions
 			await data.SaveChangesAsync();
 		}
 
-		public async Task GetAllUserTransactions(string userId, UserTransactionsExtendedViewModel model)
+		public async Task GetAllUserTransactions(string userId, UserTransactionsViewModel model)
 		{
 			model.Pagination.TotalElements = data.Transactions.Count(t =>
 				t.Account.OwnerId == userId
@@ -164,7 +212,7 @@ namespace PersonalFinancer.Services.Transactions
 					model.Pagination.ElementsPerPage * (model.Pagination.Page - 1)
 					: 0)
 				.Take(model.Pagination.ElementsPerPage)
-				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
+				.ProjectTo<TransactionTableViewModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
 		}
 
@@ -222,11 +270,11 @@ namespace PersonalFinancer.Services.Transactions
 		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<TransactionExtendedViewModel> GetTransactionViewModel(string transactionId)
+		public async Task<TransactionDetailsViewModel> GetTransactionViewModel(string transactionId)
 		{
 			return await data.Transactions
 				.Where(t => t.Id == transactionId)
-				.ProjectTo<TransactionExtendedViewModel>(mapper.ConfigurationProvider)
+				.ProjectTo<TransactionDetailsViewModel>(mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 	}

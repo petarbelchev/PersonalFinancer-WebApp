@@ -1,9 +1,9 @@
 ﻿using PersonalFinancer.Data.Enums;
 
-namespace PersonalFinancer.Services.Transactions.Models
+namespace PersonalFinancer.Services.User.Models
 {
-	public class TransactionServiceModel
-	{
+    public class TransactionDTO
+    {
         public string CurrencyName { get; set; } = null!;
 
         public TransactionType TransactionType { get; set; }
