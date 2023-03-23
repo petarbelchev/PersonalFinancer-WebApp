@@ -30,7 +30,7 @@ namespace PersonalFinancer.Services.Accounts
 		/// </summary>
 		/// <returns>New Account Id.</returns>
 		/// <exception cref="ArgumentException"></exception>
-		Task<string> CreateAccount(string userId, AccountFormModel accountModel);
+		Task<string> CreateAccount(AccountFormModel model);
 		
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist

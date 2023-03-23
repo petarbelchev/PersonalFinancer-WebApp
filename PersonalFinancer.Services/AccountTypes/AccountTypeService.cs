@@ -47,10 +47,10 @@ namespace PersonalFinancer.Services.AccountTypes
 		/// Throws ArgumentException if given name already exists.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<AccountTypeViewModel> CreateAccountType(string userId, string accountTypeName)
+		public async Task<AccountTypeViewModel> CreateAccountType(AccountTypeInputModel model)
 		{
 			AccountType? accountType = await data.AccountTypes
-				.FirstOrDefaultAsync(at => at.Name == accountTypeName && at.OwnerId == userId);
+				.FirstOrDefaultAsync(at => at.Name == model.Name && at.OwnerId == model.OwnerId);
 
 			if (accountType != null)
 			{
@@ -58,15 +58,15 @@ namespace PersonalFinancer.Services.AccountTypes
 					throw new ArgumentException("Account Type with the same name exist!");
 
 				accountType.IsDeleted = false;
-				accountType.Name = accountTypeName;
+				accountType.Name = model.Name.Trim();
 			}
 			else
 			{
 				accountType = new AccountType
 				{
 					Id = Guid.NewGuid().ToString(),
-					Name = accountTypeName,
-					OwnerId = userId
+					Name = model.Name.Trim(),
+					OwnerId = model.OwnerId
 				};
 
 				data.AccountTypes.Add(accountType);
@@ -74,32 +74,32 @@ namespace PersonalFinancer.Services.AccountTypes
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(CacheKeyValue + userId);
+			memoryCache.Remove(CacheKeyValue + model.OwnerId);
 
 			return mapper.Map<AccountTypeViewModel>(accountType);
 		}
 
 		/// <summary>
 		/// Throws exception when Account Type does not exist
-		/// and ArgumentException when User is not owner.
+		/// and ArgumentException when User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteAccountType(string accountTypeId, string userId)
+		public async Task DeleteAccountType(string accountTypeId, string? ownerId = null)
 		{
 			AccountType? accountType = await data.AccountTypes.FindAsync(accountTypeId);
 
 			if (accountType == null)
 				throw new InvalidOperationException("Account Type does not exist.");
 
-			if (accountType.OwnerId != userId)
+			if (ownerId != null && accountType.OwnerId != ownerId)
 				throw new ArgumentException("Can't delete someone else Account Type.");
 
 			accountType.IsDeleted = true;
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(CacheKeyValue + userId);
+			memoryCache.Remove(CacheKeyValue + ownerId);
 		}
 	}
 }

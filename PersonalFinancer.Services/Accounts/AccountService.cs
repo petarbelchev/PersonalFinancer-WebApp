@@ -57,7 +57,6 @@ namespace PersonalFinancer.Services.Accounts
 				.FirstAsync();
 		}
 
-		//TODO: Move it to User Service?
 		public async Task<AllUsersAccountCardsViewModel> GetAllUsersAccountCardsViewModel(int page)
 		{
 			var model = new AllUsersAccountCardsViewModel();
@@ -153,20 +152,20 @@ namespace PersonalFinancer.Services.Accounts
 		/// </summary>
 		/// <returns>New Account Id.</returns>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<string> CreateAccount(string userId, AccountFormModel accountModel)
+		public async Task<string> CreateAccount(AccountFormModel model)
 		{
-			if (await IsNameExists(accountModel.Name, userId))
+			if (await IsNameExists(model.Name, model.OwnerId))
 				throw new ArgumentException(
-					$"The User already have Account with {accountModel.Name} name.");
+					$"The User already have Account with {model.Name} name.");
 
 			Account newAccount = new Account()
 			{
 				Id = Guid.NewGuid().ToString(),
-				Name = accountModel.Name.Trim(),
-				Balance = accountModel.Balance ?? throw new InvalidOperationException("Account balance cannot be null."),
-				AccountTypeId = accountModel.AccountTypeId,
-				CurrencyId = accountModel.CurrencyId,
-				OwnerId = userId
+				Name = model.Name.Trim(),
+				Balance = model.Balance ?? throw new InvalidOperationException("Account balance cannot be null."),
+				AccountTypeId = model.AccountTypeId,
+				CurrencyId = model.CurrencyId,
+				OwnerId = model.OwnerId
 			};
 
 			await data.Accounts.AddAsync(newAccount);
@@ -189,7 +188,7 @@ namespace PersonalFinancer.Services.Accounts
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.CacheKeyValue + userId);
+			memoryCache.Remove(AccountConstants.CacheKeyValue + model.OwnerId);
 
 			return newAccount.Id;
 		}
@@ -311,16 +310,20 @@ namespace PersonalFinancer.Services.Accounts
 					CurrencyId = a.CurrencyId,
 					AccountTypeId = a.AccountTypeId,
 					Balance = a.Balance,
-					Currencies = a.Owner.Currencies.Select(c => new CurrencyViewModel
-					{
-						Id = c.Id,
-						Name = c.Name
-					}),
-					AccountTypes = a.Owner.AccountTypes.Select(at => new AccountTypeViewModel
-					{
-						Id = at.Id,
-						Name = at.Name
-					})
+					Currencies = a.Owner.Currencies
+						.Where(c => !c.IsDeleted)
+						.Select(c => new CurrencyViewModel
+						{
+							Id = c.Id,
+							Name = c.Name
+						}),
+					AccountTypes = a.Owner.AccountTypes
+						.Where(at => !at.IsDeleted)
+						.Select(at => new AccountTypeViewModel
+						{
+							Id = at.Id,
+							Name = at.Name
+						})
 				})
 				.FirstAsync();
 		}
@@ -409,6 +412,7 @@ namespace PersonalFinancer.Services.Accounts
 			return await data.Users.Where(u => u.Id == userId)
 				.Select(u => new AccountFormModel
 				{
+					OwnerId = u.Id,
 					AccountTypes = u.AccountTypes
 						.Where(at => !at.IsDeleted)
 						.Select(at => new AccountTypeViewModel

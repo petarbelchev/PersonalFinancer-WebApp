@@ -31,7 +31,7 @@ namespace PersonalFinancer.Web.Controllers
 
 			try
 			{
-				string newAccountId = await accountService.CreateAccount(User.Id(), inputModel);
+				string newAccountId = await accountService.CreateAccount(inputModel);
 
 				TempData["successMsg"] = "You create a new account successfully!";
 

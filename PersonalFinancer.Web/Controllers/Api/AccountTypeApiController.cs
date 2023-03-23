@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.AccountTypes;
 using PersonalFinancer.Services.AccountTypes.Models;
 using PersonalFinancer.Web.Infrastructure;
-using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-	[Authorize(Roles = UserRoleName)]
+	[Authorize]
 	[Route("api/accounttypes")]
 	[ApiController]
 	public class AccountTypeApiController : ControllerBase
@@ -16,17 +15,15 @@ namespace PersonalFinancer.Web.Controllers.Api
 		private readonly IAccountTypeService accountTypeService;
 
 		public AccountTypeApiController(IAccountTypeService accountTypeService)
-		{
-			this.accountTypeService = accountTypeService;
-		}
+			=> this.accountTypeService = accountTypeService;
 
 		[HttpPost]
 		public async Task<ActionResult<AccountTypeViewModel>> Create(AccountTypeInputModel inputModel)
 		{
 			try
 			{
-				AccountTypeViewModel viewModel = await accountTypeService
-					.CreateAccountType(User.Id(), inputModel.Name.Trim());
+				AccountTypeViewModel viewModel = 
+					await accountTypeService.CreateAccountType(inputModel);
 
 				return Created(string.Empty, viewModel);
 			}
@@ -41,7 +38,10 @@ namespace PersonalFinancer.Web.Controllers.Api
 		{
 			try
 			{
-				await accountTypeService.DeleteAccountType(id, User.Id());
+				if (User.IsAdmin())
+					await accountTypeService.DeleteAccountType(id);
+				else
+					await accountTypeService.DeleteAccountType(id, User.Id());
 
 				return NoContent();
 			}

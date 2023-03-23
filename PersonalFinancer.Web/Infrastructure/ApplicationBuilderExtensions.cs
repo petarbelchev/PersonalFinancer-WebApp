@@ -66,36 +66,40 @@ namespace PersonalFinancer.Web.Infrastructure
 
 			Task.Run(async () =>
 			{
-				string cashBgnAccId = await accountService.CreateAccount(FirstUserId, new AccountFormModel
+				string cashBgnAccId = await accountService.CreateAccount(new AccountFormModel
 				{
 					Name = "Cash BGN",
 					AccountTypeId = CashAccountTypeId,
 					Balance = 0,
-					CurrencyId = BgnCurrencyId
+					CurrencyId = BgnCurrencyId,
+					OwnerId = FirstUserId
 				});
 
-				string bankBgnAccId = await accountService.CreateAccount(FirstUserId, new AccountFormModel
+				string bankBgnAccId = await accountService.CreateAccount(new AccountFormModel
 				{
 					Name = "Bank BGN",
 					AccountTypeId = BankAccountTypeId,
 					Balance = 0,
-					CurrencyId = BgnCurrencyId
+					CurrencyId = BgnCurrencyId,
+					OwnerId = FirstUserId
 				});
 
-				string euroSavingsAccId = await accountService.CreateAccount(FirstUserId, new AccountFormModel
+				string euroSavingsAccId = await accountService.CreateAccount(new AccountFormModel
 				{
 					Name = "Euro Savings",
 					AccountTypeId = SavingAccountTypeId,
 					Balance = 0,
-					CurrencyId = EurCurrencyId
+					CurrencyId = EurCurrencyId,
+					OwnerId = FirstUserId
 				});
 
-				string usdSavingsAccId = await accountService.CreateAccount(FirstUserId, new AccountFormModel
+				string usdSavingsAccId = await accountService.CreateAccount(new AccountFormModel
 				{
 					Name = "Dolar Savings",
 					AccountTypeId = SavingAccountTypeId,
 					Balance = 0,
-					CurrencyId = UsdCurrencyId
+					CurrencyId = UsdCurrencyId,
+					OwnerId = FirstUserId
 				});
 
 				await transactionsService.CreateTransaction(FirstUserId, new TransactionFormModel

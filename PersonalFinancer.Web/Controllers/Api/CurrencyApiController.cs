@@ -38,7 +38,10 @@ namespace PersonalFinancer.Web.Controllers.Api
 		{
 			try
 			{
-				await currencyService.DeleteCurrency(id, User.Id());
+				if (User.IsAdmin())
+					await currencyService.DeleteCurrency(id);
+				else
+					await currencyService.DeleteCurrency(id, User.Id());
 
 				return NoContent();
 			}

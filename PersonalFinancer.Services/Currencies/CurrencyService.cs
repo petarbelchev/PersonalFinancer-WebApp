@@ -63,18 +63,18 @@ namespace PersonalFinancer.Services.Currencies
 
 		/// <summary>
 		/// Throws InvalidOperationException when Currency does not exist
-		/// and ArgumentException when User is not owner.
+		/// and ArgumentException when User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteCurrency(string currencyId, string ownerId)
+		public async Task DeleteCurrency(string currencyId, string? ownerId = null)
 		{
 			Currency? currency = await data.Currencies.FindAsync(currencyId);
 
 			if (currency == null)
 				throw new InvalidOperationException("Currency does not exist.");
 
-			if (currency.OwnerId != ownerId)
+			if (ownerId != null && currency.OwnerId != ownerId)
 				throw new ArgumentException("Can't delete someone else Currency.");
 
 			currency.IsDeleted = true;

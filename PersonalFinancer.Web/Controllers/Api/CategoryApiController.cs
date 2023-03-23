@@ -4,11 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.Categories;
 using PersonalFinancer.Services.Categories.Models;
 using PersonalFinancer.Web.Infrastructure;
-using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-	[Authorize(Roles = UserRoleName)]
+	[Authorize]
 	[Route("api/categories")]
 	[ApiController]
 	public class CategoryApiController : ControllerBase
@@ -16,33 +15,15 @@ namespace PersonalFinancer.Web.Controllers.Api
 		private readonly ICategoryService categoryService;
 
 		public CategoryApiController(ICategoryService categoryService)
-		{
-			this.categoryService = categoryService;
-		}
-
-		//[HttpGet("{id}")]
-		//public async Task<ActionResult<CategoryViewModel>> GetCategory(string id)
-		//{
-		//	if (!User.Identity?.IsAuthenticated ?? false)
-		//		return Unauthorized();
-
-		//	try
-		//	{
-		//		return await categoryService.GetCategoryViewModel(id, User.Id());
-		//	}
-		//	catch (InvalidOperationException)
-		//	{
-		//		return BadRequest();
-		//	}
-		//}
+			=> this.categoryService = categoryService;
 
 		[HttpPost]
 		public async Task<ActionResult<CategoryViewModel>> CreateCategory(CategoryInputModel inputModel)
 		{
 			try
 			{
-				CategoryViewModel viewModel = await categoryService
-					.CreateCategory(User.Id(), inputModel.Name.Trim());
+				CategoryViewModel viewModel = 
+					await categoryService.CreateCategory(inputModel);
 
 				return Created(string.Empty, viewModel);
 			}
@@ -57,7 +38,10 @@ namespace PersonalFinancer.Web.Controllers.Api
 		{
 			try
 			{
-				await categoryService.DeleteCategory(id, User.Id());
+				if (User.IsAdmin())
+					await categoryService.DeleteCategory(id);
+				else
+					await categoryService.DeleteCategory(id, User.Id());
 
 				return NoContent();
 			}

@@ -55,6 +55,7 @@
 					<a class="btn btn-secondary" id="createCurrencyBtn">Create New Currency</a>
 					<a class="btn btn-danger" style="display: none;" id="deleteCurrencyBtn">Delete This Currency</a>
 				</div>
+				<input type="hidden" asp-for="@Model.OwnerId" />
 				<div>
 					<button type="submit" class="w-100 btn btn-lg btn-success">Create</button>
 				</div>
