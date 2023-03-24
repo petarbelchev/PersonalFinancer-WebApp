@@ -1,9 +1,12 @@
 ﻿@using PersonalFinancer.Web.Infrastructure;
 @using PersonalFinancer.Services.Accounts.Models;
 @using static PersonalFinancer.Data.Constants.HostConstants;
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @model AccountFormModel
 @{
 	ViewData["Title"] = "Create Account";
+
+	var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
 <p class="display-6 text-center">@ViewData["Title"]</p>
@@ -61,13 +64,14 @@
 				<div>
 					<button type="submit" class="w-100 btn btn-lg btn-success">Create</button>
 				</div>
+				<input id="RequestVerificationToken" type="hidden" value="@requestToken" />
 			</form>
 		</section>
 	</div>
 </div>
 
 @section Scripts {
-	@*<partial name="_ValidationScriptsPartial" />*@
+	<partial name="_ValidationScriptsPartial" />
 	<script src="/js/createDeleteBtns.js"></script>
 
 	<script>

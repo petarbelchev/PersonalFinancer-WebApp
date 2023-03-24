@@ -7,9 +7,13 @@
 	@*Guest Home Page*@
 	ViewData["Title"] = "Home Page";
 
-	<div class="text-center" style="margin-top: 50px;">
+	<div class="text-center" style="margin-top: 120px;">
 		<p class="display-4">Personal Financer</p>
 		<p class="display-6">Your Finances in One Place!</p>
+		<p class="display-6 fs-3" style="margin-top: 100px;">
+			<a style="text-decoration: none;" asp-controller="User" asp-action="Login">Login</a> if you already track your finances or
+			<a style="text-decoration: none;" asp-controller="User" asp-action="Register">register</a> to start now.
+		</p>
 	</div>
 }
 else
@@ -114,7 +118,7 @@ else
 				Your Dashboard is empty.
 			</p>
 			<p class="display-6">
-				<a asp-controller="Account" asp-action="Create">Create</a> your first account and start record your Finances!
+				<a style="text-decoration: none;" asp-controller="Account" asp-action="Create">Create</a> your first account and start record your Finances!
 			</p>
 		</div>
 	}

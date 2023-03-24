@@ -5,12 +5,30 @@
 <div class="row">
 	<div class="card offset-md-4 col-md-4">
 		<ul class="list-group list-group-flush">
-			<li class="list-group-item">Created On: @Model.CreatedOn</li>
-			<li class="list-group-item">Refference: @Model.Refference</li>
-			<li class="list-group-item">Amount: @Model.Amount @Model.AccountCurrencyName</li>
-			<li class="list-group-item">Account: @Model.AccountName</li>
-			<li class="list-group-item">Category: @Model.CategoryName</li>
-			<li class="list-group-item">Type: @Model.TransactionType</li>
+			<li class="list-group-item d-flex justify-content-between">
+				<div class="p-2"><span>Created On: </span></div>
+				<div class="p-2"><span>@Model.CreatedOn</span></div>
+			</li>
+			<li class="list-group-item d-flex justify-content-between">
+				<span class="p-2">Refference: </span>
+				<span class="p-2">@Model.Refference</span>
+			</li>
+			<li class="list-group-item d-flex justify-content-between">
+				<span class="p-2">Amount: </span>
+				<span class="p-2">@Model.Amount @Model.AccountCurrencyName</span>
+			</li>
+			<li class="list-group-item d-flex justify-content-between">
+				<span class="p-2">Account: </span>
+				<span class="p-2">@Model.AccountName</span>
+			</li>
+			<li class="list-group-item d-flex justify-content-between">
+				<span class="p-2">Category: </span>
+				<span class="p-2">@Model.CategoryName</span>
+			</li>
+			<li class="list-group-item d-flex justify-content-between">
+				<span class="p-2">Type: </span>
+				<span class="p-2">@Model.TransactionType</span>
+			</li>
 		</ul>
 		<div style="margin-top:20px;">
 			<a asp-controller="Transaction" asp-action="EditTransaction" asp-route-id="@Model.Id" class="w-100 btn btn-lg btn-warning">Edit</a>

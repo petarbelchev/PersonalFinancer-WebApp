@@ -10,12 +10,12 @@ function eventSetter(elToListen, newElemDiv, selectField, inputField, url, owner
     } else if (elToListen.id.includes('delete')) {
         elToListen.addEventListener('click', async () => {
             if (confirm('Are you sure you want to delete this?')) {
-                await remove(selectField, url/*, userId*/, elToListen);
+                await remove(selectField, url, elToListen);
             }
         });
     } else if (elToListen.id.includes('Field')) {
         elToListen.addEventListener('change', () => {
-            deleteBtnController(selectField, deleteBtn/*, userId*/);
+            deleteBtnController(selectField, deleteBtn);
         });
     }
 }
@@ -32,7 +32,8 @@ async function add(newElemDiv, inputField, url, selectField, deleteBtn, ownerId)
         method: 'POST',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.getElementById("RequestVerificationToken").value
         },
         body: JSON.stringify({ name: inputField.value.trim(), ownerId })
     });
@@ -42,7 +43,6 @@ async function add(newElemDiv, inputField, url, selectField, deleteBtn, ownerId)
 
         let optionTag = document.createElement('option');
         optionTag.value = data.id;
-        //optionTag.setAttribute("userId", data.ownerId);
         optionTag.setAttribute("id", data.id);
         optionTag.textContent = data.name;
 
@@ -54,25 +54,26 @@ async function add(newElemDiv, inputField, url, selectField, deleteBtn, ownerId)
         deleteBtn.style.display = 'block';
     } else if (response.status == 400) {
         let error = await response.json();
-        newElemDiv.children[2].textContent = error.errors.Name[0];
+        alert(`${error.status} ${error.title}`);
     }
 }
 
-async function remove(selectField, url/*, userId*/, deleteBtn) {
+async function remove(selectField, url, deleteBtn) {
     let elemId = selectField.value;
-    //let ownerId = selectField.selectedOptions[0].attributes['userid'].value;
 
-    //if (ownerId != userId) {
-    //    return alert("You can't delete this!")
-    //}
-
-    let response = await fetch(url + elemId, { method: 'DELETE' });
+    let response = await fetch(url + elemId, {
+        method: 'DELETE',
+        headers: {
+            'RequestVerificationToken': document.getElementById("RequestVerificationToken").value
+        }
+    });
 
     if (response.status == 204) {
         selectField.removeChild(document.getElementById(elemId));
         deleteBtnController(selectField, deleteBtn);
     } else {
-        alert('Somethink happend!')
+        let error = await response.json();
+        alert(`${error.status} ${error.title}`);
     }
 }
 

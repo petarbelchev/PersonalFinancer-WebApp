@@ -1,10 +1,14 @@
 async function moreStatistics(url) {
+
     let response = await fetch(url);
+
     if (response.status == 200) {
+
         let data = await response.json();
         let ul = document.createElement('ul');
         ul.className = 'list-group list-group-flush card offset-lg-2 col-lg-8';
         let ulInnerHtml = '';
+
         for (let currency in data) {
             ulInnerHtml += `
                 <li class="list-group-item">
@@ -16,9 +20,13 @@ async function moreStatistics(url) {
 				</li>
             `;
         }
+
         ul.innerHTML = ulInnerHtml;
         document.getElementById('statistics').replaceChildren(ul);
+
     } else {
-        alert('Somethink happent!');
+
+        let error = await response.json();
+        alert(`${error.status} ${error.title}`);
     }
 }
