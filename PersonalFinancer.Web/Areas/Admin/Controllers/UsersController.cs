@@ -10,9 +10,9 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 	[Authorize(Roles = AdminRoleName)]
 	public class UsersController : Controller
 	{
-		private readonly IUserService userService;
+		private readonly IUsersService userService;
 
-		public UsersController(IUserService userService)
+		public UsersController(IUsersService userService)
 			=> this.userService = userService;
 
 		public async Task<IActionResult> Index(int page = 1)

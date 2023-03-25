@@ -9,11 +9,11 @@ using static PersonalFinancer.Data.Constants.RoleConstants;
 namespace PersonalFinancer.Web.Controllers
 {
 	[Authorize(Roles = UserRoleName)]
-	public class TransactionController : Controller
+	public class TransactionsController : Controller
 	{
 		private readonly ITransactionsService transactionsService;
 
-		public TransactionController(ITransactionsService transactionsService)
+		public TransactionsController(ITransactionsService transactionsService)
 			=> this.transactionsService = transactionsService;
 
 		public async Task<IActionResult> All(string? startDate, string? endDate, int page = 1)

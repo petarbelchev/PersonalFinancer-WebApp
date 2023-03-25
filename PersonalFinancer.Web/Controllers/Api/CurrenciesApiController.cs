@@ -10,11 +10,11 @@ namespace PersonalFinancer.Web.Controllers.Api
     [Authorize]
 	[Route("api/currencies")]
 	[ApiController]
-	public class CurrencyApiController : ControllerBase
+	public class CurrenciesApiController : ControllerBase
 	{
-		private readonly IAccountService accountService;
+		private readonly IAccountsService accountService;
 
-		public CurrencyApiController(IAccountService accountService)
+		public CurrenciesApiController(IAccountsService accountService)
 			=> this.accountService = accountService;
 
 		[HttpPost]

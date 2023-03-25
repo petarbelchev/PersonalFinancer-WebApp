@@ -3,7 +3,7 @@ using PersonalFinancer.Services.Shared.Models;
 
 namespace PersonalFinancer.Services.Accounts
 {
-    public interface IAccountService
+    public interface IAccountsService
 	{
 		/// <summary>
 		/// Throws ArgumentException when User already have Account with given name.

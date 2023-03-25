@@ -2,7 +2,7 @@
 @using PersonalFinancer.Data.Models;
 @using PersonalFinancer.Services.User;
 @using PersonalFinancer.Web.Infrastructure;
-@inject IUserService userService
+@inject IUsersService userService
 
 <ul class="navbar-nav">
 	@if (User?.Identity?.IsAuthenticated ?? false)

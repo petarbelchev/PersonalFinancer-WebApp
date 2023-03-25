@@ -15,14 +15,14 @@ namespace PersonalFinancer.Data.Models
 			ErrorMessage = "Last name max length must be {1} characters long.")]
 		public string LastName { get; set; } = null!;
 
-		public ICollection<Account> Accounts { get; set; } = null!;
+		public ICollection<Account> Accounts { get; set; } = new HashSet<Account>();
 
-        public ICollection<AccountType> AccountTypes { get; set; } = null!;
+        public ICollection<AccountType> AccountTypes { get; set; } = new HashSet<AccountType>();
 
-        public ICollection<Category> Categories { get; set; } = null!;
+        public ICollection<Category> Categories { get; set; } = new HashSet<Category>();
 
-        public ICollection<Currency> Currencies { get; set; } = null!;
+        public ICollection<Currency> Currencies { get; set; } = new HashSet<Currency>();
 
-        public ICollection<Transaction> Transactions { get; set; } = null!;
+        public ICollection<Transaction> Transactions { get; set; } = new HashSet<Transaction>();
     }
 }

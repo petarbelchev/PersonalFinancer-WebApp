@@ -62,7 +62,7 @@ namespace PersonalFinancer.Web.Infrastructure
 			}
 
 			ITransactionsService transactionsService = services.GetRequiredService<ITransactionsService>();
-			IAccountService accountService = services.GetRequiredService<IAccountService>();
+			IAccountsService accountService = services.GetRequiredService<IAccountsService>();
 
 			Task.Run(async () =>
 			{

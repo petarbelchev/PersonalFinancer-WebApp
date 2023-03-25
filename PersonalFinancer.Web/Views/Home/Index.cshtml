@@ -29,7 +29,7 @@ else
 			<div class="row" style="margin-top: 25px;">
 				@foreach (var account in Model.Accounts)
 				{
-					<div class="col-xl-3 col-lg-4 col-md-6" role="button" onclick="location.href='@Url.Action("AccountDetails", "Account", new { id = account.Id })'">
+					<div class="col-xl-3 col-lg-4 col-md-6" role="button" onclick="location.href='@Url.Action("AccountDetails", "Accounts", new { id = account.Id })'">
 						<div class="card formField align-items-center">
 							<div class="d-flex flex-row align-items-center mb-2">
 								<div class="p-2">
@@ -118,7 +118,7 @@ else
 				Your Dashboard is empty.
 			</p>
 			<p class="display-6">
-				<a style="text-decoration: none;" asp-controller="Account" asp-action="Create">Create</a> your first account and start record your Finances!
+				<a style="text-decoration: none;" asp-controller="Accounts" asp-action="Create">Create</a> your first account and start record your Finances!
 			</p>
 		</div>
 	}

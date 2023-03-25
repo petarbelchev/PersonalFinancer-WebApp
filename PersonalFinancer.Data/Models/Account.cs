@@ -29,7 +29,8 @@ namespace PersonalFinancer.Data.Models
 		public string CurrencyId { get; set; } = null!;
 		public Currency Currency { get; set; } = null!;
 
-		public ICollection<Transaction> Transactions { get; set; } = null!;
+		public ICollection<Transaction> Transactions { get; set; } 
+			= new HashSet<Transaction>();
 
 		public bool IsDeleted { get; set; }
 	}

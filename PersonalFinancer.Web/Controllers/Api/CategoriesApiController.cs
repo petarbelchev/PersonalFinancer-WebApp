@@ -11,11 +11,11 @@ namespace PersonalFinancer.Web.Controllers.Api
     [Authorize]
 	[Route("api/categories")]
 	[ApiController]
-	public class CategoryApiController : ControllerBase
+	public class CategoriesApiController : ControllerBase
 	{
 		private readonly ITransactionsService transactionsService;
 
-		public CategoryApiController(ITransactionsService transactionsService)
+		public CategoriesApiController(ITransactionsService transactionsService)
 			=> this.transactionsService = transactionsService;
 
 		[HttpPost]

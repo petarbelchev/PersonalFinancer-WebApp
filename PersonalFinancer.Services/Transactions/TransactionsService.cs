@@ -10,7 +10,7 @@ using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.Transactions.Models;
 using static PersonalFinancer.Data.Constants.TransactionConstants;
 
-namespace PersonalFinancer.Services.Transactions
+namespace PersonalFinancer.Services.Transactions //TODO: Move transactions method to Account service
 {
     public class TransactionsService : ITransactionsService
 	{
@@ -36,6 +36,7 @@ namespace PersonalFinancer.Services.Transactions
 				account.Balance -= amount;
 		}
 
+		//TODO: Move it to Category Service
 		/// <summary>
 		/// Throws ArgumentException if try to create Category with existing name.
 		/// </summary>
@@ -104,6 +105,7 @@ namespace PersonalFinancer.Services.Transactions
 			return newTransaction.Id;
 		}
 		
+		//TODO: Move it to Category Service
 		/// <summary>
 		/// Throws InvalidOperationException when Category does not exist
 		/// and ArgumentException when User is not owner or Administrator.

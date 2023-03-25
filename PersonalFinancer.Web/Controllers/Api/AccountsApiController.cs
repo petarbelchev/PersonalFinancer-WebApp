@@ -9,11 +9,11 @@ namespace PersonalFinancer.Web.Controllers.Api
 	[Authorize(Roles = AdminRoleName)]
 	[Route("api/accounts")]
 	[ApiController]
-	public class AccountApiController : ControllerBase
+	public class AccountsApiController : ControllerBase
 	{
-		private IAccountService accountService;
+		private IAccountsService accountService;
 
-		public AccountApiController(IAccountService accountService)
+		public AccountsApiController(IAccountsService accountService)
 		{
 			this.accountService = accountService;
 		}

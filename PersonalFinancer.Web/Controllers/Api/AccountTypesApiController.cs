@@ -11,11 +11,11 @@ namespace PersonalFinancer.Web.Controllers.Api
     [Authorize]
 	[Route("api/accounttypes")]
 	[ApiController]
-	public class AccountTypeApiController : ControllerBase
+	public class AccountTypesApiController : ControllerBase
 	{
-		private readonly IAccountService accountService;
+		private readonly IAccountsService accountService;
 
-		public AccountTypeApiController(IAccountService accountService)
+		public AccountTypesApiController(IAccountsService accountService)
 			=> this.accountService = accountService;
 
 		[HttpPost]

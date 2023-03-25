@@ -20,6 +20,6 @@ namespace PersonalFinancer.Data.Models
 
 		public bool IsDeleted { get; set; }
 
-        public ICollection<Transaction> Transactions { get; set; } = null!;
+        public ICollection<Transaction> Transactions { get; set; } = new HashSet<Transaction>();
     }
 }

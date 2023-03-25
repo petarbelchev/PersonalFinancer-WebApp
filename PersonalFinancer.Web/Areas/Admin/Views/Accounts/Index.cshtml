@@ -24,7 +24,7 @@
 						<p class="card-text">@account.Balance @account.CurrencyName</p>
 					</div>
 				</div>
-				<a asp-area="Admin" asp-controller="Account" asp-action="AccountDetails"
+				<a asp-area="Admin" asp-controller="Accounts" asp-action="AccountDetails"
 			   asp-route-id="@account.Id" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Details</a>
 				<a asp-area="Admin" asp-controller="Users" asp-action="Details"
 			   asp-route-id="@account.OwnerId" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Owner</a>

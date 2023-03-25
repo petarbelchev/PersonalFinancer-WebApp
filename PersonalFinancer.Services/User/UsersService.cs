@@ -10,12 +10,12 @@ using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Services.User
 {
-    public class UserService : IUserService
+    public class UsersService : IUsersService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
 
-		public UserService(
+		public UsersService(
 			PersonalFinancerDbContext data,
 			IMapper mapper)
 		{

@@ -31,13 +31,13 @@ builder.Services.AddControllersWithViews(options =>
 	options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
 
-builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAccountsService, AccountsService>();
+builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<ITransactionsService, TransactionsService>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
 
 builder.Services.AddAutoMapper(
-	typeof(IAccountService).Assembly,
+	typeof(IAccountsService).Assembly,
 	typeof(HomeController).Assembly);
 
 builder.Services.ConfigureApplicationCookie(options =>

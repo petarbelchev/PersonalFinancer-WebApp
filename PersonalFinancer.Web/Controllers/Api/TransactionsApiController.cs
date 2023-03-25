@@ -9,11 +9,11 @@ namespace PersonalFinancer.Web.Controllers.Api
 	[Authorize]
 	[Route("api/transactions")]
 	[ApiController]
-	public class TransactionApiController : ControllerBase
+	public class TransactionsApiController : ControllerBase
 	{
 		private readonly ITransactionsService transactionsService;
 
-		public TransactionApiController(ITransactionsService transactionsService)
+		public TransactionsApiController(ITransactionsService transactionsService)
 		{
 			this.transactionsService = transactionsService;
 		}

@@ -9,11 +9,11 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
 	[Area("Admin")]
 	[Authorize(Roles = AdminRoleName)]
-	public class TransactionController : Controller
+	public class TransactionsController : Controller
 	{
 		private readonly ITransactionsService transactionsService;
 
-		public TransactionController(ITransactionsService transactionsService)
+		public TransactionsController(ITransactionsService transactionsService)
 			=> this.transactionsService = transactionsService;
 		
 		public async Task<IActionResult> TransactionDetails(string id)
@@ -68,7 +68,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			if (returnUrl != null)
 				return LocalRedirect(returnUrl);
 
-			return RedirectToAction("AccountDetails", "Account", new { id = inputModel.AccountId });
+			return RedirectToAction("AccountDetails", "Accounts", new { id = inputModel.AccountId });
 		}
 
 		private async Task PrepareModelForReturn(TransactionFormModel model)

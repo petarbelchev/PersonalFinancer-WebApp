@@ -9,11 +9,11 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
 	[Area("Admin")]
 	[Authorize(Roles = AdminRoleName)]
-	public class AccountController : Controller
+	public class AccountsController : Controller
 	{
-		private readonly IAccountService accountService;
+		private readonly IAccountsService accountService;
 
-		public AccountController(IAccountService accountService)
+		public AccountsController(IAccountsService accountService)
 			=> this.accountService = accountService;
 
 		public async Task<IActionResult> Index(int page = 1)
@@ -43,7 +43,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			}
 
 			viewModel.Routing.Area = "Admin";
-			viewModel.Routing.ReturnUrl = "/Admin/Account/AccountDetails/" + id;
+			viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
 			return View(viewModel);
@@ -81,7 +81,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			}
 
 			viewModel.Routing.Area = "Admin";
-			viewModel.Routing.ReturnUrl = "/Admin/Account/AccountDetails/" + id;
+			viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
 			return View(viewModel);

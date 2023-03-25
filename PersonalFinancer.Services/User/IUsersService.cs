@@ -3,7 +3,7 @@ using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Services.User
 {
-    public interface IUserService
+    public interface IUsersService
 	{
 		
 		/// <summary>

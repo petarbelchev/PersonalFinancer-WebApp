@@ -12,13 +12,13 @@ using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Services.Accounts
 {
-    public class AccountService : IAccountService
+    public class AccountsService : IAccountsService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
 		private readonly IMemoryCache memoryCache;
 
-		public AccountService(
+		public AccountsService(
 			PersonalFinancerDbContext context,
 			IMapper mapper,
 			IMemoryCache memoryCache)
@@ -49,15 +49,12 @@ namespace PersonalFinancer.Services.Accounts
 				OwnerId = model.OwnerId
 			};
 
-			await data.Accounts.AddAsync(newAccount);
-
 			if (newAccount.Balance != 0)
 			{
-				await data.Transactions.AddAsync(new Transaction()
+				newAccount.Transactions.Add(new Transaction()
 				{
 					Id = Guid.NewGuid().ToString(),
 					Amount = newAccount.Balance,
-					AccountId = newAccount.Id,
 					OwnerId = newAccount.OwnerId,
 					CategoryId = TransactionConstants.InitialBalanceCategoryId,
 					TransactionType = TransactionType.Income,
@@ -67,6 +64,7 @@ namespace PersonalFinancer.Services.Accounts
 				});
 			}
 
+			await data.Accounts.AddAsync(newAccount);
 			await data.SaveChangesAsync();
 
 			memoryCache.Remove(AccountConstants.CacheKeyValue + model.OwnerId);
@@ -74,6 +72,7 @@ namespace PersonalFinancer.Services.Accounts
 			return newAccount.Id;
 		}
 		
+		//TODO: Move to AccountType Service
 		/// <summary>
 		/// Throws ArgumentException if given name already exists.
 		/// </summary>
@@ -110,6 +109,7 @@ namespace PersonalFinancer.Services.Accounts
 			return mapper.Map<AccountTypeViewModel>(accountType);
 		}
 
+		//TODO: Move it to Currency Service
 		/// <summary>
 		/// Throws ArgumentException if given name exists.
 		/// </summary>
@@ -171,6 +171,7 @@ namespace PersonalFinancer.Services.Accounts
 			memoryCache.Remove(AccountConstants.CacheKeyValue + userId);
 		}
 		
+		//TODO: Move to AccountType Service
 		/// <summary>
 		/// Throws exception when Account Type does not exist
 		/// and ArgumentException when User is not owner or Administrator.
@@ -194,6 +195,7 @@ namespace PersonalFinancer.Services.Accounts
 			memoryCache.Remove(AccountConstants.AccTypeCacheKeyValue + ownerId);
 		}
 
+		//TODO:Move it to Currency Service
 		/// <summary>
 		/// Throws InvalidOperationException when Currency does not exist
 		/// and ArgumentException when User is not owner or Administrator.
@@ -248,7 +250,6 @@ namespace PersonalFinancer.Services.Accounts
 					{
 						Id = Guid.NewGuid().ToString(),
 						OwnerId = account.OwnerId,
-						AccountId = account.Id,
 						Amount = amountOfChange,
 						CategoryId = TransactionConstants.InitialBalanceCategoryId,
 						CreatedOn = DateTime.UtcNow,
@@ -257,7 +258,7 @@ namespace PersonalFinancer.Services.Accounts
 						IsInitialBalance = true
 					};
 
-					await data.Transactions.AddAsync(initialBalance);
+					account.Transactions.Add(initialBalance);
 				}
 				else
 				{
@@ -374,6 +375,8 @@ namespace PersonalFinancer.Services.Accounts
 
 		public async Task<Dictionary<string, CashFlowViewModel>> GetAllAccountsCashFlow()
 		{
+			//TODO: Need refactoring. Use GroupBy? SelectMany? IQueryable variables?
+
 			var result = new Dictionary<string, CashFlowViewModel>();
 
 			await data.Accounts

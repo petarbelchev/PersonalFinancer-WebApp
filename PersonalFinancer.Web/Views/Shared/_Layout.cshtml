@@ -31,17 +31,17 @@
 					<ul class="navbar-nav flex-grow-1">
 						@if ((User?.Identity?.IsAuthenticated ?? false) && !User.IsAdmin())
 						{
-							<a class="nav-link text-light" asp-area="" asp-controller="Transaction" asp-action="All">All Transactions</a>
+							<a class="nav-link text-light" asp-area="" asp-controller="Transactions" asp-action="All">All Transactions</a>
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 									Create
 								</a>
 								<ul class="dropdown-menu dropdown-menu-end">
 									<li class="dropdown-item">
-										<a class="nav-link text-dark" asp-area="" asp-controller="Transaction" asp-action="Create">Transaction</a>
+										<a class="nav-link text-dark" asp-area="" asp-controller="Transactions" asp-action="Create">Transaction</a>
 									</li>
 									<li class="dropdown-item">
-										<a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Create">Account</a>
+										<a class="nav-link text-dark" asp-area="" asp-controller="Accounts" asp-action="Create">Account</a>
 									</li>
 								</ul>
 							</li>
@@ -49,7 +49,7 @@
 						else if (User?.IsAdmin() ?? false)
 						{
 							<a class="nav-link text-light" asp-area="Admin" asp-controller="Users" asp-action="Index">All Users</a>
-							<a class="nav-link text-light" asp-area="Admin" asp-controller="Account" asp-action="Index">All Accounts</a>
+							<a class="nav-link text-light" asp-area="Admin" asp-controller="Accounts" asp-action="Index">All Accounts</a>
 						}
 					</ul>
 					<partial name="_LoginPartial" />

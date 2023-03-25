@@ -9,11 +9,11 @@ using static PersonalFinancer.Data.Constants.RoleConstants;
 namespace PersonalFinancer.Web.Controllers
 {
 	[Authorize(Roles = UserRoleName)]
-	public class AccountController : Controller
+	public class AccountsController : Controller
 	{
-		private readonly IAccountService accountService;
+		private readonly IAccountsService accountService;
 
-		public AccountController(IAccountService accountService)
+		public AccountsController(IAccountsService accountService)
 			=> this.accountService = accountService;
 
 		public async Task<IActionResult> Create()
@@ -72,7 +72,7 @@ namespace PersonalFinancer.Web.Controllers
 				return BadRequest();
 			}
 
-			viewModel.Routing.ReturnUrl = "/Account/AccountDetails/" + id;
+			viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
 			return View(viewModel);
@@ -109,7 +109,7 @@ namespace PersonalFinancer.Web.Controllers
 				return BadRequest();
 			}
 
-			viewModel.Routing.ReturnUrl = "/Account/AccountDetails/" + id;
+			viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
 			return View(viewModel);

@@ -41,7 +41,7 @@
 			<div class="row">
 				@foreach (var account in Model.Accounts)
 				{
-					<div class="col-md-6 col-sm-12" role="button" onclick="location.href='@Url.Action("AccountDetails", "Account", new { id = account.Id })'">
+					<div class="col-md-6 col-sm-12" role="button" onclick="location.href='@Url.Action("AccountDetails", "Accounts", new { id = account.Id })'">
 						<div class="card formField align-items-center" style="margin-left: 2px; margin-right: 2px;">
 							<div class="d-flex flex-row align-items-center mb-2">
 								<div class="p-2">

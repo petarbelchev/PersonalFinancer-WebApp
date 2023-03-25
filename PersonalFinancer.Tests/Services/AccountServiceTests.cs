@@ -12,12 +12,12 @@ namespace PersonalFinancer.Tests.Services
 	[TestFixture]
 	class AccountServiceTests : UnitTestsBase
 	{
-		private IAccountService accountService;
+		private IAccountsService accountService;
 
 		[SetUp]
 		public void SetUp()
 		{
-			this.accountService = new AccountService(this.data, this.mapper, this.memoryCache);
+			this.accountService = new AccountsService(this.data, this.mapper, this.memoryCache);
 		}
 
 		//[Test]
