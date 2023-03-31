@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Categories.Models;
+using PersonalFinancer.Services.ModelsState;
 using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.Transactions;
-using PersonalFinancer.Services.Transactions.Models;
 using PersonalFinancer.Web.Infrastructure;
 
 namespace PersonalFinancer.Web.Controllers.Api
@@ -13,18 +14,27 @@ namespace PersonalFinancer.Web.Controllers.Api
 	[ApiController]
 	public class CategoriesApiController : ControllerBase
 	{
-		private readonly ITransactionsService transactionsService;
+		private readonly ICategoryService categoryService;
+		private readonly IModelStateService modelStateService;
 
-		public CategoriesApiController(ITransactionsService transactionsService)
-			=> this.transactionsService = transactionsService;
+		public CategoriesApiController(
+			ICategoryService categoryService, 
+			IModelStateService modelStateService)
+		{
+			this.categoryService = categoryService;
+			this.modelStateService = modelStateService;
+		}
 
 		[HttpPost]
 		public async Task<ActionResult<CategoryViewModel>> CreateCategory(CategoryInputModel inputModel)
 		{
+			if (!ModelState.IsValid)
+				return BadRequest(modelStateService.GetErrors(ModelState.Values));
+
 			try
 			{
 				CategoryViewModel viewModel = 
-					await transactionsService.CreateCategory(inputModel);
+					await categoryService.CreateCategory(inputModel);
 
 				return Created(string.Empty, viewModel);
 			}
@@ -40,9 +50,9 @@ namespace PersonalFinancer.Web.Controllers.Api
 			try
 			{
 				if (User.IsAdmin())
-					await transactionsService.DeleteCategory(id);
+					await categoryService.DeleteCategory(id);
 				else
-					await transactionsService.DeleteCategory(id, User.Id());
+					await categoryService.DeleteCategory(id, User.Id());
 
 				return NoContent();
 			}

@@ -2,12 +2,12 @@
 	<p>@Model.Pagination.FirstElement to @Model.Pagination.LastElement from @Model.Pagination.TotalElements @Model.Pagination.ElementsName</p>
 	<ul class="pagination" style="margin-top: 25px;">
 		<li class="page-item @(Model.Pagination.Page == 1 ? "disabled" : string.Empty)">
-			<a class="page-link" style="color: black;" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action"
+			<a class="page-link" style="color: black;" asp-area="@Model.Routing.Area" asp-controller="@Model.Routing.Controller" asp-action="@Model.Routing.Action"
 			   asp-route-page="@(Model.Pagination.Page - 1)">Previous</a>
 		</li>
 		<li class="page-item @(Model.Pagination.Page == 1 ? "active" : string.Empty)">
 			<a class="page-link" style="color: black; @(Model.Pagination.Page == 1 ? "background-color: gray; border-color: gray;" : string.Empty)"
-			   asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="1">1</a>
+			   asp-area="@Model.Routing.Area" asp-controller="@Model.Routing.Controller" asp-action="@Model.Routing.Action" asp-route-page="1">1</a>
 		</li>
 		@if (Model.Pagination.Page - 3 > 1)
 		{
@@ -19,7 +19,7 @@
 			{
 				<li class="page-item @(Model.Pagination.Page == i ? "active" : string.Empty)">
 					<a class="page-link" style="color: black; @(Model.Pagination.Page == i ? "background-color: gray; border-color: gray;" : string.Empty)"
-			   asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@i">@i</a>
+			   asp-area="@Model.Routing.Area" asp-controller="@Model.Routing.Controller" asp-action="@Model.Routing.Action" asp-route-page="@i">@i</a>
 				</li>
 			}
 		}
@@ -31,11 +31,11 @@
 		{
 			<li class="page-item @(Model.Pagination.Page == Model.Pagination.Pages ? "active" : string.Empty)">
 				<a class="page-link" style="color: black; @(Model.Pagination.Page == Model.Pagination.Pages ? "background-color: gray; border-color: gray;" : string.Empty)"
-			   asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action" asp-route-page="@Model.Pagination.Pages">@Model.Pagination.Pages</a>
+			   asp-area="@Model.Routing.Area" asp-controller="@Model.Routing.Controller" asp-action="@Model.Routing.Action" asp-route-page="@Model.Pagination.Pages">@Model.Pagination.Pages</a>
 			</li>
 		}
 		<li class="page-item @(Model.Pagination.Page == Model.Pagination.Pages ? "disabled" : string.Empty)">
-			<a class="page-link" style="color: black;" asp-area="@ViewBag.Area" asp-controller="@ViewBag.Controller" asp-action="@ViewBag.Action"
+			<a class="page-link" style="color: black;" asp-area="@Model.Routing.Area" asp-controller="@Model.Routing.Controller" asp-action="@Model.Routing.Action"
 			   asp-route-page="@(Model.Pagination.Page + 1)">Next</a>
 		</li>
 	</ul>

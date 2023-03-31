@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
+
+using PersonalFinancer.Services.Currencies;
+using PersonalFinancer.Services.Currencies.Models;
+using PersonalFinancer.Services.ModelsState;
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Web.Infrastructure;
 
@@ -12,18 +14,27 @@ namespace PersonalFinancer.Web.Controllers.Api
 	[ApiController]
 	public class CurrenciesApiController : ControllerBase
 	{
-		private readonly IAccountsService accountService;
+		private readonly ICurrencyService currencyService;
+		private readonly IModelStateService modelStateService;
 
-		public CurrenciesApiController(IAccountsService accountService)
-			=> this.accountService = accountService;
+		public CurrenciesApiController(
+			ICurrencyService currencyService,
+			IModelStateService modelStateService)
+		{
+			this.currencyService = currencyService;
+			this.modelStateService = modelStateService;
+		}
 
 		[HttpPost]
 		public async Task<ActionResult<CurrencyViewModel>> Create(CurrencyInputModel inputModel)
 		{
+			if (!ModelState.IsValid)
+				return BadRequest(modelStateService.GetErrors(ModelState.Values));
+
 			try
 			{
 				CurrencyViewModel viewModel = 
-					await accountService.CreateCurrency(inputModel);
+					await currencyService.CreateCurrency(inputModel);
 
 				return Created(string.Empty, viewModel);
 			}
@@ -39,9 +50,9 @@ namespace PersonalFinancer.Web.Controllers.Api
 			try
 			{
 				if (User.IsAdmin())
-					await accountService.DeleteCurrency(id);
+					await currencyService.DeleteCurrency(id);
 				else
-					await accountService.DeleteCurrency(id, User.Id());
+					await currencyService.DeleteCurrency(id, User.Id());
 
 				return NoContent();
 			}

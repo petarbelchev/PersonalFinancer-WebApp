@@ -2,7 +2,7 @@
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class AllUsersAccountCardsViewModel
+	public class UsersAccountCardsViewModel
 	{
 		public IEnumerable<AccountCardExtendedViewModel> Accounts { get; set; } = null!;
 
@@ -16,7 +16,7 @@ namespace PersonalFinancer.Services.Accounts.Models
 		public RoutingModel Routing { get; set; } = new RoutingModel
 		{
 			Area = "Admin",
-			Controller = "Account",
+			Controller = "Accounts",
 			Action = "Index"
 		};
 	}

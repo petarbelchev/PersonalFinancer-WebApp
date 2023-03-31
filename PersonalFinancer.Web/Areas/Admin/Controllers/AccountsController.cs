@@ -17,7 +17,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			=> this.accountService = accountService;
 
 		public async Task<IActionResult> Index(int page = 1)
-			=> View(await accountService.GetAllUsersAccountCardsViewModel(page));
+			=> View(await accountService.GetUsersAccountCardsViewModel(page));
 
 		public async Task<IActionResult> AccountDetails(
 			string id, string? startDate, string? endDate, int page = 1)
@@ -42,7 +42,6 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 				return BadRequest();
 			}
 
-			viewModel.Routing.Area = "Admin";
 			viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
@@ -80,7 +79,6 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 				return BadRequest();
 			}
 
-			viewModel.Routing.Area = "Admin";
 			viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
@@ -153,7 +151,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				await PrepareModelForReturn(inputModel);
+				await accountService.PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -173,7 +171,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 					nameof(inputModel.Name),
 					$"You already have Account with {inputModel.Name} name.");
 
-				await PrepareModelForReturn(inputModel);
+				await accountService.PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -181,15 +179,6 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				return BadRequest();
 			}
-		}
-
-		private async Task PrepareModelForReturn(AccountFormModel model)
-		{
-			AccountFormModel emptyFormModel =
-				await accountService.GetEmptyAccountFormModel(model.OwnerId);
-
-			model.AccountTypes = emptyFormModel.AccountTypes;
-			model.Currencies = emptyFormModel.Currencies;
 		}
 	}
 }

@@ -1,30 +1,41 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.AccountTypes;
+using PersonalFinancer.Services.AccountTypes.Models;
+using PersonalFinancer.Services.ModelsState;
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Web.Infrastructure;
+using System.Text;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-    [Authorize]
+	[Authorize]
 	[Route("api/accounttypes")]
 	[ApiController]
 	public class AccountTypesApiController : ControllerBase
 	{
-		private readonly IAccountsService accountService;
+		private readonly IAccountTypeService accountTypeService;
+		private readonly IModelStateService modelStateService;
 
-		public AccountTypesApiController(IAccountsService accountService)
-			=> this.accountService = accountService;
+		public AccountTypesApiController(
+			IAccountTypeService accountTypeService,
+			IModelStateService modelStateService)
+		{
+			this.accountTypeService = accountTypeService;
+			this.modelStateService = modelStateService;
+		}
 
 		[HttpPost]
 		public async Task<ActionResult<AccountTypeViewModel>> Create(AccountTypeInputModel inputModel)
 		{
+			if (!ModelState.IsValid)
+				return BadRequest(modelStateService.GetErrors(ModelState.Values));
+
 			try
 			{
-				AccountTypeViewModel viewModel = 
-					await accountService.CreateAccountType(inputModel);
+				AccountTypeViewModel viewModel =
+					await accountTypeService.CreateAccountType(inputModel);
 
 				return Created(string.Empty, viewModel);
 			}
@@ -40,9 +51,9 @@ namespace PersonalFinancer.Web.Controllers.Api
 			try
 			{
 				if (User.IsAdmin())
-					await accountService.DeleteAccountType(id);
+					await accountTypeService.DeleteAccountType(id);
 				else
-					await accountService.DeleteAccountType(id, User.Id());
+					await accountTypeService.DeleteAccountType(id, User.Id());
 
 				return NoContent();
 			}

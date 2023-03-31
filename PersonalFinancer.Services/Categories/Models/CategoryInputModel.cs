@@ -2,7 +2,7 @@
 
 using static PersonalFinancer.Data.Constants.TransactionConstants;
 
-namespace PersonalFinancer.Services.Transactions.Models
+namespace PersonalFinancer.Services.Categories.Models
 {
     public class CategoryInputModel
     {

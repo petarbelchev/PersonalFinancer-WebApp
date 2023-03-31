@@ -24,7 +24,7 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				await PrepareAccountFormModelForReturn(inputModel);
+				await accountService.PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -43,7 +43,7 @@ namespace PersonalFinancer.Web.Controllers
 					nameof(inputModel.Name),
 					"You already have Account with that name.");
 
-				await PrepareAccountFormModelForReturn(inputModel);
+				await accountService.PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -184,7 +184,7 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				await PrepareAccountFormModelForReturn(inputModel);
+				await accountService.PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -203,7 +203,7 @@ namespace PersonalFinancer.Web.Controllers
 					nameof(inputModel.Name),
 					$"You already have Account with {inputModel.Name} name.");
 
-				await PrepareAccountFormModelForReturn(inputModel);
+				await accountService.PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -211,15 +211,6 @@ namespace PersonalFinancer.Web.Controllers
 			{
 				return BadRequest();
 			}
-		}
-
-		private async Task PrepareAccountFormModelForReturn(AccountFormModel model)
-		{
-			AccountFormModel emptyFormModel =
-				await accountService.GetEmptyAccountFormModel(this.User.Id());
-
-			model.AccountTypes = emptyFormModel.AccountTypes;
-			model.Currencies = emptyFormModel.Currencies;
 		}
 	}
 }

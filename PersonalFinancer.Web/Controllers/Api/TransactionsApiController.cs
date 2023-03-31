@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Transactions;
+using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Web.Infrastructure;
 
 namespace PersonalFinancer.Web.Controllers.Api
@@ -11,11 +10,11 @@ namespace PersonalFinancer.Web.Controllers.Api
 	[ApiController]
 	public class TransactionsApiController : ControllerBase
 	{
-		private readonly ITransactionsService transactionsService;
+		private readonly IAccountsService accountsService;
 
-		public TransactionsApiController(ITransactionsService transactionsService)
+		public TransactionsApiController(IAccountsService accountsService)
 		{
-			this.transactionsService = transactionsService;
+			this.accountsService = accountsService;
 		}
 
 		[HttpDelete("{id}")]
@@ -26,9 +25,9 @@ namespace PersonalFinancer.Web.Controllers.Api
 				decimal newBalance;
 
 				if (User.IsAdmin())
-					newBalance = await transactionsService.DeleteTransaction(id);
+					newBalance = await accountsService.DeleteTransaction(id);
 				else
-					newBalance = await transactionsService.DeleteTransaction(id, User.Id());
+					newBalance = await accountsService.DeleteTransaction(id, User.Id());
 
 				return Ok(new { newBalance });
 			}

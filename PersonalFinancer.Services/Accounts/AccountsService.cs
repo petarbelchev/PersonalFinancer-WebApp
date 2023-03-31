@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -27,7 +28,15 @@ namespace PersonalFinancer.Services.Accounts
 			this.mapper = mapper;
 			this.memoryCache = memoryCache;
 		}
-		
+
+		private void ChangeBalance(Account account, decimal amount, TransactionType transactionType)
+		{
+			if (transactionType == TransactionType.Income)
+				account.Balance += amount;
+			else if (transactionType == TransactionType.Expense)
+				account.Balance -= amount;
+		}
+
 		/// <summary>
 		/// Throws ArgumentException when User already have Account with given name.
 		/// </summary>
@@ -43,7 +52,8 @@ namespace PersonalFinancer.Services.Accounts
 			{
 				Id = Guid.NewGuid().ToString(),
 				Name = model.Name.Trim(),
-				Balance = model.Balance ?? throw new InvalidOperationException("Account balance cannot be null."),
+				Balance = model.Balance ?? // Not supposed to be null, its nullable because of model validation
+					throw new InvalidOperationException("Account balance cannot be null."),
 				AccountTypeId = model.AccountTypeId,
 				CurrencyId = model.CurrencyId,
 				OwnerId = model.OwnerId
@@ -72,88 +82,48 @@ namespace PersonalFinancer.Services.Accounts
 			return newAccount.Id;
 		}
 		
-		//TODO: Move to AccountType Service
 		/// <summary>
-		/// Throws ArgumentException if given name already exists.
+		/// Throws InvalidOperationException if Account does not exist.
 		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		public async Task<AccountTypeViewModel> CreateAccountType(AccountTypeInputModel model)
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<string> CreateTransaction(string userId, TransactionFormModel transactionFormModel)
 		{
-			AccountType? accountType = await data.AccountTypes
-				.FirstOrDefaultAsync(at => at.Name == model.Name && at.OwnerId == model.OwnerId);
+			Account? account = await data.Accounts.FindAsync(transactionFormModel.AccountId);
 
-			if (accountType != null)
+			if (account == null)
+				throw new InvalidOperationException("Account does not exist.");
+
+			Transaction newTransaction = new Transaction()
 			{
-				if (accountType.IsDeleted == false)
-					throw new ArgumentException("Account Type with the same name exist!");
+				Id = Guid.NewGuid().ToString(),
+				Amount = transactionFormModel.Amount,
+				OwnerId = userId,
+				CategoryId = transactionFormModel.CategoryId,
+				TransactionType = transactionFormModel.TransactionType,
+				CreatedOn = transactionFormModel.CreatedOn,
+				Refference = transactionFormModel.Refference.Trim(),
+				IsInitialBalance = transactionFormModel.IsInitialBalance
+			};
 
-				accountType.IsDeleted = false;
-				accountType.Name = model.Name.Trim();
-			}
-			else
-			{
-				accountType = new AccountType
-				{
-					Id = Guid.NewGuid().ToString(),
-					Name = model.Name.Trim(),
-					OwnerId = model.OwnerId
-				};
+			account.Transactions.Add(newTransaction);
 
-				data.AccountTypes.Add(accountType);
-			}
+			if (transactionFormModel.TransactionType == TransactionType.Income)
+				account.Balance += newTransaction.Amount;
+			else if (transactionFormModel.TransactionType == TransactionType.Expense)
+				account.Balance -= newTransaction.Amount;
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.AccTypeCacheKeyValue + model.OwnerId);
-
-			return mapper.Map<AccountTypeViewModel>(accountType);
+			return newTransaction.Id;
 		}
-
-		//TODO: Move it to Currency Service
-		/// <summary>
-		/// Throws ArgumentException if given name exists.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		public async Task<CurrencyViewModel> CreateCurrency(CurrencyInputModel model)
-		{
-			Currency? currency = await data.Currencies
-				.FirstOrDefaultAsync(c => c.Name == model.Name && c.OwnerId == model.OwnerId);
-
-			if (currency != null)
-			{
-				if (currency.IsDeleted == false)
-					throw new ArgumentException("Currency with the same name exist!");
-
-				currency.IsDeleted = false;
-				currency.Name = model.Name.Trim();
-			}
-			else
-			{
-				currency = new Currency
-				{
-					Id = Guid.NewGuid().ToString(),
-					Name = model.Name.Trim(),
-					OwnerId = model.OwnerId
-				};
-
-				await data.Currencies.AddAsync(currency);
-			}
-
-			await data.SaveChangesAsync();
-
-			memoryCache.Remove(AccountConstants.CurrencyCacheKeyValue + model.OwnerId);
-
-			return mapper.Map<CurrencyViewModel>(currency);
-		}
-		
+			
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist
 		/// and ArgumentException when User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteAccount(
-			string accountId, bool shouldDeleteTransactions = false, string? userId = null)
+		public async Task DeleteAccount(string accountId, bool shouldDeleteTransactions = false, string? userId = null)
 		{
 			Account account = await data.Accounts
 				.FirstAsync(a => a.Id == accountId && !a.IsDeleted);
@@ -171,54 +141,35 @@ namespace PersonalFinancer.Services.Accounts
 			memoryCache.Remove(AccountConstants.CacheKeyValue + userId);
 		}
 		
-		//TODO: Move to AccountType Service
 		/// <summary>
-		/// Throws exception when Account Type does not exist
-		/// and ArgumentException when User is not owner or Administrator.
+		/// Throws InvalidOperationException when Transaction does not exist
+		/// and ArgumentException when Owner Id is passed and User is not owner.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteAccountType(string accountTypeId, string? ownerId = null)
+		public async Task<decimal> DeleteTransaction(string transactionId, string? ownerId = null)
 		{
-			AccountType? accountType = await data.AccountTypes.FindAsync(accountTypeId);
+			Transaction transaction = await data.Transactions
+				.Include(t => t.Account)
+				.FirstAsync(t => t.Id == transactionId);
 
-			if (accountType == null)
-				throw new InvalidOperationException("Account Type does not exist.");
+			if (ownerId != null && transaction.OwnerId != ownerId)
+				throw new ArgumentException("User is now transaction's owner");
 
-			if (ownerId != null && accountType.OwnerId != ownerId)
-				throw new ArgumentException("Can't delete someone else Account Type.");
+			data.Transactions.Remove(transaction);
 
-			accountType.IsDeleted = true;
+			if (transaction.TransactionType == TransactionType.Income)
+				transaction.TransactionType = TransactionType.Expense;
+			else
+				transaction.TransactionType = TransactionType.Income;
+
+			ChangeBalance(transaction.Account, transaction.Amount, transaction.TransactionType);
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.AccTypeCacheKeyValue + ownerId);
+			return transaction.Account.Balance;
 		}
 
-		//TODO:Move it to Currency Service
-		/// <summary>
-		/// Throws InvalidOperationException when Currency does not exist
-		/// and ArgumentException when User is not owner or Administrator.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteCurrency(string currencyId, string? ownerId = null)
-		{
-			Currency? currency = await data.Currencies.FindAsync(currencyId);
-
-			if (currency == null)
-				throw new InvalidOperationException("Currency does not exist.");
-
-			if (ownerId != null && currency.OwnerId != ownerId)
-				throw new ArgumentException("Can't delete someone else Currency.");
-
-			currency.IsDeleted = true;
-
-			await data.SaveChangesAsync();
-
-			memoryCache.Remove(AccountConstants.CurrencyCacheKeyValue + ownerId);
-		}
-		
 		/// <summary>
 		/// Throws InvalidOperationException when Account does now exist,
 		/// and ArgumentException when User already have Account with given name.
@@ -269,6 +220,46 @@ namespace PersonalFinancer.Services.Accounts
 			await data.SaveChangesAsync();
 		}
 		
+		/// <summary>
+		/// Throws InvalidOperationException when Transaction or Account does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task EditTransaction(string id, TransactionFormModel editedTransaction)
+		{
+			Transaction transactionInDb = await data.Transactions
+				.Include(t => t.Account)
+				.FirstAsync(t => t.Id == id);
+
+			if (editedTransaction.AccountId != transactionInDb.AccountId
+				|| editedTransaction.TransactionType != transactionInDb.TransactionType
+				|| editedTransaction.Amount != transactionInDb.Amount)
+			{
+				TransactionType opositeTransactionType = TransactionType.Income;
+
+				if (transactionInDb.TransactionType == TransactionType.Income)
+					opositeTransactionType = TransactionType.Expense;
+
+				ChangeBalance(transactionInDb.Account, transactionInDb.Amount, opositeTransactionType);
+
+				if (editedTransaction.AccountId != transactionInDb.AccountId)
+				{
+					Account newAccount = await data.Accounts.FirstAsync(a => a.Id == editedTransaction.AccountId);
+					transactionInDb.Account = newAccount;
+				}
+
+				ChangeBalance(transactionInDb.Account, editedTransaction.Amount, editedTransaction.TransactionType);
+			}
+
+			transactionInDb.Refference = editedTransaction.Refference.Trim();
+			transactionInDb.AccountId = editedTransaction.AccountId;
+			transactionInDb.CategoryId = editedTransaction.CategoryId;
+			transactionInDb.Amount = editedTransaction.Amount;
+			transactionInDb.CreatedOn = editedTransaction.CreatedOn;
+			transactionInDb.TransactionType = editedTransaction.TransactionType;
+
+			await data.SaveChangesAsync();
+		}
+
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist
 		/// or User is not owner or Administrator.
@@ -373,7 +364,7 @@ namespace PersonalFinancer.Services.Accounts
 				.FirstAsync();
 		}
 
-		public async Task<Dictionary<string, CashFlowViewModel>> GetAllAccountsCashFlow()
+		public async Task<Dictionary<string, CashFlowViewModel>> GetUsersAccountsCashFlow()
 		{
 			//TODO: Need refactoring. Use GroupBy? SelectMany? IQueryable variables?
 
@@ -411,10 +402,10 @@ namespace PersonalFinancer.Services.Accounts
 
 			return result;
 		}
-
-		public async Task<AllUsersAccountCardsViewModel> GetAllUsersAccountCardsViewModel(int page)
+		
+		public async Task<UsersAccountCardsViewModel> GetUsersAccountCardsViewModel(int page)
 		{
-			var model = new AllUsersAccountCardsViewModel();
+			var model = new UsersAccountCardsViewModel();
 			model.Pagination.Page = page;
 			model.Pagination.TotalElements = data.Accounts.Count(a => !a.IsDeleted);
 			model.Accounts = await data.Accounts
@@ -475,6 +466,57 @@ namespace PersonalFinancer.Services.Accounts
 				.FirstAsync();
 		}
 
+		public async Task<TransactionFormModel> GetEmptyTransactionFormModel(string userId)
+		{
+			return await data.Users.Where(u => u.Id == userId)
+				.Select(u => new TransactionFormModel
+				{
+					OwnerId = u.Id,
+					CreatedOn = DateTime.UtcNow,
+					UserAccounts = u.Accounts
+						.Where(a => !a.IsDeleted)
+						.Select(a => mapper.Map<AccountDropdownViewModel>(a)),
+					UserCategories = u.Categories
+						.Where(c => !c.IsDeleted)
+						.Select(c => mapper.Map<CategoryViewModel>(c))
+				})
+				.FirstAsync();
+		}	
+		
+		/// <summary>
+		/// Throws InvalidOperationException when Transaction does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<TransactionFormModel> GetFulfilledTransactionFormModel(string transactionId)
+		{
+			return await data.Transactions.Where(t => t.Id == transactionId)
+				.Select(t => new TransactionFormModel
+				{
+					OwnerId = t.OwnerId,
+					AccountId = t.AccountId,
+					CategoryId = t.CategoryId,
+					Amount = t.Amount,
+					CreatedOn = t.CreatedOn,
+					TransactionType = t.TransactionType,
+					Refference = t.Refference,
+					UserAccounts = t.Account.IsDeleted ?
+						new List<AccountDropdownViewModel>()
+						{
+							new AccountDropdownViewModel { Id = t.AccountId, Name = t.Account.Name }
+						}
+						: t.Owner.Accounts
+							.Where(a => !a.IsDeleted)
+							.Select(a => mapper.Map<AccountDropdownViewModel>(a)),
+					UserCategories = t.IsInitialBalance ?
+						new List<CategoryViewModel>()
+						{
+							new CategoryViewModel { Id = t.CategoryId, Name = t.Category.Name }
+						}
+						: t.Owner.Categories.Select(c => mapper.Map<CategoryViewModel>(c))
+				})
+				.FirstAsync();
+		}
+
 		/// <summary>
 		/// Throws InvalidOperationException if Account does not exist.
 		/// </summary>
@@ -486,6 +528,18 @@ namespace PersonalFinancer.Services.Accounts
 			return account.OwnerId;
 		}
 		
+		/// <summary>
+		/// Throws InvalidOperationException when Transaction does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<TransactionDetailsViewModel> GetTransactionViewModel(string transactionId)
+		{
+			return await data.Transactions
+				.Where(t => t.Id == transactionId)
+				.ProjectTo<TransactionDetailsViewModel>(mapper.ConfigurationProvider)
+				.FirstAsync();
+		}
+
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
@@ -528,8 +582,7 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task PrepareAccountDetailsViewModelForReturn(
-			string accountId, DetailsAccountViewModel model)
+		public async Task PrepareAccountDetailsViewModelForReturn(string accountId, DetailsAccountViewModel model)
 		{
 			var dto = await data.Accounts
 				.Where(a => a.Id == accountId)
@@ -544,6 +597,39 @@ namespace PersonalFinancer.Services.Accounts
 			model.Name = dto.Name;
 			model.Balance = dto.Balance;
 			model.CurrencyName = dto.CurrencyName;
+		}
+		
+		/// <summary>
+		/// Throws InvalidOperationException if User does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task PrepareAccountFormModelForReturn(AccountFormModel model)
+		{
+			AccountFormModel emptyFormModel = await GetEmptyAccountFormModel(model.OwnerId);
+
+			model.AccountTypes = emptyFormModel.AccountTypes;
+			model.Currencies = emptyFormModel.Currencies;
+		}
+
+		public async Task SetUserTransactionsViewModel(string userId, UserTransactionsViewModel model)
+		{
+			model.Pagination.TotalElements = data.Transactions.Count(t =>
+				t.Account.OwnerId == userId
+				&& t.CreatedOn >= model.StartDate
+				&& t.CreatedOn <= model.EndDate);
+
+			model.Transactions = await data.Transactions
+				.Where(t =>
+					t.Account.OwnerId == userId
+					&& t.CreatedOn >= model.StartDate
+					&& t.CreatedOn <= model.EndDate)
+				.OrderByDescending(t => t.CreatedOn)
+				.Skip(model.Pagination.Page != 1 ?
+					model.Pagination.ElementsPerPage * (model.Pagination.Page - 1)
+					: 0)
+				.Take(model.Pagination.ElementsPerPage)
+				.ProjectTo<TransactionTableViewModel>(mapper.ConfigurationProvider)
+				.ToArrayAsync();
 		}
 	}
 }

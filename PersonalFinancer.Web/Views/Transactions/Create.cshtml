@@ -1,13 +1,10 @@
 ﻿@using PersonalFinancer.Data.Enums
-@using PersonalFinancer.Services.Transactions.Models
+@using PersonalFinancer.Services.Accounts.Models;
 @using PersonalFinancer.Web.Infrastructure;
 @using static PersonalFinancer.Data.Constants.HostConstants
-@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @model TransactionFormModel
 @{
 	ViewData["Title"] = "Create Transaction";
-
-	var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
 @if (Model.UserAccounts.Any())
@@ -28,22 +25,21 @@
 						<label asp-for="@Model.CreatedOn" class="form-label"></label>
 						<span asp-validation-for="@Model.CreatedOn" class="text-danger"></span>
 					</div>
-					<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField" id="categoriesSelection">
+					<div class="newElemDiv dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField" ownerId="@Model.OwnerId" apiUrl="@ApiCategoriesUrl">
 						<label asp-for="@Model.CategoryId" class="form-label"></label>
-						<select asp-for="@Model.CategoryId" class="form-select" id="categoriesField">
+						<select asp-for="@Model.CategoryId" class="form-select">
 							@foreach (var category in @Model.UserCategories)
 							{
 								<option value="@category.Id" id="@category.Id">@category.Name</option>
 							}
 						</select>
-						<span asp-validation-for="@Model.CategoryId" class="text-danger"></span>
-						<div id="newCategoryDiv" class="form-floating formField" style="display: none;">
-							<input id="newCategoryField" class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
+						<div class="form-floating formField" style="display: none;">
+							<input class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
 							<label class="form-label">Write new Category name...</label>
-							<p id="errorMsg" style="color: red;"></p>
+							<p class="text-danger"></p>
 						</div>
-						<a class="btn btn-secondary" id="createCategoryBtn">Create New Category</a>
-						<a class="btn btn-danger" id="deleteCategoryBtn" style="display: none;">Delete This Category</a>
+						<a class="btn btn-secondary createBtn">Create New Category</a>
+						<a class="btn btn-danger deleteBtn">Delete This Category</a>
 					</div>
 					<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 						<label asp-for="@Model.AccountId" class="form-label"></label>
@@ -67,7 +63,6 @@
 					<div>
 						<button type="submit" class="w-100 btn btn-lg btn-success">Create</button>
 					</div>
-					<input id="RequestVerificationToken" type="hidden" value="@requestToken" />
 				</form>
 			</section>
 		</div>
@@ -75,22 +70,7 @@
 
 	@section Scripts {
 	<partial name="_ValidationScriptsPartial" />
-	<script src="/js/createDeleteBtns.js"></script>
-	<script>
-		const createCategoryBtn = document.getElementById('createCategoryBtn');
-		const deleteCategoryBtn = document.getElementById('deleteCategoryBtn');
-		const newCategoryDiv = document.getElementById('newCategoryDiv');
-		const newCategoryField = document.getElementById('newCategoryField');
-		const categoriesField = document.getElementById('categoriesField');
-		const userId = '@User.Id()';
-		const categoriesApi = '@ApiCategoriesUrl';
-
-		deleteBtnController(categoriesField, deleteCategoryBtn, userId);
-
-		eventSetter(createCategoryBtn, newCategoryDiv, categoriesField, newCategoryField, categoriesApi, userId, deleteCategoryBtn);
-		eventSetter(deleteCategoryBtn, newCategoryDiv, categoriesField, newCategoryField, categoriesApi, userId);
-		eventSetter(categoriesField, newCategoryDiv, categoriesField, newCategoryField, categoriesApi, userId, deleteCategoryBtn);
-	</script>
+	<script src="/js/createDeleteAjax.js"></script>
 	}
 }
 else

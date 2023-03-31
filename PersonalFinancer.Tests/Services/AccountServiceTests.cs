@@ -9,7 +9,7 @@ using PersonalFinancer.Services.Shared.Models;
 
 namespace PersonalFinancer.Tests.Services
 {
-	[TestFixture]
+    [TestFixture]
 	class AccountServiceTests : UnitTestsBase
 	{
 		private IAccountsService accountService;
@@ -19,6 +19,321 @@ namespace PersonalFinancer.Tests.Services
 		{
 			this.accountService = new AccountsService(this.data, this.mapper, this.memoryCache);
 		}
+
+		[Test]
+		public async Task CreateTransaction_ShouldAddNewTransaction_AndChangeAccountBalance()
+		{
+			//Arrange
+			TransactionFormModel transactionModel = new TransactionFormModel()
+			{
+				Amount = 100,
+				AccountId = this.Account1User1.Id,
+				CategoryId = this.Category2.Id,
+				CreatedOn = DateTime.UtcNow,
+				Refference = "Not Initial Balance",
+				TransactionType = TransactionType.Expense
+			};
+			int transactionsCountBefore = this.Account1User1.Transactions.Count();
+			decimal balanceBefore = this.Account1User1.Balance;
+
+			//Act
+			string id = await accountService.CreateTransaction(this.User1.Id, transactionModel);
+			Transaction? transaction = await data.Transactions.FindAsync(id);
+
+			//Assert
+			Assert.That(transaction, Is.Not.Null);
+			Assert.That(this.Account1User1.Transactions.Count(), Is.EqualTo(transactionsCountBefore + 1));
+			Assert.That(transaction.Amount, Is.EqualTo(transactionModel.Amount));
+			Assert.That(transaction.CategoryId, Is.EqualTo(transactionModel.CategoryId));
+			Assert.That(transaction.AccountId, Is.EqualTo(transactionModel.AccountId));
+			Assert.That(transaction.Refference, Is.EqualTo(transactionModel.Refference));
+			Assert.That(transaction.CreatedOn, Is.EqualTo(transactionModel.CreatedOn));
+			Assert.That(transaction.TransactionType, Is.EqualTo(transactionModel.TransactionType));
+			Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore - transaction.Amount));
+		}
+
+
+		[Test]
+		public async Task DeleteTransactionById_ShouldDeleteIncomeTransactionReductBalanceAndNewBalance_WithValidInput()
+		{
+			//Arrange
+			string transactionId = Guid.NewGuid().ToString();
+			Transaction transaction = new Transaction
+			{
+				Id = transactionId,
+				OwnerId = this.User1.Id,
+				AccountId = this.Account1User1.Id,
+				Amount = 123,
+				CategoryId = this.Category2.Id,
+				CreatedOn = DateTime.UtcNow,
+				Refference = "TestTransaction",
+				TransactionType = TransactionType.Income
+			};
+			await data.Transactions.AddAsync(transaction);
+			this.Account1User1.Balance += transaction.Amount;
+			await data.SaveChangesAsync();
+
+			decimal balanceBefore = this.Account1User1.Balance;
+			int transactionsBefore = this.Account1User1.Transactions.Count;
+			Transaction? transactionInDb = await data.Transactions.FindAsync(transactionId);
+
+			//Assert
+			Assert.That(transactionInDb, Is.Not.Null);
+
+			//Act
+			decimal newBalance = await accountService.DeleteTransaction(transactionId);
+
+			//Assert
+			Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
+			Assert.That(this.Account1User1.Balance, Is.EqualTo(newBalance));
+			Assert.That(this.Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
+			Assert.That(await data.Transactions.FindAsync(transactionId), Is.Null);
+		}
+
+		[Test]
+		public void DeleteTransactionById_ShouldThrowAnException_WithInvalidInput()
+		{
+			//Arrange
+
+			//Act & Assert
+			Assert.That(async () => await accountService.DeleteTransaction(Guid.NewGuid().ToString()),
+				Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task EditTransactionFormModelById_ShouldReturnCorrectDTO_WithValidInput()
+		{
+			//Act
+			TransactionFormModel? transactionFormModel = await accountService
+				.GetFulfilledTransactionFormModel(this.Transaction1.Id);
+
+			//Assert
+			Assert.That(transactionFormModel, Is.Not.Null);
+			//Assert.That(transactionFormModel.Id, Is.EqualTo(this.Transaction1.Id));
+			Assert.That(transactionFormModel.AccountId, Is.EqualTo(this.Transaction1.AccountId));
+			Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction1.Amount));
+			Assert.That(transactionFormModel.CategoryId, Is.EqualTo(this.Transaction1.CategoryId));
+			Assert.That(transactionFormModel.Refference, Is.EqualTo(this.Transaction1.Refference));
+			Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.Transaction1.TransactionType));
+		}
+
+		[Test]
+		public void EditTransactionFormModelById_ShouldReturnNull_WithInValidInput()
+		{
+			//Act & Assert
+			Assert.That(async () => await accountService.GetFulfilledTransactionFormModel(Guid.NewGuid().ToString()),
+				Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task TransactionViewModel_ShouldReturnCorrectDTO_WithValidInput()
+		{
+			//Act
+			TransactionDetailsViewModel transactionFormModel =
+				await accountService.GetTransactionViewModel(this.Transaction1.Id);
+
+			//Assert
+			Assert.That(transactionFormModel, Is.Not.Null);
+			Assert.That(transactionFormModel.Id, Is.EqualTo(this.Transaction1.Id));
+			Assert.That(transactionFormModel.AccountName, Is.EqualTo(this.Transaction1.Account.Name));
+			Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction1.Amount));
+			Assert.That(transactionFormModel.CategoryName, Is.EqualTo(this.Transaction1.Category.Name));
+			Assert.That(transactionFormModel.Refference, Is.EqualTo(this.Transaction1.Refference));
+			Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.Transaction1.TransactionType.ToString()));
+		}
+
+		[Test]
+		public void TransactionViewModel_ShouldReturnNull_WithInValidInput()
+		{
+			//Act & Assert
+			Assert.That(async () => await accountService.GetTransactionViewModel(Guid.NewGuid().ToString()),
+				Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task AllTransactionsViewModel_ShouldReturnCorrectDTO_WithValidInput()
+		{
+			//Arrange
+			var model = new UserTransactionsViewModel
+			{
+				StartDate = DateTime.Now.AddMonths(-1),
+				EndDate = DateTime.Now
+			};
+
+			IEnumerable<Transaction> expectedTransactions = await data.Transactions
+				.Where(t => t.Account.OwnerId == this.User1.Id &&
+					t.CreatedOn >= model.StartDate &&
+					t.CreatedOn <= model.EndDate)
+				.OrderByDescending(t => t.CreatedOn)
+				.ToListAsync();
+
+			//Act
+			await accountService.SetUserTransactionsViewModel(this.User1.Id, model);
+
+			//Assert
+			Assert.That(model, Is.Not.Null);
+			Assert.That(model.Transactions.Count(), Is.EqualTo(expectedTransactions.Count()));
+			for (int i = 0; i < expectedTransactions.Count(); i++)
+			{
+				Assert.That(model.Transactions.ElementAt(i).Id,
+					Is.EqualTo(expectedTransactions.ElementAt(i).Id));
+				Assert.That(model.Transactions.ElementAt(i).Amount,
+					Is.EqualTo(expectedTransactions.ElementAt(i).Amount));
+				Assert.That(model.Transactions.ElementAt(i).CategoryName,
+					Is.EqualTo(expectedTransactions.ElementAt(i).Category.Name));
+				Assert.That(model.Transactions.ElementAt(i).Refference,
+					Is.EqualTo(expectedTransactions.ElementAt(i).Refference));
+				Assert.That(model.Transactions.ElementAt(i).TransactionType,
+					Is.EqualTo(expectedTransactions.ElementAt(i).TransactionType.ToString()));
+			}
+		}
+
+		[Test]
+		public async Task EditTransaction_ShouldEditTransactionAndChangeBalance_WhenTransactionTypeIsChanged()
+		{
+			//Arrange
+			string transactionId = Guid.NewGuid().ToString();
+			Transaction transaction = new Transaction
+			{
+				Id = transactionId,
+				OwnerId = this.User1.Id,
+				AccountId = this.Account1User1.Id,
+				Amount = 123,
+				CategoryId = this.Category2.Id,
+				CreatedOn = DateTime.UtcNow,
+				Refference = "TransactionTypeChanged",
+				TransactionType = TransactionType.Income
+			};
+
+			data.Transactions.Add(transaction);
+			this.Account1User1.Balance += transaction.Amount;
+			await data.SaveChangesAsync();
+			decimal balanceBefore = this.Account1User1.Balance;
+
+			TransactionFormModel transactionEditModel = await data.Transactions
+				.Where(t => t.Id == transactionId)
+				.Select(t => mapper.Map<TransactionFormModel>(t))
+				.FirstAsync();
+
+			//Act
+			transactionEditModel.TransactionType = TransactionType.Expense;
+			await accountService.EditTransaction(transactionId.ToString(), transactionEditModel);
+
+			//Assert
+			Assert.That(transaction.TransactionType, Is.EqualTo(TransactionType.Expense));
+			Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore - transaction.Amount * 2));
+		}
+
+		[Test]
+		public async Task EditTransaction_ShouldEditTransactionAndChangeBalanceOnTwoAccounts_WhenAccountIsChanged()
+		{
+			//Arrange
+			string transactionId = Guid.NewGuid().ToString();
+			Transaction transaction = new Transaction
+			{
+				Id = transactionId,
+				OwnerId = this.User1.Id,
+				AccountId = this.Account2User1.Id,
+				Amount = 123,
+				CategoryId = this.Category2.Id,
+				CreatedOn = DateTime.UtcNow,
+				Refference = "AccountChanged",
+				TransactionType = TransactionType.Income
+			};
+
+			data.Transactions.Add(transaction);
+			this.Account2User1.Balance += transaction.Amount;
+			await data.SaveChangesAsync();
+			decimal firstAccBalanceBefore = this.Account2User1.Balance;
+			decimal secondAccBalanceBefore = this.Account1User1.Balance;
+
+			//Act
+			TransactionFormModel editTransactionModel = await data.Transactions
+				.Where(t => t.Id == transactionId)
+				.Select(t => mapper.Map<TransactionFormModel>(t))
+				.FirstAsync();
+
+			editTransactionModel.AccountId = this.Account1User1.Id;
+			await accountService.EditTransaction(transactionId.ToString(), editTransactionModel);
+
+			//Assert
+			Assert.That(transaction.AccountId, Is.EqualTo(this.Account1User1.Id));
+			Assert.That(this.Account2User1.Balance, Is.EqualTo(firstAccBalanceBefore - transaction.Amount));
+			Assert.That(this.Account1User1.Balance, Is.EqualTo(secondAccBalanceBefore + transaction.Amount));
+		}
+
+		[Test]
+		public async Task EditTransaction_ShouldEditTransaction_WhenPaymentRefferenceIsChanged()
+		{
+			//Arrange
+			string transactionId = Guid.NewGuid().ToString();
+			Transaction transaction = new Transaction
+			{
+				Id = transactionId,
+				OwnerId = this.User1.Id,
+				AccountId = this.Account1User1.Id,
+				Amount = 123,
+				CategoryId = this.Category2.Id,
+				CreatedOn = DateTime.UtcNow,
+				Refference = "First Refference",
+				TransactionType = TransactionType.Income
+			};
+
+			await data.Transactions.AddAsync(transaction);
+			this.Account1User1.Balance += transaction.Amount;
+			await data.SaveChangesAsync();
+			decimal balanceBefore = this.Account1User1.Balance;
+			string categoryIdBefore = transaction.CategoryId;
+
+			//Act
+			TransactionFormModel editTransactionModel = await data.Transactions
+				.Where(t => t.Id == transactionId)
+				.Select(t => mapper.Map<TransactionFormModel>(t))
+				.FirstAsync();
+			editTransactionModel.Refference = "Second Refference";
+			await accountService.EditTransaction(transactionId.ToString(), editTransactionModel);
+
+			//Assert that only transaction refference is changed
+			Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore));
+			Assert.That(transaction.Refference, Is.EqualTo(editTransactionModel.Refference));
+			Assert.That(transaction.CategoryId, Is.EqualTo(categoryIdBefore));
+		}
+
+		//[Test]
+		//public async Task DeleteTransactionById_ShouldDeleteExpenseTransactionIncreaseBalanceAndNewBalance_WithValidInput()
+		//{
+		//	//Arrange
+		//	string transactionId = Guid.NewGuid().ToString();
+		//	Transaction transaction = new Transaction
+		//	{
+		//		Id = transactionId,
+		//		AccountId = this.Account1User1.Id,
+		//		Amount = 123,
+		//		CategoryId = this.Category2.Id,
+		//		CreatedOn = DateTime.UtcNow,
+		//		Refference = "TestTransaction",
+		//		TransactionType = TransactionType.Expense
+		//	};
+		//	data.Transactions.Add(transaction);
+		//	this.Account1User1.Balance -= transaction.Amount;
+		//	await data.SaveChangesAsync();
+
+		//	decimal balanceBefore = this.Account1User1.Balance;
+		//	int transactionsBefore = this.Account1User1.Transactions.Count;
+		//	Transaction? transactionInDb = await data.Transactions.FindAsync(transactionId);
+
+		//	//Assert
+		//	Assert.That(transactionInDb, Is.Not.Null);
+
+		//	//Act
+		//	decimal newBalance = await transactionService.DeleteTransaction(transactionId);
+
+		//	//Assert
+		//	Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
+		//	Assert.That(this.Account1User1.Balance, Is.EqualTo(newBalance));
+		//	Assert.That(this.Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
+		//	Assert.That(await data.Transactions.FindAsync(transactionId), Is.Null);
+		//}
 
 		//[Test]
 		//public async Task AllAccountsDropdownViewModel_ShouldReturnCorrectData_WithValidUserId()
@@ -375,346 +690,5 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(actualViewModel.Name, Is.EqualTo(this.Account1User1.Name));
 			//Assert.That(actualViewModel.OwnerId, Is.EqualTo(this.Account1User1.OwnerId));
 		}
-
-		[Test]
-		public async Task CreateAccountType_ShouldAddNewAccountType_WithValidParams()
-		{
-			//Arrange
-			var inputModel = new AccountTypeInputModel
-			{
-				Name = "NewAccountType",
-				OwnerId = this.User1.Id
-			};
-			int countBefore = data.AccountTypes.Count();
-
-			//Act
-			AccountTypeViewModel viewModel = 
-				await accountService.CreateAccountType(inputModel);
-
-			int countAfter = data.AccountTypes.Count();
-
-			//Assert
-			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
-			Assert.That(viewModel.Id, Is.Not.Null);
-			Assert.That(viewModel.Name, Is.EqualTo(inputModel.Name));
-		}
-
-		[Test]
-		public async Task CreateAccountType_ShouldRecreateDeletedBeforeAccountType_WithValidParams()
-		{
-			//Arrange
-			var deletedAccType = new AccountType
-			{
-				Id = Guid.NewGuid().ToString(),
-				Name = "DeletedAccType",
-				OwnerId = this.User1.Id,
-				IsDeleted = true
-			};
-			await data.AccountTypes.AddAsync(deletedAccType);
-			await data.SaveChangesAsync();
-			int countBefore = data.AccountTypes.Count();
-			
-			var inputModel = new AccountTypeInputModel
-			{
-				Name = deletedAccType.Name,
-				OwnerId = this.User1.Id
-			};
-
-			//Assert
-			Assert.That(async () =>
-			{
-				var deletedAcc = await data.AccountTypes.FindAsync(deletedAccType.Id);
-				Assert.That(deletedAcc, Is.Not.Null);
-				return deletedAcc.IsDeleted;
-			}, Is.True);
-
-			//Act
-			AccountTypeViewModel viewModel = 
-				await accountService.CreateAccountType(inputModel);
-
-			int countAfter = data.AccountTypes.Count();
-
-			//Assert
-			Assert.That(countAfter, Is.EqualTo(countBefore));
-			Assert.That(viewModel.Id, Is.Not.Null);
-			Assert.That(viewModel.Name, Is.EqualTo(deletedAccType.Name));
-		}
-
-		[Test]
-		public async Task CreateAccountType_ShouldAddNewAccTypeWhenAnotherUserHaveTheSameAccType()
-		{
-			//Arrange
-			var user2AccType = new AccountType 
-			{ 
-				Id = Guid.NewGuid().ToString(),
-				Name = "User2AccType", 
-				OwnerId = this.User2.Id 
-			};
-
-			await data.AccountTypes.AddAsync(user2AccType);
-			await data.SaveChangesAsync();
-			int countBefore = data.AccountTypes.Count();
-			
-			var inputModel = new AccountTypeInputModel
-			{
-				Name = user2AccType.Name,
-				OwnerId = this.User1.Id
-			};
-
-			//Assert
-			Assert.That(await data.AccountTypes.FindAsync(user2AccType.Id), Is.Not.Null);
-
-			//Act
-			AccountTypeViewModel viewModel = 
-				await accountService.CreateAccountType(inputModel);
-
-			int countAfter = data.AccountTypes.Count();
-
-			//Assert
-			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
-			Assert.That(viewModel.Id, Is.Not.Null);
-			Assert.That(viewModel.Name, Is.EqualTo("User2AccType"));
-		}
-
-		[Test]
-		public void CreateAccountType_ShouldThrowException_WhenAccTypeExist()
-		{
-			//Arrange
-			
-			var inputModel = new AccountTypeInputModel
-			{
-				Name = this.AccountType1.Name,
-				OwnerId = this.User1.Id
-			};
-
-			//Act & Assert
-			Assert.That(async () => await accountService.CreateAccountType(inputModel),
-				Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Account Type with the same name exist!"));
-		}
-
-		//[Test]
-		//[TestCase("A")]
-		//[TestCase("NameWith16Chars!")]
-		//public void CreateAccountType_ShouldThrowException_WithInvalidName(string accountTypeName)
-		//{
-		//	//Arrange
-		//	var inputModel = new AccountTypeInputModel
-		//	{
-		//		Name = accountTypeName,
-		//		OwnerId = this.User1.Id
-		//	};
-
-		//	//Act & Assert
-		//	Assert.That(async () => await accountService.CreateAccountType(inputModel),
-		//		Throws.TypeOf<ArgumentException>().With.Message
-		//			.EqualTo("Account Type name must be between 2 and 15 characters long."));
-		//}
-
-		[Test]
-		public async Task DeleteAccountType_ShouldRemoveAccType_WithValidParams()
-		{
-			//Arrange
-			var newAccType = new AccountType() 
-			{
-				Id = Guid.NewGuid().ToString(),
-				Name = "NewAccType", 
-				OwnerId = this.User1.Id 
-			};
-			await data.AccountTypes.AddAsync(newAccType);
-			await data.SaveChangesAsync();
-
-			//Assert
-			Assert.That(await data.AccountTypes.FindAsync(newAccType.Id), Is.Not.Null);
-			Assert.That(newAccType.IsDeleted, Is.False);
-
-			//Act
-			await accountService.DeleteAccountType(newAccType.Id, this.User1.Id);
-
-			//Assert
-			Assert.That(newAccType.IsDeleted, Is.True);
-		}
-
-		[Test]
-		public void DeleteAccountType_ShouldThrowException_WhenAccTypeNotExist()
-		{
-			//Act & Assert
-			Assert.That(async () => await accountService.DeleteAccountType(Guid.NewGuid().ToString(), this.User1.Id),
-				Throws.TypeOf<InvalidOperationException>());
-		}
-
-		[Test]
-		public async Task DeleteAccountType_ShouldThrowException_WhenUserIsNotOwner()
-		{
-			//Arrange
-			var user2AccType = new AccountType() 
-			{ 
-				Id = Guid.NewGuid().ToString(),
-				Name = "ForDelete", 
-				OwnerId = this.User2.Id 
-			};
-			await data.AccountTypes.AddAsync(user2AccType);
-			await data.SaveChangesAsync();
-
-			//Act & Assert
-			Assert.That(async () => await accountService
-					.DeleteAccountType(user2AccType.Id, this.User1.Id),
-				Throws.TypeOf<ArgumentException>()
-					.With.Message.EqualTo("Can't delete someone else Account Type."));
-		}
-
-		//[Test]
-		//		public async Task CreateCurrency_ShouldAddNewCurrency_WithValidParams()
-		//		{
-		//			//Arrange
-		//			int currenciesBefore = data.Currencies
-		//				.Count(c => c.OwnerId == this.User1.Id && !c.IsDeleted);
-
-		//			var model = new CurrencyViewModel { Name = "NEW" };
-
-		//			//Assert
-		//			Assert.That(await data.Currencies.FirstOrDefaultAsync(c => c.Name == model.Name),
-		//				Is.Null);
-
-		//			//Act
-		//			await currencyService.CreateCurrency(this.User1.Id, model);
-		//			int actualCurrencies = data.Currencies
-		//				.Count(c => c.OwnerId == this.User1.Id && !c.IsDeleted);
-
-		//			//Assert
-		//			Assert.That(model.Id, Is.Not.Null);
-		//			Assert.That(model.Name, Is.EqualTo("NEW"));
-		//			Assert.That(model.OwnerId, Is.EqualTo(this.User1.Id));
-		//			Assert.That(await data.Currencies.FirstOrDefaultAsync(c => c.Name == "NEW"), Is.Not.Null);
-		//			Assert.That(actualCurrencies, Is.EqualTo(currenciesBefore + 1));
-		//		}
-
-		//		[Test]
-		//		public async Task CreateCurrency_ShouldAddNewCurrencyWhenAnotherUserHaveTheSameCurrency()
-		//		{
-		//			//Arrange
-		//			var user2Currency = new Currency { Name = "NEW2", OwnerId = this.User2.Id };
-		//			data.Currencies.Add(user2Currency);
-		//			await data.SaveChangesAsync();
-
-		//			int currenciesBefore = data.Currencies.Count();
-		//			var model = new CurrencyViewModel { Name = user2Currency.Name };
-
-		//			//Assert
-		//			Assert.That(await data.Currencies.FindAsync(user2Currency.Id), Is.Not.Null);
-
-		//			//Act
-		//			await currencyService.CreateCurrency(this.User1.Id, model);
-		//			int actualCurrencies = data.Currencies.Count();
-
-		//			//Assert
-		//			Assert.That(model.Id, Is.Not.Null);
-		//			Assert.That(model.Name, Is.EqualTo(user2Currency.Name));
-		//			Assert.That(model.OwnerId, Is.EqualTo(this.User1.Id));
-		//			Assert.That(data.Currencies.Count(c => c.Name == "NEW2"), Is.EqualTo(2));
-		//			Assert.That(actualCurrencies, Is.EqualTo(currenciesBefore + 1));
-		//		}
-
-		//		[Test]
-		//		public async Task CreateCurrency_ShouldRecreateDeletedBeforeCurrency_WithValidParams()
-		//		{
-		//			//Arrange
-		//			var deletedCurrency = new Currency
-		//			{
-		//				Name = "DeletedCurrency",
-		//				OwnerId = this.User1.Id,
-		//				IsDeleted = true
-		//			};
-		//			data.Currencies.Add(deletedCurrency);
-		//			await data.SaveChangesAsync();
-		//			int countBefore = data.Currencies.Count();
-		//			var model = new CurrencyViewModel { Name = deletedCurrency.Name };
-
-		//			//Assert
-		//			Assert.That(async () =>
-		//			{
-		//				var deletedCurr = await data.Currencies.FindAsync(deletedCurrency.Id);
-		//				Assert.That(deletedCurr, Is.Not.Null);
-		//				return deletedCurr.IsDeleted;
-		//			}, Is.True);
-
-		//			//Act
-		//			await currencyService.CreateCurrency(this.User1.Id, model);
-		//			int countAfter = data.Currencies.Count();
-
-		//			//Assert
-		//			Assert.That(model.Id, Is.Not.Null);
-		//			Assert.That(countAfter, Is.EqualTo(countBefore));
-		//			Assert.That(model.OwnerId, Is.EqualTo(this.User1.Id));
-		//			Assert.That(model.Name, Is.EqualTo(deletedCurrency.Name));
-		//		}
-
-		//		[Test]
-		//		public void CreateCurrency_ShouldThrowException_WithExistingCurrency()
-		//		{
-		//			//Arrange
-		//			var model = new CurrencyViewModel { Name = this.Currency1.Name };
-
-		//			//Act & Assert
-		//			Assert.That(async () => await currencyService.CreateCurrency(this.User1.Id, model),
-		//				Throws.TypeOf<ArgumentException>()
-		//					.With.Message.EqualTo("Currency with the same name exist!"));
-		//		}
-
-		//		[Test]
-		//		[TestCase("A")]
-		//		[TestCase("NameWith11!")]
-		//		public void CreateCurrency_ShouldThrowException_WithInvalidName(string currencyName)
-		//		{
-		//			//Arrange
-		//			var model = new CurrencyViewModel { Name = currencyName };
-
-		//			//Act & Assert
-		//			Assert.That(async () => await currencyService.CreateCurrency(this.User1.Id, model),
-		//				Throws.TypeOf<ArgumentException>().With.Message
-		//					.EqualTo("Currency name must be between 2 and 10 characters long."));
-		//		}
-
-		//		[Test]
-		//		public async Task DeleteCurrency_ShouldDeleteCurrency_WithValidParams()
-		//		{
-		//			//Arrange
-		//			var newCurrency = new Currency { Name = "DEL", OwnerId = this.User1.Id };
-		//			data.Currencies.Add(newCurrency);
-		//			await data.SaveChangesAsync();
-
-		//			//Assert
-		//			Assert.That(await data.Currencies.FindAsync(newCurrency.Id), Is.Not.Null);
-		//			Assert.That(newCurrency.IsDeleted, Is.False);
-
-		//			//Act
-		//			await currencyService.DeleteCurrency(newCurrency.Id, this.User1.Id);
-
-		//			//Assert
-		//			Assert.That(newCurrency.IsDeleted, Is.True);
-		//		}
-
-		//		[Test]
-		//		public void DeleteCurrency_ShouldThrowException_WhenCurrencyNotExist()
-		//		{
-		//			//Arrange
-
-		//			//Act & Assert
-		//			Assert.That(async () => await currencyService.DeleteCurrency(Guid.NewGuid().ToString(), this.User1.Id),
-		//				Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Currency does not exist."));
-		//		}
-
-		//		[Test]
-		//		public async Task DeleteCurrency_ShouldThrowException_WhenUserIsNotOwner()
-		//		{
-		//			//Arrange
-		//			var newCurrency = new Currency { Name = "NOT", OwnerId = this.User2.Id };
-		//			data.Currencies.Add(newCurrency);
-		//			await data.SaveChangesAsync();
-
-		//			//Act & Assert
-		//			Assert.That(async () => await currencyService.DeleteCurrency(newCurrency.Id, this.User1.Id),
-		//				Throws.TypeOf<InvalidOperationException>()
-		//					.With.Message.EqualTo("Can't delete someone else Currency."));
-		//		}
 	}
 }

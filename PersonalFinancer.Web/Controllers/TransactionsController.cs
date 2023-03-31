@@ -1,20 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Transactions;
-using PersonalFinancer.Services.Transactions.Models;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Web.Infrastructure;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {
-	[Authorize(Roles = UserRoleName)]
+    [Authorize(Roles = UserRoleName)]
 	public class TransactionsController : Controller
 	{
-		private readonly ITransactionsService transactionsService;
+		private readonly IAccountsService accountsService;
 
-		public TransactionsController(ITransactionsService transactionsService)
-			=> this.transactionsService = transactionsService;
+		public TransactionsController(IAccountsService accountsService)
+			=> this.accountsService = accountsService;
 
 		public async Task<IActionResult> All(string? startDate, string? endDate, int page = 1)
 		{
@@ -33,7 +32,7 @@ namespace PersonalFinancer.Web.Controllers
 				viewModel.EndDate = DateTime.Parse(endDate);
 			}
 
-			await transactionsService.GetAllUserTransactions(User.Id(), viewModel);
+			await accountsService.SetUserTransactionsViewModel(User.Id(), viewModel);
 
 			return View(viewModel);
 		}
@@ -45,7 +44,7 @@ namespace PersonalFinancer.Web.Controllers
 			if (!ModelState.IsValid)
 				return View(inputModel);
 
-			await transactionsService.GetAllUserTransactions(User.Id(), inputModel);
+			await accountsService.SetUserTransactionsViewModel(User.Id(), inputModel);
 
 			return View(inputModel);
 		}
@@ -53,7 +52,7 @@ namespace PersonalFinancer.Web.Controllers
 		public async Task<IActionResult> Create()
 		{
 			TransactionFormModel viewModel =
-				await transactionsService.GetEmptyTransactionFormModel(User.Id());
+				await accountsService.GetEmptyTransactionFormModel(User.Id());
 
 			return View(viewModel);
 		}
@@ -71,7 +70,7 @@ namespace PersonalFinancer.Web.Controllers
 			try
 			{
 				string newTransactionId =
-					await transactionsService.CreateTransaction(User.Id(), inputModel);
+					await accountsService.CreateTransaction(User.Id(), inputModel);
 
 				TempData["successMsg"] = "You create a new transaction successfully!";
 
@@ -88,7 +87,7 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				await transactionsService.DeleteTransaction(id, User.Id());
+				await accountsService.DeleteTransaction(id, User.Id());
 			}
 			catch (ArgumentException)
 			{
@@ -111,7 +110,7 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				return View(await transactionsService.GetTransactionViewModel(id));
+				return View(await accountsService.GetTransactionViewModel(id));
 			}
 			catch (InvalidOperationException)
 			{
@@ -124,7 +123,7 @@ namespace PersonalFinancer.Web.Controllers
 			try
 			{
 				TransactionFormModel viewModel =
-					await transactionsService.GetFulfilledTransactionFormModel(id);
+					await accountsService.GetFulfilledTransactionFormModel(id);
 
 				if (User.Id() != viewModel.OwnerId)
 					return Unauthorized();
@@ -153,7 +152,7 @@ namespace PersonalFinancer.Web.Controllers
 
 			try
 			{
-				await transactionsService.EditTransaction(id, inputModel);
+				await accountsService.EditTransaction(id, inputModel);
 			}
 			catch (InvalidOperationException)
 			{
@@ -171,7 +170,7 @@ namespace PersonalFinancer.Web.Controllers
 		private async Task PrepareModelForReturn(TransactionFormModel model)
 		{
 			TransactionFormModel emptyFormModel =
-				await transactionsService.GetEmptyTransactionFormModel(User.Id());
+				await accountsService.GetEmptyTransactionFormModel(User.Id());
 
 			model.UserCategories = emptyFormModel.UserCategories;
 			model.UserAccounts = emptyFormModel.UserAccounts;

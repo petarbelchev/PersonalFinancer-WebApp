@@ -3,7 +3,6 @@
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.Transactions.Models;
 using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Services.Infrastructure

@@ -25,7 +25,7 @@ namespace PersonalFinancer.Services.Accounts.Models
 
 		public RoutingModel Routing { get; set; } = new RoutingModel
 		{
-			Controller = "Account",
+			Controller = "Accounts",
 			Action = "AccountDetails"
 		};
 

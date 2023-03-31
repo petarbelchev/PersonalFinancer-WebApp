@@ -22,39 +22,37 @@
 					<label asp-for="@Model.Balance" class="form-label"></label>
 					<span asp-validation-for="@Model.Balance" class="text-danger"></span>
 				</div>
-				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
+				<div class="newElemDiv dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField" ownerId="@Model.OwnerId" apiUrl="@ApiAccountTypesUrl">
 					<label asp-for="@Model.AccountTypeId" class="form-label"></label>
-					<select asp-for="@Model.AccountTypeId" class="form-select" id="accountTypesField">
+					<select asp-for="@Model.AccountTypeId" class="form-select">
 						@foreach (var accountType in @Model.AccountTypes)
 						{
 							<option value="@accountType.Id" id="@accountType.Id">@accountType.Name</option>
 						}
 					</select>
-					<span asp-validation-for="@Model.AccountTypeId" class="text-danger"></span>
-					<div id="newAccountTypeDiv" class="form-floating formField" style="display: none;">
-						<input id="newAccountTypeField" class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
+					<div class="form-floating formField" style="display: none;">
+						<input class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
 						<label class="form-label">Write New Account Type's name...</label>
-						<p style="color: red;"></p>
+						<p class="text-danger"></p>
 					</div>
-					<a class="btn btn-secondary" id="createAccountTypeBtn">Create New Account Type</a>
-					<a class="btn btn-danger" style="display: none;" id="deleteAccountTypeBtn">Delete This Account Type</a>
+					<a class="btn btn-secondary createBtn">Create New Account Type</a>
+					<a class="btn btn-danger deleteBtn">Delete This Account Type</a>
 				</div>
-				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
+				<div class="newElemDiv dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField" ownerId="@Model.OwnerId" apiUrl="@ApiCurrencyUrl">
 					<label asp-for="@Model.CurrencyId" class="form-label"></label>
-					<select asp-for="@Model.CurrencyId" class="form-select" id="currenciesField">
+					<select asp-for="@Model.CurrencyId" class="form-select">
 						@foreach (var currency in @Model.Currencies)
 						{
 							<option value="@currency.Id" id="@currency.Id">@currency.Name</option>
 						}
 					</select>
-					<span asp-validation-for="@Model.CurrencyId" class="text-danger"></span>
-					<div id="newCurrencyDiv" class="form-floating formField" style="display: none;">
-						<input id="newCurrencyField" class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
+					<div class="form-floating formField" style="display: none;">
+						<input class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
 						<label class="form-label">Write New Currency's name...</label>
-						<p style="color: red;"></p>
+						<p class="text-danger"></p>
 					</div>
-					<a class="btn btn-secondary" id="createCurrencyBtn">Create New Currency</a>
-					<a class="btn btn-danger" style="display: none;" id="deleteCurrencyBtn">Delete This Currency</a>
+					<a class="btn btn-secondary createBtn">Create New Currency</a>
+					<a class="btn btn-danger deleteBtn">Delete This Currency</a>
 				</div>
 				<input type="hidden" asp-for="@Model.OwnerId" />
 				<div>
@@ -67,33 +65,5 @@
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
-	<script src="/js/createDeleteBtns.js"></script>
-
-	<script>
-		const createAccountTypeBtn = document.getElementById('createAccountTypeBtn');
-		const deleteAccountTypeBtn = document.getElementById('deleteAccountTypeBtn');
-		const accountTypesField = document.getElementById('accountTypesField');
-		const accountTypesApi = '@ApiAccountTypesUrl';
-		const newAccountTypeDiv = document.getElementById('newAccountTypeDiv');
-		const inputAccountTypeField = document.getElementById('newAccountTypeField');
-
-		const createCurrencyBtn = document.getElementById('createCurrencyBtn');
-		const deleteCurrencyBtn = document.getElementById('deleteCurrencyBtn');
-		const currenciesField = document.getElementById('currenciesField');
-		const currenciesApi = '@ApiCurrencyUrl';
-		const newCurrencyDiv = document.getElementById('newCurrencyDiv');
-		const inputCurrencyField = document.getElementById('newCurrencyField');
-
-		const userId = '@Model.OwnerId';
-
-		deleteBtnController(accountTypesField, deleteAccountTypeBtn, userId);
-		deleteBtnController(currenciesField, deleteCurrencyBtn, userId);
-
-		eventSetter(createAccountTypeBtn, newAccountTypeDiv, accountTypesField, inputAccountTypeField, accountTypesApi, userId, deleteAccountTypeBtn);
-		eventSetter(createCurrencyBtn, newCurrencyDiv, currenciesField, inputCurrencyField, currenciesApi, userId, deleteCurrencyBtn);
-		eventSetter(deleteAccountTypeBtn, newAccountTypeDiv, accountTypesField, inputAccountTypeField, accountTypesApi, userId);
-		eventSetter(deleteCurrencyBtn, newCurrencyDiv, currenciesField, inputCurrencyField, currenciesApi, userId);
-		eventSetter(accountTypesField, newAccountTypeDiv, accountTypesField, inputAccountTypeField, accountTypesApi, userId, deleteAccountTypeBtn);
-		eventSetter(currenciesField, newCurrencyDiv, currenciesField, inputCurrencyField, currenciesApi, userId, deleteCurrencyBtn);
-	</script>
+	<script src="/js/createDeleteAjax.js"></script>
 }

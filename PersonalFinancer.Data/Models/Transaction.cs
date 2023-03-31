@@ -18,7 +18,6 @@ namespace PersonalFinancer.Data.Models
 		public string AccountId { get; set; } = null!;
 		public Account Account { get; set; } = null!;
 
-		//TODO: Remove it
 		[ForeignKey(nameof(Owner))]
         public string OwnerId { get; set; } = null!;
         public ApplicationUser Owner { get; set; } = null!;

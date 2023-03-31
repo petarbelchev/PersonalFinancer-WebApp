@@ -46,7 +46,6 @@ namespace PersonalFinancer.Data
 				b.Ignore(p => p.LockoutEnabled);
 				b.Ignore(p => p.LockoutEnd);
 
-				//TODO: To be removed
 				b.HasMany(a => a.Transactions).WithOne(a => a.Owner).OnDelete(DeleteBehavior.Restrict);
 			});
 

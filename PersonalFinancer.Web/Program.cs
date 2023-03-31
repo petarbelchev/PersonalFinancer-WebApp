@@ -6,7 +6,10 @@ using Microsoft.Extensions.Caching.Memory;
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Transactions;
+using PersonalFinancer.Services.AccountTypes;
+using PersonalFinancer.Services.Categories;
+using PersonalFinancer.Services.Currencies;
+using PersonalFinancer.Services.ModelsState;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Infrastructure;
@@ -29,12 +32,19 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 builder.Services.AddControllersWithViews(options =>
 {
 	options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-});
+})
+	.ConfigureApiBehaviorOptions(options =>
+	{
+		options.SuppressModelStateInvalidFilter = true;
+	});
 
 builder.Services.AddScoped<IAccountsService, AccountsService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
-builder.Services.AddScoped<ITransactionsService, TransactionsService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+builder.Services.AddScoped<IAccountTypeService, AccountTypeService>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
+builder.Services.AddSingleton<IModelStateService, ModelStateService>();
 
 builder.Services.AddAutoMapper(
 	typeof(IAccountsService).Assembly,

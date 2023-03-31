@@ -1,26 +1,26 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using PersonalFinancer.Services.Transactions;
-using PersonalFinancer.Services.Transactions.Models;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	[Area("Admin")]
+    [Area("Admin")]
 	[Authorize(Roles = AdminRoleName)]
 	public class TransactionsController : Controller
 	{
-		private readonly ITransactionsService transactionsService;
+		private readonly IAccountsService accountsService;
 
-		public TransactionsController(ITransactionsService transactionsService)
-			=> this.transactionsService = transactionsService;
+		public TransactionsController(IAccountsService accountsService)
+			=> this.accountsService = accountsService;
 		
 		public async Task<IActionResult> TransactionDetails(string id)
 		{
 			try
 			{
-				return View(await transactionsService.GetTransactionViewModel(id));
+				return View(await accountsService.GetTransactionViewModel(id));
 			}
 			catch (InvalidOperationException)
 			{
@@ -33,7 +33,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			try
 			{
 				TransactionFormModel viewModel = 
-					await transactionsService.GetFulfilledTransactionFormModel(id);
+					await accountsService.GetFulfilledTransactionFormModel(id);
 
 				return View(viewModel);
 			}
@@ -56,7 +56,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 			try
 			{
-				await transactionsService.EditTransaction(id, inputModel);
+				await accountsService.EditTransaction(id, inputModel);
 			}
 			catch (InvalidOperationException)
 			{
@@ -74,7 +74,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		private async Task PrepareModelForReturn(TransactionFormModel model)
 		{
 			TransactionFormModel emptyFormModel =
-				await transactionsService.GetEmptyTransactionFormModel(model.OwnerId);
+				await accountsService.GetEmptyTransactionFormModel(model.OwnerId);
 
 			model.UserCategories = emptyFormModel.UserCategories;
 			model.UserAccounts = emptyFormModel.UserAccounts;
