@@ -9,13 +9,13 @@ async function moreStatistics(url) {
         ul.className = 'list-group list-group-flush card offset-lg-2 col-lg-8';
         let ulInnerHtml = '';
 
-        for (let currency in data) {
+        for (let i in data) {
             ulInnerHtml += `
                 <li class="list-group-item">
 					<img src="icons/icons8-banknotes-64.png" style="max-width: fit-content;">
 					<span>
-						<b>${currency}</b>: <b>${data[currency].incomes.toFixed(2)}</b> is a total <b>incomes </b> and 
-                        <b>${data[currency].expenses.toFixed(2)}</b> is a total <b>expenses</b>  maded by our users!
+						<b>${data[i].name}</b>: <b>${data[i].incomes.toFixed(2)}</b> is a total <b>incomes </b> and 
+                        <b>${data[i].expenses.toFixed(2)}</b> is a total <b>expenses</b>  maded by our users!
 					</span>
 				</li>
             `;

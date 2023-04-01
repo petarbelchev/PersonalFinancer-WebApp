@@ -21,8 +21,8 @@ namespace PersonalFinancer.Services.User.Models
         public IEnumerable<AccountCardViewModel> Accounts { get; set; }
             = new List<AccountCardViewModel>();
 
-        public Dictionary<string, CashFlowViewModel> CurrenciesCashFlow { get; set; }
-            = new Dictionary<string, CashFlowViewModel>();
+        public IEnumerable<CurrencyCashFlowViewModel> CurrenciesCashFlow { get; set; }
+            = new List<CurrencyCashFlowViewModel>();
 
 		public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
 		{

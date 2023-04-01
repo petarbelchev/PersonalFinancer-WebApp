@@ -68,12 +68,6 @@ namespace PersonalFinancer.Services.Accounts
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<AccountFormModel> GetAccountFormModel(string accountId, string? ownerId = null);
 
-		Task<Dictionary<string, CashFlowViewModel>> GetUsersAccountsCashFlow();
-
-		Task<UsersAccountCardsViewModel> GetUsersAccountCardsViewModel(int page);
-		
-		Task SetUserTransactionsViewModel(string userId, UserTransactionsViewModel model);
-
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist
 		/// or User is not owner or Administrator.
@@ -106,6 +100,10 @@ namespace PersonalFinancer.Services.Accounts
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<TransactionDetailsViewModel> GetTransactionViewModel(string transactionId);
+					
+		Task<UsersAccountCardsViewModel> GetUsersAccountCardsViewModel(int page);
+		
+		Task<IEnumerable<CurrencyCashFlowViewModel>> GetUsersCurrenciesCashFlow();
 
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist.
@@ -130,5 +128,9 @@ namespace PersonalFinancer.Services.Accounts
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task PrepareAccountFormModelForReturn(AccountFormModel model);
+
+		Task PrepareTransactionFormModelForReturn(TransactionFormModel model);
+		
+		Task SetUserTransactionsViewModel(string userId, UserTransactionsViewModel model);
 	}
 }

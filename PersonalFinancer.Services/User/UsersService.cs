@@ -100,31 +100,21 @@ namespace PersonalFinancer.Services.User
 							CategoryName = t.Category.Name
 						}),
 					CurrenciesCashFlow = u.Transactions
-						.Where(t =>
-							t.CreatedOn >= model.StartDate
-							&& t.CreatedOn <= model.EndDate)
-						.Select(t => new TransactionDTO
+						.GroupBy(t => t.Account.Currency.Name)
+						.Select(t => new CurrencyCashFlowViewModel
 						{
-							Amount = t.Amount,
-							CurrencyName = t.Account.Currency.Name,
-							TransactionType = t.TransactionType
+							Name = t.Key,
+							Incomes = t.Where(t => t.TransactionType == TransactionType.Income).Sum(t => t.Amount),
+							Expenses = t.Where(t => t.TransactionType == TransactionType.Expense).Sum(t => t.Amount)
 						})
+						.OrderBy(c => c.Name)
+						.ToList()
 				})
 				.FirstAsync();
 
 			model.Accounts = dto.Accounts;
 			model.Transactions = dto.LastTransactions;
-
-			foreach (var t in dto.CurrenciesCashFlow)
-			{
-				if (!model.CurrenciesCashFlow.ContainsKey(t.CurrencyName))
-					model.CurrenciesCashFlow[t.CurrencyName] = new CashFlowViewModel();
-
-				if (t.TransactionType == TransactionType.Income)
-					model.CurrenciesCashFlow[t.CurrencyName].Incomes += t.Amount;
-				else
-					model.CurrenciesCashFlow[t.CurrencyName].Expenses += t.Amount;
-			}
+			model.CurrenciesCashFlow = dto.CurrenciesCashFlow;
 		}
 
 		/// <summary>

@@ -13,7 +13,7 @@ using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Services.Accounts
 {
-    public class AccountsService : IAccountsService
+	public class AccountsService : IAccountsService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
@@ -81,7 +81,7 @@ namespace PersonalFinancer.Services.Accounts
 
 			return newAccount.Id;
 		}
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException if Account does not exist.
 		/// </summary>
@@ -116,7 +116,7 @@ namespace PersonalFinancer.Services.Accounts
 
 			return newTransaction.Id;
 		}
-			
+
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist
 		/// and ArgumentException when User is not owner or Administrator.
@@ -140,7 +140,7 @@ namespace PersonalFinancer.Services.Accounts
 
 			memoryCache.Remove(AccountConstants.CacheKeyValue + userId);
 		}
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist
 		/// and ArgumentException when Owner Id is passed and User is not owner.
@@ -219,7 +219,7 @@ namespace PersonalFinancer.Services.Accounts
 
 			await data.SaveChangesAsync();
 		}
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction or Account does not exist.
 		/// </summary>
@@ -363,45 +363,6 @@ namespace PersonalFinancer.Services.Accounts
 				})
 				.FirstAsync();
 		}
-
-		public async Task<Dictionary<string, CashFlowViewModel>> GetUsersAccountsCashFlow()
-		{
-			//TODO: Need refactoring. Use GroupBy? SelectMany? IQueryable variables?
-
-			var result = new Dictionary<string, CashFlowViewModel>();
-
-			await data.Accounts
-				.Where(a => a.Transactions.Any())
-				.Include(a => a.Currency)
-				.Include(a => a.Transactions)
-				.ForEachAsync(a =>
-				{
-					if (!result.ContainsKey(a.Currency.Name))
-					{
-						result[a.Currency.Name] = new CashFlowViewModel();
-					}
-
-					decimal? income = a.Transactions?
-						.Where(t => t.TransactionType == TransactionType.Income)
-						.Sum(t => t.Amount);
-
-					if (income != null)
-					{
-						result[a.Currency.Name].Incomes += (decimal)income;
-					}
-
-					decimal? expense = a.Transactions?
-						.Where(t => t.TransactionType == TransactionType.Expense)
-						.Sum(t => t.Amount);
-
-					if (expense != null)
-					{
-						result[a.Currency.Name].Expenses += (decimal)expense;
-					}
-				});
-
-			return result;
-		}
 		
 		public async Task<UsersAccountCardsViewModel> GetUsersAccountCardsViewModel(int page)
 		{
@@ -418,7 +379,21 @@ namespace PersonalFinancer.Services.Accounts
 
 			return model;
 		}
-		
+
+		public async Task<IEnumerable<CurrencyCashFlowViewModel>> GetUsersCurrenciesCashFlow()
+		{
+			return await data.Transactions
+				.GroupBy(t => t.Account.Currency.Name)
+				.Select(t => new CurrencyCashFlowViewModel
+				{
+					Name = t.Key,
+					Incomes = t.Where(t => t.TransactionType == TransactionType.Income).Sum(t => t.Amount),
+					Expenses = t.Where(t => t.TransactionType == TransactionType.Expense).Sum(t => t.Amount)
+				})
+				.OrderBy(c => c.Name)
+				.ToArrayAsync();
+		}
+
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist
 		/// or User is not owner or Administrator.
@@ -437,7 +412,7 @@ namespace PersonalFinancer.Services.Accounts
 				.Select(a => mapper.Map<DeleteAccountViewModel>(a))
 				.FirstAsync();
 		}
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
@@ -481,8 +456,8 @@ namespace PersonalFinancer.Services.Accounts
 						.Select(c => mapper.Map<CategoryViewModel>(c))
 				})
 				.FirstAsync();
-		}	
-		
+		}
+
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
@@ -527,7 +502,7 @@ namespace PersonalFinancer.Services.Accounts
 
 			return account.OwnerId;
 		}
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist.
 		/// </summary>
@@ -553,7 +528,7 @@ namespace PersonalFinancer.Services.Accounts
 
 			return account.IsDeleted;
 		}
-		
+
 		/// <summary>
 		/// Throws ArgumentNullException when Account does not exist.
 		/// </summary>
@@ -567,7 +542,7 @@ namespace PersonalFinancer.Services.Accounts
 
 			return account.OwnerId == userId;
 		}
-		
+
 		private async Task<bool> IsNameExists(string name, string userId)
 		{
 			var names = await data.Accounts
@@ -598,7 +573,7 @@ namespace PersonalFinancer.Services.Accounts
 			model.Balance = dto.Balance;
 			model.CurrencyName = dto.CurrencyName;
 		}
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
@@ -609,6 +584,14 @@ namespace PersonalFinancer.Services.Accounts
 
 			model.AccountTypes = emptyFormModel.AccountTypes;
 			model.Currencies = emptyFormModel.Currencies;
+		}
+
+		public async Task PrepareTransactionFormModelForReturn(TransactionFormModel model)
+		{
+			TransactionFormModel emptyFormModel = await GetEmptyTransactionFormModel(model.OwnerId);
+
+			model.UserCategories = emptyFormModel.UserCategories;
+			model.UserAccounts = emptyFormModel.UserAccounts;
 		}
 
 		public async Task SetUserTransactionsViewModel(string userId, UserTransactionsViewModel model)

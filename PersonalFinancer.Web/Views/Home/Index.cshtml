@@ -71,25 +71,25 @@ else
 							<h6>Cash Flow</h6>
 						</div>
 						<div class="card-body">
-							@foreach (var (key, value) in Model.CurrenciesCashFlow)
+							@foreach (var currency in Model.CurrenciesCashFlow)
 							{
-								decimal cashFlow = value.Incomes + value.Expenses;
-								decimal income = cashFlow != 0 ? Math.Round(value.Incomes / cashFlow * 100, 2) : 0;
-								decimal expence = cashFlow != 0 ? Math.Round(value.Expenses / cashFlow * 100, 2) : 0;
+								decimal cashFlow = currency.Incomes + currency.Expenses;
+								decimal income = cashFlow != 0 ? Math.Round(currency.Incomes / cashFlow * 100, 2) : 0;
+								decimal expence = cashFlow != 0 ? Math.Round(currency.Expenses / cashFlow * 100, 2) : 0;
 
 								<div class="card-title">
 									<div class="row row-cols-auto">
 										<div class="col">
 											<img src="/icons/icons8-profit-64.png" style="max-width: 50px;">
 										</div>
-										<h4 class="col">@key</h4>
+										<h4 class="col">@currency.Name</h4>
 									</div>
 								</div>
-								<h4 class="small font-weight-bold">Income <span class="float-right">@value.Incomes (@income%)</span></h4>
+								<h4 class="small font-weight-bold">Income <span class="float-right">@currency.Incomes (@income%)</span></h4>
 								<div class="progress mb-4">
 									<div class="progress-bar bg-success" role="progressbar" style="width: @income%"></div>
 								</div>
-								<h4 class="small font-weight-bold">Expense <span class="float-right">@value.Expenses (@expence%)</span></h4>
+								<h4 class="small font-weight-bold">Expense <span class="float-right">@currency.Expenses (@expence%)</span></h4>
 								<div class="progress mb-4">
 									<div class="progress-bar bg-danger" role="progressbar" style="width: @expence%"></div>
 								</div>

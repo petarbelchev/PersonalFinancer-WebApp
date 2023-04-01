@@ -8,6 +8,6 @@ namespace PersonalFinancer.Services.User.Models
 
         public IEnumerable<AccountCardViewModel> Accounts { get; set; } = null!;
 
-        public IEnumerable<TransactionDTO> CurrenciesCashFlow { get; set; } = null!;
+        public IEnumerable<CurrencyCashFlowViewModel> CurrenciesCashFlow { get; set; } = null!;
 	}
 }

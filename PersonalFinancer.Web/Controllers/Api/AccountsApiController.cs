@@ -17,6 +17,6 @@ namespace PersonalFinancer.Web.Controllers.Api
 			=> this.accountService = accountService;
 
 		public async Task<IActionResult> GetAccountsCashFlow()
-			=> Ok(await accountService.GetUsersAccountsCashFlow());
+			=> Ok(await accountService.GetUsersCurrenciesCashFlow());
 	}
 }

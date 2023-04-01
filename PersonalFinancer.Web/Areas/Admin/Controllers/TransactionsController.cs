@@ -49,7 +49,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				await PrepareModelForReturn(inputModel);
+				await accountsService.PrepareTransactionFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -69,15 +69,6 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 				return LocalRedirect(returnUrl);
 
 			return RedirectToAction("AccountDetails", "Accounts", new { id = inputModel.AccountId });
-		}
-
-		private async Task PrepareModelForReturn(TransactionFormModel model)
-		{
-			TransactionFormModel emptyFormModel =
-				await accountsService.GetEmptyTransactionFormModel(model.OwnerId);
-
-			model.UserCategories = emptyFormModel.UserCategories;
-			model.UserAccounts = emptyFormModel.UserAccounts;
 		}
 	}
 }

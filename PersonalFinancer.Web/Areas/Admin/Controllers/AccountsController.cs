@@ -41,7 +41,8 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				return BadRequest();
 			}
-
+			
+			viewModel.Routing.Area = "Admin";
 			viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 
@@ -78,7 +79,8 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				return BadRequest();
 			}
-
+			
+			viewModel.Routing.Area = "Admin";
 			viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + id;
 			ViewBag.ModelId = id;
 

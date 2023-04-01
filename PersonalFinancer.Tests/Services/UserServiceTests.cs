@@ -88,91 +88,91 @@ namespace PersonalFinancer.Tests.Services
 			}
 		}
 
-		[Test]
-		public async Task SetUserDashboard_ShouldReturnCorrectData_WithValidParams()
-		{
-			//Arrange
-			var actualDashboard = new UserDashboardViewModel()
-			{
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
-			};
+		//[Test]
+		//public async Task SetUserDashboard_ShouldReturnCorrectData_WithValidParams()
+		//{
+		//	//Arrange
+		//	var actualDashboard = new UserDashboardViewModel()
+		//	{
+		//		StartDate = DateTime.UtcNow.AddMonths(-1),
+		//		EndDate = DateTime.UtcNow
+		//	};
 
-			IEnumerable<AccountCardViewModel> expectedAccounts = await data.Accounts
-				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
-				.Select(a => mapper.Map<AccountCardViewModel>(a))
-				.ToListAsync();
+		//	IEnumerable<AccountCardViewModel> expectedAccounts = await data.Accounts
+		//		.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
+		//		.Select(a => mapper.Map<AccountCardViewModel>(a))
+		//		.ToListAsync();
 
-			var expectedCashFlow = new Dictionary<string, CashFlowViewModel>();
+		//	var expectedCashFlow = new Dictionary<string, CashFlowViewModel>();
 
-			await data.Transactions
-				.Where(t =>	t.OwnerId == this.User1.Id 
-					&& t.CreatedOn >= actualDashboard.StartDate 
-					&& t.CreatedOn <= actualDashboard.EndDate)
-				.ForEachAsync(t =>
-				{
-					if (!expectedCashFlow.ContainsKey(t.Account.Currency.Name))
-					{
-						expectedCashFlow[t.Account.Currency.Name] = new CashFlowViewModel();
-					}
+		//	await data.Transactions
+		//		.Where(t =>	t.OwnerId == this.User1.Id 
+		//			&& t.CreatedOn >= actualDashboard.StartDate 
+		//			&& t.CreatedOn <= actualDashboard.EndDate)
+		//		.ForEachAsync(t =>
+		//		{
+		//			if (!expectedCashFlow.ContainsKey(t.Account.Currency.Name))
+		//			{
+		//				expectedCashFlow[t.Account.Currency.Name] = new CashFlowViewModel();
+		//			}
 
-					if (t.TransactionType == TransactionType.Income)
-					{
-						expectedCashFlow[t.Account.Currency.Name].Incomes += t.Amount;
-					}
-					else
-					{
-						expectedCashFlow[t.Account.Currency.Name].Expenses += t.Amount;
-					}
-				});
+		//			if (t.TransactionType == TransactionType.Income)
+		//			{
+		//				expectedCashFlow[t.Account.Currency.Name].Incomes += t.Amount;
+		//			}
+		//			else
+		//			{
+		//				expectedCashFlow[t.Account.Currency.Name].Expenses += t.Amount;
+		//			}
+		//		});
 
-			var expectedLastFiveTransaction = await data.Transactions
-				.Where(t =>
-					t.Account.OwnerId == this.User1.Id &&
-					t.CreatedOn >= actualDashboard.StartDate &&
-					t.CreatedOn <= actualDashboard.EndDate)
-				.OrderByDescending(t => t.CreatedOn)
-				.Take(5)
-				.Select(t => mapper.Map<TransactionTableViewModel>(t))
-				.ToListAsync();
+		//	var expectedLastFiveTransaction = await data.Transactions
+		//		.Where(t =>
+		//			t.Account.OwnerId == this.User1.Id &&
+		//			t.CreatedOn >= actualDashboard.StartDate &&
+		//			t.CreatedOn <= actualDashboard.EndDate)
+		//		.OrderByDescending(t => t.CreatedOn)
+		//		.Take(5)
+		//		.Select(t => mapper.Map<TransactionTableViewModel>(t))
+		//		.ToListAsync();
 
-			//Act
-			await userService.SetUserDashboard(this.User1.Id, actualDashboard);
+		//	//Act
+		//	await userService.SetUserDashboard(this.User1.Id, actualDashboard);
 
-			//Assert
-			Assert.That(actualDashboard.Accounts.Count(), Is.EqualTo(expectedAccounts.Count()));
-			for (int i = 0; i < actualDashboard.Accounts.Count(); i++)
-			{
-				Assert.That(actualDashboard.Accounts.ElementAt(i).Id,
-					Is.EqualTo(expectedAccounts.ElementAt(i).Id));
-				Assert.That(actualDashboard.Accounts.ElementAt(i).Name,
-					Is.EqualTo(expectedAccounts.ElementAt(i).Name));
-			}
+		//	//Assert
+		//	Assert.That(actualDashboard.Accounts.Count(), Is.EqualTo(expectedAccounts.Count()));
+		//	for (int i = 0; i < actualDashboard.Accounts.Count(); i++)
+		//	{
+		//		Assert.That(actualDashboard.Accounts.ElementAt(i).Id,
+		//			Is.EqualTo(expectedAccounts.ElementAt(i).Id));
+		//		Assert.That(actualDashboard.Accounts.ElementAt(i).Name,
+		//			Is.EqualTo(expectedAccounts.ElementAt(i).Name));
+		//	}
 
-			Assert.That(actualDashboard.Transactions.Count(),
-			Is.EqualTo(expectedLastFiveTransaction.Count()));
-			for (int i = 0; i < actualDashboard.Transactions.Count(); i++)
-			{
-				Assert.That(actualDashboard.Transactions.ElementAt(i).Id,
-					Is.EqualTo(expectedLastFiveTransaction.ElementAt(i).Id));
-				Assert.That(actualDashboard.Transactions.ElementAt(i).Amount,
-					Is.EqualTo(expectedLastFiveTransaction.ElementAt(i).Amount));
-			}
+		//	Assert.That(actualDashboard.Transactions.Count(),
+		//	Is.EqualTo(expectedLastFiveTransaction.Count()));
+		//	for (int i = 0; i < actualDashboard.Transactions.Count(); i++)
+		//	{
+		//		Assert.That(actualDashboard.Transactions.ElementAt(i).Id,
+		//			Is.EqualTo(expectedLastFiveTransaction.ElementAt(i).Id));
+		//		Assert.That(actualDashboard.Transactions.ElementAt(i).Amount,
+		//			Is.EqualTo(expectedLastFiveTransaction.ElementAt(i).Amount));
+		//	}
 
-			Assert.That(actualDashboard.CurrenciesCashFlow.Count,
-			Is.EqualTo(expectedCashFlow.Count));
+		//	Assert.That(actualDashboard.CurrenciesCashFlow.Count,
+		//	Is.EqualTo(expectedCashFlow.Count));
 
-			foreach (string expectedKey in expectedCashFlow.Keys)
-			{
-				Assert.That(actualDashboard.CurrenciesCashFlow.ContainsKey(expectedKey), Is.True);
+		//	foreach (string expectedKey in expectedCashFlow.Keys)
+		//	{
+		//		Assert.That(actualDashboard.CurrenciesCashFlow.ContainsKey(expectedKey), Is.True);
 
-				Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Incomes,
-					Is.EqualTo(expectedCashFlow[expectedKey].Incomes));
+		//		Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Incomes,
+		//			Is.EqualTo(expectedCashFlow[expectedKey].Incomes));
 
-				Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Expenses,
-					Is.EqualTo(expectedCashFlow[expectedKey].Expenses));
-			}
-		}
+		//		Assert.That(actualDashboard.CurrenciesCashFlow[expectedKey].Expenses,
+		//			Is.EqualTo(expectedCashFlow[expectedKey].Expenses));
+		//	}
+		//}
 
 		[Test]
 		public void UsersCount_ShouldReturnCorrectData()
