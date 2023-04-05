@@ -256,7 +256,8 @@ namespace PersonalFinancer.Data.Migrations
                     CategoryId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     TransactionType = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Refference = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Refference = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    IsInitialBalance = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -284,17 +285,23 @@ namespace PersonalFinancer.Data.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
-                values: new object[] { "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e", "114af31f-a596-420f-9617-7e7408dd0588", "petar@mail.com", "Petar", "Petrov", "PETAR@MAIL.COM", "PETAR@MAIL.COM", "AQAAAAEAACcQAAAAEFhKQl+SeJMcQoUiwuYpGd/B19vinbTwpvbgs31MRu9yFm3bFQpq1f6WYzZWDfdClQ==", "1234567890", "239b553c-d6c2-4f02-86d1-2c008e8facfb", "petar@mail.com" });
-
-            migrationBuilder.InsertData(
-                table: "AspNetUsers",
-                columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
-                values: new object[] { "bcb4f072-ecca-43c9-ab26-c060c6f364e4", "8c34b5c2-2b9e-488f-adf6-6195b4ace5fe", "teodor@mail.com", "Teodor", "Lesly", "TEODOR@MAIL.COM", "TEODOR@MAIL.COM", "AQAAAAEAACcQAAAAEAscUNLE32Xa5P/zJ9ELf3KnsUjrhkcgqNLlDw8VV52cJ54fL7rOrot5sVGv18me1w==", "1325476980", "8fdeaf27-21c4-43a7-8971-9a2db7b91caa", "teodor@mail.com" });
-
-            migrationBuilder.InsertData(
-                table: "AspNetUsers",
-                columns: new[] { "Id", "ConcurrencyStamp", "Email", "FirstName", "LastName", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "SecurityStamp", "UserName" },
-                values: new object[] { "dea12856-c198-4129-b3f3-b893d8395082", "8b6eb14c-8f3d-49e2-951f-e0240dfa68f0", "admin@admin.com", "Great", "Admin", "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAEAACcQAAAAEMyJ+2Z18z8GN+mT4Q3KCqx4ADbUduWm7fvUhx46gkQgNgCnAiWGIbkORbGxXDAMtQ==", "9876543021", "e99955e6-fb2a-44f2-a082-740a7187eff2", "admin@admin.com" });
+                values: new object[,]
+                {
+                    { "06df8f30-07c1-45cc-a5c7-214dac6155a1", "a44e75fc-0166-4e76-b591-5f259e096511", "user13@mail.com", "User13", "Userov13", "USER13@MAIL.COM", "USER13@MAIL.COM", "AQAAAAEAACcQAAAAEH3aoQ3xo6ufxRZzveCHOZ3+ooUUA2JkockRzdGZBykZdrl1LaDnPtsnABPR4DP5Jw==", "1325476913", "66440d01-e5c4-4af1-9a16-a38afd4eafed", "user13@mail.com" },
+                    { "0b73dd4d-440d-4d28-84a2-73d34e1b5a1b", "63cd5274-ca36-4366-be63-96f5fc6c227f", "user4@mail.com", "User4", "Userov4", "USER4@MAIL.COM", "USER4@MAIL.COM", "AQAAAAEAACcQAAAAEI/3VqoJ3aQV+/tEEZPzVpqCfC+op5agaSL7aDk6B6jeeQMcFkNxlBkZO1gNBdc5Kg==", "132547694", "a7349fee-24f8-4505-ac85-0c4c833c28b7", "user4@mail.com" },
+                    { "1701fe87-c6fd-4e5c-8ac7-514dbea7d1a2", "6517d258-de8c-43c6-b7e9-34d0c176743d", "user10@mail.com", "User10", "Userov10", "USER10@MAIL.COM", "USER10@MAIL.COM", "AQAAAAEAACcQAAAAELsv3wqGyUo/DnHrBhchH+qNUj1lDuSlYBFCVz4/GCJK2be6c4XhaMRdu+/GI1u8BQ==", "1325476910", "27c8e8ea-a52c-475c-b11e-1a46e023fed4", "user10@mail.com" },
+                    { "1cc73160-5f3d-4c41-b351-430168e2d12e", "b2394a9c-b2a7-4607-9b0b-48e3bbee0a44", "user12@mail.com", "User12", "Userov12", "USER12@MAIL.COM", "USER12@MAIL.COM", "AQAAAAEAACcQAAAAEBtscTMcbI50f3922SDDsR+PDjqUi2Qk+GkxUOrD81Ag6pPRiCDUU1zzQZoPgPXdHg==", "1325476912", "2567fda8-c6ed-4f15-bd42-250690ea4ba9", "user12@mail.com" },
+                    { "3edfe677-4c7e-4bd7-b8d4-b9a867b6659b", "32d0bb16-0f77-4a0e-ba67-3d0c11e0b2d6", "user8@mail.com", "User8", "Userov8", "USER8@MAIL.COM", "USER8@MAIL.COM", "AQAAAAEAACcQAAAAEB8ijerHvaamnaCpNujD59d/goRlqKCYsHCZFjWMwmVM9iyLraIkSCYSIfjaK8b7BQ==", "132547698", "c1f4fc77-665f-426f-962f-c32b812a7e59", "user8@mail.com" },
+                    { "47f33c7f-d0c2-4d85-b50a-f9f0fc2689ef", "75a93bff-c3c9-4ba4-bd80-27b76476704c", "user6@mail.com", "User6", "Userov6", "USER6@MAIL.COM", "USER6@MAIL.COM", "AQAAAAEAACcQAAAAEEzDKBdjMOo+skTb3Oor3WAfiMpql6zk4+Oar/sgR6/5osrYYJDLxDmPE5/a6ng2Hg==", "132547696", "72f48e1a-362f-4446-af9e-0e84ae364a03", "user6@mail.com" },
+                    { "57662463-4aaf-4366-8676-5b900853b1b5", "46707765-b311-4513-bf74-1030de573256", "user11@mail.com", "User11", "Userov11", "USER11@MAIL.COM", "USER11@MAIL.COM", "AQAAAAEAACcQAAAAEKnFtcMDtkp3ojnwzvA7ax8wFUz+2+8p0h6VmjqmL0a2ZQov0YKru1B1Ku8wtOY0yw==", "1325476911", "6a53c96e-46f3-4db0-baa4-c225e903e6e2", "user11@mail.com" },
+                    { "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e", "c116946b-d4b0-451e-aa48-604eb9046dca", "petar@mail.com", "Petar", "Petrov", "PETAR@MAIL.COM", "PETAR@MAIL.COM", "AQAAAAEAACcQAAAAEDAC2zwlVKOkUjIJGDVqzOmAW2Yt6d0acjKcQ6uMG1wNYLjaYxMoGAe1kJm3PKlqEQ==", "1234567890", "4bbbd9ef-2ca7-4b7b-93c1-7a3b927faa68", "petar@mail.com" },
+                    { "70425af1-d5b8-4095-abd5-6ecf64be78db", "6fd4f499-7df2-4b46-bc5a-8b4831f44d80", "user3@mail.com", "User3", "Userov3", "USER3@MAIL.COM", "USER3@MAIL.COM", "AQAAAAEAACcQAAAAEENfONr9SoD+XZoYt/lRBSCBDEQUZDXxtw3K/Cv1aYUIqNkT2foMqMAJ9JjvnFbaHA==", "132547693", "39768d8d-bcf4-4d98-9505-895f7f076766", "user3@mail.com" },
+                    { "76d9469c-5b51-42d8-8aad-9825c49cf05e", "92593e0a-2979-4bd5-b65f-b3b006b0200b", "user9@mail.com", "User9", "Userov9", "USER9@MAIL.COM", "USER9@MAIL.COM", "AQAAAAEAACcQAAAAEMa5BfPHZNmGGd332XDG5oRa/HhpgSkq1HceRJprLE2oFGeXvMHz86ohak0Cdj1mbA==", "132547699", "6079a6c5-7844-45d0-8cd2-4fd3bb724aff", "user9@mail.com" },
+                    { "9c1ed10d-6b74-4751-88b3-d78f83a9925e", "83eb971d-427e-4ce3-a4a5-ae063dd4eb15", "user5@mail.com", "User5", "Userov5", "USER5@MAIL.COM", "USER5@MAIL.COM", "AQAAAAEAACcQAAAAEFuw2ESuBvy/7fECFNPIyjq39fRigL00fCSe/C4e8kx6bD6M3vwFZr68qSClwWwP0w==", "132547695", "9f165a66-e1a0-45cf-83cd-c11f1c6fd5f8", "user5@mail.com" },
+                    { "b1c3d5b1-21d6-41b8-8706-fe480ac261b3", "34f56131-5534-4631-8800-f12b37d9870a", "user7@mail.com", "User7", "Userov7", "USER7@MAIL.COM", "USER7@MAIL.COM", "AQAAAAEAACcQAAAAEEUQtfTaUb1l3Q0o1XcpghhAa41d2y/7UZ1wf79HxOiVf7TpWeSQFPqeaiZ/m+2tgA==", "132547697", "bb988a90-2dba-4381-925c-45dcc200776e", "user7@mail.com" },
+                    { "bcb4f072-ecca-43c9-ab26-c060c6f364e4", "36f26458-e197-49fd-843c-64db9425812b", "teodor@mail.com", "Teodor", "Lesly", "TEODOR@MAIL.COM", "TEODOR@MAIL.COM", "AQAAAAEAACcQAAAAEPtjgzspGhd6+Vhmx04kyoGRtchn4ZQsKEvQsDbVZy31SgFCUPsbP8vd8oHM2pslvw==", "1325476980", "82c31886-114b-4fe3-b4f7-68aae8d308a7", "teodor@mail.com" },
+                    { "dea12856-c198-4129-b3f3-b893d8395082", "9f808318-9e8a-4c16-aaa0-b46956149963", "admin@admin.com", "Great", "Admin", "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAEAACcQAAAAEB75v3qlloDcq71my5XtONhPWUV3dIa3p8LhQq2y4jB7zqdlxVl+Ek5JP0Lkg7rXwg==", "9876543021", "61f0bf2b-2c2f-4294-aed4-3f5227e97209", "admin@admin.com" }
+                });
 
             migrationBuilder.InsertData(
                 table: "AccountTypes",
@@ -302,6 +309,8 @@ namespace PersonalFinancer.Data.Migrations
                 values: new object[,]
                 {
                     { "1dfe1780-daed-4198-8360-378aa33c5411", false, "Bank", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "42e54cf1-dc38-474a-814d-abdd97ec332e", false, "Cash Money", "bcb4f072-ecca-43c9-ab26-c060c6f364e4" },
+                    { "cea9346d-bcf4-41aa-aa11-5ddb0b7e6a61", false, "Bank Money", "bcb4f072-ecca-43c9-ab26-c060c6f364e4" },
                     { "daef2351-e2e9-43b9-b908-8d7d00bf3df6", false, "Savings", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
                     { "f4c3803a-7ed5-4d78-9038-7b21bf08a040", false, "Cash", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
                 });
@@ -328,6 +337,8 @@ namespace PersonalFinancer.Data.Migrations
                 {
                     { "2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f", false, "USD", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
                     { "3bf454ad-941b-4ab6-a1ad-c212bfc46e7d", false, "BGN", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" },
+                    { "8370adf0-ef14-465d-8394-215014aaf7c4", false, "GBP", "bcb4f072-ecca-43c9-ab26-c060c6f364e4" },
+                    { "c7edb668-a98e-4bc9-800c-fffbe9747d02", false, "SEK", "bcb4f072-ecca-43c9-ab26-c060c6f364e4" },
                     { "dab2761d-acb1-43bc-b56b-0d9c241c8882", false, "EUR", "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e" }
                 });
 

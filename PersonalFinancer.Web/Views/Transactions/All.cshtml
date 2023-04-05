@@ -14,7 +14,7 @@
 		<div class="offset-md-1 col-md-10">
 
 			@*Pagination*@
-			<partial name="_PaginationWithDateFilterPartial" />
+			<partial name="_PaginationPartial" />
 
 			@*Transactions Table*@
 			<div class="card">
@@ -25,7 +25,7 @@
 			</div>
 
 			@*Pagination*@
-			<partial name="_PaginationWithDateFilterPartial" />
+			<partial name="_PaginationPartial" />
 
 		</div>
 	</div>
@@ -42,4 +42,16 @@ else
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
+	<script>
+		let params = {
+			id: '@Model.Id',
+			startDate: '@Model.StartDate.ToString("O")',
+			endDate: '@Model.EndDate.ToString("O")',
+			ownerId: '@Model.OwnerId',
+			url: '@Model.ApiTransactionsEndpoint',
+			pages: @Model.Pagination.Pages
+		}
+	</script>
+	<script src="~/js/getTransactions.js"></script>
+	<script src="~/js/setUpPagination.js"></script>
 }

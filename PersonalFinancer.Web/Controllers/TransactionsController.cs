@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Web.Infrastructure;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
@@ -15,38 +17,30 @@ namespace PersonalFinancer.Web.Controllers
 		public TransactionsController(IAccountsService accountsService)
 			=> this.accountsService = accountsService;
 
-		public async Task<IActionResult> All(string? startDate, string? endDate, int page = 1)
+		public async Task<IActionResult> All()
 		{
-			var viewModel = new UserTransactionsViewModel();
-
-			viewModel.Pagination.Page = page;
-
-			if (startDate == null || endDate == null)
+			var inputModel = new DateFilterModel
 			{
-				viewModel.StartDate = DateTime.UtcNow.AddMonths(-1);
-				viewModel.EndDate = DateTime.UtcNow;
-			}
-			else
-			{
-				viewModel.StartDate = DateTime.Parse(startDate);
-				viewModel.EndDate = DateTime.Parse(endDate);
-			}
+				StartDate = DateTime.UtcNow.AddMonths(-1),
+				EndDate = DateTime.UtcNow
+			};
 
-			await accountsService.SetUserTransactionsViewModel(User.Id(), viewModel);
-
-			return View(viewModel);
+			return View(await accountsService
+				.GetUserTransactionsViewModel(User.Id(), inputModel));
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> All(
-			[Bind("StartDate,EndDate")] UserTransactionsViewModel inputModel)
+		public async Task<IActionResult> All(DateFilterModel inputModel)
 		{
 			if (!ModelState.IsValid)
-				return View(inputModel);
+				return View(new UserTransactionsViewModel
+				{
+					StartDate = inputModel.StartDate ?? new DateTime(),
+					EndDate = inputModel.EndDate ?? new DateTime()
+				});
 
-			await accountsService.SetUserTransactionsViewModel(User.Id(), inputModel);
-
-			return View(inputModel);
+			return View(await accountsService
+				.GetUserTransactionsViewModel(User.Id(), inputModel));
 		}
 
 		public async Task<IActionResult> Create()

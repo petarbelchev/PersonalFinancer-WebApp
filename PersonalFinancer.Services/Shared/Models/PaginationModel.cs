@@ -2,7 +2,7 @@
 {
 	public class PaginationModel
 	{
-        public string? ElementsName { get; set; }
+        public string ElementsName { get; set; } = null!;
 
         public int ElementsPerPage { get; set; } = 10;
 

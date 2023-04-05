@@ -53,7 +53,7 @@ namespace PersonalFinancer.Services.Accounts
 		/// or User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<DetailsAccountViewModel> GetAccountDetailsViewModel(string accountId, DateTime startDate, DateTime endDate, int page = 1, string? ownerId = null);
+		Task<AccountDetailsViewModel> GetAccountDetailsViewModel(AccountDetailsInputModel inputModel, string? ownerId = null);
 	
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist.
@@ -67,6 +67,12 @@ namespace PersonalFinancer.Services.Accounts
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<AccountFormModel> GetAccountFormModel(string accountId, string? ownerId = null);
+				
+		/// <summary>
+		/// Throws InvalidOperationException when Account does not exist or dates are invalid.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		Task<TransactionsViewModel> GetAccountTransactions(AccountTransactionsInputModel model);
 
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist
@@ -104,6 +110,14 @@ namespace PersonalFinancer.Services.Accounts
 		Task<UsersAccountCardsViewModel> GetUsersAccountCardsViewModel(int page);
 		
 		Task<IEnumerable<CurrencyCashFlowViewModel>> GetUsersCurrenciesCashFlow();
+				
+		/// <summary>
+		/// Throws InvalidOperationException when User does not exist or dates are invalid.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		Task<TransactionsViewModel> GetUserTransactions(UserTransactionsApiInputModel inputModel);
+
+		Task<UserTransactionsViewModel> GetUserTransactionsViewModel(string userId, DateFilterModel inputModel);
 
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist.
@@ -121,7 +135,7 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task PrepareAccountDetailsViewModelForReturn(string accountId, DetailsAccountViewModel model);
+		Task<AccountDetailsViewModel> PrepareAccountDetailsViewModelForReturn(AccountDetailsInputModel inputModel);
 		
 		/// <summary>
 		/// Throws InvalidOperationException if User does not exist.
@@ -130,7 +144,5 @@ namespace PersonalFinancer.Services.Accounts
 		Task PrepareAccountFormModelForReturn(AccountFormModel model);
 
 		Task PrepareTransactionFormModelForReturn(TransactionFormModel model);
-		
-		Task SetUserTransactionsViewModel(string userId, UserTransactionsViewModel model);
 	}
 }

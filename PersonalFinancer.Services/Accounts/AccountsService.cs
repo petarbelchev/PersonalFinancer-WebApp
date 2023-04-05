@@ -4,6 +4,8 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
+using System.Globalization;
+
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
@@ -265,8 +267,7 @@ namespace PersonalFinancer.Services.Accounts
 		/// or User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<DetailsAccountViewModel> GetAccountDetailsViewModel(
-			string accountId, DateTime startDate, DateTime endDate, int page = 1, string? ownerId = null)
+		public async Task<AccountDetailsViewModel> GetAccountDetailsViewModel(AccountDetailsInputModel inputModel, string? ownerId = null)
 		{
 			bool isUserAdmin = false;
 
@@ -274,26 +275,28 @@ namespace PersonalFinancer.Services.Accounts
 				isUserAdmin = true;
 
 			return await data.Accounts
-				.Where(a => a.Id == accountId
+				.Where(a => a.Id == inputModel.Id
 							&& !a.IsDeleted
 							&& (isUserAdmin || a.OwnerId == ownerId))
-				.Select(a => new DetailsAccountViewModel
+				.Select(a => new AccountDetailsViewModel
 				{
+					Id = a.Id,
 					Name = a.Name,
 					Balance = a.Balance,
 					CurrencyName = a.Currency.Name,
-					StartDate = startDate,
-					EndDate = endDate,
+					StartDate = inputModel.StartDate ?? new DateTime(),
+					EndDate = inputModel.EndDate ?? new DateTime(),
 					Pagination = new PaginationModel
 					{
-						Page = page,
 						TotalElements = a.Transactions.Count(t =>
-							t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+							t.CreatedOn >= inputModel.StartDate && t.CreatedOn <= inputModel.EndDate),
+						ElementsName = "transactions"
 					},
+					OwnerId = a.OwnerId,
+					ApiTransactionsEndpoint = HostConstants.ApiAccountTransactionsUrl,
 					Transactions = a.Transactions
-						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.Where(t => t.CreatedOn >= inputModel.StartDate && t.CreatedOn <= inputModel.EndDate)
 						.OrderByDescending(t => t.CreatedOn)
-						.Skip(page != 1 ? 10 * (page - 1) : 0)
 						.Take(10)
 						.Select(t => new TransactionTableViewModel
 						{
@@ -364,6 +367,57 @@ namespace PersonalFinancer.Services.Accounts
 				.FirstAsync();
 		}
 		
+		/// <summary>
+		/// Throws InvalidOperationException when Account does not exist or dates are invalid.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<TransactionsViewModel> GetAccountTransactions(AccountTransactionsInputModel inputModel)
+		{
+			bool isStartDateValid = DateTime.TryParse(
+				inputModel.StartDate, null, DateTimeStyles.None, out DateTime startDate);
+
+			bool isEndDateValid = DateTime.TryParse(
+				inputModel.EndDate, null, DateTimeStyles.None, out DateTime endDate);
+
+			if (!isStartDateValid || !isEndDateValid || startDate > endDate)
+				throw new InvalidOperationException("Invalid model dates.");
+
+			var accountTransactions = new TransactionsViewModel();
+
+			accountTransactions = await data.Accounts
+				.Where(a => a.Id == inputModel.Id && !a.IsDeleted)
+				.Select(a => new TransactionsViewModel
+				{
+					Transactions = a.Transactions
+						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.OrderByDescending(t => t.CreatedOn)
+						.Skip(accountTransactions.Pagination.ElementsPerPage * (inputModel.Page - 1))
+						.Take(accountTransactions.Pagination.ElementsPerPage)
+						.Select(t => new TransactionTableViewModel
+						{
+							Id = t.Id,
+							Amount = t.Amount,
+							AccountCurrencyName = a.Currency.Name,
+							CreatedOn = t.CreatedOn,
+							CategoryName = t.Category.Name + (t.Category.IsDeleted ?
+								" (Deleted)"
+								: string.Empty),
+							TransactionType = t.TransactionType.ToString(),
+							Refference = t.Refference
+						}),
+					Pagination = new PaginationModel
+					{
+						Page = inputModel.Page,
+						TotalElements = a.Transactions
+							.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+						ElementsName = "transactions"
+					}
+				})				
+				.FirstAsync();
+
+			return accountTransactions;
+		}
+
 		public async Task<UsersAccountCardsViewModel> GetUsersAccountCardsViewModel(int page)
 		{
 			var model = new UsersAccountCardsViewModel();
@@ -392,6 +446,100 @@ namespace PersonalFinancer.Services.Accounts
 				})
 				.OrderBy(c => c.Name)
 				.ToArrayAsync();
+		}
+		
+		/// <summary>
+		/// Throws InvalidOperationException when User does not exist or dates are invalid.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<TransactionsViewModel> GetUserTransactions(UserTransactionsApiInputModel inputModel)
+		{
+			bool isStartDateValid = DateTime.TryParse(
+				inputModel.StartDate, null, DateTimeStyles.None, out DateTime startDate);
+
+			bool isEndDateValid = DateTime.TryParse(
+				inputModel.EndDate, null, DateTimeStyles.None, out DateTime endDate);
+
+			if (!isStartDateValid || !isEndDateValid || startDate > endDate)
+				throw new InvalidOperationException("Invalid model dates.");
+
+			var viewModel = new TransactionsViewModel();
+
+			viewModel = await data.Users
+				.Where(u => u.Id == inputModel.Id)
+				.Select(u => new TransactionsViewModel
+				{
+					Transactions = u.Transactions
+						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.OrderByDescending(t => t.CreatedOn)
+						.Skip(viewModel.Pagination.ElementsPerPage * (inputModel.Page - 1))
+						.Take(viewModel.Pagination.ElementsPerPage)
+						.Select(t => new TransactionTableViewModel
+						{
+							Id = t.Id,
+							Amount = t.Amount,
+							AccountCurrencyName = t.Account.Currency.Name,
+							CategoryName = t.Category.Name + (t.Category.IsDeleted ?
+								" (Deleted)"
+								: string.Empty),
+							CreatedOn = t.CreatedOn,
+							Refference = t.Refference,
+							TransactionType = t.TransactionType.ToString()
+						}),
+					Pagination = new PaginationModel
+					{
+						Page = inputModel.Page,
+						TotalElements = u.Transactions
+							.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+						ElementsName = "transactions"
+					}
+				})				
+				.FirstAsync();
+
+			return viewModel;
+		}
+
+		public async Task<UserTransactionsViewModel> GetUserTransactionsViewModel(string userId, DateFilterModel inputModel)
+		{
+			var viewModel = new UserTransactionsViewModel();
+
+			DateTime startDate = inputModel.StartDate ?? throw new InvalidOperationException();
+			DateTime endDate = inputModel.EndDate ?? throw new InvalidOperationException();
+
+			viewModel = await data.Users
+				.Where(u => u.Id == userId)
+				.Select(u => new UserTransactionsViewModel
+				{
+					Id = u.Id,
+					StartDate = startDate,
+					EndDate = endDate,
+					OwnerId = u.Id,
+					Pagination = new PaginationModel
+					{
+						TotalElements = u.Transactions
+							.Count(t => t.CreatedOn >= inputModel.StartDate
+										&& t.CreatedOn <= inputModel.EndDate),
+						ElementsName = "transactions"
+					},
+					Transactions = u.Transactions
+						.Where(t => t.CreatedOn >= inputModel.StartDate
+									&& t.CreatedOn <= inputModel.EndDate)
+						.OrderByDescending(t => t.CreatedOn)
+						.Take(viewModel.Pagination.ElementsPerPage)
+						.Select(t => new TransactionTableViewModel
+						{
+							Id = t.Id,
+							Amount = t.Amount,
+							AccountCurrencyName = t.Account.Currency.Name,
+							CategoryName = t.Category.Name,
+							CreatedOn = t.CreatedOn,
+							TransactionType = t.TransactionType.ToString(),
+							Refference = t.Refference
+						})
+				})
+				.FirstAsync();
+
+			return viewModel;
 		}
 
 		/// <summary>
@@ -557,21 +705,19 @@ namespace PersonalFinancer.Services.Accounts
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task PrepareAccountDetailsViewModelForReturn(string accountId, DetailsAccountViewModel model)
+		public async Task<AccountDetailsViewModel> PrepareAccountDetailsViewModelForReturn(AccountDetailsInputModel inputModel)
 		{
-			var dto = await data.Accounts
-				.Where(a => a.Id == accountId)
-				.Select(a => new DetailsAccountViewModel
+			return await data.Accounts
+				.Where(a => a.Id == inputModel.Id)
+				.Select(a => new AccountDetailsViewModel
 				{
 					Name = a.Name,
 					Balance = a.Balance,
-					CurrencyName = a.Currency.Name
+					CurrencyName = a.Currency.Name,
+					StartDate = inputModel.StartDate ?? new DateTime(),
+					EndDate = inputModel.EndDate ?? new DateTime()
 				})
 				.FirstAsync();
-
-			model.Name = dto.Name;
-			model.Balance = dto.Balance;
-			model.CurrencyName = dto.CurrencyName;
 		}
 
 		/// <summary>
@@ -592,27 +738,6 @@ namespace PersonalFinancer.Services.Accounts
 
 			model.UserCategories = emptyFormModel.UserCategories;
 			model.UserAccounts = emptyFormModel.UserAccounts;
-		}
-
-		public async Task SetUserTransactionsViewModel(string userId, UserTransactionsViewModel model)
-		{
-			model.Pagination.TotalElements = data.Transactions.Count(t =>
-				t.Account.OwnerId == userId
-				&& t.CreatedOn >= model.StartDate
-				&& t.CreatedOn <= model.EndDate);
-
-			model.Transactions = await data.Transactions
-				.Where(t =>
-					t.Account.OwnerId == userId
-					&& t.CreatedOn >= model.StartDate
-					&& t.CreatedOn <= model.EndDate)
-				.OrderByDescending(t => t.CreatedOn)
-				.Skip(model.Pagination.Page != 1 ?
-					model.Pagination.ElementsPerPage * (model.Pagination.Page - 1)
-					: 0)
-				.Take(model.Pagination.ElementsPerPage)
-				.ProjectTo<TransactionTableViewModel>(mapper.ConfigurationProvider)
-				.ToArrayAsync();
 		}
 	}
 }

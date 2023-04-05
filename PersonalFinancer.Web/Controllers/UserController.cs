@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Data.Models;
-using PersonalFinancer.Web.Models.Account;
+using PersonalFinancer.Web.Models.User;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers

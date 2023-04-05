@@ -1,22 +1,23 @@
 ﻿using PersonalFinancer.Services.Shared.Models;
-using System.ComponentModel.DataAnnotations;
+using static PersonalFinancer.Data.Constants.HostConstants;
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-    public class UserTransactionsViewModel : IValidatableObject
+	public class UserTransactionsViewModel
     {
-        [Required(ErrorMessage = "Start Date is required.")]
-        [DataType(DataType.DateTime)]
-        [Display(Name = "Start Date")]
-        public DateTime? StartDate { get; set; }
+        public string Id { get; set; } = null!;
 
-        [Required(ErrorMessage = "End Date is required.")]
-        [DataType(DataType.DateTime)]
-        [Display(Name = "End Date")]
-        public DateTime? EndDate { get; set; }
+        public DateTime StartDate { get; set; }
+
+        public DateTime EndDate { get; set; }
 
         public IEnumerable<TransactionTableViewModel> Transactions { get; set; }
             = new List<TransactionTableViewModel>();
+
+        public string OwnerId { get; set; } = null!;
+        
+		public string ApiTransactionsEndpoint { get; set; }
+			= ApiTransactionsUrl;
 
         public RoutingModel Routing { get; set; } = new RoutingModel
         {
@@ -26,19 +27,5 @@ namespace PersonalFinancer.Services.Accounts.Models
 
         public PaginationModel Pagination { get; set; }
             = new PaginationModel();
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (StartDate > EndDate)
-            {
-                yield return new ValidationResult(
-                    "Start Date must be before End Date.",
-                    new[] { "StartDate" });
-
-                yield return new ValidationResult(
-                    "End Date must be after Start Date.",
-                    new[] { "EndDate" });
-            }
-        }
     }
 }

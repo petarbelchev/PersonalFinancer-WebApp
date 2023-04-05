@@ -1,4 +1,5 @@
 ﻿using PersonalFinancer.Services.Shared.Models;
+using static PersonalFinancer.Data.Constants.HostConstants;
 
 namespace PersonalFinancer.Services.User.Models
 {
@@ -10,6 +11,9 @@ namespace PersonalFinancer.Services.User.Models
 		{
 			ElementsName = "users",
 		};
+		
+		public string ApiUsersEndpoint { get; set; }
+			= ApiUsersUrl;
 
         public RoutingModel Routing { get; set; } = new RoutingModel
 		{

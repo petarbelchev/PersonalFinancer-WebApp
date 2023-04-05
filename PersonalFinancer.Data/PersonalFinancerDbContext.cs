@@ -17,6 +17,10 @@ namespace PersonalFinancer.Data
 			{
 				this.Database.EnsureCreated();
 			}
+			//else
+			//{
+			//	this.Database.Migrate();
+			//}
 
 			this.seed = seed;
 		}

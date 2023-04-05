@@ -100,6 +100,8 @@ namespace PersonalFinancer.Services.User
 							CategoryName = t.Category.Name
 						}),
 					CurrenciesCashFlow = u.Transactions
+						.Where(t => t.CreatedOn >= model.StartDate
+									&& t.CreatedOn <= model.EndDate)
 						.GroupBy(t => t.Account.Currency.Name)
 						.Select(t => new CurrencyCashFlowViewModel
 						{

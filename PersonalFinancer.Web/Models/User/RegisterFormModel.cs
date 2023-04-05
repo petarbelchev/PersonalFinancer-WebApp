@@ -2,7 +2,7 @@
 
 using static PersonalFinancer.Data.Constants.UserConstants;
 
-namespace PersonalFinancer.Web.Models.Account
+namespace PersonalFinancer.Web.Models.User
 {
 	public class RegisterFormModel
 	{

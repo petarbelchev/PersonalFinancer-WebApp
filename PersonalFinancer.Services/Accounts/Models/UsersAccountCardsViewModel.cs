@@ -1,10 +1,14 @@
 ﻿using PersonalFinancer.Services.Shared.Models;
+using static PersonalFinancer.Data.Constants.HostConstants;
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
 	public class UsersAccountCardsViewModel
 	{
 		public IEnumerable<AccountCardExtendedViewModel> Accounts { get; set; } = null!;
+
+		public string ApiAccountsEndpoint { get; set; }
+			= ApiAccountsUrl;
 
 		public PaginationModel Pagination { get; set; }
 			= new PaginationModel()

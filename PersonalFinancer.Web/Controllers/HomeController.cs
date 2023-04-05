@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
+using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Infrastructure;
@@ -35,18 +35,23 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Index(
-			[Bind("StartDate,EndDate")]UserDashboardViewModel inputModel)
+		public async Task<IActionResult> Index(DateFilterModel inputModel)
 		{
+			var viewModel = new UserDashboardViewModel
+			{
+				StartDate = inputModel.StartDate,
+				EndDate = inputModel.EndDate
+			};
+
 			if (!ModelState.IsValid)
 			{
-				inputModel.Accounts = await userService.GetUserAccounts(User.Id());
-				return View(inputModel);
+				viewModel.Accounts = await userService.GetUserAccounts(User.Id());
+				return View(viewModel);
 			}
 
-			await userService.SetUserDashboard(User.Id(), inputModel);
+			await userService.SetUserDashboard(User.Id(), viewModel);
 
-			return View(inputModel);
+			return View(viewModel);
 		}
 
 		public IActionResult Error(int statusCode)

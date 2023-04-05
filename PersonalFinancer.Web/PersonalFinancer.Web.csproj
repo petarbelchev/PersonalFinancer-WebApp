@@ -37,4 +37,8 @@
     <ProjectReference Include="..\PersonalFinancer.Services\PersonalFinancer.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Accounts\" />
+  </ItemGroup>
+
 </Project>

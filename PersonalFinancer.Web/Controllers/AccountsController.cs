@@ -39,9 +39,7 @@ namespace PersonalFinancer.Web.Controllers
 			}
 			catch (ArgumentException)
 			{
-				ModelState.AddModelError(
-					nameof(inputModel.Name),
-					"You already have Account with that name.");
+				ModelState.AddModelError(nameof(inputModel.Name), "You already have Account with that name.");
 
 				await accountService.PrepareAccountFormModelForReturn(inputModel);
 
@@ -49,46 +47,39 @@ namespace PersonalFinancer.Web.Controllers
 			}
 		}
 
-		public async Task<IActionResult> AccountDetails(
-			string id, string? startDate, string? endDate, int page = 1)
+		public async Task<IActionResult> AccountDetails(string id)
 		{
-			DetailsAccountViewModel viewModel;
+			var inputModel = new AccountDetailsInputModel
+			{
+				Id = id,
+				StartDate = DateTime.UtcNow.AddMonths(-1),
+				EndDate = DateTime.UtcNow
+			};
 
 			try
 			{
-				if (startDate == null || endDate == null)
-				{
-					viewModel = await accountService.GetAccountDetailsViewModel(
-						id, DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow, page, User.Id());
-				}
-				else
-				{
-					viewModel = await accountService.GetAccountDetailsViewModel(
-						id, DateTime.Parse(startDate), DateTime.Parse(endDate), page, User.Id());
-				}
+				AccountDetailsViewModel viewModel =
+					await accountService.GetAccountDetailsViewModel(inputModel, User.Id());
+
+				viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + id;
+
+				return View(viewModel);
 			}
 			catch (InvalidOperationException)
 			{
 				return BadRequest();
 			}
-
-			viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + id;
-			ViewBag.ModelId = id;
-
-			return View(viewModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> AccountDetails(
-			string id, [Bind("StartDate,EndDate")] DetailsAccountViewModel inputModel)
+		public async Task<IActionResult> AccountDetails(AccountDetailsInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
 			{
 				try
 				{
-					await accountService.PrepareAccountDetailsViewModelForReturn(id, inputModel);
-
-					return View(inputModel);
+					return View(await accountService
+						.PrepareAccountDetailsViewModelForReturn(inputModel));
 				}
 				catch (Exception)
 				{
@@ -96,23 +87,19 @@ namespace PersonalFinancer.Web.Controllers
 				}
 			}
 
-			DetailsAccountViewModel viewModel;
-
 			try
 			{
-				viewModel = await accountService.GetAccountDetailsViewModel(id,
-					inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."),
-					inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null."));
+				AccountDetailsViewModel viewModel =
+					await accountService.GetAccountDetailsViewModel(inputModel, User.Id());
+
+				viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + inputModel.Id;
+
+				return View(viewModel);
 			}
 			catch (InvalidOperationException)
 			{
 				return BadRequest();
 			}
-
-			viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + id;
-			ViewBag.ModelId = id;
-
-			return View(viewModel);
 		}
 
 		public async Task<IActionResult> Delete(string id)
@@ -167,7 +154,7 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				AccountFormModel viewModel = 
+				AccountFormModel viewModel =
 					await accountService.GetAccountFormModel(id, User.Id());
 
 				return View(viewModel);
