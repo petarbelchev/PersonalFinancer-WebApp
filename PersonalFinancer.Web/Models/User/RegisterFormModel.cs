@@ -33,5 +33,10 @@ namespace PersonalFinancer.Web.Models.User
 		[Compare(nameof(Password), ErrorMessage = "Password do not match.")]
 		[Display(Name = "Confirm Password")]
 		public string ConfirmPassword { get; set; } = null!;
-	}
+
+		[DataType(DataType.PhoneNumber)]
+		[RegularExpression(@"^\d{10}$", ErrorMessage = "Your phone number should be 10 digits long.")]
+		[Display(Name = "Phone Number")]
+        public string? PhoneNumber { get; set; }
+    }
 }

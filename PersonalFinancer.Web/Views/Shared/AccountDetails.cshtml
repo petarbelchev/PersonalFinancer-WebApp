@@ -1,5 +1,5 @@
-﻿@using PersonalFinancer.Services.Accounts.Models;
-@using PersonalFinancer.Services.Shared.Models;
+﻿@using PersonalFinancer.Web.Models.Accounts;
+@using PersonalFinancer.Web.Models.Shared;
 @model AccountDetailsViewModel
 @{
 	ViewData["Title"] = "Account Details";
@@ -25,7 +25,7 @@
 </div>
 
 @*DatePicker*@
-<partial name="_DatePickerFormPartial" model='new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }' />
+<partial name="_DatePickerFormPartial" model='new DateFilterInputModel { StartDate = Model.StartDate, EndDate = Model.EndDate }' />
 
 @if (Model.Transactions.Any())
 {

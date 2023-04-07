@@ -5,12 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
+
+using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Services.User
 {
-    public class UsersService : IUsersService
+	public class UsersService : IUsersService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
@@ -37,28 +39,28 @@ namespace PersonalFinancer.Services.User
 			return $"{user.FirstName} {user.LastName}";
 		}
 
-		public async Task<AllUsersViewModel> GetAllUsers(int page)
+		public async Task<AllUsersDTO> GetAllUsers(int page, int elementsPerPage)
 		{
-			var model = new AllUsersViewModel();
-			model.Pagination.Page = page;
-			model.Pagination.TotalElements = data.Users.Count();
-			model.Users = await data.Users
-				.OrderBy(u => u.FirstName)
-				.ThenBy(u => u.LastName)
-				.Skip(model.Pagination.ElementsPerPage * (model.Pagination.Page - 1))
-				.Take(model.Pagination.ElementsPerPage)
-				.ProjectTo<UserViewModel>(mapper.ConfigurationProvider)
-				.ToListAsync();
-
-			return model;
+			return new AllUsersDTO
+			{
+				Users = await data.Users
+					.OrderBy(u => u.FirstName)
+					.ThenBy(u => u.LastName)
+					.Skip(elementsPerPage * (page - 1))
+					.Take(elementsPerPage)
+					.Select(u => mapper.Map<UserDTO>(u))
+					.ToListAsync(),
+				Page = page,
+				AllUsersCount = data.Users.Count(),
+			};
 		}
 
-		public async Task<IEnumerable<AccountCardViewModel>> GetUserAccounts(string userId)
+		public async Task<IEnumerable<AccountCardDTO>> GetUserAccounts(string userId)
 		{
 			return await data.Accounts
 				.Where(a => a.OwnerId == userId && !a.IsDeleted)
 				.OrderBy(a => a.Name)
-				.Select(a => mapper.Map<AccountCardViewModel>(a))
+				.Select(a => mapper.Map<AccountCardDTO>(a))
 				.ToArrayAsync();
 		}
 
@@ -69,41 +71,41 @@ namespace PersonalFinancer.Services.User
 			return accountsCount;
 		}
 
-		public async Task SetUserDashboard(string userId, UserDashboardViewModel model)
+		public async Task<UserDashboardDTO> GetUserDashboardData(string userId, DateTime startDate, DateTime endDate)
 		{
-			var dto = await data.Users
+			return await data.Users
 				.Where(u => u.Id == userId)
 				.Select(u => new UserDashboardDTO
 				{
+					StartDate = startDate,
+					EndDate = endDate,
 					Accounts = u.Accounts.Where(a => !a.IsDeleted)
 						.OrderBy(a => a.Name)
-						.Select(a => new AccountCardViewModel
+						.Select(a => new AccountCardDTO
 						{
 							Id = a.Id,
 							Name = a.Name,
 							Balance = a.Balance,
 							CurrencyName = a.Currency.Name
 						}),
-					LastTransactions = u.Transactions
-						.Where(t => t.CreatedOn >= model.StartDate
-									&& t.CreatedOn <= model.EndDate)
+					Transactions = u.Transactions
+						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 						.OrderByDescending(t => t.CreatedOn)
 						.Take(5)
-						.Select(t => new TransactionTableViewModel
+						.Select(t => new TransactionTableDTO
 						{
 							Id = t.Id,
 							Amount = t.Amount,
 							AccountCurrencyName = t.Account.Currency.Name,
+							CategoryName = t.Category.Name,
 							CreatedOn = t.CreatedOn,
-							TransactionType = t.TransactionType.ToString(),
 							Refference = t.Refference,
-							CategoryName = t.Category.Name
+							TransactionType = t.TransactionType.ToString()
 						}),
 					CurrenciesCashFlow = u.Transactions
-						.Where(t => t.CreatedOn >= model.StartDate
-									&& t.CreatedOn <= model.EndDate)
+						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 						.GroupBy(t => t.Account.Currency.Name)
-						.Select(t => new CurrencyCashFlowViewModel
+						.Select(t => new CurrencyCashFlowDTO
 						{
 							Name = t.Key,
 							Incomes = t.Where(t => t.TransactionType == TransactionType.Income).Sum(t => t.Amount),
@@ -113,21 +115,17 @@ namespace PersonalFinancer.Services.User
 						.ToList()
 				})
 				.FirstAsync();
-
-			model.Accounts = dto.Accounts;
-			model.Transactions = dto.LastTransactions;
-			model.CurrenciesCashFlow = dto.CurrenciesCashFlow;
 		}
 
 		/// <summary>
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<UserDetailsViewModel> UserDetails(string userId)
+		public async Task<UserDetailsDTO> UserDetails(string userId)
 		{
 			var result = await data.Users
 				.Where(u => u.Id == userId)
-				.ProjectTo<UserDetailsViewModel>(mapper.ConfigurationProvider)
+				.ProjectTo<UserDetailsDTO>(mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			return result;

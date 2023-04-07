@@ -9,7 +9,7 @@ namespace PersonalFinancer.Services.Currencies
 		/// Throws ArgumentException if given name exists.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		Task<CurrencyViewModel> CreateCurrency(CurrencyInputModel model);
+		Task<CurrencyOutputDTO> CreateCurrency(CurrencyInputDTO model);
 		
 		/// <summary>
 		/// Throws InvalidOperationException when Currency does not exist

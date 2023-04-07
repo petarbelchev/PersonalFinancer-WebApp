@@ -36,7 +36,8 @@ namespace PersonalFinancer.Web.Controllers
 				FirstName = model.FirstName,
 				LastName = model.LastName,
 				Email = model.Email,
-				UserName = model.Email
+				UserName = model.Email,
+				PhoneNumber = model.PhoneNumber
 			};
 
 			IdentityResult creationResult = await userManager.CreateAsync(newUser, model.Password);

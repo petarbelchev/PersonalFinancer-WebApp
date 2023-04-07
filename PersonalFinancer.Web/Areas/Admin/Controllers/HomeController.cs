@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.User;
-using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.User;
 using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers

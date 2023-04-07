@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Accounts;
+using PersonalFinancer.Web.Models.Shared;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
@@ -12,26 +15,44 @@ namespace PersonalFinancer.Web.Controllers
 	public class AccountsController : Controller
 	{
 		private readonly IAccountsService accountService;
+		private readonly IMapper mapper;
 
-		public AccountsController(IAccountsService accountService)
-			=> this.accountService = accountService;
+		public AccountsController(
+			IAccountsService accountService,
+			IMapper mapper)
+		{
+			this.accountService = accountService;
+			this.mapper = mapper;
+		}
 
 		public async Task<IActionResult> Create()
-			=> View(await accountService.GetEmptyAccountFormModel(this.User.Id()));
+		{
+			CreateAccountFormDTO accountData =
+				await accountService.GetEmptyAccountForm(User.Id());
+
+			var viewModel = mapper.Map<CreateAccountFormModel>(accountData);
+
+			return View(viewModel);
+		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(AccountFormModel inputModel)
+		public async Task<IActionResult> Create(CreateAccountFormModel inputModel)
 		{
+			CreateAccountFormDTO accountData;
+			CreateAccountFormModel viewModel;
+
 			if (!ModelState.IsValid)
 			{
-				await accountService.PrepareAccountFormModelForReturn(inputModel);
+				accountData = await accountService.GetEmptyAccountForm(User.Id());
+				viewModel = mapper.Map<CreateAccountFormModel>(accountData);
 
-				return View(inputModel);
+				return View(viewModel);
 			}
 
 			try
 			{
-				string newAccountId = await accountService.CreateAccount(inputModel);
+				accountData = mapper.Map<CreateAccountFormDTO>(inputModel);
+				string newAccountId = await accountService.CreateAccount(accountData);
 
 				TempData["successMsg"] = "You create a new account successfully!";
 
@@ -39,28 +60,31 @@ namespace PersonalFinancer.Web.Controllers
 			}
 			catch (ArgumentException)
 			{
-				ModelState.AddModelError(nameof(inputModel.Name), "You already have Account with that name.");
+				ModelState.AddModelError(nameof(inputModel.Name),
+					"You already have Account with that name.");
 
-				await accountService.PrepareAccountFormModelForReturn(inputModel);
+				accountData = await accountService.GetEmptyAccountForm(User.Id());
+				viewModel = mapper.Map<CreateAccountFormModel>(accountData);
 
-				return View(inputModel);
+				return View(viewModel);
 			}
 		}
 
 		public async Task<IActionResult> AccountDetails(string id)
 		{
-			var inputModel = new AccountDetailsInputModel
-			{
-				Id = id,
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
-			};
-
 			try
 			{
-				AccountDetailsViewModel viewModel =
-					await accountService.GetAccountDetailsViewModel(inputModel, User.Id());
+				AccountDetailsInputDTO inputDTO = new AccountDetailsInputDTO
+				{
+					Id = id,
+					StartDate = DateTime.UtcNow.AddMonths(-1),
+					EndDate = DateTime.UtcNow
+				};
 
+				AccountDetailsOutputDTO accountData =
+					await accountService.GetAccountDetails(inputDTO, User.Id());
+				var viewModel = mapper.Map<AccountDetailsViewModel>(accountData);
+				viewModel.Pagination.TotalElements = accountData.AllTransactionsCount;
 				viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + id;
 
 				return View(viewModel);
@@ -74,25 +98,29 @@ namespace PersonalFinancer.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> AccountDetails(AccountDetailsInputModel inputModel)
 		{
-			if (!ModelState.IsValid)
+			AccountDetailsOutputDTO accountData;
+			AccountDetailsViewModel viewModel;
+			var inputDTO = new AccountDetailsInputDTO
 			{
-				try
-				{
-					return View(await accountService
-						.PrepareAccountDetailsViewModelForReturn(inputModel));
-				}
-				catch (Exception)
-				{
-					return BadRequest();
-				}
-			}
+				Id = inputModel.Id,
+				StartDate = inputModel.StartDate ?? new DateTime(),
+				EndDate = inputModel.EndDate ?? new DateTime()
+			};
 
 			try
 			{
-				AccountDetailsViewModel viewModel =
-					await accountService.GetAccountDetailsViewModel(inputModel, User.Id());
-
-				viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + inputModel.Id;
+				if (!ModelState.IsValid)
+				{
+					accountData = await accountService.GetAccountDetailsForReturn(inputDTO);
+					viewModel = mapper.Map<AccountDetailsViewModel>(accountData);
+				}
+				else
+				{
+					accountData = await accountService.GetAccountDetails(inputDTO, User.Id());
+					viewModel = mapper.Map<AccountDetailsViewModel>(accountData);
+					viewModel.Pagination.TotalElements = accountData.AllTransactionsCount;
+					viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + inputModel.Id;
+				}
 
 				return View(viewModel);
 			}
@@ -104,13 +132,12 @@ namespace PersonalFinancer.Web.Controllers
 
 		public async Task<IActionResult> Delete(string id)
 		{
-			if (!ModelState.IsValid)
-				return BadRequest();
-
 			try
 			{
-				DeleteAccountViewModel viewModel =
-					await accountService.GetDeleteAccountViewModel(id, User.Id());
+				DeleteAccountDTO accountData =
+					await accountService.GetDeleteAccountData(id, User.Id());
+
+				var viewModel = mapper.Map<DeleteAccountViewModel>(accountData);
 
 				return View(viewModel);
 			}
@@ -154,8 +181,10 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				AccountFormModel viewModel =
-					await accountService.GetAccountFormModel(id, User.Id());
+				EditAccountFormDTO accountData =
+					await accountService.GetAccountForm(id, User.Id());
+
+				var viewModel = mapper.Map<CreateAccountFormModel>(accountData);
 
 				return View(viewModel);
 			}
@@ -166,31 +195,33 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> EditAccount(
-			string id, AccountFormModel inputModel, string returnUrl)
+		public async Task<IActionResult> EditAccount(EditAccountFormModel inputModel)
 		{
-			if (!ModelState.IsValid)
-			{
-				await accountService.PrepareAccountFormModelForReturn(inputModel);
-
-				return View(inputModel);
-			}
+			if (inputModel.OwnerId != User.Id())
+				return Unauthorized();
 
 			try
 			{
-				await accountService.EditAccount(id, inputModel);
+				if (!ModelState.IsValid)
+				{
+					await PrepareViewModelForReturn(inputModel);
+
+					return View(inputModel);
+				}
+
+				EditAccountFormDTO accountData = mapper.Map<EditAccountFormDTO>(inputModel);
+				await accountService.EditAccount(accountData);
 
 				TempData["successMsg"] = "Your account was successfully edited!";
 
-				return LocalRedirect(returnUrl);
+				return LocalRedirect(inputModel.ReturnUrl);
 			}
 			catch (ArgumentException)
 			{
-				ModelState.AddModelError(
-					nameof(inputModel.Name),
+				ModelState.AddModelError(nameof(inputModel.Name),
 					$"You already have Account with {inputModel.Name} name.");
 
-				await accountService.PrepareAccountFormModelForReturn(inputModel);
+				await PrepareViewModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -198,6 +229,17 @@ namespace PersonalFinancer.Web.Controllers
 			{
 				return BadRequest();
 			}
+		}
+
+		private async Task PrepareViewModelForReturn<T>(T inputModel)
+			where T : IAccountFormModel
+		{
+			CreateAccountFormDTO accountData =
+				await accountService.GetEmptyAccountForm(inputModel.OwnerId);
+			inputModel.AccountTypes = accountData.AccountTypes
+				.Select(at => mapper.Map<AccountTypeViewModel>(at));
+			inputModel.Currencies = accountData.Currencies
+				.Select(c => mapper.Map<CurrencyViewModel>(c));
 		}
 	}
 }

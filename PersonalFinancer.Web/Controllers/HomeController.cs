@@ -1,17 +1,29 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PersonalFinancer.Services.Shared.Models;
+﻿using AutoMapper;
+
+using Microsoft.AspNetCore.Mvc;
+
+using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
+
 using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Home;
+using PersonalFinancer.Web.Models.Shared;
 
 namespace PersonalFinancer.Web.Controllers
 {
 	public class HomeController : Controller
 	{
 		private readonly IUsersService userService;
+		private readonly IMapper mapper;
 
-		public HomeController(IUsersService userService)
-			=> this.userService = userService;
+		public HomeController(
+			IUsersService userService,
+			IMapper mapper)
+		{
+			this.userService = userService;
+			this.mapper = mapper;
+		}
 
 		public async Task<IActionResult> Index()
 		{
@@ -20,13 +32,10 @@ namespace PersonalFinancer.Web.Controllers
 
 			if (User.Identity?.IsAuthenticated ?? false)
 			{
-				var viewModel = new UserDashboardViewModel()
-				{
-					StartDate = DateTime.UtcNow.AddMonths(-1),
-					EndDate = DateTime.UtcNow
-				};
+				UserDashboardDTO userData = await userService.GetUserDashboardData(
+					User.Id(), DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow);
 
-				await userService.SetUserDashboard(User.Id(), viewModel);
+				var viewModel = mapper.Map<UserDashboardViewModel>(userData);
 
 				return View(viewModel);
 			}
@@ -35,21 +44,28 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Index(DateFilterModel inputModel)
+		public async Task<IActionResult> Index(DateFilterInputModel inputModel)
 		{
-			var viewModel = new UserDashboardViewModel
-			{
-				StartDate = inputModel.StartDate,
-				EndDate = inputModel.EndDate
-			};
-
 			if (!ModelState.IsValid)
 			{
-				viewModel.Accounts = await userService.GetUserAccounts(User.Id());
-				return View(viewModel);
+				IEnumerable<AccountCardDTO> userAccountsData = 
+					await userService.GetUserAccounts(User.Id());
+
+				return View(new UserDashboardViewModel
+				{
+					StartDate = inputModel.StartDate,
+					EndDate = inputModel.EndDate,
+					Accounts = userAccountsData
+						.Select(a => mapper.Map<AccountCardViewModel>(a))
+				});
 			}
 
-			await userService.SetUserDashboard(User.Id(), viewModel);
+			UserDashboardDTO userData = await userService
+				.GetUserDashboardData(User.Id(),
+					inputModel.StartDate ?? throw new InvalidOperationException(),
+					inputModel.EndDate ?? throw new InvalidOperationException());
+
+			var viewModel = mapper.Map<UserDashboardViewModel>(userData);
 
 			return View(viewModel);
 		}
