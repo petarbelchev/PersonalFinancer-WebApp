@@ -54,17 +54,17 @@ namespace PersonalFinancer.Web.Controllers
 			if (!ModelState.IsValid)
 				return View(new UserTransactionsViewModel
 				{
-					StartDate = inputModel.StartDate ?? new DateTime(),
-					EndDate = inputModel.EndDate ?? new DateTime()
+					StartDate = inputModel.StartDate,
+					EndDate = inputModel.EndDate
 				});
-			// NOTE: Think to simplify elements per page and repeated code!
+
 			var viewModel = new UserTransactionsViewModel();
 
 			var inputDTO = new UserTransactionsInputDTO
 			{
 				Id = User.Id(),
-				StartDate = inputModel.StartDate ?? new DateTime(),
-				EndDate = inputModel.EndDate ?? new DateTime(),
+				StartDate = inputModel.StartDate,
+				EndDate = inputModel.EndDate,
 				ElementsPerPage = viewModel.Pagination.ElementsPerPage
 			};
 
@@ -209,7 +209,6 @@ namespace PersonalFinancer.Web.Controllers
 			return RedirectToAction(nameof(TransactionDetails), new { id });
 		}
 
-		// NOTE: Think to simplify
 		private async Task PrepareTransactionFormModelForReturn(TransactionFormModel inputModel)
 		{
 			EmptyTransactionFormDTO emptyFormModel =

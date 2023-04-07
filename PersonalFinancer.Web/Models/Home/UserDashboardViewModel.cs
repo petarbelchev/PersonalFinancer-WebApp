@@ -1,9 +1,8 @@
-﻿using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Models.Shared;
+﻿using PersonalFinancer.Web.Models.Shared;
 
 namespace PersonalFinancer.Web.Models.Home
 {
-    public class UserDashboardViewModel : DateFilterInputModel
+	public class UserDashboardViewModel : DateFilterInputModel
     {
         public IEnumerable<TransactionTableViewModel> Transactions { get; set; }
             = new List<TransactionTableViewModel>();

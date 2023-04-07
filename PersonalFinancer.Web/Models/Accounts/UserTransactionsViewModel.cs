@@ -11,10 +11,9 @@ namespace PersonalFinancer.Web.Models.Accounts
 
         public DateTime EndDate { get; set; }
 
-        public IEnumerable<TransactionTableViewModel> Transactions { get; set; } = null!;
+        public IEnumerable<TransactionTableViewModel> Transactions { get; set; } 
+            = new List<TransactionDetailsViewModel>();
 
-        //public string OwnerId { get; set; } = null!;
-        
 		public string ApiTransactionsEndpoint { get; set; }
 			= ApiTransactionsUrl;
 

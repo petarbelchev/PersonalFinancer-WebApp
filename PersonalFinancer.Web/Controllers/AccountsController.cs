@@ -103,8 +103,8 @@ namespace PersonalFinancer.Web.Controllers
 			var inputDTO = new AccountDetailsInputDTO
 			{
 				Id = inputModel.Id,
-				StartDate = inputModel.StartDate ?? new DateTime(),
-				EndDate = inputModel.EndDate ?? new DateTime()
+				StartDate = inputModel.StartDate,
+				EndDate = inputModel.EndDate
 			};
 
 			try

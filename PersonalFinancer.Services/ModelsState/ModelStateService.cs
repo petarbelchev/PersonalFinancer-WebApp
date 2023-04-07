@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using PersonalFinancer.Services.Accounts.Models;
 using System.Text;
 
 namespace PersonalFinancer.Services.ModelsState

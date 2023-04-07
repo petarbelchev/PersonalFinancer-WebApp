@@ -62,8 +62,8 @@ namespace PersonalFinancer.Web.Controllers
 
 			UserDashboardDTO userData = await userService
 				.GetUserDashboardData(User.Id(),
-					inputModel.StartDate ?? throw new InvalidOperationException(),
-					inputModel.EndDate ?? throw new InvalidOperationException());
+					inputModel.StartDate,
+					inputModel.EndDate);
 
 			var viewModel = mapper.Map<UserDashboardViewModel>(userData);
 
