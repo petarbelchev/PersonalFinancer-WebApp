@@ -52,6 +52,25 @@ namespace PersonalFinancer.Data.Configurations
 
 			users.Add(user2);
 
+			for (int i = 3; i <= 13; i++)
+			{
+				var user = new ApplicationUser()
+				{
+					Id = Guid.NewGuid().ToString(),
+					FirstName = "User" + i,
+					LastName = "Userov" + i,
+					Email = "user" + i + "@mail.com",
+					NormalizedEmail = "USER" + i + "@MAIL.COM",
+					UserName = "user" + i + "@mail.com",
+					NormalizedUserName = "USER" + i + "@MAIL.COM",
+					PhoneNumber = "13254769" + i
+				};
+
+				user.PasswordHash = hasher.HashPassword(user, "user123");
+
+				users.Add(user);
+			}
+
 			var admin = new ApplicationUser()
 			{
 				Id = AdminId,

@@ -2,14 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.User;
-using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Infrastructure;
-using static PersonalFinancer.Data.Constants.RoleConstants;
+using PersonalFinancer.Web.Models.User;
+using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
 	[Area("Admin")]
-	[Authorize(Roles = AdminRoleName)]
+	[Authorize(Roles = RoleConstants.AdminRoleName)]
 	public class HomeController : Controller
 	{
 		private readonly IUsersService userService;
@@ -23,7 +23,8 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				RegisteredUsers = userService.UsersCount(),
 				CreatedAccounts = userService.GetUsersAccountsCount(),
-				AdminFullName = await userService.FullName(User.Id())
+				AdminFullName = await userService.FullName(User.Id()),
+				AccountsCashFlowEndpoint = HostConstants.ApiAccountsCashFlowUrl
 			});
 		}
 	}

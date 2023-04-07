@@ -31,7 +31,7 @@ namespace PersonalFinancer.Services.AccountTypes
 		/// Throws ArgumentException if given name already exists.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<AccountTypeViewModel> CreateAccountType(AccountTypeInputModel model)
+		public async Task<AccountTypeOutputDTO> CreateAccountType(AccountTypeInputDTO model)
 		{
 			AccountType? accountType = await data.AccountTypes
 				.FirstOrDefaultAsync(at => at.Name == model.Name && at.OwnerId == model.OwnerId);
@@ -60,7 +60,7 @@ namespace PersonalFinancer.Services.AccountTypes
 
 			memoryCache.Remove(AccountConstants.AccTypeCacheKeyValue + model.OwnerId);
 
-			return mapper.Map<AccountTypeViewModel>(accountType);
+			return mapper.Map<AccountTypeOutputDTO>(accountType);
 		}
 		
 		/// <summary>

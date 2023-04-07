@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Data.Models;
-using PersonalFinancer.Web.Models.Account;
+using PersonalFinancer.Web.Models.User;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
@@ -36,7 +36,8 @@ namespace PersonalFinancer.Web.Controllers
 				FirstName = model.FirstName,
 				LastName = model.LastName,
 				Email = model.Email,
-				UserName = model.Email
+				UserName = model.Email,
+				PhoneNumber = model.PhoneNumber
 			};
 
 			IdentityResult creationResult = await userManager.CreateAsync(newUser, model.Password);

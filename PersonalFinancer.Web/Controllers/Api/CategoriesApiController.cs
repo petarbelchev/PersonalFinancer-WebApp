@@ -1,28 +1,32 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.Categories;
 using PersonalFinancer.Services.Categories.Models;
 using PersonalFinancer.Services.ModelsState;
-using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Shared;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-    [Authorize]
+	[Authorize]
 	[Route("api/categories")]
 	[ApiController]
 	public class CategoriesApiController : ControllerBase
 	{
 		private readonly ICategoryService categoryService;
 		private readonly IModelStateService modelStateService;
+		private readonly IMapper mapper;
 
 		public CategoriesApiController(
-			ICategoryService categoryService, 
-			IModelStateService modelStateService)
+			ICategoryService categoryService,
+			IModelStateService modelStateService,
+			IMapper mapper)
 		{
 			this.categoryService = categoryService;
 			this.modelStateService = modelStateService;
+			this.mapper = mapper;
 		}
 
 		[HttpPost]
@@ -33,8 +37,10 @@ namespace PersonalFinancer.Web.Controllers.Api
 
 			try
 			{
-				CategoryViewModel viewModel = 
-					await categoryService.CreateCategory(inputModel);
+				var inputDTO = mapper.Map<CategoryInputDTO>(inputModel);
+				CategoryOutputDTO categoryOutputDTO =
+					await categoryService.CreateCategory(inputDTO);
+				var viewModel = mapper.Map<CategoryViewModel>(categoryOutputDTO);
 
 				return Created(string.Empty, viewModel);
 			}

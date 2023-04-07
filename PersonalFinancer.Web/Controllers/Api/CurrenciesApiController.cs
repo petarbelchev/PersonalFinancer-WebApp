@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.Currencies;
 using PersonalFinancer.Services.Currencies.Models;
 using PersonalFinancer.Services.ModelsState;
-using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Currencies;
+using PersonalFinancer.Web.Models.Shared;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
@@ -16,13 +18,16 @@ namespace PersonalFinancer.Web.Controllers.Api
 	{
 		private readonly ICurrencyService currencyService;
 		private readonly IModelStateService modelStateService;
+		private readonly IMapper mapper;
 
 		public CurrenciesApiController(
 			ICurrencyService currencyService,
-			IModelStateService modelStateService)
+			IModelStateService modelStateService,
+			IMapper mapper)
 		{
 			this.currencyService = currencyService;
 			this.modelStateService = modelStateService;
+			this.mapper = mapper;
 		}
 
 		[HttpPost]
@@ -33,8 +38,13 @@ namespace PersonalFinancer.Web.Controllers.Api
 
 			try
 			{
-				CurrencyViewModel viewModel = 
-					await currencyService.CreateCurrency(inputModel);
+				// NOTE: Think to simplify models... 
+				var inputData = mapper.Map<CurrencyInputDTO>(inputModel);
+
+				CurrencyOutputDTO currencyData = 
+					await currencyService.CreateCurrency(inputData);
+
+				var viewModel = mapper.Map<CurrencyViewModel>(currencyData);					
 
 				return Created(string.Empty, viewModel);
 			}

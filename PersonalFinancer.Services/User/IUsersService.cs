@@ -1,9 +1,9 @@
-﻿using PersonalFinancer.Services.Shared.Models;
+﻿using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Services.User
 {
-    public interface IUsersService
+	public interface IUsersService
 	{
 		
 		/// <summary>
@@ -12,19 +12,19 @@ namespace PersonalFinancer.Services.User
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<string> FullName(string userId);
 
-		Task<AllUsersViewModel> GetAllUsers(int page = 1);
+		Task<AllUsersDTO> GetAllUsers(int page, int elementsPerPage);
 
-		Task<IEnumerable<AccountCardViewModel>> GetUserAccounts(string userId);
+		Task<IEnumerable<AccountCardDTO>> GetUserAccounts(string userId);
 				
 		int GetUsersAccountsCount();
 
-		Task SetUserDashboard(string userId, UserDashboardViewModel model);
+		Task<UserDashboardDTO> GetUserDashboardData(string userId, DateTime startDate, DateTime endDate);
 		
 		/// <summary>
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<UserDetailsViewModel> UserDetails(string userId);
+		Task<UserDetailsDTO> UserDetails(string userId);
 
 		int UsersCount();
 	}

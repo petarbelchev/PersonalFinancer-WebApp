@@ -9,7 +9,7 @@ namespace PersonalFinancer.Services.AccountTypes
 		/// Throws ArgumentException if given name already exists.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		Task<AccountTypeViewModel> CreateAccountType(AccountTypeInputModel model);
+		Task<AccountTypeOutputDTO> CreateAccountType(AccountTypeInputDTO model);
 		
 		/// <summary>
 		/// Throws exception when Account Type does not exist

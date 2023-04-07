@@ -14,21 +14,33 @@ namespace PersonalFinancer.Data.Configurations
 			{
 				new Currency
 				{
-					Id = BgnCurrencyId,
+					Id = FirstUserBGNCurrencyId,
 					Name = "BGN",
 					OwnerId = FirstUserId
 				},
 				new Currency
 				{
-					Id = EurCurrencyId,
+					Id = FirstUserEURCurrencyId,
 					Name = "EUR",
 					OwnerId = FirstUserId
 				},
 				new Currency
 				{
-					Id = UsdCurrencyId,
+					Id = FirstUserUSDCurrencyId,
 					Name = "USD",
 					OwnerId = FirstUserId
+				},
+				new Currency
+				{
+					Id = SecondUserSEKCurrencyId,
+					Name = "SEK",
+					OwnerId = SecondUserId
+				},
+				new Currency
+				{
+					Id = SecondUserGBPCurrencyId,
+					Name = "GBP",
+					OwnerId = SecondUserId
 				}
 			});
 		}

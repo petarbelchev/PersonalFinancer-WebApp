@@ -1,5 +1,4 @@
-﻿@using PersonalFinancer.Services.User.Models
-@using static PersonalFinancer.Data.Constants.HostConstants;
+﻿@using PersonalFinancer.Web.Models.User;
 @model AdminDashboardViewModel
 @{
 	ViewData["Title"] = "Admin Dashboard";
@@ -38,7 +37,7 @@
 			</div>
 		</div>
 	</div>
-	<button class="btn btn-secondary" style="margin-top: 50px;" onclick="moreStatistics('@ApiAccountsUrl')">More statistics...</button>
+	<button class="btn btn-secondary" style="margin-top: 50px;" onclick="moreStatistics('@Model.AccountsCashFlowEndpoint')">More statistics...</button>
 	<div id="statistics" style="margin-top: 50px;">
 	</div>
 </div>

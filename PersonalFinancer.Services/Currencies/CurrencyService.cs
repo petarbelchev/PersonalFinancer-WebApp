@@ -6,7 +6,6 @@ using Microsoft.Extensions.Caching.Memory;
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Currencies.Models;
-using PersonalFinancer.Services.Shared.Models;
 using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Services.Currencies
@@ -31,7 +30,7 @@ namespace PersonalFinancer.Services.Currencies
 		/// Throws ArgumentException if given name exists.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<CurrencyViewModel> CreateCurrency(CurrencyInputModel model)
+		public async Task<CurrencyOutputDTO> CreateCurrency(CurrencyInputDTO model)
 		{
 			Currency? currency = await data.Currencies
 				.FirstOrDefaultAsync(c => c.Name == model.Name && c.OwnerId == model.OwnerId);
@@ -60,7 +59,7 @@ namespace PersonalFinancer.Services.Currencies
 
 			memoryCache.Remove(AccountConstants.CurrencyCacheKeyValue + model.OwnerId);
 
-			return mapper.Map<CurrencyViewModel>(currency);
+			return mapper.Map<CurrencyOutputDTO>(currency);
 		}
 
 		/// <summary>

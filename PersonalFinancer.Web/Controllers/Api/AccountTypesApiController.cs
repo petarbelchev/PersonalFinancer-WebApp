@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.AccountTypes;
 using PersonalFinancer.Services.AccountTypes.Models;
 using PersonalFinancer.Services.ModelsState;
-using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Web.Infrastructure;
-using System.Text;
+using PersonalFinancer.Web.Models.AccountTypes;
+using PersonalFinancer.Web.Models.Shared;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
@@ -17,13 +18,16 @@ namespace PersonalFinancer.Web.Controllers.Api
 	{
 		private readonly IAccountTypeService accountTypeService;
 		private readonly IModelStateService modelStateService;
+		private readonly IMapper mapper;
 
 		public AccountTypesApiController(
 			IAccountTypeService accountTypeService,
-			IModelStateService modelStateService)
+			IModelStateService modelStateService,
+			IMapper mapper)
 		{
 			this.accountTypeService = accountTypeService;
 			this.modelStateService = modelStateService;
+			this.mapper = mapper;
 		}
 
 		[HttpPost]
@@ -34,8 +38,13 @@ namespace PersonalFinancer.Web.Controllers.Api
 
 			try
 			{
-				AccountTypeViewModel viewModel =
-					await accountTypeService.CreateAccountType(inputModel);
+				var accountTypeInputDTO = 
+					mapper.Map<AccountTypeInputDTO>(inputModel);
+
+				var accountTypeOutputDTO =
+					await accountTypeService.CreateAccountType(accountTypeInputDTO);
+
+				var viewModel = mapper.Map<AccountTypeViewModel>(accountTypeOutputDTO);
 
 				return Created(string.Empty, viewModel);
 			}

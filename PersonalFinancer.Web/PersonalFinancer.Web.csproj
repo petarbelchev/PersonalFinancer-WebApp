@@ -9,13 +9,9 @@
 
   <ItemGroup>
     <Compile Remove="Areas\Admin\Views\Shared\**" />
-    <Compile Remove="Models\Home\**" />
     <Content Remove="Areas\Admin\Views\Shared\**" />
-    <Content Remove="Models\Home\**" />
     <EmbeddedResource Remove="Areas\Admin\Views\Shared\**" />
-    <EmbeddedResource Remove="Models\Home\**" />
     <None Remove="Areas\Admin\Views\Shared\**" />
-    <None Remove="Models\Home\**" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿@using PersonalFinancer.Web.Models.Account;
+﻿@using PersonalFinancer.Web.Models.User;
 @model RegisterFormModel
 @{
 	ViewData["Title"] = "Register";
@@ -36,6 +36,11 @@
 				<input asp-for="@Model.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
 				<label asp-for="@Model.ConfirmPassword"></label>
 				<span asp-validation-for="@Model.ConfirmPassword" class="text-danger"></span>
+			</div>
+			<div class="form-floating formField">
+				<input asp-for="@Model.PhoneNumber" class="form-control" autocomplete="new-password" aria-required="true" />
+				<label asp-for="@Model.PhoneNumber">Phone Number <i>(Optional)</i></label>
+				<span asp-validation-for="@Model.PhoneNumber" class="text-danger"></span>
 			</div>
 			<button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-secondary">Register</button>
 		</form>

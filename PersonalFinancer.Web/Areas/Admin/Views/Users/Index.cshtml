@@ -1,4 +1,4 @@
-﻿@using PersonalFinancer.Services.User.Models;
+﻿@using PersonalFinancer.Web.Models.User;
 @model AllUsersViewModel
 @{
 	ViewData["Title"] = "All Users";
@@ -38,3 +38,15 @@
 		<partial name="_PaginationPartial" />
 	</div>
 </div>
+
+
+@section Scripts {
+	<script>
+		let params = {
+			url: '@Model.ApiUsersEndpoint',
+			pages: @Model.Pagination.Pages
+		}
+	</script>
+	<script src="/js/getUsers.js"></script>
+	<script src="~/js/setUpPagination.js"></script>
+}

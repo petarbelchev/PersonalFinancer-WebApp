@@ -1,4 +1,4 @@
-﻿@using PersonalFinancer.Services.Accounts.Models;
+﻿@using PersonalFinancer.Web.Models.Accounts;
 @model UsersAccountCardsViewModel
 @{
 	ViewData["Title"] = "All Accounts";
@@ -11,27 +11,40 @@
 	<partial name="_PaginationPartial" />
 
 	@*Account Cards*@
-	@foreach (AccountCardExtendedViewModel account in Model.Accounts)
-	{
-		<div class="col-xl-3 col-lg-4 col-sm-6">
-			<div class="card formField align-items-center">
-				<div class="d-flex flex-row align-items-center mb-2">
-					<div class="p-2">
-						<img src="/icons/icons8-wallet-64.png">
+	<section class="row">
+		@foreach (AccountCardExtendedViewModel account in Model.Accounts)
+		{
+			<div class="col-xl-3 col-lg-4 col-sm-6">
+				<div class="card formField align-items-center">
+					<div class="d-flex flex-row align-items-center mb-2">
+						<div class="p-2">
+							<img src="/icons/icons8-wallet-64.png">
+						</div>
+						<div class="card-body p-2 flex-grow-1">
+							<h5 class="card-title">@account.Name</h5>
+							<p class="card-text">@account.Balance @account.CurrencyName</p>
+						</div>
 					</div>
-					<div class="card-body p-2 flex-grow-1">
-						<h5 class="card-title">@account.Name</h5>
-						<p class="card-text">@account.Balance @account.CurrencyName</p>
-					</div>
+					<a asp-area="Admin" asp-controller="Accounts" asp-action="AccountDetails"
+				   asp-route-id="@account.Id" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Details</a>
+					<a asp-area="Admin" asp-controller="Users" asp-action="Details"
+				   asp-route-id="@account.OwnerId" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Owner</a>
 				</div>
-				<a asp-area="Admin" asp-controller="Accounts" asp-action="AccountDetails"
-			   asp-route-id="@account.Id" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Details</a>
-				<a asp-area="Admin" asp-controller="Users" asp-action="Details"
-			   asp-route-id="@account.OwnerId" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Owner</a>
 			</div>
-		</div>
-	}
+		}
+	</section>
 
 	@*Pagination*@
 	<partial name="_PaginationPartial" />
 </div>
+
+@section Scripts {
+	<script>
+		let params = {
+			url: '@Model.ApiAccountsEndpoint',
+			pages: @Model.Pagination.Pages
+		}
+	</script>
+	<script src="/js/getAccounts.js"></script>
+	<script src="~/js/setUpPagination.js"></script>
+}
