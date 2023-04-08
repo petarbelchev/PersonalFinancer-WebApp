@@ -1,7 +1,7 @@
-﻿using PersonalFinancer.Services.Shared.Models;
-
-namespace PersonalFinancer.Services.Accounts.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
+	using Services.Shared.Models;
+	
 	public class AccountDetailsOutputDTO : AccountCardDTO
 	{
 		public DateTime StartDate { get; set; }
@@ -12,6 +12,6 @@ namespace PersonalFinancer.Services.Accounts.Models
 
 		public IEnumerable<TransactionTableDTO> Transactions { get; set; } = null!;
 
-        public int AllTransactionsCount { get; set; }
-    }
+		public int AllTransactionsCount { get; set; }
+	}
 }

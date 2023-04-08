@@ -1,25 +1,26 @@
-﻿using AutoMapper;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.AccountTypes.Models;
-using PersonalFinancer.Services.Shared.Models;
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Services.AccountTypes
+﻿namespace PersonalFinancer.Services.AccountTypes
 {
-    public class AccountTypeService : IAccountTypeService
+	using AutoMapper;
+
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+
+	using Data;
+	using Data.Models;
+	using static Data.Constants;
+
+	using Services.AccountTypes.Models;
+	using Services.Shared.Models;
+	
+	public class AccountTypeService : IAccountTypeService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
 		private readonly IMemoryCache memoryCache;
 
 		public AccountTypeService(
-			PersonalFinancerDbContext data, 
-			IMapper mapper, 
+			PersonalFinancerDbContext data,
+			IMapper mapper,
 			IMemoryCache memoryCache)
 		{
 			this.data = data;
@@ -58,11 +59,11 @@ namespace PersonalFinancer.Services.AccountTypes
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.AccTypeCacheKeyValue + model.OwnerId);
+			memoryCache.Remove(AccountTypeConstants.AccTypeCacheKeyValue + model.OwnerId);
 
 			return mapper.Map<AccountTypeOutputDTO>(accountType);
 		}
-		
+
 		/// <summary>
 		/// Throws exception when Account Type does not exist
 		/// and ArgumentException when User is not owner or Administrator.
@@ -83,7 +84,7 @@ namespace PersonalFinancer.Services.AccountTypes
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.AccTypeCacheKeyValue + ownerId);
+			memoryCache.Remove(AccountTypeConstants.AccTypeCacheKeyValue + ownerId);
 		}
 	}
 }

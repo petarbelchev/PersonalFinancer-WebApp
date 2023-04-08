@@ -1,15 +1,15 @@
-﻿using AutoMapper;
-
-using PersonalFinancer.Data.Models;
-
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Categories.Models;
-using PersonalFinancer.Services.Currencies.Models;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User.Models;
-
-namespace PersonalFinancer.Services.Infrastructure
+﻿namespace PersonalFinancer.Services.Infrastructure
 {
+	using AutoMapper;
+
+	using Data.Models;
+
+	using Services.Accounts.Models;
+	using Services.Categories.Models;
+	using Services.Currencies.Models;
+	using Services.Shared.Models;
+	using Services.User.Models;
+
 	public class ServiceMappingProfile : Profile
 	{
 		public ServiceMappingProfile()
@@ -18,8 +18,8 @@ namespace PersonalFinancer.Services.Infrastructure
 
 			CreateMap<Currency, CurrencyOutputDTO>();
 
-			CreateMap<Account, DeleteAccountDTO>(); 
-			CreateMap<Account, AccountDTO>(); 
+			CreateMap<Account, DeleteAccountDTO>();
+			CreateMap<Account, AccountDTO>();
 			CreateMap<Account, AccountCardDTO>();
 			CreateMap<Account, AccountCardExtendedDTO>()
 				.ForMember(m => m.CurrencyName, mf => mf.MapFrom(s => s.Currency.Name));
@@ -33,7 +33,7 @@ namespace PersonalFinancer.Services.Infrastructure
 					.MapFrom(s => s.Account.Name + (s.Account.IsDeleted ? " (Deleted)" : string.Empty)));
 			CreateMap<Transaction, TransactionTableDTO>()
 				.ForMember(m => m.CategoryName, mf => mf.MapFrom(s => s.Category.Name));
-			
+
 			CreateMap<ApplicationUser, UserDTO>();
 			CreateMap<ApplicationUser, UserDetailsDTO>()
 				.ForMember(m => m.Accounts, mf => mf.MapFrom(s => s.Accounts.Where(a => !a.IsDeleted).OrderBy(a => a.Name)));

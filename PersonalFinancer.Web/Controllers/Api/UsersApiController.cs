@@ -1,14 +1,17 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.User;
-using PersonalFinancer.Services.User.Models;
-using PersonalFinancer.Web.Models.User;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.User;
+	using Services.User.Models;
+
+	using Web.Models.User;
+
+	using static Data.Constants.RoleConstants;
+
 	[Authorize(Roles = AdminRoleName)]
 	[Route("api/users")]
 	[ApiController]
@@ -31,6 +34,7 @@ namespace PersonalFinancer.Web.Controllers.Api
 			var model = new AllUsersViewModel();
 			AllUsersDTO usersDTO = await usersService
 				.GetAllUsers(page, model.Pagination.ElementsPerPage);
+
 			model.Users = usersDTO.Users.Select(u => mapper.Map<UserViewModel>(u));
 			model.Pagination.Page = usersDTO.Page;
 			model.Pagination.TotalElements = usersDTO.AllUsersCount;

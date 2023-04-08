@@ -1,17 +1,17 @@
-﻿using AutoMapper;
-
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.User;
-using PersonalFinancer.Services.User.Models;
-
-using PersonalFinancer.Web.Infrastructure;
-using PersonalFinancer.Web.Models.Home;
-using PersonalFinancer.Web.Models.Shared;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Accounts.Models;
+	using Services.User;
+	using Services.User.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Home;
+	using Web.Models.Shared;
+
 	public class HomeController : Controller
 	{
 		private readonly IUsersService userService;
@@ -48,7 +48,7 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				IEnumerable<AccountCardDTO> userAccountsData = 
+				IEnumerable<AccountCardDTO> userAccountsData =
 					await userService.GetUserAccounts(User.Id());
 
 				return View(new UserDashboardViewModel
@@ -60,10 +60,8 @@ namespace PersonalFinancer.Web.Controllers
 				});
 			}
 
-			UserDashboardDTO userData = await userService
-				.GetUserDashboardData(User.Id(),
-					inputModel.StartDate,
-					inputModel.EndDate);
+			UserDashboardDTO userData = await userService.GetUserDashboardData(
+				User.Id(), inputModel.StartDate, inputModel.EndDate);
 
 			var viewModel = mapper.Map<UserDashboardViewModel>(userData);
 
@@ -73,9 +71,9 @@ namespace PersonalFinancer.Web.Controllers
 		public IActionResult Error(int statusCode)
 		{
 			if (statusCode == 400)
-				ViewBag.ImgUrl = "/400-Bad-Request-Error.webp";
+				ViewBag.ImgUrl = "/img/400BadRequestError.webp";
 			else
-				ViewBag.ImgUrl = "/internal-server-error-status-code-500-.webp";
+				ViewBag.ImgUrl = "/img/500InternalServerError.webp";
 
 			return View();
 		}

@@ -1,20 +1,21 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Shared.Models;
-using static PersonalFinancer.Data.Constants;
-using PersonalFinancer.Services.Categories.Models;
-using PersonalFinancer.Services.Currencies.Models;
-
-namespace PersonalFinancer.Services.Accounts
+﻿namespace PersonalFinancer.Services.Accounts
 {
+	using AutoMapper;
+	using AutoMapper.QueryableExtensions;
+
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+
+	using Data;
+	using Data.Enums;
+	using Data.Models;
+	using static Data.Constants;
+	
+	using Services.Accounts.Models;
+	using Services.Categories.Models;
+	using Services.Currencies.Models;
+	using Services.Shared.Models;
+
 	public class AccountsService : IAccountsService
 	{
 		private readonly PersonalFinancerDbContext data;
@@ -67,10 +68,10 @@ namespace PersonalFinancer.Services.Accounts
 					Id = Guid.NewGuid().ToString(),
 					Amount = newAccount.Balance,
 					OwnerId = newAccount.OwnerId,
-					CategoryId = TransactionConstants.InitialBalanceCategoryId,
+					CategoryId = CategoryConstants.InitialBalanceCategoryId,
 					TransactionType = TransactionType.Income,
 					CreatedOn = DateTime.UtcNow,
-					Refference = TransactionConstants.CategoryInitialBalanceName,
+					Refference = CategoryConstants.CategoryInitialBalanceName,
 					IsInitialBalance = true
 				});
 			}
@@ -203,9 +204,9 @@ namespace PersonalFinancer.Services.Accounts
 						Id = Guid.NewGuid().ToString(),
 						OwnerId = account.OwnerId,
 						Amount = amountOfChange,
-						CategoryId = TransactionConstants.InitialBalanceCategoryId,
+						CategoryId = CategoryConstants.InitialBalanceCategoryId,
 						CreatedOn = DateTime.UtcNow,
-						Refference = TransactionConstants.CategoryInitialBalanceName,
+						Refference = CategoryConstants.CategoryInitialBalanceName,
 						TransactionType = amountOfChange < 0 ? TransactionType.Expense : TransactionType.Income,
 						IsInitialBalance = true
 					};

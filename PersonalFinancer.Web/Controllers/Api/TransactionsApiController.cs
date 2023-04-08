@@ -1,16 +1,19 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Web.Infrastructure;
-using PersonalFinancer.Web.Models.Accounts;
-using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Accounts;
+	using Services.Accounts.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Accounts;
+	using Web.Models.Shared;
+
+	using static Data.Constants.RoleConstants;
+
 	[Authorize]
 	[Route("api/transactions")]
 	[ApiController]
@@ -64,10 +67,10 @@ namespace PersonalFinancer.Web.Controllers.Api
 			try
 			{
 				var inputDTO = mapper.Map<UserTransactionsApiInputDTO>(inputModel);
-
 				var viewModel = new TransactionsViewModel();
 				inputDTO.ElementsPerPage = viewModel.Pagination.ElementsPerPage;
-				UserTransactionsApiOutputDTO transactionsData = 
+
+				UserTransactionsApiOutputDTO transactionsData =
 					await accountService.GetUserTransactionsApi(inputDTO);
 
 				viewModel.Transactions = transactionsData.Transactions

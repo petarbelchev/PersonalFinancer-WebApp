@@ -1,11 +1,11 @@
-﻿using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.User.Models;
-
-namespace PersonalFinancer.Services.User
+﻿namespace PersonalFinancer.Services.User
 {
+	using Services.Accounts.Models;
+	using Services.User.Models;
+
 	public interface IUsersService
 	{
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
@@ -15,11 +15,11 @@ namespace PersonalFinancer.Services.User
 		Task<AllUsersDTO> GetAllUsers(int page, int elementsPerPage);
 
 		Task<IEnumerable<AccountCardDTO>> GetUserAccounts(string userId);
-				
+
 		int GetUsersAccountsCount();
 
 		Task<UserDashboardDTO> GetUserDashboardData(string userId, DateTime startDate, DateTime endDate);
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>

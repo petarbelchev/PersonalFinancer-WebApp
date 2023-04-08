@@ -1,36 +1,42 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Web.Models.Accounts;
-using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Areas.Admin.Controllers
+﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Accounts;
+	using Services.Accounts.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Accounts;
+
+	using static Data.Constants.RoleConstants;
+
 	[Area("Admin")]
 	[Authorize(Roles = AdminRoleName)]
 	public class AccountsController : Controller
 	{
-		private readonly IAccountsService accountService;
+		private readonly IAccountsService accountsService;
 		private readonly IMapper mapper;
+		private readonly IControllerService controllerService;
 
 		public AccountsController(
-			IAccountsService accountService,
-			IMapper mapper)
+			IAccountsService accountsService,
+			IMapper mapper,
+			IControllerService controllerService)
 		{
-			this.accountService = accountService;
+			this.accountsService = accountsService;
 			this.mapper = mapper;
+			this.controllerService = controllerService;
 		}
 
 		public async Task<IActionResult> Index(int page = 1)
 		{
 			var viewModel = new UsersAccountCardsViewModel();
-
-			AccountCardsOutputDTO accountCardsData = await accountService
+			AccountCardsOutputDTO accountCardsData = await accountsService
 				.GetUsersAccountCards(page, viewModel.Pagination.ElementsPerPage);
+
 			viewModel.Accounts = accountCardsData.Accounts
 				.Select(ac => mapper.Map<AccountCardExtendedViewModel>(ac)).ToArray();
 			viewModel.Pagination.Page = accountCardsData.Page;
@@ -41,8 +47,6 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 		public async Task<IActionResult> AccountDetails(string id)
 		{
-			// ApiTransactionsEndpoint = HostConstants.ApiAccountTransactionsUrl,
-
 			try
 			{
 				var inputDTO = new AccountDetailsInputDTO
@@ -53,10 +57,9 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 				};
 
 				AccountDetailsOutputDTO accountData =
-					await accountService.GetAccountDetails(inputDTO);
+					await accountsService.GetAccountDetails(inputDTO);
 
 				var viewModel = mapper.Map<AccountDetailsViewModel>(accountData);
-				//viewModel.Pagination.ElementsName = "transactions";
 				viewModel.Pagination.TotalElements = accountData.AllTransactionsCount;
 				viewModel.Routing.Area = "Admin";
 				viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + id;
@@ -85,14 +88,13 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				if (!ModelState.IsValid)
 				{
-					accountData = await accountService.GetAccountDetailsForReturn(inputDTO);
+					accountData = await accountsService.GetAccountDetailsForReturn(inputDTO);
 					viewModel = mapper.Map<AccountDetailsViewModel>(accountData);
 				}
 				else
 				{
-					accountData = await accountService.GetAccountDetails(inputDTO);
+					accountData = await accountsService.GetAccountDetails(inputDTO);
 					viewModel = mapper.Map<AccountDetailsViewModel>(accountData);
-					//viewModel.Pagination.ElementsName = "transactions";
 					viewModel.Pagination.TotalElements = accountData.AllTransactionsCount;
 					viewModel.Routing.Area = "Admin";
 					viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + inputModel.Id;
@@ -111,7 +113,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			try
 			{
 				DeleteAccountDTO accountData =
-					await accountService.GetDeleteAccountData(id);
+					await accountsService.GetDeleteAccountData(id);
 
 				var viewModel = mapper.Map<DeleteAccountViewModel>(accountData);
 
@@ -134,11 +136,10 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 			try
 			{
-				string ownerId = await accountService.GetOwnerId(inputModel.Id);
+				string ownerId = await accountsService.GetOwnerId(inputModel.Id);
 
-				await accountService.DeleteAccount(
-					inputModel.Id,
-					inputModel.ShouldDeleteTransactions ?? false);
+				await accountsService.DeleteAccount(
+					inputModel.Id, inputModel.ShouldDeleteTransactions ?? false);
 
 				TempData["successMsg"] = "You successfully delete user's account!";
 
@@ -154,7 +155,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		{
 			try
 			{
-				EditAccountFormDTO accountData = await accountService.GetAccountForm(id);
+				EditAccountFormDTO accountData = await accountsService.GetAccountForm(id);
 
 				var viewModel = mapper.Map<CreateAccountFormModel>(accountData);
 
@@ -175,13 +176,13 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				if (!ModelState.IsValid)
 				{
-					await PrepareViewModelForReturn(inputModel);
+					await controllerService.PrepareAccountFormModelForReturn(inputModel);
 
 					return View(inputModel);
 				}
 
 				accountData = mapper.Map<EditAccountFormDTO>(inputModel);
-				await accountService.EditAccount(accountData);
+				await accountsService.EditAccount(accountData);
 
 				TempData["successMsg"] = "You successfully edited user's account!";
 
@@ -189,11 +190,10 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			}
 			catch (ArgumentException)
 			{
-				ModelState.AddModelError(
-					nameof(inputModel.Name),
+				ModelState.AddModelError(nameof(inputModel.Name),
 					$"The User already have Account with {inputModel.Name} name.");
 
-				await PrepareViewModelForReturn(inputModel);
+				await controllerService.PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -201,17 +201,6 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				return BadRequest();
 			}
-		}
-
-		private async Task PrepareViewModelForReturn<T>(T inputModel)
-			where T : IAccountFormModel
-		{
-			CreateAccountFormDTO accountData =
-				await accountService.GetEmptyAccountForm(inputModel.OwnerId);
-			inputModel.AccountTypes = accountData.AccountTypes
-				.Select(at => mapper.Map<AccountTypeViewModel>(at));
-			inputModel.Currencies = accountData.Currencies
-				.Select(c => mapper.Map<CurrencyViewModel>(c));
 		}
 	}
 }

@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-using System.ComponentModel.DataAnnotations;
-
-using PersonalFinancer.Data.Enums;
-using static PersonalFinancer.Data.Constants.TransactionConstants;
-
-using PersonalFinancer.Web.Models.Shared;
-using PersonalFinancer.Web.ModelBinders;
-
-namespace PersonalFinancer.Web.Models.Accounts
+﻿namespace PersonalFinancer.Web.Models.Accounts
 {
+	using Microsoft.AspNetCore.Mvc;
+
+	using System.ComponentModel.DataAnnotations;
+
+	using Data.Enums;
+	using static Data.Constants.TransactionConstants;
+
+	using Web.Models.Shared;
+	using Web.ModelBinders;
+
 	public class TransactionFormModel
 	{
 		[ModelBinder(BinderType = typeof(DecimalModelBinder))]

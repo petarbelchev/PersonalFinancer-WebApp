@@ -1,8 +1,8 @@
-﻿using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Shared.Models;
-
-namespace PersonalFinancer.Services.Accounts
+﻿namespace PersonalFinancer.Services.Accounts
 {
+	using Services.Accounts.Models;
+	using Services.Shared.Models;
+
 	public interface IAccountsService
 	{
 		/// <summary>

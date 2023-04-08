@@ -1,19 +1,19 @@
-﻿using AutoMapper;
-
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-
-using PersonalFinancer.Web.Infrastructure;
-using PersonalFinancer.Web.Models.Accounts;
-using PersonalFinancer.Web.Models.Shared;
-
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Accounts;
+	using Services.Accounts.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Accounts;
+	using Web.Models.Shared;
+
+	using static Data.Constants;
+
 	[Authorize]
 	[Route("api/accounts")]
 	[ApiController]
@@ -65,18 +65,17 @@ namespace PersonalFinancer.Web.Controllers.Api
 			try
 			{
 				var inputDTO = mapper.Map<AccountTransactionsInputDTO>(inputModel);
-				TransactionsViewModel viewModel = new TransactionsViewModel();
+				var viewModel = new TransactionsViewModel();
 				inputDTO.ElementsPerPage = viewModel.Pagination.ElementsPerPage;
 
-				AccountTransactionsOutputDTO transactionsData = 
+				AccountTransactionsOutputDTO transactionsData =
 					await accountService.GetAccountTransactions(inputDTO);
 
 				viewModel.Transactions = transactionsData.Transactions
 					.Select(t => mapper.Map<TransactionTableViewModel>(t));
 				viewModel.Pagination.Page = transactionsData.Page;
 				viewModel.Pagination.TotalElements = transactionsData.AllTransactionsCount;
-				viewModel.Pagination.ElementsName = "transactions";
-				viewModel.TransactionDetailsUrl = 
+				viewModel.TransactionDetailsUrl =
 					$"{(User.IsAdmin() ? "/Admin" : string.Empty)}/Transactions/TransactionDetails/";
 
 				return Ok(viewModel);

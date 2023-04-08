@@ -1,24 +1,25 @@
-﻿using AutoMapper;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Currencies.Models;
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Services.Currencies
+﻿namespace PersonalFinancer.Services.Currencies
 {
-    public class CurrencyService : ICurrencyService
+	using AutoMapper;
+
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+
+	using Data;
+	using Data.Models;
+	using static Data.Constants;
+
+	using Services.Currencies.Models;
+	
+	public class CurrencyService : ICurrencyService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
 		private readonly IMemoryCache memoryCache;
 
 		public CurrencyService(
-			PersonalFinancerDbContext data, 
-			IMapper mapper, 
+			PersonalFinancerDbContext data,
+			IMapper mapper,
 			IMemoryCache memoryCache)
 		{
 			this.data = data;
@@ -57,7 +58,7 @@ namespace PersonalFinancer.Services.Currencies
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.CurrencyCacheKeyValue + model.OwnerId);
+			memoryCache.Remove(CurrencyConstants.CurrencyCacheKeyValue + model.OwnerId);
 
 			return mapper.Map<CurrencyOutputDTO>(currency);
 		}
@@ -82,7 +83,7 @@ namespace PersonalFinancer.Services.Currencies
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.CurrencyCacheKeyValue + ownerId);
+			memoryCache.Remove(CurrencyConstants.CurrencyCacheKeyValue + ownerId);
 		}
 	}
 }

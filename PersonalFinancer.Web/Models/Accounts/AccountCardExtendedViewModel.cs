@@ -1,9 +1,9 @@
-﻿using PersonalFinancer.Web.Models.Shared;
-
-namespace PersonalFinancer.Web.Models.Accounts
+﻿namespace PersonalFinancer.Web.Models.Accounts
 {
-    public class AccountCardExtendedViewModel : AccountCardViewModel
+	using Web.Models.Shared;
+	
+	public class AccountCardExtendedViewModel : AccountCardViewModel
 	{
-        public string OwnerId { get; set; } = null!;
-    }
+		public string OwnerId { get; set; } = null!;
+	}
 }

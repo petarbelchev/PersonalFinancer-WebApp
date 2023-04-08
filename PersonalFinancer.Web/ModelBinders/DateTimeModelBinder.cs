@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-
-namespace PersonalFinancer.Web.ModelBinders
+﻿namespace PersonalFinancer.Web.ModelBinders
 {
+	using Microsoft.AspNetCore.Mvc.ModelBinding;
+
 	public class DateTimeModelBinder : IModelBinder
 	{
 		public Task BindModelAsync(ModelBindingContext bindingContext)
@@ -16,7 +16,7 @@ namespace PersonalFinancer.Web.ModelBinders
 			{
 				bindingContext.Result = ModelBindingResult.Failed();
 
-				bindingContext.ModelState.AddModelError(bindingContext.FieldName, 
+				bindingContext.ModelState.AddModelError(bindingContext.FieldName,
 					$"Please enter a valid date.");
 			}
 

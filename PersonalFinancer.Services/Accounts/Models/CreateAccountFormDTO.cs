@@ -1,11 +1,11 @@
-﻿using PersonalFinancer.Services.Currencies.Models;
-using PersonalFinancer.Services.Shared.Models;
-
-namespace PersonalFinancer.Services.Accounts.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
+	using Services.Currencies.Models;
+	using Services.Shared.Models;
+
 	public class CreateAccountFormDTO
 	{
-        public string Name { get; set; } = null!;
+		public string Name { get; set; } = null!;
 
 		public decimal Balance { get; set; }
 

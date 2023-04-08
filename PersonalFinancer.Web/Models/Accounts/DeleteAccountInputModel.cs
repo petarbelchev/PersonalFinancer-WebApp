@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PersonalFinancer.Web.Models.Accounts
+﻿namespace PersonalFinancer.Web.Models.Accounts
 {
+	using System.ComponentModel.DataAnnotations;
+
 	public class DeleteAccountInputModel
 	{
 		[Required]
@@ -11,6 +11,6 @@ namespace PersonalFinancer.Web.Models.Accounts
 		public bool? ShouldDeleteTransactions { get; set; }
 
 		[Required]
-        public string ConfirmButton { get; set; } = null!;
-    }
+		public string ConfirmButton { get; set; } = null!;
+	}
 }

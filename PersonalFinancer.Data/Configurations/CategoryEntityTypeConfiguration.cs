@@ -1,12 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-using PersonalFinancer.Data.Models;
-using static PersonalFinancer.Data.Constants.TransactionConstants;
-using static PersonalFinancer.Data.Constants.SeedConstants;
-
-namespace PersonalFinancer.Data.Configurations
+﻿namespace PersonalFinancer.Data.Configurations
 {
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+	using Models;
+	using static Constants;
+
 	internal class CategoryEntityTypeConfiguration : IEntityTypeConfiguration<Category>
 	{
 		public void Configure(EntityTypeBuilder<Category> builder)
@@ -15,51 +14,51 @@ namespace PersonalFinancer.Data.Configurations
 			{
 				new Category
 				{
-					Id = InitialBalanceCategoryId,
-					Name = CategoryInitialBalanceName,
-					OwnerId = AdminId
+					Id = CategoryConstants.InitialBalanceCategoryId,
+					Name = CategoryConstants.CategoryInitialBalanceName,
+					OwnerId = SeedConstants.AdminId
 				},
 				new Category
 				{
-					Id = FoodDrinkCategoryId,
+					Id = SeedConstants.FoodDrinkCategoryId,
 					Name = "Food & Drink",
-					OwnerId = FirstUserId
+					OwnerId = SeedConstants.FirstUserId
 				},
 				new Category
 				{
-					Id = UtilitiesCategoryId,
+					Id = SeedConstants.UtilitiesCategoryId,
 					Name = "Utilities",
-					OwnerId = FirstUserId
+					OwnerId = SeedConstants.FirstUserId
 				},
 				new Category
 				{
-					Id = TransportCategoryId,
+					Id = SeedConstants.TransportCategoryId,
 					Name = "Transport",
-					OwnerId = FirstUserId
+					OwnerId = SeedConstants.FirstUserId
 				},
 				new Category
 				{
-					Id = MedicalHealthcareCategoryId,
+					Id = SeedConstants.MedicalHealthcareCategoryId,
 					Name = "Medical & Healthcare",
-					OwnerId = FirstUserId
+					OwnerId = SeedConstants.FirstUserId
 				},
 				new Category
 				{
-					Id = SalaryCategoryId,
+					Id = SeedConstants.SalaryCategoryId,
 					Name = "Salary",
-					OwnerId = FirstUserId
+					OwnerId = SeedConstants.FirstUserId
 				},
 				new Category
 				{
-					Id = MoneyTransferCategoryId,
+					Id = SeedConstants.MoneyTransferCategoryId,
 					Name = "Money Transfer",
-					OwnerId = FirstUserId
+					OwnerId = SeedConstants.FirstUserId
 				},
 				new Category
 				{
-					Id = DividentsCategoryId,
+					Id = SeedConstants.DividentsCategoryId,
 					Name = "Dividents",
-					OwnerId = FirstUserId
+					OwnerId = SeedConstants.FirstUserId
 				}
 			});
 		}

@@ -1,28 +1,33 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Web.Infrastructure;
-using PersonalFinancer.Web.Models.Accounts;
-using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
-	[Authorize(Roles = UserRoleName)]
+    using AutoMapper;
+
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+
+    using Services.Accounts;
+    using Services.Accounts.Models;
+
+    using Web.Infrastructure;
+    using Web.Models.Accounts;
+
+    using static Data.Constants.RoleConstants;
+
+    [Authorize(Roles = UserRoleName)]
 	public class AccountsController : Controller
 	{
 		private readonly IAccountsService accountService;
 		private readonly IMapper mapper;
+		private readonly IControllerService controllerService;
 
 		public AccountsController(
 			IAccountsService accountService,
-			IMapper mapper)
+			IMapper mapper,
+			IControllerService controllerService)
 		{
 			this.accountService = accountService;
 			this.mapper = mapper;
+			this.controllerService = controllerService;
 		}
 
 		public async Task<IActionResult> Create()
@@ -204,7 +209,7 @@ namespace PersonalFinancer.Web.Controllers
 			{
 				if (!ModelState.IsValid)
 				{
-					await PrepareViewModelForReturn(inputModel);
+					await controllerService.PrepareAccountFormModelForReturn(inputModel);
 
 					return View(inputModel);
 				}
@@ -221,7 +226,7 @@ namespace PersonalFinancer.Web.Controllers
 				ModelState.AddModelError(nameof(inputModel.Name),
 					$"You already have Account with {inputModel.Name} name.");
 
-				await PrepareViewModelForReturn(inputModel);
+				await controllerService.PrepareAccountFormModelForReturn(inputModel);
 
 				return View(inputModel);
 			}
@@ -229,17 +234,6 @@ namespace PersonalFinancer.Web.Controllers
 			{
 				return BadRequest();
 			}
-		}
-
-		private async Task PrepareViewModelForReturn<T>(T inputModel)
-			where T : IAccountFormModel
-		{
-			CreateAccountFormDTO accountData =
-				await accountService.GetEmptyAccountForm(inputModel.OwnerId);
-			inputModel.AccountTypes = accountData.AccountTypes
-				.Select(at => mapper.Map<AccountTypeViewModel>(at));
-			inputModel.Currencies = accountData.Currencies
-				.Select(c => mapper.Map<CurrencyViewModel>(c));
 		}
 	}
 }

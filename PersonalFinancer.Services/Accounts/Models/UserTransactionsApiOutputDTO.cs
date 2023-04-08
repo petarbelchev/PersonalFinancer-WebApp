@@ -1,13 +1,13 @@
-﻿using PersonalFinancer.Services.Shared.Models;
-
-namespace PersonalFinancer.Services.Accounts.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
+	using Services.Shared.Models;
+
 	public class UserTransactionsApiOutputDTO
 	{
-        public IEnumerable<TransactionTableDTO> Transactions { get; set; } = null!;
+		public IEnumerable<TransactionTableDTO> Transactions { get; set; } = null!;
 
-        public int Page { get; set; }
+		public int Page { get; set; }
 
-        public int AllTransactionsCount { get; set; }
-    }
+		public int AllTransactionsCount { get; set; }
+	}
 }

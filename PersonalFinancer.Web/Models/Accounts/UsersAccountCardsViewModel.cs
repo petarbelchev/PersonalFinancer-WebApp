@@ -1,8 +1,9 @@
-﻿using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Data.Constants.HostConstants;
-
-namespace PersonalFinancer.Web.Models.Accounts
+﻿namespace PersonalFinancer.Web.Models.Accounts
 {
+	using Web.Models.Shared;
+
+	using static Data.Constants.HostConstants;
+
 	public class UsersAccountCardsViewModel
 	{
 		public IEnumerable<AccountCardExtendedViewModel> Accounts { get; set; } = null!;

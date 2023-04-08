@@ -1,7 +1,7 @@
-﻿using PersonalFinancer.Services.Categories.Models;
-
-namespace PersonalFinancer.Services.Categories
+﻿namespace PersonalFinancer.Services.Categories
 {
+	using Services.Categories.Models;
+	
 	public interface ICategoryService
 	{
 		/// <summary>

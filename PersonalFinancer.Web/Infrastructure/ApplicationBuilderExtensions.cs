@@ -1,14 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using System.Security.Cryptography;
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Web.Infrastructure
+﻿namespace PersonalFinancer.Web.Infrastructure
 {
+	using Microsoft.AspNetCore.Identity;
+
+	using System.Security.Cryptography;
+
+	using Data;
+	using Data.Enums;
+	using Data.Models;
+	using static Data.Constants;
+
+	using Services.Accounts;
+	using Services.Accounts.Models;
+
 	public static class ApplicationBuilderExtensions
 	{
 		public static IApplicationBuilder SeedUserRoles(this IApplicationBuilder app)
@@ -113,9 +116,9 @@ namespace PersonalFinancer.Web.Infrastructure
 					AccountId = cashBgnAccId,
 					Amount = 2000,
 					OwnerId = SeedConstants.FirstUserId,
-					CategoryId = TransactionConstants.InitialBalanceCategoryId,
+					CategoryId = CategoryConstants.InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = TransactionConstants.CategoryInitialBalanceName,
+					Refference = CategoryConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
 					IsInitialBalance = true
 				});
@@ -124,9 +127,9 @@ namespace PersonalFinancer.Web.Infrastructure
 					AccountId = bankBgnAccId,
 					Amount = 4000,
 					OwnerId = SeedConstants.FirstUserId,
-					CategoryId = TransactionConstants.InitialBalanceCategoryId,
+					CategoryId = CategoryConstants.InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = TransactionConstants.CategoryInitialBalanceName,
+					Refference = CategoryConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
 					IsInitialBalance = true
 				});
@@ -135,9 +138,9 @@ namespace PersonalFinancer.Web.Infrastructure
 					AccountId = euroSavingsAccId,
 					Amount = 2800,
 					OwnerId = SeedConstants.FirstUserId,
-					CategoryId = TransactionConstants.InitialBalanceCategoryId,
+					CategoryId = CategoryConstants.InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = TransactionConstants.CategoryInitialBalanceName,
+					Refference = CategoryConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
 					IsInitialBalance = true
 				});
@@ -146,9 +149,9 @@ namespace PersonalFinancer.Web.Infrastructure
 					AccountId = usdSavingsAccId,
 					Amount = 3800,
 					OwnerId = SeedConstants.FirstUserId,
-					CategoryId = TransactionConstants.InitialBalanceCategoryId,
+					CategoryId = CategoryConstants.InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = TransactionConstants.CategoryInitialBalanceName,
+					Refference = CategoryConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
 					IsInitialBalance = true
 				});

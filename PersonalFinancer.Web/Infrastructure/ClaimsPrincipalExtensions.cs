@@ -1,9 +1,9 @@
-﻿using System.Security.Claims;
-
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Infrastructure
+﻿namespace PersonalFinancer.Web.Infrastructure
 {
+	using System.Security.Claims;
+
+	using static Data.Constants.RoleConstants;
+
 	public static class ClaimsPrincipalExtensions
 	{
 		/// <summary>

@@ -1,24 +1,24 @@
-﻿using AutoMapper;
-
-using PersonalFinancer.Data.Models;
-
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.AccountTypes.Models;
-using PersonalFinancer.Services.Categories.Models;
-using PersonalFinancer.Services.Currencies.Models;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User.Models;
-
-using PersonalFinancer.Web.Models.Accounts;
-using PersonalFinancer.Web.Models.Currencies;
-using PersonalFinancer.Web.Models.Home;
-using PersonalFinancer.Web.Models.Shared;
-using PersonalFinancer.Web.Models.User;
-using PersonalFinancer.Web.Models.AccountTypes;
-
-namespace PersonalFinancer.Web.Infrastructure
+﻿namespace PersonalFinancer.Web.Infrastructure
 {
-    public class ViewModelsMappingProfile : Profile
+	using AutoMapper;
+
+	using Data.Models;
+
+	using Services.Accounts.Models;
+	using Services.AccountTypes.Models;
+	using Services.Categories.Models;
+	using Services.Currencies.Models;
+	using Services.Shared.Models;
+	using Services.User.Models;
+
+	using Web.Models.Accounts;
+	using Web.Models.Currencies;
+	using Web.Models.Home;
+	using Web.Models.Shared;
+	using Web.Models.User;
+	using Web.Models.AccountTypes;
+
+	public class ViewModelsMappingProfile : Profile
 	{
 		public ViewModelsMappingProfile()
 		{
@@ -30,12 +30,12 @@ namespace PersonalFinancer.Web.Infrastructure
 			CreateMap<CurrencyCashFlowDTO, CurrencyCashFlowViewModel>();
 
 			CreateMap<AccountCardExtendedDTO, AccountCardExtendedViewModel>();
-			CreateMap<AccountDTO, AccountCardExtendedViewModel>(); 
-			CreateMap<AccountDTO, AccountDropdownViewModel>(); 
-			CreateMap<AccountCardDTO, AccountCardViewModel>(); 
-			CreateMap<DeleteAccountDTO, DeleteAccountViewModel>(); 
-			CreateMap<CreateAccountFormDTO, CreateAccountFormModel>().ReverseMap(); 
-			CreateMap<EditAccountFormDTO, EditAccountFormModel>().ReverseMap(); 
+			CreateMap<AccountDTO, AccountCardExtendedViewModel>();
+			CreateMap<AccountDTO, AccountDropdownViewModel>();
+			CreateMap<AccountCardDTO, AccountCardViewModel>();
+			CreateMap<DeleteAccountDTO, DeleteAccountViewModel>();
+			CreateMap<CreateAccountFormDTO, CreateAccountFormModel>().ReverseMap();
+			CreateMap<EditAccountFormDTO, EditAccountFormModel>().ReverseMap();
 
 			CreateMap<AccountTypeInputModel, AccountTypeInputDTO>();
 			CreateMap<AccountTypeOutputDTO, AccountTypeViewModel>();
@@ -55,10 +55,12 @@ namespace PersonalFinancer.Web.Infrastructure
 
 			CreateMap<UserTransactionsApiInputModel, UserTransactionsApiInputDTO>();
 			CreateMap<UserTransactionsOutputDTO, UserTransactionsViewModel>();
-			
+
 			CreateMap<UserDTO, UserViewModel>();
 			CreateMap<ApplicationUser, CreateAccountFormModel>();
-			
+			CreateMap<RegisterFormModel, ApplicationUser>()
+				.ForMember(m => m.UserName, mf => mf.MapFrom(s => s.Email));
+
 			CreateMap<UserDetailsDTO, UserDetailsViewModel>();
 		}
 	}

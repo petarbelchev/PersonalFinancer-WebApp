@@ -1,13 +1,13 @@
-﻿using PersonalFinancer.Data.Enums;
-
-namespace PersonalFinancer.Services.User.Models
+﻿namespace PersonalFinancer.Services.User.Models
 {
-    public class TransactionDTO
-    {
-        public string CurrencyName { get; set; } = null!;
+	using Data.Enums;
 
-        public TransactionType TransactionType { get; set; }
+	public class TransactionDTO
+	{
+		public string CurrencyName { get; set; } = null!;
 
-        public decimal Amount { get; set; }
-    }
+		public TransactionType TransactionType { get; set; }
+
+		public decimal Amount { get; set; }
+	}
 }

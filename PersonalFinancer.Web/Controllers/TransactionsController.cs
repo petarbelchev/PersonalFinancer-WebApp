@@ -1,30 +1,35 @@
-﻿using AutoMapper;
-
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure;
-using PersonalFinancer.Web.Models.Accounts;
-using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Accounts;
+	using Services.Accounts.Models;
+	using Services.Shared.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Accounts;
+	using Web.Models.Shared;
+	
+	using static Data.Constants.RoleConstants;
+
 	[Authorize(Roles = UserRoleName)]
 	public class TransactionsController : Controller
 	{
 		private readonly IAccountsService accountsService;
 		private readonly IMapper mapper;
+		private readonly IControllerService controllerService;
 
 		public TransactionsController(
 			IAccountsService accountsService,
-			IMapper mapper)
+			IMapper mapper,
+			IControllerService controllerService)
 		{
 			this.accountsService = accountsService;
 			this.mapper = mapper;
+			this.controllerService = controllerService;
 		}
 
 		public async Task<IActionResult> All()
@@ -97,7 +102,7 @@ namespace PersonalFinancer.Web.Controllers
 
 				if (!ModelState.IsValid)
 				{
-					await PrepareTransactionFormModelForReturn(inputModel);
+					await controllerService.PrepareTransactionFormModelForReturn(inputModel);
 
 					return View(inputModel);
 				}
@@ -187,7 +192,7 @@ namespace PersonalFinancer.Web.Controllers
 
 			if (!ModelState.IsValid)
 			{
-				await PrepareTransactionFormModelForReturn(inputModel);
+				await controllerService.PrepareTransactionFormModelForReturn(inputModel);
 				return View(inputModel);
 			}
 
@@ -207,16 +212,6 @@ namespace PersonalFinancer.Web.Controllers
 				return LocalRedirect(returnUrl);
 
 			return RedirectToAction(nameof(TransactionDetails), new { id });
-		}
-
-		private async Task PrepareTransactionFormModelForReturn(TransactionFormModel inputModel)
-		{
-			EmptyTransactionFormDTO emptyFormModel =
-				await accountsService.GetEmptyTransactionForm(User.Id());
-			inputModel.UserCategories = emptyFormModel.UserCategories
-				.Select(c => mapper.Map<CategoryViewModel>(c));
-			inputModel.UserAccounts = emptyFormModel.UserAccounts
-				.Select(a => mapper.Map<AccountDropdownViewModel>(a));
 		}
 	}
 }

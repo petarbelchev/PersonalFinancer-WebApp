@@ -1,15 +1,17 @@
-﻿using AutoMapper;
-using Microsoft.Extensions.Caching.Memory;
-using NUnit.Framework;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Tests.Mocks;
-using static PersonalFinancer.Data.Constants.TransactionConstants;
-
-namespace PersonalFinancer.Tests
+﻿namespace PersonalFinancer.Tests
 {
+	using AutoMapper;
+	using Microsoft.Extensions.Caching.Memory;
+
+	using NUnit.Framework;
+
+	using Data;
+	using Data.Enums;
+	using Data.Models;
+	using static Data.Constants.CategoryConstants;
+
+	using Tests.Mocks;
+
 	[TestFixture]
 	abstract class UnitTestsBase
 	{

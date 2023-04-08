@@ -1,8 +1,9 @@
-﻿using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Data.Constants.HostConstants;
-
-namespace PersonalFinancer.Web.Models.Accounts
+﻿namespace PersonalFinancer.Web.Models.Accounts
 {
+	using Web.Models.Shared;
+
+	using static Data.Constants.HostConstants;
+
 	public class AccountDetailsViewModel : AccountCardExtendedViewModel
 	{
 		public DateTime StartDate { get; set; }

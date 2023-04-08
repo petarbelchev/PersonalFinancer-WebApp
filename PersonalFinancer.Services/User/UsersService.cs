@@ -1,17 +1,18 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Microsoft.EntityFrameworkCore;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Data.Models;
-
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User.Models;
-
-namespace PersonalFinancer.Services.User
+﻿namespace PersonalFinancer.Services.User
 {
+	using AutoMapper;
+	using AutoMapper.QueryableExtensions;
+
+	using Microsoft.EntityFrameworkCore;
+
+	using Data;
+	using Data.Enums;
+	using Data.Models;
+
+	using Services.Accounts.Models;
+	using Services.Shared.Models;
+	using Services.User.Models;
+	
 	public class UsersService : IUsersService
 	{
 		private readonly PersonalFinancerDbContext data;

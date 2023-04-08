@@ -1,14 +1,16 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Categories.Models;
-using static PersonalFinancer.Data.Constants.TransactionConstants;
-
-namespace PersonalFinancer.Services.Categories
+﻿namespace PersonalFinancer.Services.Categories
 {
+	using AutoMapper;
+
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+
+	using Data;
+	using Data.Models;
+	using static Data.Constants.CategoryConstants;
+
+	using Services.Categories.Models;
+
 	public class CategoryService : ICategoryService
 	{
 		private readonly PersonalFinancerDbContext data;

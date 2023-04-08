@@ -1,16 +1,16 @@
-﻿using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Categories.Models;
-
-namespace PersonalFinancer.Services.Shared.Models
+﻿namespace PersonalFinancer.Services.Shared.Models
 {
+	using Services.Accounts.Models;
+	using Services.Categories.Models;
+
 	public class EmptyTransactionFormDTO
 	{
-        public string OwnerId { get; set; } = null!;
+		public string OwnerId { get; set; } = null!;
 
-        public DateTime CreatedOn { get; set; }
+		public DateTime CreatedOn { get; set; }
 
-        public IEnumerable<AccountDTO> UserAccounts { get; set; } = null!;
+		public IEnumerable<AccountDTO> UserAccounts { get; set; } = null!;
 
-        public IEnumerable<CategoryOutputDTO> UserCategories { get; set; } = null!;
-    }
+		public IEnumerable<CategoryOutputDTO> UserCategories { get; set; } = null!;
+	}
 }

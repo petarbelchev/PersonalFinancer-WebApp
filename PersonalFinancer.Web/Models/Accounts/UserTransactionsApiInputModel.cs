@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PersonalFinancer.Web.Models.Accounts
+﻿namespace PersonalFinancer.Web.Models.Accounts
 {
+	using System.ComponentModel.DataAnnotations;
+	
 	public class UserTransactionsApiInputModel
 	{
 		[Required]

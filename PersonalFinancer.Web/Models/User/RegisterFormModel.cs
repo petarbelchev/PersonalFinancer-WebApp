@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-using static PersonalFinancer.Data.Constants.UserConstants;
-
-namespace PersonalFinancer.Web.Models.User
+﻿namespace PersonalFinancer.Web.Models.User
 {
+	using System.ComponentModel.DataAnnotations;
+
+	using static Data.Constants.UserConstants;
+
 	public class RegisterFormModel
 	{
 		[Required(ErrorMessage = "First Name is required.")]
@@ -37,6 +37,6 @@ namespace PersonalFinancer.Web.Models.User
 		[DataType(DataType.PhoneNumber)]
 		[RegularExpression(@"^\d{10}$", ErrorMessage = "Your phone number should be 10 digits long.")]
 		[Display(Name = "Phone Number")]
-        public string? PhoneNumber { get; set; }
-    }
+		public string? PhoneNumber { get; set; }
+	}
 }

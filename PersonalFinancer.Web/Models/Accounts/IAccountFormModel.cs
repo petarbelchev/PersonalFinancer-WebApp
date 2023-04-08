@@ -1,7 +1,7 @@
-﻿using PersonalFinancer.Web.Models.Shared;
-
-namespace PersonalFinancer.Web.Models.Accounts
+﻿namespace PersonalFinancer.Web.Models.Accounts
 {
+	using Web.Models.Shared;
+
 	public interface IAccountFormModel
 	{
 		public string Name { get; set; }
