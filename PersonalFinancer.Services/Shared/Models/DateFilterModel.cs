@@ -1,16 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Services.Infrastructure;
+using System.ComponentModel.DataAnnotations;
 
 namespace PersonalFinancer.Services.Shared.Models
 {
 	public class DateFilterModel : IValidatableObject
 	{
 		[Required(ErrorMessage = "Start Date is required.")]
+        [ModelBinder(BinderType = typeof(DateTimeModelBinder))]
 		[Display(Name = "From")]
-        public DateTime? StartDate { get; set; }
+        public DateTime StartDate { get; set; }
 
         [Required(ErrorMessage = "End Date is required.")]
+        [ModelBinder(BinderType = typeof(DateTimeModelBinder))]
 		[Display(Name = "To")]
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

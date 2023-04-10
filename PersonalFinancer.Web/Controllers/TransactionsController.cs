@@ -35,8 +35,8 @@ namespace PersonalFinancer.Web.Controllers
 			if (!ModelState.IsValid)
 				return View(new UserTransactionsViewModel
 				{
-					StartDate = inputModel.StartDate ?? new DateTime(),
-					EndDate = inputModel.EndDate ?? new DateTime()
+					StartDate = inputModel.StartDate,
+					EndDate = inputModel.EndDate
 				});
 
 			return View(await accountsService
@@ -52,7 +52,7 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(TransactionFormModel inputModel)
+		public async Task<IActionResult> Create(TransactionFormModel inputModel) // TODO: Use separate form model without Owner Id
 		{
 			if (!ModelState.IsValid)
 			{

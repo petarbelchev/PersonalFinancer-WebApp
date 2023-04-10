@@ -53,7 +53,7 @@ namespace PersonalFinancer.Services.AccountTypes
 					OwnerId = model.OwnerId
 				};
 
-				data.AccountTypes.Add(accountType);
+				await data.AccountTypes.AddAsync(accountType);
 			}
 
 			await data.SaveChangesAsync();

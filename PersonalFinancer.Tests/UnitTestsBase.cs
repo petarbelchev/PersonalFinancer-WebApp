@@ -38,6 +38,7 @@ namespace PersonalFinancer.Tests
 
 		protected Account Account1User1 { get; private set; } = null!;
 		protected Account Account2User1 { get; private set; } = null!;
+		protected Account Account2User2 { get; private set; } = null!;
 
 		protected AccountType AccountType1 { get; private set; } = null!;
 		protected AccountType AccountType2 { get; private set; } = null!;
@@ -51,30 +52,30 @@ namespace PersonalFinancer.Tests
 		protected Currency Currency1 { get; private set; } = null!;
 		protected Currency Currency2 { get; private set; } = null!;
 
-		protected Transaction Transaction1 { get; private set; } = null!;
-		protected Transaction Transaction2 { get; private set; } = null!;
-		protected Transaction Transaction3 { get; private set; } = null!;
-		protected Transaction Transaction4 { get; private set; } = null!;
-		protected Transaction Transaction5 { get; private set; } = null!;
-		protected Transaction Transaction6 { get; private set; } = null!;
+		protected Transaction Transaction1User1 { get; private set; } = null!;
+		protected Transaction Transaction2User1 { get; private set; } = null!;
+		protected Transaction Transaction3User1 { get; private set; } = null!;
+		protected Transaction Transaction4User1 { get; private set; } = null!;
+		protected Transaction Transaction5User1 { get; private set; } = null!;
+		protected Transaction Transaction6User1 { get; private set; } = null!;
 
 		private async void SeedDatabase()
 		{
 			//Users
-			string PetarId = Guid.NewGuid().ToString();
+			string User1Id = Guid.NewGuid().ToString();
 			User1 = new ApplicationUser
 			{
-				Id = PetarId,
+				Id = User1Id,
 				FirstName = "Petar",
 				LastName = "Petrov",
 				Email = "petar@mail.com",
 				UserName = "petar@mail.com",
 			};
 			data.Users.Add(User1);
-			string TodorId = Guid.NewGuid().ToString();
+			string User2Id = Guid.NewGuid().ToString();
 			User2 = new ApplicationUser
 			{
-				Id = TodorId,
+				Id = User2Id,
 				FirstName = "Todor",
 				LastName = "Todorov",
 				Email = "todor@mail.com",
@@ -88,14 +89,14 @@ namespace PersonalFinancer.Tests
 			{
 				Id = cashAccTypeId,
 				Name = "Cash",
-				OwnerId = PetarId
+				OwnerId = User1Id
 			};
 			string BankAccTypeId = Guid.NewGuid().ToString();
 			AccountType2 = new AccountType
 			{
 				Id = BankAccTypeId,
 				Name = "Bank",
-				OwnerId = PetarId
+				OwnerId = User1Id
 			};
 			string CustomAccTypeId = Guid.NewGuid().ToString();
 			AccountType3 = new AccountType
@@ -103,7 +104,7 @@ namespace PersonalFinancer.Tests
 				Id = CustomAccTypeId,
 				Name = "Bank",
 				IsDeleted = true,
-				OwnerId = PetarId
+				OwnerId = User1Id
 			};
 			data.AccountTypes.AddRange(AccountType1, AccountType2, AccountType3);
 
@@ -113,14 +114,14 @@ namespace PersonalFinancer.Tests
 			{
 				Id = BgnCurrencyId,
 				Name = "BGN",
-				OwnerId = PetarId
+				OwnerId = User1Id
 			};
 			string EurCurrencyId = Guid.NewGuid().ToString();
 			Currency2 = new Currency
 			{
 				Id = EurCurrencyId,
 				Name = "EUR",
-				OwnerId = PetarId
+				OwnerId = User1Id
 			};
 			//Guid UsdCurrencyId = Guid.NewGuid();
 			//Currency3 = new Currency
@@ -131,28 +132,39 @@ namespace PersonalFinancer.Tests
 			data.Currencies.AddRange(Currency1, Currency2/*, Currency3*/);
 
 			// Accounts
-			string petarCashBgnAccId = Guid.NewGuid().ToString();
+			string user1CashBgnAccId = Guid.NewGuid().ToString();
 			Account1User1 = new Account
 			{
-				Id = petarCashBgnAccId,
+				Id = user1CashBgnAccId,
 				Name = "Cash BGN",
 				AccountTypeId = cashAccTypeId,
 				Balance = 189.55m,
 				CurrencyId = BgnCurrencyId,
-				OwnerId = PetarId
+				OwnerId = User1Id
 			};
-			string petarBankEurAccId = Guid.NewGuid().ToString();
+			string user1BankEurAccId = Guid.NewGuid().ToString();
 			Account2User1 = new Account
 			{
-				Id = petarBankEurAccId,
+				Id = user1BankEurAccId,
 				Name = "Bank EUR",
 				AccountTypeId = BankAccTypeId,
 				Balance = 900.01m,
 				CurrencyId = EurCurrencyId,
-				OwnerId = PetarId,
+				OwnerId = User1Id,
 				IsDeleted = true
 			};
-			data.Accounts.AddRange(Account1User1, Account2User1);
+			string user2BankEurAccId = Guid.NewGuid().ToString();
+			Account2User2 = new Account
+			{
+				Id = user2BankEurAccId,
+				Name = "Bank EUR",
+				AccountTypeId = BankAccTypeId,
+				Balance = 0,
+				CurrencyId = EurCurrencyId,
+				OwnerId = User1Id,
+				IsDeleted = true
+			};
+			data.Accounts.AddRange(Account1User1, Account2User1, Account2User2);
 
 			// Categories
 			Category1 = new Category
@@ -166,53 +178,54 @@ namespace PersonalFinancer.Tests
 			{
 				Id = foodCatId,
 				Name = "Food and Drinks",
-				OwnerId = PetarId
+				OwnerId = User1Id
 			};
 			string transportCatId = Guid.NewGuid().ToString();
 			Category3 = new Category
 			{
 				Id = transportCatId,
 				Name = "Transport",
-				OwnerId = PetarId
+				OwnerId = User1Id
 			};
 			string salaryCatId = Guid.NewGuid().ToString();
 			Category4 = new Category
 			{
 				Id = salaryCatId,
 				Name = "Salary",
-				OwnerId = PetarId
+				OwnerId = User1Id
 			};
 			data.Categories.AddRange(Category1, Category2, Category3, Category4);
 
 			// Transactions
 			// Cash BGN
-			Transaction1 = new Transaction()
+			Transaction1User1 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
-				OwnerId = PetarId,
-				AccountId = petarCashBgnAccId,
+				OwnerId = User1Id,
+				AccountId = user1CashBgnAccId,
 				Amount = 200,
 				CategoryId = InitialBalanceCategoryId,
 				CreatedOn = DateTime.UtcNow.AddMonths(-3),
 				Refference = CategoryInitialBalanceName,
-				TransactionType = TransactionType.Income
+				TransactionType = TransactionType.Income,
+				IsInitialBalance = true
 			};
-			Transaction2 = new Transaction()
+			Transaction2User1 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
-				OwnerId = PetarId,
-				AccountId = petarCashBgnAccId,
+				OwnerId = User1Id,
+				AccountId = user1CashBgnAccId,
 				Amount = 5.65m,
 				CategoryId = foodCatId,
 				CreatedOn = DateTime.UtcNow.AddMonths(-2),
 				Refference = "Lunch",
 				TransactionType = TransactionType.Expense
 			};
-			Transaction3 = new Transaction()
+			Transaction3User1 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
-				OwnerId = PetarId,
-				AccountId = petarCashBgnAccId,
+				OwnerId = User1Id,
+				AccountId = user1CashBgnAccId,
 				Amount = 4.80m,
 				CategoryId = transportCatId,
 				CreatedOn = DateTime.UtcNow.AddDays(-2),
@@ -220,33 +233,34 @@ namespace PersonalFinancer.Tests
 				TransactionType = TransactionType.Expense
 			};
 			// Bank EUR
-			Transaction4 = new Transaction()
+			Transaction4User1 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
-				OwnerId = PetarId,
-				AccountId = petarBankEurAccId,
+				OwnerId = User1Id,
+				AccountId = user1BankEurAccId,
 				Amount = 200,
 				CategoryId = InitialBalanceCategoryId,
 				CreatedOn = DateTime.UtcNow.AddMonths(-3),
 				Refference = CategoryInitialBalanceName,
-				TransactionType = TransactionType.Income
+				TransactionType = TransactionType.Income,
+				IsInitialBalance = true
 			};
-			Transaction5 = new Transaction()
+			Transaction5User1 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
-				OwnerId = PetarId,
-				AccountId = petarBankEurAccId,
+				OwnerId = User1Id,
+				AccountId = user1BankEurAccId,
 				Amount = 750m,
 				CategoryId = salaryCatId,
 				CreatedOn = DateTime.UtcNow.AddMonths(-2),
 				Refference = "Salary",
 				TransactionType = TransactionType.Income
 			};
-			Transaction6 = new Transaction()
+			Transaction6User1 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
-				OwnerId = PetarId,
-				AccountId = petarBankEurAccId,
+				OwnerId = User1Id,
+				AccountId = user1BankEurAccId,
 				Amount = 49.99m,
 				CategoryId = transportCatId,
 				CreatedOn = DateTime.UtcNow.AddMonths(-2),
@@ -254,7 +268,7 @@ namespace PersonalFinancer.Tests
 				TransactionType = TransactionType.Expense
 			};
 
-			data.Transactions.AddRange(Transaction1, Transaction2, Transaction3, Transaction4, Transaction5, Transaction6);
+			data.Transactions.AddRange(Transaction1User1, Transaction2User1, Transaction3User1, Transaction4User1, Transaction5User1, Transaction6User1);
 			await data.SaveChangesAsync();
 		}
 	}

@@ -47,8 +47,7 @@ namespace PersonalFinancer.Services.Accounts
 		public async Task<string> CreateAccount(AccountFormModel model)
 		{
 			if (await IsNameExists(model.Name, model.OwnerId))
-				throw new ArgumentException(
-					$"The User already have Account with {model.Name} name.");
+				throw new ArgumentException($"The User already have Account with {model.Name} name.");
 
 			Account newAccount = new Account()
 			{
@@ -284,8 +283,8 @@ namespace PersonalFinancer.Services.Accounts
 					Name = a.Name,
 					Balance = a.Balance,
 					CurrencyName = a.Currency.Name,
-					StartDate = inputModel.StartDate ?? new DateTime(),
-					EndDate = inputModel.EndDate ?? new DateTime(),
+					StartDate = inputModel.StartDate,
+					EndDate = inputModel.EndDate,
 					Pagination = new PaginationModel
 					{
 						TotalElements = a.Transactions.Count(t =>
@@ -503,8 +502,8 @@ namespace PersonalFinancer.Services.Accounts
 		{
 			var viewModel = new UserTransactionsViewModel();
 
-			DateTime startDate = inputModel.StartDate ?? throw new InvalidOperationException();
-			DateTime endDate = inputModel.EndDate ?? throw new InvalidOperationException();
+			DateTime startDate = inputModel.StartDate;
+			DateTime endDate = inputModel.EndDate;
 
 			viewModel = await data.Users
 				.Where(u => u.Id == userId)
@@ -713,8 +712,8 @@ namespace PersonalFinancer.Services.Accounts
 					Name = a.Name,
 					Balance = a.Balance,
 					CurrencyName = a.Currency.Name,
-					StartDate = inputModel.StartDate ?? new DateTime(),
-					EndDate = inputModel.EndDate ?? new DateTime()
+					StartDate = inputModel.StartDate,
+					EndDate = inputModel.EndDate 
 				})
 				.FirstAsync();
 		}

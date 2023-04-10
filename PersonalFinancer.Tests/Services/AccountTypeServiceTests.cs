@@ -67,7 +67,8 @@ namespace PersonalFinancer.Tests.Services
 				var deletedAcc = await data.AccountTypes.FindAsync(deletedAccType.Id);
 				Assert.That(deletedAcc, Is.Not.Null);
 				return deletedAcc.IsDeleted;
-			}, Is.True);
+			}, 
+			Is.True);
 
 			//Act
 			AccountTypeViewModel viewModel =
@@ -132,24 +133,6 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(async () => await accountTypeService.CreateAccountType(inputModel),
 				Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Account Type with the same name exist."));
 		}
-
-		//[Test]
-		//[TestCase("A")]
-		//[TestCase("NameWith16Chars!")]
-		//public void CreateAccountType_ShouldThrowException_WithInvalidName(string accountTypeName)
-		//{
-		//	//Arrange
-		//	var inputModel = new AccountTypeInputModel
-		//	{
-		//		Name = accountTypeName,
-		//		OwnerId = this.User1.Id
-		//	};
-
-		//	//Act & Assert
-		//	Assert.That(async () => await accountService.CreateAccountType(inputModel),
-		//		Throws.TypeOf<ArgumentException>().With.Message
-		//			.EqualTo("Account Type name must be between 2 and 15 characters long."));
-		//}
 
 		[Test]
 		public async Task DeleteAccountType_ShouldRemoveAccType_WithValidParams()
