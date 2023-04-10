@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-using static PersonalFinancer.Data.Constants.UserConstants;
-
-namespace PersonalFinancer.Web.Models.User
+﻿namespace PersonalFinancer.Web.Models.User
 {
+	using System.ComponentModel.DataAnnotations;
+
+	using static Data.Constants.UserConstants;
+
 	public class LoginFormModel
 	{
 		[Required(ErrorMessage = "Email address is required.")]

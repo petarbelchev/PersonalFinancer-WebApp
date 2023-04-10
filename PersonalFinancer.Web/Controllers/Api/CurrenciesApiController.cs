@@ -1,40 +1,50 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Currencies;
-using PersonalFinancer.Services.Currencies.Models;
-using PersonalFinancer.Services.ModelsState;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure;
-
-namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    [Authorize]
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Currencies;
+	using Services.Currencies.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Currencies;
+	using Web.Models.Shared;
+
+	[Authorize]
 	[Route("api/currencies")]
 	[ApiController]
 	public class CurrenciesApiController : ControllerBase
 	{
 		private readonly ICurrencyService currencyService;
-		private readonly IModelStateService modelStateService;
+		private readonly IControllerService controllerService;
+		private readonly IMapper mapper;
 
 		public CurrenciesApiController(
 			ICurrencyService currencyService,
-			IModelStateService modelStateService)
+			IControllerService controllerService,
+			IMapper mapper)
 		{
 			this.currencyService = currencyService;
-			this.modelStateService = modelStateService;
+			this.controllerService = controllerService;
+			this.mapper = mapper;
 		}
 
 		[HttpPost]
 		public async Task<ActionResult<CurrencyViewModel>> Create(CurrencyInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest(modelStateService.GetErrors(ModelState.Values));
+				return BadRequest(controllerService.GetModelErrors(ModelState.Values));
 
 			try
 			{
-				CurrencyViewModel viewModel = 
-					await currencyService.CreateCurrency(inputModel);
+				var inputDTO = mapper.Map<CurrencyInputDTO>(inputModel);
+
+				CurrencyOutputDTO currencyData =
+					await currencyService.CreateCurrency(inputDTO);
+
+				var viewModel = mapper.Map<CurrencyViewModel>(currencyData);
 
 				return Created(string.Empty, viewModel);
 			}

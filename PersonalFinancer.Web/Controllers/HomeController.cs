@@ -1,17 +1,29 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User;
-using PersonalFinancer.Services.User.Models;
-using PersonalFinancer.Web.Infrastructure;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Accounts.Models;
+	using Services.User;
+	using Services.User.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Home;
+	using Web.Models.Shared;
+
 	public class HomeController : Controller
 	{
 		private readonly IUsersService userService;
+		private readonly IMapper mapper;
 
-		public HomeController(IUsersService userService)
-			=> this.userService = userService;
+		public HomeController(
+			IUsersService userService,
+			IMapper mapper)
+		{
+			this.userService = userService;
+			this.mapper = mapper;
+		}
 
 		public async Task<IActionResult> Index()
 		{
@@ -20,13 +32,10 @@ namespace PersonalFinancer.Web.Controllers
 
 			if (User.Identity?.IsAuthenticated ?? false)
 			{
-				var viewModel = new UserDashboardViewModel()
-				{
-					StartDate = DateTime.UtcNow.AddMonths(-1),
-					EndDate = DateTime.UtcNow
-				};
+				UserDashboardDTO userData = await userService.GetUserDashboardData(
+					User.Id(), DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow);
 
-				await userService.SetUserDashboard(User.Id(), viewModel);
+				var viewModel = mapper.Map<UserDashboardViewModel>(userData);
 
 				return View(viewModel);
 			}
@@ -35,21 +44,26 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Index(DateFilterModel inputModel)
+		public async Task<IActionResult> Index(DateFilterInputModel inputModel)
 		{
-			var viewModel = new UserDashboardViewModel
-			{
-				StartDate = inputModel.StartDate,
-				EndDate = inputModel.EndDate
-			};
-
 			if (!ModelState.IsValid)
 			{
-				viewModel.Accounts = await userService.GetUserAccounts(User.Id());
-				return View(viewModel);
+				IEnumerable<AccountCardDTO> userAccountsData =
+					await userService.GetUserAccounts(User.Id());
+
+				return View(new UserDashboardViewModel
+				{
+					StartDate = inputModel.StartDate,
+					EndDate = inputModel.EndDate,
+					Accounts = userAccountsData
+						.Select(a => mapper.Map<AccountCardViewModel>(a))
+				});
 			}
 
-			await userService.SetUserDashboard(User.Id(), viewModel);
+			UserDashboardDTO userData = await userService.GetUserDashboardData(
+				User.Id(), inputModel.StartDate, inputModel.EndDate);
+
+			var viewModel = mapper.Map<UserDashboardViewModel>(userData);
 
 			return View(viewModel);
 		}
@@ -57,9 +71,9 @@ namespace PersonalFinancer.Web.Controllers
 		public IActionResult Error(int statusCode)
 		{
 			if (statusCode == 400)
-				ViewBag.ImgUrl = "/400-Bad-Request-Error.webp";
+				ViewBag.ImgUrl = "/img/400BadRequestError.webp";
 			else
-				ViewBag.ImgUrl = "/internal-server-error-status-code-500-.webp";
+				ViewBag.ImgUrl = "/img/500InternalServerError.webp";
 
 			return View();
 		}

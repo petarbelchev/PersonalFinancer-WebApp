@@ -1,40 +1,47 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Categories;
-using PersonalFinancer.Services.Categories.Models;
-using PersonalFinancer.Services.ModelsState;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure;
-
-namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    [Authorize]
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Categories;
+	using Services.Categories.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Shared;
+
+	[Authorize]
 	[Route("api/categories")]
 	[ApiController]
 	public class CategoriesApiController : ControllerBase
 	{
 		private readonly ICategoryService categoryService;
-		private readonly IModelStateService modelStateService;
+		private readonly IControllerService controllerService;
+		private readonly IMapper mapper;
 
 		public CategoriesApiController(
-			ICategoryService categoryService, 
-			IModelStateService modelStateService)
+			ICategoryService categoryService,
+			IControllerService controllerService,
+			IMapper mapper)
 		{
 			this.categoryService = categoryService;
-			this.modelStateService = modelStateService;
+			this.controllerService = controllerService;
+			this.mapper = mapper;
 		}
 
 		[HttpPost]
 		public async Task<ActionResult<CategoryViewModel>> CreateCategory(CategoryInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest(modelStateService.GetErrors(ModelState.Values));
+				return BadRequest(controllerService.GetModelErrors(ModelState.Values));
 
 			try
 			{
-				CategoryViewModel viewModel = 
-					await categoryService.CreateCategory(inputModel);
+				var inputDTO = mapper.Map<CategoryInputDTO>(inputModel);
+				CategoryOutputDTO categoryOutputDTO =
+					await categoryService.CreateCategory(inputDTO);
+				var viewModel = mapper.Map<CategoryViewModel>(categoryOutputDTO);
 
 				return Created(string.Empty, viewModel);
 			}

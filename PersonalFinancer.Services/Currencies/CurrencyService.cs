@@ -1,25 +1,25 @@
-﻿using AutoMapper;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Currencies.Models;
-using PersonalFinancer.Services.Shared.Models;
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Services.Currencies
+﻿namespace PersonalFinancer.Services.Currencies
 {
-    public class CurrencyService : ICurrencyService
+	using AutoMapper;
+
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+
+	using Data;
+	using Data.Models;
+	using static Data.Constants;
+
+	using Services.Currencies.Models;
+	
+	public class CurrencyService : ICurrencyService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
 		private readonly IMemoryCache memoryCache;
 
 		public CurrencyService(
-			PersonalFinancerDbContext data, 
-			IMapper mapper, 
+			PersonalFinancerDbContext data,
+			IMapper mapper,
 			IMemoryCache memoryCache)
 		{
 			this.data = data;
@@ -31,7 +31,7 @@ namespace PersonalFinancer.Services.Currencies
 		/// Throws ArgumentException if given name exists.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<CurrencyViewModel> CreateCurrency(CurrencyInputModel model)
+		public async Task<CurrencyOutputDTO> CreateCurrency(CurrencyInputDTO model)
 		{
 			Currency? currency = await data.Currencies
 				.FirstOrDefaultAsync(c => c.Name == model.Name && c.OwnerId == model.OwnerId);
@@ -58,9 +58,9 @@ namespace PersonalFinancer.Services.Currencies
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.CurrencyCacheKeyValue + model.OwnerId);
+			memoryCache.Remove(CurrencyConstants.CurrencyCacheKeyValue + model.OwnerId);
 
-			return mapper.Map<CurrencyViewModel>(currency);
+			return mapper.Map<CurrencyOutputDTO>(currency);
 		}
 
 		/// <summary>
@@ -83,7 +83,7 @@ namespace PersonalFinancer.Services.Currencies
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.CurrencyCacheKeyValue + ownerId);
+			memoryCache.Remove(CurrencyConstants.CurrencyCacheKeyValue + ownerId);
 		}
 	}
 }

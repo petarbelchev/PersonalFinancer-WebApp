@@ -1,26 +1,46 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Areas.Admin.Controllers
+﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-    [Area("Admin")]
+	using AutoMapper;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Accounts;
+	using Services.Accounts.Models;
+	using Services.Shared.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Accounts;
+	using Web.Models.Shared;
+
+	using static Data.Constants.RoleConstants;
+
+	[Area("Admin")]
 	[Authorize(Roles = AdminRoleName)]
 	public class TransactionsController : Controller
 	{
 		private readonly IAccountsService accountsService;
+		private readonly IMapper mapper;
+		private readonly IControllerService controllerService;
 
-		public TransactionsController(IAccountsService accountsService)
-			=> this.accountsService = accountsService;
-		
+		public TransactionsController(
+			IAccountsService accountsService,
+			IMapper mapper,
+			IControllerService controllerService)
+		{
+			this.accountsService = accountsService;
+			this.mapper = mapper;
+			this.controllerService = controllerService;
+		}
+
 		public async Task<IActionResult> TransactionDetails(string id)
 		{
 			try
 			{
-				return View(await accountsService.GetTransactionViewModel(id));
+				TransactionDetailsDTO transactionData =
+					await accountsService.GetTransactionDetails(id);
+				var viewModel = mapper.Map<TransactionDetailsViewModel>(transactionData);
+
+				return View(viewModel);
 			}
 			catch (InvalidOperationException)
 			{
@@ -32,8 +52,10 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		{
 			try
 			{
-				TransactionFormModel viewModel = 
-					await accountsService.GetFulfilledTransactionFormModel(id);
+				FulfilledTransactionFormDTO formDTO =
+				   await accountsService.GetFulfilledTransactionForm(id);
+
+				var viewModel = mapper.Map<TransactionFormModel>(formDTO);
 
 				return View(viewModel);
 			}
@@ -49,14 +71,14 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				await accountsService.PrepareTransactionFormModelForReturn(inputModel);
-
+				await controllerService.PrepareTransactionFormModelForReturn(inputModel);
 				return View(inputModel);
 			}
 
 			try
 			{
-				await accountsService.EditTransaction(id, inputModel);
+				var inputDTO = mapper.Map<EditTransactionInputDTO>(inputModel);
+				await accountsService.EditTransaction(inputDTO);
 			}
 			catch (InvalidOperationException)
 			{

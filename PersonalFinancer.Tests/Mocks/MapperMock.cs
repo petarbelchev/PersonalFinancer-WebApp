@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 
-using PersonalFinancer.Services.Infrastructure;
+using PersonalFinancer.Web.Infrastructure;
 
 namespace PersonalFinancer.Tests.Mocks
 {
@@ -10,7 +10,7 @@ namespace PersonalFinancer.Tests.Mocks
 		{
 			get
 			{
-				var config = new MapperConfiguration(cfg => cfg.AddProfile<ServiceMappingProfile>());
+				var config = new MapperConfiguration(cfg => cfg.AddProfile<ViewModelsMappingProfile>());
 
 				return config.CreateMapper();
 			}

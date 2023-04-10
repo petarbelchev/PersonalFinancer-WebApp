@@ -1,15 +1,14 @@
-﻿using PersonalFinancer.Services.Categories.Models;
-using PersonalFinancer.Services.Shared.Models;
-
-namespace PersonalFinancer.Services.Categories
+﻿namespace PersonalFinancer.Services.Categories
 {
-    public interface ICategoryService
+	using Services.Categories.Models;
+	
+	public interface ICategoryService
 	{
 		/// <summary>
 		/// Throws ArgumentException if try to create Category with existing name.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		Task<CategoryViewModel> CreateCategory(CategoryInputModel model);
+		Task<CategoryOutputDTO> CreateCategory(CategoryInputDTO inputDTO);
 
 		/// <summary>
 		/// Throws InvalidOperationException when Category does not exist

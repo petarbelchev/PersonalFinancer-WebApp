@@ -1,16 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-using static PersonalFinancer.Data.Constants.AccountConstants;
-
-namespace PersonalFinancer.Data.Models
+﻿namespace PersonalFinancer.Data.Models
 {
+	using System.ComponentModel.DataAnnotations;
+	using System.ComponentModel.DataAnnotations.Schema;
+
+	using static Constants.AccountConstants;
+	
 	public class Account
 	{
 		[Key]
 		public string Id { get; set; } = null!;
 
-		[MaxLength(AccountNameMaxLength, 
+		[MaxLength(AccountNameMaxLength,
 			ErrorMessage = "Account name max length must be {1} characters long.")]
 		public string Name { get; set; } = null!;
 
@@ -29,7 +29,7 @@ namespace PersonalFinancer.Data.Models
 		public string CurrencyId { get; set; } = null!;
 		public Currency Currency { get; set; } = null!;
 
-		public ICollection<Transaction> Transactions { get; set; } 
+		public ICollection<Transaction> Transactions { get; set; }
 			= new HashSet<Transaction>();
 
 		public bool IsDeleted { get; set; }

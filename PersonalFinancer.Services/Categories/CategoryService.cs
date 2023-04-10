@@ -1,16 +1,17 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Categories.Models;
-using PersonalFinancer.Services.Shared.Models;
-using static PersonalFinancer.Data.Constants.TransactionConstants;
-
-namespace PersonalFinancer.Services.Categories
+﻿namespace PersonalFinancer.Services.Categories
 {
-    public class CategoryService : ICategoryService
+	using AutoMapper;
+
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+
+	using Data;
+	using Data.Models;
+	using static Data.Constants.CategoryConstants;
+
+	using Services.Categories.Models;
+
+	public class CategoryService : ICategoryService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMemoryCache memoryCache;
@@ -30,10 +31,10 @@ namespace PersonalFinancer.Services.Categories
 		/// Throws ArgumentException if try to create Category with existing name.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<CategoryViewModel> CreateCategory(CategoryInputModel model)
+		public async Task<CategoryOutputDTO> CreateCategory(CategoryInputDTO inputDTO)
 		{
 			Category? category = await data.Categories
-				.FirstOrDefaultAsync(c => c.Name == model.Name && c.OwnerId == model.OwnerId);
+				.FirstOrDefaultAsync(c => c.Name == inputDTO.Name && c.OwnerId == inputDTO.OwnerId);
 
 			if (category != null)
 			{
@@ -41,24 +42,24 @@ namespace PersonalFinancer.Services.Categories
 					throw new ArgumentException("Category with the same name exist!");
 
 				category.IsDeleted = false;
-				category.Name = model.Name.Trim();
+				category.Name = inputDTO.Name.Trim();
 			}
 			else
 			{
 				category = new Category
 				{
 					Id = Guid.NewGuid().ToString(),
-					Name = model.Name.Trim(),
-					OwnerId = model.OwnerId
+					Name = inputDTO.Name.Trim(),
+					OwnerId = inputDTO.OwnerId
 				};
 
 				data.Categories.Add(category);
 			}
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(CategoryCacheKeyValue + model.OwnerId);
+			memoryCache.Remove(CategoryCacheKeyValue + inputDTO.OwnerId);
 
-			return mapper.Map<CategoryViewModel>(category);
+			return mapper.Map<CategoryOutputDTO>(category);
 		}
 
 		/// <summary>

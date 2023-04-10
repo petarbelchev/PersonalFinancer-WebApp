@@ -1,12 +1,12 @@
-﻿@using PersonalFinancer.Services.Shared.Models;
-@using PersonalFinancer.Services.Accounts.Models;
+﻿@using PersonalFinancer.Web.Models.Accounts;
+@using PersonalFinancer.Web.Models.Shared;
 @model UserTransactionsViewModel
 @{
 	ViewData["Title"] = "All Transactions";
 }
 
 @*DatePicker*@
-<partial name="_DatePickerFormPartial" model='new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }' />
+<partial name="_DatePickerFormPartial" model='new DateFilterInputModel { StartDate = Model.StartDate, EndDate = Model.EndDate }' />
 
 @if (Model.Transactions.Any())
 {
@@ -47,7 +47,7 @@ else
 			id: '@Model.Id',
 			startDate: '@Model.StartDate.ToString("O")',
 			endDate: '@Model.EndDate.ToString("O")',
-			ownerId: '@Model.OwnerId',
+			//ownerId: 'Model.OwnerId',
 			url: '@Model.ApiTransactionsEndpoint',
 			pages: @Model.Pagination.Pages
 		}

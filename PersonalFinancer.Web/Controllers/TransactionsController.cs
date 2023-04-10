@@ -1,52 +1,93 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
-    [Authorize(Roles = UserRoleName)]
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Accounts;
+	using Services.Accounts.Models;
+	using Services.Shared.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Accounts;
+	using Web.Models.Shared;
+	
+	using static Data.Constants.RoleConstants;
+
+	[Authorize(Roles = UserRoleName)]
 	public class TransactionsController : Controller
 	{
 		private readonly IAccountsService accountsService;
+		private readonly IMapper mapper;
+		private readonly IControllerService controllerService;
 
-		public TransactionsController(IAccountsService accountsService)
-			=> this.accountsService = accountsService;
+		public TransactionsController(
+			IAccountsService accountsService,
+			IMapper mapper,
+			IControllerService controllerService)
+		{
+			this.accountsService = accountsService;
+			this.mapper = mapper;
+			this.controllerService = controllerService;
+		}
 
 		public async Task<IActionResult> All()
 		{
-			var inputModel = new DateFilterModel
+			var viewModel = new UserTransactionsViewModel();
+
+			var inputDTO = new UserTransactionsInputDTO
 			{
+				Id = User.Id(),
 				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
+				EndDate = DateTime.UtcNow,
+				ElementsPerPage = viewModel.Pagination.ElementsPerPage
 			};
 
-			return View(await accountsService
-				.GetUserTransactionsViewModel(User.Id(), inputModel));
+			UserTransactionsOutputDTO transactionsData =
+				await accountsService.GetUserTransactions(inputDTO);
+
+			viewModel = mapper.Map<UserTransactionsViewModel>(transactionsData);
+			viewModel.Pagination.TotalElements = transactionsData.AllTransactionsCount;
+
+			return View(viewModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> All(DateFilterModel inputModel)
+		public async Task<IActionResult> All(DateFilterInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return View(new UserTransactionsViewModel
 				{
-					StartDate = inputModel.StartDate ?? new DateTime(),
-					EndDate = inputModel.EndDate ?? new DateTime()
+					StartDate = inputModel.StartDate,
+					EndDate = inputModel.EndDate
 				});
 
-			return View(await accountsService
-				.GetUserTransactionsViewModel(User.Id(), inputModel));
+			var viewModel = new UserTransactionsViewModel();
+
+			var inputDTO = new UserTransactionsInputDTO
+			{
+				Id = User.Id(),
+				StartDate = inputModel.StartDate,
+				EndDate = inputModel.EndDate,
+				ElementsPerPage = viewModel.Pagination.ElementsPerPage
+			};
+
+			UserTransactionsOutputDTO transactionsData =
+				await accountsService.GetUserTransactions(inputDTO);
+
+			viewModel = mapper.Map<UserTransactionsViewModel>(transactionsData);
+			viewModel.Pagination.TotalElements = transactionsData.AllTransactionsCount;
+
+			return View(viewModel);
 		}
 
 		public async Task<IActionResult> Create()
 		{
-			TransactionFormModel viewModel =
-				await accountsService.GetEmptyTransactionFormModel(User.Id());
+			EmptyTransactionFormDTO formData =
+				await accountsService.GetEmptyTransactionForm(User.Id());
+
+			var viewModel = mapper.Map<TransactionFormModel>(formData);
 
 			return View(viewModel);
 		}
@@ -54,17 +95,21 @@ namespace PersonalFinancer.Web.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create(TransactionFormModel inputModel)
 		{
-			if (!ModelState.IsValid)
-			{
-				await accountsService.PrepareTransactionFormModelForReturn(inputModel);
-
-				return View(inputModel);
-			}
-
 			try
 			{
-				string newTransactionId =
-					await accountsService.CreateTransaction(User.Id(), inputModel);
+				if (inputModel.OwnerId != User.Id())
+					throw new InvalidOperationException();
+
+				if (!ModelState.IsValid)
+				{
+					await controllerService.PrepareTransactionFormModelForReturn(inputModel);
+
+					return View(inputModel);
+				}
+
+				var inputDTO = mapper.Map<CreateTransactionInputDTO>(inputModel);
+
+				string newTransactionId = await accountsService.CreateTransaction(inputDTO);
 
 				TempData["successMsg"] = "You create a new transaction successfully!";
 
@@ -104,7 +149,13 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				return View(await accountsService.GetTransactionViewModel(id));
+				TransactionDetailsDTO transactionData =
+					await accountsService.GetTransactionDetails(id);
+
+				TransactionDetailsViewModel viewModel =
+					mapper.Map<TransactionDetailsViewModel>(transactionData);
+
+				return View(viewModel);
 			}
 			catch (InvalidOperationException)
 			{
@@ -116,11 +167,13 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				TransactionFormModel viewModel =
-					await accountsService.GetFulfilledTransactionFormModel(id);
+				FulfilledTransactionFormDTO transactionFormDTO =
+					await accountsService.GetFulfilledTransactionForm(id);
 
-				if (User.Id() != viewModel.OwnerId)
+				if (User.Id() != transactionFormDTO.OwnerId)
 					return Unauthorized();
+
+				var viewModel = mapper.Map<TransactionFormModel>(transactionFormDTO);
 
 				return View(viewModel);
 			}
@@ -139,14 +192,14 @@ namespace PersonalFinancer.Web.Controllers
 
 			if (!ModelState.IsValid)
 			{
-				await accountsService.PrepareTransactionFormModelForReturn(inputModel);
-
+				await controllerService.PrepareTransactionFormModelForReturn(inputModel);
 				return View(inputModel);
 			}
 
 			try
 			{
-				await accountsService.EditTransaction(id, inputModel);
+				var inputDTO = mapper.Map<EditTransactionInputDTO>(inputModel);
+				await accountsService.EditTransaction(inputDTO);
 			}
 			catch (InvalidOperationException)
 			{

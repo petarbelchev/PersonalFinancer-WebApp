@@ -1,16 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-using static PersonalFinancer.Data.Constants.TransactionConstants;
-
-namespace PersonalFinancer.Data.Models
+﻿namespace PersonalFinancer.Data.Models
 {
+	using System.ComponentModel.DataAnnotations;
+	using System.ComponentModel.DataAnnotations.Schema;
+
+	using static Constants.CategoryConstants;
+
 	public class Category
 	{
 		[Key]
 		public string Id { get; set; } = null!;
 
-		[MaxLength(CategoryNameMaxLength, 
+		[MaxLength(CategoryNameMaxLength,
 			ErrorMessage = "Category's name max length must be {1} characters long.")]
 		public string Name { get; set; } = null!;
 
@@ -20,6 +20,6 @@ namespace PersonalFinancer.Data.Models
 
 		public bool IsDeleted { get; set; }
 
-        public ICollection<Transaction> Transactions { get; set; } = new HashSet<Transaction>();
-    }
+		public ICollection<Transaction> Transactions { get; set; } = new HashSet<Transaction>();
+	}
 }
