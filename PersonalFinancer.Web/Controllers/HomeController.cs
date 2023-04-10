@@ -57,9 +57,9 @@ namespace PersonalFinancer.Web.Controllers
 		public IActionResult Error(int statusCode)
 		{
 			if (statusCode == 400)
-				ViewBag.ImgUrl = "/400-Bad-Request-Error.webp";
+				ViewBag.ImgUrl = "/images/400BadRequest.webp";
 			else
-				ViewBag.ImgUrl = "/internal-server-error-status-code-500-.webp";
+				ViewBag.ImgUrl = "/images/500InternalServerError.webp";
 
 			return View();
 		}

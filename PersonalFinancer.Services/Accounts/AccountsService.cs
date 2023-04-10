@@ -513,7 +513,6 @@ namespace PersonalFinancer.Services.Accounts
 					Id = u.Id,
 					StartDate = startDate,
 					EndDate = endDate,
-					OwnerId = u.Id,
 					Pagination = new PaginationModel
 					{
 						TotalElements = u.Transactions

@@ -13,8 +13,6 @@ namespace PersonalFinancer.Services.Accounts.Models
 
         public IEnumerable<TransactionTableViewModel> Transactions { get; set; }
             = new List<TransactionTableViewModel>();
-
-        public string OwnerId { get; set; } = null!;
         
 		public string ApiTransactionsEndpoint { get; set; }
 			= ApiTransactionsUrl;

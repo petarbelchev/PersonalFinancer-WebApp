@@ -49,7 +49,7 @@ namespace PersonalFinancer.Web.Controllers.Api
 			if (!ModelState.IsValid)
 				return BadRequest();
 
-			if (inputModel.OwnerId != User.Id())
+			if (inputModel.Id != User.Id())
 				return Unauthorized();
 
 			try
