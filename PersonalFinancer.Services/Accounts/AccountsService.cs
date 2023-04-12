@@ -45,29 +45,22 @@
 		/// <exception cref="ArgumentException"></exception>
 		public async Task<string> CreateAccount(AccountFormShortServiceModel model)
 		{
-			if (await IsNameExists(model.Name, model.OwnerId))
+			if (IsNameExists(model.Name, model.OwnerId))
 				throw new ArgumentException($"The User already have Account with \"{model.Name}\" name.");
 
-			var newAccount = new Account()
-			{
-				Id = Guid.NewGuid().ToString(),
-				Name = model.Name.Trim(),
-				Balance = model.Balance,
-				AccountTypeId = model.AccountTypeId,
-				CurrencyId = model.CurrencyId,
-				OwnerId = model.OwnerId
-			};
+			var newAccount = mapper.Map<Account>(model);
+			newAccount.Id = Guid.NewGuid().ToString();
 
 			if (newAccount.Balance != 0)
 			{
 				newAccount.Transactions.Add(new Transaction()
 				{
 					Id = Guid.NewGuid().ToString(),
-					Amount = newAccount.Balance,
 					OwnerId = newAccount.OwnerId,
 					CategoryId = TransactionConstants.InitialBalanceCategoryId,
-					TransactionType = TransactionType.Income,
+					Amount = newAccount.Balance,
 					CreatedOn = DateTime.UtcNow,
+					TransactionType = TransactionType.Income,
 					Refference = TransactionConstants.CategoryInitialBalanceName,
 					IsInitialBalance = true
 				});
@@ -177,7 +170,7 @@
 		{
 			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
 
-			if (account.Name != model.Name && await IsNameExists(model.Name, model.OwnerId))
+			if (account.Name != model.Name && IsNameExists(model.Name, model.OwnerId))
 				throw new ArgumentException($"The User already have Account with {model.Name} name.");
 
 			account.Name = model.Name.Trim();
@@ -299,18 +292,6 @@
 							Refference = t.Refference
 						})
 				})
-				.FirstAsync();
-		}
-
-		/// <summary>
-		/// Throws InvalidOperationException when Account does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<AccountServiceModel> GetAccountDropdownViewModel(string accountId)
-		{
-			return await data.Accounts
-				.Where(a => a.Id == accountId)
-				.Select(a => mapper.Map<AccountServiceModel>(a))
 				.FirstAsync();
 		}
 
@@ -482,9 +463,12 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> GetOwnerId(string accountId)
 		{
-			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
+			string ownerId = await data.Accounts
+				.Where(a => a.Id == accountId)
+				.Select(a => a.OwnerId)
+				.FirstAsync();
 
-			return account.OwnerId;
+			return ownerId;
 		}
 
 		/// <summary>
@@ -505,12 +489,12 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<bool> IsAccountDeleted(string accountId)
 		{
-			Account? account = await data.Accounts.FindAsync(accountId);
+			bool isDeleted = await data.Accounts
+				.Where(a => a.Id == accountId)
+				.Select(a => a.IsDeleted)
+				.FirstAsync();
 
-			if (account == null)
-				throw new InvalidOperationException("Account does not exist.");
-
-			return account.IsDeleted;
+			return isDeleted;
 		}
 
 		/// <summary>
@@ -519,22 +503,20 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<bool> IsAccountOwner(string userId, string accountId)
 		{
-			Account? account = await data.Accounts.FindAsync(accountId);
+			string ownerId = await data.Accounts
+				.Where(a => a.Id == accountId)
+				.Select(a => a.OwnerId)
+				.FirstAsync();
 
-			if (account == null)
-				throw new InvalidOperationException("Account does not exist.");
-
-			return account.OwnerId == userId;
+			return ownerId == userId;
 		}
 
-		private async Task<bool> IsNameExists(string name, string userId)
+		private bool IsNameExists(string name, string userId)
 		{
-			var names = await data.Accounts
-				.Where(a => a.OwnerId == userId)
-				.Select(a => a.Name.ToLower())
-				.ToArrayAsync();
+			bool isExist = data.Accounts
+				.Any(a => a.OwnerId == userId && a.Name == name);
 
-			return names.Contains(name.ToLower().Trim());
+			return isExist;
 		}
 
 		/// <summary>

@@ -17,10 +17,10 @@
 			CreateMap<Currency, CurrencyServiceModel>();
 
 			CreateMap<Account, AccountServiceModel>();
-			CreateMap<Account, AccountCardServiceModel>()
-					/*.ForMember(m => m.CurrencyName, mf => mf
-						.MapFrom(s => s.Currency.Name))*/;
 			CreateMap<Account, AccountCardServiceModel>();
+			CreateMap<Account, AccountCardServiceModel>();
+			CreateMap<AccountFormShortServiceModel, Account>()
+				.ForMember(m => m.Name, mf => mf.MapFrom(s => s.Name.Trim()));
 
 			CreateMap<AccountType, AccountTypeServiceModel>();
 
@@ -29,8 +29,9 @@
 					.MapFrom(s => s.Category.Name + (s.Category.IsDeleted ? " (Deleted)" : string.Empty)))
 				.ForMember(m => m.AccountName, mf => mf
 					.MapFrom(s => s.Account.Name + (s.Account.IsDeleted ? " (Deleted)" : string.Empty)));
-			CreateMap<Transaction, TransactionTableServiceModel>()
-				/*.ForMember(m => m.CategoryName, mf => mf.MapFrom(s => s.Category.Name))*/;
+			//CreateMap<Transaction, TransactionFormShortServiceModel>()
+			//	.ForMember(m => m.Refference, mf => mf.MapFrom(s => s.Refference.Trim()));
+
 
 			CreateMap<ApplicationUser, UserServiceModel>();
 			CreateMap<ApplicationUser, UserDetailsServiceModel>()

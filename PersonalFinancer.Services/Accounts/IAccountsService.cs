@@ -58,12 +58,6 @@
 			string id, DateTime startDate, DateTime endDate, string? ownerId = null);
 
 		/// <summary>
-		/// Throws InvalidOperationException when Account does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
-		Task<AccountServiceModel> GetAccountDropdownViewModel(string accountId);
-
-		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist 
 		/// or User is not owner or Administrator.
 		/// </summary>

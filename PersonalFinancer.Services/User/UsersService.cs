@@ -7,10 +7,8 @@
 
     using Data;
     using Data.Enums;
-    using Data.Models;
     using static Data.Constants;
 
-    using Services.Accounts.Models;
     using Services.Shared.Models;
     using Services.User.Models;
 
@@ -33,12 +31,12 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> FullName(string userId)
 		{
-			ApplicationUser? user = await data.Users.FindAsync(userId);
+			string fullName = await data.Users
+				.Where(u => u.Id == userId)
+				.Select(u => $"{u.FirstName} {u.LastName}")
+				.FirstAsync();
 
-			if (user == null)
-				throw new InvalidOperationException("User does not exist.");
-
-			return $"{user.FirstName} {user.LastName}";
+			return fullName;
 		}
 
 		public async Task<UsersServiceModel> GetAllUsers(int page)
@@ -86,18 +84,10 @@
 				{
 					AccountTypes = u.AccountTypes
 						.Where(at => !at.IsDeleted)
-						.Select(at => new AccountTypeServiceModel
-						{
-							Id = at.Id,
-							Name = at.Name
-						}),
+						.Select(at => mapper.Map<AccountTypeServiceModel>(at)),
 					Currencies = u.Currencies
 						.Where(c => !c.IsDeleted)
-						.Select(c => new CurrencyServiceModel
-						{
-							Id = c.Id,
-							Name = c.Name
-						})
+						.Select(c => mapper.Map<CurrencyServiceModel>(c))
 				})
 				.FirstAsync();
 		}
