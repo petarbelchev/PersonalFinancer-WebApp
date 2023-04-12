@@ -1,16 +1,18 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Categories.Models;
-using PersonalFinancer.Services.Shared.Models;
-using static PersonalFinancer.Data.Constants.TransactionConstants;
-
-namespace PersonalFinancer.Services.Categories
+﻿namespace PersonalFinancer.Services.Categories
 {
-    public class CategoryService : ICategoryService
+	using AutoMapper;
+
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+
+	using Data;
+	using Data.Models;
+	using static Data.Constants.TransactionConstants;
+
+	using Services.Categories.Models;
+	using Services.Shared.Models;
+	
+	public class CategoryService : ICategoryService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMemoryCache memoryCache;
@@ -30,7 +32,7 @@ namespace PersonalFinancer.Services.Categories
 		/// Throws ArgumentException if try to create Category with existing name.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<CategoryViewModel> CreateCategory(CategoryInputModel model)
+		public async Task<CategoryServiceModel> CreateCategory(CategoryInputModel model)
 		{
 			Category? category = await data.Categories
 				.FirstOrDefaultAsync(c => c.Name == model.Name && c.OwnerId == model.OwnerId);
@@ -58,7 +60,7 @@ namespace PersonalFinancer.Services.Categories
 
 			memoryCache.Remove(CategoryCacheKeyValue + model.OwnerId);
 
-			return mapper.Map<CategoryViewModel>(category);
+			return mapper.Map<CategoryServiceModel>(category);
 		}
 
 		/// <summary>

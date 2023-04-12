@@ -1,30 +1,35 @@
-﻿using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User.Models;
-
-namespace PersonalFinancer.Services.User
+﻿namespace PersonalFinancer.Services.User
 {
-    public interface IUsersService
+	using Services.Shared.Models;
+	using Services.User.Models;
+
+	public interface IUsersService
 	{
-		
 		/// <summary>
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<string> FullName(string userId);
 
-		Task<AllUsersViewModel> GetAllUsers(int page = 1);
-
-		Task<IEnumerable<AccountCardViewModel>> GetUserAccounts(string userId);
-				
-		int GetUsersAccountsCount();
-
-		Task SetUserDashboard(string userId, UserDashboardViewModel model);
+		Task<UsersServiceModel> GetAllUsers(int page);
 		
+		Task<UserAccountsAndCategoriesServiceModel> GetUserAccountsAndCategories(string userId);
+		
+		Task<UserAccountTypesAndCurrenciesServiceModel> GetUserAccountTypesAndCurrencies(string userId);
+
+		Task<IEnumerable<AccountCardServiceModel>> GetUserAccounts(string userId);
+
+		int GetUsersAccountsCount();
+		
+		Task<TransactionsServiceModel> GetUserTransactions(string userId, DateTime startDate, DateTime endDate, int page = 1);
+
+		Task<UserDashboardServiceModel> GetUserDashboardData(string userId, DateTime startDate, DateTime endDate);
+
 		/// <summary>
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<UserDetailsViewModel> UserDetails(string userId);
+		Task<UserDetailsServiceModel> UserDetails(string userId);
 
 		int UsersCount();
 	}

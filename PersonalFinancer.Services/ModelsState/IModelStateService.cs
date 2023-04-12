@@ -1,9 +1,7 @@
-﻿using PersonalFinancer.Services.Accounts.Models;
-
-using static Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary;
-
-namespace PersonalFinancer.Services.ModelsState
+﻿namespace PersonalFinancer.Services.ModelsState
 {
+	using static Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary;
+
 	public interface IModelStateService
 	{
 		string GetErrors(ValueEnumerable modelStateValues);

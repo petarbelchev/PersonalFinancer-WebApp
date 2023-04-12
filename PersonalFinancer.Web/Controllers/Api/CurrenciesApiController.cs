@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Currencies;
-using PersonalFinancer.Services.Currencies.Models;
-using PersonalFinancer.Services.ModelsState;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure;
-
-namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    [Authorize]
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Currencies;
+	using Services.Currencies.Models;
+	using Services.ModelsState;
+	using Services.Shared.Models;
+
+	using Web.Infrastructure;
+
+	[Authorize]
 	[Route("api/currencies")]
 	[ApiController]
 	public class CurrenciesApiController : ControllerBase
@@ -26,17 +27,17 @@ namespace PersonalFinancer.Web.Controllers.Api
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<CurrencyViewModel>> Create(CurrencyInputModel inputModel)
+		public async Task<ActionResult<CurrencyServiceModel>> Create(CurrencyInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(modelStateService.GetErrors(ModelState.Values));
 
 			try
 			{
-				CurrencyViewModel viewModel = 
+				CurrencyServiceModel model =
 					await currencyService.CreateCurrency(inputModel);
 
-				return Created(string.Empty, viewModel);
+				return Created(string.Empty, model);
 			}
 			catch (ArgumentException ex)
 			{

@@ -40,17 +40,18 @@ namespace PersonalFinancer.Tests
 		protected Account Account2User1 { get; private set; } = null!;
 		protected Account Account2User2 { get; private set; } = null!;
 
-		protected AccountType AccountType1 { get; private set; } = null!;
-		protected AccountType AccountType2 { get; private set; } = null!;
-		protected AccountType AccountType3 { get; private set; } = null!;
+		protected AccountType AccountType1User1 { get; private set; } = null!;
+		protected AccountType AccountType2User1 { get; private set; } = null!;
+		protected AccountType AccountType3User2 { get; private set; } = null!;
 
 		protected Category Category1 { get; private set; } = null!;
 		protected Category Category2 { get; private set; } = null!;
 		protected Category Category3 { get; private set; } = null!;
 		protected Category Category4 { get; private set; } = null!;
 
-		protected Currency Currency1 { get; private set; } = null!;
-		protected Currency Currency2 { get; private set; } = null!;
+		protected Currency Currency1User1 { get; private set; } = null!;
+		protected Currency Currency2User1 { get; private set; } = null!;
+		protected Currency Currency3User2 { get; private set; } = null!;
 
 		protected Transaction Transaction1User1 { get; private set; } = null!;
 		protected Transaction Transaction2User1 { get; private set; } = null!;
@@ -85,51 +86,51 @@ namespace PersonalFinancer.Tests
 
 			// Account Types
 			string cashAccTypeId = Guid.NewGuid().ToString();
-			AccountType1 = new AccountType
+			AccountType1User1 = new AccountType
 			{
 				Id = cashAccTypeId,
 				Name = "Cash",
 				OwnerId = User1Id
 			};
 			string BankAccTypeId = Guid.NewGuid().ToString();
-			AccountType2 = new AccountType
+			AccountType2User1 = new AccountType
 			{
 				Id = BankAccTypeId,
 				Name = "Bank",
 				OwnerId = User1Id
 			};
-			string CustomAccTypeId = Guid.NewGuid().ToString();
-			AccountType3 = new AccountType
+			string User2AccTypeId = Guid.NewGuid().ToString();
+			AccountType3User2 = new AccountType
 			{
-				Id = CustomAccTypeId,
+				Id = User2AccTypeId,
 				Name = "Bank",
-				IsDeleted = true,
-				OwnerId = User1Id
+				OwnerId = User2Id
 			};
-			data.AccountTypes.AddRange(AccountType1, AccountType2, AccountType3);
+			data.AccountTypes.AddRange(AccountType1User1, AccountType2User1, AccountType3User2);
 
 			// Currencies
 			string BgnCurrencyId = Guid.NewGuid().ToString();
-			Currency1 = new Currency
+			Currency1User1 = new Currency
 			{
 				Id = BgnCurrencyId,
 				Name = "BGN",
 				OwnerId = User1Id
 			};
 			string EurCurrencyId = Guid.NewGuid().ToString();
-			Currency2 = new Currency
+			Currency2User1 = new Currency
 			{
 				Id = EurCurrencyId,
 				Name = "EUR",
 				OwnerId = User1Id
 			};
-			//Guid UsdCurrencyId = Guid.NewGuid();
-			//Currency3 = new Currency
-			//{
-			//	Id = UsdCurrencyId,
-			//	Name = "USD"
-			//};
-			data.Currencies.AddRange(Currency1, Currency2/*, Currency3*/);
+			string User2UsdCurrencyId = Guid.NewGuid().ToString();
+			Currency3User2 = new Currency
+			{
+				Id = User2UsdCurrencyId,
+				Name = "USD",
+				OwnerId = User2Id
+			};
+			data.Currencies.AddRange(Currency1User1, Currency2User1, Currency3User2);
 
 			// Accounts
 			string user1CashBgnAccId = Guid.NewGuid().ToString();
@@ -157,10 +158,10 @@ namespace PersonalFinancer.Tests
 			Account2User2 = new Account
 			{
 				Id = user2BankEurAccId,
-				Name = "Bank EUR",
-				AccountTypeId = BankAccTypeId,
+				Name = "Bank USD",
+				AccountTypeId = User2AccTypeId,
 				Balance = 0,
-				CurrencyId = EurCurrencyId,
+				CurrencyId = User2UsdCurrencyId,
 				OwnerId = User1Id,
 				IsDeleted = true
 			};

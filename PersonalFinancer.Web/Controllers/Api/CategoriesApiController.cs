@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Categories;
-using PersonalFinancer.Services.Categories.Models;
-using PersonalFinancer.Services.ModelsState;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure;
-
-namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    [Authorize]
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Categories;
+	using Services.Categories.Models;
+	using Services.ModelsState;
+	using Services.Shared.Models;
+
+	using Web.Infrastructure;
+
+	[Authorize]
 	[Route("api/categories")]
 	[ApiController]
 	public class CategoriesApiController : ControllerBase
@@ -18,7 +19,7 @@ namespace PersonalFinancer.Web.Controllers.Api
 		private readonly IModelStateService modelStateService;
 
 		public CategoriesApiController(
-			ICategoryService categoryService, 
+			ICategoryService categoryService,
 			IModelStateService modelStateService)
 		{
 			this.categoryService = categoryService;
@@ -26,17 +27,17 @@ namespace PersonalFinancer.Web.Controllers.Api
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<CategoryViewModel>> CreateCategory(CategoryInputModel inputModel)
+		public async Task<ActionResult<CategoryServiceModel>> CreateCategory(CategoryInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(modelStateService.GetErrors(ModelState.Values));
 
 			try
 			{
-				CategoryViewModel viewModel = 
+				CategoryServiceModel model =
 					await categoryService.CreateCategory(inputModel);
 
-				return Created(string.Empty, viewModel);
+				return Created(string.Empty, model);
 			}
 			catch (ArgumentException ex)
 			{

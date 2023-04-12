@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.User;
-using PersonalFinancer.Services.User.Models;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.User;
+	using Services.User.Models;
+
+	using static Data.Constants.RoleConstants;
+
 	[Authorize(Roles = AdminRoleName)]
 	[Route("api/users")]
 	[ApiController]
@@ -18,7 +19,19 @@ namespace PersonalFinancer.Web.Controllers.Api
 			=> this.usersService = usersService;
 
 		[HttpGet("{page}")]
-		public async Task<ActionResult<AllUsersViewModel>> AllUsers(int page)
-			=> Ok(await usersService.GetAllUsers(page));
+		public async Task<ActionResult<UsersViewModel>> AllUsers(int page)
+		{
+			UsersServiceModel usersData =
+				await usersService.GetAllUsers(page);
+
+			var usersModel = new UsersViewModel
+			{
+				Users = usersData.Users
+			};
+			usersModel.Pagination.Page = page;
+			usersModel.Pagination.TotalElements = usersData.TotalUsersCount;
+
+			return Ok(usersModel);
+		}
 	}
 }

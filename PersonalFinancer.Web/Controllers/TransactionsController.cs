@@ -1,32 +1,52 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
-    [Authorize(Roles = UserRoleName)]
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.Accounts;
+	using Services.Accounts.Models;
+	using Services.Shared.Models;
+	using Services.User;
+	using Services.User.Models;
+	
+	using Web.Infrastructure;
+	using Web.Models.Shared;
+	using Web.Models.Transaction;
+	
+	using static Data.Constants.RoleConstants;
+
+	[Authorize(Roles = UserRoleName)]
 	public class TransactionsController : Controller
 	{
 		private readonly IAccountsService accountsService;
+		private readonly IUsersService usersService;
 
-		public TransactionsController(IAccountsService accountsService)
-			=> this.accountsService = accountsService;
+		public TransactionsController(
+			IAccountsService accountsService,
+			IUsersService usersService)
+		{
+			this.accountsService = accountsService;
+			this.usersService = usersService;
+		}
 
 		public async Task<IActionResult> All()
 		{
-			var inputModel = new DateFilterModel
-			{
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
-			};
+			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
+			DateTime endDate = DateTime.UtcNow;
 
-			return View(await accountsService
-				.GetUserTransactionsViewModel(User.Id(), inputModel));
+			TransactionsServiceModel userTransactions =
+				await usersService.GetUserTransactions(User.Id(), startDate, endDate);
+
+			var viewModel = new UserTransactionsViewModel
+			{
+				Id = User.Id(),
+				StartDate = startDate,
+				EndDate = endDate,
+				Transactions = userTransactions.Transactions
+			};
+			viewModel.Pagination.TotalElements = userTransactions.TotalTransactionsCount;
+
+			return View(viewModel);
 		}
 
 		[HttpPost]
@@ -39,32 +59,66 @@ namespace PersonalFinancer.Web.Controllers
 					EndDate = inputModel.EndDate
 				});
 
-			return View(await accountsService
-				.GetUserTransactionsViewModel(User.Id(), inputModel));
+			TransactionsServiceModel userTransactions = await usersService
+				.GetUserTransactions(User.Id(), inputModel.StartDate, inputModel.EndDate);
+
+			var viewModel = new UserTransactionsViewModel
+			{
+				Id = User.Id(),
+				StartDate = inputModel.StartDate,
+				EndDate = inputModel.EndDate,
+				Transactions = userTransactions.Transactions
+			};
+			viewModel.Pagination.TotalElements = userTransactions.TotalTransactionsCount;
+
+			return View(viewModel);
 		}
 
 		public async Task<IActionResult> Create()
 		{
-			TransactionFormModel viewModel =
-				await accountsService.GetEmptyTransactionFormModel(User.Id());
+			UserAccountsAndCategoriesServiceModel userData =
+				await usersService.GetUserAccountsAndCategories(User.Id());
+
+			var viewModel = new TransactionFormModel
+			{
+				UserAccounts = userData.UserAccounts,
+				UserCategories = userData.UserCategories,
+				CreatedOn = DateTime.UtcNow,
+				OwnerId = User.Id()
+			};
 
 			return View(viewModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Create(TransactionFormModel inputModel) // TODO: Use separate form model without Owner Id
+		public async Task<IActionResult> Create(TransactionFormModel inputModel)
 		{
 			if (!ModelState.IsValid)
 			{
-				await accountsService.PrepareTransactionFormModelForReturn(inputModel);
+				UserAccountsAndCategoriesServiceModel userData =
+					await usersService.GetUserAccountsAndCategories(User.Id());
+
+				inputModel.UserCategories = userData.UserCategories;
+				inputModel.UserAccounts = userData.UserAccounts;
 
 				return View(inputModel);
 			}
 
 			try
 			{
+				var serviceModel = new TransactionFormShortServiceModel
+				{
+					OwnerId = User.Id(),
+					AccountId = inputModel.AccountId,
+					Amount = inputModel.Amount,
+					CategoryId = inputModel.CategoryId,
+					CreatedOn = inputModel.CreatedOn,
+					Refference = inputModel.Refference,
+					TransactionType = inputModel.TransactionType
+				};
+
 				string newTransactionId =
-					await accountsService.CreateTransaction(User.Id(), inputModel);
+					await accountsService.CreateTransaction(serviceModel);
 
 				TempData["successMsg"] = "You create a new transaction successfully!";
 
@@ -104,7 +158,7 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				return View(await accountsService.GetTransactionViewModel(id));
+				return View(await accountsService.GetTransactionDetails(id));
 			}
 			catch (InvalidOperationException)
 			{
@@ -116,11 +170,25 @@ namespace PersonalFinancer.Web.Controllers
 		{
 			try
 			{
-				TransactionFormModel viewModel =
-					await accountsService.GetFulfilledTransactionFormModel(id);
+				TransactionFormServiceModel transactionData =
+					await accountsService.GetTransactionFormData(id);
 
-				if (User.Id() != viewModel.OwnerId)
+				if (User.Id() != transactionData.OwnerId)
 					return Unauthorized();
+
+				var viewModel = new TransactionFormModel
+				{
+					OwnerId = transactionData.OwnerId,
+					AccountId = transactionData.AccountId,
+					Amount = transactionData.Amount,
+					TransactionType = transactionData.TransactionType,
+					Refference = transactionData.Refference,
+					CreatedOn = transactionData.CreatedOn,
+					CategoryId = transactionData.CategoryId,
+					UserAccounts = transactionData.UserAccounts,
+					UserCategories = transactionData.UserCategories,
+					IsInitialBalance = transactionData.IsInitialBalance
+				};
 
 				return View(viewModel);
 			}
@@ -134,19 +202,34 @@ namespace PersonalFinancer.Web.Controllers
 		public async Task<IActionResult> EditTransaction(
 			string id, TransactionFormModel inputModel, string? returnUrl)
 		{
-			if (User.Id() != inputModel.OwnerId)
-				return Unauthorized();
-
 			if (!ModelState.IsValid)
 			{
-				await accountsService.PrepareTransactionFormModelForReturn(inputModel);
+				UserAccountsAndCategoriesServiceModel userData =
+					await usersService.GetUserAccountsAndCategories(User.Id());
+				
+				inputModel.UserCategories = userData.UserCategories;
+				inputModel.UserAccounts = userData.UserAccounts;
 
 				return View(inputModel);
 			}
 
+			if (User.Id() != inputModel.OwnerId)
+				return Unauthorized();
+
+			var serviceModel = new TransactionFormShortServiceModel
+			{
+				Amount = inputModel.Amount,
+				CategoryId = inputModel.CategoryId,
+				AccountId = inputModel.AccountId,
+				CreatedOn = inputModel.CreatedOn,
+				OwnerId = inputModel.OwnerId,
+				Refference = inputModel.Refference,
+				TransactionType = inputModel.TransactionType
+			};
+
 			try
 			{
-				await accountsService.EditTransaction(id, inputModel);
+				await accountsService.EditTransaction(id, serviceModel);
 			}
 			catch (InvalidOperationException)
 			{

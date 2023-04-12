@@ -29,7 +29,7 @@ namespace PersonalFinancer.Tests.Services
 			int countBefore = data.AccountTypes.Count();
 
 			//Act
-			AccountTypeViewModel viewModel =
+			AccountTypeServiceModel viewModel =
 				await accountTypeService.CreateAccountType(inputModel);
 
 			int countAfter = data.AccountTypes.Count();
@@ -71,7 +71,7 @@ namespace PersonalFinancer.Tests.Services
 			Is.True);
 
 			//Act
-			AccountTypeViewModel viewModel =
+			AccountTypeServiceModel viewModel =
 				await accountTypeService.CreateAccountType(inputModel);
 
 			int countAfter = data.AccountTypes.Count();
@@ -107,7 +107,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(await data.AccountTypes.FindAsync(user2AccType.Id), Is.Not.Null);
 
 			//Act
-			AccountTypeViewModel viewModel =
+			AccountTypeServiceModel viewModel =
 				await accountTypeService.CreateAccountType(inputModel);
 
 			int countAfter = data.AccountTypes.Count();
@@ -125,7 +125,7 @@ namespace PersonalFinancer.Tests.Services
 
 			var inputModel = new AccountTypeInputModel
 			{
-				Name = this.AccountType1.Name,
+				Name = this.AccountType1User1.Name,
 				OwnerId = this.User1.Id
 			};
 

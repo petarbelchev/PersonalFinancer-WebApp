@@ -1,12 +1,20 @@
-﻿using AutoMapper;
-
-namespace PersonalFinancer.Web.Infrastructure
+﻿namespace PersonalFinancer.Web.Infrastructure
 {
-	public class ControllerMappingProfile : Profile
+    using AutoMapper;
+
+    using Data.Models;
+    using PersonalFinancer.Web.Models.Transaction;
+    using Web.Models.Account;
+
+    public class ControllerMappingProfile : Profile
 	{
 		public ControllerMappingProfile()
 		{
 
+			CreateMap<Account, DeleteAccountViewModel>();
+			CreateMap<Account, AccountFormViewModel>();
+			CreateMap<Transaction, TransactionFormModel>();
+			CreateMap<ApplicationUser, AccountFormViewModel>();
 		}
 	}
 }

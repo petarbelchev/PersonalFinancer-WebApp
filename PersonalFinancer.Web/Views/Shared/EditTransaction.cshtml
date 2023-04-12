@@ -1,6 +1,6 @@
 ﻿@using PersonalFinancer.Data.Enums;
-@using PersonalFinancer.Services.Shared.Models;
-@using PersonalFinancer.Services.Accounts.Models;
+@using PersonalFinancer.Web.Models.Account;
+@using PersonalFinancer.Web.Models.Transaction;
 @model TransactionFormModel
 @{
 	ViewData["Title"] = "Edit Transaction";
@@ -33,7 +33,7 @@
 				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 					<label asp-for="@Model.AccountId" class="form-label"></label>
 					<select asp-for="@Model.AccountId" class="form-select">
-						@foreach (AccountDropdownViewModel account in @Model.UserAccounts)
+						@foreach (var account in @Model.UserAccounts)
 						{
 							<option value="@account.Id">@account.Name</option>
 						}

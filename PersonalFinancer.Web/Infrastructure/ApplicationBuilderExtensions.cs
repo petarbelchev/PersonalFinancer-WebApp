@@ -64,7 +64,7 @@ namespace PersonalFinancer.Web.Infrastructure
 			{
 				for (int i = 1; i <= 10; i++)
 				{
-					await accountService.CreateAccount(new AccountFormModel
+					await accountService.CreateAccount(new AccountFormShortServiceModel
 					{
 						Name = "Account" + i,
 						AccountTypeId = SeedConstants.SecondUserCashMoneyAccountTypeId,
@@ -74,7 +74,7 @@ namespace PersonalFinancer.Web.Infrastructure
 					});
 				}
 
-				string cashBgnAccId = await accountService.CreateAccount(new AccountFormModel
+				string cashBgnAccId = await accountService.CreateAccount(new AccountFormShortServiceModel
 				{
 					Name = "Cash BGN",
 					AccountTypeId = SeedConstants.FirstUserCashAccountTypeId,
@@ -83,7 +83,7 @@ namespace PersonalFinancer.Web.Infrastructure
 					OwnerId = SeedConstants.FirstUserId
 				});
 
-				string bankBgnAccId = await accountService.CreateAccount(new AccountFormModel
+				string bankBgnAccId = await accountService.CreateAccount(new AccountFormShortServiceModel
 				{
 					Name = "Bank BGN",
 					AccountTypeId = SeedConstants.FirstUserBankAccountTypeId,
@@ -92,7 +92,7 @@ namespace PersonalFinancer.Web.Infrastructure
 					OwnerId = SeedConstants.FirstUserId
 				});
 
-				string euroSavingsAccId = await accountService.CreateAccount(new AccountFormModel
+				string euroSavingsAccId = await accountService.CreateAccount(new AccountFormShortServiceModel
 				{
 					Name = "Euro Savings",
 					AccountTypeId = SeedConstants.FirstUserSavingAccountTypeId,
@@ -101,7 +101,7 @@ namespace PersonalFinancer.Web.Infrastructure
 					OwnerId = SeedConstants.FirstUserId
 				});
 
-				string usdSavingsAccId = await accountService.CreateAccount(new AccountFormModel
+				string usdSavingsAccId = await accountService.CreateAccount(new AccountFormShortServiceModel
 				{
 					Name = "Dolar Savings",
 					AccountTypeId = SeedConstants.FirstUserSavingAccountTypeId,
@@ -110,7 +110,7 @@ namespace PersonalFinancer.Web.Infrastructure
 					OwnerId = SeedConstants.FirstUserId
 				});
 
-				await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+				await accountService.CreateTransaction(new TransactionFormShortServiceModel
 				{
 					AccountId = cashBgnAccId,
 					Amount = 2000,
@@ -118,9 +118,10 @@ namespace PersonalFinancer.Web.Infrastructure
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = TransactionConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
-					IsInitialBalance = true
+					IsInitialBalance = true,
+					OwnerId = SeedConstants.FirstUserId
 				});
-				await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+				await accountService.CreateTransaction(new TransactionFormShortServiceModel
 				{
 					AccountId = bankBgnAccId,
 					Amount = 4000,
@@ -128,9 +129,10 @@ namespace PersonalFinancer.Web.Infrastructure
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = TransactionConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
-					IsInitialBalance = true
+					IsInitialBalance = true,
+					OwnerId = SeedConstants.FirstUserId
 				});
-				await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+				await accountService.CreateTransaction(new TransactionFormShortServiceModel
 				{
 					AccountId = euroSavingsAccId,
 					Amount = 2800,
@@ -138,9 +140,10 @@ namespace PersonalFinancer.Web.Infrastructure
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = TransactionConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
-					IsInitialBalance = true
+					IsInitialBalance = true,
+					OwnerId = SeedConstants.FirstUserId
 				});
-				await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+				await accountService.CreateTransaction(new TransactionFormShortServiceModel
 				{
 					AccountId = usdSavingsAccId,
 					Amount = 3800,
@@ -148,7 +151,8 @@ namespace PersonalFinancer.Web.Infrastructure
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
 					Refference = TransactionConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
-					IsInitialBalance = true
+					IsInitialBalance = true,
+					OwnerId = SeedConstants.FirstUserId
 				});
 
 				int taxiCounter = 0;
@@ -157,128 +161,138 @@ namespace PersonalFinancer.Web.Infrastructure
 				{
 					if (i == 57 || i == 32 || i == 7)
 					{
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = 1500m,
 							CategoryId = SeedConstants.SalaryCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Salary",
-							TransactionType = TransactionType.Income
+							TransactionType = TransactionType.Income,
+							OwnerId = SeedConstants.FirstUserId
 						});
 					}
 
 					if (taxiCounter <= 5)
 					{
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = cashBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.63, 2),
 							CategoryId = SeedConstants.TransportCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Taxi",
-							TransactionType = TransactionType.Expense
+							TransactionType = TransactionType.Expense,
+							OwnerId = SeedConstants.FirstUserId
 						});
 					}
 
 					if (i == 40 || i == 20)
 					{
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = 14.99m,
 							CategoryId = SeedConstants.MedicalHealthcareCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Vitamins",
-							TransactionType = TransactionType.Expense
+							TransactionType = TransactionType.Expense,
+							OwnerId = SeedConstants.FirstUserId
 						});
 					}
 
 					if (i == 38 || i == 18)
 					{
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = euroSavingsAccId,
 							Amount = 100,
 							CategoryId = SeedConstants.DividentsCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Stocks dividents",
-							TransactionType = TransactionType.Income
+							TransactionType = TransactionType.Income,
+							OwnerId = SeedConstants.FirstUserId
 						});
 					}
 
 					if (i == 34 || i == 14)
 					{
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = usdSavingsAccId,
 							Amount = 150,
 							CategoryId = SeedConstants.DividentsCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Stocks dividents",
-							TransactionType = TransactionType.Income
+							TransactionType = TransactionType.Income,
+							OwnerId = SeedConstants.FirstUserId
 						});
 					}
 
 					if (i == 54 || i == 29 || i == 4)
 					{
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 4.83, 2),
 							CategoryId = SeedConstants.UtilitiesCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Electricity bill",
-							TransactionType = TransactionType.Expense
+							TransactionType = TransactionType.Expense,
+							OwnerId = SeedConstants.FirstUserId
 						});
 					}
 
-					await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+					await accountService.CreateTransaction(new TransactionFormShortServiceModel
 					{
 						AccountId = cashBgnAccId,
 						Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.53, 2),
 						CategoryId = SeedConstants.FoodDrinkCategoryId,
 						CreatedOn = DateTime.UtcNow.AddDays(-i),
 						Refference = "Lunch",
-						TransactionType = TransactionType.Expense
+						TransactionType = TransactionType.Expense,
+						OwnerId = SeedConstants.FirstUserId
 					});
 
 					if (i == 52 || i == 27 || i == 2)
 					{
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 1.83, 2),
 							CategoryId = SeedConstants.UtilitiesCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Water bill",
-							TransactionType = TransactionType.Expense
+							TransactionType = TransactionType.Expense,
+							OwnerId = SeedConstants.FirstUserId
 						});
 					}
 
 					if (i == 50 || i == 25 || i == 1)
 					{
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 2.83, 2),
 							CategoryId = SeedConstants.UtilitiesCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Phone bill",
-							TransactionType = TransactionType.Expense
+							TransactionType = TransactionType.Expense,
+							OwnerId = SeedConstants.FirstUserId
 						});
 					}
 
 					if (taxiCounter <= 5)
 					{
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = cashBgnAccId,
 							Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.63, 2),
 							CategoryId = SeedConstants.TransportCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "Taxi",
-							TransactionType = TransactionType.Expense
+							TransactionType = TransactionType.Expense,
+							OwnerId = SeedConstants.FirstUserId
 						});
 
 						if (taxiCounter == 5)
@@ -289,35 +303,38 @@ namespace PersonalFinancer.Web.Infrastructure
 
 					if (i == 48 || i == 21)
 					{
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = bankBgnAccId,
 							Amount = 500,
 							CategoryId = SeedConstants.MoneyTransferCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "ATM Withdraw",
-							TransactionType = TransactionType.Expense
+							TransactionType = TransactionType.Expense,
+							OwnerId = SeedConstants.FirstUserId
 						});
 
-						await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+						await accountService.CreateTransaction(new TransactionFormShortServiceModel
 						{
 							AccountId = cashBgnAccId,
 							Amount = 500,
 							CategoryId = SeedConstants.MoneyTransferCategoryId,
 							CreatedOn = DateTime.UtcNow.AddDays(-i),
 							Refference = "ATM Withdraw",
-							TransactionType = TransactionType.Income
+							TransactionType = TransactionType.Income,
+							OwnerId = SeedConstants.FirstUserId
 						});
 					}
 
-					await accountService.CreateTransaction(SeedConstants.FirstUserId, new TransactionFormModel
+					await accountService.CreateTransaction(new TransactionFormShortServiceModel
 					{
 						AccountId = bankBgnAccId,
 						Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.83, 2),
 						CategoryId = SeedConstants.FoodDrinkCategoryId,
 						CreatedOn = DateTime.UtcNow.AddDays(-i),
 						Refference = "Dinner",
-						TransactionType = TransactionType.Expense
+						TransactionType = TransactionType.Expense,
+						OwnerId = SeedConstants.FirstUserId
 					});
 				}
 			})

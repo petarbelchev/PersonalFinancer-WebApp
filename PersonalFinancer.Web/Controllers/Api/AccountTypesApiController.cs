@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Services.AccountTypes;
-using PersonalFinancer.Services.AccountTypes.Models;
-using PersonalFinancer.Services.ModelsState;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure;
-using System.Text;
-
-namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Services.AccountTypes;
+	using Services.AccountTypes.Models;
+	using Services.ModelsState;
+	using Services.Shared.Models;
+
+	using Web.Infrastructure;
+
 	[Authorize]
 	[Route("api/accounttypes")]
 	[ApiController]
@@ -27,17 +27,17 @@ namespace PersonalFinancer.Web.Controllers.Api
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<AccountTypeViewModel>> Create(AccountTypeInputModel inputModel)
+		public async Task<ActionResult<AccountTypeServiceModel>> Create(AccountTypeInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(modelStateService.GetErrors(ModelState.Values));
 
 			try
 			{
-				AccountTypeViewModel viewModel =
+				AccountTypeServiceModel model =
 					await accountTypeService.CreateAccountType(inputModel);
 
-				return Created(string.Empty, viewModel);
+				return Created(string.Empty, model);
 			}
 			catch (ArgumentException ex)
 			{

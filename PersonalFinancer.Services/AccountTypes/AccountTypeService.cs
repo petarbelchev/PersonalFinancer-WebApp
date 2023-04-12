@@ -1,25 +1,26 @@
-﻿using AutoMapper;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.AccountTypes.Models;
-using PersonalFinancer.Services.Shared.Models;
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Services.AccountTypes
+﻿namespace PersonalFinancer.Services.AccountTypes
 {
-    public class AccountTypeService : IAccountTypeService
+	using AutoMapper;
+
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+
+	using Data;
+	using Data.Models;
+	using static Data.Constants;
+
+	using Services.AccountTypes.Models;
+	using Services.Shared.Models;
+
+	public class AccountTypeService : IAccountTypeService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
 		private readonly IMemoryCache memoryCache;
 
 		public AccountTypeService(
-			PersonalFinancerDbContext data, 
-			IMapper mapper, 
+			PersonalFinancerDbContext data,
+			IMapper mapper,
 			IMemoryCache memoryCache)
 		{
 			this.data = data;
@@ -31,7 +32,7 @@ namespace PersonalFinancer.Services.AccountTypes
 		/// Throws ArgumentException if given name already exists.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<AccountTypeViewModel> CreateAccountType(AccountTypeInputModel model)
+		public async Task<AccountTypeServiceModel> CreateAccountType(AccountTypeInputModel model)
 		{
 			AccountType? accountType = await data.AccountTypes
 				.FirstOrDefaultAsync(at => at.Name == model.Name && at.OwnerId == model.OwnerId);
@@ -60,9 +61,9 @@ namespace PersonalFinancer.Services.AccountTypes
 
 			memoryCache.Remove(AccountConstants.AccTypeCacheKeyValue + model.OwnerId);
 
-			return mapper.Map<AccountTypeViewModel>(accountType);
+			return mapper.Map<AccountTypeServiceModel>(accountType);
 		}
-		
+
 		/// <summary>
 		/// Throws exception when Account Type does not exist
 		/// and ArgumentException when User is not owner or Administrator.

@@ -28,7 +28,7 @@ namespace PersonalFinancer.Tests.Services
 			};
 
 			//Act
-			CategoryViewModel viewModel = await categoryService.CreateCategory(inputModel);
+			CategoryServiceModel viewModel = await categoryService.CreateCategory(inputModel);
 
 			//Assert
 			Assert.That(viewModel.Id, Is.Not.Null);
@@ -75,7 +75,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(category.IsDeleted, Is.True);
 
 			//Act: Recreate deleted Category
-			CategoryViewModel newCategory = 
+			CategoryServiceModel newCategory = 
 				await categoryService.CreateCategory(inputModel);
 
 			//Assert: The Category is not deleted anymore and the data is correct

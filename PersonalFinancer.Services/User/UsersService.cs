@@ -1,15 +1,19 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Microsoft.EntityFrameworkCore;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User.Models;
-
-namespace PersonalFinancer.Services.User
+﻿namespace PersonalFinancer.Services.User
 {
+    using AutoMapper;
+    using AutoMapper.QueryableExtensions;
+
+    using Microsoft.EntityFrameworkCore;
+
+    using Data;
+    using Data.Enums;
+    using Data.Models;
+    using static Data.Constants;
+
+    using Services.Accounts.Models;
+    using Services.Shared.Models;
+    using Services.User.Models;
+
     public class UsersService : IUsersService
 	{
 		private readonly PersonalFinancerDbContext data;
@@ -37,28 +41,73 @@ namespace PersonalFinancer.Services.User
 			return $"{user.FirstName} {user.LastName}";
 		}
 
-		public async Task<AllUsersViewModel> GetAllUsers(int page)
+		public async Task<UsersServiceModel> GetAllUsers(int page)
 		{
-			var model = new AllUsersViewModel();
-			model.Pagination.Page = page;
-			model.Pagination.TotalElements = data.Users.Count();
-			model.Users = await data.Users
-				.OrderBy(u => u.FirstName)
-				.ThenBy(u => u.LastName)
-				.Skip(model.Pagination.ElementsPerPage * (model.Pagination.Page - 1))
-				.Take(model.Pagination.ElementsPerPage)
-				.ProjectTo<UserViewModel>(mapper.ConfigurationProvider)
-				.ToListAsync();
+			var users = new UsersServiceModel
+			{
+				Users = await data.Users
+					.OrderBy(u => u.FirstName)
+					.ThenBy(u => u.LastName)
+					.Skip(PaginationConstants.UsersPerPage * (page - 1))
+					.Take(PaginationConstants.UsersPerPage)
+					.ProjectTo<UserServiceModel>(mapper.ConfigurationProvider)
+					.ToListAsync(),
+				TotalUsersCount = data.Users.Count()
+			};
 
-			return model;
+			return users;
 		}
 
-		public async Task<IEnumerable<AccountCardViewModel>> GetUserAccounts(string userId)
+		public async Task<UserAccountsAndCategoriesServiceModel> GetUserAccountsAndCategories(string userId)
+		{
+			var userData = await data.Users.Where(u => u.Id == userId)
+				.Select(u => new UserAccountsAndCategoriesServiceModel
+				{
+					UserAccounts = u.Accounts
+						.Where(a => !a.IsDeleted)
+						.Select(a => mapper.Map<AccountServiceModel>(a)),
+					UserCategories = u.Categories
+						.Where(c => !c.IsDeleted)
+						.Select(c => mapper.Map<CategoryServiceModel>(c))
+				})
+				.FirstAsync();
+
+			return userData;
+		}
+
+		/// <summary>
+		/// Throws InvalidOperationException if User does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<UserAccountTypesAndCurrenciesServiceModel> GetUserAccountTypesAndCurrencies(string userId)
+		{
+			return await data.Users.Where(u => u.Id == userId)
+				.Select(u => new UserAccountTypesAndCurrenciesServiceModel
+				{
+					AccountTypes = u.AccountTypes
+						.Where(at => !at.IsDeleted)
+						.Select(at => new AccountTypeServiceModel
+						{
+							Id = at.Id,
+							Name = at.Name
+						}),
+					Currencies = u.Currencies
+						.Where(c => !c.IsDeleted)
+						.Select(c => new CurrencyServiceModel
+						{
+							Id = c.Id,
+							Name = c.Name
+						})
+				})
+				.FirstAsync();
+		}
+
+		public async Task<IEnumerable<AccountCardServiceModel>> GetUserAccounts(string userId)
 		{
 			return await data.Accounts
 				.Where(a => a.OwnerId == userId && !a.IsDeleted)
 				.OrderBy(a => a.Name)
-				.Select(a => mapper.Map<AccountCardViewModel>(a))
+				.Select(a => mapper.Map<AccountCardServiceModel>(a))
 				.ToArrayAsync();
 		}
 
@@ -69,15 +118,46 @@ namespace PersonalFinancer.Services.User
 			return accountsCount;
 		}
 
-		public async Task SetUserDashboard(string userId, UserDashboardViewModel model)
+		public async Task<TransactionsServiceModel> GetUserTransactions(string userId, DateTime startDate, DateTime endDate, int page = 1)
+		{
+			TransactionsServiceModel userTransactions = await data.Users
+				.Where(u => u.Id == userId)
+				.Select(u => new TransactionsServiceModel
+				{
+					TotalTransactionsCount = u.Transactions
+						.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+					Transactions = u.Transactions
+						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.OrderByDescending(t => t.CreatedOn)
+						.Skip(PaginationConstants.TransactionsPerPage * (page - 1))
+						.Take(PaginationConstants.TransactionsPerPage)
+						.Select(t => new TransactionTableServiceModel
+						{
+							Id = t.Id,
+							Amount = t.Amount,
+							AccountCurrencyName = t.Account.Currency.Name,
+							CategoryName = t.Category.Name + (t.Category.IsDeleted ?
+								" (Deleted)"
+								: string.Empty),
+							CreatedOn = t.CreatedOn,
+							Refference = t.Refference,
+							TransactionType = t.TransactionType.ToString()
+						})
+				})
+				.FirstAsync();
+
+			return userTransactions;
+		}
+
+		public async Task<UserDashboardServiceModel> GetUserDashboardData(string userId, DateTime startDate, DateTime endDate)
 		{
 			var dto = await data.Users
 				.Where(u => u.Id == userId)
-				.Select(u => new UserDashboardDTO
+				.Select(u => new UserDashboardServiceModel
 				{
 					Accounts = u.Accounts.Where(a => !a.IsDeleted)
 						.OrderBy(a => a.Name)
-						.Select(a => new AccountCardViewModel
+						.Select(a => new AccountCardServiceModel
 						{
 							Id = a.Id,
 							Name = a.Name,
@@ -85,11 +165,10 @@ namespace PersonalFinancer.Services.User
 							CurrencyName = a.Currency.Name
 						}),
 					LastTransactions = u.Transactions
-						.Where(t => t.CreatedOn >= model.StartDate
-									&& t.CreatedOn <= model.EndDate)
+						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 						.OrderByDescending(t => t.CreatedOn)
 						.Take(5)
-						.Select(t => new TransactionTableViewModel
+						.Select(t => new TransactionTableServiceModel
 						{
 							Id = t.Id,
 							Amount = t.Amount,
@@ -100,10 +179,9 @@ namespace PersonalFinancer.Services.User
 							CategoryName = t.Category.Name
 						}),
 					CurrenciesCashFlow = u.Transactions
-						.Where(t => t.CreatedOn >= model.StartDate
-									&& t.CreatedOn <= model.EndDate)
+						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 						.GroupBy(t => t.Account.Currency.Name)
-						.Select(t => new CurrencyCashFlowViewModel
+						.Select(t => new CurrencyCashFlowServiceModel
 						{
 							Name = t.Key,
 							Incomes = t.Where(t => t.TransactionType == TransactionType.Income).Sum(t => t.Amount),
@@ -114,20 +192,18 @@ namespace PersonalFinancer.Services.User
 				})
 				.FirstAsync();
 
-			model.Accounts = dto.Accounts;
-			model.Transactions = dto.LastTransactions;
-			model.CurrenciesCashFlow = dto.CurrenciesCashFlow;
+			return dto;
 		}
 
 		/// <summary>
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<UserDetailsViewModel> UserDetails(string userId)
+		public async Task<UserDetailsServiceModel> UserDetails(string userId)
 		{
 			var result = await data.Users
 				.Where(u => u.Id == userId)
-				.ProjectTo<UserDetailsViewModel>(mapper.ConfigurationProvider)
+				.ProjectTo<UserDetailsServiceModel>(mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			return result;

@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Services.User.Models;
+using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Account;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
@@ -12,27 +16,53 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 	public class AccountsController : Controller
 	{
 		private readonly IAccountsService accountService;
+		private readonly IUsersService usersService;
 
-		public AccountsController(IAccountsService accountService)
-			=> this.accountService = accountService;
+		public AccountsController(
+			IAccountsService accountService,
+			IUsersService usersService)
+		{
+			this.accountService = accountService;
+			this.usersService = usersService;
+		}
 
 		public async Task<IActionResult> Index(int page = 1)
-			=> View(await accountService.GetUsersAccountCardsViewModel(page));
+		{
+			UsersAccountCardsServiceModel usersAccountCardsData =
+				await accountService.GetUsersAccountCardsData(page);
+
+			var viewModel = new UsersAccountCardsViewModel
+			{
+				Accounts = usersAccountCardsData.Accounts
+			};
+			viewModel.Pagination.Page = page;
+			viewModel.Pagination.TotalElements = usersAccountCardsData.TotalUsersAccountsCount;
+
+			return View(viewModel);
+		}
 
 		public async Task<IActionResult> AccountDetails(string id)
 		{
-			var inputModel = new AccountDetailsInputModel
-			{
-				Id = id,
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
-			};
+			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
+			DateTime endDate = DateTime.UtcNow;
 
 			try
 			{
-				AccountDetailsViewModel viewModel =
-					await accountService.GetAccountDetailsViewModel(inputModel);
+				AccountDetailsServiceModel accountDetails =
+					await accountService.GetAccountDetails(id, startDate, endDate);
 
+				var viewModel = new AccountDetailsViewModel
+				{
+					Id = accountDetails.Id,
+					Name = accountDetails.Name,
+					Balance = accountDetails.Balance,
+					OwnerId = accountDetails.OwnerId,
+					CurrencyName = accountDetails.CurrencyName,
+					Transactions = accountDetails.Transactions,
+					StartDate = startDate,
+					EndDate = endDate
+				};
+				viewModel.Pagination.TotalElements = accountDetails.TotalAccountTransactions;
 				viewModel.Routing.Area = "Admin";
 				viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + id;
 
@@ -51,8 +81,17 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				try
 				{
-					return View(await accountService
-						.PrepareAccountDetailsViewModelForReturn(inputModel));
+					AccountDetailsShortServiceModel accShortDetails =
+						await accountService.GetAccountShortDetails(inputModel.Id);
+
+					var viewModel = new AccountDetailsViewModel
+					{
+						Name = accShortDetails.Name,
+						Balance = accShortDetails.Balance,
+						CurrencyName = accShortDetails.CurrencyName
+					};
+
+					return View(viewModel);
 				}
 				catch (InvalidOperationException)
 				{
@@ -62,11 +101,23 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 			try
 			{
-				AccountDetailsViewModel viewModel =
-					await accountService.GetAccountDetailsViewModel(inputModel);
+				AccountDetailsServiceModel accountDetails = await accountService
+					.GetAccountDetails(inputModel.Id, inputModel.StartDate, inputModel.EndDate);
 
+				var viewModel = new AccountDetailsViewModel
+				{
+					Id = accountDetails.Id,
+					Balance = accountDetails.Balance,
+					Name = accountDetails.Name,
+					CurrencyName = accountDetails.CurrencyName,
+					OwnerId = accountDetails.OwnerId,
+					StartDate = inputModel.StartDate,
+					EndDate = inputModel.EndDate,
+					Transactions = accountDetails.Transactions
+				};
+				viewModel.Pagination.TotalElements = accountDetails.TotalAccountTransactions;
 				viewModel.Routing.Area = "Admin";
-				viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + inputModel.Id;
+				viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + accountDetails.Id;
 
 				return View(viewModel);
 			}
@@ -83,8 +134,8 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 			try
 			{
-				DeleteAccountViewModel viewModel =
-					await accountService.GetDeleteAccountViewModel(id);
+				string accountName = await accountService.GetAccountName(id);
+				var viewModel = new DeleteAccountViewModel { Name = accountName };
 
 				return View(viewModel);
 			}
@@ -95,23 +146,23 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Delete(DeleteAccountInputModel inputModel, string returnUrl)
+		public async Task<IActionResult> Delete(DeleteAccountInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest();
 
 			if (inputModel.ConfirmButton == "reject")
-				return LocalRedirect(returnUrl);
+				return LocalRedirect(inputModel.ReturnUrl);
 
 			try
 			{
-				string ownerId = await accountService.GetOwnerId(inputModel.Id);
-
 				await accountService.DeleteAccount(
 					inputModel.Id,
 					inputModel.ShouldDeleteTransactions ?? false);
 
 				TempData["successMsg"] = "You successfully delete user's account!";
+
+				string ownerId = await accountService.GetOwnerId(inputModel.Id);
 
 				return LocalRedirect("/Admin/Users/Details/" + ownerId);
 			}
@@ -125,8 +176,19 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		{
 			try
 			{
-				AccountFormModel viewModel =
-					await accountService.GetAccountFormModel(id);
+				AccountFormServiceModel accountData =
+					await accountService.GetAccountFormData(id);
+
+				var viewModel = new AccountFormViewModel
+				{
+					Name = accountData.Name,
+					Balance = accountData.Balance,
+					AccountTypeId = accountData.AccountTypeId,
+					CurrencyId = accountData.CurrencyId,
+					OwnerId = accountData.OwnerId,
+					AccountTypes = accountData.AccountTypes,
+					Currencies = accountData.Currencies
+				};
 
 				return View(viewModel);
 			}
@@ -138,19 +200,33 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 		[HttpPost]
 		public async Task<IActionResult> EditAccount(
-			string id, AccountFormModel inputModel, string returnUrl)
+			string id, AccountFormViewModel inputModel, string returnUrl)
 		{
 			if (!ModelState.IsValid)
 			{
-				await accountService.PrepareAccountFormModelForReturn(inputModel);
+				string ownerId = await accountService.GetOwnerId(id);
+
+				UserAccountTypesAndCurrenciesServiceModel userData =
+					await usersService.GetUserAccountTypesAndCurrencies(ownerId);
+
+				inputModel.AccountTypes = userData.AccountTypes;
+				inputModel.Currencies = userData.Currencies;
 
 				return View(inputModel);
 			}
 
 			try
 			{
+				var serviceModel = new AccountFormShortServiceModel
+				{
+					Name = inputModel.Name,
+					Balance = inputModel.Balance ?? 0,
+					OwnerId = inputModel.OwnerId,
+					AccountTypeId = inputModel.AccountTypeId,
+					CurrencyId = inputModel.CurrencyId
+				};
 
-				await accountService.EditAccount(id, inputModel);
+				await accountService.EditAccount(id, serviceModel);
 
 				TempData["successMsg"] = "You successfully edited user's account!";
 
@@ -162,7 +238,13 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 					nameof(inputModel.Name),
 					$"You already have Account with {inputModel.Name} name.");
 
-				await accountService.PrepareAccountFormModelForReturn(inputModel);
+				string ownerId = await accountService.GetOwnerId(id);
+
+				UserAccountTypesAndCurrenciesServiceModel userData =
+					await usersService.GetUserAccountTypesAndCurrencies(ownerId);
+
+				inputModel.AccountTypes = userData.AccountTypes;
+				inputModel.Currencies = userData.Currencies;
 
 				return View(inputModel);
 			}

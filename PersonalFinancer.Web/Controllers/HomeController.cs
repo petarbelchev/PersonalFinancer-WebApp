@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User;
-using PersonalFinancer.Services.User.Models;
-using PersonalFinancer.Web.Infrastructure;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
+	using Microsoft.AspNetCore.Mvc;
+	
+	using Services.User;
+	using Services.User.Models;
+
+	using Web.Infrastructure;
+	using Web.Models.Home;
+	using Web.Models.Shared;
+
 	public class HomeController : Controller
 	{
 		private readonly IUsersService userService;
@@ -20,13 +23,19 @@ namespace PersonalFinancer.Web.Controllers
 
 			if (User.Identity?.IsAuthenticated ?? false)
 			{
-				var viewModel = new UserDashboardViewModel()
-				{
-					StartDate = DateTime.UtcNow.AddMonths(-1),
-					EndDate = DateTime.UtcNow
-				};
+				DateTime startDate = DateTime.UtcNow.AddMonths(-1);
+				DateTime endDate = DateTime.UtcNow;
+				UserDashboardServiceModel userDashboardData = await userService
+					.GetUserDashboardData(User.Id(), startDate, endDate);
 
-				await userService.SetUserDashboard(User.Id(), viewModel);
+				var viewModel = new UserDashboardViewModel
+				{
+					StartDate = startDate,
+					EndDate = endDate,
+					Accounts = userDashboardData.Accounts,
+					Transactions = userDashboardData.LastTransactions,
+					CurrenciesCashFlow = userDashboardData.CurrenciesCashFlow
+				};
 
 				return View(viewModel);
 			}
@@ -49,7 +58,11 @@ namespace PersonalFinancer.Web.Controllers
 				return View(viewModel);
 			}
 
-			await userService.SetUserDashboard(User.Id(), viewModel);
+			UserDashboardServiceModel userDashboardData =
+				await userService.GetUserDashboardData(User.Id(), viewModel.StartDate, viewModel.EndDate);
+			viewModel.Accounts = userDashboardData.Accounts;
+			viewModel.Transactions = userDashboardData.LastTransactions;
+			viewModel.CurrenciesCashFlow = userDashboardData.CurrenciesCashFlow;
 
 			return View(viewModel);
 		}

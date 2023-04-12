@@ -21,10 +21,10 @@ namespace PersonalFinancer.Web.Controllers
 			this.signInManager = signInManager;
 		}
 
-		public IActionResult Register() => View(new RegisterFormModel());
+		public IActionResult Register() => View(new RegisterFormViewModel());
 
 		[HttpPost]
-		public async Task<IActionResult> Register(RegisterFormModel model)
+		public async Task<IActionResult> Register(RegisterFormViewModel model)
 		{
 			if (!ModelState.IsValid)
 			{
@@ -72,10 +72,10 @@ namespace PersonalFinancer.Web.Controllers
 			return RedirectToAction("Index", "Home");
 		}
 
-		public IActionResult Login() => View(new LoginFormModel());
+		public IActionResult Login() => View(new LoginFormViewModel());
 		
 		[HttpPost]
-		public async Task<IActionResult> Login(LoginFormModel model)
+		public async Task<IActionResult> Login(LoginFormViewModel model)
 		{
 			if (!ModelState.IsValid)
 			{

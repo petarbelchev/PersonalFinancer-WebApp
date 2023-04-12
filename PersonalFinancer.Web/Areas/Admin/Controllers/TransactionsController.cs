@@ -3,7 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.User.Models;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Web.Infrastructure;
 using static PersonalFinancer.Data.Constants.RoleConstants;
+using PersonalFinancer.Web.Models.Transaction;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
@@ -12,15 +16,21 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 	public class TransactionsController : Controller
 	{
 		private readonly IAccountsService accountsService;
+		private readonly IUsersService usersService;
 
-		public TransactionsController(IAccountsService accountsService)
-			=> this.accountsService = accountsService;
-		
+		public TransactionsController(
+			IAccountsService accountsService,
+			IUsersService usersService)
+		{
+			this.accountsService = accountsService;
+			this.usersService = usersService;
+		}
+
 		public async Task<IActionResult> TransactionDetails(string id)
 		{
 			try
 			{
-				return View(await accountsService.GetTransactionViewModel(id));
+				return View(await accountsService.GetTransactionDetails(id));
 			}
 			catch (InvalidOperationException)
 			{
@@ -32,8 +42,21 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		{
 			try
 			{
-				TransactionFormModel viewModel = 
-					await accountsService.GetFulfilledTransactionFormModel(id);
+				TransactionFormServiceModel transactionData = 
+					await accountsService.GetTransactionFormData(id);
+
+				var viewModel = new TransactionFormModel
+				{
+					OwnerId = transactionData.OwnerId,
+					AccountId = transactionData.AccountId,
+					Amount = transactionData.Amount,
+					TransactionType = transactionData.TransactionType,
+					Refference = transactionData.Refference,
+					CreatedOn = transactionData.CreatedOn,
+					CategoryId = transactionData.CategoryId,
+					UserAccounts = transactionData.UserAccounts,
+					UserCategories = transactionData.UserCategories
+				};
 
 				return View(viewModel);
 			}
@@ -49,14 +72,29 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		{
 			if (!ModelState.IsValid)
 			{
-				await accountsService.PrepareTransactionFormModelForReturn(inputModel);
+				UserAccountsAndCategoriesServiceModel userData =
+					await usersService.GetUserAccountsAndCategories(inputModel.OwnerId);
+				
+				inputModel.UserCategories = userData.UserCategories;
+				inputModel.UserAccounts = userData.UserAccounts;
 
 				return View(inputModel);
 			}
 
+			var serviceModel = new TransactionFormShortServiceModel
+			{
+				Amount = inputModel.Amount,
+				CategoryId = inputModel.CategoryId,
+				AccountId = inputModel.AccountId,
+				CreatedOn = inputModel.CreatedOn,
+				OwnerId = inputModel.OwnerId,
+				Refference = inputModel.Refference,
+				TransactionType = inputModel.TransactionType
+			};
+
 			try
 			{
-				await accountsService.EditTransaction(id, inputModel);
+				await accountsService.EditTransaction(id, serviceModel);
 			}
 			catch (InvalidOperationException)
 			{

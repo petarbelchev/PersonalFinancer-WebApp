@@ -70,6 +70,18 @@
 			public const string UserRoleName = "User";
 		}
 
+		public static class PaginationConstants
+		{
+			public const int TransactionsPerPage = 10;
+			public const string TransactionsName = "transactions";
+
+			public const string AccountsName = "accounts";
+			public const int AccountsPerPage = 12;
+
+			public const int UsersPerPage = 10;
+			public const string UsersName = "users";
+		}
+
 		public static class SeedConstants
 		{
 			public const string FirstUserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e";
