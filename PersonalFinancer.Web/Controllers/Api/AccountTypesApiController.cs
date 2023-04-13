@@ -1,36 +1,29 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
 
-	using Services.AccountTypes;
-	using Services.AccountTypes.Models;
-	using Services.ModelsState;
-	using Services.Shared.Models;
+    using Services.AccountTypes;
+    using Services.AccountTypes.Models;
+    using Services.Shared.Models;
 
-	using Web.Infrastructure;
+    using Web.Infrastructure;
 
-	[Authorize]
+    [Authorize]
 	[Route("api/accounttypes")]
 	[ApiController]
-	public class AccountTypesApiController : ControllerBase
+	public class AccountTypesApiController : BaseApiController
 	{
 		private readonly IAccountTypeService accountTypeService;
-		private readonly IModelStateService modelStateService;
 
-		public AccountTypesApiController(
-			IAccountTypeService accountTypeService,
-			IModelStateService modelStateService)
-		{
-			this.accountTypeService = accountTypeService;
-			this.modelStateService = modelStateService;
-		}
+		public AccountTypesApiController(IAccountTypeService accountTypeService)
+			=> this.accountTypeService = accountTypeService;
 
 		[HttpPost]
 		public async Task<ActionResult<AccountTypeServiceModel>> Create(AccountTypeInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest(modelStateService.GetErrors(ModelState.Values));
+				return BadRequest(GetErrors(ModelState.Values));
 
 			try
 			{

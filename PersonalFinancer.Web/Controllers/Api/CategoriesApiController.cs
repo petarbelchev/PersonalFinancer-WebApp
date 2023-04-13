@@ -1,36 +1,29 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
 
-	using Services.Categories;
-	using Services.Categories.Models;
-	using Services.ModelsState;
-	using Services.Shared.Models;
+    using Services.Categories;
+    using Services.Categories.Models;
+    using Services.Shared.Models;
 
-	using Web.Infrastructure;
+    using Web.Infrastructure;
 
-	[Authorize]
+    [Authorize]
 	[Route("api/categories")]
 	[ApiController]
-	public class CategoriesApiController : ControllerBase
+	public class CategoriesApiController : BaseApiController
 	{
 		private readonly ICategoryService categoryService;
-		private readonly IModelStateService modelStateService;
 
-		public CategoriesApiController(
-			ICategoryService categoryService,
-			IModelStateService modelStateService)
-		{
-			this.categoryService = categoryService;
-			this.modelStateService = modelStateService;
-		}
+		public CategoriesApiController(ICategoryService categoryService)
+			=> this.categoryService = categoryService;
 
 		[HttpPost]
 		public async Task<ActionResult<CategoryServiceModel>> CreateCategory(CategoryInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest(modelStateService.GetErrors(ModelState.Values));
+				return BadRequest(GetErrors(ModelState.Values));
 
 			try
 			{

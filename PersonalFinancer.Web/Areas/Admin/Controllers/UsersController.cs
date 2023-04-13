@@ -20,10 +20,7 @@
 		public async Task<IActionResult> Index(int page = 1)
 		{
 			UsersServiceModel usersData = await userService.GetAllUsers(page);
-			var viewModel = new UsersViewModel
-			{
-				Users = usersData.Users
-			};
+			var viewModel = new UsersViewModel { Users = usersData.Users };
 			viewModel.Pagination.TotalElements = usersData.TotalUsersCount;
 			viewModel.Pagination.Page = page;
 

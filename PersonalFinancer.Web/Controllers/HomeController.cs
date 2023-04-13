@@ -1,5 +1,6 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
+	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	
 	using Services.User;
@@ -43,6 +44,7 @@
 			return View();
 		}
 
+		[Authorize]
 		[HttpPost]
 		public async Task<IActionResult> Index(DateFilterModel inputModel)
 		{

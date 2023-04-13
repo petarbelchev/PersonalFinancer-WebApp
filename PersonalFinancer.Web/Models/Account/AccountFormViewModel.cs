@@ -17,11 +17,10 @@
 			ErrorMessage = "Account name must be between {2} and {1} characters long.")]
 		public string Name { get; set; } = null!;
 
-		// TODO: Make it not nullable
 		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		[Range(AccountInitialBalanceMinValue, AccountInitialBalanceMaxValue,
 			ErrorMessage = "Ballace must be a number between {1} and {2}")]
-		public decimal? Balance { get; set; }
+		public decimal Balance { get; set; }
 
 		public string OwnerId { get; set; } = null!;
 

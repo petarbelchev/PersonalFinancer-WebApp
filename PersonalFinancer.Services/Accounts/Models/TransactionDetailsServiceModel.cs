@@ -4,6 +4,8 @@
     {
         public string Id { get; set; } = null!;
 
+        public string OwnerId { get; set; } = null!;
+
         public string AccountName { get; init; } = null!;
 
         public string AccountCurrencyName { get; init; } = null!;

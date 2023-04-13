@@ -9,7 +9,6 @@ using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.AccountTypes;
 using PersonalFinancer.Services.Categories;
 using PersonalFinancer.Services.Currencies;
-using PersonalFinancer.Services.ModelsState;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Infrastructure;
@@ -44,7 +43,6 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
 builder.Services.AddScoped<IAccountTypeService, AccountTypeService>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
-builder.Services.AddSingleton<IModelStateService, ModelStateService>();
 
 builder.Services.AddAutoMapper(
 	typeof(IAccountsService).Assembly,

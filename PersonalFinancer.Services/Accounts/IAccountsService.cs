@@ -89,12 +89,15 @@
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<string> GetOwnerId(string accountId);
-
+		
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction does not exist.
+		/// Throws InvalidOperationException when Transaction does not exist
+		/// and ArgumentException when the User is not owner or Administrator.
 		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<TransactionDetailsServiceModel> GetTransactionDetails(string transactionId);
+		Task<TransactionDetailsServiceModel> GetTransactionDetails(
+			string transactionId, string? ownerId = null);
 
 		Task<UsersAccountCardsServiceModel> GetUsersAccountCardsData(int page);
 

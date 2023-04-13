@@ -1,5 +1,7 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
+	using AutoMapper;
+
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 
@@ -13,75 +15,59 @@
 
 	using static Data.Constants.RoleConstants;
 
-	[Authorize(Roles = UserRoleName)]
+	[Authorize]
 	public class AccountsController : Controller
 	{
-		private readonly IAccountsService accountService;
-		private readonly IUsersService usersService;
+		protected readonly IAccountsService accountService;
+		protected readonly IUsersService usersService;
+		protected readonly IMapper mapper;
 
 		public AccountsController(
-			IAccountsService accountService,
+			IAccountsService accountService, 
+			IMapper mapper,
 			IUsersService usersService)
 		{
 			this.accountService = accountService;
+			this.mapper = mapper;
 			this.usersService = usersService;
 		}
 
+		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Create()
 		{
-			UserAccountTypesAndCurrenciesServiceModel userData =
-				await usersService.GetUserAccountTypesAndCurrencies(this.User.Id());
-
-			var viewModel = new AccountFormViewModel
-			{
-				AccountTypes = userData.AccountTypes,
-				Currencies = userData.Currencies,
-				OwnerId = User.Id()
-			};
+			var viewModel = new AccountFormViewModel { OwnerId = User.Id() };
+			await PrepareAccountFormViewModel(viewModel);
 
 			return View(viewModel);
 		}
 
+		[Authorize(Roles = UserRoleName)]
 		[HttpPost]
 		public async Task<IActionResult> Create(AccountFormViewModel inputModel)
 		{
 			if (!ModelState.IsValid)
-			{ // NOTE: Repeating code!!!
-				UserAccountTypesAndCurrenciesServiceModel userData =
-					await usersService.GetUserAccountTypesAndCurrencies(this.User.Id());
-
-				inputModel.AccountTypes = userData.AccountTypes;
-				inputModel.Currencies = userData.Currencies;
+			{
+				await PrepareAccountFormViewModel(inputModel);
 
 				return View(inputModel);
 			}
 
+			if (inputModel.OwnerId != User.Id())
+				return BadRequest();
+
 			try
 			{
-				var accountServiceModel = new AccountFormShortServiceModel
-				{
-					Name = inputModel.Name,
-					Balance = inputModel.Balance ?? 0,
-					AccountTypeId = inputModel.AccountTypeId,
-					CurrencyId = inputModel.CurrencyId,
-					OwnerId = User.Id()
-				};
-
+				var accountServiceModel = mapper.Map<AccountFormShortServiceModel>(inputModel);
 				string newAccountId = await accountService.CreateAccount(accountServiceModel);
-
 				TempData["successMsg"] = "You create a new account successfully!";
 
 				return RedirectToAction(nameof(AccountDetails), new { id = newAccountId });
 			}
 			catch (ArgumentException)
 			{
-				ModelState.AddModelError(nameof(inputModel.Name), "You already have Account with that name.");
-
-				UserAccountTypesAndCurrenciesServiceModel userData =
-					await usersService.GetUserAccountTypesAndCurrencies(this.User.Id());
-
-				inputModel.AccountTypes = userData.AccountTypes;
-				inputModel.Currencies = userData.Currencies;
+				ModelState.AddModelError(nameof(inputModel.Name),
+					"You already have Account with that name.");
+				await PrepareAccountFormViewModel(inputModel);
 
 				return View(inputModel);
 			}
@@ -94,22 +80,9 @@
 
 			try
 			{
-				AccountDetailsServiceModel serviceModel = await accountService
-					.GetAccountDetails(id, startDate, endDate, User.Id());
-				// NOTE: Repeating code!!!
-				var viewModel = new AccountDetailsViewModel
-				{
-					Id = serviceModel.Id,
-					Balance = serviceModel.Balance,
-					Name = serviceModel.Name,
-					CurrencyName = serviceModel.CurrencyName,
-					OwnerId = serviceModel.OwnerId,
-					StartDate = startDate,
-					EndDate = endDate,
-					Transactions = serviceModel.Transactions
-				};
-				viewModel.Pagination.TotalElements = serviceModel.TotalAccountTransactions;
-				viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + id;
+				AccountDetailsViewModel viewModel = User.IsAdmin() ?
+					viewModel = await GetAccountDetailsViewModel(id, startDate, endDate)
+					: viewModel = await GetAccountDetailsViewModel(id, startDate, endDate, User.Id());
 
 				return View(viewModel);
 			}
@@ -129,12 +102,7 @@
 					AccountDetailsShortServiceModel accShortDetails =
 						await accountService.GetAccountShortDetails(inputModel.Id);
 
-					var viewModel = new AccountDetailsViewModel
-					{
-						Name = accShortDetails.Name,
-						Balance = accShortDetails.Balance,
-						CurrencyName = accShortDetails.CurrencyName
-					};
+					var viewModel = mapper.Map<AccountDetailsViewModel>(accShortDetails);
 
 					return View(viewModel);
 				}
@@ -146,22 +114,11 @@
 
 			try
 			{
-				AccountDetailsServiceModel accountDetails = await accountService
-					.GetAccountDetails(inputModel.Id, inputModel.StartDate, inputModel.EndDate, User.Id());
-
-				var viewModel = new AccountDetailsViewModel
-				{
-					Id = accountDetails.Id,
-					Balance = accountDetails.Balance,
-					Name = accountDetails.Name,
-					CurrencyName = accountDetails.CurrencyName,
-					OwnerId = accountDetails.OwnerId,
-					StartDate = inputModel.StartDate,
-					EndDate = inputModel.EndDate,
-					Transactions = accountDetails.Transactions
-				};
-				viewModel.Pagination.TotalElements = accountDetails.TotalAccountTransactions;
-				viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + inputModel.Id;
+				AccountDetailsViewModel viewModel = User.IsAdmin() ?
+					viewModel = await GetAccountDetailsViewModel(
+						inputModel.Id, inputModel.StartDate, inputModel.EndDate)
+					: viewModel = await GetAccountDetailsViewModel(
+						inputModel.Id, inputModel.StartDate, inputModel.EndDate, User.Id());
 
 				return View(viewModel);
 			}
@@ -178,7 +135,10 @@
 
 			try
 			{
-				string accountName = await accountService.GetAccountName(id, User.Id());
+				string accountName = User.IsAdmin() ?
+					accountName = await accountService.GetAccountName(id)
+					: accountName = await accountService.GetAccountName(id, User.Id());
+
 				var viewModel = new DeleteAccountViewModel { Name = accountName };
 
 				return View(viewModel);
@@ -200,10 +160,26 @@
 
 			try
 			{
-				await accountService.DeleteAccount(
-					inputModel.Id,
-					inputModel.ShouldDeleteTransactions ?? false,
-					User.Id());
+				if (User.IsAdmin())
+				{
+					await accountService.DeleteAccount(inputModel.Id,
+						inputModel.ShouldDeleteTransactions ?? false);
+
+					TempData["successMsg"] = "You successfully delete user's account!";
+					string ownerId = await accountService.GetOwnerId(inputModel.Id);
+
+					return LocalRedirect("/Admin/Users/Details/" + ownerId);
+				}
+				else
+				{
+					await accountService.DeleteAccount(inputModel.Id,
+						inputModel.ShouldDeleteTransactions ?? false,
+						User.Id());
+
+					TempData["successMsg"] = "Your account was successfully deleted!";
+
+					return RedirectToAction("Index", "Home");
+				}
 			}
 			catch (ArgumentException)
 			{
@@ -213,29 +189,17 @@
 			{
 				return BadRequest();
 			}
-
-			TempData["successMsg"] = "Your account was successfully deleted!";
-
-			return RedirectToAction("Index", "Home");
 		}
 
 		public async Task<IActionResult> EditAccount(string id)
 		{
 			try
 			{
-				AccountFormServiceModel accountData =
-					await accountService.GetAccountFormData(id, User.Id());
+				AccountFormServiceModel accountData = User.IsAdmin() ?
+					accountData = await accountService.GetAccountFormData(id)
+					: accountData = await accountService.GetAccountFormData(id, User.Id());
 
-				var viewModel = new AccountFormViewModel
-				{
-					Name = accountData.Name,
-					Balance = accountData.Balance,
-					AccountTypeId = accountData.AccountTypeId,
-					CurrencyId = accountData.CurrencyId,
-					OwnerId = accountData.OwnerId,
-					AccountTypes = accountData.AccountTypes,
-					Currencies = accountData.Currencies
-				};
+				var viewModel = mapper.Map<AccountFormViewModel>(accountData);
 
 				return View(viewModel);
 			}
@@ -251,45 +215,32 @@
 		{
 			if (!ModelState.IsValid)
 			{
-				UserAccountTypesAndCurrenciesServiceModel userData =
-					await usersService.GetUserAccountTypesAndCurrencies(this.User.Id());
-
-				inputModel.AccountTypes = userData.AccountTypes;
-				inputModel.Currencies = userData.Currencies;
+				await PrepareAccountFormViewModel(inputModel);
 
 				return View(inputModel);
 			}
 
-			if (inputModel.OwnerId != User.Id())
-				return Unauthorized();
+			string ownerId = User.IsAdmin() ? await accountService.GetOwnerId(id) : User.Id();
+
+			if (inputModel.OwnerId != ownerId)
+				return BadRequest();
 
 			try
 			{
-				var serviceModel = new AccountFormShortServiceModel
-				{
-					Name = inputModel.Name,
-					Balance = inputModel.Balance ?? 0,
-					OwnerId = inputModel.OwnerId,
-					AccountTypeId = inputModel.AccountTypeId,
-					CurrencyId = inputModel.CurrencyId
-				};
-
+				var serviceModel = mapper.Map<AccountFormShortServiceModel>(inputModel);
 				await accountService.EditAccount(id, serviceModel);
-
-				TempData["successMsg"] = "Your account was successfully edited!";
+				TempData["successMsg"] = User.IsAdmin() ? 
+					"You successfully edited user's account!"
+					: "Your account was successfully edited!";
 
 				return LocalRedirect(returnUrl);
 			}
 			catch (ArgumentException)
 			{
-				ModelState.AddModelError(nameof(inputModel.Name),
-					$"You already have Account with \"{inputModel.Name}\" name.");
-				
-				UserAccountTypesAndCurrenciesServiceModel userData =
-					await usersService.GetUserAccountTypesAndCurrencies(this.User.Id());
-
-				inputModel.AccountTypes = userData.AccountTypes;
-				inputModel.Currencies = userData.Currencies;
+				ModelState.AddModelError(nameof(inputModel.Name), User.IsAdmin() ?
+					$"The user already have Account with \"{inputModel.Name}\" name."
+					: $"You already have Account with \"{inputModel.Name}\" name.");
+				await PrepareAccountFormViewModel(inputModel);
 
 				return View(inputModel);
 			}
@@ -297,6 +248,37 @@
 			{
 				return BadRequest();
 			}
+		}
+		
+		private async Task PrepareAccountFormViewModel(AccountFormViewModel viewModel)
+		{
+			UserAccountTypesAndCurrenciesServiceModel userData =
+			await usersService.GetUserAccountTypesAndCurrencies(viewModel.OwnerId);
+
+			viewModel.AccountTypes = userData.AccountTypes;
+			viewModel.Currencies = userData.Currencies;
+		}
+
+		private async Task<AccountDetailsViewModel> GetAccountDetailsViewModel(
+			string accountId, DateTime startDate, DateTime endDate, string? ownerId = null)
+		{
+			AccountDetailsServiceModel accountDetails =
+				await accountService.GetAccountDetails(accountId, startDate, endDate, ownerId);
+
+			var viewModel = mapper.Map<AccountDetailsViewModel>(accountDetails);
+			viewModel.Pagination.TotalElements = accountDetails.TotalAccountTransactions;
+
+			if (ownerId == null)
+			{
+				viewModel.Routing.Area = "Admin";
+				viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + accountId;
+			}
+			else
+			{
+				viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + accountId;
+			}
+
+			return viewModel;
 		}
 	}
 }

@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using PersonalFinancer.Services.Accounts.Models;
-using System.Text;
-
-namespace PersonalFinancer.Services.ModelsState
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	public class ModelStateService : IModelStateService
+	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.AspNetCore.Mvc.ModelBinding;
+
+	using System.Text;
+
+	public class BaseApiController : ControllerBase
 	{
 		public string GetErrors(ModelStateDictionary.ValueEnumerable modelStateValues)
 		{

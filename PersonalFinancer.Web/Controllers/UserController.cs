@@ -1,24 +1,30 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Web.Models.User;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
+	using AutoMapper;
+
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Identity;
+	using Microsoft.AspNetCore.Mvc;
+
+	using Data.Models;
+	using static Data.Constants.RoleConstants;
+
+	using Web.Models.User;
+
 	public class UserController : Controller
 	{
 		private readonly UserManager<ApplicationUser> userManager;
 		private readonly SignInManager<ApplicationUser> signInManager;
+		private readonly IMapper mapper;
 
 		public UserController(
 			UserManager<ApplicationUser> userManager,
-			SignInManager<ApplicationUser> signInManager)
+			SignInManager<ApplicationUser> signInManager,
+			IMapper mapper)
 		{
 			this.userManager = userManager;
 			this.signInManager = signInManager;
+			this.mapper = mapper;
 		}
 
 		public IActionResult Register() => View(new RegisterFormViewModel());
@@ -27,26 +33,17 @@ namespace PersonalFinancer.Web.Controllers
 		public async Task<IActionResult> Register(RegisterFormViewModel model)
 		{
 			if (!ModelState.IsValid)
-			{
 				return View(model);
-			}
 
-			ApplicationUser newUser = new ApplicationUser
-			{
-				FirstName = model.FirstName,
-				LastName = model.LastName,
-				Email = model.Email,
-				UserName = model.Email
-			};
+			var newUser = mapper.Map<ApplicationUser>(model);
 
-			IdentityResult creationResult = await userManager.CreateAsync(newUser, model.Password);
+			IdentityResult creationResult =
+				await userManager.CreateAsync(newUser, model.Password);
 
 			if (!creationResult.Succeeded)
 			{
 				foreach (IdentityError error in creationResult.Errors)
-				{
 					ModelState.AddModelError(string.Empty, error.Description);
-				}
 
 				return View(model);
 			}
@@ -58,9 +55,7 @@ namespace PersonalFinancer.Web.Controllers
 				await userManager.DeleteAsync(newUser);
 
 				foreach (IdentityError error in roleResult.Errors)
-				{
 					ModelState.AddModelError(string.Empty, error.Description);
-				}
 
 				return View(model);
 			}
@@ -73,25 +68,18 @@ namespace PersonalFinancer.Web.Controllers
 		}
 
 		public IActionResult Login() => View(new LoginFormViewModel());
-		
+
 		[HttpPost]
 		public async Task<IActionResult> Login(LoginFormViewModel model)
 		{
 			if (!ModelState.IsValid)
-			{
 				return View(model);
-			}
 
 			var result = await signInManager.PasswordSignInAsync(
-												model.Email,
-												model.Password,
-												model.RememberMe,
-												lockoutOnFailure: false);
+				model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
 			if (result.Succeeded)
-			{
 				return RedirectToAction("Index", "Home");
-			}
 
 			ModelState.AddModelError(string.Empty, "Invalid login attempt.");
 

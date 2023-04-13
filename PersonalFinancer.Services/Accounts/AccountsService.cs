@@ -83,17 +83,8 @@
 		{
 			Account account = await data.Accounts.FirstAsync(a => a.Id == model.AccountId);
 
-			var newTransaction = new Transaction()
-			{
-				Id = Guid.NewGuid().ToString(),
-				Amount = model.Amount,
-				OwnerId = model.OwnerId,
-				CategoryId = model.CategoryId,
-				TransactionType = model.TransactionType,
-				CreatedOn = model.CreatedOn,
-				Refference = model.Refference.Trim(),
-				IsInitialBalance = model.IsInitialBalance
-			};
+			var newTransaction = mapper.Map<Transaction>(model);
+			newTransaction.Id = Guid.NewGuid().ToString();
 
 			account.Transactions.Add(newTransaction);
 
@@ -273,6 +264,8 @@
 					OwnerId = a.OwnerId,
 					Balance = a.Balance,
 					CurrencyName = a.Currency.Name,
+					StartDate = startDate,
+					EndDate = endDate,
 					TotalAccountTransactions = a.Transactions
 						.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
 					Transactions = a.Transactions
@@ -346,6 +339,8 @@
 				.Where(a => a.Id == id && !a.IsDeleted)
 				.Select(a => new TransactionsServiceModel
 				{
+					StartDate = startDate,
+					EndDate = endDate,
 					Transactions = a.Transactions
 						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 						.OrderByDescending(t => t.CreatedOn)
@@ -472,15 +467,26 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction does not exist.
+		/// Throws InvalidOperationException when Transaction does not exist
+		/// and ArgumentException when the User is not owner or Administrator.
 		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<TransactionDetailsServiceModel> GetTransactionDetails(string transactionId)
+		public async Task<TransactionDetailsServiceModel> GetTransactionDetails(
+			string transactionId, string? ownerId = null)
 		{
-			return await data.Transactions
+			TransactionDetailsServiceModel? transaction = await data.Transactions
 				.Where(t => t.Id == transactionId)
 				.ProjectTo<TransactionDetailsServiceModel>(mapper.ConfigurationProvider)
-				.FirstAsync();
+				.FirstOrDefaultAsync();
+
+			if (transaction == null)
+				throw new InvalidOperationException("Transaction does not exist.");
+
+			if (ownerId != null && transaction.OwnerId != ownerId)
+				throw new ArgumentException("User is not transaction's owner.");
+
+			return transaction;
 		}
 
 		/// <summary>

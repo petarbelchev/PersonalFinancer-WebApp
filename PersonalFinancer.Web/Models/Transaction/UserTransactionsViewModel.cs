@@ -6,13 +6,9 @@
 
     using static Data.Constants;
 
-    public class UserTransactionsViewModel
+    public class UserTransactionsViewModel : DateFilterModel
     {
         public string Id { get; set; } = null!;
-
-        public DateTime StartDate { get; set; }
-
-        public DateTime EndDate { get; set; }
 
         public IEnumerable<TransactionTableServiceModel> Transactions { get; set; }
             = new List<TransactionTableServiceModel>();

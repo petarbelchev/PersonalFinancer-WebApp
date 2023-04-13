@@ -61,6 +61,7 @@
 			var userData = await data.Users.Where(u => u.Id == userId)
 				.Select(u => new UserAccountsAndCategoriesServiceModel
 				{
+					OwnerId = u.Id,
 					UserAccounts = u.Accounts
 						.Where(a => !a.IsDeleted)
 						.Select(a => mapper.Map<AccountServiceModel>(a)),
@@ -114,6 +115,8 @@
 				.Where(u => u.Id == userId)
 				.Select(u => new TransactionsServiceModel
 				{
+					StartDate = startDate,
+					EndDate = endDate,
 					TotalTransactionsCount = u.Transactions
 						.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
 					Transactions = u.Transactions

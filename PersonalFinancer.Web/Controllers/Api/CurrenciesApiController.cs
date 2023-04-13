@@ -1,36 +1,29 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
 
-	using Services.Currencies;
-	using Services.Currencies.Models;
-	using Services.ModelsState;
-	using Services.Shared.Models;
+    using Services.Currencies;
+    using Services.Currencies.Models;
+    using Services.Shared.Models;
 
-	using Web.Infrastructure;
+    using Web.Infrastructure;
 
-	[Authorize]
+    [Authorize]
 	[Route("api/currencies")]
 	[ApiController]
-	public class CurrenciesApiController : ControllerBase
+	public class CurrenciesApiController : BaseApiController
 	{
 		private readonly ICurrencyService currencyService;
-		private readonly IModelStateService modelStateService;
 
-		public CurrenciesApiController(
-			ICurrencyService currencyService,
-			IModelStateService modelStateService)
-		{
-			this.currencyService = currencyService;
-			this.modelStateService = modelStateService;
-		}
+		public CurrenciesApiController(ICurrencyService currencyService)
+			=> this.currencyService = currencyService;
 
 		[HttpPost]
 		public async Task<ActionResult<CurrencyServiceModel>> Create(CurrencyInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest(modelStateService.GetErrors(ModelState.Values));
+				return BadRequest(GetErrors(ModelState.Values));
 
 			try
 			{

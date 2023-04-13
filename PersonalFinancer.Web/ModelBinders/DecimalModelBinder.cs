@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-
-namespace PersonalFinancer.Web.ModelBinders
+﻿namespace PersonalFinancer.Web.ModelBinders
 {
+	using Microsoft.AspNetCore.Mvc.ModelBinding;
+	
 	public class DecimalModelBinder : IModelBinder
 	{
 		public Task BindModelAsync(ModelBindingContext bindingContext)
@@ -17,7 +17,7 @@ namespace PersonalFinancer.Web.ModelBinders
 				bindingContext.Result = ModelBindingResult.Failed();
 
 				bindingContext.ModelState.AddModelError(
-					bindingContext.FieldName, 
+					bindingContext.FieldName,
 					$"{bindingContext.FieldName} is required and must be a number.");
 			}
 
