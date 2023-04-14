@@ -5,6 +5,7 @@
 	using Data.Models;
 
 	using Services.Accounts.Models;
+	using Services.ApiService.Models;
 	using Services.Shared.Models;
 	using Services.User.Models;
 

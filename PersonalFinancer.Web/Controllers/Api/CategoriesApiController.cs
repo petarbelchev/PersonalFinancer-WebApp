@@ -1,16 +1,16 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
 
-	using Data.Models;
+    using Data.Models;
 
-	using Services.Shared;
-	using Services.Shared.Models;
+    using Services.ApiService;
+    using Services.ApiService.Models;
 
-	using Web.Infrastructure;
+    using Web.Infrastructure;
 
-	[Authorize]
+    [Authorize]
 	[Route("api/categories")]
 	[ApiController]
 	public class CategoriesApiController : BaseApiController

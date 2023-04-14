@@ -2,13 +2,16 @@
 {
 	using AutoMapper;
 	using AutoMapper.QueryableExtensions;
-	using Data;
-	using Data.Enums;
+
 	using Microsoft.EntityFrameworkCore;
 	using Microsoft.Extensions.Caching.Memory;
+
+	using Data;
+	using Data.Enums;
+	using static Data.Constants;
+
 	using Services.Shared.Models;
 	using Services.User.Models;
-	using static Data.Constants;
 
 	public class UsersService : IUsersService
 	{

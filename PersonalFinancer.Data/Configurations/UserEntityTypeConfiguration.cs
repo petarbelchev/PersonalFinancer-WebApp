@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-using PersonalFinancer.Data.Models;
-using static PersonalFinancer.Data.Constants.SeedConstants;
-
-namespace PersonalFinancer.Data.Configurations
+﻿namespace PersonalFinancer.Data.Configurations
 {
+	using Microsoft.AspNetCore.Identity;
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+	using Data.Models;
+	using static Data.Constants.SeedConstants;
+
 	internal class UserEntityTypeConfiguration : IEntityTypeConfiguration<ApplicationUser>
 	{
 		public void Configure(EntityTypeBuilder<ApplicationUser> builder)

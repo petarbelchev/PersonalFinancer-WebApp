@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-using PersonalFinancer.Data;
-
-namespace PersonalFinancer.Tests.Mocks
+﻿namespace PersonalFinancer.Tests.Mocks
 {
+	using Microsoft.EntityFrameworkCore;
+
+	using Data;
+
 	static class DatabaseMock
 	{
 		public static PersonalFinancerDbContext Instance

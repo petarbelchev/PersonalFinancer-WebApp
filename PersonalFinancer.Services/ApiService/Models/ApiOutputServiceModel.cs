@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Services.Shared.Models
+﻿namespace PersonalFinancer.Services.ApiService.Models
 {
     public class ApiOutputServiceModel
     {

@@ -2,8 +2,6 @@
 {
     using Services.Shared.Models;
 
-    using Web.Models.Shared;
-
     using static Data.Constants;
 
     public class TransactionsViewModel

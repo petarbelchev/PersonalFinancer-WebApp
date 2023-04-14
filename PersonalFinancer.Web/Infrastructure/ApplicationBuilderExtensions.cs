@@ -1,16 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-using System.Security.Cryptography;
-
-using PersonalFinancer.Data;
-using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Web.Infrastructure
+﻿namespace PersonalFinancer.Web.Infrastructure
 {
+	using Microsoft.AspNetCore.Identity;
+
+	using System.Security.Cryptography;
+
+	using Data;
+	using Data.Enums;
+	using Data.Models;
+	using static Data.Constants;
+
+	using Services.Accounts;
+	using Services.Accounts.Models;
+
 	public static class ApplicationBuilderExtensions
 	{
 		public static IApplicationBuilder SeedUserRoles(this IApplicationBuilder app)

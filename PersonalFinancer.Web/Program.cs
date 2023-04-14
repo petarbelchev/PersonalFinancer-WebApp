@@ -7,7 +7,7 @@ using PersonalFinancer.Data;
 using PersonalFinancer.Data.Models;
 
 using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Shared;
+using PersonalFinancer.Services.ApiService;
 using PersonalFinancer.Services.User;
 
 using PersonalFinancer.Web.Controllers;
