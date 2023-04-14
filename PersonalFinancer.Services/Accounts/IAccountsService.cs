@@ -25,7 +25,7 @@
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task DeleteAccount(string accountId, bool shouldDeleteTransactions = false, string? userId = null);
+		Task DeleteAccount(string accountId, string userId, bool isUserAdmin, bool shouldDeleteTransactions = false);
 
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist
@@ -33,7 +33,7 @@
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<decimal> DeleteTransaction(string transactionId, string? ownerId = null);
+		Task<decimal> DeleteTransaction(string transactionId, string userId, bool isUserAdmin);
 
 		/// <summary>
 		/// Throws InvalidOperationException when Account does now exist,
@@ -55,14 +55,14 @@
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<AccountDetailsServiceModel> GetAccountDetails(
-			string id, DateTime startDate, DateTime endDate, string? ownerId = null);
+			string id, DateTime startDate, DateTime endDate, string ownerId, bool isUserAdmin);
 
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist 
 		/// or User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<AccountFormServiceModel> GetAccountFormData(string accountId, string? ownerId = null);
+		Task<AccountFormServiceModel> GetAccountFormData(string accountId, string userId, bool isUserAdmin);
 
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist.
@@ -76,7 +76,7 @@
 		/// or User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<string> GetAccountName(string accountId, string? ownerId = null);
+		Task<string> GetAccountName(string accountId, string userId, bool isUserAdmin);
 
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist.
@@ -97,7 +97,7 @@
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<TransactionDetailsServiceModel> GetTransactionDetails(
-			string transactionId, string? ownerId = null);
+			string transactionId, string ownerId, bool isUserAdmin);
 
 		Task<UsersAccountCardsServiceModel> GetUsersAccountCardsData(int page);
 

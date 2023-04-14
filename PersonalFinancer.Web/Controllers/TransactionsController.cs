@@ -39,7 +39,8 @@
 		{
 			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
 			DateTime endDate = DateTime.UtcNow;
-			UserTransactionsViewModel viewModel = 
+
+			UserTransactionsViewModel viewModel =
 				await PrepareUserTransactionsViewModel(User.Id(), startDate, endDate);
 
 			return View(viewModel);
@@ -103,16 +104,11 @@
 		{
 			try
 			{
-				if (User.IsAdmin())
-				{
-					await accountsService.DeleteTransaction(id);
-					TempData["successMsg"] = "You successfully delete a user's transaction!";
-				}
-				else
-				{
-					await accountsService.DeleteTransaction(id, User.Id());
-					TempData["successMsg"] = "Your transaction was successfully deleted!";
-				}
+				await accountsService.DeleteTransaction(id, User.Id(), User.IsAdmin());
+
+				TempData["successMsg"] = User.IsAdmin() ?
+					"You successfully delete a user's transaction!"
+					: "Your transaction was successfully deleted!";
 			}
 			catch (ArgumentException)
 			{
@@ -133,10 +129,8 @@
 		{
 			try
 			{
-				if (User.IsAdmin())
-					return View(await accountsService.GetTransactionDetails(id));
-				else
-					return View(await accountsService.GetTransactionDetails(id, User.Id()));
+				return View(await accountsService
+					.GetTransactionDetails(id, User.Id(), User.IsAdmin()));
 			}
 			catch (ArgumentException)
 			{
@@ -178,7 +172,7 @@
 				return View(inputModel);
 			}
 
-			string ownerId = User.IsAdmin() ? 
+			string ownerId = User.IsAdmin() ?
 				await accountsService.GetOwnerId(inputModel.AccountId)
 				: User.Id();
 

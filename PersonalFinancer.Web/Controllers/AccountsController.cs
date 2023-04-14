@@ -80,9 +80,8 @@
 
 			try
 			{
-				AccountDetailsViewModel viewModel = User.IsAdmin() ?
-					viewModel = await GetAccountDetailsViewModel(id, startDate, endDate)
-					: viewModel = await GetAccountDetailsViewModel(id, startDate, endDate, User.Id());
+				AccountDetailsViewModel viewModel = await GetAccountDetailsViewModel(
+					id, startDate, endDate, User.Id(), User.IsAdmin());
 
 				return View(viewModel);
 			}
@@ -114,11 +113,8 @@
 
 			try
 			{
-				AccountDetailsViewModel viewModel = User.IsAdmin() ?
-					viewModel = await GetAccountDetailsViewModel(
-						inputModel.Id, inputModel.StartDate, inputModel.EndDate)
-					: viewModel = await GetAccountDetailsViewModel(
-						inputModel.Id, inputModel.StartDate, inputModel.EndDate, User.Id());
+				AccountDetailsViewModel viewModel = await GetAccountDetailsViewModel(
+					inputModel.Id, inputModel.StartDate, inputModel.EndDate, User.Id(), User.IsAdmin());
 
 				return View(viewModel);
 			}
@@ -135,9 +131,8 @@
 
 			try
 			{
-				string accountName = User.IsAdmin() ?
-					accountName = await accountService.GetAccountName(id)
-					: accountName = await accountService.GetAccountName(id, User.Id());
+				string accountName = await accountService
+					.GetAccountName(id, User.Id(), User.IsAdmin());
 
 				var viewModel = new DeleteAccountViewModel { Name = accountName };
 
@@ -160,11 +155,11 @@
 
 			try
 			{
+				await accountService.DeleteAccount(inputModel.Id, User.Id(), User.IsAdmin(),
+					inputModel.ShouldDeleteTransactions ?? false);
+
 				if (User.IsAdmin())
 				{
-					await accountService.DeleteAccount(inputModel.Id,
-						inputModel.ShouldDeleteTransactions ?? false);
-
 					TempData["successMsg"] = "You successfully delete user's account!";
 					string ownerId = await accountService.GetOwnerId(inputModel.Id);
 
@@ -172,10 +167,6 @@
 				}
 				else
 				{
-					await accountService.DeleteAccount(inputModel.Id,
-						inputModel.ShouldDeleteTransactions ?? false,
-						User.Id());
-
 					TempData["successMsg"] = "Your account was successfully deleted!";
 
 					return RedirectToAction("Index", "Home");
@@ -195,9 +186,8 @@
 		{
 			try
 			{
-				AccountFormServiceModel accountData = User.IsAdmin() ?
-					accountData = await accountService.GetAccountFormData(id)
-					: accountData = await accountService.GetAccountFormData(id, User.Id());
+				AccountFormServiceModel accountData = 
+					await accountService.GetAccountFormData(id, User.Id(), User.IsAdmin());
 
 				var viewModel = mapper.Map<AccountFormViewModel>(accountData);
 
@@ -220,7 +210,9 @@
 				return View(inputModel);
 			}
 
-			string ownerId = User.IsAdmin() ? await accountService.GetOwnerId(id) : User.Id();
+			string ownerId = User.IsAdmin() ? 
+				await accountService.GetOwnerId(id) 
+				: User.Id();
 
 			if (inputModel.OwnerId != ownerId)
 				return BadRequest();
@@ -229,7 +221,8 @@
 			{
 				var serviceModel = mapper.Map<AccountFormShortServiceModel>(inputModel);
 				await accountService.EditAccount(id, serviceModel);
-				TempData["successMsg"] = User.IsAdmin() ?
+
+				TempData["successMsg"] = User.IsAdmin() ? 
 					"You successfully edited user's account!"
 					: "Your account was successfully edited!";
 
@@ -240,6 +233,7 @@
 				ModelState.AddModelError(nameof(inputModel.Name), User.IsAdmin() ?
 					$"The user already have Account with \"{inputModel.Name}\" name."
 					: $"You already have Account with \"{inputModel.Name}\" name.");
+
 				await PrepareAccountFormViewModel(inputModel);
 
 				return View(inputModel);
@@ -260,15 +254,15 @@
 		}
 
 		private async Task<AccountDetailsViewModel> GetAccountDetailsViewModel(
-			string accountId, DateTime startDate, DateTime endDate, string? ownerId = null)
+			string accountId, DateTime startDate, DateTime endDate, string ownerId, bool isUserAdmin)
 		{
-			AccountDetailsServiceModel accountDetails =
-				await accountService.GetAccountDetails(accountId, startDate, endDate, ownerId);
+			AccountDetailsServiceModel accountDetails = await accountService
+				.GetAccountDetails(accountId, startDate, endDate, ownerId, isUserAdmin);
 
 			var viewModel = mapper.Map<AccountDetailsViewModel>(accountDetails);
 			viewModel.Pagination.TotalElements = accountDetails.TotalAccountTransactions;
 
-			if (ownerId == null)
+			if (isUserAdmin)
 			{
 				viewModel.Routing.Area = "Admin";
 				viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + accountId;

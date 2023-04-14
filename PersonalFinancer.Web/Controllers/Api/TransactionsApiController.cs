@@ -36,12 +36,8 @@
 		{
 			try
 			{
-				decimal newBalance;
-
-				if (User.IsAdmin())
-					newBalance = await accountService.DeleteTransaction(id);
-				else
-					newBalance = await accountService.DeleteTransaction(id, User.Id());
+				decimal newBalance = await accountService
+					.DeleteTransaction(id, User.Id(), User.IsAdmin());
 
 				return Ok(new { newBalance });
 			}

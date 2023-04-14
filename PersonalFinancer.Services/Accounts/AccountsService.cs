@@ -104,12 +104,13 @@
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task DeleteAccount(string accountId, bool shouldDeleteTransactions = false, string? userId = null)
+		public async Task DeleteAccount(
+			string accountId, string userId, bool isUserAdmin, bool shouldDeleteTransactions = false)
 		{
 			Account account = await data.Accounts
 				.FirstAsync(a => a.Id == accountId && !a.IsDeleted);
 
-			if (userId != null && account.OwnerId != userId)
+			if (!isUserAdmin && account.OwnerId != userId)
 				throw new ArgumentException("Can't delete someone else account.");
 
 			if (shouldDeleteTransactions)
@@ -128,14 +129,14 @@
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<decimal> DeleteTransaction(string transactionId, string? ownerId = null)
+		public async Task<decimal> DeleteTransaction(string transactionId, string userId, bool isUserAdmin)
 		{
 			Transaction transaction = await data.Transactions
 				.Include(t => t.Account)
 				.FirstAsync(t => t.Id == transactionId);
 
-			if (ownerId != null && transaction.OwnerId != ownerId)
-				throw new ArgumentException("User is now transaction's owner");
+			if (!isUserAdmin && transaction.OwnerId != userId)
+				throw new ArgumentException("User is not transaction's owner");
 
 			data.Transactions.Remove(transaction);
 
@@ -247,13 +248,8 @@
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<AccountDetailsServiceModel> GetAccountDetails(
-			string id, DateTime startDate, DateTime endDate, string? ownerId = null)
+			string id, DateTime startDate, DateTime endDate, string ownerId, bool isUserAdmin)
 		{
-			bool isUserAdmin = false;
-
-			if (ownerId == null)
-				isUserAdmin = true;
-
 			return await data.Accounts
 				.Where(a => a.Id == id && !a.IsDeleted
 							&& (isUserAdmin || a.OwnerId == ownerId))
@@ -293,16 +289,12 @@
 		/// or User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<AccountFormServiceModel> GetAccountFormData(string accountId, string? ownerId = null)
+		public async Task<AccountFormServiceModel> GetAccountFormData(
+			string accountId, string userId, bool isUserAdmin)
 		{
-			bool isUserAdmin = false;
-
-			if (ownerId == null)
-				isUserAdmin = true;
-
 			return await data.Accounts
 				.Where(a => a.Id == accountId
-							&& (isUserAdmin || a.OwnerId == ownerId))
+							&& (isUserAdmin || a.OwnerId == userId))
 				.Select(a => new AccountFormServiceModel
 				{
 					Name = a.Name,
@@ -402,15 +394,10 @@
 		/// or User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<string> GetAccountName(string accountId, string? ownerId = null)
+		public async Task<string> GetAccountName(string accountId, string userId, bool isUserAdmin)
 		{
-			bool isUserAdmin = false;
-
-			if (ownerId == null)
-				isUserAdmin = true;
-
 			string name = await data.Accounts
-				.Where(a => a.Id == accountId && (isUserAdmin || a.OwnerId == ownerId))
+				.Where(a => a.Id == accountId && (isUserAdmin || a.OwnerId == userId))
 				.Select(a => a.Name)
 				.FirstAsync();
 
@@ -473,7 +460,7 @@
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<TransactionDetailsServiceModel> GetTransactionDetails(
-			string transactionId, string? ownerId = null)
+			string transactionId, string ownerId, bool isUserAdmin)
 		{
 			TransactionDetailsServiceModel? transaction = await data.Transactions
 				.Where(t => t.Id == transactionId)
@@ -483,7 +470,7 @@
 			if (transaction == null)
 				throw new InvalidOperationException("Transaction does not exist.");
 
-			if (ownerId != null && transaction.OwnerId != ownerId)
+			if (!isUserAdmin && transaction.OwnerId != ownerId)
 				throw new ArgumentException("User is not transaction's owner.");
 
 			return transaction;
