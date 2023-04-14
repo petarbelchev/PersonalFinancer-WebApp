@@ -33,5 +33,10 @@
 		[Compare(nameof(Password), ErrorMessage = "Password do not match.")]
 		[Display(Name = "Confirm Password")]
 		public string ConfirmPassword { get; set; } = null!;
-	}
+
+		[DataType(DataType.PhoneNumber)]
+		[RegularExpression(@"^\d{10}$", ErrorMessage = "Phone number must be 10 digits.")]
+		[Display(Name = "Phone number")]
+        public string? PhoneNumber { get; set; }
+    }
 }

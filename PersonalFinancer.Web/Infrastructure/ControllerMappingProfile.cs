@@ -32,7 +32,8 @@
 			CreateMap<UserAccountsAndCategoriesServiceModel, TransactionFormModel>();
 
 			CreateMap<ApplicationUser, AccountFormViewModel>();
-			CreateMap<RegisterFormViewModel, ApplicationUser>();
+			CreateMap<RegisterFormViewModel, ApplicationUser>()
+				.ForMember(m => m.UserName, mf => mf.MapFrom(s => s.Email));
 		}
 	}
 }
