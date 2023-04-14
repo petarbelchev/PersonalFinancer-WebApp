@@ -6,7 +6,7 @@ Personal Financer is Web Application that give on his users the ability to recor
 ![User Dashboard Page](./Screenshots/user-dashboard-page.jpeg)
 
 ## Motivation
-This is my first project. I created it to practice my skills and it is also a defense project for ASP.NET Advanced course at SoftUni.
+This is my first project. I created it to practice my skills and it also will be a defense project for [**ASP.NET Advanced**](https://softuni.bg/trainings/4107/asp-net-advanced-june-2023) course at [SoftUni](https://softuni.bg/ "SoftUni") (June 2023).
 
 ## Used Tech/Frameworks
 - ASP.NET Core 6
@@ -96,7 +96,7 @@ Here what Admin can do.
 
 ![Admin Home Page](./Screenshots/admin-homepage.jpeg)
 
-Admin can manage all users and their accounts. Edit and delete accounts and transactions, edit them. The Administrator has information about number of users and accounts. When press "More statistics" button on Home page he makes AJAX request and receive more fresh data from the server about amount of all trabsactions maded by users grouped by currencies.
+Admin can manage all users and their accounts. Edit and delete accounts and transactions, edit them. The Administrator has information about number of users and accounts. When press "More statistics" button on Home page he makes AJAX request and receive more fresh data from the server about amount of all transactions maded by users grouped by currencies.
 
 ![More statistics](./Screenshots/admin-more-statistics.jpeg)
 
