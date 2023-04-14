@@ -1,25 +1,26 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-using static PersonalFinancer.Data.Constants.TransactionConstants;
-
-namespace PersonalFinancer.Data.Models
+﻿namespace PersonalFinancer.Data.Models
 {
-	public class Category
+	using System.ComponentModel.DataAnnotations;
+	using System.ComponentModel.DataAnnotations.Schema;
+
+	using static Data.Constants.CategoryConstants;
+
+	public class Category : ApiEntity
 	{
 		[Key]
-		public string Id { get; set; } = null!;
+		public override string Id { get; set; } = null!;
 
-		[MaxLength(CategoryNameMaxLength, 
+		[MaxLength(CategoryNameMaxLength,
 			ErrorMessage = "Category's name max length must be {1} characters long.")]
-		public string Name { get; set; } = null!;
+		public override string Name { get; set; } = null!;
 
 		[ForeignKey(nameof(Owner))]
-		public string OwnerId { get; set; } = null!;
+		public override string OwnerId { get; set; } = null!;
 		public ApplicationUser Owner { get; set; } = null!;
 
-		public bool IsDeleted { get; set; }
+		public override bool IsDeleted { get; set; }
 
-        public ICollection<Transaction> Transactions { get; set; } = new HashSet<Transaction>();
-    }
+		public ICollection<Transaction> Transactions { get; set; } 
+			= new HashSet<Transaction>();
+	}
 }

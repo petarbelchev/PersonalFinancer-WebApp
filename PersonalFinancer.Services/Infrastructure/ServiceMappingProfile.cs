@@ -32,11 +32,12 @@
 			CreateMap<TransactionFormShortServiceModel, Transaction>()
 				.ForMember(m => m.Refference, mf => mf.MapFrom(s => s.Refference.Trim()));
 
-
 			CreateMap<ApplicationUser, UserServiceModel>();
 			CreateMap<ApplicationUser, UserDetailsServiceModel>()
 				.ForMember(m => m.Accounts, mf => mf
 					.MapFrom(s => s.Accounts.Where(a => !a.IsDeleted).OrderBy(a => a.Name)));
+
+			CreateMap<ApiEntity, ApiOutputServiceModel>();
 		}
 	}
 }

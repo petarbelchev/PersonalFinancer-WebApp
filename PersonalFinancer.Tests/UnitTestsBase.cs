@@ -6,7 +6,7 @@ using PersonalFinancer.Data;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Tests.Mocks;
-using static PersonalFinancer.Data.Constants.TransactionConstants;
+using static PersonalFinancer.Data.Constants.CategoryConstants;
 
 namespace PersonalFinancer.Tests
 {

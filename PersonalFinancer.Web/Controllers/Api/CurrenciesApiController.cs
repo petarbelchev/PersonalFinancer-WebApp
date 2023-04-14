@@ -1,34 +1,35 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
 
-    using Services.Currencies;
-    using Services.Currencies.Models;
-    using Services.Shared.Models;
+	using Data.Models;
 
-    using Web.Infrastructure;
+	using Services.Shared;
+	using Services.Shared.Models;
 
-    [Authorize]
+	using Web.Infrastructure;
+
+	[Authorize]
 	[Route("api/currencies")]
 	[ApiController]
 	public class CurrenciesApiController : BaseApiController
 	{
-		private readonly ICurrencyService currencyService;
+		private readonly ApiService<Currency> apiService;
 
-		public CurrenciesApiController(ICurrencyService currencyService)
-			=> this.currencyService = currencyService;
+		public CurrenciesApiController(ApiService<Currency> apiService)
+			=> this.apiService = apiService;
 
 		[HttpPost]
-		public async Task<ActionResult<CurrencyServiceModel>> Create(CurrencyInputModel inputModel)
+		public async Task<ActionResult> Create(ApiInputServiceModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(GetErrors(ModelState.Values));
 
 			try
 			{
-				CurrencyServiceModel model =
-					await currencyService.CreateCurrency(inputModel);
+				ApiOutputServiceModel model =
+					await apiService.CreateEntity(inputModel);
 
 				return Created(string.Empty, model);
 			}
@@ -43,10 +44,7 @@
 		{
 			try
 			{
-				if (User.IsAdmin())
-					await currencyService.DeleteCurrency(id);
-				else
-					await currencyService.DeleteCurrency(id, User.Id());
+				await apiService.DeleteEntity(id, User.Id(), User.IsAdmin());
 
 				return NoContent();
 			}

@@ -1,28 +1,29 @@
 ﻿namespace PersonalFinancer.Services.User
 {
-    using AutoMapper;
-    using AutoMapper.QueryableExtensions;
+	using AutoMapper;
+	using AutoMapper.QueryableExtensions;
+	using Data;
+	using Data.Enums;
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+	using Services.Shared.Models;
+	using Services.User.Models;
+	using static Data.Constants;
 
-    using Microsoft.EntityFrameworkCore;
-
-    using Data;
-    using Data.Enums;
-    using static Data.Constants;
-
-    using Services.Shared.Models;
-    using Services.User.Models;
-
-    public class UsersService : IUsersService
+	public class UsersService : IUsersService
 	{
 		private readonly PersonalFinancerDbContext data;
 		private readonly IMapper mapper;
+		private readonly IMemoryCache memoryCache;
 
 		public UsersService(
 			PersonalFinancerDbContext data,
-			IMapper mapper)
+			IMapper mapper,
+			IMemoryCache memoryCache)
 		{
 			this.data = data;
 			this.mapper = mapper;
+			this.memoryCache = memoryCache;
 		}
 
 		/// <summary>
@@ -58,39 +59,69 @@
 
 		public async Task<UserAccountsAndCategoriesServiceModel> GetUserAccountsAndCategories(string userId)
 		{
-			var userData = await data.Users.Where(u => u.Id == userId)
-				.Select(u => new UserAccountsAndCategoriesServiceModel
-				{
-					OwnerId = u.Id,
-					UserAccounts = u.Accounts
-						.Where(a => !a.IsDeleted)
-						.Select(a => mapper.Map<AccountServiceModel>(a)),
-					UserCategories = u.Categories
-						.Where(c => !c.IsDeleted)
-						.Select(c => mapper.Map<CategoryServiceModel>(c))
-				})
-				.FirstAsync();
+			if (!memoryCache.TryGetValue(CategoryConstants.CategoryCacheKeyValue + userId,
+				out CategoryServiceModel[] categories))
+			{
+				categories = await data.Categories
+					.Where(c => c.OwnerId == userId && !c.IsDeleted)
+					.Select(c => mapper.Map<CategoryServiceModel>(c))
+					.ToArrayAsync();
+
+				memoryCache.Set(CategoryConstants.CategoryCacheKeyValue + userId, categories, TimeSpan.FromDays(3));
+			}
+
+			if (!memoryCache.TryGetValue(AccountConstants.AccountCacheKeyValue + userId,
+				out AccountServiceModel[] accounts))
+			{
+				accounts = await data.Accounts
+					.Where(a => a.OwnerId == userId && !a.IsDeleted)
+					.Select(a => mapper.Map<AccountServiceModel>(a))
+					.ToArrayAsync();
+				
+				memoryCache.Set(AccountConstants.AccountCacheKeyValue + userId, accounts, TimeSpan.FromDays(3));
+			}
+
+			var userData = new UserAccountsAndCategoriesServiceModel
+			{
+				OwnerId = userId,
+				UserAccounts = accounts,
+				UserCategories = categories
+			};
 
 			return userData;
 		}
 
-		/// <summary>
-		/// Throws InvalidOperationException if User does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<UserAccountTypesAndCurrenciesServiceModel> GetUserAccountTypesAndCurrencies(string userId)
 		{
-			return await data.Users.Where(u => u.Id == userId)
-				.Select(u => new UserAccountTypesAndCurrenciesServiceModel
-				{
-					AccountTypes = u.AccountTypes
-						.Where(at => !at.IsDeleted)
-						.Select(at => mapper.Map<AccountTypeServiceModel>(at)),
-					Currencies = u.Currencies
-						.Where(c => !c.IsDeleted)
-						.Select(c => mapper.Map<CurrencyServiceModel>(c))
-				})
-				.FirstAsync();
+			if (!memoryCache.TryGetValue(AccountTypeConstants.AccTypeCacheKeyValue + userId,
+				out AccountTypeServiceModel[] accTypes))
+			{
+				accTypes = await data.AccountTypes
+					.Where(at => at.OwnerId == userId && !at.IsDeleted)
+					.Select(at => mapper.Map<AccountTypeServiceModel>(at))
+					.ToArrayAsync();
+
+				memoryCache.Set(AccountTypeConstants.AccTypeCacheKeyValue + userId, accTypes, TimeSpan.FromDays(3));
+			}
+
+			if (!memoryCache.TryGetValue(CurrencyConstants.CurrencyCacheKeyValue + userId,
+				out CurrencyServiceModel[] currencies))
+			{
+				currencies = await data.Currencies
+					.Where(c => c.OwnerId == userId && !c.IsDeleted)
+					.Select(c => mapper.Map<CurrencyServiceModel>(c))
+					.ToArrayAsync();
+				
+				memoryCache.Set(CurrencyConstants.CurrencyCacheKeyValue + userId, currencies, TimeSpan.FromDays(3));
+			}
+
+			var userData = new UserAccountTypesAndCurrenciesServiceModel
+			{
+				AccountTypes = accTypes,
+				Currencies = currencies
+			};
+
+			return userData;
 		}
 
 		public async Task<IEnumerable<AccountCardServiceModel>> GetUserAccounts(string userId)

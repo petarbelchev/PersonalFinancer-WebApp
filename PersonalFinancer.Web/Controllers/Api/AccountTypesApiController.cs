@@ -1,40 +1,41 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
 
-    using Services.AccountTypes;
-    using Services.AccountTypes.Models;
-    using Services.Shared.Models;
+	using Data.Models;
+	
+	using Services.Shared;
+	using Services.Shared.Models;
+	
+	using Web.Infrastructure;
 
-    using Web.Infrastructure;
-
-    [Authorize]
+	[Authorize]
 	[Route("api/accounttypes")]
 	[ApiController]
 	public class AccountTypesApiController : BaseApiController
 	{
-		private readonly IAccountTypeService accountTypeService;
+		private readonly ApiService<AccountType> apiService;
 
-		public AccountTypesApiController(IAccountTypeService accountTypeService)
-			=> this.accountTypeService = accountTypeService;
+		public AccountTypesApiController(ApiService<AccountType> apiService)
+			=> this.apiService = apiService;
 
 		[HttpPost]
-		public async Task<ActionResult<AccountTypeServiceModel>> Create(AccountTypeInputModel inputModel)
+		public async Task<ActionResult> Create(ApiInputServiceModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(GetErrors(ModelState.Values));
 
 			try
 			{
-				AccountTypeServiceModel model =
-					await accountTypeService.CreateAccountType(inputModel);
+				ApiOutputServiceModel model =
+					await apiService.CreateEntity(inputModel);
 
 				return Created(string.Empty, model);
 			}
-			catch (ArgumentException ex)
+			catch (ArgumentException)
 			{
-				return BadRequest(ex.Message);
+				return BadRequest($"Account Type with the name \"{inputModel.Name}\" exist.");
 			}
 		}
 
@@ -43,10 +44,7 @@
 		{
 			try
 			{
-				if (User.IsAdmin())
-					await accountTypeService.DeleteAccountType(id);
-				else
-					await accountTypeService.DeleteAccountType(id, User.Id());
+				await apiService.DeleteEntity(id, User.Id(), User.IsAdmin());
 
 				return NoContent();
 			}

@@ -1,34 +1,35 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
 
-    using Services.Categories;
-    using Services.Categories.Models;
-    using Services.Shared.Models;
+	using Data.Models;
 
-    using Web.Infrastructure;
+	using Services.Shared;
+	using Services.Shared.Models;
 
-    [Authorize]
+	using Web.Infrastructure;
+
+	[Authorize]
 	[Route("api/categories")]
 	[ApiController]
 	public class CategoriesApiController : BaseApiController
 	{
-		private readonly ICategoryService categoryService;
+		private readonly ApiService<Category> apiService;
 
-		public CategoriesApiController(ICategoryService categoryService)
-			=> this.categoryService = categoryService;
+		public CategoriesApiController(ApiService<Category> apiService)
+			=> this.apiService = apiService;
 
 		[HttpPost]
-		public async Task<ActionResult<CategoryServiceModel>> CreateCategory(CategoryInputModel inputModel)
+		public async Task<ActionResult> CreateCategory(ApiInputServiceModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(GetErrors(ModelState.Values));
 
 			try
 			{
-				CategoryServiceModel model =
-					await categoryService.CreateCategory(inputModel);
+				ApiOutputServiceModel model =
+					await apiService.CreateEntity(inputModel);
 
 				return Created(string.Empty, model);
 			}
@@ -43,10 +44,7 @@
 		{
 			try
 			{
-				if (User.IsAdmin())
-					await categoryService.DeleteCategory(id);
-				else
-					await categoryService.DeleteCategory(id, User.Id());
+				await apiService.DeleteEntity(id, User.Id(), User.IsAdmin());
 
 				return NoContent();
 			}

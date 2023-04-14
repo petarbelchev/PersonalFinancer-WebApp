@@ -57,11 +57,11 @@
 				{
 					Id = Guid.NewGuid().ToString(),
 					OwnerId = newAccount.OwnerId,
-					CategoryId = TransactionConstants.InitialBalanceCategoryId,
+					CategoryId = CategoryConstants.InitialBalanceCategoryId,
 					Amount = newAccount.Balance,
 					CreatedOn = DateTime.UtcNow,
 					TransactionType = TransactionType.Income,
-					Refference = TransactionConstants.CategoryInitialBalanceName,
+					Refference = CategoryConstants.CategoryInitialBalanceName,
 					IsInitialBalance = true
 				});
 			}
@@ -69,7 +69,7 @@
 			await data.Accounts.AddAsync(newAccount);
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.CacheKeyValue + model.OwnerId);
+			memoryCache.Remove(AccountConstants.AccountCacheKeyValue + model.OwnerId);
 
 			return newAccount.Id;
 		}
@@ -119,7 +119,7 @@
 
 			await data.SaveChangesAsync();
 
-			memoryCache.Remove(AccountConstants.CacheKeyValue + userId);
+			memoryCache.Remove(AccountConstants.AccountCacheKeyValue + userId);
 		}
 
 		/// <summary>
@@ -183,9 +183,9 @@
 						Id = Guid.NewGuid().ToString(),
 						OwnerId = account.OwnerId,
 						Amount = amountOfChange,
-						CategoryId = TransactionConstants.InitialBalanceCategoryId,
+						CategoryId = CategoryConstants.InitialBalanceCategoryId,
 						CreatedOn = DateTime.UtcNow,
-						Refference = TransactionConstants.CategoryInitialBalanceName,
+						Refference = CategoryConstants.CategoryInitialBalanceName,
 						TransactionType = amountOfChange < 0 ? TransactionType.Expense : TransactionType.Income,
 						IsInitialBalance = true
 					};

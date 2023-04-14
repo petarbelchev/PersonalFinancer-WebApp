@@ -114,9 +114,9 @@ namespace PersonalFinancer.Web.Infrastructure
 				{
 					AccountId = cashBgnAccId,
 					Amount = 2000,
-					CategoryId = TransactionConstants.InitialBalanceCategoryId,
+					CategoryId = CategoryConstants.InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = TransactionConstants.CategoryInitialBalanceName,
+					Refference = CategoryConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
 					IsInitialBalance = true,
 					OwnerId = SeedConstants.FirstUserId
@@ -125,9 +125,9 @@ namespace PersonalFinancer.Web.Infrastructure
 				{
 					AccountId = bankBgnAccId,
 					Amount = 4000,
-					CategoryId = TransactionConstants.InitialBalanceCategoryId,
+					CategoryId = CategoryConstants.InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = TransactionConstants.CategoryInitialBalanceName,
+					Refference = CategoryConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
 					IsInitialBalance = true,
 					OwnerId = SeedConstants.FirstUserId
@@ -136,9 +136,9 @@ namespace PersonalFinancer.Web.Infrastructure
 				{
 					AccountId = euroSavingsAccId,
 					Amount = 2800,
-					CategoryId = TransactionConstants.InitialBalanceCategoryId,
+					CategoryId = CategoryConstants.InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = TransactionConstants.CategoryInitialBalanceName,
+					Refference = CategoryConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
 					IsInitialBalance = true,
 					OwnerId = SeedConstants.FirstUserId
@@ -147,9 +147,9 @@ namespace PersonalFinancer.Web.Infrastructure
 				{
 					AccountId = usdSavingsAccId,
 					Amount = 3800,
-					CategoryId = TransactionConstants.InitialBalanceCategoryId,
+					CategoryId = CategoryConstants.InitialBalanceCategoryId,
 					CreatedOn = DateTime.UtcNow.AddMonths(-2),
-					Refference = TransactionConstants.CategoryInitialBalanceName,
+					Refference = CategoryConstants.CategoryInitialBalanceName,
 					TransactionType = TransactionType.Income,
 					IsInitialBalance = true,
 					OwnerId = SeedConstants.FirstUserId

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using PersonalFinancer.Data.Models;
-using static PersonalFinancer.Data.Constants.TransactionConstants;
+using static PersonalFinancer.Data.Constants.CategoryConstants;
 using static PersonalFinancer.Data.Constants.SeedConstants;
 
 namespace PersonalFinancer.Data.Configurations

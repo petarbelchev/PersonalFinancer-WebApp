@@ -23,7 +23,7 @@
 		protected readonly IMapper mapper;
 
 		public AccountsController(
-			IAccountsService accountService, 
+			IAccountsService accountService,
 			IMapper mapper,
 			IUsersService usersService)
 		{
@@ -229,7 +229,7 @@
 			{
 				var serviceModel = mapper.Map<AccountFormShortServiceModel>(inputModel);
 				await accountService.EditAccount(id, serviceModel);
-				TempData["successMsg"] = User.IsAdmin() ? 
+				TempData["successMsg"] = User.IsAdmin() ?
 					"You successfully edited user's account!"
 					: "Your account was successfully edited!";
 
@@ -249,11 +249,11 @@
 				return BadRequest();
 			}
 		}
-		
+
 		private async Task PrepareAccountFormViewModel(AccountFormViewModel viewModel)
 		{
 			UserAccountTypesAndCurrenciesServiceModel userData =
-			await usersService.GetUserAccountTypesAndCurrencies(viewModel.OwnerId);
+				await usersService.GetUserAccountTypesAndCurrencies(viewModel.OwnerId);
 
 			viewModel.AccountTypes = userData.AccountTypes;
 			viewModel.Currencies = userData.Currencies;
