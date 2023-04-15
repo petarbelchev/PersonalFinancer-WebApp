@@ -1,12 +1,12 @@
 # Personal Financer
 
 ## Overview
-Personal Financer is Web Application that give on his users the ability to record their incomes and expenses structured on Accounts and transactions.
+Personal Financer is Web Application that give on his users the ability to record their incomes and expenses structured on Accounts and Transactions.
 
 ![User Dashboard Page](./Screenshots/user-dashboard-page.jpeg)
 
 ## Motivation
-This is my first project. I created it to practice my skills and it also will be a defense project for [**ASP.NET Advanced**](https://softuni.bg/trainings/4107/asp-net-advanced-june-2023) course at [SoftUni](https://softuni.bg/ "SoftUni") (June 2023).
+This is my first project. I created it to practice my skills and also will be a defense project for [**ASP.NET Advanced**](https://softuni.bg/trainings/4107/asp-net-advanced-june-2023) course at [SoftUni](https://softuni.bg/ "SoftUni") (June 2023).
 
 ## Used Tech/Frameworks
 - ASP.NET Core 6
@@ -34,7 +34,7 @@ The Migration will seed the Database with:
 - User with accounts and transactions for easy and fast tests - email: petar@mail.com, password: petar123
 
 ## Features
-Personal Financer is a website for record your cash flow and analyze it. To use the application you must create a registration or login.
+Personal Financer is a website for record your cash flow and analyze it. To use the application you must login or create a registration.
 
 ![Welcome Guest Page](./Screenshots/welcome-page.jpeg)
 
@@ -52,15 +52,15 @@ When click on 'Create New Account Type' or 'Create New Currency' you can create 
 
 ![Create Delete Types](./Screenshots/create-delete-account-type-or-currency.jpeg)
 
-When Account is created you will be redirected to the new Account Details Page. Personal Financer App automatically made Initial Balance Transaction with Amount gived as Account Balance from you.
+When Account is created you will be redirected to the new Account Details page. Personal Financer App automatically made Initial Balance Transaction with Amount gived as Account Balance from you.
 
 ![New Account Details Page](./Screenshots/new-account-page.jpeg)
 
-Details Page gives options for Edit and Delete Account, filter transactions for given period and shows them on separated pages by 10 on each one. Pages are changed again with AJAX requests and Web APIs on backend.
+Details page gives options for Edit and Delete Account, filter transactions for given period and shows them on separated pages by 10 on each one. Pages are changed again with AJAX requests and Web APIs on backend.
 
 ![Account Details Page](./Screenshots/account-details-page.jpeg)
 
-On Edit Account Page you can change Name, Balance, Account Type and Currency on the account. 
+On Edit Account page you can change Name, Balance, Account Type and Currency of the account. 
 
 ![Edit Account Page](./Screenshots/edit-account-page.jpeg)
 
@@ -72,22 +72,22 @@ If you press 'Delete Account' you will be redirected to confirm your decision. Y
 
 ![Delete Account Confirm Page](./Screenshots/confirm-delete-account-page.jpeg)
 
-On Create Transaction Page you can create transaction with Amount, Date, Category, Account, Transaction Type and Payment Refference.
-The App gives a option for adding and removing categories (again with AJAX and Web API).
+On Create Transaction page you can create transaction with Amount, Date, Category, Account, Transaction Type and Payment Refference.
+The App gives an option for adding and removing Categories (again with AJAX and Web API).
 
 ![Create Transaction Page](./Screenshots/create-transaction-page.jpeg)
 
-When Transaction is created you will be redirected to Transaction Details Page. There the App gives options for Edit and Delete transaction.
+When Transaction is created you will be redirected to Transaction Details page. There the App gives an options for Edit and Delete transaction.
 
 ![Transaction Details Page](./Screenshots/transaction-details-page.jpeg)
 
-You can change everything on transactions data including the account. That will automatically change balance on both accounts.
+You can change everything on transactions data including the Account. That will automatically change Balance on both accounts.
 
 ![Edit Transaction Page](./Screenshots/edit-transaction-page.jpeg)
 
 ![Edited Transaction Message](./Screenshots/edited-transaction-message.jpeg)
 
-On All Transactions Page you can manage all of yours transactions. Filter them by specific period e.g.
+On All Transactions page you can manage all of yours transactions. Filter them by specific period e.g.
 
 ![All Transactions Page](./Screenshots/all-transactions-page.jpeg)
 
@@ -96,7 +96,7 @@ Here what Admin can do.
 
 ![Admin Home Page](./Screenshots/admin-homepage.jpeg)
 
-Admin can manage all users and their accounts. Edit and delete accounts and transactions, edit them. The Administrator has information about number of users and accounts. When press "More statistics" button on Home page he makes AJAX request and receive more fresh data from the server about amount of all transactions maded by users grouped by currencies.
+Admin can manage all users and their accounts. He can Edit and Delete accounts and transactions. The Administrator has information about the number of users and accounts. When press "More statistics" button on Home page makes AJAX request and receive more fresh data from the server about amount of all transactions maded by users grouped by currencies.
 
 ![More statistics](./Screenshots/admin-more-statistics.jpeg)
 
