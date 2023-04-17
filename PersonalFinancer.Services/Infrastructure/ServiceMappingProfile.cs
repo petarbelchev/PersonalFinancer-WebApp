@@ -1,11 +1,12 @@
 ﻿namespace PersonalFinancer.Services.Infrastructure
 {
 	using AutoMapper;
-
+	
 	using Data.Models;
 
 	using Services.Accounts.Models;
 	using Services.ApiService.Models;
+	using Services.Messages.Models;
 	using Services.Shared.Models;
 	using Services.User.Models;
 
@@ -39,6 +40,10 @@
 					.MapFrom(s => s.Accounts.Where(a => !a.IsDeleted).OrderBy(a => a.Name)));
 
 			CreateMap<ApiEntity, ApiOutputServiceModel>();
+
+			CreateMap<Reply, ReplyOutputServiceModel>();
+			CreateMap<MessageInputServiceModel, Message>();
+			CreateMap<ReplyInputServiceModel, Reply>();
 		}
 	}
 }

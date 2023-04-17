@@ -3,12 +3,14 @@
 	using AutoMapper;
 
 	using Data.Models;
-	
+
 	using Services.Accounts.Models;
+	using Services.Messages.Models;
 	using Services.Shared.Models;
 	using Services.User.Models;
-	
+
 	using Web.Models.Account;
+	using Web.Models.Message;
 	using Web.Models.Shared;
 	using Web.Models.Transaction;
 	using Web.Models.User;
@@ -34,6 +36,8 @@
 			CreateMap<ApplicationUser, AccountFormViewModel>();
 			CreateMap<RegisterFormViewModel, ApplicationUser>()
 				.ForMember(m => m.UserName, mf => mf.MapFrom(s => s.Email));
+
+			CreateMap<MessageDetailsServiceModel, MessageDetailsViewModel>();
 		}
 	}
 }

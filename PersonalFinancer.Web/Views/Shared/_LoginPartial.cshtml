@@ -7,6 +7,24 @@
 <ul class="navbar-nav">
 	@if (User?.Identity?.IsAuthenticated ?? false)
 	{
+		if (User.IsAdmin())
+		{
+			<a class="nav-link text-light" asp-controller="Messages" asp-action="AllMessages">Users Messages</a>
+		}
+		else
+		{
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Contact Us</a>
+				<ul class="dropdown-menu dropdown-menu-end">
+					<li class="dropdown-item">
+						<a class="text-dark" asp-controller="Messages" asp-action="Create" style="text-decoration: none;">Write Message</a>
+					</li>
+					<li class="dropdown-item">
+						<a class="text-dark" asp-controller="Messages" asp-action="AllMessages" style="text-decoration: none;">Your Messages</a>
+					</li>
+				</ul>
+			</li>
+		}
 		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 				@await userService.FullName(User.Id())

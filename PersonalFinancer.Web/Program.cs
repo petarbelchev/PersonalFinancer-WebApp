@@ -8,6 +8,7 @@ using PersonalFinancer.Data.Models;
 
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.ApiService;
+using PersonalFinancer.Services.Messages;
 using PersonalFinancer.Services.User;
 
 using PersonalFinancer.Web.Controllers;
@@ -19,6 +20,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<PersonalFinancerDbContext>(options =>
 	options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.Configure<MessagesDatabaseSettings>(
+	builder.Configuration.GetSection("MessagesDatabase"));
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
@@ -43,6 +47,7 @@ builder.Services.AddScoped<ApiService<AccountType>, ApiService<AccountType>>();
 builder.Services.AddScoped<ApiService<Category>, ApiService<Category>>();
 builder.Services.AddScoped<ApiService<Currency>, ApiService<Currency>>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
+builder.Services.AddSingleton<MessagesService>();
 
 builder.Services.AddAutoMapper(
 	typeof(IAccountsService).Assembly,

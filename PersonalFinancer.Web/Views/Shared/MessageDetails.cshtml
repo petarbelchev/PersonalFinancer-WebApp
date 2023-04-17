@@ -1,0 +1,57 @@
+﻿@using PersonalFinancer.Web.Models.Message;
+@model MessageDetailsViewModel
+@{
+	ViewData["Title"] = "Message Details";
+}
+
+<p class="display-6 text-center">@ViewData["Title"]</p>
+<div class="row d-flex justify-content-center">
+	<div class="col-lg-8">
+		<div>
+			<div class="card">
+				<div class="card-header fs-4 d-flex justify-content-between">
+					<span><b>@Model.Subject</b></span>
+					<span>
+						<a asp-controller="Messages" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger" 
+						onclick="return confirm('Are you sure you want to delete this Message?')">Delete</a>
+					</span>
+				</div>
+				<div class="card-body">
+					<blockquote class="blockquote mb-0">
+						<p>@Model.Content</p>
+						<footer class="blockquote-footer" style="margin-top: 10px;">Writed from  @Model.AuthorName on <cite title="Source Title">@Model.CreatedOn</cite></footer>
+					</blockquote>
+				</div>
+			</div>
+
+			<p class="display-6 fs-4 text-center" style="margin-top: 30px;">Replies</p>
+
+			@foreach (var reply in Model.Replies)
+			{
+				<div class="card formField">
+					<div class="card-body">
+						<blockquote class="blockquote mb-0">
+							<p>@reply.Content</p>
+							<footer class="blockquote-footer" style="margin-top: 10px;">Writed from  @reply.AuthorName on <cite title="Source Title">@reply.CreatedOn</cite></footer>
+						</blockquote>
+					</div>
+				</div>
+			}
+		</div>
+
+		<hr style="margin-top: 50px;" />
+		<form method="post">
+			<div class="mb-3">
+				<textarea asp-for="@Model.ReplyContent" class="form-control" rows="5" placeholder="Write your reply here..."></textarea>
+				<span asp-validation-for="@Model.ReplyContent" class="text-danger"></span>
+			</div>
+			<div>
+				<button type="submit" class="w-100 btn btn-lg btn-success">Send Reply</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

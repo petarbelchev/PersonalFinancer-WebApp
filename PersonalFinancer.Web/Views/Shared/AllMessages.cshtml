@@ -1,0 +1,36 @@
+﻿@using PersonalFinancer.Services.Messages.Models;
+@model IEnumerable<MessageOutputServiceModel>
+@{
+	ViewData["Title"] = "Messages";
+}
+
+<p class="display-6 text-center">@ViewData["Title"]</p>
+
+@if (Model.Any())
+{
+	<div class="row d-flex justify-content-center">
+		<div class="col-lg-8">
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th scope="col">Subject</th>
+						<th scope="col">Date</th>
+					</tr>
+				</thead>
+				<tbody style="vertical-align: text-top;">
+					@foreach (var message in Model)
+					{
+						<tr role="button" onclick="location.href='@Url.Action("MessageDetails", "Messages", new { id = message.Id })'">
+							<td><img src="/icons/icons8-message-64.png" style="max-width: 45px;" /><span>	@message.Subject</span></td>
+							<td><p>@message.CreatedOn</p></td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+else
+{
+	<p class="display-6 fs-4 text-center">You don't have any messages.</p>
+}
