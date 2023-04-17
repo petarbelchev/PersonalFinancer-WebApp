@@ -27,7 +27,7 @@ This is my first project. I created it to practice my skills and also will be a 
 
 ## How to Install and Run the Project
 The Project can be easy tested. All you need to do:
-1. Create appsettings.json file with connection string;
+1. Create appsettings.json file with connection strings for MS SQL Server and MongoDB;
 3. Run the App & Enjoy! :)
 
 The Migration will seed the Database with: 
