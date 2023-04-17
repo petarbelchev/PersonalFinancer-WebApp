@@ -10,11 +10,11 @@ This is my first project. I created it to practice my skills and also will be a 
 
 ## Used Tech/Frameworks
 - ASP.NET Core 6
-    - Database layer with 6 entity models
-    - UI layer with 4 controllers + 4 more in the "Admin" area
+    - Database layer with 8 entity models
+    - UI layer with 5 controllers + 5 more in the "Admin" area
     - Web API with 7 controllers for RESTful services
-    - Service layer with 3 services
-    - 16 views + 5 partial views
+    - Service layer with 4 services
+    - 20 views + 5 partial views
     - Client and Server validations 
     - AutoMapper
     - Cache in-memory
@@ -22,6 +22,7 @@ This is my first project. I created it to practice my skills and also will be a 
 - JavaScript for AJAX requests and DOM manipulations
 - Entity Framework Core
 - Microsoft SQL Server
+- MongoDB (for Messages) *NEW
 - NUnit
 
 ## How to Install and Run the Project
@@ -90,6 +91,14 @@ You can change everything on transactions data including the Account. That will 
 On All Transactions page you can manage all of yours transactions. Filter them by specific period e.g.
 
 ![All Transactions Page](./Screenshots/all-transactions-page.jpeg)
+
+*NEW Users can write messages to support team.
+
+![Create Message Page](./Screenshots/create-message-page.jpeg)
+
+![User Messages Page](./Screenshots/user-messages.jpeg)
+
+![Message Details Page](./Screenshots/message-details-page.jpeg)
 
 Personal Financer has a two roles - User and Admin.
 Here what Admin can do.
