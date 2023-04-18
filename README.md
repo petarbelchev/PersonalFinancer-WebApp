@@ -92,7 +92,7 @@ On All Transactions page you can manage all of yours transactions. Filter them b
 
 ![All Transactions Page](./Screenshots/all-transactions-page.jpeg)
 
-*NEW Users can write messages to support team.
+*NEW Users can write messages to support team. Every Admin can see users messages and reply to them. Messages can be deleted both from users and admins. They are stored in separated database (MongoDB).
 
 ![Create Message Page](./Screenshots/create-message-page.jpeg)
 
