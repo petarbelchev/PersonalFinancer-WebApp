@@ -2,7 +2,7 @@
 {
 	using AutoMapper;
 
-	using Services.Infrastructure;
+	using PersonalFinancer.Services.Infrastructure;
 
 	static class MapperMock
 	{

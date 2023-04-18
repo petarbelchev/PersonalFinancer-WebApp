@@ -26,10 +26,10 @@
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task DeleteAccount(string accountId, string userId, bool isUserAdmin, bool shouldDeleteTransactions = false);
-
+		
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist
-		/// and ArgumentException when Owner Id is passed and User is not owner.
+		/// and ArgumentException when User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>

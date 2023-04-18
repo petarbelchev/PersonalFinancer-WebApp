@@ -229,5 +229,47 @@
 //			Assert.That(async () => await userService.FullName(Guid.NewGuid().ToString()),
 //				Throws.TypeOf<InvalidOperationException>());
 //		}
+
+
+//[Test]
+//		public async Task GetUserTransactionsViewModel_ShouldReturnCorrectViewModel_WithValidInput()
+//		{
+//			//Arrange
+//			var dateFilterModel = new DateFilterModel
+//			{
+//				StartDate = DateTime.Now.AddMonths(-1),
+//				EndDate = DateTime.Now
+//			};
+
+//			IEnumerable<Transaction> expectedTransactions = await data.Transactions
+//	.Where(t => t.Account.OwnerId == User1.Id &&
+//					t.CreatedOn >= dateFilterModel.StartDate &&
+//					t.CreatedOn <= dateFilterModel.EndDate)
+//				.OrderByDescending(t => t.CreatedOn)
+//				.ToListAsync();
+
+//			//Act
+//			UserTransactionsViewModel actual =
+//				await accountService.getuser(User1.Id, dateFilterModel);
+
+//	//Assert
+//			Assert.That(actual, Is.Not.Null);
+//			Assert.That(actual.Transactions.Count(), Is.EqualTo(expectedTransactions.Count()));
+//			for (int i = 0; i < expectedTransactions.Count(); i++)
+//			{
+//				Assert.That(actual.Transactions.ElementAt(i).Id,
+//					Is.EqualTo(expectedTransactions.ElementAt(i).Id));
+//				Assert.That(actual.Transactions.ElementAt(i).Amount,
+//					Is.EqualTo(expectedTransactions.ElementAt(i).Amount));
+//				Assert.That(actual.Transactions.ElementAt(i).CategoryName,
+//					Is.EqualTo(expectedTransactions.ElementAt(i).Category.Name));
+//				Assert.That(actual.Transactions.ElementAt(i).Refference,
+//					Is.EqualTo(expectedTransactions.ElementAt(i).Refference));
+//				Assert.That(actual.Transactions.ElementAt(i).TransactionType,
+//					Is.EqualTo(expectedTransactions.ElementAt(i).TransactionType.ToString()));
+//			}
+//		}
+
+
 //	}
 //}

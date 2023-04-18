@@ -125,7 +125,7 @@
 
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist
-		/// and ArgumentException when Owner Id is passed and User is not owner.
+		/// and ArgumentException when User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
@@ -163,7 +163,7 @@
 			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
 
 			if (account.Name != model.Name && IsNameExists(model.Name, model.OwnerId))
-				throw new ArgumentException($"The User already have Account with {model.Name} name.");
+				throw new ArgumentException($"The User already have Account with \"{model.Name}\" name.");
 
 			account.Name = model.Name.Trim();
 			account.CurrencyId = model.CurrencyId;
@@ -427,6 +427,7 @@
 							new AccountServiceModel { Id = t.AccountId, Name = t.Account.Name }
 						}
 						: t.Owner.Accounts.Where(a => !a.IsDeleted)
+							.OrderBy(a => a.Name)
 							.Select(a => mapper.Map<AccountServiceModel>(a)),
 					UserCategories = t.IsInitialBalance ?
 						new List<CategoryServiceModel>()
@@ -434,6 +435,7 @@
 							new CategoryServiceModel { Id = t.CategoryId, Name = t.Category.Name }
 						}
 						: t.Owner.Categories.Where(c => !c.IsDeleted)
+							.OrderBy(c => c.Name)
 							.Select(c => mapper.Map<CategoryServiceModel>(c))
 				})
 				.FirstAsync();
