@@ -36,7 +36,7 @@
         public async Task<ApiOutputServiceModel> CreateEntity(ApiInputServiceModel model)
         {
             T? entity = await dbSet.FirstOrDefaultAsync(
-                at => at.Name == model.Name && at.OwnerId == model.OwnerId);
+                x => x.Name == model.Name && x.OwnerId == model.OwnerId);
 
             if (entity != null)
             {

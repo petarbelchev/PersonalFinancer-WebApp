@@ -54,7 +54,7 @@
 					.Take(PaginationConstants.UsersPerPage)
 					.ProjectTo<UserServiceModel>(mapper.ConfigurationProvider)
 					.ToListAsync(),
-				TotalUsersCount = data.Users.Count()
+				TotalUsersCount = await data.Users.CountAsync()
 			};
 
 			return users;
@@ -67,6 +67,7 @@
 			{
 				categories = await data.Categories
 					.Where(c => c.OwnerId == userId && !c.IsDeleted)
+					.OrderBy(c => c.Name)
 					.Select(c => mapper.Map<CategoryServiceModel>(c))
 					.ToArrayAsync();
 
@@ -78,6 +79,7 @@
 			{
 				accounts = await data.Accounts
 					.Where(a => a.OwnerId == userId && !a.IsDeleted)
+					.OrderBy(a => a.Name)
 					.Select(a => mapper.Map<AccountServiceModel>(a))
 					.ToArrayAsync();
 				
@@ -101,6 +103,7 @@
 			{
 				accTypes = await data.AccountTypes
 					.Where(at => at.OwnerId == userId && !at.IsDeleted)
+					.OrderBy(at => at.Name)
 					.Select(at => mapper.Map<AccountTypeServiceModel>(at))
 					.ToArrayAsync();
 
@@ -112,6 +115,7 @@
 			{
 				currencies = await data.Currencies
 					.Where(c => c.OwnerId == userId && !c.IsDeleted)
+					.OrderBy(c => c.Name)
 					.Select(c => mapper.Map<CurrencyServiceModel>(c))
 					.ToArrayAsync();
 				
@@ -136,9 +140,9 @@
 				.ToArrayAsync();
 		}
 
-		public int GetUsersAccountsCount()
+		public async Task<int> GetUsersAccountsCount()
 		{
-			int accountsCount = data.Accounts.Count(a => !a.IsDeleted);
+			int accountsCount = await data.Accounts.CountAsync(a => !a.IsDeleted);
 
 			return accountsCount;
 		}
@@ -236,6 +240,6 @@
 			return result;
 		}
 
-		public int UsersCount() => data.Users.Count();
+		public async Task<int> UsersCount() => await data.Users.CountAsync();
 	}
 }

@@ -1,275 +1,370 @@
-﻿//using AutoMapper.QueryableExtensions;
-//using Microsoft.EntityFrameworkCore;
-//using NUnit.Framework;
+﻿using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
 
-//using PersonalFinancer.Data.Enums;
-//using PersonalFinancer.Services.Shared.Models;
-//using PersonalFinancer.Services.User;
-//using PersonalFinancer.Services.User.Models;
+using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Services.Shared.Models;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Services.User.Models;
+using static PersonalFinancer.Data.Constants.PaginationConstants;
 
-//namespace PersonalFinancer.Tests.Services
-//{
-//	[TestFixture]
-//	class UserServiceTests : UnitTestsBase
-//	{
-//		private IUsersService userService;
+namespace PersonalFinancer.Tests.Services
+{
+	[TestFixture]
+	class UserServiceTests : UnitTestsBase
+	{
+		private IUsersService userService;
 
-//		[SetUp]
-//		public void SetUp()
-//		{
-//			this.userService = new UsersService(this.data, this.mapper);
-//		}
+		[SetUp]
+		public void SetUp()
+		{
+			userService = new UsersService(data, mapper, memoryCache);
+		}
 
-//		[Test]
-//		public void AccountsCount_ShouldReturnAccountsCount()
-//		{
-//			//Arrange
-//			int expectedCount = data.Accounts.Count(a => !a.IsDeleted);
+		[Test]
+		public async Task FullName_ShouldReturnUsersFullName_WithValidId()
+		{
+			//Arrange
+			string expectedFullName = $"{User1.FirstName} {User1.LastName}";
 
-//			//Act
-//			int actualCount = userService.GetUsersAccountsCount();
+			//Act
+			string actualFullName = await userService.FullName(User1.Id);
 
-//			//Assert
-//			Assert.That(actualCount, Is.EqualTo(expectedCount));
-//		}
+			//Assert
+			Assert.That(actualFullName, Is.EqualTo(expectedFullName));
+		}
 
-//		[Test]
-//		public async Task GetUserAccounts_ShouldReturnUsersAccounts_WithValidId()
-//		{
-//			//Arrange
-//			var expectedAccounts = await data.Accounts
-//				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
-//				.ProjectTo<AccountCardServiceModel>(mapper.ConfigurationProvider)
-//				.ToListAsync();
+		[Test]
+		public void FullName_ShouldThrowException_WithInvalidId()
+		{
+			//Act & Assert
+			Assert.That(async () => await userService.FullName(Guid.NewGuid().ToString()),
+			Throws.TypeOf<InvalidOperationException>());
+		}
 
-//			//Act
-//			var actualAccounts = await userService.GetUserAccounts(this.User1.Id);
+		[Test]
+		public async Task GetAllUsers_ShouldReturnCollectionOfAllUsers()
+		{
+			//Arrange
+			var expectedUsers = await data.Users
+				.OrderBy(u => u.FirstName)
+				.ThenBy(u => u.LastName)
+				.Take(UsersPerPage)
+				.ProjectTo<UserServiceModel>(mapper.ConfigurationProvider)
+				.ToListAsync();
 
-//			//Assert
-//			Assert.That(actualAccounts, Is.Not.Null);
-//			Assert.That(actualAccounts.Count(), Is.EqualTo(expectedAccounts.Count));
-//			for (int i = 0; i < expectedAccounts.Count; i++)
-//			{
-//				Assert.That(actualAccounts.ElementAt(i).Id,
-//					Is.EqualTo(expectedAccounts.ElementAt(i).Id));
-//				Assert.That(actualAccounts.ElementAt(i).Name,
-//					Is.EqualTo(expectedAccounts.ElementAt(i).Name));
-//				Assert.That(actualAccounts.ElementAt(i).Balance,
-//					Is.EqualTo(expectedAccounts.ElementAt(i).Balance));
-//			}
-//		}
+			var expectedTotalCount = await data.Users.CountAsync();
 
-//		[Test]
-//		public async Task GetAllUsers_ShouldReturnCollectionOfAllUsers()
-//		{
-//			//Arrange
-//			var actual = new AllUsersViewModel();
+			//Act
+			var actual = await userService.GetAllUsers(1);
 
-//			var expected = await data.Users
-//				.OrderBy(u => u.FirstName)
-//				.ThenBy(u => u.LastName)
-//				.Skip(actual.Pagination.ElementsPerPage * (actual.Pagination.Page - 1))
-//				.Take(actual.Pagination.ElementsPerPage)
-//				.ProjectTo<UserViewModel>(mapper.ConfigurationProvider)
-//				.ToListAsync();
+			//Assert
+			Assert.That(actual, Is.Not.Null);
+			Assert.That(actual.Users.Count(), Is.EqualTo(expectedUsers.Count));
+			Assert.That(actual.TotalUsersCount, Is.EqualTo(expectedTotalCount));
 
-//			//Act
-//			actual = await userService.GetAllUsers();
+			for (int i = 0; i < expectedUsers.Count; i++)
+			{
+				Assert.That(actual.Users.ElementAt(i).Id,
+					Is.EqualTo(expectedUsers.ElementAt(i).Id));
+				Assert.That(actual.Users.ElementAt(i).Email,
+					Is.EqualTo(expectedUsers.ElementAt(i).Email));
+				Assert.That(actual.Users.ElementAt(i).FirstName,
+					Is.EqualTo(expectedUsers.ElementAt(i).FirstName));
+				Assert.That(actual.Users.ElementAt(i).LastName,
+					Is.EqualTo(expectedUsers.ElementAt(i).LastName));
+			}
+		}
 
-//			//Assert
-//			Assert.That(actual, Is.Not.Null);
-//			Assert.That(actual.Users.Count(), Is.EqualTo(expected.Count));
-//			for (int i = 0; i < expected.Count; i++)
-//			{
-//				Assert.That(actual.Users.ElementAt(i).Id, Is.EqualTo(expected.ElementAt(i).Id));
-//				Assert.That(actual.Users.ElementAt(i).Email, Is.EqualTo(expected.ElementAt(i).Email));
-//				Assert.That(actual.Users.ElementAt(i).FirstName, Is.EqualTo(expected.ElementAt(i).FirstName));
-//				Assert.That(actual.Users.ElementAt(i).LastName, Is.EqualTo(expected.ElementAt(i).LastName));
-//			}
-//		}
+		[Test]
+		public async Task GetUserAccounts_ShouldReturnUsersAccounts_WithValidId()
+		{
+			//Arrange
+			var expectedAccounts = await data.Accounts
+				.Where(a => a.OwnerId == User1.Id && !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.ProjectTo<AccountCardServiceModel>(mapper.ConfigurationProvider)
+				.ToListAsync();
 
-//		[Test]
-//		public async Task SetUserDashboard_ShouldReturnCorrectData_WithValidParams()
-//		{
-//			//Arrange
-//			var actualDashboard = new UserDashboardViewModel()
-//			{
-//				StartDate = DateTime.UtcNow.AddMonths(-1),
-//				EndDate = DateTime.UtcNow
-//			};
+			//Act
+			var actualAccounts = await userService.GetUserAccounts(User1.Id);
 
-//			var expectedAccounts = await data.Accounts
-//				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
-//				.Select(a => mapper.Map<AccountCardServiceModel>(a))
-//				.ToListAsync();
+			//Assert
+			Assert.That(actualAccounts, Is.Not.Null);
+			Assert.That(actualAccounts.Count(), Is.EqualTo(expectedAccounts.Count));
 
-//			var expectedCurrenciesCashFlow = await data.Transactions
-//				.Where(t => t.OwnerId == this.User1.Id 
-//					&& t.CreatedOn >= actualDashboard.StartDate
-//					&& t.CreatedOn <= actualDashboard.EndDate)
-//				.GroupBy(t => t.Account.Currency.Name)
-//				.Select(t => new CurrencyCashFlowServiceModel
-//				{
-//					Name = t.Key,
-//					Incomes = t.Where(t => t.TransactionType == TransactionType.Income).Sum(t => t.Amount),
-//					Expenses = t.Where(t => t.TransactionType == TransactionType.Expense).Sum(t => t.Amount)
-//				})
-//				.OrderBy(c => c.Name)
-//				.ToListAsync();
+			for (int i = 0; i < expectedAccounts.Count; i++)
+			{
+				Assert.That(actualAccounts.ElementAt(i).Id,
+					Is.EqualTo(expectedAccounts.ElementAt(i).Id));
+				Assert.That(actualAccounts.ElementAt(i).Name,
+					Is.EqualTo(expectedAccounts.ElementAt(i).Name));
+				Assert.That(actualAccounts.ElementAt(i).Balance,
+					Is.EqualTo(expectedAccounts.ElementAt(i).Balance));
+			}
+		}
 
-//			var expectedLastFiveTransaction = await data.Transactions
-//				.Where(t =>
-//					t.Account.OwnerId == this.User1.Id &&
-//					t.CreatedOn >= actualDashboard.StartDate &&
-//					t.CreatedOn <= actualDashboard.EndDate)
-//				.OrderByDescending(t => t.CreatedOn)
-//				.Take(5)
-//				.Select(t => mapper.Map<TransactionTableServiceModel>(t))
-//				.ToListAsync();
+		[Test]
+		public async Task GetUserAccountsAndCategories_ShouldReturnCorrectData()
+		{
+			//Arrange
+			AccountServiceModel[] expectedAccounts = await data.Accounts
+				.Where(a => a.OwnerId == User1.Id && !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.Select(a => mapper.Map<AccountServiceModel>(a))
+				.ToArrayAsync();
 
-//			//Act
-//			await userService.GetUserDashboardData(this.User1.Id, actualDashboard);
+			CategoryServiceModel[] expectedCategories = await data.Categories
+				.Where(c => c.OwnerId == User1.Id && !c.IsDeleted)
+				.OrderBy(c => c.Name)
+				.Select(c => mapper.Map<CategoryServiceModel>(c))
+				.ToArrayAsync();
 
-//			//Assert
-//			Assert.That(actualDashboard.Accounts.Count(), 
-//				Is.EqualTo(expectedAccounts.Count()));
+			//Act
+			var actual = await userService.GetUserAccountsAndCategories(User1.Id);
 
-//			for (int i = 0; i < actualDashboard.Accounts.Count(); i++)
-//			{
-//				Assert.That(actualDashboard.Accounts.ElementAt(i).Id,
-//					Is.EqualTo(expectedAccounts.ElementAt(i).Id));
-//				Assert.That(actualDashboard.Accounts.ElementAt(i).Name,
-//					Is.EqualTo(expectedAccounts.ElementAt(i).Name));
-//			}
+			//Assert
+			Assert.That(actual, Is.Not.Null);
+			Assert.That(actual.OwnerId, Is.EqualTo(User1.Id));
+			Assert.That(actual.UserAccounts.Count(), Is.EqualTo(expectedAccounts.Length));
+			Assert.That(actual.UserCategories.Count(), Is.EqualTo(expectedCategories.Length));
 
-//			Assert.That(actualDashboard.Transactions.Count(),
-//				Is.EqualTo(expectedLastFiveTransaction.Count()));
-//			for (int i = 0; i < actualDashboard.Transactions.Count(); i++)
-//			{
-//				Assert.That(actualDashboard.Transactions.ElementAt(i).Id,
-//					Is.EqualTo(expectedLastFiveTransaction.ElementAt(i).Id));
-//				Assert.That(actualDashboard.Transactions.ElementAt(i).Amount,
-//					Is.EqualTo(expectedLastFiveTransaction.ElementAt(i).Amount));
-//			}
+			for (int i = 0; i < expectedAccounts.Length; i++)
+			{
+				Assert.That(actual.UserAccounts.ElementAt(i).Id,
+					Is.EqualTo(expectedAccounts[i].Id));
+				Assert.That(actual.UserAccounts.ElementAt(i).Name,
+					Is.EqualTo(expectedAccounts[i].Name));
+			}
 
-//			Assert.That(actualDashboard.CurrenciesCashFlow.Count(),
-//				Is.EqualTo(expectedCurrenciesCashFlow.Count));
+			for (int i = 0; i < expectedCategories.Length; i++)
+			{
+				Assert.That(actual.UserCategories.ElementAt(i).Id,
+					Is.EqualTo(expectedCategories[i].Id));
+				Assert.That(actual.UserCategories.ElementAt(i).Name,
+					Is.EqualTo(expectedCategories[i].Name));
+			}
+		}
 
-//			for (int i = 0; i < expectedCurrenciesCashFlow.Count; i++)
-//			{
-//				Assert.That(actualDashboard.CurrenciesCashFlow.ElementAt(i).Name, 
-//					Is.EqualTo(expectedCurrenciesCashFlow[i].Name));
+		[Test]
+		public async Task GetUserAccountTypesAndCurrencies_ShouldReturnCorrectData()
+		{
+			//Arrange
+			AccountTypeServiceModel[] expectedAccTypes = await data.AccountTypes
+				.Where(at => at.OwnerId == User1.Id && !at.IsDeleted)
+				.OrderBy(at => at.Name)
+				.Select(at => mapper.Map<AccountTypeServiceModel>(at))
+				.ToArrayAsync();
+			
+			CurrencyServiceModel[] expectedCurrencies = await data.Currencies
+				.Where(c => c.OwnerId == User1.Id && !c.IsDeleted)
+				.OrderBy(c => c.Name)
+				.Select(c => mapper.Map<CurrencyServiceModel>(c))
+				.ToArrayAsync();
 
-//				Assert.That(actualDashboard.CurrenciesCashFlow.ElementAt(i).Incomes,
-//					Is.EqualTo(expectedCurrenciesCashFlow[i].Incomes));
+			//Act
+			var actual = await userService.GetUserAccountTypesAndCurrencies(User1.Id);
 
-//				Assert.That(actualDashboard.CurrenciesCashFlow.ElementAt(i).Expenses,
-//					Is.EqualTo(expectedCurrenciesCashFlow[i].Expenses));
-//			}
-//		}
+			//Assert
+			Assert.That(actual, Is.Not.Null);
+			Assert.That(actual.Currencies.Count(), Is.EqualTo(expectedCurrencies.Length));
+			Assert.That(actual.AccountTypes.Count(), Is.EqualTo(expectedAccTypes.Length));
 
-//		[Test]
-//		public void UsersCount_ShouldReturnCorrectData()
-//		{
-//			//Arrange
-//			int expected = data.Users.Count();
+			for (int i = 0; i < expectedAccTypes.Length; i++)
+			{
+				Assert.That(actual.AccountTypes.ElementAt(i).Id,
+					Is.EqualTo(expectedAccTypes[i].Id));
+				Assert.That(actual.AccountTypes.ElementAt(i).Name,
+					Is.EqualTo(expectedAccTypes[i].Name));
+			}
+			
+			for (int i = 0; i < expectedCurrencies.Length; i++)
+			{
+				Assert.That(actual.Currencies.ElementAt(i).Id,
+					Is.EqualTo(expectedCurrencies[i].Id));
+				Assert.That(actual.Currencies.ElementAt(i).Name,
+					Is.EqualTo(expectedCurrencies[i].Name));
+			}
+		}
 
-//			//Act
-//			int actual = userService.UsersCount();
+		[Test]
+		public async Task GetUsersAccountsCount_ShouldReturnAccountsCount()
+		{
+			//Arrange
+			int expectedCount = data.Accounts.Count(a => !a.IsDeleted);
 
-//			//Assert
-//			Assert.That(actual, Is.EqualTo(expected));
-//		}
+			//Act
+			int actualCount = await userService.GetUsersAccountsCount();
 
-//		[Test]
-//		public async Task UserDetails_ShouldReturnCorrectData_WithValidUserId()
-//		{
-//			//Arrange
-//			var expectedAccounts = await data.Accounts
-//				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
-//				.ToListAsync();
+			//Assert
+			Assert.That(actualCount, Is.EqualTo(expectedCount));
+		}
 
-//			//Act
-//			var actual = await userService.UserDetails(this.User1.Id);
+		[Test]
+		public async Task GetUserTransactions_ShouldReturnCorrectViewModel_WithValidInput()
+		{
+			//Arrange
+			DateTime startDate = DateTime.Now.AddMonths(-1);
+			DateTime endDate = DateTime.Now;
 
-//			//Assert
-//			Assert.That(actual, Is.Not.Null);
-//			Assert.That(actual.Id, Is.EqualTo(this.User1.Id));
-//			Assert.That(actual.FirstName, Is.EqualTo(this.User1.FirstName));
-//			Assert.That(actual.Email, Is.EqualTo(this.User1.Email));
-//			Assert.That(actual.Accounts.Count(), Is.EqualTo(expectedAccounts.Count));
-//			for (int i = 0; i < expectedAccounts.Count; i++)
-//			{
-//				Assert.That(actual.Accounts.ElementAt(i).Id,
-//					Is.EqualTo(expectedAccounts[i].Id));
-//				Assert.That(actual.Accounts.ElementAt(i).Name,
-//					Is.EqualTo(expectedAccounts[i].Name));
-//				Assert.That(actual.Accounts.ElementAt(i).Balance,
-//					Is.EqualTo(expectedAccounts[i].Balance));
-//			}
-//		}
+			var expectedTransactions = await data.Transactions
+				.Where(t => t.OwnerId == User1.Id
+					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+				.OrderByDescending(t => t.CreatedOn)
+				.Take(TransactionsPerPage)
+				.ProjectTo<TransactionTableServiceModel>(mapper.ConfigurationProvider)
+				.ToArrayAsync();
 
-//		[Test]
-//		public async Task FullName_ShouldReturnUsersFullName_WithValidId()
-//		{
-//			//Arrange
-//			string expectedFullName = $"{this.User1.FirstName} {this.User1.LastName}";
+			int expectedTotalTransactions = await data.Transactions
+				.CountAsync(t => t.OwnerId == User1.Id
+					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate);
 
-//			//Act
-//			string actualFullName = await userService.FullName(this.User1.Id);
+			//Act
+			var actual = await userService.GetUserTransactions(User1.Id, startDate, endDate);
 
-//			//Assert
-//			Assert.That(actualFullName, Is.EqualTo(expectedFullName));
-//		}
+			//Assert
+			Assert.That(actual, Is.Not.Null);
+			Assert.That(actual.Transactions.Count(), Is.EqualTo(expectedTransactions.Count()));
+			Assert.That(actual.TotalTransactionsCount, Is.EqualTo(expectedTotalTransactions));
 
-//		[Test]
-//		public void FullName_ShouldThrowException_WithInvalidId()
-//		{
-//			//Act & Assert
-//			Assert.That(async () => await userService.FullName(Guid.NewGuid().ToString()),
-//				Throws.TypeOf<InvalidOperationException>());
-//		}
+			for (int i = 0; i < expectedTransactions.Count(); i++)
+			{
+				Assert.That(actual.Transactions.ElementAt(i).Id,
+					Is.EqualTo(expectedTransactions.ElementAt(i).Id));
+				Assert.That(actual.Transactions.ElementAt(i).Amount,
+					Is.EqualTo(expectedTransactions.ElementAt(i).Amount));
+				Assert.That(actual.Transactions.ElementAt(i).CategoryName,
+					Is.EqualTo(expectedTransactions.ElementAt(i).CategoryName));
+				Assert.That(actual.Transactions.ElementAt(i).Refference,
+					Is.EqualTo(expectedTransactions.ElementAt(i).Refference));
+				Assert.That(actual.Transactions.ElementAt(i).TransactionType,
+					Is.EqualTo(expectedTransactions.ElementAt(i).TransactionType.ToString()));
+			}
+		}
 
+		[Test]
+		public async Task GetUserDashboardData_ShouldReturnCorrectData_WithValidParams()
+		{
+			//Arrange
+			DateTime startDate = DateTime.Now.AddMonths(-1);
+			DateTime endDate = DateTime.Now;
 
-//[Test]
-//		public async Task GetUserTransactionsViewModel_ShouldReturnCorrectViewModel_WithValidInput()
-//		{
-//			//Arrange
-//			var dateFilterModel = new DateFilterModel
-//			{
-//				StartDate = DateTime.Now.AddMonths(-1),
-//				EndDate = DateTime.Now
-//			};
+			var expectedAccounts = await data.Accounts
+				.Where(a => a.OwnerId == User1.Id && !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.Select(a => mapper.Map<AccountCardServiceModel>(a))
+				.ToListAsync();
 
-//			IEnumerable<Transaction> expectedTransactions = await data.Transactions
-//	.Where(t => t.Account.OwnerId == User1.Id &&
-//					t.CreatedOn >= dateFilterModel.StartDate &&
-//					t.CreatedOn <= dateFilterModel.EndDate)
-//				.OrderByDescending(t => t.CreatedOn)
-//				.ToListAsync();
+			var expectedCurrenciesCashFlow = await data.Transactions
+				.Where(t => t.OwnerId == User1.Id
+					&& t.CreatedOn >= startDate	&& t.CreatedOn <= endDate)
+				.GroupBy(t => t.Account.Currency.Name)
+				.Select(t => new CurrencyCashFlowServiceModel
+				{
+					Name = t.Key,
+					Incomes = t.Where(t => t.TransactionType == TransactionType.Income)
+						.Sum(t => t.Amount),
+					Expenses = t.Where(t => t.TransactionType == TransactionType.Expense)
+						.Sum(t => t.Amount)
+				})
+				.OrderBy(c => c.Name)
+				.ToListAsync();
 
-//			//Act
-//			UserTransactionsViewModel actual =
-//				await accountService.getuser(User1.Id, dateFilterModel);
+			var expectedLastFiveTransaction = await data.Transactions
+				.Where(t =>	t.Account.OwnerId == User1.Id 
+					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+				.OrderByDescending(t => t.CreatedOn)
+				.Take(5)
+				.Select(t => mapper.Map<TransactionTableServiceModel>(t))
+				.ToListAsync();
 
-//	//Assert
-//			Assert.That(actual, Is.Not.Null);
-//			Assert.That(actual.Transactions.Count(), Is.EqualTo(expectedTransactions.Count()));
-//			for (int i = 0; i < expectedTransactions.Count(); i++)
-//			{
-//				Assert.That(actual.Transactions.ElementAt(i).Id,
-//					Is.EqualTo(expectedTransactions.ElementAt(i).Id));
-//				Assert.That(actual.Transactions.ElementAt(i).Amount,
-//					Is.EqualTo(expectedTransactions.ElementAt(i).Amount));
-//				Assert.That(actual.Transactions.ElementAt(i).CategoryName,
-//					Is.EqualTo(expectedTransactions.ElementAt(i).Category.Name));
-//				Assert.That(actual.Transactions.ElementAt(i).Refference,
-//					Is.EqualTo(expectedTransactions.ElementAt(i).Refference));
-//				Assert.That(actual.Transactions.ElementAt(i).TransactionType,
-//					Is.EqualTo(expectedTransactions.ElementAt(i).TransactionType.ToString()));
-//			}
-//		}
+			//Act
+			var actual = await userService.GetUserDashboardData(User1.Id, startDate, endDate);
 
+			//Assert
+			Assert.That(actual.Accounts.Count(),
+				Is.EqualTo(expectedAccounts.Count()));
 
-//	}
-//}
+			for (int i = 0; i < actual.Accounts.Count(); i++)
+			{
+				Assert.That(actual.Accounts.ElementAt(i).Id,
+					Is.EqualTo(expectedAccounts.ElementAt(i).Id));
+				Assert.That(actual.Accounts.ElementAt(i).Name,
+					Is.EqualTo(expectedAccounts.ElementAt(i).Name));
+			}
+
+			Assert.That(actual.LastTransactions.Count(),
+				Is.EqualTo(expectedLastFiveTransaction.Count()));
+
+			for (int i = 0; i < actual.LastTransactions.Count(); i++)
+			{
+				Assert.That(actual.LastTransactions.ElementAt(i).Id,
+					Is.EqualTo(expectedLastFiveTransaction.ElementAt(i).Id));
+				Assert.That(actual.LastTransactions.ElementAt(i).Amount,
+					Is.EqualTo(expectedLastFiveTransaction.ElementAt(i).Amount));
+			}
+
+			Assert.That(actual.CurrenciesCashFlow.Count(),
+				Is.EqualTo(expectedCurrenciesCashFlow.Count));
+
+			for (int i = 0; i < expectedCurrenciesCashFlow.Count; i++)
+			{
+				Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Name,
+					Is.EqualTo(expectedCurrenciesCashFlow[i].Name));
+
+				Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Incomes,
+					Is.EqualTo(expectedCurrenciesCashFlow[i].Incomes));
+
+				Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Expenses,
+					Is.EqualTo(expectedCurrenciesCashFlow[i].Expenses));
+			}
+		}
+
+		[Test]
+		public async Task UserDetails_ShouldReturnCorrectData_WithValidUserId()
+		{
+			//Arrange
+			var expectedAccounts = await data.Accounts
+				.Where(a => a.OwnerId == User1.Id && !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.ToListAsync();
+
+			//Act
+			var actual = await userService.UserDetails(User1.Id);
+
+			//Assert
+			Assert.That(actual, Is.Not.Null);
+			Assert.That(actual.Id, Is.EqualTo(User1.Id));
+			Assert.That(actual.FirstName, Is.EqualTo(User1.FirstName));
+			Assert.That(actual.Email, Is.EqualTo(User1.Email));
+			Assert.That(actual.Accounts.Count(), Is.EqualTo(expectedAccounts.Count));
+
+			for (int i = 0; i < expectedAccounts.Count; i++)
+			{
+				Assert.That(actual.Accounts.ElementAt(i).Id,
+					Is.EqualTo(expectedAccounts[i].Id));
+				Assert.That(actual.Accounts.ElementAt(i).Name,
+					Is.EqualTo(expectedAccounts[i].Name));
+				Assert.That(actual.Accounts.ElementAt(i).Balance,
+					Is.EqualTo(expectedAccounts[i].Balance));
+				Assert.That(actual.Accounts.ElementAt(i).CurrencyName,
+					Is.EqualTo(expectedAccounts[i].Currency.Name));
+				Assert.That(actual.Accounts.ElementAt(i).OwnerId,
+					Is.EqualTo(expectedAccounts[i].OwnerId));
+			}
+		}
+
+		[Test]
+		public async Task UsersCount_ShouldReturnCorrectData()
+		{
+			//Arrange
+			int expected = data.Users.Count();
+
+			//Act
+			int actual = await userService.UsersCount();
+
+			//Assert
+			Assert.That(actual, Is.EqualTo(expected));
+		}
+	}
+}

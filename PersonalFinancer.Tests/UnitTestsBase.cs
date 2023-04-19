@@ -44,14 +44,14 @@ namespace PersonalFinancer.Tests
 		protected AccountType AccType2User1 { get; private set; } = null!;
 		//protected AccountType AccountType3User2 { get; private set; } = null!;
 
-		protected Category Cat1User1 { get; private set; } = null!;
+		protected Category CatInitialBalance { get; private set; } = null!;
 		protected Category Cat2User1 { get; private set; } = null!;
 		protected Category Cat3User1 { get; private set; } = null!;
 		protected Category Cat4User1 { get; private set; } = null!;
 
 		protected Currency Curr1User1 { get; private set; } = null!;
-		//protected Currency Currency2User1 { get; private set; } = null!;
-		//protected Currency Currency3User2 { get; private set; } = null!;
+		protected Currency Curr2User1 { get; private set; } = null!;
+		protected Currency Curr3User2 { get; private set; } = null!;
 
 		protected Transaction Transaction1User1 { get; private set; } = null!;
 		protected Transaction Transaction2User1 { get; private set; } = null!;
@@ -115,20 +115,20 @@ namespace PersonalFinancer.Tests
 				Name = "BGN",
 				OwnerId = user1Id
 			};
-			//string EurCurrencyId = Guid.NewGuid().ToString();
-			//Currency2User1 = new Currency
-			//{
-			//	Id = EurCurrencyId,
-			//	Name = "EUR",
-			//	OwnerId = User1Id
-			//};
-			//string User2UsdCurrencyId = Guid.NewGuid().ToString();
-			//Currency3User2 = new Currency
-			//{
-			//	Id = User2UsdCurrencyId,
-			//	Name = "USD",
-			//	OwnerId = User2Id
-			//};
+			string EurCurrencyId = Guid.NewGuid().ToString();
+			Curr2User1 = new Currency
+			{
+				Id = EurCurrencyId,
+				Name = "EUR",
+				OwnerId = user1Id
+			};
+			string User2UsdCurrencyId = Guid.NewGuid().ToString();
+			Curr3User2 = new Currency
+			{
+				Id = User2UsdCurrencyId,
+				Name = "USD",
+				OwnerId = user1Id
+			};
 			await data.Currencies.AddAsync(Curr1User1/*, Currency2User1, Currency3User2*/);
 
 			//// Accounts
@@ -166,7 +166,7 @@ namespace PersonalFinancer.Tests
 			await data.Accounts.AddRangeAsync(Account1User1, Account2User1, Account3User1Deleted);
 
 			// Categories
-			Cat1User1 = new Category
+			CatInitialBalance = new Category
 			{
 				Id = InitialBalanceCategoryId,
 				Name = CategoryInitialBalanceName,
@@ -193,7 +193,7 @@ namespace PersonalFinancer.Tests
 				Name = "Salary",
 				OwnerId = user1Id
 			};
-			await data.Categories.AddRangeAsync(Cat1User1, Cat2User1, Cat3User1, Cat4User1);
+			await data.Categories.AddRangeAsync(CatInitialBalance, Cat2User1, Cat3User1, Cat4User1);
 
 			// Transactions
 			// Cash BGN

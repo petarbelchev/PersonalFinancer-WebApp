@@ -99,9 +99,9 @@
 		Task<TransactionDetailsServiceModel> GetTransactionDetails(
 			string transactionId, string ownerId, bool isUserAdmin);
 
-		Task<UsersAccountCardsServiceModel> GetUsersAccountCardsData(int page);
+		Task<UsersAccountCardsServiceModel> GetAccountCardsData(int page);
 
-		Task<IEnumerable<CurrencyCashFlowServiceModel>> GetUsersCurrenciesCashFlow();
+		Task<IEnumerable<CurrencyCashFlowServiceModel>> GetCurrenciesCashFlow();
 
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist.

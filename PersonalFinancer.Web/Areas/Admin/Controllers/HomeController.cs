@@ -23,8 +23,8 @@
 		{
 			return View(new AdminDashboardViewModel
 			{
-				RegisteredUsers = userService.UsersCount(),
-				CreatedAccounts = userService.GetUsersAccountsCount(),
+				RegisteredUsers = await userService.UsersCount(),
+				CreatedAccounts = await userService.GetUsersAccountsCount(),
 				AdminFullName = await userService.FullName(User.Id()),
 				AccountsCashFlowEndpoint = HostConstants.ApiAccountsCashFlowUrl
 			});

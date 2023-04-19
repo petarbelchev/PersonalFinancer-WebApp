@@ -1,13 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
+using static PersonalFinancer.Data.Constants.PaginationConstants;
+using static PersonalFinancer.Data.Constants.CategoryConstants;
+
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Shared.Models;
-using static PersonalFinancer.Data.Constants.PaginationConstants;
-using static PersonalFinancer.Data.Constants.CategoryConstants;
 
 namespace PersonalFinancer.Tests.Services
 {
@@ -51,7 +53,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(newAccount.CurrencyId, Is.EqualTo(inputModel.CurrencyId));
 			Assert.That(newAccount.AccountTypeId, Is.EqualTo(inputModel.AccountTypeId));
 			Assert.That(newAccount.Transactions.Count, Is.EqualTo(1));
-			Assert.That(newAccount.Transactions.First().CategoryId, Is.EqualTo(Cat1User1.Id));
+			Assert.That(newAccount.Transactions.First().CategoryId, Is.EqualTo(CatInitialBalance.Id));
 		}
 
 		[Test]
@@ -113,7 +115,7 @@ namespace PersonalFinancer.Tests.Services
 				Amount = 100,
 				AccountId = Account1User1.Id,
 				OwnerId = User1.Id,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "Not Initial Balance",
 				TransactionType = TransactionType.Expense
@@ -146,7 +148,7 @@ namespace PersonalFinancer.Tests.Services
 				Amount = 100,
 				AccountId = Account1User1.Id,
 				OwnerId = User1.Id,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "Not Initial Balance",
 				TransactionType = TransactionType.Income
@@ -179,7 +181,7 @@ namespace PersonalFinancer.Tests.Services
 				Amount = 100,
 				AccountId = Guid.NewGuid().ToString(),
 				OwnerId = User1.Id,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "Not Initial Balance",
 				TransactionType = TransactionType.Expense
@@ -210,7 +212,7 @@ namespace PersonalFinancer.Tests.Services
 						Id = Guid.NewGuid().ToString(),
 						OwnerId = User1.Id,
 						Amount = 200,
-						CategoryId = Cat1User1.Id,
+						CategoryId = CatInitialBalance.Id,
 						CreatedOn = DateTime.UtcNow,
 						Refference = "Salary",
 						TransactionType = TransactionType.Income
@@ -253,7 +255,7 @@ namespace PersonalFinancer.Tests.Services
 						Id = Guid.NewGuid().ToString(),
 						OwnerId = User1.Id,
 						Amount = 200,
-						CategoryId = Cat1User1.Id,
+						CategoryId = CatInitialBalance.Id,
 						CreatedOn = DateTime.UtcNow,
 						Refference = "Salary",
 						TransactionType = TransactionType.Income
@@ -333,7 +335,7 @@ namespace PersonalFinancer.Tests.Services
 						Id = Guid.NewGuid().ToString(),
 						OwnerId = User1.Id,
 						Amount = 200,
-						CategoryId = Cat1User1.Id,
+						CategoryId = CatInitialBalance.Id,
 						CreatedOn = DateTime.UtcNow,
 						Refference = "Salary",
 						TransactionType = TransactionType.Income
@@ -380,7 +382,7 @@ namespace PersonalFinancer.Tests.Services
 						Id = Guid.NewGuid().ToString(),
 						OwnerId = User1.Id,
 						Amount = 200,
-						CategoryId = Cat1User1.Id,
+						CategoryId = CatInitialBalance.Id,
 						CreatedOn = DateTime.UtcNow,
 						Refference = "Salary",
 						TransactionType = TransactionType.Income
@@ -419,7 +421,7 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = User1.Id,
 				AccountId = Account1User1.Id,
 				Amount = 123,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "TestTransaction",
 				TransactionType = TransactionType.Income
@@ -456,7 +458,7 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = User1.Id,
 				AccountId = Account1User1.Id,
 				Amount = 123,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "TestTransaction",
 				TransactionType = TransactionType.Income
@@ -493,7 +495,7 @@ namespace PersonalFinancer.Tests.Services
 				AccountId = Account1User1.Id,
 				OwnerId = User1.Id,
 				Amount = 123,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "TestTransaction",
 				TransactionType = TransactionType.Expense
@@ -530,7 +532,7 @@ namespace PersonalFinancer.Tests.Services
 				AccountId = Account1User1.Id,
 				OwnerId = User1.Id,
 				Amount = 123,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "TestTransaction",
 				TransactionType = TransactionType.Expense
@@ -626,6 +628,43 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(account.CurrencyId, Is.EqualTo(inputModel.CurrencyId));
 			Assert.That(account.OwnerId, Is.EqualTo(inputModel.OwnerId));
 		}
+		
+		[Test]
+		public async Task EditAccount_ShouldChangeCurrency()
+		{
+			//Arrange
+			string accId = Guid.NewGuid().ToString();
+			var account = new Account
+			{
+				Id = accId,
+				Name = "For Edit 2",
+				Balance = 10,
+				AccountTypeId = AccType1User1.Id,
+				CurrencyId = Curr1User1.Id,
+				OwnerId = User1.Id
+			};
+			await data.Accounts.AddAsync(account);
+			await data.SaveChangesAsync();
+
+			var inputModel = new AccountFormShortServiceModel
+			{
+				Name = account.Name,
+				AccountTypeId = account.AccountTypeId,
+				Balance = account.Balance,
+				CurrencyId = Curr2User1.Id, // Change
+				OwnerId = account.OwnerId
+			};
+
+			//Act
+			await accountService.EditAccount(accId, inputModel);
+
+			//Assert
+			Assert.That(account.Name, Is.EqualTo(inputModel.Name));
+			Assert.That(account.AccountTypeId, Is.EqualTo(inputModel.AccountTypeId));
+			Assert.That(account.Balance, Is.EqualTo(inputModel.Balance));
+			Assert.That(account.CurrencyId, Is.EqualTo(inputModel.CurrencyId));
+			Assert.That(account.OwnerId, Is.EqualTo(inputModel.OwnerId));
+		}
 
 		[Test]
 		public async Task EditAccount_ShouldChangeAccountAccountType()
@@ -635,7 +674,7 @@ namespace PersonalFinancer.Tests.Services
 			var account = new Account
 			{
 				Id = accId,
-				Name = "For Edit2",
+				Name = "For Edit 3",
 				Balance = 10,
 				AccountTypeId = AccType1User1.Id,
 				CurrencyId = Curr1User1.Id,
@@ -671,7 +710,7 @@ namespace PersonalFinancer.Tests.Services
 			var account = new Account
 			{
 				Id = Guid.NewGuid().ToString(),
-				Name = "For Edit 3",
+				Name = "For Edit 4",
 				Balance = 5,
 				AccountTypeId = AccType1User1.Id,
 				CurrencyId = Curr1User1.Id,
@@ -683,7 +722,7 @@ namespace PersonalFinancer.Tests.Services
 				Amount = 10,
 				OwnerId = account.OwnerId,
 				AccountId = account.Id,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "Initial Balance",
 				IsInitialBalance = true,
@@ -695,7 +734,7 @@ namespace PersonalFinancer.Tests.Services
 				Amount = 5,
 				OwnerId = account.OwnerId,
 				AccountId = account.Id,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "Lunch",
 				TransactionType = TransactionType.Expense
@@ -733,7 +772,88 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(account.Balance, Is.EqualTo(accountIncomesSum - accountExpensesSum + 100));
-			Assert.That(initBalTransactionAmountBefore, Is.EqualTo(initialBalTransaction.Amount - 100));
+			Assert.That(account.Balance, Is.EqualTo(inputModel.Balance));
+			Assert.That(initialBalTransaction.Amount, Is.EqualTo(initBalTransactionAmountBefore + 100));
+			Assert.That(initialBalTransaction.TransactionType, Is.EqualTo(TransactionType.Income));
+			Assert.That(account.Name, Is.EqualTo(inputModel.Name));
+			Assert.That(account.AccountTypeId, Is.EqualTo(inputModel.AccountTypeId));
+			Assert.That(account.CurrencyId, Is.EqualTo(inputModel.CurrencyId));
+			Assert.That(account.OwnerId, Is.EqualTo(inputModel.OwnerId));
+			Assert.That(account.AccountTypeId, Is.EqualTo(inputModel.AccountTypeId));
+		}
+		
+		[Test]
+		public async Task EditAccount_ShouldChangeAccountBalanceAndInitialBalanceTransactionAmountAndType()
+		{
+			//Arrange
+			var account = new Account
+			{
+				Id = Guid.NewGuid().ToString(),
+				Name = "For Edit 4",
+				Balance = 5,
+				AccountTypeId = AccType1User1.Id,
+				CurrencyId = Curr1User1.Id,
+				OwnerId = User1.Id
+			};
+			var initialBalTransaction = new Transaction
+			{
+				Id = Guid.NewGuid().ToString(),
+				Amount = 10,
+				OwnerId = account.OwnerId,
+				AccountId = account.Id,
+				CategoryId = CatInitialBalance.Id,
+				CreatedOn = DateTime.UtcNow,
+				Refference = "Initial Balance",
+				IsInitialBalance = true,
+				TransactionType = TransactionType.Income
+			};
+			var expenseTransaction = new Transaction
+			{
+				Id = Guid.NewGuid().ToString(),
+				Amount = 5,
+				OwnerId = account.OwnerId,
+				AccountId = account.Id,
+				CategoryId = CatInitialBalance.Id,
+				CreatedOn = DateTime.UtcNow,
+				Refference = "Lunch",
+				TransactionType = TransactionType.Expense
+			};
+			account.Transactions.Add(initialBalTransaction);
+			account.Transactions.Add(expenseTransaction);
+			await data.Accounts.AddAsync(account);
+			await data.SaveChangesAsync();
+
+			decimal initBalTransactionAmountBefore = initialBalTransaction.Amount;
+
+			decimal accountExpensesSum = account.Transactions
+				.Where(t => t.TransactionType == TransactionType.Expense)
+				.Sum(t => t.Amount);
+
+			decimal accountIncomesSum = account.Transactions
+				.Where(t => t.TransactionType == TransactionType.Income)
+				.Sum(t => t.Amount);
+
+
+			//Assert that the account has correct balance before the test
+			Assert.That(account.Balance, Is.EqualTo(accountIncomesSum - accountExpensesSum));
+
+			var inputModel = new AccountFormShortServiceModel
+			{
+				Name = account.Name,
+				AccountTypeId = account.AccountTypeId,
+				Balance = account.Balance - 100, // Change
+				CurrencyId = account.CurrencyId,
+				OwnerId = account.OwnerId
+			};
+
+			//Act
+			await accountService.EditAccount(account.Id, inputModel);
+
+			//Assert
+			Assert.That(account.Balance, Is.EqualTo(accountIncomesSum - accountExpensesSum - 100));
+			Assert.That(account.Balance, Is.EqualTo(inputModel.Balance));
+			Assert.That(initialBalTransaction.Amount, Is.EqualTo(initBalTransactionAmountBefore - 100));
+			Assert.That(initialBalTransaction.TransactionType, Is.EqualTo(TransactionType.Expense));
 			Assert.That(account.Name, Is.EqualTo(inputModel.Name));
 			Assert.That(account.AccountTypeId, Is.EqualTo(inputModel.AccountTypeId));
 			Assert.That(account.CurrencyId, Is.EqualTo(inputModel.CurrencyId));
@@ -772,8 +892,16 @@ namespace PersonalFinancer.Tests.Services
 				account.Transactions.First(t => t.IsInitialBalance);
 
 			//Assert
-			Assert.That(account.Balance, Is.EqualTo(100));
 			Assert.That(initialBalTransaction.Amount, Is.EqualTo(100));
+			Assert.That(initialBalTransaction.IsInitialBalance, Is.True);
+			Assert.That(initialBalTransaction.Refference, Is.EqualTo(CategoryInitialBalanceName));
+			Assert.That(initialBalTransaction.OwnerId, Is.EqualTo(account.OwnerId));
+			Assert.That(initialBalTransaction.AccountId, Is.EqualTo(account.Id));
+			Assert.That(initialBalTransaction.CategoryId, Is.EqualTo(CatInitialBalance.Id));
+			Assert.That(initialBalTransaction.TransactionType, Is.EqualTo(TransactionType.Income));
+
+			Assert.That(account.Balance, Is.EqualTo(100));
+			Assert.That(account.Balance, Is.EqualTo(inputModel.Balance));
 			Assert.That(account.Name, Is.EqualTo(inputModel.Name));
 			Assert.That(account.AccountTypeId, Is.EqualTo(inputModel.AccountTypeId));
 			Assert.That(account.CurrencyId, Is.EqualTo(inputModel.CurrencyId));
@@ -809,7 +937,7 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = User1.Id,
 				AccountId = Account1User1.Id,
 				Amount = 123,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "TransactionTypeChanged",
 				TransactionType = TransactionType.Income
@@ -844,7 +972,7 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = User1.Id,
 				AccountId = Account2User1.Id,
 				Amount = 123,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "AccountChanged",
 				TransactionType = TransactionType.Income
@@ -881,7 +1009,7 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = User1.Id,
 				AccountId = Account1User1.Id,
 				Amount = 123,
-				CategoryId = Cat1User1.Id,
+				CategoryId = CatInitialBalance.Id,
 				CreatedOn = DateTime.UtcNow,
 				Refference = "First Refference",
 				TransactionType = TransactionType.Income
@@ -991,6 +1119,91 @@ namespace PersonalFinancer.Tests.Services
 			//Act & Assert
 			Assert.That(async () => await accountService.GetAccountDetails(id, startDate, endDate, User1.Id, isUserAdmin: false),
 			Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task GetAccountCardsData_ShouldReturnCorrectData()
+		{
+			//Arrange
+			var expectedAccounts = await data.Accounts
+				.Where(a => !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.Take(AccountsPerPage)
+				.ProjectTo<AccountCardServiceModel>(mapper.ConfigurationProvider)
+				.ToArrayAsync();
+
+			int expectedTotalAccount = await data.Accounts
+				.CountAsync(a => !a.IsDeleted);
+
+			//Act
+			var actual = await accountService.GetAccountCardsData(1);
+
+			//Assert
+			Assert.That(actual, Is.Not.Null);
+			Assert.That(actual.Accounts.Count(), Is.EqualTo(expectedAccounts.Length));
+			Assert.That(actual.TotalUsersAccountsCount, Is.EqualTo(expectedTotalAccount));
+
+			for (int i = 0; i < expectedAccounts.Length; i++)
+			{
+				Assert.That(actual.Accounts.ElementAt(i).Id,
+					Is.EqualTo(expectedAccounts[i].Id));
+				Assert.That(actual.Accounts.ElementAt(i).Name,
+					Is.EqualTo(expectedAccounts[i].Name));
+				Assert.That(actual.Accounts.ElementAt(i).Balance,
+					Is.EqualTo(expectedAccounts[i].Balance));
+				Assert.That(actual.Accounts.ElementAt(i).CurrencyName,
+					Is.EqualTo(expectedAccounts[i].CurrencyName));
+				Assert.That(actual.Accounts.ElementAt(i).OwnerId,
+					Is.EqualTo(expectedAccounts[i].OwnerId));
+			}
+		}
+
+		[Test]
+		public async Task GetCurrenciesCashFlow_ShouldReturnCorrectData()
+		{
+			//Arrange
+			var expectedIncomes = new Dictionary<string, decimal>();
+			var expectedExpenses = new Dictionary<string, decimal>();
+
+			await data.Transactions
+				.Include(t => t.Account)
+				.ThenInclude(a => a.Currency)
+				.OrderBy(t => t.Account.Currency.Name)
+				.ForEachAsync(t =>
+				{
+					string currency = t.Account.Currency.Name;
+
+					if (t.TransactionType == TransactionType.Income)
+					{
+						if (!expectedIncomes.ContainsKey(currency))
+							expectedIncomes[currency] = 0;
+
+						expectedIncomes[currency] += t.Amount;
+					}
+					else
+					{
+						if (!expectedExpenses.ContainsKey(currency))
+							expectedExpenses[currency] = 0;
+
+						expectedExpenses[currency] += t.Amount;
+					}
+				});
+
+			//Act
+			var actual = await accountService.GetCurrenciesCashFlow();
+
+			//Assert
+			Assert.That(actual, Is.Not.Null);
+			foreach (var (currency, amount) in expectedIncomes)
+			{
+				Assert.That(actual.Any(c => c.Name == currency && c.Incomes == amount),
+					Is.True);
+			}
+			foreach (var (currency, amount) in expectedExpenses)
+			{
+				Assert.That(actual.Any(c => c.Name == currency && c.Expenses == amount),
+					Is.True);
+			}
 		}
 
 		[Test]
@@ -1241,6 +1454,24 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(transactionFormModel.AccountCurrencyName, Is.EqualTo(Transaction1User1.Account.Currency.Name));
 			Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(Transaction1User1.CreatedOn));
 			Assert.That(transactionFormModel.TransactionType, Is.EqualTo(Transaction1User1.TransactionType.ToString()));
+		}
+
+		[Test]
+		public async Task GetOwnerId_ShouldReturnOwnerId_WithValidAccountId()
+		{
+			//Act
+			string ownerId = await accountService.GetOwnerId(Account1User1.Id);
+
+			//Assert
+			Assert.That(ownerId, Is.EqualTo(User1.Id));
+		}
+		
+		[Test]
+		public void GetOwnerId_ShouldThrowException_WhenAccountIdIsInvalid()
+		{
+			//Assert
+			Assert.That(async () => await accountService.GetOwnerId(Guid.NewGuid().ToString()),
+			Throws.TypeOf<InvalidOperationException>());
 		}
 		
 		[Test]

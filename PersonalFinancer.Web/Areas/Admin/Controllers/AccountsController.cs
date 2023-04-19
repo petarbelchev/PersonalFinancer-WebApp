@@ -27,7 +27,7 @@
 		public async Task<IActionResult> Index(int page = 1)
 		{
 			UsersAccountCardsServiceModel usersAccountCardsData =
-				await accountService.GetUsersAccountCardsData(page);
+				await accountService.GetAccountCardsData(page);
 
 			var viewModel = new UsersAccountCardsViewModel
 			{

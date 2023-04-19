@@ -19,7 +19,7 @@
 
 		Task<IEnumerable<AccountCardServiceModel>> GetUserAccounts(string userId);
 
-		int GetUsersAccountsCount();
+		Task<int> GetUsersAccountsCount();
 		
 		Task<TransactionsServiceModel> GetUserTransactions(string userId, DateTime startDate, DateTime endDate, int page = 1);
 
@@ -31,6 +31,6 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<UserDetailsServiceModel> UserDetails(string userId);
 
-		int UsersCount();
+		Task<int> UsersCount();
 	}
 }

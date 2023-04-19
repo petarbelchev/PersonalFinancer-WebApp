@@ -196,6 +196,9 @@
 				else
 				{
 					transaction.Amount += amountOfChange;
+
+					if (transaction.Amount < 0)
+						transaction.TransactionType = TransactionType.Expense;
 				}
 			}
 
@@ -358,7 +361,7 @@
 			return accountTransactions;
 		}
 
-		public async Task<UsersAccountCardsServiceModel> GetUsersAccountCardsData(int page)
+		public async Task<UsersAccountCardsServiceModel> GetAccountCardsData(int page)
 		{
 			var outputModel = new UsersAccountCardsServiceModel
 			{
@@ -369,13 +372,13 @@
 					.Take(PaginationConstants.AccountsPerPage)
 					.ProjectTo<AccountCardServiceModel>(mapper.ConfigurationProvider)
 					.ToArrayAsync(),
-				TotalUsersAccountsCount = data.Accounts.Count(a => !a.IsDeleted)
+				TotalUsersAccountsCount = await data.Accounts.CountAsync(a => !a.IsDeleted)
 			};
 
 			return outputModel;
 		}
 
-		public async Task<IEnumerable<CurrencyCashFlowServiceModel>> GetUsersCurrenciesCashFlow()
+		public async Task<IEnumerable<CurrencyCashFlowServiceModel>> GetCurrenciesCashFlow()
 		{
 			return await data.Transactions
 				.GroupBy(t => t.Account.Currency.Name)

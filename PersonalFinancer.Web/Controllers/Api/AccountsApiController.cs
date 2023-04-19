@@ -32,7 +32,7 @@
 		public async Task<IActionResult> GetAccounts(int page)
 		{
 			UsersAccountCardsServiceModel usersCardsData =
-				await accountService.GetUsersAccountCardsData(page);
+				await accountService.GetAccountCardsData(page);
 
 			var usersCardsModel = new UsersAccountCardsViewModel
 			{
@@ -46,7 +46,7 @@
 		[Authorize(Roles = RoleConstants.AdminRoleName)]
 		[HttpGet("cashflow")]
 		public async Task<IActionResult> GetAccountsCashFlow()
-			=> Ok(await accountService.GetUsersCurrenciesCashFlow());
+			=> Ok(await accountService.GetCurrenciesCashFlow());
 
 		[HttpPost("transactions")]
 		public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
