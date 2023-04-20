@@ -21,7 +21,7 @@ namespace PersonalFinancer.Tests.Services
 		[SetUp]
 		public void SetUp()
 		{
-			accountService = new AccountsService(data, mapper, memoryCache);
+			accountService = new AccountsService(sqlDbContext, mapper, memoryCache);
 		}
 
 		[Test]
@@ -37,17 +37,17 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = User1.Id
 			};
 
-			int accountsCountBefore = await data.Accounts.CountAsync();
+			int accountsCountBefore = await sqlDbContext.Accounts.CountAsync();
 
 			//Act
 			string newAccountId = await accountService.CreateAccount(inputModel);
-			Account newAccount = await data.Accounts
+			Account newAccount = await sqlDbContext.Accounts
 				.Where(a => a.Id == newAccountId)
 				.Include(a => a.Transactions)
 				.FirstAsync();
 
 			//Assert
-			Assert.That(await data.Accounts.CountAsync(), Is.EqualTo(accountsCountBefore + 1));
+			Assert.That(await sqlDbContext.Accounts.CountAsync(), Is.EqualTo(accountsCountBefore + 1));
 			Assert.That(newAccount.Name, Is.EqualTo(inputModel.Name));
 			Assert.That(newAccount.Balance, Is.EqualTo(inputModel.Balance));
 			Assert.That(newAccount.CurrencyId, Is.EqualTo(inputModel.CurrencyId));
@@ -69,17 +69,17 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = User1.Id
 			};
 
-			int accountsCountBefore = await data.Accounts.CountAsync();
+			int accountsCountBefore = await sqlDbContext.Accounts.CountAsync();
 
 			//Act
 			string newAccountId = await accountService.CreateAccount(newAccountModel);
-			Account newAccount = await data.Accounts
+			Account newAccount = await sqlDbContext.Accounts
 				.Where(a => a.Id == newAccountId)
 				.Include(a => a.Transactions)
 				.FirstAsync();
 
 			//Assert
-			Assert.That(await data.Accounts.CountAsync(), Is.EqualTo(accountsCountBefore + 1));
+			Assert.That(await sqlDbContext.Accounts.CountAsync(), Is.EqualTo(accountsCountBefore + 1));
 			Assert.That(newAccount.Name, Is.EqualTo(newAccountModel.Name));
 			Assert.That(newAccount.Balance, Is.EqualTo(newAccountModel.Balance));
 			Assert.That(newAccount.CurrencyId, Is.EqualTo(newAccountModel.CurrencyId));
@@ -125,7 +125,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act
 			string id = await accountService.CreateTransaction(transactionModel);
-			Transaction? transaction = await data.Transactions.FindAsync(id);
+			Transaction? transaction = await sqlDbContext.Transactions.FindAsync(id);
 
 			//Assert
 			Assert.That(transaction, Is.Not.Null);
@@ -158,7 +158,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Act
 			string id = await accountService.CreateTransaction(transactionModel);
-			Transaction? transaction = await data.Transactions.FindAsync(id);
+			Transaction? transaction = await sqlDbContext.Transactions.FindAsync(id);
 
 			//Assert
 			Assert.That(transaction, Is.Not.Null);
@@ -197,7 +197,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange
 			string accId = Guid.NewGuid().ToString();
-			await data.Accounts.AddAsync(new Account
+			await sqlDbContext.Accounts.AddAsync(new Account
 			{
 				Id = accId,
 				Name = "AccountForDelete",
@@ -219,10 +219,10 @@ namespace PersonalFinancer.Tests.Services
 					}
 				}
 			});
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 
 			//Assert that the Account and Transactions are created and Account is not deleted
-			var account = await data.Accounts.FindAsync(accId);
+			var account = await sqlDbContext.Accounts.FindAsync(accId);
 			Assert.That(account, Is.Not.Null);
 			Assert.That(account.IsDeleted, Is.False);
 			Assert.That(account.Transactions.Count, Is.EqualTo(1));
@@ -240,7 +240,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange
 			string accountId = Guid.NewGuid().ToString();
-			await data.Accounts.AddAsync(new Account
+			await sqlDbContext.Accounts.AddAsync(new Account
 			{
 				Id = accountId,
 				Name = "AccountForDelete",
@@ -262,24 +262,24 @@ namespace PersonalFinancer.Tests.Services
 					}
 				}
 			});
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 
 			//Assert that the Account and Transactions are created and Account is not deleted
-			var account = await data.Accounts.FindAsync(accountId);
+			var account = await sqlDbContext.Accounts.FindAsync(accountId);
 			Assert.That(account, Is.Not.Null);
 			Assert.That(account.IsDeleted, Is.False);
 			Assert.That(account.Transactions.Count, Is.EqualTo(1));
 
 			//Arrange
-			int accountsCountBefore = await data.Accounts.CountAsync();
-			int transactionsCountBefore = await data.Transactions.CountAsync();
+			int accountsCountBefore = await sqlDbContext.Accounts.CountAsync();
+			int transactionsCountBefore = await sqlDbContext.Transactions.CountAsync();
 
 			//Act
 			await accountService.DeleteAccount(accountId, User1.Id, isUserAdmin: false, shouldDeleteTransactions: true);
 
 			//Assert that the Account is deleted but Transactions not
-			Assert.That(await data.Accounts.CountAsync(), Is.EqualTo(accountsCountBefore - 1));
-			Assert.That(await data.Transactions.CountAsync(), Is.EqualTo(transactionsCountBefore - 1));
+			Assert.That(await sqlDbContext.Accounts.CountAsync(), Is.EqualTo(accountsCountBefore - 1));
+			Assert.That(await sqlDbContext.Transactions.CountAsync(), Is.EqualTo(transactionsCountBefore - 1));
 		}
 
 		[Test]
@@ -298,7 +298,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange
 			string accId = Guid.NewGuid().ToString();
-			await data.Accounts.AddAsync(new Account
+			await sqlDbContext.Accounts.AddAsync(new Account
 			{
 				Id = accId,
 				AccountTypeId = AccType1User1.Id,
@@ -307,7 +307,7 @@ namespace PersonalFinancer.Tests.Services
 				Name = "For Delete",
 				OwnerId = User1.Id
 			});
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 
 			//Act & Assert
 			Assert.That(async () => await accountService.DeleteAccount(
@@ -320,7 +320,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange
 			string accId = Guid.NewGuid().ToString();
-			await data.Accounts.AddAsync(new Account
+			await sqlDbContext.Accounts.AddAsync(new Account
 			{
 				Id = accId,
 				AccountTypeId = AccType1User1.Id,
@@ -342,24 +342,24 @@ namespace PersonalFinancer.Tests.Services
 					}
 				}
 			});
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 
 			//Assert that the Account and Transactions are created and Account is not deleted
-			var account = await data.Accounts.FindAsync(accId);
+			var account = await sqlDbContext.Accounts.FindAsync(accId);
 			Assert.That(account, Is.Not.Null);
 			Assert.That(account.IsDeleted, Is.False);
 			Assert.That(account.Transactions.Count, Is.EqualTo(1));
 
 			//Arrange
-			int accountsCountBefore = await data.Accounts.CountAsync();
-			int transactionsCountBefore = await data.Transactions.CountAsync();
+			int accountsCountBefore = await sqlDbContext.Accounts.CountAsync();
+			int transactionsCountBefore = await sqlDbContext.Transactions.CountAsync();
 
 			//Act
 			await accountService.DeleteAccount(accId, User2.Id, isUserAdmin: true, shouldDeleteTransactions: true);
 
 			//Assert that the Account is deleted but Transactions not
-			Assert.That(await data.Accounts.CountAsync(), Is.EqualTo(accountsCountBefore - 1));
-			Assert.That(await data.Transactions.CountAsync(), Is.EqualTo(transactionsCountBefore - 1));
+			Assert.That(await sqlDbContext.Accounts.CountAsync(), Is.EqualTo(accountsCountBefore - 1));
+			Assert.That(await sqlDbContext.Transactions.CountAsync(), Is.EqualTo(transactionsCountBefore - 1));
 		}
 
 		[Test]
@@ -367,7 +367,7 @@ namespace PersonalFinancer.Tests.Services
 		{
 			//Arrange
 			string accId = Guid.NewGuid().ToString();
-			await data.Accounts.AddAsync(new Account
+			await sqlDbContext.Accounts.AddAsync(new Account
 			{
 				Id = accId,
 				AccountTypeId = AccType1User1.Id,
@@ -389,25 +389,25 @@ namespace PersonalFinancer.Tests.Services
 					}
 				}
 			});
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 
 			//Assert that the Account and Transactions are created and Account is not deleted
-			var account = await data.Accounts.FindAsync(accId);
+			var account = await sqlDbContext.Accounts.FindAsync(accId);
 			Assert.That(account, Is.Not.Null);
 			Assert.That(account.IsDeleted, Is.False);
 			Assert.That(account.Transactions.Count, Is.EqualTo(1));
 
 			//Arrange
-			int accountsCountBefore = await data.Accounts.CountAsync();
-			int transactionsCountBefore = await data.Transactions.CountAsync();
+			int accountsCountBefore = await sqlDbContext.Accounts.CountAsync();
+			int transactionsCountBefore = await sqlDbContext.Transactions.CountAsync();
 
 			//Act
 			await accountService.DeleteAccount(accId, User2.Id, isUserAdmin: true, shouldDeleteTransactions: false);
 
 			//Assert that the Account is deleted but Transactions not
 			Assert.That(account.IsDeleted, Is.True);
-			Assert.That(await data.Accounts.CountAsync(), Is.EqualTo(accountsCountBefore));
-			Assert.That(await data.Transactions.CountAsync(), Is.EqualTo(transactionsCountBefore));
+			Assert.That(await sqlDbContext.Accounts.CountAsync(), Is.EqualTo(accountsCountBefore));
+			Assert.That(await sqlDbContext.Transactions.CountAsync(), Is.EqualTo(transactionsCountBefore));
 		}
 
 		[Test]
@@ -426,13 +426,13 @@ namespace PersonalFinancer.Tests.Services
 				Refference = "TestTransaction",
 				TransactionType = TransactionType.Income
 			};
-			await data.Transactions.AddAsync(transaction);
+			await sqlDbContext.Transactions.AddAsync(transaction);
 			Account1User1.Balance += transaction.Amount;
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 
 			decimal balanceBefore = Account1User1.Balance;
 			int transactionsBefore = Account1User1.Transactions.Count;
-			Transaction? transactionInDb = await data.Transactions.FindAsync(transactionId);
+			Transaction? transactionInDb = await sqlDbContext.Transactions.FindAsync(transactionId);
 
 			//Assert
 			Assert.That(transactionInDb, Is.Not.Null);
@@ -444,7 +444,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(Account1User1.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
 			Assert.That(Account1User1.Balance, Is.EqualTo(newBalance));
 			Assert.That(Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
-			Assert.That(await data.Transactions.FindAsync(transactionId), Is.Null);
+			Assert.That(await sqlDbContext.Transactions.FindAsync(transactionId), Is.Null);
 		}
 
 		[Test]
@@ -463,13 +463,13 @@ namespace PersonalFinancer.Tests.Services
 				Refference = "TestTransaction",
 				TransactionType = TransactionType.Income
 			};
-			await data.Transactions.AddAsync(transaction);
+			await sqlDbContext.Transactions.AddAsync(transaction);
 			Account1User1.Balance += transaction.Amount;
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 
 			decimal balanceBefore = Account1User1.Balance;
 			int transactionsBefore = Account1User1.Transactions.Count;
-			Transaction? transactionInDb = await data.Transactions.FindAsync(transactionId);
+			Transaction? transactionInDb = await sqlDbContext.Transactions.FindAsync(transactionId);
 
 			//Assert
 			Assert.That(transactionInDb, Is.Not.Null);
@@ -481,7 +481,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(Account1User1.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
 			Assert.That(Account1User1.Balance, Is.EqualTo(newBalance));
 			Assert.That(Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
-			Assert.That(await data.Transactions.FindAsync(transactionId), Is.Null);
+			Assert.That(await sqlDbContext.Transactions.FindAsync(transactionId), Is.Null);
 		}
 
 		[Test]
@@ -500,13 +500,13 @@ namespace PersonalFinancer.Tests.Services
 				Refference = "TestTransaction",
 				TransactionType = TransactionType.Expense
 			};
-			await data.Transactions.AddAsync(transaction);
+			await sqlDbContext.Transactions.AddAsync(transaction);
 			Account1User1.Balance -= transaction.Amount;
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 
 			decimal balanceBefore = Account1User1.Balance;
 			int transactionsBefore = Account1User1.Transactions.Count;
-			Transaction? transactionInDb = await data.Transactions.FindAsync(transactionId);
+			Transaction? transactionInDb = await sqlDbContext.Transactions.FindAsync(transactionId);
 
 			//Assert
 			Assert.That(transactionInDb, Is.Not.Null);
@@ -518,7 +518,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(Account1User1.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
 			Assert.That(Account1User1.Balance, Is.EqualTo(newBalance));
 			Assert.That(Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
-			Assert.That(await data.Transactions.FindAsync(transactionId), Is.Null);
+			Assert.That(await sqlDbContext.Transactions.FindAsync(transactionId), Is.Null);
 		}
 
 		[Test]
@@ -537,13 +537,13 @@ namespace PersonalFinancer.Tests.Services
 				Refference = "TestTransaction",
 				TransactionType = TransactionType.Expense
 			};
-			await data.Transactions.AddAsync(transaction);
+			await sqlDbContext.Transactions.AddAsync(transaction);
 			Account1User1.Balance -= transaction.Amount;
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 
 			decimal balanceBefore = Account1User1.Balance;
 			int transactionsBefore = Account1User1.Transactions.Count;
-			Transaction? transactionInDb = await data.Transactions.FindAsync(transactionId);
+			Transaction? transactionInDb = await sqlDbContext.Transactions.FindAsync(transactionId);
 
 			//Assert
 			Assert.That(transactionInDb, Is.Not.Null);
@@ -555,7 +555,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(Account1User1.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
 			Assert.That(Account1User1.Balance, Is.EqualTo(newBalance));
 			Assert.That(Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
-			Assert.That(await data.Transactions.FindAsync(transactionId), Is.Null);
+			Assert.That(await sqlDbContext.Transactions.FindAsync(transactionId), Is.Null);
 		}
 
 		[Test]
@@ -584,8 +584,8 @@ namespace PersonalFinancer.Tests.Services
 				Refference = "For Delete",
 				TransactionType = TransactionType.Expense
 			};
-			await data.Transactions.AddAsync(transaction);
-			await data.SaveChangesAsync();
+			await sqlDbContext.Transactions.AddAsync(transaction);
+			await sqlDbContext.SaveChangesAsync();
 
 			//Act & Assert
 			Assert.That(async () => await accountService.DeleteTransaction(id, User2.Id, isUserAdmin: false),
@@ -606,8 +606,8 @@ namespace PersonalFinancer.Tests.Services
 				CurrencyId = Curr1User1.Id,
 				OwnerId = User1.Id
 			};
-			await data.Accounts.AddAsync(account);
-			await data.SaveChangesAsync();
+			await sqlDbContext.Accounts.AddAsync(account);
+			await sqlDbContext.SaveChangesAsync();
 
 			var inputModel = new AccountFormShortServiceModel
 			{
@@ -643,8 +643,8 @@ namespace PersonalFinancer.Tests.Services
 				CurrencyId = Curr1User1.Id,
 				OwnerId = User1.Id
 			};
-			await data.Accounts.AddAsync(account);
-			await data.SaveChangesAsync();
+			await sqlDbContext.Accounts.AddAsync(account);
+			await sqlDbContext.SaveChangesAsync();
 
 			var inputModel = new AccountFormShortServiceModel
 			{
@@ -680,8 +680,8 @@ namespace PersonalFinancer.Tests.Services
 				CurrencyId = Curr1User1.Id,
 				OwnerId = User2.Id
 			};
-			await data.Accounts.AddAsync(account);
-			await data.SaveChangesAsync();
+			await sqlDbContext.Accounts.AddAsync(account);
+			await sqlDbContext.SaveChangesAsync();
 
 			var inputModel = new AccountFormShortServiceModel
 			{
@@ -741,8 +741,8 @@ namespace PersonalFinancer.Tests.Services
 			};
 			account.Transactions.Add(initialBalTransaction);
 			account.Transactions.Add(expenseTransaction);
-			await data.Accounts.AddAsync(account);
-			await data.SaveChangesAsync();
+			await sqlDbContext.Accounts.AddAsync(account);
+			await sqlDbContext.SaveChangesAsync();
 
 			decimal initBalTransactionAmountBefore = initialBalTransaction.Amount;
 
@@ -820,8 +820,8 @@ namespace PersonalFinancer.Tests.Services
 			};
 			account.Transactions.Add(initialBalTransaction);
 			account.Transactions.Add(expenseTransaction);
-			await data.Accounts.AddAsync(account);
-			await data.SaveChangesAsync();
+			await sqlDbContext.Accounts.AddAsync(account);
+			await sqlDbContext.SaveChangesAsync();
 
 			decimal initBalTransactionAmountBefore = initialBalTransaction.Amount;
 
@@ -873,8 +873,8 @@ namespace PersonalFinancer.Tests.Services
 				CurrencyId = Curr1User1.Id,
 				OwnerId = User1.Id
 			};
-			await data.Accounts.AddAsync(account);
-			await data.SaveChangesAsync();
+			await sqlDbContext.Accounts.AddAsync(account);
+			await sqlDbContext.SaveChangesAsync();
 
 			var inputModel = new AccountFormShortServiceModel
 			{
@@ -943,12 +943,12 @@ namespace PersonalFinancer.Tests.Services
 				TransactionType = TransactionType.Income
 			};
 
-			await data.Transactions.AddAsync(transaction);
+			await sqlDbContext.Transactions.AddAsync(transaction);
 			Account1User1.Balance += transaction.Amount;
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 			decimal balanceBefore = Account1User1.Balance;
 
-			TransactionFormShortServiceModel transactionEditModel = await data.Transactions
+			TransactionFormShortServiceModel transactionEditModel = await sqlDbContext.Transactions
 				.Where(t => t.Id == transaction.Id)
 				.Select(t => mapper.Map<TransactionFormShortServiceModel>(t))
 				.FirstAsync();
@@ -978,14 +978,14 @@ namespace PersonalFinancer.Tests.Services
 				TransactionType = TransactionType.Income
 			};
 
-			await data.Transactions.AddAsync(transaction);
+			await sqlDbContext.Transactions.AddAsync(transaction);
 			Account2User1.Balance += transaction.Amount;
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 			decimal firstAccBalanceBefore = Account2User1.Balance;
 			decimal secondAccBalanceBefore = Account1User1.Balance;
 
 			//Act
-			TransactionFormShortServiceModel editTransactionModel = await data.Transactions
+			TransactionFormShortServiceModel editTransactionModel = await sqlDbContext.Transactions
 				.Where(t => t.Id == transaction.Id)
 				.Select(t => mapper.Map<TransactionFormShortServiceModel>(t))
 				.FirstAsync();
@@ -1015,13 +1015,13 @@ namespace PersonalFinancer.Tests.Services
 				TransactionType = TransactionType.Income
 			};
 
-			await data.Transactions.AddAsync(transaction);
+			await sqlDbContext.Transactions.AddAsync(transaction);
 			Account1User1.Balance += transaction.Amount;
-			await data.SaveChangesAsync();
+			await sqlDbContext.SaveChangesAsync();
 			decimal balanceBefore = Account1User1.Balance;
 
 			//Act
-			TransactionFormShortServiceModel editTransactionModel = await data.Transactions
+			TransactionFormShortServiceModel editTransactionModel = await sqlDbContext.Transactions
 				.Where(t => t.Id == transaction.Id)
 				.Select(t => mapper.Map<TransactionFormShortServiceModel>(t))
 				.FirstAsync();
@@ -1045,7 +1045,7 @@ namespace PersonalFinancer.Tests.Services
 			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
 			DateTime endDate = DateTime.UtcNow;
 
-			AccountDetailsServiceModel? expected = await data.Accounts
+			AccountDetailsServiceModel? expected = await sqlDbContext.Accounts
 				.Where(a => a.Id == Account1User1.Id && !a.IsDeleted)
 				.Select(a => new AccountDetailsServiceModel
 				{
@@ -1125,14 +1125,14 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetAccountCardsData_ShouldReturnCorrectData()
 		{
 			//Arrange
-			var expectedAccounts = await data.Accounts
+			var expectedAccounts = await sqlDbContext.Accounts
 				.Where(a => !a.IsDeleted)
 				.OrderBy(a => a.Name)
 				.Take(AccountsPerPage)
 				.ProjectTo<AccountCardServiceModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
 
-			int expectedTotalAccount = await data.Accounts
+			int expectedTotalAccount = await sqlDbContext.Accounts
 				.CountAsync(a => !a.IsDeleted);
 
 			//Act
@@ -1165,7 +1165,7 @@ namespace PersonalFinancer.Tests.Services
 			var expectedIncomes = new Dictionary<string, decimal>();
 			var expectedExpenses = new Dictionary<string, decimal>();
 
-			await data.Transactions
+			await sqlDbContext.Transactions
 				.Include(t => t.Account)
 				.ThenInclude(a => a.Currency)
 				.OrderBy(t => t.Account.Currency.Name)
@@ -1294,7 +1294,7 @@ namespace PersonalFinancer.Tests.Services
 				StartDate = startDate,
 				EndDate = endDate
 			};
-			expect.Transactions = await data.Transactions
+			expect.Transactions = await sqlDbContext.Transactions
 					.Where(t => t.AccountId == Account1User1.Id && t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 					.OrderByDescending(t => t.CreatedOn)
 					.Take(TransactionsPerPage)
@@ -1312,7 +1312,7 @@ namespace PersonalFinancer.Tests.Services
 					})
 					.ToListAsync();
 
-			expect.TotalTransactionsCount = await data.Transactions.CountAsync(t => 
+			expect.TotalTransactionsCount = await sqlDbContext.Transactions.CountAsync(t => 
 				t.AccountId == Account1User1.Id && t.CreatedOn >= startDate && t.CreatedOn <= endDate);
 
 			//Act
@@ -1361,12 +1361,12 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetTransactionFormData_ShouldReturnCorrectData_WhenTransactionIsNotInitial()
 		{
 			//Arrange
-			var orderedUserAccounts = await data.Accounts
+			var orderedUserAccounts = await sqlDbContext.Accounts
 				.Where(a => a.OwnerId == User1.Id && !a.IsDeleted)
 				.OrderBy(a => a.Name)
 				.ToListAsync();
 
-			var orderedUserCategories = await data.Categories
+			var orderedUserCategories = await sqlDbContext.Categories
 				.Where(c => c.OwnerId == User1.Id && !c.IsDeleted)
 				.OrderBy(c => c.Name)
 				.ToListAsync();

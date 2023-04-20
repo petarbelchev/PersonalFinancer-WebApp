@@ -21,7 +21,7 @@ builder.Services.AddDbContext<PersonalFinancerDbContext>(options =>
 	options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.Configure<MessagesDatabaseSettings>(
+builder.Services.Configure<MongoDbSettings>(
 	builder.Configuration.GetSection("MessagesDatabase"));
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -47,6 +47,7 @@ builder.Services.AddScoped<ApiService<AccountType>, ApiService<AccountType>>();
 builder.Services.AddScoped<ApiService<Category>, ApiService<Category>>();
 builder.Services.AddScoped<ApiService<Currency>, ApiService<Currency>>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
+builder.Services.AddSingleton<MongoDbContext, MongoDbContext>();
 builder.Services.AddSingleton<MessagesService>();
 
 builder.Services.AddAutoMapper(

@@ -1,8 +1,5 @@
 ﻿namespace PersonalFinancer.Services.Messages
 {
-	using Microsoft.Extensions.Options;
-
-	using MongoDB.Bson.Serialization.Conventions;
 	using MongoDB.Driver;
 	using MongoDB.Driver.Linq;
 
@@ -14,31 +11,20 @@
 
 	public class MessagesService
 	{
-		private readonly IMongoCollection<Message> messagesCollection;
+		private readonly IMongoCollection<Message> data;
 		private readonly IMapper mapper;
 
 		public MessagesService(
-			IOptions<MessagesDatabaseSettings> messagesDatabaseSettings,
+			MongoDbContext data,
 			IMapper mapper)
 		{
-			var camelCaseConvension = new ConventionPack { new CamelCaseElementNameConvention() };
-			ConventionRegistry.Register("camelCase", camelCaseConvension, type => true);
-
-			var mongoClient = new MongoClient(
-				messagesDatabaseSettings.Value.ConnectionString);
-
-			var mongoDatabase = mongoClient.GetDatabase(
-				messagesDatabaseSettings.Value.DatabaseName);
-
-			messagesCollection = mongoDatabase.GetCollection<Message>(
-				messagesDatabaseSettings.Value.MessagesCollectionName);
-
+			this.data = data.GetCollection<Message>("Messages");
 			this.mapper = mapper;
 		}
 
 		public async Task<IEnumerable<MessageOutputServiceModel>> GetAllAsync()
 		{
-			var messages = await messagesCollection.AsQueryable()
+			var messages = await data.AsQueryable()
 				.Select(m => new MessageOutputServiceModel
 				{
 					Id = m.Id,
@@ -52,7 +38,7 @@
 
 		public async Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(string userId)
 		{
-			var messages = await messagesCollection.AsQueryable()
+			var messages = await data.AsQueryable()
 				.Where(m => m.AuthorId == userId)
 				.Select(m => new MessageOutputServiceModel
 				{
@@ -72,7 +58,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<MessageDetailsServiceModel> GetMessageAsync(string id, string userId, bool isUserAdmin)
 		{
-			MessageDetailsServiceModel message = await messagesCollection.AsQueryable()
+			MessageDetailsServiceModel message = await data.AsQueryable()
 				.Where(m => m.Id == id && (isUserAdmin || m.AuthorId == userId))
 				.Select(m => new MessageDetailsServiceModel
 				{
@@ -98,7 +84,7 @@
 			var newMessage = mapper.Map<Message>(model);
 			newMessage.CreatedOn = DateTime.UtcNow;
 
-			await messagesCollection.InsertOneAsync(newMessage);
+			await data.InsertOneAsync(newMessage);
 
 			return newMessage.Id;
 		}
@@ -120,10 +106,7 @@
 			var filter = Builders<Message>.Filter.Eq(x => x.Id, model.MessageId);
 			var update = Builders<Message>.Update.Push(x => x.Replies, reply);
 
-			UpdateResult updateResult = await messagesCollection.UpdateOneAsync(filter, update);
-
-			if (!updateResult.IsAcknowledged)
-				throw new InvalidOperationException("Adding a reply was unsuccessful.");
+			await data.UpdateOneAsync(filter, update);
 		}
 		
 		/// <summary>
@@ -137,14 +120,11 @@
 			if (!isUserAdmin && !await IsUserAuthorized(messageId, userId))
 				throw new ArgumentException("The User is not Authorized to make replies.");
 
-			DeleteResult deleteResult = await messagesCollection.DeleteOneAsync(m => m.Id == messageId);
-
-			if (!deleteResult.IsAcknowledged)
-				throw new InvalidOperationException("Deleting of the message was unsuccessful.");
+			await data.DeleteOneAsync(m => m.Id == messageId);
 		}
 
 		private async Task<bool> IsUserAuthorized(string messageId, string userId)
-			=> await messagesCollection.AsQueryable()
+			=> await data.AsQueryable()
 				.AnyAsync(m => m.Id == messageId && m.AuthorId == userId);
 	}
 }

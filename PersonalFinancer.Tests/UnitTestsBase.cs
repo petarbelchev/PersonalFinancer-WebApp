@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Memory;
+using MongoDB.Driver;
 using NUnit.Framework;
 
 using PersonalFinancer.Data;
@@ -13,24 +14,30 @@ namespace PersonalFinancer.Tests
 	[TestFixture]
 	abstract class UnitTestsBase
 	{
-		protected PersonalFinancerDbContext data;
+		protected PersonalFinancerDbContext sqlDbContext;
 		protected IMapper mapper;
 		protected IMemoryCache memoryCache;
+		protected MongoDbContext mongoDbContext;
+		protected IMongoCollection<Message> messagesCollection;
 
 		[OneTimeSetUp]
-		protected void SetUpBase()
+		protected async Task SetUpBase()
 		{
-			data = DatabaseMock.Instance;
+			sqlDbContext = DatabaseMock.Instance;
 			mapper = MapperMock.Instance;
 			memoryCache = MemoryCacheMock.Instance;
 
-			SeedDatabase();
+			mongoDbContext = MongoDbContextMock.Instance;
+			messagesCollection = mongoDbContext.GetCollection<Message>("Messages");
+
+			await SeedDatabase();
 		}
 
 		[OneTimeTearDown]
-		protected void TearDownBase()
+		protected async Task TearDownBase()
 		{
-			data.Dispose();
+			await sqlDbContext.DisposeAsync();
+			await mongoDbContext.DropDatabaseAsync("MessagesMock");
 		}
 
 		protected ApplicationUser User1 { get; private set; } = null!;
@@ -42,7 +49,7 @@ namespace PersonalFinancer.Tests
 
 		protected AccountType AccType1User1 { get; private set; } = null!;
 		protected AccountType AccType2User1 { get; private set; } = null!;
-		//protected AccountType AccountType3User2 { get; private set; } = null!;
+		protected AccountType AccType3User1 { get; private set; } = null!;
 
 		protected Category CatInitialBalance { get; private set; } = null!;
 		protected Category Cat2User1 { get; private set; } = null!;
@@ -51,7 +58,7 @@ namespace PersonalFinancer.Tests
 
 		protected Currency Curr1User1 { get; private set; } = null!;
 		protected Currency Curr2User1 { get; private set; } = null!;
-		protected Currency Curr3User2 { get; private set; } = null!;
+		protected Currency Curr3User1 { get; private set; } = null!;
 
 		protected Transaction Transaction1User1 { get; private set; } = null!;
 		protected Transaction Transaction2User1 { get; private set; } = null!;
@@ -60,10 +67,14 @@ namespace PersonalFinancer.Tests
 		protected Transaction Transaction5User1 { get; private set; } = null!;
 		protected Transaction Transaction6User1 { get; private set; } = null!;
 
-		private async void SeedDatabase()
+		protected Message Message1User1 { get; private set; } = null!;
+		protected Message Message2User2 { get; private set; } = null!;
+
+		private async Task SeedDatabase()
 		{
 			//Users
 			string user1Id = Guid.NewGuid().ToString();
+			string user2Id = Guid.NewGuid().ToString();
 			User1 = new ApplicationUser
 			{
 				Id = user1Id,
@@ -72,7 +83,6 @@ namespace PersonalFinancer.Tests
 				Email = "petar@mail.com",
 				UserName = "petar@mail.com",
 			};
-			string user2Id = Guid.NewGuid().ToString();
 			User2 = new ApplicationUser
 			{
 				Id = user2Id,
@@ -81,58 +91,63 @@ namespace PersonalFinancer.Tests
 				Email = "todor@mail.com",
 				UserName = "todor@mail.com",
 			};
-			await data.Users.AddRangeAsync(User1, User2);
+
+			await sqlDbContext.Users.AddRangeAsync(User1, User2);
 
 			// Account Types
 			string accType1Id = Guid.NewGuid().ToString();
+			string accType2Id = Guid.NewGuid().ToString();
+			string accType3Id = Guid.NewGuid().ToString();
 			AccType1User1 = new AccountType
 			{
 				Id = accType1Id,
 				Name = "Cash",
 				OwnerId = user1Id
 			};
-			string accType2Id = Guid.NewGuid().ToString();
 			AccType2User1 = new AccountType
 			{
 				Id = accType2Id,
 				Name = "Bank",
 				OwnerId = user1Id
 			};
-			//string User2AccTypeId = Guid.NewGuid().ToString();
-			//AccountType3User2 = new AccountType
-			//{
-			//	Id = User2AccTypeId,
-			//	Name = "Bank",
-			//	OwnerId = User2Id
-			//};
-			await data.AccountTypes.AddRangeAsync(AccType1User1, AccType2User1/*, AccountType3User2*/);
+			AccType3User1 = new AccountType
+			{
+				Id = accType3Id,
+				Name = "Bank",
+				OwnerId = user1Id
+			};
+
+			await sqlDbContext.AccountTypes.AddRangeAsync(AccType1User1, AccType2User1, AccType3User1);
 
 			// Currencies
 			string curr1Id = Guid.NewGuid().ToString();
+			string EurCurrencyId = Guid.NewGuid().ToString();
+			string User2UsdCurrencyId = Guid.NewGuid().ToString();
 			Curr1User1 = new Currency
 			{
 				Id = curr1Id,
 				Name = "BGN",
 				OwnerId = user1Id
 			};
-			string EurCurrencyId = Guid.NewGuid().ToString();
 			Curr2User1 = new Currency
 			{
 				Id = EurCurrencyId,
 				Name = "EUR",
 				OwnerId = user1Id
 			};
-			string User2UsdCurrencyId = Guid.NewGuid().ToString();
-			Curr3User2 = new Currency
+			Curr3User1 = new Currency
 			{
 				Id = User2UsdCurrencyId,
 				Name = "USD",
 				OwnerId = user1Id
 			};
-			await data.Currencies.AddAsync(Curr1User1/*, Currency2User1, Currency3User2*/);
+
+			await sqlDbContext.Currencies.AddRangeAsync(Curr1User1, Curr2User1, Curr3User1);
 
 			//// Accounts
 			string acc1Id = Guid.NewGuid().ToString();
+			string acc2Id = Guid.NewGuid().ToString();
+			string acc3Id = Guid.NewGuid().ToString();
 			Account1User1 = new Account
 			{
 				Id = acc1Id,
@@ -142,7 +157,6 @@ namespace PersonalFinancer.Tests
 				CurrencyId = curr1Id,
 				OwnerId = user1Id
 			};
-			string acc2Id = Guid.NewGuid().ToString();
 			Account2User1 = new Account
 			{
 				Id = acc2Id,
@@ -152,7 +166,6 @@ namespace PersonalFinancer.Tests
 				CurrencyId = curr1Id,
 				OwnerId = user1Id
 			};
-			string acc3Id = Guid.NewGuid().ToString();
 			Account3User1Deleted = new Account
 			{
 				Id = acc3Id,
@@ -163,40 +176,42 @@ namespace PersonalFinancer.Tests
 				OwnerId = user1Id,
 				IsDeleted = true
 			};
-			await data.Accounts.AddRangeAsync(Account1User1, Account2User1, Account3User1Deleted);
+
+			await sqlDbContext.Accounts.AddRangeAsync(Account1User1, Account2User1, Account3User1Deleted);
 
 			// Categories
+			string foodCatId = Guid.NewGuid().ToString();
+			string transportCatId = Guid.NewGuid().ToString();
+			string salaryCatId = Guid.NewGuid().ToString();
 			CatInitialBalance = new Category
 			{
 				Id = InitialBalanceCategoryId,
 				Name = CategoryInitialBalanceName,
 				OwnerId = "adminId"
 			};
-			string foodCatId = Guid.NewGuid().ToString();
 			Cat2User1 = new Category
 			{
 				Id = foodCatId,
 				Name = "Food and Drinks",
 				OwnerId = user1Id
 			};
-			string transportCatId = Guid.NewGuid().ToString();
 			Cat3User1 = new Category
 			{
 				Id = transportCatId,
 				Name = "Transport",
 				OwnerId = user1Id
 			};
-			string salaryCatId = Guid.NewGuid().ToString();
 			Cat4User1 = new Category
 			{
 				Id = salaryCatId,
 				Name = "Salary",
 				OwnerId = user1Id
 			};
-			await data.Categories.AddRangeAsync(CatInitialBalance, Cat2User1, Cat3User1, Cat4User1);
+
+			await sqlDbContext.Categories.AddRangeAsync(CatInitialBalance, Cat2User1, Cat3User1, Cat4User1);
 
 			// Transactions
-			// Cash BGN
+			// Account 1
 			Transaction1User1 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
@@ -231,7 +246,7 @@ namespace PersonalFinancer.Tests
 				Refference = "Taxi",
 				TransactionType = TransactionType.Expense
 			};
-			// Bank EUR
+			// Account 2
 			Transaction4User1 = new Transaction()
 			{
 				Id = Guid.NewGuid().ToString(),
@@ -267,8 +282,66 @@ namespace PersonalFinancer.Tests
 				TransactionType = TransactionType.Expense
 			};
 
-			data.Transactions.AddRange(Transaction1User1, Transaction2User1, Transaction3User1, Transaction4User1, Transaction5User1, Transaction6User1);
-			await data.SaveChangesAsync();
+			await sqlDbContext.Transactions.AddRangeAsync(
+				Transaction1User1, Transaction2User1, Transaction3User1, 
+				Transaction4User1, Transaction5User1, Transaction6User1);
+
+			await sqlDbContext.SaveChangesAsync();
+
+			// Messages
+			Message1User1 = new Message
+			{
+				AuthorId = User1.Id,
+				AuthorName = $"{User1.FirstName} {User1.LastName}",
+				CreatedOn = DateTime.UtcNow.AddDays(-4),
+				Subject = "How to delete a transaction?",
+				Content = "Can someone tell me how to delete a transaction?",
+				Replies = new Reply[]
+				{
+					new Reply
+					{
+						AuthorId = User2.Id,
+						AuthorName = $"{User2.FirstName} {User2.LastName}",
+						Content = "I am here to help you! When open a transaction details click on \"Delete\" button.",
+						CreatedOn = DateTime.UtcNow.AddDays(-3)
+					},
+					new Reply
+					{
+						AuthorId = User1.Id,
+						AuthorName = $"{User1.FirstName} {User1.LastName}",
+						Content = "You help me! Thank you!",
+						CreatedOn = DateTime.UtcNow.AddDays(-2)
+					}
+				}
+			};
+
+			Message2User2 = new Message
+			{
+				AuthorId = User2.Id,
+				AuthorName = $"{User2.FirstName} {User2.LastName}",
+				CreatedOn = DateTime.UtcNow.AddDays(-2),
+				Subject = "How to create an Account?",
+				Content = "Can someone tell me how to create an Account?",
+				Replies = new Reply[]
+				{
+					new Reply
+					{
+						AuthorId = User1.Id,
+						AuthorName = $"{User1.FirstName} {User1.LastName}",
+						Content = "I can help! Click \"Create\" on your navigation panel, then \"Create Account\".",
+						CreatedOn = DateTime.UtcNow.AddDays(-1)
+					},
+					new Reply
+					{
+						AuthorId = User2.Id,
+						AuthorName = $"{User2.FirstName} {User2.LastName}",
+						Content = "Thank you!",
+						CreatedOn = DateTime.UtcNow.AddDays(-1)
+					}
+				}
+			};
+
+			await messagesCollection.InsertManyAsync(new Message[] { Message1User1, Message2User2 });
 		}
 	}
 }
