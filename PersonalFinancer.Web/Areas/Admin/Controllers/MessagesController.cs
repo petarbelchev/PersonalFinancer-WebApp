@@ -11,7 +11,7 @@
 	public class MessagesController : Web.Controllers.MessagesController
 	{
 		public MessagesController(
-			MessagesService messagesService,
+			IMessagesService messagesService,
 			IUsersService usersService,
 			IMapper mapper)
 			: base(messagesService, usersService, mapper)

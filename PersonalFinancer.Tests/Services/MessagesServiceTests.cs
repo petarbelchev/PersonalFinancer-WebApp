@@ -3,6 +3,7 @@ using MongoDB.Driver.Linq;
 
 using NUnit.Framework;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Services.Infrastructure;
 using PersonalFinancer.Services.Messages;
 using PersonalFinancer.Services.Messages.Models;
 
@@ -16,7 +17,8 @@ namespace PersonalFinancer.Tests.Services
 		[SetUp]
 		public void SetUp()
 		{
-			this.messagesService = new MessagesService(this.mongoDbContext, this.mapper);
+			IMongoRepository<Message> repo = new MongoRepository<Message>(this.mongoDbContext);
+			this.messagesService = new MessagesService(repo, this.mapper);
 		}
 
 		[Test]

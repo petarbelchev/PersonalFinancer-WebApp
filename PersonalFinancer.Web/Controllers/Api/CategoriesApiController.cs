@@ -15,9 +15,9 @@
 	[ApiController]
 	public class CategoriesApiController : BaseApiController
 	{
-		private readonly ApiService<Category> apiService;
+		private readonly IApiService<Category> apiService;
 
-		public CategoriesApiController(ApiService<Category> apiService)
+		public CategoriesApiController(IApiService<Category> apiService)
 			=> this.apiService = apiService;
 
 		[HttpPost]

@@ -15,9 +15,9 @@
 	[ApiController]
 	public class AccountTypesApiController : BaseApiController
 	{
-		private readonly ApiService<AccountType> apiService;
+		private readonly IApiService<AccountType> apiService;
 
-		public AccountTypesApiController(ApiService<AccountType> apiService)
+		public AccountTypesApiController(IApiService<AccountType> apiService)
 			=> this.apiService = apiService;
 
 		[HttpPost]

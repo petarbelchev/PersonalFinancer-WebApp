@@ -17,7 +17,7 @@ namespace PersonalFinancer.Tests
 		protected PersonalFinancerDbContext sqlDbContext;
 		protected IMapper mapper;
 		protected IMemoryCache memoryCache;
-		protected MongoDbContext mongoDbContext;
+		protected IMongoDbContext mongoDbContext;
 		protected IMongoCollection<Message> messagesCollection;
 
 		[OneTimeSetUp]
@@ -26,9 +26,8 @@ namespace PersonalFinancer.Tests
 			sqlDbContext = DatabaseMock.Instance;
 			mapper = MapperMock.Instance;
 			memoryCache = MemoryCacheMock.Instance;
-
 			mongoDbContext = MongoDbContextMock.Instance;
-			messagesCollection = mongoDbContext.GetCollection<Message>("Messages");
+			messagesCollection = mongoDbContext.GetCollection<Message>("Message");
 
 			await SeedDatabase();
 		}
@@ -37,7 +36,7 @@ namespace PersonalFinancer.Tests
 		protected async Task TearDownBase()
 		{
 			await sqlDbContext.DisposeAsync();
-			await mongoDbContext.DropDatabaseAsync("MessagesMock");
+			await mongoDbContext.DropDatabaseAsync("UnitTestsDbMock");
 		}
 
 		protected ApplicationUser User1 { get; private set; } = null!;

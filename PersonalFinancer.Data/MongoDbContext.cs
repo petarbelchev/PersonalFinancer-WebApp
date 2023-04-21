@@ -5,7 +5,7 @@
 	using MongoDB.Bson.Serialization.Conventions;
 	using MongoDB.Driver;
 
-	public class MongoDbContext
+	public class MongoDbContext : IMongoDbContext
 	{
 		private IMongoClient client;
 		private IMongoDatabase database;

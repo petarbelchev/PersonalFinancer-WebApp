@@ -4,17 +4,20 @@ using NUnit.Framework;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.ApiService;
 using PersonalFinancer.Services.ApiService.Models;
+using PersonalFinancer.Services.Infrastructure;
 
 namespace PersonalFinancer.Tests.Services
 {
 	internal class AccountTypeServiceTests : UnitTestsBase
 	{
+		private IEfRepository<AccountType> repo;
 		private ApiService<AccountType> accountTypeService;
 
 		[SetUp]
 		public void SetUp()
 		{
-			this.accountTypeService = new ApiService<AccountType>(this.sqlDbContext, this.mapper, this.memoryCache);
+			repo = new EfRepository<AccountType>(this.sqlDbContext);
+			accountTypeService = new ApiService<AccountType>(repo, this.mapper, this.memoryCache);
 		}
 
 		[Test]
@@ -26,13 +29,13 @@ namespace PersonalFinancer.Tests.Services
 				Name = "NewAccountType",
 				OwnerId = this.User1.Id
 			};
-			int countBefore = await sqlDbContext.AccountTypes.CountAsync();
+			int countBefore = await repo.All().CountAsync();
 
 			//Act
 			ApiOutputServiceModel actual =
 				await accountTypeService.CreateEntity(inputModel);
 
-			int countAfter = await sqlDbContext.AccountTypes.CountAsync();
+			int countAfter = await repo.All().CountAsync();
 
 			//Assert
 			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
@@ -52,9 +55,9 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = this.User1.Id,
 				IsDeleted = true
 			};
-			await sqlDbContext.AccountTypes.AddAsync(deletedAccType);
-			await sqlDbContext.SaveChangesAsync();
-			int countBefore = await sqlDbContext.AccountTypes.CountAsync();
+			await repo.AddAsync(deletedAccType);
+			await repo.SaveChangesAsync();
+			int countBefore = await repo.All().CountAsync();
 
 			var inputModel = new ApiInputServiceModel
 			{
@@ -65,7 +68,7 @@ namespace PersonalFinancer.Tests.Services
 			//Assert
 			Assert.That(async () =>
 			{
-				var deletedAcc = await sqlDbContext.AccountTypes.FindAsync(deletedAccType.Id);
+				var deletedAcc = await repo.FindAsync(deletedAccType.Id);
 				Assert.That(deletedAcc, Is.Not.Null);
 				return deletedAcc.IsDeleted;
 			},
@@ -75,7 +78,7 @@ namespace PersonalFinancer.Tests.Services
 			ApiOutputServiceModel result =
 				await accountTypeService.CreateEntity(inputModel);
 
-			int countAfter = await sqlDbContext.AccountTypes.CountAsync();
+			int countAfter = await repo.All().CountAsync();
 
 			//Assert
 			Assert.That(countAfter, Is.EqualTo(countBefore));
@@ -95,9 +98,9 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = this.User2.Id
 			};
 
-			await sqlDbContext.AccountTypes.AddAsync(user2AccType);
-			await sqlDbContext.SaveChangesAsync();
-			int countBefore = await sqlDbContext.AccountTypes.CountAsync();
+			await repo.AddAsync(user2AccType);
+			await repo.SaveChangesAsync();
+			int countBefore = await repo.All().CountAsync();
 
 			var inputModel = new ApiInputServiceModel
 			{
@@ -106,13 +109,13 @@ namespace PersonalFinancer.Tests.Services
 			};
 
 			//Assert
-			Assert.That(await sqlDbContext.AccountTypes.FindAsync(user2AccType.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(user2AccType.Id), Is.Not.Null);
 
 			//Act
 			ApiOutputServiceModel result =
 				await accountTypeService.CreateEntity(inputModel);
 
-			int countAfter = await sqlDbContext.AccountTypes.CountAsync();
+			int countAfter = await repo.All().CountAsync();
 
 			//Assert
 			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
@@ -147,11 +150,11 @@ namespace PersonalFinancer.Tests.Services
 				Name = "NewAccType",
 				OwnerId = this.User1.Id
 			};
-			await sqlDbContext.AccountTypes.AddAsync(newAccType);
-			await sqlDbContext.SaveChangesAsync();
+			await repo.AddAsync(newAccType);
+			await repo.SaveChangesAsync();
 
 			//Assert
-			Assert.That(await sqlDbContext.AccountTypes.FindAsync(newAccType.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newAccType.Id), Is.Not.Null);
 			Assert.That(newAccType.IsDeleted, Is.False);
 
 			//Act
@@ -159,7 +162,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(newAccType.IsDeleted, Is.True);
-			Assert.That(await sqlDbContext.AccountTypes.FindAsync(newAccType.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newAccType.Id), Is.Not.Null);
 		}
 		
 		[Test]
@@ -172,11 +175,11 @@ namespace PersonalFinancer.Tests.Services
 				Name = "NewAccType",
 				OwnerId = this.User1.Id
 			};
-			await sqlDbContext.AccountTypes.AddAsync(newAccType);
-			await sqlDbContext.SaveChangesAsync();
+			await repo.AddAsync(newAccType);
+			await repo.SaveChangesAsync();
 
 			//Assert
-			Assert.That(await sqlDbContext.AccountTypes.FindAsync(newAccType.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newAccType.Id), Is.Not.Null);
 			Assert.That(newAccType.IsDeleted, Is.False);
 
 			//Act
@@ -184,7 +187,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(newAccType.IsDeleted, Is.True);
-			Assert.That(await sqlDbContext.AccountTypes.FindAsync(newAccType.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newAccType.Id), Is.Not.Null);
 		}
 
 		[Test]
@@ -206,8 +209,8 @@ namespace PersonalFinancer.Tests.Services
 				Name = "ForDelete",
 				OwnerId = this.User2.Id
 			};
-			await sqlDbContext.AccountTypes.AddAsync(user2AccType);
-			await sqlDbContext.SaveChangesAsync();
+			await repo.AddAsync(user2AccType);
+			await repo.SaveChangesAsync();
 
 			//Act & Assert
 			Assert.That(async () => await accountTypeService

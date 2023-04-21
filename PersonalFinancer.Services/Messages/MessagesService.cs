@@ -1,30 +1,33 @@
 ﻿namespace PersonalFinancer.Services.Messages
 {
-	using MongoDB.Driver;
-	using MongoDB.Driver.Linq;
-
-	using Services.Messages.Models;
-
-	using Data;
-	using Data.Models;
 	using AutoMapper;
 
-	public class MessagesService
+	//using Microsoft.EntityFrameworkCore;
+	
+	using MongoDB.Driver;
+	using MongoDB.Driver.Linq;
+	
+	using Data.Models;
+	
+	using Services.Infrastructure;
+	using Services.Messages.Models;
+
+	public class MessagesService : IMessagesService
 	{
-		private readonly IMongoCollection<Message> data;
+		private readonly IMongoRepository<Message> messagesRepo;
 		private readonly IMapper mapper;
 
 		public MessagesService(
-			MongoDbContext data,
+			IMongoRepository<Message> repo,
 			IMapper mapper)
 		{
-			this.data = data.GetCollection<Message>("Messages");
+			this.messagesRepo = repo;
 			this.mapper = mapper;
 		}
 
 		public async Task<IEnumerable<MessageOutputServiceModel>> GetAllAsync()
 		{
-			var messages = await data.AsQueryable()
+			var messages = await messagesRepo.All()
 				.Select(m => new MessageOutputServiceModel
 				{
 					Id = m.Id,
@@ -38,7 +41,7 @@
 
 		public async Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(string userId)
 		{
-			var messages = await data.AsQueryable()
+			var messages = await messagesRepo.All()
 				.Where(m => m.AuthorId == userId)
 				.Select(m => new MessageOutputServiceModel
 				{
@@ -58,7 +61,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<MessageDetailsServiceModel> GetMessageAsync(string id, string userId, bool isUserAdmin)
 		{
-			MessageDetailsServiceModel message = await data.AsQueryable()
+			MessageDetailsServiceModel message = await messagesRepo.All()
 				.Where(m => m.Id == id && (isUserAdmin || m.AuthorId == userId))
 				.Select(m => new MessageDetailsServiceModel
 				{
@@ -84,7 +87,7 @@
 			var newMessage = mapper.Map<Message>(model);
 			newMessage.CreatedOn = DateTime.UtcNow;
 
-			await data.InsertOneAsync(newMessage);
+			await messagesRepo.AddAsync(newMessage);
 
 			return newMessage.Id;
 		}
@@ -106,7 +109,7 @@
 			var filter = Builders<Message>.Filter.Eq(x => x.Id, model.MessageId);
 			var update = Builders<Message>.Update.Push(x => x.Replies, reply);
 
-			await data.UpdateOneAsync(filter, update);
+			await messagesRepo.UpdateAsync(filter, update);
 		}
 		
 		/// <summary>
@@ -120,11 +123,12 @@
 			if (!isUserAdmin && !await IsUserAuthorized(messageId, userId))
 				throw new ArgumentException("The User is not Authorized to make replies.");
 
-			await data.DeleteOneAsync(m => m.Id == messageId);
+			var filter = Builders<Message>.Filter.Eq(x => x.Id, messageId);
+
+			await messagesRepo.Remove(filter);
 		}
 
 		private async Task<bool> IsUserAuthorized(string messageId, string userId)
-			=> await data.AsQueryable()
-				.AnyAsync(m => m.Id == messageId && m.AuthorId == userId);
+			=> await messagesRepo.All().AnyAsync(m => m.Id == messageId && m.AuthorId == userId);
 	}
 }

@@ -5,26 +5,24 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
-    using Data;
     using Data.Models;
     using static Data.Constants;
 
-    using PersonalFinancer.Services.ApiService.Models;
+    using Services.ApiService.Models;
+	using Services.Infrastructure;
 
-    public class ApiService<T> where T : ApiEntity, new()
+	public class ApiService<T> : IApiService<T> where T : ApiEntity, new()
     {
-        private readonly PersonalFinancerDbContext context;
-        private readonly DbSet<T> dbSet;
+        private readonly IEfRepository<T> repo;
         private readonly IMapper mapper;
         private readonly IMemoryCache memoryCache;
 
         public ApiService(
-            PersonalFinancerDbContext context,
+            IEfRepository<T> repo,
             IMapper mapper,
             IMemoryCache memoryCache)
         {
-            this.context = context;
-            dbSet = this.context.Set<T>();
+            this.repo = repo;
             this.mapper = mapper;
             this.memoryCache = memoryCache;
         }
@@ -35,7 +33,7 @@
         /// <exception cref="ArgumentException"></exception>
         public async Task<ApiOutputServiceModel> CreateEntity(ApiInputServiceModel model)
         {
-            T? entity = await dbSet.FirstOrDefaultAsync(
+            T? entity = await repo.All().FirstOrDefaultAsync(
                 x => x.Name == model.Name && x.OwnerId == model.OwnerId);
 
             if (entity != null)
@@ -55,10 +53,10 @@
                     OwnerId = model.OwnerId
                 };
 
-                await context.Set<T>().AddAsync(entity);
+                await repo.AddAsync(entity);
             }
 
-            await context.SaveChangesAsync();
+            await repo.SaveChangesAsync();
 
             ClearCache(entity.GetType().Name, entity.OwnerId);
 
@@ -75,7 +73,7 @@
         /// <exception cref="InvalidOperationException"></exception>
         public async Task DeleteEntity(string entityId, string userId, bool isUserAdmin)
         {
-            T? entity = await dbSet.FindAsync(entityId);
+            T? entity = await repo.FindAsync(entityId);
 
             if (entity == null)
                 throw new InvalidOperationException("Entity does not exist.");
@@ -88,7 +86,7 @@
 
             entity.IsDeleted = true;
 
-            await context.SaveChangesAsync();
+            await repo.SaveChangesAsync();
 
             ClearCache(entity.GetType().Name, userId);
         }

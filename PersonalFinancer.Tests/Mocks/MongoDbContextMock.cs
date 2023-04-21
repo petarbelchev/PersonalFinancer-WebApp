@@ -12,7 +12,7 @@
 				var dbSettings = new MongoDbSettings
 				{
 					ConnectionString = "mongodb://localhost:27017",
-					DatabaseName = "MessagesMock"
+					DatabaseName = "UnitTestsDbMock"
 				};
 
 				IOptions<MongoDbSettings> options = Options.Create(dbSettings);
