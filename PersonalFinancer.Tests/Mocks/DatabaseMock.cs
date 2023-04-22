@@ -6,14 +6,14 @@
 
 	static class DatabaseMock
 	{
-		public static PersonalFinancerDbContext Instance
+		public static SqlDbContext Instance
 		{
 			get
 			{
-				var dbContextOptionsBuilder = new DbContextOptionsBuilder<PersonalFinancerDbContext>()
+				var dbContextOptionsBuilder = new DbContextOptionsBuilder<SqlDbContext>()
 					.UseInMemoryDatabase("PersonalFinancerInMemoryDb" + DateTime.Now.Ticks.ToString()).Options;
 
-				return new PersonalFinancerDbContext(dbContextOptionsBuilder, false);
+				return new SqlDbContext(dbContextOptionsBuilder, false);
 			}
 		}
 	}

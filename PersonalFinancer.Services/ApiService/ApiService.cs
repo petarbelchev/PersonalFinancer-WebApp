@@ -5,11 +5,12 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
+    using Data.Contracts;
     using Data.Models;
+	using Data.Repositories;
     using static Data.Constants;
 
     using Services.ApiService.Models;
-	using Services.Infrastructure;
 
 	public class ApiService<T> : IApiService<T> where T : ApiEntity, new()
     {

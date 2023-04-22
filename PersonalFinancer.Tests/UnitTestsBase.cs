@@ -1,24 +1,24 @@
 ﻿using AutoMapper;
+
 using Microsoft.Extensions.Caching.Memory;
-using MongoDB.Driver;
+
 using NUnit.Framework;
 
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
-using PersonalFinancer.Tests.Mocks;
 using static PersonalFinancer.Data.Constants.CategoryConstants;
+
+using PersonalFinancer.Tests.Mocks;
 
 namespace PersonalFinancer.Tests
 {
 	[TestFixture]
 	abstract class UnitTestsBase
 	{
-		protected PersonalFinancerDbContext sqlDbContext;
+		protected SqlDbContext sqlDbContext;
 		protected IMapper mapper;
 		protected IMemoryCache memoryCache;
-		protected IMongoDbContext mongoDbContext;
-		protected IMongoCollection<Message> messagesCollection;
 
 		[OneTimeSetUp]
 		protected async Task SetUpBase()
@@ -26,8 +26,6 @@ namespace PersonalFinancer.Tests
 			sqlDbContext = DatabaseMock.Instance;
 			mapper = MapperMock.Instance;
 			memoryCache = MemoryCacheMock.Instance;
-			mongoDbContext = MongoDbContextMock.Instance;
-			messagesCollection = mongoDbContext.GetCollection<Message>("Message");
 
 			await SeedDatabase();
 		}
@@ -36,7 +34,6 @@ namespace PersonalFinancer.Tests
 		protected async Task TearDownBase()
 		{
 			await sqlDbContext.DisposeAsync();
-			await mongoDbContext.DropDatabaseAsync("UnitTestsDbMock");
 		}
 
 		protected ApplicationUser User1 { get; private set; } = null!;
@@ -65,9 +62,6 @@ namespace PersonalFinancer.Tests
 		protected Transaction Transaction4User1 { get; private set; } = null!;
 		protected Transaction Transaction5User1 { get; private set; } = null!;
 		protected Transaction Transaction6User1 { get; private set; } = null!;
-
-		protected Message Message1User1 { get; private set; } = null!;
-		protected Message Message2User2 { get; private set; } = null!;
 
 		private async Task SeedDatabase()
 		{
@@ -286,61 +280,6 @@ namespace PersonalFinancer.Tests
 				Transaction4User1, Transaction5User1, Transaction6User1);
 
 			await sqlDbContext.SaveChangesAsync();
-
-			// Messages
-			Message1User1 = new Message
-			{
-				AuthorId = User1.Id,
-				AuthorName = $"{User1.FirstName} {User1.LastName}",
-				CreatedOn = DateTime.UtcNow.AddDays(-4),
-				Subject = "How to delete a transaction?",
-				Content = "Can someone tell me how to delete a transaction?",
-				Replies = new Reply[]
-				{
-					new Reply
-					{
-						AuthorId = User2.Id,
-						AuthorName = $"{User2.FirstName} {User2.LastName}",
-						Content = "I am here to help you! When open a transaction details click on \"Delete\" button.",
-						CreatedOn = DateTime.UtcNow.AddDays(-3)
-					},
-					new Reply
-					{
-						AuthorId = User1.Id,
-						AuthorName = $"{User1.FirstName} {User1.LastName}",
-						Content = "You help me! Thank you!",
-						CreatedOn = DateTime.UtcNow.AddDays(-2)
-					}
-				}
-			};
-
-			Message2User2 = new Message
-			{
-				AuthorId = User2.Id,
-				AuthorName = $"{User2.FirstName} {User2.LastName}",
-				CreatedOn = DateTime.UtcNow.AddDays(-2),
-				Subject = "How to create an Account?",
-				Content = "Can someone tell me how to create an Account?",
-				Replies = new Reply[]
-				{
-					new Reply
-					{
-						AuthorId = User1.Id,
-						AuthorName = $"{User1.FirstName} {User1.LastName}",
-						Content = "I can help! Click \"Create\" on your navigation panel, then \"Create Account\".",
-						CreatedOn = DateTime.UtcNow.AddDays(-1)
-					},
-					new Reply
-					{
-						AuthorId = User2.Id,
-						AuthorName = $"{User2.FirstName} {User2.LastName}",
-						Content = "Thank you!",
-						CreatedOn = DateTime.UtcNow.AddDays(-1)
-					}
-				}
-			};
-
-			await messagesCollection.InsertManyAsync(new Message[] { Message1User1, Message2User2 });
 		}
 	}
 }

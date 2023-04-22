@@ -8,12 +8,12 @@
 	
 	using Data.Enums;
 	using Data.Models;
+	using Data.Repositories;
 	using static Data.Constants;
 	
 	using Services.Accounts.Models;
-	using Services.Infrastructure;
 	using Services.Shared.Models;
-	
+
 	public class AccountsService : IAccountsService
 	{
 		private readonly IEfRepository<Account> accountsRepo;

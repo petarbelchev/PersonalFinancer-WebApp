@@ -52,7 +52,7 @@
 		{
 			using IServiceScope scope = app.ApplicationServices.CreateScope();
 			IServiceProvider services = scope.ServiceProvider;
-			var context = services.GetRequiredService<PersonalFinancerDbContext>();
+			var context = services.GetRequiredService<SqlDbContext>();
 
 			if (context.Accounts.Any() || context.Transactions.Any())
 			{

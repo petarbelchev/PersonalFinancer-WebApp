@@ -1,14 +1,17 @@
 ﻿using AutoMapper.QueryableExtensions;
+
 using Microsoft.EntityFrameworkCore;
+
 using NUnit.Framework;
 
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Infrastructure;
+using PersonalFinancer.Data.Repositories;
+using static PersonalFinancer.Data.Constants.PaginationConstants;
+
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
-using static PersonalFinancer.Data.Constants.PaginationConstants;
 
 namespace PersonalFinancer.Tests.Services
 {

@@ -1,5 +1,7 @@
 ﻿namespace PersonalFinancer.Services.Messages
 {
+	using MongoDB.Driver;
+
 	using Services.Messages.Models;
 
 	public interface IMessagesService
@@ -12,7 +14,7 @@
 
 		Task<string> CreateAsync(MessageInputServiceModel model);
 
-		Task AddReplyAsync(ReplyInputServiceModel model);
+		Task<UpdateResult> AddReplyAsync(ReplyInputServiceModel model);
 
 		Task RemoveAsync(string messageId, string userId, bool isUserAdmin);
 	}

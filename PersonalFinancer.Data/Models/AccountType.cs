@@ -1,11 +1,11 @@
 ﻿namespace PersonalFinancer.Data.Models
 {
-	using System.ComponentModel.DataAnnotations;
-	using System.ComponentModel.DataAnnotations.Schema;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using PersonalFinancer.Data.Contracts;
+    using static Data.Constants.AccountTypeConstants;
 
-	using static Data.Constants.AccountTypeConstants;
-
-	public class AccountType : ApiEntity
+    public class AccountType : ApiEntity
 	{
 		[Key]
 		public override string Id { get; set; } = null!;

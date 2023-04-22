@@ -4,11 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
 using PersonalFinancer.Data;
+using PersonalFinancer.Data.Contracts;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Repositories;
 
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.ApiService;
-using PersonalFinancer.Services.Infrastructure;
 using PersonalFinancer.Services.Messages;
 using PersonalFinancer.Services.User;
 
@@ -18,7 +19,7 @@ using PersonalFinancer.Web.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<PersonalFinancerDbContext>(options =>
+builder.Services.AddDbContext<SqlDbContext>(options =>
 	options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -31,7 +32,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 	options.Password.RequireNonAlphanumeric = false;
 })
 	.AddRoles<IdentityRole>()
-	.AddEntityFrameworkStores<PersonalFinancerDbContext>();
+	.AddEntityFrameworkStores<SqlDbContext>();
 
 builder.Services.AddControllersWithViews(options =>
 {
