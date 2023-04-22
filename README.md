@@ -24,6 +24,7 @@ This is my first project. I created it to practice my skills and also will be a 
 - Microsoft SQL Server
 - MongoDB (for Messages) *NEW
 - NUnit
+- Moq
 
 ## How to Install and Run the Project
 The Project can be easy tested. All you need to do:
