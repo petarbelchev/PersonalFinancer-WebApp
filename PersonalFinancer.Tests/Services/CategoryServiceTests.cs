@@ -2,6 +2,8 @@
 using NUnit.Framework;
 
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Repositories;
+
 using PersonalFinancer.Services.ApiService.Models;
 using PersonalFinancer.Services.ApiService;
 
@@ -9,13 +11,14 @@ namespace PersonalFinancer.Tests.Services
 {
 	internal class CategoryServiceTests : UnitTestsBase
 	{
-		
+		private IEfRepository<Category> repo;
 		private ApiService<Category> categoryService;
 
 		[SetUp]
 		public void SetUp()
 		{
-			this.categoryService = new ApiService<Category>(this.sqlDbContext, this.mapper, this.memoryCache);
+			repo = new EfRepository<Category>(this.sqlDbContext);
+			categoryService = new ApiService<Category>(repo, this.mapper, this.memoryCache);
 		}
 
 		[Test]
@@ -27,13 +30,13 @@ namespace PersonalFinancer.Tests.Services
 				Name = "NewCategory",
 				OwnerId = this.User1.Id
 			};
-			int countBefore = await sqlDbContext.Categories.CountAsync();
+			int countBefore = await repo.All().CountAsync();
 
 			//Act
 			ApiOutputServiceModel actual =
 				await categoryService.CreateEntity(inputModel);
 
-			int countAfter = await sqlDbContext.Categories.CountAsync();
+			int countAfter = await repo.All().CountAsync();
 
 			//Assert
 			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
@@ -53,9 +56,9 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = this.User1.Id,
 				IsDeleted = true
 			};
-			await sqlDbContext.Categories.AddAsync(deletedCategory);
-			await sqlDbContext.SaveChangesAsync();
-			int countBefore = await sqlDbContext.Categories.CountAsync();
+			await repo.AddAsync(deletedCategory);
+			await repo.SaveChangesAsync();
+			int countBefore = await repo.All().CountAsync();
 
 			var inputModel = new ApiInputServiceModel
 			{
@@ -66,7 +69,7 @@ namespace PersonalFinancer.Tests.Services
 			//Assert
 			Assert.That(async () =>
 			{
-				var deletedAcc = await sqlDbContext.Categories.FindAsync(deletedCategory.Id);
+				var deletedAcc = await repo.FindAsync(deletedCategory.Id);
 				Assert.That(deletedAcc, Is.Not.Null);
 				return deletedAcc.IsDeleted;
 			},
@@ -76,7 +79,7 @@ namespace PersonalFinancer.Tests.Services
 			ApiOutputServiceModel result =
 				await categoryService.CreateEntity(inputModel);
 
-			int countAfter = await sqlDbContext.Categories.CountAsync();
+			int countAfter = await repo.All().CountAsync();
 
 			//Assert
 			Assert.That(countAfter, Is.EqualTo(countBefore));
@@ -96,9 +99,9 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = this.User2.Id
 			};
 
-			await sqlDbContext.Categories.AddAsync(user2Category);
-			await sqlDbContext.SaveChangesAsync();
-			int countBefore = await sqlDbContext.Categories.CountAsync();
+			await repo.AddAsync(user2Category);
+			await repo.SaveChangesAsync();
+			int countBefore = await repo.All().CountAsync();
 
 			var inputModel = new ApiInputServiceModel
 			{
@@ -107,13 +110,13 @@ namespace PersonalFinancer.Tests.Services
 			};
 
 			//Assert
-			Assert.That(await sqlDbContext.Categories.FindAsync(user2Category.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(user2Category.Id), Is.Not.Null);
 
 			//Act
 			ApiOutputServiceModel result =
 				await categoryService.CreateEntity(inputModel);
 
-			int countAfter = await sqlDbContext.Categories.CountAsync();
+			int countAfter = await repo.All().CountAsync();
 
 			//Assert
 			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
@@ -148,11 +151,11 @@ namespace PersonalFinancer.Tests.Services
 				Name = "NewCategory",
 				OwnerId = this.User1.Id
 			};
-			await sqlDbContext.Categories.AddAsync(newCategory);
-			await sqlDbContext.SaveChangesAsync();
+			await repo.AddAsync(newCategory);
+			await repo.SaveChangesAsync();
 
 			//Assert
-			Assert.That(await sqlDbContext.Categories.FindAsync(newCategory.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newCategory.Id), Is.Not.Null);
 			Assert.That(newCategory.IsDeleted, Is.False);
 
 			//Act
@@ -160,7 +163,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(newCategory.IsDeleted, Is.True);
-			Assert.That(await sqlDbContext.Categories.FindAsync(newCategory.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newCategory.Id), Is.Not.Null);
 		}
 		
 		[Test]
@@ -173,11 +176,11 @@ namespace PersonalFinancer.Tests.Services
 				Name = "NewCategory",
 				OwnerId = this.User1.Id
 			};
-			await sqlDbContext.Categories.AddAsync(newCategory);
-			await sqlDbContext.SaveChangesAsync();
+			await repo.AddAsync(newCategory);
+			await repo.SaveChangesAsync();
 
 			//Assert
-			Assert.That(await sqlDbContext.Categories.FindAsync(newCategory.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newCategory.Id), Is.Not.Null);
 			Assert.That(newCategory.IsDeleted, Is.False);
 
 			//Act
@@ -185,7 +188,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(newCategory.IsDeleted, Is.True);
-			Assert.That(await sqlDbContext.Categories.FindAsync(newCategory.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newCategory.Id), Is.Not.Null);
 		}
 
 		[Test]
@@ -207,8 +210,8 @@ namespace PersonalFinancer.Tests.Services
 				Name = "ForDelete",
 				OwnerId = this.User2.Id
 			};
-			await sqlDbContext.Categories.AddAsync(user2Category);
-			await sqlDbContext.SaveChangesAsync();
+			await repo.AddAsync(user2Category);
+			await repo.SaveChangesAsync();
 
 			//Act & Assert
 			Assert.That(async () => await categoryService

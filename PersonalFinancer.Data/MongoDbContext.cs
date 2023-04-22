@@ -1,11 +1,13 @@
 ﻿namespace PersonalFinancer.Data
 {
-	using Microsoft.Extensions.Options;
-	
-	using MongoDB.Bson.Serialization.Conventions;
-	using MongoDB.Driver;
+    using Microsoft.Extensions.Options;
 
-	public class MongoDbContext
+    using MongoDB.Bson.Serialization.Conventions;
+    using MongoDB.Driver;
+
+    using Data.Contracts;
+
+    public class MongoDbContext : IMongoDbContext
 	{
 		private IMongoClient client;
 		private IMongoDatabase database;
@@ -22,8 +24,5 @@
 
 		public IMongoCollection<T> GetCollection<T>(string name)
 			=> database.GetCollection<T>(name);
-
-		public async Task DropDatabaseAsync(string name)
-			=> await client.DropDatabaseAsync(name);
 	}
 }

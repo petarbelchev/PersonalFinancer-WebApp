@@ -2,6 +2,8 @@
 using NUnit.Framework;
 
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Repositories;
+
 using PersonalFinancer.Services.ApiService;
 using PersonalFinancer.Services.ApiService.Models;
 
@@ -9,12 +11,14 @@ namespace PersonalFinancer.Tests.Services
 {
 	internal class CurrencyServiceTests : UnitTestsBase
 	{
+		private IEfRepository<Currency> repo;
 		private ApiService<Currency> currencyService;
 
 		[SetUp]
 		public void SetUp()
 		{
-			this.currencyService = new ApiService<Currency>(this.sqlDbContext, this.mapper, this.memoryCache);
+			repo = new EfRepository<Currency>(this.sqlDbContext);
+			currencyService = new ApiService<Currency>(repo, this.mapper, this.memoryCache);
 		}
 
 		[Test]
@@ -26,13 +30,13 @@ namespace PersonalFinancer.Tests.Services
 				Name = "NewCurrency",
 				OwnerId = this.User1.Id
 			};
-			int countBefore = await sqlDbContext.Currencies.CountAsync();
+			int countBefore = await repo.All().CountAsync();
 
 			//Act
 			ApiOutputServiceModel actual =
 				await currencyService.CreateEntity(inputModel);
 
-			int countAfter = await sqlDbContext.Currencies.CountAsync();
+			int countAfter = await repo.All().CountAsync();
 
 			//Assert
 			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
@@ -52,9 +56,9 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = this.User1.Id,
 				IsDeleted = true
 			};
-			await sqlDbContext.Currencies.AddAsync(deletedCurrency);
-			await sqlDbContext.SaveChangesAsync();
-			int countBefore = await sqlDbContext.Currencies.CountAsync();
+			await repo.AddAsync(deletedCurrency);
+			await repo.SaveChangesAsync();
+			int countBefore = await repo.All().CountAsync();
 
 			var inputModel = new ApiInputServiceModel
 			{
@@ -65,7 +69,7 @@ namespace PersonalFinancer.Tests.Services
 			//Assert
 			Assert.That(async () =>
 			{
-				var deletedAcc = await sqlDbContext.Currencies.FindAsync(deletedCurrency.Id);
+				var deletedAcc = await repo.FindAsync(deletedCurrency.Id);
 				Assert.That(deletedAcc, Is.Not.Null);
 				return deletedAcc.IsDeleted;
 			},
@@ -75,7 +79,7 @@ namespace PersonalFinancer.Tests.Services
 			ApiOutputServiceModel result =
 				await currencyService.CreateEntity(inputModel);
 
-			int countAfter = await sqlDbContext.Currencies.CountAsync();
+			int countAfter = await repo.All().CountAsync();
 
 			//Assert
 			Assert.That(countAfter, Is.EqualTo(countBefore));
@@ -95,9 +99,9 @@ namespace PersonalFinancer.Tests.Services
 				OwnerId = this.User2.Id
 			};
 
-			await sqlDbContext.Currencies.AddAsync(user2Currency);
-			await sqlDbContext.SaveChangesAsync();
-			int countBefore = await sqlDbContext.Currencies.CountAsync();
+			await repo.AddAsync(user2Currency);
+			await repo.SaveChangesAsync();
+			int countBefore = await repo.All().CountAsync();
 
 			var inputModel = new ApiInputServiceModel
 			{
@@ -106,13 +110,13 @@ namespace PersonalFinancer.Tests.Services
 			};
 
 			//Assert
-			Assert.That(await sqlDbContext.Currencies.FindAsync(user2Currency.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(user2Currency.Id), Is.Not.Null);
 
 			//Act
 			ApiOutputServiceModel result =
 				await currencyService.CreateEntity(inputModel);
 
-			int countAfter = await sqlDbContext.Currencies.CountAsync();
+			int countAfter = await repo.All().CountAsync();
 
 			//Assert
 			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
@@ -147,11 +151,11 @@ namespace PersonalFinancer.Tests.Services
 				Name = "NewCurrency",
 				OwnerId = this.User1.Id
 			};
-			await sqlDbContext.Currencies.AddAsync(newCategory);
-			await sqlDbContext.SaveChangesAsync();
+			await repo.AddAsync(newCategory);
+			await repo.SaveChangesAsync();
 
 			//Assert
-			Assert.That(await sqlDbContext.Currencies.FindAsync(newCategory.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newCategory.Id), Is.Not.Null);
 			Assert.That(newCategory.IsDeleted, Is.False);
 
 			//Act
@@ -159,7 +163,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(newCategory.IsDeleted, Is.True);
-			Assert.That(await sqlDbContext.Currencies.FindAsync(newCategory.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newCategory.Id), Is.Not.Null);
 		}
 		
 		[Test]
@@ -172,11 +176,11 @@ namespace PersonalFinancer.Tests.Services
 				Name = "NewCurrency",
 				OwnerId = this.User1.Id
 			};
-			await sqlDbContext.Currencies.AddAsync(newCurrency);
-			await sqlDbContext.SaveChangesAsync();
+			await repo.AddAsync(newCurrency);
+			await repo.SaveChangesAsync();
 
 			//Assert
-			Assert.That(await sqlDbContext.Currencies.FindAsync(newCurrency.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newCurrency.Id), Is.Not.Null);
 			Assert.That(newCurrency.IsDeleted, Is.False);
 
 			//Act
@@ -184,7 +188,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(newCurrency.IsDeleted, Is.True);
-			Assert.That(await sqlDbContext.Currencies.FindAsync(newCurrency.Id), Is.Not.Null);
+			Assert.That(await repo.FindAsync(newCurrency.Id), Is.Not.Null);
 		}
 
 		[Test]
@@ -206,8 +210,8 @@ namespace PersonalFinancer.Tests.Services
 				Name = "ForDelete",
 				OwnerId = this.User2.Id
 			};
-			await sqlDbContext.Currencies.AddAsync(user2Currency);
-			await sqlDbContext.SaveChangesAsync();
+			await repo.AddAsync(user2Currency);
+			await repo.SaveChangesAsync();
 
 			//Act & Assert
 			Assert.That(async () => await currencyService

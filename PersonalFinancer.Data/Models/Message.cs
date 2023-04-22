@@ -1,16 +1,9 @@
 ﻿namespace PersonalFinancer.Data.Models
 {
-	using MongoDB.Bson;
-	using MongoDB.Bson.Serialization.Attributes;
+	using Data.Contracts;
 
-	public class Message
+	public class Message : MongoDocument
 	{
-		[BsonId]
-		[BsonRepresentation(BsonType.ObjectId)]
-		public string Id { get; set; } = null!;
-
-		public string AuthorId { get; set; } = null!;
-
         public string AuthorName { get; set; } = null!;
 
         public DateTime CreatedOn { get; set; }

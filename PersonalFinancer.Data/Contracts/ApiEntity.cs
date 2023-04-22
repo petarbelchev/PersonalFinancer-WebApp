@@ -1,7 +1,7 @@
-﻿namespace PersonalFinancer.Data.Models
+﻿namespace PersonalFinancer.Data.Contracts
 {
-	public abstract class ApiEntity
-	{
+    public abstract class ApiEntity
+    {
         public abstract string Id { get; set; }
 
         public abstract string Name { get; set; }

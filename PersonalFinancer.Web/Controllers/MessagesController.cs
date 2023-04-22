@@ -17,12 +17,12 @@
 	[Authorize]
 	public class MessagesController : Controller
 	{
-		private readonly MessagesService messagesService;
+		private readonly IMessagesService messagesService;
 		private readonly IUsersService usersService;
 		private readonly IMapper mapper;
 
 		public MessagesController(
-			MessagesService messagesService,
+			IMessagesService messagesService,
 			IUsersService usersService,
 			IMapper mapper)
 		{

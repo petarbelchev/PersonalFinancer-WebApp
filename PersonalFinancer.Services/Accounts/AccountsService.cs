@@ -1,31 +1,34 @@
 ﻿namespace PersonalFinancer.Services.Accounts
 {
-    using AutoMapper;
-    using AutoMapper.QueryableExtensions;
+	using AutoMapper;
+	using AutoMapper.QueryableExtensions;
 
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Caching.Memory;
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+	
+	using Data.Enums;
+	using Data.Models;
+	using Data.Repositories;
+	using static Data.Constants;
+	
+	using Services.Accounts.Models;
+	using Services.Shared.Models;
 
-    using Data;
-    using Data.Enums;
-    using Data.Models;
-    using static Data.Constants;
-
-    using Services.Accounts.Models;
-    using Services.Shared.Models;
-
-    public class AccountsService : IAccountsService
+	public class AccountsService : IAccountsService
 	{
-		private readonly PersonalFinancerDbContext data;
+		private readonly IEfRepository<Account> accountsRepo;
+		private readonly IEfRepository<Transaction> transactionsRepo;
 		private readonly IMapper mapper;
 		private readonly IMemoryCache memoryCache;
 
 		public AccountsService(
-			PersonalFinancerDbContext context,
+			IEfRepository<Account> accountRepository,
+			IEfRepository<Transaction> transactionRepository,
 			IMapper mapper,
 			IMemoryCache memoryCache)
 		{
-			this.data = context;
+			this.accountsRepo = accountRepository;
+			this.transactionsRepo = transactionRepository;
 			this.mapper = mapper;
 			this.memoryCache = memoryCache;
 		}
@@ -66,8 +69,8 @@
 				});
 			}
 
-			await data.Accounts.AddAsync(newAccount);
-			await data.SaveChangesAsync();
+			await accountsRepo.AddAsync(newAccount);
+			await accountsRepo.SaveChangesAsync();
 
 			memoryCache.Remove(AccountConstants.AccountCacheKeyValue + model.OwnerId);
 
@@ -81,7 +84,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> CreateTransaction(TransactionFormShortServiceModel model)
 		{
-			Account account = await data.Accounts.FirstAsync(a => a.Id == model.AccountId);
+			Account account = await accountsRepo.All().FirstAsync(a => a.Id == model.AccountId);
 
 			var newTransaction = mapper.Map<Transaction>(model);
 			newTransaction.Id = Guid.NewGuid().ToString();
@@ -93,7 +96,7 @@
 			else if (model.TransactionType == TransactionType.Expense)
 				account.Balance -= newTransaction.Amount;
 
-			await data.SaveChangesAsync();
+			await accountsRepo.SaveChangesAsync();
 
 			return newTransaction.Id;
 		}
@@ -107,18 +110,18 @@
 		public async Task DeleteAccount(
 			string accountId, string userId, bool isUserAdmin, bool shouldDeleteTransactions = false)
 		{
-			Account account = await data.Accounts
+			Account account = await accountsRepo.All()
 				.FirstAsync(a => a.Id == accountId && !a.IsDeleted);
 
 			if (!isUserAdmin && account.OwnerId != userId)
 				throw new ArgumentException("Can't delete someone else account.");
 
 			if (shouldDeleteTransactions)
-				data.Accounts.Remove(account);
+				accountsRepo.Remove(account);
 			else
 				account.IsDeleted = true;
 
-			await data.SaveChangesAsync();
+			await accountsRepo.SaveChangesAsync();
 
 			memoryCache.Remove(AccountConstants.AccountCacheKeyValue + userId);
 		}
@@ -131,14 +134,14 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<decimal> DeleteTransaction(string transactionId, string userId, bool isUserAdmin)
 		{
-			Transaction transaction = await data.Transactions
+			Transaction transaction = await transactionsRepo.All()
 				.Include(t => t.Account)
 				.FirstAsync(t => t.Id == transactionId);
 
 			if (!isUserAdmin && transaction.OwnerId != userId)
 				throw new ArgumentException("User is not transaction's owner");
 
-			data.Transactions.Remove(transaction);
+			transactionsRepo.Remove(transaction);
 
 			if (transaction.TransactionType == TransactionType.Income)
 				transaction.TransactionType = TransactionType.Expense;
@@ -147,7 +150,7 @@
 
 			ChangeBalance(transaction.Account, transaction.Amount, transaction.TransactionType);
 
-			await data.SaveChangesAsync();
+			await transactionsRepo.SaveChangesAsync();
 
 			return transaction.Account.Balance;
 		}
@@ -160,7 +163,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task EditAccount(string accountId, AccountFormShortServiceModel model)
 		{
-			Account account = await data.Accounts.FirstAsync(a => a.Id == accountId);
+			Account account = await accountsRepo.All().FirstAsync(a => a.Id == accountId);
 
 			if (account.Name != model.Name && IsNameExists(model.Name, model.OwnerId))
 				throw new ArgumentException($"The User already have Account with \"{model.Name}\" name.");
@@ -174,7 +177,7 @@
 				decimal amountOfChange = model.Balance - account.Balance;
 				account.Balance = model.Balance;
 
-				Transaction? transaction = await data.Transactions
+				Transaction? transaction = await transactionsRepo.All()
 					.FirstOrDefaultAsync(t => t.AccountId == account.Id && t.IsInitialBalance);
 
 				if (transaction == null)
@@ -202,7 +205,7 @@
 				}
 			}
 
-			await data.SaveChangesAsync();
+			await transactionsRepo.SaveChangesAsync();
 		}
 
 		/// <summary>
@@ -211,7 +214,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task EditTransaction(string id, TransactionFormShortServiceModel model)
 		{
-			Transaction transactionInDb = await data.Transactions
+			Transaction transactionInDb = await transactionsRepo.All()
 				.Include(t => t.Account)
 				.FirstAsync(t => t.Id == id);
 
@@ -228,7 +231,7 @@
 
 				if (model.AccountId != transactionInDb.AccountId)
 				{
-					Account newAccount = await data.Accounts.FirstAsync(a => a.Id == model.AccountId);
+					Account newAccount = await accountsRepo.All().FirstAsync(a => a.Id == model.AccountId);
 					transactionInDb.Account = newAccount;
 				}
 
@@ -242,7 +245,7 @@
 			transactionInDb.CreatedOn = model.CreatedOn;
 			transactionInDb.TransactionType = model.TransactionType;
 
-			await data.SaveChangesAsync();
+			await transactionsRepo.SaveChangesAsync();
 		}
 
 		/// <summary>
@@ -253,7 +256,7 @@
 		public async Task<AccountDetailsServiceModel> GetAccountDetails(
 			string id, DateTime startDate, DateTime endDate, string ownerId, bool isUserAdmin)
 		{
-			return await data.Accounts
+			return await accountsRepo.All()
 				.Where(a => a.Id == id && !a.IsDeleted
 							&& (isUserAdmin || a.OwnerId == ownerId))
 				.Select(a => new AccountDetailsServiceModel
@@ -295,7 +298,7 @@
 		public async Task<AccountFormServiceModel> GetAccountFormData(
 			string accountId, string userId, bool isUserAdmin)
 		{
-			return await data.Accounts
+			return await accountsRepo.All()
 				.Where(a => a.Id == accountId
 							&& (isUserAdmin || a.OwnerId == userId))
 				.Select(a => new AccountFormServiceModel
@@ -330,7 +333,7 @@
 		public async Task<TransactionsServiceModel> GetAccountTransactions(
 			string id, DateTime startDate, DateTime endDate, int page)
 		{
-			var accountTransactions = await data.Accounts
+			var accountTransactions = await accountsRepo.All()
 				.Where(a => a.Id == id && !a.IsDeleted)
 				.Select(a => new TransactionsServiceModel
 				{
@@ -365,14 +368,14 @@
 		{
 			var outputModel = new UsersAccountCardsServiceModel
 			{
-				Accounts = await data.Accounts
+				Accounts = await accountsRepo.All()
 					.Where(a => !a.IsDeleted)
 					.OrderBy(a => a.Name)
 					.Skip(PaginationConstants.AccountsPerPage * (page - 1))
 					.Take(PaginationConstants.AccountsPerPage)
 					.ProjectTo<AccountCardServiceModel>(mapper.ConfigurationProvider)
 					.ToArrayAsync(),
-				TotalUsersAccountsCount = await data.Accounts.CountAsync(a => !a.IsDeleted)
+				TotalUsersAccountsCount = await accountsRepo.All().CountAsync(a => !a.IsDeleted)
 			};
 
 			return outputModel;
@@ -380,7 +383,7 @@
 
 		public async Task<IEnumerable<CurrencyCashFlowServiceModel>> GetCurrenciesCashFlow()
 		{
-			return await data.Transactions
+			return await transactionsRepo.All()
 				.GroupBy(t => t.Account.Currency.Name)
 				.Select(t => new CurrencyCashFlowServiceModel
 				{
@@ -399,7 +402,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> GetAccountName(string accountId, string userId, bool isUserAdmin)
 		{
-			string name = await data.Accounts
+			string name = await accountsRepo.All()
 				.Where(a => a.Id == accountId && (isUserAdmin || a.OwnerId == userId))
 				.Select(a => a.Name)
 				.FirstAsync();
@@ -413,7 +416,8 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<TransactionFormServiceModel> GetTransactionFormData(string transactionId)
 		{
-			return await data.Transactions.Where(t => t.Id == transactionId)
+			return await transactionsRepo.All()
+				.Where(t => t.Id == transactionId)
 				.Select(t => new TransactionFormServiceModel
 				{
 					OwnerId = t.OwnerId,
@@ -450,7 +454,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> GetOwnerId(string accountId)
 		{
-			string ownerId = await data.Accounts
+			string ownerId = await accountsRepo.All()
 				.Where(a => a.Id == accountId)
 				.Select(a => a.OwnerId)
 				.FirstAsync();
@@ -467,7 +471,7 @@
 		public async Task<TransactionDetailsServiceModel> GetTransactionDetails(
 			string transactionId, string ownerId, bool isUserAdmin)
 		{
-			TransactionDetailsServiceModel? transaction = await data.Transactions
+			TransactionDetailsServiceModel? transaction = await transactionsRepo.All()
 				.Where(t => t.Id == transactionId)
 				.ProjectTo<TransactionDetailsServiceModel>(mapper.ConfigurationProvider)
 				.FirstOrDefaultAsync();
@@ -487,7 +491,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<bool> IsAccountDeleted(string accountId)
 		{
-			bool isDeleted = await data.Accounts
+			bool isDeleted = await accountsRepo.All()
 				.Where(a => a.Id == accountId)
 				.Select(a => a.IsDeleted)
 				.FirstAsync();
@@ -501,7 +505,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<bool> IsAccountOwner(string userId, string accountId)
 		{
-			string ownerId = await data.Accounts
+			string ownerId = await accountsRepo.All()
 				.Where(a => a.Id == accountId)
 				.Select(a => a.OwnerId)
 				.FirstAsync();
@@ -511,7 +515,7 @@
 
 		private bool IsNameExists(string name, string userId)
 		{
-			bool isExist = data.Accounts
+			bool isExist = accountsRepo.All()
 				.Any(a => a.OwnerId == userId && a.Name == name);
 
 			return isExist;
@@ -523,7 +527,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<AccountDetailsShortServiceModel> GetAccountShortDetails(string accountId)
 		{
-			return await data.Accounts
+			return await accountsRepo.All()
 				.Where(a => a.Id == accountId)
 				.Select(a => new AccountDetailsShortServiceModel
 				{

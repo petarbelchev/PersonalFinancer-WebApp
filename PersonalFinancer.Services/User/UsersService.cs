@@ -1,30 +1,43 @@
 ﻿namespace PersonalFinancer.Services.User
-{
+{	
 	using AutoMapper;
 	using AutoMapper.QueryableExtensions;
 
 	using Microsoft.EntityFrameworkCore;
 	using Microsoft.Extensions.Caching.Memory;
 
-	using Data;
 	using Data.Enums;
+	using Data.Models;
+	using Data.Repositories;
 	using static Data.Constants;
-
+	
 	using Services.Shared.Models;
 	using Services.User.Models;
 
 	public class UsersService : IUsersService
 	{
-		private readonly PersonalFinancerDbContext data;
+		private readonly IEfRepository<ApplicationUser> usersRepo;
+		private readonly IEfRepository<Category> categoriesRepo;
+		private readonly IEfRepository<Account> accountsRepo;
+		private readonly IEfRepository<AccountType> accountTypesRepo;
+		private readonly IEfRepository<Currency> currenciesRepo;
 		private readonly IMapper mapper;
 		private readonly IMemoryCache memoryCache;
 
 		public UsersService(
-			PersonalFinancerDbContext data,
+			IEfRepository<ApplicationUser> usersRepo,
+			IEfRepository<Category> categoriesRepo,
+			IEfRepository<Account> accountsRepo,
+			IEfRepository<AccountType> accountTypesRepo,
+			IEfRepository<Currency> currenciesRepo,
 			IMapper mapper,
 			IMemoryCache memoryCache)
 		{
-			this.data = data;
+			this.usersRepo = usersRepo;
+			this.categoriesRepo = categoriesRepo;
+			this.accountsRepo = accountsRepo;
+			this.accountTypesRepo = accountTypesRepo;
+			this.currenciesRepo = currenciesRepo;
 			this.mapper = mapper;
 			this.memoryCache = memoryCache;
 		}
@@ -35,7 +48,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> FullName(string userId)
 		{
-			string fullName = await data.Users
+			string fullName = await usersRepo.All()
 				.Where(u => u.Id == userId)
 				.Select(u => $"{u.FirstName} {u.LastName}")
 				.FirstAsync();
@@ -47,14 +60,14 @@
 		{
 			var users = new UsersServiceModel
 			{
-				Users = await data.Users
+				Users = await usersRepo.All()
 					.OrderBy(u => u.FirstName)
 					.ThenBy(u => u.LastName)
 					.Skip(PaginationConstants.UsersPerPage * (page - 1))
 					.Take(PaginationConstants.UsersPerPage)
 					.ProjectTo<UserServiceModel>(mapper.ConfigurationProvider)
 					.ToListAsync(),
-				TotalUsersCount = await data.Users.CountAsync()
+				TotalUsersCount = await usersRepo.All().CountAsync()
 			};
 
 			return users;
@@ -65,7 +78,7 @@
 			if (!memoryCache.TryGetValue(CategoryConstants.CategoryCacheKeyValue + userId,
 				out CategoryServiceModel[] categories))
 			{
-				categories = await data.Categories
+				categories = await categoriesRepo.All()
 					.Where(c => c.OwnerId == userId && !c.IsDeleted)
 					.OrderBy(c => c.Name)
 					.Select(c => mapper.Map<CategoryServiceModel>(c))
@@ -77,7 +90,7 @@
 			if (!memoryCache.TryGetValue(AccountConstants.AccountCacheKeyValue + userId,
 				out AccountServiceModel[] accounts))
 			{
-				accounts = await data.Accounts
+				accounts = await accountsRepo.All()
 					.Where(a => a.OwnerId == userId && !a.IsDeleted)
 					.OrderBy(a => a.Name)
 					.Select(a => mapper.Map<AccountServiceModel>(a))
@@ -101,7 +114,7 @@
 			if (!memoryCache.TryGetValue(AccountTypeConstants.AccTypeCacheKeyValue + userId,
 				out AccountTypeServiceModel[] accTypes))
 			{
-				accTypes = await data.AccountTypes
+				accTypes = await accountTypesRepo.All()
 					.Where(at => at.OwnerId == userId && !at.IsDeleted)
 					.OrderBy(at => at.Name)
 					.Select(at => mapper.Map<AccountTypeServiceModel>(at))
@@ -113,7 +126,7 @@
 			if (!memoryCache.TryGetValue(CurrencyConstants.CurrencyCacheKeyValue + userId,
 				out CurrencyServiceModel[] currencies))
 			{
-				currencies = await data.Currencies
+				currencies = await currenciesRepo.All()
 					.Where(c => c.OwnerId == userId && !c.IsDeleted)
 					.OrderBy(c => c.Name)
 					.Select(c => mapper.Map<CurrencyServiceModel>(c))
@@ -133,7 +146,7 @@
 
 		public async Task<IEnumerable<AccountCardServiceModel>> GetUserAccounts(string userId)
 		{
-			return await data.Accounts
+			return await accountsRepo.All()
 				.Where(a => a.OwnerId == userId && !a.IsDeleted)
 				.OrderBy(a => a.Name)
 				.Select(a => mapper.Map<AccountCardServiceModel>(a))
@@ -142,14 +155,14 @@
 
 		public async Task<int> GetUsersAccountsCount()
 		{
-			int accountsCount = await data.Accounts.CountAsync(a => !a.IsDeleted);
+			int accountsCount = await accountsRepo.All().CountAsync(a => !a.IsDeleted);
 
 			return accountsCount;
 		}
 
 		public async Task<TransactionsServiceModel> GetUserTransactions(string userId, DateTime startDate, DateTime endDate, int page = 1)
 		{
-			TransactionsServiceModel userTransactions = await data.Users
+			TransactionsServiceModel userTransactions = await usersRepo.All()
 				.Where(u => u.Id == userId)
 				.Select(u => new TransactionsServiceModel
 				{
@@ -182,7 +195,7 @@
 
 		public async Task<UserDashboardServiceModel> GetUserDashboardData(string userId, DateTime startDate, DateTime endDate)
 		{
-			var dto = await data.Users
+			var dto = await usersRepo.All()
 				.Where(u => u.Id == userId)
 				.Select(u => new UserDashboardServiceModel
 				{
@@ -232,7 +245,7 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<UserDetailsServiceModel> UserDetails(string userId)
 		{
-			var result = await data.Users
+			var result = await usersRepo.All()
 				.Where(u => u.Id == userId)
 				.ProjectTo<UserDetailsServiceModel>(mapper.ConfigurationProvider)
 				.FirstAsync();
@@ -240,6 +253,6 @@
 			return result;
 		}
 
-		public async Task<int> UsersCount() => await data.Users.CountAsync();
+		public async Task<int> UsersCount() => await usersRepo.All().CountAsync();
 	}
 }

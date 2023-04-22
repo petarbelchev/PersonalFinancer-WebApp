@@ -4,7 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
 using PersonalFinancer.Data;
+using PersonalFinancer.Data.Contracts;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Repositories;
 
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.ApiService;
@@ -17,12 +19,12 @@ using PersonalFinancer.Web.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<PersonalFinancerDbContext>(options =>
+builder.Services.AddDbContext<SqlDbContext>(options =>
 	options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.Configure<MongoDbSettings>(
-	builder.Configuration.GetSection("MessagesDatabase"));
+	builder.Configuration.GetSection("MongoDbSettings"));
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
@@ -30,7 +32,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 	options.Password.RequireNonAlphanumeric = false;
 })
 	.AddRoles<IdentityRole>()
-	.AddEntityFrameworkStores<PersonalFinancerDbContext>();
+	.AddEntityFrameworkStores<SqlDbContext>();
 
 builder.Services.AddControllersWithViews(options =>
 {
@@ -42,13 +44,20 @@ builder.Services.AddControllersWithViews(options =>
 	});
 
 builder.Services.AddScoped<IAccountsService, AccountsService>();
-builder.Services.AddScoped<IUsersService, UsersService>();
-builder.Services.AddScoped<ApiService<AccountType>, ApiService<AccountType>>();
-builder.Services.AddScoped<ApiService<Category>, ApiService<Category>>();
-builder.Services.AddScoped<ApiService<Currency>, ApiService<Currency>>();
+builder.Services.AddScoped<IApiService<AccountType>, ApiService<AccountType>>();
+builder.Services.AddScoped<IApiService<Category>, ApiService<Category>>();
+builder.Services.AddScoped<IApiService<Currency>, ApiService<Currency>>();
+builder.Services.AddScoped<IEfRepository<Account>, EfRepository<Account>>();
+builder.Services.AddScoped<IEfRepository<AccountType>, EfRepository<AccountType>>();
+builder.Services.AddScoped<IEfRepository<ApplicationUser>, EfRepository<ApplicationUser>>();
+builder.Services.AddScoped<IEfRepository<Category>, EfRepository<Category>>();
+builder.Services.AddScoped<IEfRepository<Currency>, EfRepository<Currency>>();
+builder.Services.AddScoped<IEfRepository<Transaction>, EfRepository<Transaction>>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
-builder.Services.AddSingleton<MongoDbContext, MongoDbContext>();
-builder.Services.AddSingleton<MessagesService>();
+builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
+builder.Services.AddSingleton<IMongoRepository<Message>, MongoRepository<Message>>();
+builder.Services.AddSingleton<IMessagesService, MessagesService>();
+builder.Services.AddScoped<IUsersService, UsersService>();
 
 builder.Services.AddAutoMapper(
 	typeof(IAccountsService).Assembly,

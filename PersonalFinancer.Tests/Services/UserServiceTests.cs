@@ -1,24 +1,41 @@
 ﻿using AutoMapper.QueryableExtensions;
+
 using Microsoft.EntityFrameworkCore;
+
 using NUnit.Framework;
 
 using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Repositories;
+using static PersonalFinancer.Data.Constants.PaginationConstants;
+
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
-using static PersonalFinancer.Data.Constants.PaginationConstants;
 
 namespace PersonalFinancer.Tests.Services
 {
 	[TestFixture]
 	class UserServiceTests : UnitTestsBase
 	{
+		private IEfRepository<ApplicationUser> usersRepo;
+		private IEfRepository<Category> categoriesRepo;
+		private IEfRepository<Account> accountsRepo;
+		private IEfRepository<AccountType> accountTypeRepo;
+		private IEfRepository<Currency> currenciesRepo;
+		private IEfRepository<Transaction> transactionsRepo;
 		private IUsersService userService;
 
 		[SetUp]
 		public void SetUp()
 		{
-			userService = new UsersService(sqlDbContext, mapper, memoryCache);
+			usersRepo = new EfRepository<ApplicationUser>(this.sqlDbContext);
+			categoriesRepo = new EfRepository<Category>(this.sqlDbContext);
+			accountsRepo = new EfRepository<Account>(this.sqlDbContext);
+			accountTypeRepo = new EfRepository<AccountType>(this.sqlDbContext);
+			currenciesRepo = new EfRepository<Currency>(this.sqlDbContext);
+			transactionsRepo = new EfRepository<Transaction>(this.sqlDbContext);
+			userService = new UsersService(usersRepo, categoriesRepo, accountsRepo, accountTypeRepo, currenciesRepo, this.mapper, this.memoryCache);
 		}
 
 		[Test]
@@ -46,14 +63,14 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetAllUsers_ShouldReturnCollectionOfAllUsers()
 		{
 			//Arrange
-			var expectedUsers = await sqlDbContext.Users
+			var expectedUsers = await usersRepo.All()
 				.OrderBy(u => u.FirstName)
 				.ThenBy(u => u.LastName)
 				.Take(UsersPerPage)
 				.ProjectTo<UserServiceModel>(mapper.ConfigurationProvider)
 				.ToListAsync();
 
-			var expectedTotalCount = await sqlDbContext.Users.CountAsync();
+			var expectedTotalCount = await usersRepo.All().CountAsync();
 
 			//Act
 			var actual = await userService.GetAllUsers(1);
@@ -80,7 +97,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetUserAccounts_ShouldReturnUsersAccounts_WithValidId()
 		{
 			//Arrange
-			var expectedAccounts = await sqlDbContext.Accounts
+			var expectedAccounts = await accountsRepo.All()
 				.Where(a => a.OwnerId == User1.Id && !a.IsDeleted)
 				.OrderBy(a => a.Name)
 				.ProjectTo<AccountCardServiceModel>(mapper.ConfigurationProvider)
@@ -108,13 +125,13 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetUserAccountsAndCategories_ShouldReturnCorrectData()
 		{
 			//Arrange
-			AccountServiceModel[] expectedAccounts = await sqlDbContext.Accounts
+			AccountServiceModel[] expectedAccounts = await accountsRepo.All()
 				.Where(a => a.OwnerId == User1.Id && !a.IsDeleted)
 				.OrderBy(a => a.Name)
 				.Select(a => mapper.Map<AccountServiceModel>(a))
 				.ToArrayAsync();
 
-			CategoryServiceModel[] expectedCategories = await sqlDbContext.Categories
+			CategoryServiceModel[] expectedCategories = await categoriesRepo.All()
 				.Where(c => c.OwnerId == User1.Id && !c.IsDeleted)
 				.OrderBy(c => c.Name)
 				.Select(c => mapper.Map<CategoryServiceModel>(c))
@@ -150,13 +167,13 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetUserAccountTypesAndCurrencies_ShouldReturnCorrectData()
 		{
 			//Arrange
-			AccountTypeServiceModel[] expectedAccTypes = await sqlDbContext.AccountTypes
+			AccountTypeServiceModel[] expectedAccTypes = await accountTypeRepo.All()
 				.Where(at => at.OwnerId == User1.Id && !at.IsDeleted)
 				.OrderBy(at => at.Name)
 				.Select(at => mapper.Map<AccountTypeServiceModel>(at))
 				.ToArrayAsync();
 			
-			CurrencyServiceModel[] expectedCurrencies = await sqlDbContext.Currencies
+			CurrencyServiceModel[] expectedCurrencies = await currenciesRepo.All()
 				.Where(c => c.OwnerId == User1.Id && !c.IsDeleted)
 				.OrderBy(c => c.Name)
 				.Select(c => mapper.Map<CurrencyServiceModel>(c))
@@ -191,7 +208,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetUsersAccountsCount_ShouldReturnAccountsCount()
 		{
 			//Arrange
-			int expectedCount = sqlDbContext.Accounts.Count(a => !a.IsDeleted);
+			int expectedCount = await accountsRepo.All().CountAsync(a => !a.IsDeleted);
 
 			//Act
 			int actualCount = await userService.GetUsersAccountsCount();
@@ -207,7 +224,7 @@ namespace PersonalFinancer.Tests.Services
 			DateTime startDate = DateTime.Now.AddMonths(-1);
 			DateTime endDate = DateTime.Now;
 
-			var expectedTransactions = await sqlDbContext.Transactions
+			var expectedTransactions = await transactionsRepo.All()
 				.Where(t => t.OwnerId == User1.Id
 					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 				.OrderByDescending(t => t.CreatedOn)
@@ -215,7 +232,7 @@ namespace PersonalFinancer.Tests.Services
 				.ProjectTo<TransactionTableServiceModel>(mapper.ConfigurationProvider)
 				.ToArrayAsync();
 
-			int expectedTotalTransactions = await sqlDbContext.Transactions
+			int expectedTotalTransactions = await transactionsRepo.All()
 				.CountAsync(t => t.OwnerId == User1.Id
 					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate);
 
@@ -249,13 +266,13 @@ namespace PersonalFinancer.Tests.Services
 			DateTime startDate = DateTime.Now.AddMonths(-1);
 			DateTime endDate = DateTime.Now;
 
-			var expectedAccounts = await sqlDbContext.Accounts
+			var expectedAccounts = await accountsRepo.All()
 				.Where(a => a.OwnerId == User1.Id && !a.IsDeleted)
 				.OrderBy(a => a.Name)
 				.Select(a => mapper.Map<AccountCardServiceModel>(a))
 				.ToListAsync();
 
-			var expectedCurrenciesCashFlow = await sqlDbContext.Transactions
+			var expectedCurrenciesCashFlow = await transactionsRepo.All()
 				.Where(t => t.OwnerId == User1.Id
 					&& t.CreatedOn >= startDate	&& t.CreatedOn <= endDate)
 				.GroupBy(t => t.Account.Currency.Name)
@@ -270,7 +287,7 @@ namespace PersonalFinancer.Tests.Services
 				.OrderBy(c => c.Name)
 				.ToListAsync();
 
-			var expectedLastFiveTransaction = await sqlDbContext.Transactions
+			var expectedLastFiveTransaction = await transactionsRepo.All()
 				.Where(t =>	t.Account.OwnerId == User1.Id 
 					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 				.OrderByDescending(t => t.CreatedOn)
@@ -324,7 +341,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task UserDetails_ShouldReturnCorrectData_WithValidUserId()
 		{
 			//Arrange
-			var expectedAccounts = await sqlDbContext.Accounts
+			var expectedAccounts = await accountsRepo.All()
 				.Where(a => a.OwnerId == User1.Id && !a.IsDeleted)
 				.OrderBy(a => a.Name)
 				.ToListAsync();
@@ -358,7 +375,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task UsersCount_ShouldReturnCorrectData()
 		{
 			//Arrange
-			int expected = sqlDbContext.Users.Count();
+			int expected = await usersRepo.All().CountAsync();
 
 			//Act
 			int actual = await userService.UsersCount();

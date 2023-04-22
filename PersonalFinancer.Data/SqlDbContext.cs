@@ -6,11 +6,11 @@
 	using Data.Configurations;
 	using Data.Models;
 
-	public class PersonalFinancerDbContext : IdentityDbContext<ApplicationUser>
+	public class SqlDbContext : IdentityDbContext<ApplicationUser>
 	{
 		private bool seed;
 
-		public PersonalFinancerDbContext(DbContextOptions<PersonalFinancerDbContext> options, bool seed = true)
+		public SqlDbContext(DbContextOptions<SqlDbContext> options, bool seed = true)
 			: base(options)
 		{
 			if (!this.Database.IsRelational())

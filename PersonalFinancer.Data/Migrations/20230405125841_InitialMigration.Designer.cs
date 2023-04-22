@@ -11,7 +11,7 @@ using PersonalFinancer.Data;
 
 namespace PersonalFinancer.Data.Migrations
 {
-    [DbContext(typeof(PersonalFinancerDbContext))]
+    [DbContext(typeof(SqlDbContext))]
     [Migration("20230405125841_InitialMigration")]
     partial class InitialMigration
     {

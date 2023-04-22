@@ -1,8 +1,13 @@
 ﻿using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
+using Moq;
+
 using NUnit.Framework;
+
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Repositories;
+
 using PersonalFinancer.Services.Messages;
 using PersonalFinancer.Services.Messages.Models;
 
@@ -11,29 +16,40 @@ namespace PersonalFinancer.Tests.Services
 	[TestFixture]
 	internal class MessagesServiceTests : UnitTestsBase
 	{
-		private MessagesService messagesService;
-
-		[SetUp]
-		public void SetUp()
-		{
-			this.messagesService = new MessagesService(this.mongoDbContext, this.mapper);
-		}
-
 		[Test]
 		public async Task GelAllAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
-			var expect = await messagesCollection.AsQueryable()
-				.Select(m => new MessageOutputServiceModel
+			var expect = new List<MessageOutputServiceModel>
+			{
+				new MessageOutputServiceModel
+				{
+					Id = "1",
+					CreatedOn = DateTime.UtcNow,
+					Subject = "Test Subject 1"
+				},
+				new MessageOutputServiceModel
+				{
+					Id = "2",
+					CreatedOn = DateTime.UtcNow,
+					Subject = "Test Subject 2"
+				}
+			};
+			
+			var repoMock = new Mock<IMongoRepository<Message>>();
+			
+			repoMock.Setup(x => x.FindAsync(
+				m => new MessageOutputServiceModel
 				{
 					Id = m.Id,
 					CreatedOn = m.CreatedOn,
 					Subject = m.Subject
-				})
-				.ToListAsync();
+				})).ReturnsAsync(expect);
+			
+			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
-			var actual = await messagesService.GetAllAsync();
+			var actual = await service.GetAllAsync();
 
 			//Assert
 			Assert.That(actual.Count(), Is.EqualTo(expect.Count));
@@ -53,18 +69,32 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetUserMessagesAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
-			var expect = await messagesCollection.AsQueryable()
-				.Where(m => m.AuthorId == User1.Id)
-				.Select(m => new MessageOutputServiceModel
+			var expect = new List<MessageOutputServiceModel>
+			{
+				new MessageOutputServiceModel
+				{
+					Id = "1",
+					CreatedOn = DateTime.UtcNow,
+					Subject = "Test Subject 1"
+				}
+			};
+			
+			string userId = "user id";
+			var repoMock = new Mock<IMongoRepository<Message>>();
+
+			repoMock.Setup(x => x.FindAsync(
+				m => m.AuthorId == userId, 
+				m => new MessageOutputServiceModel
 				{
 					Id = m.Id,
-					Subject = m.Subject,
-					CreatedOn = m.CreatedOn
-				})
-				.ToListAsync();
+					CreatedOn = m.CreatedOn,
+					Subject = m.Subject
+				})).ReturnsAsync(expect);
+			
+			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
-			var actual = await messagesService.GetUserMessagesAsync(User1.Id);
+			var actual = await service.GetUserMessagesAsync(userId);
 
 			//Assert
 			Assert.That(actual.Count(), Is.EqualTo(expect.Count));
@@ -84,9 +114,32 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetMessageAsync_ShouldReturnCorrectData_WhenUserIsAuthor()
 		{
 			//Arrange
-			var expect = await messagesCollection.AsQueryable()
-				.Where(m => m.Id == Message1User1.Id)
-				.Select(m => new MessageDetailsServiceModel
+			var expect = new MessageDetailsServiceModel
+			{
+				Id = "1",
+				AuthorName = "Test Author Name",
+				Content = "Test Content",
+				Subject = "Test Subject",
+				CreatedOn = DateTime.UtcNow,
+				Replies = new List<ReplyOutputServiceModel>
+				{
+					new ReplyOutputServiceModel
+					{
+						AuthorName = "Test Reply Author",
+						CreatedOn = DateTime.UtcNow,
+						Content = "Test Reply Content"
+					}
+				}
+			};
+
+			string messageId = "messageId";
+			bool isUserAdmin = false;
+			string userId = "userId";
+			var repoMock = new Mock<IMongoRepository<Message>>();
+
+			repoMock.Setup(x => x.FindOneAsync(
+				x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
+				m => new MessageDetailsServiceModel
 				{
 					Id = m.Id,
 					AuthorName = m.AuthorName,
@@ -99,12 +152,12 @@ namespace PersonalFinancer.Tests.Services
 						CreatedOn = r.CreatedOn,
 						Content = r.Content
 					})
-				})
-				.FirstAsync();
+				})).ReturnsAsync(expect);
+
+			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
-			var actual = await messagesService
-				.GetMessageAsync(Message1User1.Id, User1.Id, isUserAdmin: false);
+			var actual = await service.GetMessageAsync(messageId, userId, isUserAdmin);
 
 			//Assert
 			Assert.That(actual.Id, Is.EqualTo(expect.Id));
@@ -124,14 +177,37 @@ namespace PersonalFinancer.Tests.Services
 					Is.EqualTo(expect.Replies.ElementAt(i).CreatedOn));
 			}
 		}
-		
+
 		[Test]
 		public async Task GetMessageAsync_ShouldReturnCorrectData_WhenUserIsAdmin()
 		{
 			//Arrange
-			var expect = await messagesCollection.AsQueryable()
-				.Where(m => m.Id == Message1User1.Id)
-				.Select(m => new MessageDetailsServiceModel
+			var expect = new MessageDetailsServiceModel
+			{
+				Id = "1",
+				AuthorName = "Test Author Name",
+				Content = "Test Content",
+				Subject = "Test Subject",
+				CreatedOn = DateTime.UtcNow,
+				Replies = new List<ReplyOutputServiceModel>
+				{
+					new ReplyOutputServiceModel
+					{
+						AuthorName = "Test Reply Author",
+						CreatedOn = DateTime.UtcNow,
+						Content = "Test Reply Content"
+					}
+				}
+			};
+
+			string messageId = "messageId";
+			bool isUserAdmin = true;
+			string userId = "userId";
+			var repoMock = new Mock<IMongoRepository<Message>>();
+
+			repoMock.Setup(x => x.FindOneAsync(
+				x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
+				m => new MessageDetailsServiceModel
 				{
 					Id = m.Id,
 					AuthorName = m.AuthorName,
@@ -144,12 +220,12 @@ namespace PersonalFinancer.Tests.Services
 						CreatedOn = r.CreatedOn,
 						Content = r.Content
 					})
-				})
-				.FirstAsync();
+				})).ReturnsAsync(expect);
+
+			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
-			var actual = await messagesService
-				.GetMessageAsync(Message1User1.Id, User2.Id, isUserAdmin: true);
+			var actual = await service.GetMessageAsync(messageId, userId, isUserAdmin);
 
 			//Assert
 			Assert.That(actual.Id, Is.EqualTo(expect.Id));
@@ -169,25 +245,38 @@ namespace PersonalFinancer.Tests.Services
 					Is.EqualTo(expect.Replies.ElementAt(i).CreatedOn));
 			}
 		}
-				
+
 		[Test]
-		public void GetMessageAsync_ShouldThrowException_WhenUserIsNotAuthor()
-		{
-			//Act & Assert
-			Assert.That(async () => await messagesService
-				.GetMessageAsync(Message1User1.Id, User2.Id, isUserAdmin: false),
-			Throws.TypeOf<InvalidOperationException>());
-		}
-		
-		[Test]
-		public void GetMessageAsync_ShouldThrowException_WhenMessageDoesNotExist()
+		public void GetMessageAsync_ShouldThrowException_WhenUserIsNotAuthorOrAdmin()
 		{
 			//Arrange
-			string invalidId = "DFFCFE4DB5712BAC41909A7E";
+			string messageId = "messageId";
+			bool isUserAdmin = false;
+			string notAuthorId = "notAuthorId";
+			var repoMock = new Mock<IMongoRepository<Message>>();
+
+			repoMock.Setup(x => x.FindOneAsync(
+				x => x.Id == messageId && (isUserAdmin || x.AuthorId == notAuthorId),
+				m => new MessageDetailsServiceModel
+				{
+					Id = m.Id,
+					AuthorName = m.AuthorName,
+					Content = m.Content,
+					Subject = m.Subject,
+					CreatedOn = m.CreatedOn,
+					Replies = m.Replies.Select(r => new ReplyOutputServiceModel
+					{
+						AuthorName = r.AuthorName,
+						CreatedOn = r.CreatedOn,
+						Content = r.Content
+					})
+				})).Throws<InvalidOperationException>();
+			
+			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act & Assert
-			Assert.That(async () => await messagesService
-				.GetMessageAsync(invalidId, User2.Id, isUserAdmin: false),
+			Assert.That(async () => await service
+				.GetMessageAsync(messageId, notAuthorId, isUserAdmin),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -195,129 +284,141 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateAsync_ShouldCreateNewMessage_WithValidInput()
 		{
 			//Arrange
-			long totalCountBefore = await messagesCollection
-				.CountDocumentsAsync(_ => true);
+			var fakeCollection = new List<Message>();
 
-			long userCountBefore = await messagesCollection
-				.CountDocumentsAsync(d => d.AuthorId == User1.Id);
-
-			//Act
 			var inputModel = new MessageInputServiceModel
 			{
-				AuthorId = User1.Id,
-				AuthorName = $"{User1.FirstName} {User1.LastName}",
+				AuthorId = "Test Author Id",
+				AuthorName = "Test Author Name",
 				Subject = "Test Subject",
 				Content = "Test Content"
 			};
-			string newMessageId = await messagesService.CreateAsync(inputModel);
 
-			var newMessage = await messagesCollection.AsQueryable()
-				.FirstAsync(d => d.Id == newMessageId);
+			string newMessageId = "New Message Id";
+			var repoMock = new Mock<IMongoRepository<Message>>();
 
-			long totalCountAfter = await messagesCollection
-				.CountDocumentsAsync(_ => true);
+			repoMock.Setup(x => x.InsertOneAsync(It.IsAny<Message>()))
+				.Callback((Message message) =>
+				{
+					message.Id = newMessageId;
+					fakeCollection.Add(message);
+				});
 
-			long userCountAfter = await messagesCollection
-				.CountDocumentsAsync(d => d.AuthorId == User1.Id);
+			var service = new MessagesService(repoMock.Object, this.mapper);
+
+			//Act
+			string returnedId = await service.CreateAsync(inputModel);
+			var msgInCollection = fakeCollection.First();
 
 			//Assert
-			Assert.That(newMessageId, Is.Not.Null);
-			Assert.That(newMessage.Id, Is.EqualTo(newMessageId));
-			Assert.That(newMessage.AuthorId, Is.EqualTo(inputModel.AuthorId));
-			Assert.That(newMessage.AuthorName, Is.EqualTo(inputModel.AuthorName));
-			Assert.That(newMessage.Subject, Is.EqualTo(inputModel.Subject));
-			Assert.That(newMessage.Content, Is.EqualTo(inputModel.Content));
-			Assert.That(userCountAfter, Is.EqualTo(userCountBefore + 1));
-			Assert.That(totalCountAfter, Is.EqualTo(totalCountBefore + 1));
+			Assert.That(returnedId, Is.Not.Null);
+			Assert.That(returnedId, Is.EqualTo(newMessageId));
+			Assert.That(fakeCollection.Count, Is.EqualTo(1));
+			Assert.That(msgInCollection.AuthorId, Is.EqualTo(inputModel.AuthorId));
+			Assert.That(msgInCollection.AuthorName, Is.EqualTo(inputModel.AuthorName));
+			Assert.That(msgInCollection.Subject, Is.EqualTo(inputModel.Subject));
+			Assert.That(msgInCollection.Content, Is.EqualTo(inputModel.Content));
 		}
 
 		[Test]
 		public async Task AddReplyAsync_ShouldAddNewReplyToMessage_WhenUserIsMessageAuthor()
 		{
 			//Arrange
-			int repliesCountBefore = await messagesCollection.AsQueryable()
-				.Where(m => m.Id == Message1User1.Id)
-				.Select(m => m.Replies.Count)
-				.FirstAsync();
-
-			//Act
 			var inputModel = new ReplyInputServiceModel
 			{
-				AuthorId = User1.Id,
-				AuthorName = $"{User1.FirstName} {User1.LastName}",
-				MessageId = Message1User1.Id,
-				Content = "New test reply",
+				AuthorId = "Test Author Id",
+				AuthorName = "Test Author Name",
+				MessageId = "Test Message Id",
+				Content = "Test Content",
 				IsAuthorAdmin = false
 			};
-			await messagesService.AddReplyAsync(inputModel);
-			
-			int repliesCountAfter = await messagesCollection.AsQueryable()
-				.Where(m => m.Id == Message1User1.Id)
-				.Select(m => m.Replies.Count)
-				.FirstAsync();
 
-			Reply reply = await messagesCollection.AsQueryable()
-				.Where(m => m.Id == inputModel.MessageId)
-				.Select(m => m.Replies.Last())
-				.FirstAsync();
+			var updateResultMock = new Mock<UpdateResult>();
+			updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
+
+			var repoMock = new Mock<IMongoRepository<Message>>();
+
+			repoMock.Setup(x => x
+				.IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
+				.ReturnsAsync(true);
+
+			repoMock.Setup(x => x
+				.UpdateOneAsync(
+					x => x.Id == inputModel.MessageId,
+					It.IsAny<UpdateDefinition<Message>>()))
+				.ReturnsAsync(updateResultMock.Object);
+
+			var service = new MessagesService(repoMock.Object, this.mapper);
+
+			//Act
+			var result = await service.AddReplyAsync(inputModel);
 
 			//Assert
-			Assert.That(repliesCountAfter, Is.EqualTo(repliesCountBefore + 1));
-			Assert.That(reply.Content, Is.EqualTo(inputModel.Content));
-			Assert.That(reply.AuthorId, Is.EqualTo(inputModel.AuthorId));
-			Assert.That(reply.AuthorName, Is.EqualTo(inputModel.AuthorName));
+			Assert.That(result, Is.Not.Null);
+			Assert.That(result.IsAcknowledged, Is.True);
 		}
-		
+
 		[Test]
 		public async Task AddReplyAsync_ShouldAddNewReplyToMessage_WhenUserIsAdmin()
 		{
 			//Arrange
-			int repliesCountBefore = await messagesCollection.AsQueryable()
-				.Where(m => m.Id == Message1User1.Id)
-				.Select(m => m.Replies.Count)
-				.FirstAsync();
-
-			//Act
 			var inputModel = new ReplyInputServiceModel
 			{
-				AuthorId = User2.Id,
-				AuthorName = $"{User2.FirstName} {User2.LastName}",
-				MessageId = Message1User1.Id,
-				Content = "New test reply",
+				AuthorId = "Test Author Id",
+				AuthorName = "Test Author Name",
+				MessageId = "Test Message Id",
+				Content = "Test Content",
 				IsAuthorAdmin = true
 			};
-			await messagesService.AddReplyAsync(inputModel);
-			
-			int repliesCountAfter = await messagesCollection.AsQueryable()
-				.Where(m => m.Id == Message1User1.Id)
-				.Select(m => m.Replies.Count)
-				.FirstAsync();
 
-			Reply reply = await messagesCollection.AsQueryable()
-				.Where(m => m.Id == inputModel.MessageId)
-				.Select(m => m.Replies.Last())
-				.FirstAsync();
+			var updateResultMock = new Mock<UpdateResult>();
+			updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
+
+			var repoMock = new Mock<IMongoRepository<Message>>();
+
+			repoMock.Setup(x => x
+				.IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
+				.ReturnsAsync(false);
+
+			repoMock.Setup(x => x
+				.UpdateOneAsync(
+					x => x.Id == inputModel.MessageId,
+					It.IsAny<UpdateDefinition<Message>>()))
+				.ReturnsAsync(updateResultMock.Object);
+
+			var service = new MessagesService(repoMock.Object, this.mapper);
+
+			//Act
+			var result = await service.AddReplyAsync(inputModel);
 
 			//Assert
-			Assert.That(repliesCountAfter, Is.EqualTo(repliesCountBefore + 1));
-			Assert.That(reply.Content, Is.EqualTo(inputModel.Content));
-			Assert.That(reply.AuthorId, Is.EqualTo(inputModel.AuthorId));
-			Assert.That(reply.AuthorName, Is.EqualTo(inputModel.AuthorName));
+			Assert.That(result, Is.Not.Null);
+			Assert.That(result.IsAcknowledged, Is.True);
 		}
 
 		[Test]
 		public void AddReplyAsync_ShouldThrowException_WhenUserIsNotAuthorized()
 		{
-			//Act & Assert
+			//Arrange
 			var inputModel = new ReplyInputServiceModel
 			{
-				AuthorId = User2.Id,
-				AuthorName = $"{User2.FirstName} {User2.LastName}",
-				MessageId = Message1User1.Id,
-				Content = "New test reply",
+				AuthorId = "Test Author Id",
+				AuthorName = "Test Author Name",
+				MessageId = "Test Message Id",
+				Content = "Test Content",
 				IsAuthorAdmin = false
 			};
-			Assert.That(async () => await messagesService.AddReplyAsync(inputModel),
+
+			var repoMock = new Mock<IMongoRepository<Message>>();
+
+			repoMock.Setup(x => x
+				.IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
+				.ReturnsAsync(false);
+
+			var service = new MessagesService(repoMock.Object, this.mapper);
+
+			//Act & Assert
+			Assert.That(async () => await service.AddReplyAsync(inputModel),
 			Throws.TypeOf<ArgumentException>().With.Message
 				.EqualTo("The User is not Authorized to make replies."));
 		}
@@ -328,83 +429,96 @@ namespace PersonalFinancer.Tests.Services
 			//Arrange
 			Message message = new Message
 			{
-				AuthorId = User1.Id,
-				AuthorName = $"{User1.FirstName} {User1.LastName}",
+				Id = "Test Message Id",
+				AuthorId = "Test Author Id",
+				AuthorName = "Test Author Name",
 				CreatedOn = DateTime.UtcNow,
-				Subject = "Test Message",
-				Content = "This is a test message"
+				Subject = "Test Message Subject",
+				Content = "This Message Content"
 			};
-			await messagesCollection.InsertOneAsync(message);
+			var fakeCollection = new List<Message> { message };
 
-			long messagesCountBefore = await messagesCollection
-				.CountDocumentsAsync(_ => true);
+			var repoMock = new Mock<IMongoRepository<Message>>();
+
+			repoMock.Setup(x => x
+				.IsUserDocumentAuthor(message.Id, message.AuthorId))
+				.ReturnsAsync(true);
+
+			repoMock.Setup(x => x
+				.DeleteOneAsync(message.Id))
+				.Callback(() => fakeCollection.Remove(message));
+
+			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
-			await messagesService.RemoveAsync(message.Id, User1.Id, isUserAdmin: false);
-			
-			long messagesCountAfter = await messagesCollection
-				.CountDocumentsAsync(_ => true);
-			
-			Message? messageInDb = await messagesCollection
-				.AsQueryable()
-				.FirstOrDefaultAsync(m => m.Id == message.Id);
+			await service.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: false);
 
 			//Assert
-			Assert.That(messagesCountAfter, Is.EqualTo(messagesCountBefore - 1));
-			Assert.That(messageInDb, Is.Null);
+			Assert.That(fakeCollection.Any(), Is.False);
 		}
-		
+
 		[Test]
 		public async Task RemoveAsync_ShouldRemoveMessage_WhenUserIsAdmin()
 		{
 			//Arrange
 			Message message = new Message
 			{
-				AuthorId = User1.Id,
-				AuthorName = $"{User1.FirstName} {User1.LastName}",
+				Id = "Test Message Id",
+				AuthorId = "Test Author Id",
+				AuthorName = "Test Author Name",
 				CreatedOn = DateTime.UtcNow,
-				Subject = "Test Message",
-				Content = "This is a test message"
+				Subject = "Test Message Subject",
+				Content = "This Message Content"
 			};
-			await messagesCollection.InsertOneAsync(message);
+			var fakeCollection = new List<Message> { message };
 
-			long messagesCountBefore = await messagesCollection
-				.CountDocumentsAsync(_ => true);
+			var repoMock = new Mock<IMongoRepository<Message>>();
+
+			repoMock.Setup(x => x
+				.IsUserDocumentAuthor(message.Id, message.AuthorId))
+				.ReturnsAsync(false);
+
+			repoMock.Setup(x => x
+				.DeleteOneAsync(message.Id))
+				.Callback(() => fakeCollection.Remove(message));
+
+			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
-			await messagesService.RemoveAsync(message.Id, User2.Id, isUserAdmin: true);
-			
-			long messagesCountAfter = await messagesCollection
-				.CountDocumentsAsync(_ => true);
-			
-			Message? messageInDb = await messagesCollection
-				.AsQueryable()
-				.FirstOrDefaultAsync(m => m.Id == message.Id);
+			await service.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: true);
 
 			//Assert
-			Assert.That(messagesCountAfter, Is.EqualTo(messagesCountBefore - 1));
-			Assert.That(messageInDb, Is.Null);
+			Assert.That(fakeCollection.Any(), Is.False);
 		}
 
 		[Test]
-		public async Task RemoveAsync_ShouldThrowException_WhenUserIsNotAuthorized()
+		public void RemoveAsync_ShouldThrowException_WhenUserIsNotAuthorized()
 		{
 			//Arrange
 			Message message = new Message
 			{
-				AuthorId = User1.Id,
-				AuthorName = $"{User1.FirstName} {User1.LastName}",
+				Id = "Test Message Id",
+				AuthorId = "Test Author Id",
+				AuthorName = "Test Author Name",
 				CreatedOn = DateTime.UtcNow,
-				Subject = "Test Message",
-				Content = "This is a test message"
+				Subject = "Test Message Subject",
+				Content = "This Message Content"
 			};
-			await messagesCollection.InsertOneAsync(message);
+			var fakeCollection = new List<Message> { message };
+
+			var repoMock = new Mock<IMongoRepository<Message>>();
+
+			repoMock.Setup(x => x
+				.IsUserDocumentAuthor(message.Id, message.AuthorId))
+				.ReturnsAsync(false);
+
+			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act & Assert
-			Assert.That(async () => await messagesService
-				.RemoveAsync(message.Id, User2.Id, isUserAdmin: false),
+			Assert.That(async () => await service
+				.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: false),
 			Throws.TypeOf<ArgumentException>().With.Message
-				.EqualTo("The User is not Authorized to make replies."));
+				.EqualTo("The User is not Authorized to delete the message."));
 		}
 	}
 }

@@ -15,9 +15,9 @@
 	[ApiController]
 	public class CurrenciesApiController : BaseApiController
 	{
-		private readonly ApiService<Currency> apiService;
+		private readonly IApiService<Currency> apiService;
 
-		public CurrenciesApiController(ApiService<Currency> apiService)
+		public CurrenciesApiController(IApiService<Currency> apiService)
 			=> this.apiService = apiService;
 
 		[HttpPost]

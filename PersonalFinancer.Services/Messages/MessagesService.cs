@@ -1,52 +1,51 @@
 ﻿namespace PersonalFinancer.Services.Messages
 {
+	using AutoMapper;
+
 	using MongoDB.Driver;
 	using MongoDB.Driver.Linq;
 
+	using Data.Models;
+	using Data.Repositories;
+
 	using Services.Messages.Models;
 
-	using Data;
-	using Data.Models;
-	using AutoMapper;
-
-	public class MessagesService
+	public class MessagesService : IMessagesService
 	{
-		private readonly IMongoCollection<Message> data;
+		private readonly IMongoRepository<Message> repo;
 		private readonly IMapper mapper;
 
 		public MessagesService(
-			MongoDbContext data,
+			IMongoRepository<Message> repo,
 			IMapper mapper)
 		{
-			this.data = data.GetCollection<Message>("Messages");
+			this.repo = repo;
 			this.mapper = mapper;
 		}
 
 		public async Task<IEnumerable<MessageOutputServiceModel>> GetAllAsync()
 		{
-			var messages = await data.AsQueryable()
-				.Select(m => new MessageOutputServiceModel
+			var messages = await repo
+				.FindAsync(m => new MessageOutputServiceModel
 				{
 					Id = m.Id,
 					CreatedOn = m.CreatedOn,
 					Subject = m.Subject
-				})
-				.ToListAsync();
+				});
 
 			return messages;
 		}
 
 		public async Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(string userId)
 		{
-			var messages = await data.AsQueryable()
-				.Where(m => m.AuthorId == userId)
-				.Select(m => new MessageOutputServiceModel
+			var messages = await repo.FindAsync(
+				x => x.AuthorId == userId, 
+				m => new MessageOutputServiceModel
 				{
 					Id = m.Id,
 					CreatedOn = m.CreatedOn,
 					Subject = m.Subject
-				})
-				.ToListAsync();
+				});
 
 			return messages;
 		}
@@ -56,11 +55,12 @@
 		/// or User is not owner or Administrator
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<MessageDetailsServiceModel> GetMessageAsync(string id, string userId, bool isUserAdmin)
+		public async Task<MessageDetailsServiceModel> GetMessageAsync(
+			string messageId, string userId, bool isUserAdmin)
 		{
-			MessageDetailsServiceModel message = await data.AsQueryable()
-				.Where(m => m.Id == id && (isUserAdmin || m.AuthorId == userId))
-				.Select(m => new MessageDetailsServiceModel
+			MessageDetailsServiceModel message = await repo.FindOneAsync(
+				x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
+				m => new MessageDetailsServiceModel
 				{
 					Id = m.Id,
 					AuthorName = m.AuthorName,
@@ -73,8 +73,7 @@
 						CreatedOn = r.CreatedOn,
 						Content = r.Content
 					})
-				})
-				.FirstAsync();
+				});
 
 			return message;
 		}
@@ -84,7 +83,7 @@
 			var newMessage = mapper.Map<Message>(model);
 			newMessage.CreatedOn = DateTime.UtcNow;
 
-			await data.InsertOneAsync(newMessage);
+			await repo.InsertOneAsync(newMessage);
 
 			return newMessage.Id;
 		}
@@ -95,20 +94,21 @@
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task AddReplyAsync(ReplyInputServiceModel model)
+		public async Task<UpdateResult> AddReplyAsync(ReplyInputServiceModel model)
 		{
-			if (!model.IsAuthorAdmin && !await IsUserAuthorized(model.MessageId, model.AuthorId))
+			if (!model.IsAuthorAdmin && !await repo.IsUserDocumentAuthor(model.MessageId, model.AuthorId))
 				throw new ArgumentException("The User is not Authorized to make replies.");
 
 			var reply = mapper.Map<Reply>(model);
 			reply.CreatedOn = DateTime.UtcNow;
 
-			var filter = Builders<Message>.Filter.Eq(x => x.Id, model.MessageId);
 			var update = Builders<Message>.Update.Push(x => x.Replies, reply);
 
-			await data.UpdateOneAsync(filter, update);
+			var result = await repo.UpdateOneAsync(x => x.Id == model.MessageId, update);
+
+			return result;
 		}
-		
+
 		/// <summary>
 		/// Throws ArgumentException when the User is not Authorized 
 		/// and InvalidOperationException when deleting a message was unsuccessful.
@@ -117,14 +117,10 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task RemoveAsync(string messageId, string userId, bool isUserAdmin)
 		{
-			if (!isUserAdmin && !await IsUserAuthorized(messageId, userId))
-				throw new ArgumentException("The User is not Authorized to make replies.");
+			if (!isUserAdmin && !await repo.IsUserDocumentAuthor(messageId, userId))
+				throw new ArgumentException("The User is not Authorized to delete the message.");
 
-			await data.DeleteOneAsync(m => m.Id == messageId);
+			await repo.DeleteOneAsync(messageId);
 		}
-
-		private async Task<bool> IsUserAuthorized(string messageId, string userId)
-			=> await data.AsQueryable()
-				.AnyAsync(m => m.Id == messageId && m.AuthorId == userId);
 	}
 }
