@@ -10,6 +10,8 @@
 	using Web.Models.Home;
 	using Web.Models.Shared;
 
+	using static Data.Constants.HostConstants;
+
 	public class HomeController : Controller
 	{
 		private readonly IUsersService userService;
@@ -72,9 +74,9 @@
 		public IActionResult Error(int statusCode)
 		{
 			if (statusCode == 400)
-				ViewBag.ImgUrl = "/images/400BadRequest.webp";
+				ViewBag.ImgUrl = BadRequestImgUrl;
 			else
-				ViewBag.ImgUrl = "/images/500InternalServerError.webp";
+				ViewBag.ImgUrl = InternalServerErrorImgUrl;
 
 			return View();
 		}
