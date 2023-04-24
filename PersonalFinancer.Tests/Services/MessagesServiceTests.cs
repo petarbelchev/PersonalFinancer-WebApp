@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using AutoMapper;
+using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 using Moq;
@@ -10,12 +11,24 @@ using PersonalFinancer.Data.Repositories;
 
 using PersonalFinancer.Services.Messages;
 using PersonalFinancer.Services.Messages.Models;
+using PersonalFinancer.Tests.Mocks;
 
 namespace PersonalFinancer.Tests.Services
 {
 	[TestFixture]
-	internal class MessagesServiceTests : UnitTestsBase
+	internal class MessagesServiceTests
 	{
+		private Mock<IMongoRepository<Message>> repoMock;
+		private MessagesService service;
+		private IMapper mapper = ServicesMapperMock.Instance;
+
+		[SetUp]
+		public void SetUp()
+		{
+			repoMock = new Mock<IMongoRepository<Message>>();
+			service = new MessagesService(repoMock.Object, this.mapper);
+		}
+
 		[Test]
 		public async Task GelAllAsync_ShouldReturnCorrectData()
 		{
@@ -36,8 +49,6 @@ namespace PersonalFinancer.Tests.Services
 				}
 			};
 			
-			var repoMock = new Mock<IMongoRepository<Message>>();
-			
 			repoMock.Setup(x => x.FindAsync(
 				m => new MessageOutputServiceModel
 				{
@@ -46,8 +57,6 @@ namespace PersonalFinancer.Tests.Services
 					Subject = m.Subject
 				})).ReturnsAsync(expect);
 			
-			var service = new MessagesService(repoMock.Object, this.mapper);
-
 			//Act
 			var actual = await service.GetAllAsync();
 
@@ -80,8 +89,7 @@ namespace PersonalFinancer.Tests.Services
 			};
 			
 			string userId = "user id";
-			var repoMock = new Mock<IMongoRepository<Message>>();
-
+			
 			repoMock.Setup(x => x.FindAsync(
 				m => m.AuthorId == userId, 
 				m => new MessageOutputServiceModel
@@ -90,8 +98,6 @@ namespace PersonalFinancer.Tests.Services
 					CreatedOn = m.CreatedOn,
 					Subject = m.Subject
 				})).ReturnsAsync(expect);
-			
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
 			var actual = await service.GetUserMessagesAsync(userId);
@@ -135,7 +141,6 @@ namespace PersonalFinancer.Tests.Services
 			string messageId = "messageId";
 			bool isUserAdmin = false;
 			string userId = "userId";
-			var repoMock = new Mock<IMongoRepository<Message>>();
 
 			repoMock.Setup(x => x.FindOneAsync(
 				x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
@@ -153,8 +158,6 @@ namespace PersonalFinancer.Tests.Services
 						Content = r.Content
 					})
 				})).ReturnsAsync(expect);
-
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
 			var actual = await service.GetMessageAsync(messageId, userId, isUserAdmin);
@@ -203,7 +206,6 @@ namespace PersonalFinancer.Tests.Services
 			string messageId = "messageId";
 			bool isUserAdmin = true;
 			string userId = "userId";
-			var repoMock = new Mock<IMongoRepository<Message>>();
 
 			repoMock.Setup(x => x.FindOneAsync(
 				x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
@@ -221,8 +223,6 @@ namespace PersonalFinancer.Tests.Services
 						Content = r.Content
 					})
 				})).ReturnsAsync(expect);
-
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
 			var actual = await service.GetMessageAsync(messageId, userId, isUserAdmin);
@@ -253,7 +253,6 @@ namespace PersonalFinancer.Tests.Services
 			string messageId = "messageId";
 			bool isUserAdmin = false;
 			string notAuthorId = "notAuthorId";
-			var repoMock = new Mock<IMongoRepository<Message>>();
 
 			repoMock.Setup(x => x.FindOneAsync(
 				x => x.Id == messageId && (isUserAdmin || x.AuthorId == notAuthorId),
@@ -271,8 +270,6 @@ namespace PersonalFinancer.Tests.Services
 						Content = r.Content
 					})
 				})).Throws<InvalidOperationException>();
-			
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act & Assert
 			Assert.That(async () => await service
@@ -295,7 +292,6 @@ namespace PersonalFinancer.Tests.Services
 			};
 
 			string newMessageId = "New Message Id";
-			var repoMock = new Mock<IMongoRepository<Message>>();
 
 			repoMock.Setup(x => x.InsertOneAsync(It.IsAny<Message>()))
 				.Callback((Message message) =>
@@ -303,8 +299,6 @@ namespace PersonalFinancer.Tests.Services
 					message.Id = newMessageId;
 					fakeCollection.Add(message);
 				});
-
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
 			string returnedId = await service.CreateAsync(inputModel);
@@ -336,8 +330,6 @@ namespace PersonalFinancer.Tests.Services
 			var updateResultMock = new Mock<UpdateResult>();
 			updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
 
-			var repoMock = new Mock<IMongoRepository<Message>>();
-
 			repoMock.Setup(x => x
 				.IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
 				.ReturnsAsync(true);
@@ -347,8 +339,6 @@ namespace PersonalFinancer.Tests.Services
 					x => x.Id == inputModel.MessageId,
 					It.IsAny<UpdateDefinition<Message>>()))
 				.ReturnsAsync(updateResultMock.Object);
-
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
 			var result = await service.AddReplyAsync(inputModel);
@@ -374,8 +364,6 @@ namespace PersonalFinancer.Tests.Services
 			var updateResultMock = new Mock<UpdateResult>();
 			updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
 
-			var repoMock = new Mock<IMongoRepository<Message>>();
-
 			repoMock.Setup(x => x
 				.IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
 				.ReturnsAsync(false);
@@ -385,8 +373,6 @@ namespace PersonalFinancer.Tests.Services
 					x => x.Id == inputModel.MessageId,
 					It.IsAny<UpdateDefinition<Message>>()))
 				.ReturnsAsync(updateResultMock.Object);
-
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
 			var result = await service.AddReplyAsync(inputModel);
@@ -409,13 +395,9 @@ namespace PersonalFinancer.Tests.Services
 				IsAuthorAdmin = false
 			};
 
-			var repoMock = new Mock<IMongoRepository<Message>>();
-
 			repoMock.Setup(x => x
 				.IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
 				.ReturnsAsync(false);
-
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act & Assert
 			Assert.That(async () => await service.AddReplyAsync(inputModel),
@@ -438,8 +420,6 @@ namespace PersonalFinancer.Tests.Services
 			};
 			var fakeCollection = new List<Message> { message };
 
-			var repoMock = new Mock<IMongoRepository<Message>>();
-
 			repoMock.Setup(x => x
 				.IsUserDocumentAuthor(message.Id, message.AuthorId))
 				.ReturnsAsync(true);
@@ -447,8 +427,6 @@ namespace PersonalFinancer.Tests.Services
 			repoMock.Setup(x => x
 				.DeleteOneAsync(message.Id))
 				.Callback(() => fakeCollection.Remove(message));
-
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
 			await service.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: false);
@@ -472,8 +450,6 @@ namespace PersonalFinancer.Tests.Services
 			};
 			var fakeCollection = new List<Message> { message };
 
-			var repoMock = new Mock<IMongoRepository<Message>>();
-
 			repoMock.Setup(x => x
 				.IsUserDocumentAuthor(message.Id, message.AuthorId))
 				.ReturnsAsync(false);
@@ -481,8 +457,6 @@ namespace PersonalFinancer.Tests.Services
 			repoMock.Setup(x => x
 				.DeleteOneAsync(message.Id))
 				.Callback(() => fakeCollection.Remove(message));
-
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act
 			await service.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: true);
@@ -506,13 +480,9 @@ namespace PersonalFinancer.Tests.Services
 			};
 			var fakeCollection = new List<Message> { message };
 
-			var repoMock = new Mock<IMongoRepository<Message>>();
-
 			repoMock.Setup(x => x
 				.IsUserDocumentAuthor(message.Id, message.AuthorId))
 				.ReturnsAsync(false);
-
-			var service = new MessagesService(repoMock.Object, this.mapper);
 
 			//Act & Assert
 			Assert.That(async () => await service
