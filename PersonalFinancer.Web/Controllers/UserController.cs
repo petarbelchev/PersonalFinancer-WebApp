@@ -43,7 +43,7 @@
 			if (!creationResult.Succeeded)
 			{
 				foreach (IdentityError error in creationResult.Errors)
-					ModelState.AddModelError(string.Empty, error.Description);
+					ModelState.AddModelError(error.Code, error.Description);
 
 				return View(model);
 			}
@@ -55,7 +55,7 @@
 				await userManager.DeleteAsync(newUser);
 
 				foreach (IdentityError error in roleResult.Errors)
-					ModelState.AddModelError(string.Empty, error.Description);
+					ModelState.AddModelError(error.Code, error.Description);
 
 				return View(model);
 			}

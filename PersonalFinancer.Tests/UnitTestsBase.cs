@@ -24,7 +24,7 @@ namespace PersonalFinancer.Tests
 		protected async Task SetUpBase()
 		{
 			sqlDbContext = DatabaseMock.Instance;
-			mapper = MapperMock.Instance;
+			mapper = ServicesMapperMock.Instance;
 			memoryCache = MemoryCacheMock.Instance;
 
 			await SeedDatabase();
