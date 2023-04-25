@@ -55,7 +55,7 @@
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<AccountDetailsServiceModel> GetAccountDetails(
-			string id, DateTime startDate, DateTime endDate, string ownerId, bool isUserAdmin);
+			string id, DateTime startDate, DateTime endDate, string userId, bool isUserAdmin);
 
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist 

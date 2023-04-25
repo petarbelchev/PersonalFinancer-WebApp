@@ -254,11 +254,11 @@
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<AccountDetailsServiceModel> GetAccountDetails(
-			string id, DateTime startDate, DateTime endDate, string ownerId, bool isUserAdmin)
+			string id, DateTime startDate, DateTime endDate, string userId, bool isUserAdmin)
 		{
 			return await accountsRepo.All()
 				.Where(a => a.Id == id && !a.IsDeleted
-							&& (isUserAdmin || a.OwnerId == ownerId))
+							&& (isUserAdmin || a.OwnerId == userId))
 				.Select(a => new AccountDetailsServiceModel
 				{
 					Id = a.Id,
