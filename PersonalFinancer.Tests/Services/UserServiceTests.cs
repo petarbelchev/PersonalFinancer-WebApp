@@ -16,7 +16,7 @@ using PersonalFinancer.Services.User.Models;
 namespace PersonalFinancer.Tests.Services
 {
 	[TestFixture]
-	class UserServiceTests : UnitTestsBase
+	class UserServiceTests : ServicesUnitTestsBase
 	{
 		private IEfRepository<ApplicationUser> usersRepo;
 		private IEfRepository<Category> categoriesRepo;

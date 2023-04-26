@@ -1,19 +1,13 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
 using NUnit.Framework;
-using System.Security.Claims;
 
 using PersonalFinancer.Data.Enums;
-using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
-using PersonalFinancer.Tests.Mocks;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Models.Account;
 using static PersonalFinancer.Data.Constants;
@@ -21,17 +15,11 @@ using static PersonalFinancer.Data.Constants;
 namespace PersonalFinancer.Tests.Controllers
 {
 	[TestFixture]
-	internal class AccountsControllerTests
+	internal class AccountsControllerTests : ControllersUnitTestsBase
 	{
-		private IMapper mapper = ControllersMapperMock.Instance;
-		private Mock<IAccountsService> accountsServiceMock;
-		private Mock<IUsersService> usersServiceMock;
-		private Mock<ClaimsPrincipal> userMock;
 		private AccountsController controller;
 
-		private string userId = "user Id";
-		private UserAccountTypesAndCurrenciesServiceModel expAccTypesAndCurrencies
-			= new UserAccountTypesAndCurrenciesServiceModel()
+		private UserAccountTypesAndCurrenciesServiceModel expAccTypesAndCurrencies = new ()
 			{
 				AccountTypes = new AccountTypeServiceModel[]
 				{
@@ -60,7 +48,7 @@ namespace PersonalFinancer.Tests.Controllers
 					}
 				}
 			};
-		private AccountDetailsServiceModel expAccDetailsDto = new AccountDetailsServiceModel
+		private AccountDetailsServiceModel expAccDetailsDto = new ()
 		{
 			Id = "account id",
 			Balance = 100,
@@ -85,16 +73,9 @@ namespace PersonalFinancer.Tests.Controllers
 		[SetUp]
 		public void SetUp()
 		{
-			this.accountsServiceMock = new Mock<IAccountsService>();
-
-			this.usersServiceMock = new Mock<IUsersService>();
 			usersServiceMock
 				.Setup(x => x.GetUserAccountTypesAndCurrencies(this.userId))
 				.ReturnsAsync(expAccTypesAndCurrencies);
-
-			userMock = new Mock<ClaimsPrincipal>();
-			userMock.Setup(x => x.FindFirst(ClaimTypes.NameIdentifier))
-				.Returns(new Claim(ClaimTypes.NameIdentifier, userId));
 
 			this.controller = new AccountsController(
 				this.accountsServiceMock.Object,
@@ -202,11 +183,9 @@ namespace PersonalFinancer.Tests.Controllers
 			//Assert
 			Assert.That(result, Is.Not.Null);
 			Assert.That(result.ActionName, Is.EqualTo("AccountDetails"));
-			Assert.That(result.RouteValues, Is.Not.Null);
-			Assert.That(result.RouteValues.Keys.Count, Is.EqualTo(1));
-			Assert.That(result.RouteValues.ContainsKey("id"), Is.True);
-			Assert.That(result.RouteValues.Values.Count, Is.EqualTo(1));
-			Assert.That(result.RouteValues.Values.First(), Is.EqualTo(newAccId));
+
+			Assert.That(result.RouteValues, Is.Not.Null);			
+			CheckRouteValues(result.RouteValues, "id", newAccId);
 
 			CheckTempDataMessage(controller.TempData, "You create a new account successfully!");
 		}
@@ -997,18 +976,6 @@ namespace PersonalFinancer.Tests.Controllers
 			Assert.That(result.StatusCode, Is.EqualTo(400));
 		}
 
-		private void CheckModelStateErrors(
-			ModelStateDictionary modelState, string key, string errorMessage)
-		{
-			Assert.That(modelState.Keys.Count(), Is.EqualTo(1));
-			Assert.That(modelState.Keys.First(), Is.EqualTo(key));
-			Assert.That(modelState.Values.Count(), Is.EqualTo(1));
-			Assert.That(modelState.Values.First().Errors.Count, Is.EqualTo(1));
-
-			Assert.That(modelState.Values.First().Errors.First().ErrorMessage,
-				Is.EqualTo(errorMessage));
-		}
-
 		private void CheckAccountFormViewModel(
 			AccountFormViewModel? viewModel,
 			AccountFormViewModel? inputModel = null)
@@ -1121,15 +1088,6 @@ namespace PersonalFinancer.Tests.Controllers
 				+ serviceModel.Id;
 
 			Assert.That(viewModel.Routing.ReturnUrl, Is.EqualTo(expectedReturnUrl));
-		}
-
-		private void CheckTempDataMessage(
-			ITempDataDictionary tempData, string expectedMessage)
-		{
-			Assert.That(tempData.Keys.Count(), Is.EqualTo(1));
-			Assert.That(tempData.Keys.First(), Is.EqualTo("successMsg"));
-			Assert.That(tempData.Values.Count(), Is.EqualTo(1));
-			Assert.That(tempData.Values.First(), Is.EqualTo(expectedMessage));
 		}
 	}
 }

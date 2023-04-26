@@ -14,7 +14,7 @@ using PersonalFinancer.Tests.Mocks;
 namespace PersonalFinancer.Tests
 {
 	[TestFixture]
-	abstract class UnitTestsBase
+	abstract class ServicesUnitTestsBase
 	{
 		protected SqlDbContext sqlDbContext;
 		protected IMapper mapper;

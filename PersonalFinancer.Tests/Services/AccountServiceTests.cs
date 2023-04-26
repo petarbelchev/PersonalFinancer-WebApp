@@ -17,7 +17,7 @@ using PersonalFinancer.Services.Shared.Models;
 namespace PersonalFinancer.Tests.Services
 {
 	[TestFixture]
-	class AccountServiceTests : UnitTestsBase
+	class AccountServiceTests : ServicesUnitTestsBase
 	{
 		private IEfRepository<Account> accountsRepo;
 		private IEfRepository<Transaction> transactionsRepo;

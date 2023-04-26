@@ -2,11 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
-using System.Security.Claims;
 
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Models.Home;
@@ -16,9 +14,9 @@ using static PersonalFinancer.Data.Constants;
 namespace PersonalFinancer.Tests.Controllers
 {
 	[TestFixture]
-	internal class HomeControllerTests
+	internal class HomeControllerTests : ControllersUnitTestsBase
 	{
-		private UserDashboardServiceModel expUserDashboard = new UserDashboardServiceModel
+		private UserDashboardServiceModel expUserDashboard = new ()
 		{
 			Accounts = new AccountCardServiceModel[]
 			{
@@ -54,7 +52,6 @@ namespace PersonalFinancer.Tests.Controllers
 				}
 			}
 		};
-
 		private AccountCardServiceModel[] expAccountCard = new AccountCardServiceModel[]
 		{
 			new AccountCardServiceModel
@@ -66,33 +63,20 @@ namespace PersonalFinancer.Tests.Controllers
 				OwnerId = "Test Owner Id"
 			}
 		};
-
-		private Mock<IUsersService> serviceMock;
-
-		private Mock<ClaimsPrincipal> userMock;
-		
+				
 		private HomeController controller;
-
-		private string userId = "Test User Id";
 
 		[SetUp]
 		public void SetUp()
 		{
-			serviceMock = new Mock<IUsersService>();
-			
-			serviceMock.Setup(x => x.GetUserDashboardData(
+			this.usersServiceMock.Setup(x => x.GetUserDashboardData(
 					userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
 				.ReturnsAsync(expUserDashboard);					
 
-			serviceMock.Setup(x => x.GetUserAccounts(userId))
+			this.usersServiceMock.Setup(x => x.GetUserAccounts(userId))
 				.ReturnsAsync(expAccountCard);
-
-			userMock = new Mock<ClaimsPrincipal>();
 			
-			userMock.Setup(x => x.FindFirst(ClaimTypes.NameIdentifier))
-				.Returns(new Claim(ClaimTypes.NameIdentifier, userId));
-			
-			controller = new HomeController(serviceMock.Object);
+			controller = new HomeController(this.usersServiceMock.Object);
 
 			controller.ControllerContext = new ControllerContext
 			{
