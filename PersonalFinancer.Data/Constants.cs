@@ -65,16 +65,14 @@
 
 		public static class HostConstants
 		{
-			private const string hostUrl = "https://localhost:7187";
-
-			public const string ApiCategoriesUrl = hostUrl + "/api/categories/";
-			public const string ApiTransactionsUrl = hostUrl + "/api/transactions/";
-			public const string ApiAccountTypesUrl = hostUrl + "/api/accounttypes/";
-			public const string ApiCurrencyUrl = hostUrl + "/api/currencies/";
-			public const string ApiAccountsUrl = hostUrl + "/api/accounts/";
-			public const string ApiAccountsCashFlowUrl = hostUrl + "/api/accounts/cashflow";
-			public const string ApiAccountTransactionsUrl = hostUrl + "/api/accounts/transactions";
-			public const string ApiUsersUrl = hostUrl + "/api/users/";
+			public const string ApiCategoriesUrl = "/api/categories/";
+			public const string ApiTransactionsUrl = "/api/transactions/";
+			public const string ApiAccountTypesUrl = "/api/accounttypes/";
+			public const string ApiCurrencyUrl = "/api/currencies/";
+			public const string ApiAccountsUrl = "/api/accounts/";
+			public const string ApiAccountsCashFlowUrl = "/api/accounts/cashflow";
+			public const string ApiAccountTransactionsUrl = "/api/accounts/transactions";
+			public const string ApiUsersUrl = "/api/users/";
 
 			public const string BadRequestImgUrl = "/images/400BadRequest.webp";
 			public const string InternalServerErrorImgUrl = "/images/500InternalServerError.webp";
