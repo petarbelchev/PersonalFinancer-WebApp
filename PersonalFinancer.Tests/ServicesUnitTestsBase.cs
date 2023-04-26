@@ -14,7 +14,7 @@ using PersonalFinancer.Tests.Mocks;
 namespace PersonalFinancer.Tests
 {
 	[TestFixture]
-	abstract class UnitTestsBase
+	abstract class ServicesUnitTestsBase
 	{
 		protected SqlDbContext sqlDbContext;
 		protected IMapper mapper;
@@ -24,7 +24,7 @@ namespace PersonalFinancer.Tests
 		protected async Task SetUpBase()
 		{
 			sqlDbContext = DatabaseMock.Instance;
-			mapper = MapperMock.Instance;
+			mapper = ServicesMapperMock.Instance;
 			memoryCache = MemoryCacheMock.Instance;
 
 			await SeedDatabase();

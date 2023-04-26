@@ -9,7 +9,7 @@ using PersonalFinancer.Services.ApiService;
 
 namespace PersonalFinancer.Tests.Services
 {
-	internal class CategoryServiceTests : UnitTestsBase
+	internal class CategoryServiceTests : ServicesUnitTestsBase
 	{
 		private IEfRepository<Category> repo;
 		private ApiService<Category> categoryService;

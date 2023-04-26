@@ -252,12 +252,17 @@
 			viewModel.AccountTypes = userData.AccountTypes;
 			viewModel.Currencies = userData.Currencies;
 		}
-
+		
+		/// <summary>
+		/// Throws InvalidOperationException when Account does not exist
+		/// or User is not owner or Administrator.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
 		private async Task<AccountDetailsViewModel> GetAccountDetailsViewModel(
-			string accountId, DateTime startDate, DateTime endDate, string ownerId, bool isUserAdmin)
+			string accountId, DateTime startDate, DateTime endDate, string userId, bool isUserAdmin)
 		{
 			AccountDetailsServiceModel accountDetails = await accountService
-				.GetAccountDetails(accountId, startDate, endDate, ownerId, isUserAdmin);
+				.GetAccountDetails(accountId, startDate, endDate, userId, isUserAdmin);
 
 			var viewModel = mapper.Map<AccountDetailsViewModel>(accountDetails);
 			viewModel.Pagination.TotalElements = accountDetails.TotalAccountTransactions;

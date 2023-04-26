@@ -4,7 +4,7 @@
 
 	using PersonalFinancer.Services.Infrastructure;
 
-	static class MapperMock
+	static class ServicesMapperMock
 	{
 		public static IMapper Instance
 		{

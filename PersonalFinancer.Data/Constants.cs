@@ -75,6 +75,9 @@
 			public const string ApiAccountsCashFlowUrl = hostUrl + "/api/accounts/cashflow";
 			public const string ApiAccountTransactionsUrl = hostUrl + "/api/accounts/transactions";
 			public const string ApiUsersUrl = hostUrl + "/api/users/";
+
+			public const string BadRequestImgUrl = "/images/400BadRequest.webp";
+			public const string InternalServerErrorImgUrl = "/images/500InternalServerError.webp";
 		}
 
 		public static class RoleConstants

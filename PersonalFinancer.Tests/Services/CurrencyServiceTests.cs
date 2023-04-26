@@ -9,7 +9,7 @@ using PersonalFinancer.Services.ApiService.Models;
 
 namespace PersonalFinancer.Tests.Services
 {
-	internal class CurrencyServiceTests : UnitTestsBase
+	internal class CurrencyServiceTests : ServicesUnitTestsBase
 	{
 		private IEfRepository<Currency> repo;
 		private ApiService<Currency> currencyService;
