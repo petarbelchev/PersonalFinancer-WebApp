@@ -100,19 +100,19 @@
 		[HttpPost]
 		public async Task<IActionResult> MessageDetails(ReplyInputModel inputModel)
 		{
-			if (!ModelState.IsValid)
-			{
-				MessageDetailsServiceModel message =
-					await messagesService.GetMessageAsync(inputModel.Id, User.Id(), User.IsAdmin());
-
-				var viewModel = mapper.Map<MessageDetailsViewModel>(message);
-				viewModel.ReplyContent = inputModel.ReplyContent;
-
-				return View(viewModel);
-			}
-
 			try
 			{
+				if (!ModelState.IsValid)
+				{
+					MessageDetailsServiceModel message =
+						await messagesService.GetMessageAsync(inputModel.Id, User.Id(), User.IsAdmin());
+
+					var viewModel = mapper.Map<MessageDetailsViewModel>(message);
+					viewModel.ReplyContent = inputModel.ReplyContent;
+
+					return View(viewModel);
+				}
+
 				await messagesService.AddReplyAsync(new ReplyInputServiceModel
 				{
 					MessageId = inputModel.Id,
