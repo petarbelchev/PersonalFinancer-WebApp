@@ -65,7 +65,7 @@ builder.Services.AddAutoMapper(
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-	options.LoginPath = "/User/Login";
+	//options.LoginPath = "/User/Login";
 	options.AccessDeniedPath = "/Home/AccessDenied";
 });
 
