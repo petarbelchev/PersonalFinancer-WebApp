@@ -8,9 +8,9 @@
 	ViewData["Title"] = "Home Page";
 
 	<div class="text-center" style="margin-top: 120px;">
-		<p class="display-4">Personal Financer</p>
-		<p class="display-6">Your Finances in One Place!</p>
-		<p class="display-6 fs-3" style="margin-top: 100px;">
+		<p class="display-6">Personal Financer</p>
+		<p class="display-6 fs-4">Your Finances in One Place!</p>
+		<p class="display-6 fs-4" style="margin-top: 100px;">
 			<a style="text-decoration: none;" asp-area="Identity" asp-page="/Account/Login">Login</a> if you already track your finances or
 			<a style="text-decoration: none;" asp-area="Identity" asp-page="/Account/Register">register</a> to start now.
 		</p>
@@ -104,7 +104,7 @@ else
 		{
 			@*No Transactions Page*@
 			<div class="text-center" style="margin-top: 50px;">
-				<p class="display-6">
+				<p class="display-6 fs-4">
 					You do not have any transactions for thar period.
 				</p>
 			</div>
@@ -114,10 +114,10 @@ else
 	{
 		@*Empty Dashboard Page*@
 		<div class="text-center" style="margin-top: 50px;">
-			<p class="display-4">
+			<p class="display-6">
 				Your Dashboard is empty.
 			</p>
-			<p class="display-6">
+			<p class="display-6 fs-4">
 				<a style="text-decoration: none;" asp-controller="Accounts" asp-action="Create">Create</a> your first account and start record your Finances!
 			</p>
 		</div>
