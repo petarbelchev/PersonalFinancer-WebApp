@@ -29,18 +29,6 @@
 					Id = FirstUserUSDCurrencyId,
 					Name = "USD",
 					OwnerId = FirstUserId
-				},
-				new Currency
-				{
-					Id = SecondUserSEKCurrencyId,
-					Name = "SEK",
-					OwnerId = SecondUserId
-				},
-				new Currency
-				{
-					Id = SecondUserGBPCurrencyId,
-					Name = "GBP",
-					OwnerId = SecondUserId
 				}
 			});
 		}

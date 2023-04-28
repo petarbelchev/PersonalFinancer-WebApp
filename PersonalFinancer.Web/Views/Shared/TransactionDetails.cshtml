@@ -1,7 +1,10 @@
 ﻿@using PersonalFinancer.Services.Accounts.Models;
 @model TransactionDetailsServiceModel
+@{
+	ViewData["Title"] = "Transaction Details";
+}
 
-<p class="display-6 text-center">Transaction Details</p>
+<h1 class="display-6 text-center">@ViewData["Title"]</h1>
 <div class="row">
 	<div class="card offset-md-4 col-md-4">
 		<ul class="list-group list-group-flush">

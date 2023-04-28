@@ -38,9 +38,7 @@
 				await userManager.AddToRoleAsync(admin, RoleConstants.AdminRoleName);
 
 				ApplicationUser user1 = await userManager.FindByIdAsync(SeedConstants.FirstUserId);
-				ApplicationUser user2 = await userManager.FindByIdAsync(SeedConstants.SecondUserId);
 				await userManager.AddToRoleAsync(user1, RoleConstants.UserRoleName);
-				await userManager.AddToRoleAsync(user2, RoleConstants.UserRoleName);
 			})
 				.GetAwaiter()
 				.GetResult();
@@ -63,18 +61,6 @@
 
 			Task.Run(async () =>
 			{
-				for (int i = 1; i <= 10; i++)
-				{
-					await accountService.CreateAccount(new AccountFormShortServiceModel
-					{
-						Name = "Account" + i,
-						AccountTypeId = SeedConstants.SecondUserCashMoneyAccountTypeId,
-						Balance = 0,
-						CurrencyId = SeedConstants.SecondUserGBPCurrencyId,
-						OwnerId = SeedConstants.SecondUserId
-					});
-				}
-
 				string cashBgnAccId = await accountService.CreateAccount(new AccountFormShortServiceModel
 				{
 					Name = "Cash BGN",

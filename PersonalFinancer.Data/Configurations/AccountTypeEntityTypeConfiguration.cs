@@ -29,18 +29,6 @@
 					Id = FirstUserSavingAccountTypeId,
 					Name = "Savings",
 					OwnerId = FirstUserId
-				},
-				new AccountType
-				{
-					Id = SecondUserCashMoneyAccountTypeId,
-					Name = "Cash Money",
-					OwnerId = SecondUserId
-				},
-				new AccountType
-				{
-					Id = SecondUserBankMoneyAccountTypeId,
-					Name = "Bank Money",
-					OwnerId = SecondUserId
 				}
 			});
 		}

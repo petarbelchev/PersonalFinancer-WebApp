@@ -17,7 +17,6 @@
 		private IEnumerable<ApplicationUser> SeedUsers()
 		{
 			var hasher = new PasswordHasher<ApplicationUser>();
-
 			var users = new List<ApplicationUser>();
 
 			var user1 = new ApplicationUser()
@@ -29,28 +28,11 @@
 				NormalizedEmail = "PETAR@MAIL.COM",
 				UserName = "petar@mail.com",
 				NormalizedUserName = "PETAR@MAIL.COM",
-				PhoneNumber = "1234567890"
+				PhoneNumber = "1234567890",
+				EmailConfirmed = true
 			};
-
 			user1.PasswordHash = hasher.HashPassword(user1, "petar123");
-
 			users.Add(user1);
-
-			var user2 = new ApplicationUser()
-			{
-				Id = SecondUserId,
-				FirstName = "Teodor",
-				LastName = "Lesly",
-				Email = "teodor@mail.com",
-				NormalizedEmail = "TEODOR@MAIL.COM",
-				UserName = "teodor@mail.com",
-				NormalizedUserName = "TEODOR@MAIL.COM",
-				PhoneNumber = "1325476980"
-			};
-
-			user2.PasswordHash = hasher.HashPassword(user2, "teodor123");
-
-			users.Add(user2);
 
 			for (int i = 3; i <= 13; i++)
 			{
@@ -58,16 +40,15 @@
 				{
 					Id = Guid.NewGuid().ToString(),
 					FirstName = "User" + i,
-					LastName = "Userov" + i,
+					LastName = "User" + i,
 					Email = "user" + i + "@mail.com",
 					NormalizedEmail = "USER" + i + "@MAIL.COM",
 					UserName = "user" + i + "@mail.com",
 					NormalizedUserName = "USER" + i + "@MAIL.COM",
-					PhoneNumber = "13254769" + i
+					PhoneNumber = "0000000000",
+					EmailConfirmed = true
 				};
-
 				user.PasswordHash = hasher.HashPassword(user, "user123");
-
 				users.Add(user);
 			}
 
@@ -80,11 +61,10 @@
 				NormalizedEmail = "ADMIN@ADMIN.COM",
 				UserName = "admin@admin.com",
 				NormalizedUserName = "ADMIN@ADMIN.COM",
-				PhoneNumber = "9876543021"
+				PhoneNumber = "9876543021",
+				EmailConfirmed = true
 			};
-
 			admin.PasswordHash = hasher.HashPassword(admin, "admin123");
-
 			users.Add(admin);
 
 			return users;
