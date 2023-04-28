@@ -76,6 +76,7 @@
 
 			public const string BadRequestImgUrl = "/images/400BadRequest.webp";
 			public const string InternalServerErrorImgUrl = "/images/500InternalServerError.webp";
+			public const string NotFoundImgUrl = "/images/404NotFound.webp";
 		}
 
 		public static class RoleConstants

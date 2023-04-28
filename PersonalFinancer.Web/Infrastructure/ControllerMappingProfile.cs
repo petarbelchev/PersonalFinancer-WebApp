@@ -13,7 +13,6 @@
 	using Web.Models.Message;
 	using Web.Models.Shared;
 	using Web.Models.Transaction;
-	using Web.Models.User;
 
 	public class ControllerMappingProfile : Profile
 	{
@@ -34,8 +33,6 @@
 			CreateMap<UserAccountsAndCategoriesServiceModel, TransactionFormModel>();
 
 			CreateMap<ApplicationUser, AccountFormViewModel>();
-			CreateMap<RegisterFormViewModel, ApplicationUser>()
-				.ForMember(m => m.UserName, mf => mf.MapFrom(s => s.Email));
 
 			CreateMap<MessageDetailsServiceModel, MessageDetailsViewModel>();
 		}

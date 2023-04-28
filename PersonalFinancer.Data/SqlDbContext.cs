@@ -17,10 +17,6 @@
 			{
 				this.Database.EnsureCreated();
 			}
-			else
-			{
-				this.Database.Migrate();
-			}
 
 			this.seed = seed;
 		}
@@ -41,15 +37,6 @@
 
 			builder.Entity<ApplicationUser>(b =>
 			{
-				b.Property(p => p.UserName).HasMaxLength(50);
-				b.Property(p => p.NormalizedUserName).HasMaxLength(50);
-				b.Ignore(p => p.AccessFailedCount);
-				b.Ignore(p => p.EmailConfirmed);
-				b.Ignore(p => p.TwoFactorEnabled);
-				b.Ignore(p => p.PhoneNumberConfirmed);
-				b.Ignore(p => p.LockoutEnabled);
-				b.Ignore(p => p.LockoutEnd);
-
 				b.HasMany(a => a.Transactions).WithOne(a => a.Owner).OnDelete(DeleteBehavior.Restrict);
 			});
 

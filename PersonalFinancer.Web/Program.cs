@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -15,6 +16,7 @@ using PersonalFinancer.Services.User;
 
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Infrastructure.EmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,8 +28,12 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.Configure<MongoDbSettings>(
 	builder.Configuration.GetSection("MongoDbSettings"));
 
+builder.Services.Configure<AuthMessageSenderOptions>(
+	builder.Configuration.GetSection("SendGrid"));
+
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
+	options.SignIn.RequireConfirmedAccount = true;
 	options.User.RequireUniqueEmail = true;
 	options.Password.RequireNonAlphanumeric = false;
 })
@@ -58,6 +64,7 @@ builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
 builder.Services.AddSingleton<IMongoRepository<Message>, MongoRepository<Message>>();
 builder.Services.AddSingleton<IMessagesService, MessagesService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 builder.Services.AddAutoMapper(
 	typeof(IAccountsService).Assembly,
@@ -65,7 +72,6 @@ builder.Services.AddAutoMapper(
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-	options.LoginPath = "/User/Login";
 	options.AccessDeniedPath = "/Home/AccessDenied";
 });
 

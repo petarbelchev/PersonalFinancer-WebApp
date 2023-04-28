@@ -1,5 +1,4 @@
 ﻿@using PersonalFinancer.Web.Models.Shared;
-@using PersonalFinancer.Web.Models.User;
 @using PersonalFinancer.Web.Models.Home;
 @model UserDashboardViewModel
 
@@ -12,8 +11,8 @@
 		<p class="display-4">Personal Financer</p>
 		<p class="display-6">Your Finances in One Place!</p>
 		<p class="display-6 fs-3" style="margin-top: 100px;">
-			<a style="text-decoration: none;" asp-controller="User" asp-action="Login">Login</a> if you already track your finances or
-			<a style="text-decoration: none;" asp-controller="User" asp-action="Register">register</a> to start now.
+			<a style="text-decoration: none;" asp-area="Identity" asp-page="/Account/Login">Login</a> if you already track your finances or
+			<a style="text-decoration: none;" asp-area="Identity" asp-page="/Account/Register">register</a> to start now.
 		</p>
 	</div>
 }

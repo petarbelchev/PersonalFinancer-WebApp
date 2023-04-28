@@ -2,9 +2,11 @@
 {
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
-
+	
 	using Services.User;
 	using Services.User.Models;
+	
+	using Web.Models.User;
 
 	using static Data.Constants.RoleConstants;
 
