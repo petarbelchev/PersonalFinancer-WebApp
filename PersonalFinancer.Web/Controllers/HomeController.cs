@@ -75,6 +75,8 @@
 		{
 			if (statusCode == 400)
 				ViewBag.ImgUrl = BadRequestImgUrl;
+			else if (statusCode == 404)
+				ViewBag.ImgUrl = NotFoundImgUrl;
 			else
 				ViewBag.ImgUrl = InternalServerErrorImgUrl;
 

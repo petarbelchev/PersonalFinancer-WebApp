@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.User
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.UI.Services;
@@ -106,24 +106,24 @@
                 if (creationResult.Succeeded)
                 {
                     await userManager.AddToRoleAsync(user, RoleConstants.UserRoleName);
-
                     logger.LogInformation("User created a new account with password.");
-
-                    var userId = await userManager.GetUserIdAsync(user);
-                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId, code, returnUrl },
-                        protocol: Request.Scheme);
-
-                    await emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl!)}'>clicking here</a>.");
 
                     if (userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                        string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                        var callbackUrl = Url.Page(
+                            "/Account/ConfirmEmail",
+                            pageHandler: null,
+                            values: new { area = "Identity", userId = user.Id, code, returnUrl },
+                            protocol: Request.Scheme);
+
+                        await emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                            $"Thank you for your registration, {Input.FirstName}! Let's your finances improving begin! " +
+                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl!)}'>clicking here</a>.");
+
+                        return RedirectToPage("RegisterConfirmation");
                     }
                     else
                     {

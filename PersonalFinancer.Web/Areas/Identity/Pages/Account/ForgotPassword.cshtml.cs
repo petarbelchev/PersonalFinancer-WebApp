@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.User
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.UI.Services;
@@ -30,8 +30,8 @@
 
         public class InputModel
         {
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Email address is required.")]
+            [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
             public string Email { get; set; } = null!;
         }
 

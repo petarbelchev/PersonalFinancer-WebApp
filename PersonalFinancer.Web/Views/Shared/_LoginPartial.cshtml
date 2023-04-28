@@ -30,19 +30,21 @@
 				@await userService.FullName(User.Id())
 			</a>
 			<ul class="dropdown-menu dropdown-menu-end">
-				<form class="form-inline" asp-area="Identity" asp-page="/User/Logout" method="post">
-					<button type="submit" class="nav-link btn btn-link text-dark dropdown-item">Logout</button>
-				</form>
+				<li><a class="nav-link btn btn-link dropdown-item text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" 
+					style="text-decoration: none;">Manage your account</a></li>
+				<li>
+					<a class="nav-link btn btn-link dropdown-item text-dark" asp-area="Identity" asp-page="/Account/Logout">Logout</a>
+				</li>
 			</ul>
 		</li>
 	}
 	else
 	{
 		<li class="nav-item">
-			<a class="nav-link text-light" asp-area="Identity" asp-page="/User/Register">Register</a>
+			<a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register">Register</a>
 		</li>
 		<li class="nav-item">
-			<a class="nav-link text-light" asp-area="Identity" asp-page="/User/Login">Login</a>
+			<a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Login">Login</a>
 		</li>
 	}
 </ul>

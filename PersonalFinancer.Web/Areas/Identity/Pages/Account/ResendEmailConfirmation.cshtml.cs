@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.User
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
@@ -21,7 +21,7 @@
         private readonly IEmailSender emailSender;
 
         public ResendEmailConfirmationModel(
-            UserManager<ApplicationUser> userManager, 
+            UserManager<ApplicationUser> userManager,
             IEmailSender emailSender)
         {
             this.userManager = userManager;
@@ -50,23 +50,23 @@
             }
 
             var user = await userManager.FindByEmailAsync(Input.Email);
+
             if (user == null)
             {
                 ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");
                 return Page();
             }
 
-            var userId = await userManager.GetUserIdAsync(user);
             var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = Url.Page(
                 "/Account/ConfirmEmail",
                 pageHandler: null,
-                values: new { userId, code },
+                values: new { userId = user.Id, code },
                 protocol: Request.Scheme);
-            await emailSender.SendEmailAsync(
-                Input.Email,
-                "Confirm your email",
+
+            await emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                $"Thank you for your registration, {user.FirstName}! Let's your finances improving begin! " +
                 $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl!)}'>clicking here</a>.");
 
             ModelState.AddModelError(string.Empty, "Verification email sent. Please check your email.");

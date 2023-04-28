@@ -1,7 +1,9 @@
-﻿namespace PersonalFinancer.Services.User.Models
+﻿namespace PersonalFinancer.Web.Models.User
 {
 	using Web.Models.Shared;
 
+	using Services.User.Models;
+	
 	using static Data.Constants;
 
 	public class UsersViewModel

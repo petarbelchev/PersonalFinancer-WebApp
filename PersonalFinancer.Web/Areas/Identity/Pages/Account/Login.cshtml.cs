@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.User
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
 	using Microsoft.AspNetCore.Authentication;
 	using Microsoft.AspNetCore.Identity;
