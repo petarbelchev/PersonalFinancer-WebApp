@@ -1,10 +1,11 @@
 ﻿namespace PersonalFinancer.Web.Models.Home
 {
 	using Services.Shared.Models;
+	using Services.User.Models;
 
-	using Web.Models.Shared;
+    using Web.Models.Shared;
 
-	public class UserDashboardViewModel : DateFilterModel
+    public class UserDashboardViewModel : DateFilterModel
     {
         public IEnumerable<TransactionTableServiceModel> Transactions { get; set; }
             = new List<TransactionTableServiceModel>();

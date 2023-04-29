@@ -229,7 +229,15 @@
 						{
 							Name = t.Key,
 							Incomes = t.Where(t => t.TransactionType == TransactionType.Income).Sum(t => t.Amount),
-							Expenses = t.Where(t => t.TransactionType == TransactionType.Expense).Sum(t => t.Amount)
+							Expenses = t.Where(t => t.TransactionType == TransactionType.Expense).Sum(t => t.Amount),
+							ExpensesByCategories = t
+								.Where(t => t.TransactionType == TransactionType.Expense)
+								.GroupBy(t => t.Category.Name)
+								.Select(t => new CategoryExpensesServiceModel
+								{
+									CategoryName = t.Key,
+									ExpensesAmount = t.Where(t => t.TransactionType == TransactionType.Expense).Sum(t => t.Amount)
+								})
 						})
 						.OrderBy(c => c.Name)
 						.ToList()

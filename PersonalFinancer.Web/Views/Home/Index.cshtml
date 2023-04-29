@@ -1,4 +1,6 @@
-﻿@using PersonalFinancer.Web.Models.Shared;
+﻿@using Newtonsoft.Json;
+@using PersonalFinancer.Data.Enums;
+@using PersonalFinancer.Web.Models.Shared;
 @using PersonalFinancer.Web.Models.Home;
 @model UserDashboardViewModel
 
@@ -30,7 +32,7 @@ else
 				@foreach (var account in Model.Accounts)
 				{
 					<div class="col-xl-3 col-lg-4 col-md-6" role="button" onclick="location.href='@Url.Action("AccountDetails", "Accounts", new { id = account.Id })'">
-						<div class="card formField align-items-center">
+						<div class="card formField align-items-center shadow mb-4">
 							<div class="d-flex flex-row align-items-center mb-2">
 								<div class="p-2">
 									<img src="/icons/icons8-wallet-64.png">
@@ -54,19 +56,48 @@ else
 		{
 			<div class="row">
 
-				@*Last Five Transactions*@
-				<div class="col-lg-8" style="margin-top: 25px;">
-					<div class="card">
-						<div class="card-header">
-							<h6>Last Five Transactions</h6>
+				<div class="col-lg-8">
+					@*Last Five Transactions*@
+					<div style="margin-top: 25px;">
+						<div class="card shadow mb-4">
+							<div class="card-header">
+								<h6>Last Five Transactions</h6>
+							</div>
+							<partial name="_TransactionsTablePartial" />
 						</div>
-						<partial name="_TransactionsTablePartial" />
+					</div>
+
+					@*Doughnut Chart*@
+					<div style="margin-top: 25px;">
+						<div class="card shadow mb-4">
+							<div class="card-header">
+								<h6>Expenses Structure</h6>
+							</div>
+							<div class="card-body">
+								<div class="d-flex">
+									<div class="p-2">
+										<div class="row">
+											@for (int i = 0; i < Model.CurrenciesCashFlow.Count(); i++)
+											{
+												if (Model.CurrenciesCashFlow.ElementAt(i).ExpensesByCategories.Any())
+												{
+													<button class="col-12 btn btn-secondary formField" onclick="loadChart(@i)">@Model.CurrenciesCashFlow.ElementAt(i).Name</button>
+												}
+											}
+										</div>
+									</div>
+									<div class="p-2 flex-grow-1">
+										<canvas id="doughnutChart" style="max-height: 400px;"></canvas>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 
 				@*Cash Flow*@
 				<div class="col-lg-4" style="margin-top: 25px;">
-					<div class="card">
+					<div class="card shadow mb-4">
 						<div class="card-header">
 							<h6>Cash Flow</h6>
 						</div>
@@ -122,8 +153,45 @@ else
 			</p>
 		</div>
 	}
-}
 
-@section Scripts {
+	@section Scripts {
 	<partial name="_ValidationScriptsPartial" />
+	<script src="/js/chart.umd.js"></script>
+	<script>
+		let currencies = @Html.Raw(JsonConvert.SerializeObject(Model.CurrenciesCashFlow));
+		let canvas = document.querySelector('#doughnutChart');
+		let chart;
+		let isChartDrawed = false;
+
+		function loadChart(currencyIndex) {
+			let categories = [];
+			let amounts = [];
+
+			for (let category of currencies[currencyIndex].ExpensesByCategories) {
+				categories.push(category.CategoryName);
+				amounts.push(category.ExpensesAmount.toFixed(2));
+			}
+
+			if (isChartDrawed) {
+				chart.destroy();
+			}
+
+			chart = new Chart(canvas, {
+				type: 'doughnut',
+				data: {
+					labels: categories,
+					datasets: [{
+						label: 'Amount',
+						data: amounts,
+						hoverOffset: 15
+					}]
+				}
+			});
+
+			isChartDrawed = true;
+		};
+
+		loadChart(0);
+	</script>
+	}
 }

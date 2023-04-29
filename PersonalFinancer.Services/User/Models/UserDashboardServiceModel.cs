@@ -9,5 +9,5 @@
 		public IEnumerable<AccountCardServiceModel> Accounts { get; set; } = null!;
 
 		public IEnumerable<CurrencyCashFlowServiceModel> CurrenciesCashFlow { get; set; } = null!;
-	}
+    }
 }
