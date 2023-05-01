@@ -7,7 +7,7 @@ function setUpPagination(page, pagination) {
 
     let innerHtml = `
             <li class="page-item ${page == 1 ? 'disabled' : ''}">
-                <a class="page-link" role="button" style="color: black;" page="${page - 1}">Previous</a>
+                <a class="page-link" role="button" style="color: black;" page="${page - 1}"><<</a>
 		    </li >
 		    <li class="page-item ${page == 1 ? 'active' : ''}">
 			    <a class="page-link" role="button" style="color: black; ${page == 1 ? 'background-color: gray; border-color: gray;' : ''}" 
@@ -15,11 +15,11 @@ function setUpPagination(page, pagination) {
 		    </li>
     `;
 
-    if (page - 3 > 1) {
+    if (page - 2 > 1) {
         innerHtml += '<li class="page-item"><span class="page-link" style="color: black">...</span></li>';
     }
 
-    for (let i = page - 2; i <= page + 2; i++) {
+    for (let i = page - 1; i <= page + 1; i++) {
         if (i > 1 && i < pagination.pages) {
             innerHtml += `
                     <li class="page-item ${page == i ? 'active' : ''}">
@@ -30,7 +30,7 @@ function setUpPagination(page, pagination) {
         }
     }
 
-    if (page + 3 < pagination.pages) {
+    if (page + 2 < pagination.pages) {
         innerHtml += '<li class="page-item"><span class="page-link" style="color: black">...</span></li>';
     }
 
@@ -44,7 +44,7 @@ function setUpPagination(page, pagination) {
 
     innerHtml += `
             <li class="page-item ${page == pagination.pages ? 'disabled' : ''}">
-			    <a class="page-link" role="button" style="color: black;" page="${page + 1}">Next</a>
+			    <a class="page-link" role="button" style="color: black;" page="${page + 1}">>></a>
 		    </li>
     `;
 

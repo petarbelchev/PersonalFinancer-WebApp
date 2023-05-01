@@ -32,7 +32,7 @@
         /// Throws ArgumentException if you try to create Entity with existing name.
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<ApiOutputServiceModel> CreateEntity(ApiInputServiceModel model)
+        public async Task<ApiOutputServiceModel> CreateEntity(IApiInputServiceModel model)
         {
             T? entity = await repo.All().FirstOrDefaultAsync(
                 x => x.Name == model.Name && x.OwnerId == model.OwnerId);

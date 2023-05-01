@@ -6,6 +6,7 @@ using PersonalFinancer.Data.Repositories;
 
 using PersonalFinancer.Services.ApiService.Models;
 using PersonalFinancer.Services.ApiService;
+using PersonalFinancer.Services.Shared.Models;
 
 namespace PersonalFinancer.Tests.Services
 {
@@ -25,7 +26,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateEntity_ShouldAddNewCategory_WithValidParams()
 		{
 			//Arrange
-			var inputModel = new ApiInputServiceModel
+			var inputModel = new CategoryInputModel
 			{
 				Name = "NewCategory",
 				OwnerId = this.User1.Id
@@ -60,7 +61,7 @@ namespace PersonalFinancer.Tests.Services
 			await repo.SaveChangesAsync();
 			int countBefore = await repo.All().CountAsync();
 
-			var inputModel = new ApiInputServiceModel
+			var inputModel = new CategoryInputModel
 			{
 				Name = deletedCategory.Name,
 				OwnerId = this.User1.Id
@@ -103,7 +104,7 @@ namespace PersonalFinancer.Tests.Services
 			await repo.SaveChangesAsync();
 			int countBefore = await repo.All().CountAsync();
 
-			var inputModel = new ApiInputServiceModel
+			var inputModel = new CategoryInputModel
 			{
 				Name = user2Category.Name,
 				OwnerId = this.User1.Id
@@ -129,7 +130,7 @@ namespace PersonalFinancer.Tests.Services
 		public void CreateEntity_ShouldThrowException_WhenCategoryExist()
 		{
 			//Arrange
-			var inputModel = new ApiInputServiceModel
+			var inputModel = new CategoryInputModel
 			{
 				Name = this.Cat2User1.Name,
 				OwnerId = this.User1.Id

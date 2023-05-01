@@ -6,6 +6,7 @@ using PersonalFinancer.Data.Repositories;
 
 using PersonalFinancer.Services.ApiService;
 using PersonalFinancer.Services.ApiService.Models;
+using PersonalFinancer.Services.Shared.Models;
 
 namespace PersonalFinancer.Tests.Services
 {
@@ -25,7 +26,7 @@ namespace PersonalFinancer.Tests.Services
 		public async Task CreateEntity_ShouldAddNewAccountType_WithValidParams()
 		{
 			//Arrange
-			var inputModel = new ApiInputServiceModel
+			var inputModel = new AccountTypeInputModel
 			{
 				Name = "NewAccountType",
 				OwnerId = this.User1.Id
@@ -60,7 +61,7 @@ namespace PersonalFinancer.Tests.Services
 			await repo.SaveChangesAsync();
 			int countBefore = await repo.All().CountAsync();
 
-			var inputModel = new ApiInputServiceModel
+			var inputModel = new AccountTypeInputModel
 			{
 				Name = deletedAccType.Name,
 				OwnerId = this.User1.Id
@@ -103,7 +104,7 @@ namespace PersonalFinancer.Tests.Services
 			await repo.SaveChangesAsync();
 			int countBefore = await repo.All().CountAsync();
 
-			var inputModel = new ApiInputServiceModel
+			var inputModel = new AccountTypeInputModel
 			{
 				Name = user2AccType.Name,
 				OwnerId = this.User1.Id
@@ -129,7 +130,7 @@ namespace PersonalFinancer.Tests.Services
 		public void CreateEntity_ShouldThrowException_WhenAccTypeExist()
 		{
 			//Arrange
-			var inputModel = new ApiInputServiceModel
+			var inputModel = new AccountTypeInputModel
 			{
 				Name = this.AccType1User1.Name,
 				OwnerId = this.User1.Id

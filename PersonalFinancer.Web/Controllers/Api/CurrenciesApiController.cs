@@ -1,16 +1,17 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
 
-    using Data.Models;
+	using Data.Models;
 
-    using Services.ApiService;
-    using Services.ApiService.Models;
+	using Services.ApiService;
+	using Services.ApiService.Models;
+	using Services.Shared.Models;
 
-    using Web.Infrastructure;
+	using Web.Infrastructure;
 
-    [Authorize]
+	[Authorize]
 	[Route("api/currencies")]
 	[ApiController]
 	public class CurrenciesApiController : BaseApiController
@@ -21,7 +22,7 @@
 			=> this.apiService = apiService;
 
 		[HttpPost]
-		public async Task<ActionResult> Create(ApiInputServiceModel inputModel)
+		public async Task<ActionResult> Create(CurrencyInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(GetErrors(ModelState.Values));

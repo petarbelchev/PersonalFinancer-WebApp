@@ -1,10 +1,10 @@
-﻿using PersonalFinancer.Services.ApiService.Models;
-
-namespace PersonalFinancer.Services.ApiService
+﻿namespace PersonalFinancer.Services.ApiService
 {
+	using Services.ApiService.Models;
+
 	public interface IApiService<T>
 	{
-		Task<ApiOutputServiceModel> CreateEntity(ApiInputServiceModel model);
+		Task<ApiOutputServiceModel> CreateEntity(IApiInputServiceModel model);
 
 		Task DeleteEntity(string entityId, string userId, bool isUserAdmin);
 	}

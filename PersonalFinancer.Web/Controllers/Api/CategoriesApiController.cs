@@ -7,10 +7,11 @@
 
     using Services.ApiService;
     using Services.ApiService.Models;
+	using Services.Shared.Models;
 
     using Web.Infrastructure;
 
-    [Authorize]
+	[Authorize]
 	[Route("api/categories")]
 	[ApiController]
 	public class CategoriesApiController : BaseApiController
@@ -21,7 +22,7 @@
 			=> this.apiService = apiService;
 
 		[HttpPost]
-		public async Task<ActionResult> CreateCategory(ApiInputServiceModel inputModel)
+		public async Task<ActionResult> CreateCategory(CategoryInputModel inputModel)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(GetErrors(ModelState.Values));

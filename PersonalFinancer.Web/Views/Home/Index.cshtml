@@ -67,32 +67,35 @@ else
 						</div>
 					</div>
 
-					@*Doughnut Chart*@
-					<div style="margin-top: 25px;">
-						<div class="card shadow mb-4">
-							<div class="card-header">
-								<h6>Expenses Structure</h6>
-							</div>
-							<div class="card-body">
-								<div class="d-flex">
-									<div class="p-2">
-										<div class="row">
-											@for (int i = 0; i < Model.CurrenciesCashFlow.Count(); i++)
-											{
-												if (Model.CurrenciesCashFlow.ElementAt(i).ExpensesByCategories.Any())
+					@if (Model.CurrenciesCashFlow.Any(c => c.Expenses > 0))
+					{
+						@*Doughnut Chart*@
+						<div style="margin-top: 25px;">
+							<div class="card shadow mb-4">
+								<div class="card-header">
+									<h6>Expenses Structure</h6>
+								</div>
+								<div class="card-body">
+									<div class="d-flex">
+										<div class="p-2">
+											<div class="row">
+												@for (int i = 0; i < Model.CurrenciesCashFlow.Count(); i++)
 												{
-													<button class="col-12 btn btn-secondary formField" onclick="loadChart(@i)">@Model.CurrenciesCashFlow.ElementAt(i).Name</button>
+													if (Model.CurrenciesCashFlow.ElementAt(i).ExpensesByCategories.Any())
+													{
+														<button class="col-12 btn btn-secondary formField" onclick="loadChart(@i)">@Model.CurrenciesCashFlow.ElementAt(i).Name</button>
+													}
 												}
-											}
+											</div>
 										</div>
-									</div>
-									<div class="p-2 flex-grow-1">
-										<canvas id="doughnutChart" style="max-height: 400px;"></canvas>
+										<div class="p-2 flex-grow-1">
+											<canvas id="doughnutChart" style="max-height: 400px;"></canvas>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
+					}
 				</div>
 
 				@*Cash Flow*@

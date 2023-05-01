@@ -4,7 +4,6 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>aspnet-PersonalFinancer.Web-0db5e861-8376-4d66-bbce-28d1bbbed7b1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,5 +45,7 @@
     <ProjectReference Include="..\PersonalFinancer.Data\PersonalFinancer.Data.csproj" />
     <ProjectReference Include="..\PersonalFinancer.Services\PersonalFinancer.Services.csproj" />
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties properties_4launchsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
