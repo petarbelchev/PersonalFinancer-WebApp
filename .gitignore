@@ -364,3 +364,4 @@ FodyWeavers.xsd
 /PersonalFinancer.Web/appsettings.json
 *.lutconfig
 *.gitattributes
+/PersonalFinancer.Web/appsettings.Production.json

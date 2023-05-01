@@ -19,7 +19,7 @@
 			var hasher = new PasswordHasher<ApplicationUser>();
 			var users = new List<ApplicationUser>();
 
-			var user1 = new ApplicationUser()
+			var user = new ApplicationUser()
 			{
 				Id = FirstUserId,
 				FirstName = "Petar",
@@ -31,26 +31,8 @@
 				PhoneNumber = "1234567890",
 				EmailConfirmed = true
 			};
-			user1.PasswordHash = hasher.HashPassword(user1, "petar123");
-			users.Add(user1);
-
-			for (int i = 3; i <= 13; i++)
-			{
-				var user = new ApplicationUser()
-				{
-					Id = Guid.NewGuid().ToString(),
-					FirstName = "User" + i,
-					LastName = "User" + i,
-					Email = "user" + i + "@mail.com",
-					NormalizedEmail = "USER" + i + "@MAIL.COM",
-					UserName = "user" + i + "@mail.com",
-					NormalizedUserName = "USER" + i + "@MAIL.COM",
-					PhoneNumber = "0000000000",
-					EmailConfirmed = true
-				};
-				user.PasswordHash = hasher.HashPassword(user, "user123");
-				users.Add(user);
-			}
+			user.PasswordHash = hasher.HashPassword(user, "petar123");
+			users.Add(user);
 
 			var admin = new ApplicationUser()
 			{
@@ -61,7 +43,7 @@
 				NormalizedEmail = "ADMIN@ADMIN.COM",
 				UserName = "admin@admin.com",
 				NormalizedUserName = "ADMIN@ADMIN.COM",
-				PhoneNumber = "9876543021",
+				PhoneNumber = "0987654321",
 				EmailConfirmed = true
 			};
 			admin.PasswordHash = hasher.HashPassword(admin, "admin123");
