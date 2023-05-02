@@ -162,6 +162,9 @@
 
 		public async Task<TransactionsServiceModel> GetUserTransactions(string userId, DateTime startDate, DateTime endDate, int page = 1)
 		{
+			startDate = TimeZoneInfo.ConvertTimeToUtc(startDate);
+			endDate = TimeZoneInfo.ConvertTimeToUtc(endDate);
+
 			TransactionsServiceModel userTransactions = await usersRepo.All()
 				.Where(u => u.Id == userId)
 				.Select(u => new TransactionsServiceModel
@@ -183,7 +186,7 @@
 							CategoryName = t.Category.Name + (t.Category.IsDeleted ?
 								" (Deleted)"
 								: string.Empty),
-							CreatedOn = t.CreatedOn,
+							CreatedOn = t.CreatedOn.ToLocalTime(),
 							Refference = t.Refference,
 							TransactionType = t.TransactionType.ToString()
 						})
@@ -217,7 +220,7 @@
 							Id = t.Id,
 							Amount = t.Amount,
 							AccountCurrencyName = t.Account.Currency.Name,
-							CreatedOn = t.CreatedOn,
+							CreatedOn = t.CreatedOn.ToLocalTime(),
 							TransactionType = t.TransactionType.ToString(),
 							Refference = t.Refference,
 							CategoryName = t.Category.Name

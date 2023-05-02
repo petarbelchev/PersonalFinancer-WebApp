@@ -31,7 +31,7 @@ async function getTransactions(page) {
         for (let transaction of model.transactions) {
             let tr = `
                 <tr role="button" onclick=location.href='${model.transactionDetailsUrl + transaction.id}'>
-					<td><img src="${transaction.transactionType == 'Income' ? '/icons/greenArrow.png' : '/icons/redArrow.png'}" style="max-width: 38px;"></td>
+					<td><img src="${transaction.transactionType == 'Income' ? '/icons/greenArrow.png' : '/icons/redArrow.png'}" style="max-width: 25px;"></td>
 				    <td>${new Date(transaction.createdOn).toLocaleString()}</td>
 				    <td>${transaction.categoryName}</td>
 				    <td>${transaction.amount.toFixed(2)} ${transaction.accountCurrencyName}</td>

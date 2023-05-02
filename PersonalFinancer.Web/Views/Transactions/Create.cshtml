@@ -12,7 +12,7 @@
 {
 	<p class="display-6 text-center">@ViewData["Title"]</p>
 	<div class="row justify-content-center">
-		<div class="col-sm-6">
+		<div class="col-11 col-sm-8 col-md-6 col-xl-5">
 			<section>
 				<form method="post">
 					<div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -22,7 +22,7 @@
 						<span asp-validation-for="@Model.Amount" class="text-danger"></span>
 					</div>
 					<div class="form-floating formField">
-						<input asp-for="@Model.CreatedOn" textmode="Date" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+						<input value="@Model.CreatedOn.ToLocalTime().ToString("yyyy-MM-ddThh:mm")" name="CreatedOn" type="datetime-local" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
 						<label asp-for="@Model.CreatedOn" class="form-label"></label>
 						<span asp-validation-for="@Model.CreatedOn" class="text-danger"></span>
 					</div>

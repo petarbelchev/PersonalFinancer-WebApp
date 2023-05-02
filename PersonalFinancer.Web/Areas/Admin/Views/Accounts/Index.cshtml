@@ -4,19 +4,20 @@
 	ViewData["Title"] = "All Accounts";
 }
 
-<h1 class="display-6 text-center">@ViewData["Title"]</h1>
-<div class="row">
+<div class="container">
+
+	<h1 class="display-6 text-center">@ViewData["Title"]</h1>
 
 	@*Pagination*@
 	<partial name="_PaginationPartial" />
 
 	@*Account Cards*@
-	<section class="row">
+	<div class="row">
 		@foreach (var account in Model.Accounts)
 		{
-			<div class="col-xl-3 col-lg-4 col-sm-6">
-				<div class="card formField align-items-center shadow mb-4">
-					<div class="d-flex flex-row align-items-center mb-2">
+			<div class="col-sm-6 col-lg-4 col-xl-3">
+				<div class="card align-items-center shadow mb-4">
+					<div class="d-flex align-items-center">
 						<div class="p-2">
 							<img src="/icons/icons8-wallet-64.png">
 						</div>
@@ -25,14 +26,16 @@
 							<p class="card-text">@account.Balance @account.CurrencyName</p>
 						</div>
 					</div>
-					<a asp-area="Admin" asp-controller="Accounts" asp-action="AccountDetails"
-				   asp-route-id="@account.Id" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Details</a>
-					<a asp-area="Admin" asp-controller="Users" asp-action="Details"
-				   asp-route-id="@account.OwnerId" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Owner</a>
+					<div class="d-flex">
+						<a asp-area="Admin" asp-controller="Accounts" asp-action="AccountDetails"
+					   asp-route-id="@account.Id" class="btn btn-secondary" style="margin-bottom: 10px; margin-right: 10px;">Details</a>
+						<a asp-area="Admin" asp-controller="Users" asp-action="Details"
+					   asp-route-id="@account.OwnerId" class="btn btn-secondary" style="margin-bottom: 10px;">Owner</a>
+					</div>
 				</div>
 			</div>
 		}
-	</section>
+	</div>
 
 	@*Pagination*@
 	<partial name="_PaginationPartial" />
@@ -43,7 +46,7 @@
 		let params = {
 			url: '@Model.ApiAccountsEndpoint',
 			pages: @Model.Pagination.Pages
-		}
+																		}
 	</script>
 	<script src="/js/getAccounts.js"></script>
 	<script src="~/js/setUpPagination.js"></script>

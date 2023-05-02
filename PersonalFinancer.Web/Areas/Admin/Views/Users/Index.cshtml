@@ -6,8 +6,8 @@
 	int row = 1;
 }
 
-<div class="row">
-	<div class="offset-lg-2 col-lg-8">
+<div class="row justify-content-center">
+	<div class="col-md-10 col-lg-8">
 		<h1 class="display-6 text-center">@ViewData["Title"]</h1>
 
 		<partial name="_PaginationPartial" />
@@ -15,7 +15,6 @@
 		<table class="table table-hover">
 			<thead>
 				<tr>
-					<th scope="col"></th>
 					<th scope="col"></th>
 					<th scope="col">Name</th>
 					<th scope="col">Email</th>
@@ -25,9 +24,8 @@
 				@foreach (UserServiceModel user in Model.Users)
 				{
 					<tr role="button" onclick="location.href='@Url.Action("Details", "Users", new { id = user.Id })'">
-						<th scope="row"><img src="/icons/icons8-budget-64.png" style="max-width: 25px;"></th>
 						<th scope="row">@(row++).</th>
-						<td>@user.FirstName @user.LastName</td>
+						<td><img src="/icons/icons8-budget-64.png" style="max-width: 25px;"> @user.FirstName @user.LastName</td>
 						<td>@user.Email</td>
 					</tr>
 				}
@@ -44,7 +42,7 @@
 		let params = {
 			url: '@Model.ApiUsersEndpoint',
 			pages: @Model.Pagination.Pages
-		}
+				}
 	</script>
 	<script src="/js/getUsers.js"></script>
 	<script src="~/js/setUpPagination.js"></script>

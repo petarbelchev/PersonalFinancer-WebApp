@@ -50,10 +50,13 @@
 		[HttpPost]
 		public async Task<IActionResult> Index(DateFilterModel inputModel)
 		{
+			DateTime startDate = inputModel.StartDate.ToUniversalTime();
+			DateTime endDate = inputModel.EndDate.ToUniversalTime();
+
 			var viewModel = new UserDashboardViewModel
 			{
-				StartDate = inputModel.StartDate,
-				EndDate = inputModel.EndDate
+				StartDate = startDate,
+				EndDate = endDate
 			};
 
 			if (!ModelState.IsValid)

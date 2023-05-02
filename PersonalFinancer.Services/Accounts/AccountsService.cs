@@ -86,6 +86,8 @@
 		{
 			Account account = await accountsRepo.All().FirstAsync(a => a.Id == model.AccountId);
 
+			model.CreatedOn = model.CreatedOn.ToUniversalTime();
+
 			var newTransaction = mapper.Map<Transaction>(model);
 			newTransaction.Id = Guid.NewGuid().ToString();
 
@@ -242,7 +244,7 @@
 			transactionInDb.AccountId = model.AccountId;
 			transactionInDb.CategoryId = model.CategoryId;
 			transactionInDb.Amount = model.Amount;
-			transactionInDb.CreatedOn = model.CreatedOn;
+			transactionInDb.CreatedOn = model.CreatedOn.ToUniversalTime();
 			transactionInDb.TransactionType = model.TransactionType;
 
 			await transactionsRepo.SaveChangesAsync();
@@ -256,6 +258,9 @@
 		public async Task<AccountDetailsServiceModel> GetAccountDetails(
 			string id, DateTime startDate, DateTime endDate, string userId, bool isUserAdmin)
 		{
+			startDate = startDate.ToUniversalTime();
+			endDate = endDate.ToUniversalTime();
+
 			return await accountsRepo.All()
 				.Where(a => a.Id == id && !a.IsDeleted
 							&& (isUserAdmin || a.OwnerId == userId))
@@ -279,7 +284,7 @@
 							Id = t.Id,
 							Amount = t.Amount,
 							AccountCurrencyName = a.Currency.Name,
-							CreatedOn = t.CreatedOn,
+							CreatedOn = t.CreatedOn.ToLocalTime(),
 							CategoryName = t.Category.Name + (t.Category.IsDeleted ?
 								" (Deleted)"
 								: string.Empty),
@@ -333,6 +338,9 @@
 		public async Task<TransactionsServiceModel> GetAccountTransactions(
 			string id, DateTime startDate, DateTime endDate, int page)
 		{
+			startDate = startDate.ToUniversalTime();
+			endDate = endDate.ToUniversalTime();
+
 			var accountTransactions = await accountsRepo.All()
 				.Where(a => a.Id == id && !a.IsDeleted)
 				.Select(a => new TransactionsServiceModel
@@ -349,7 +357,7 @@
 							Id = t.Id,
 							Amount = t.Amount,
 							AccountCurrencyName = a.Currency.Name,
-							CreatedOn = t.CreatedOn,
+							CreatedOn = t.CreatedOn.ToLocalTime(),
 							CategoryName = t.Category.Name + (t.Category.IsDeleted ?
 								" (Deleted)"
 								: string.Empty),
@@ -424,7 +432,7 @@
 					AccountId = t.AccountId,
 					CategoryId = t.CategoryId,
 					Amount = t.Amount,
-					CreatedOn = t.CreatedOn,
+					CreatedOn = t.CreatedOn.ToLocalTime(),
 					TransactionType = t.TransactionType,
 					Refference = t.Refference,
 					IsInitialBalance = t.IsInitialBalance,

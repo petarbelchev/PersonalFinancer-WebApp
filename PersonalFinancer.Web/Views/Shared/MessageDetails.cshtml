@@ -19,7 +19,7 @@
 				<div class="card-body">
 					<blockquote class="blockquote mb-0">
 						<p>@Model.Content</p>
-						<footer class="blockquote-footer" style="margin-top: 10px;">Writed from  @Model.AuthorName on <cite title="Source Title">@Model.CreatedOn</cite></footer>
+						<footer class="blockquote-footer" style="margin-top: 10px;">Writed from  @Model.AuthorName on <cite title="Source Title">@Model.CreatedOn.ToLocalTime()</cite></footer>
 					</blockquote>
 				</div>
 			</div>
@@ -32,7 +32,7 @@
 					<div class="card-body">
 						<blockquote class="blockquote mb-0">
 							<p>@reply.Content</p>
-							<footer class="blockquote-footer" style="margin-top: 10px;">Writed from  @reply.AuthorName on <cite title="Source Title">@reply.CreatedOn</cite></footer>
+							<footer class="blockquote-footer" style="margin-top: 10px;">Writed from  @reply.AuthorName on <cite title="Source Title">@reply.CreatedOn.ToLocalTime()</cite></footer>
 						</blockquote>
 					</div>
 				</div>

@@ -16,11 +16,11 @@
 			<tr role="button" onclick="location.href='@Url.Action("TransactionDetails", "Transactions", new { id = transaction.Id })'">
 				@if (transaction.TransactionType == TransactionType.Income.ToString())
 				{
-					<td><img src="/icons/greenArrow.png" style="max-width: 38px;"></td>
+					<td><img src="/icons/greenArrow.png" style="max-width: 25px;"></td>
 				}
 				else
 				{
-					<td><img src="/icons/redArrow.png" style="max-width: 38px;"></td>
+					<td><img src="/icons/redArrow.png" style="max-width: 25px;"></td>
 				}
 				<td>@transaction.CreatedOn</td>
 				<td>@transaction.CategoryName</td>
