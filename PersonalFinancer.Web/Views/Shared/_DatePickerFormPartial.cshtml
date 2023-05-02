@@ -3,12 +3,12 @@
 
 <form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
 	<div class="col-lg-5 form-floating">
-		<input type="datetime-local" name="StartDate" value="@Model.StartDate.ToLocalTime().ToString("yyyy-MM-ddThh:mm")" class="form-control">
+		<input type="datetime-local" name="StartDate" value="@Model.StartDate.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")" class="form-control">
 		<label asp-for="@Model.StartDate" class="form-label"></label>
 		<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
 	</div>
 	<div class="col-lg-5 form-floating">
-		<input type="datetime-local" name="EndDate" value="@Model.EndDate.ToLocalTime().ToString("yyyy-MM-ddThh:mm")" class="form-control">
+		<input type="datetime-local" name="EndDate" value="@Model.EndDate.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")" class="form-control">
 		<label asp-for="@Model.EndDate" class="form-label"></label>
 		<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
 	</div>
