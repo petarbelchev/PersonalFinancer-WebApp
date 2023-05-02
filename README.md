@@ -1,48 +1,49 @@
 # Personal Financer
 
+## Link to the App: <a href='https://financer.azurewebsites.net/'><b>financer.azurewebsites.net</b></a>
+You can use user with test data - email: petar@mail.com, password: petar123
+
 ## Overview
 Personal Financer is Web Application that give on his users the ability to record their incomes and expenses structured on Accounts and Transactions.
 
 ![User Dashboard Page](./Screenshots/user-dashboard-page.jpeg)
 
 ## Motivation
-This is my first project. I created it to practice my skills and also will be a defense project for [**ASP.NET Advanced**](https://softuni.bg/trainings/4107/asp-net-advanced-june-2023) course at [SoftUni](https://softuni.bg/ "SoftUni") (June 2023).
+I created this project to practice my skills and also will be a defense project for [**ASP.NET Advanced**](https://softuni.bg/trainings/4107/asp-net-advanced-june-2023) course at [SoftUni](https://softuni.bg/ "SoftUni") (June 2023).
 
 ## Used Tech/Frameworks
 - ASP.NET Core 6
-    - Database layer with 8 entity models
-    - UI layer with 5 controllers + 5 more in the "Admin" area
-    - Web API with 7 controllers for RESTful services
-    - Service layer with 4 services
-    - 20 views + 5 partial views
-    - Client and Server validations 
+    - MVC
+    - Web API
+    - SendGrid
     - AutoMapper
     - Cache in-memory
     - TempData messages
+    - Moq
+    - NUnit
+    - Bootstrap
+    - HTML5 Canvas
 - JavaScript for AJAX requests and DOM manipulations
 - Entity Framework Core
 - Microsoft SQL Server
-- MongoDB (for Messages) *NEW
-- NUnit
-- Moq
+- MongoDB (for Messages)
 
-## How to Install and Run the Project
-The Project can be easy tested. All you need to do:
-1. Create appsettings.json file with connection strings for MS SQL Server and MongoDB;
-3. Run the App & Enjoy! :)
+## How Run the Project
+The Project can be easy tested locally. All you need to do:
+1. Create appsettings.json file with the configurations:
 
-The Migration will seed the Database with: 
+![appsettings.json file](./Screenshots/appsettings.png)
+
+2. Run the App & Enjoy! :)
+
+The Migrations will seed the Database with: 
 - Admin - email: admin@admin.com, password: admin123
 - User with accounts and transactions for easy and fast tests - email: petar@mail.com, password: petar123
 
 ## Features
-Personal Financer is a website for record your cash flow and analyze it. To use the application you must login or create a registration.
+Personal Financer is a website for record your cash flow and analyze it.
 
 ![Welcome Guest Page](./Screenshots/welcome-page.jpeg)
-
-![Register Page](./Screenshots/register-page.jpeg)
-
-![Login Page](./Screenshots/login-page.jpeg)
 
 ![No Accounts Page](./Screenshots/home-page-no-accounts.jpeg)
 
@@ -63,12 +64,9 @@ Details page gives options for Edit and Delete Account, filter transactions for 
 ![Account Details Page](./Screenshots/account-details-page.jpeg)
 
 On Edit Account page you can change Name, Balance, Account Type and Currency of the account. 
-
-![Edit Account Page](./Screenshots/edit-account-page.jpeg)
-
 When you change Balance of the account, the App automatically will change the Initial Balance Transaction or create it, if the account was created with zero balance, so all incomes and expenses to be equal to the new balance.
 
-![Edited Account Redirect](./Screenshots/edited-account-message.jpeg)
+![Edit Account Page](./Screenshots/edit-account-page.jpeg)
 
 If you press 'Delete Account' you will be redirected to confirm your decision. You have option also to delete all transactions releated with the account or leave then to stay on your records.
 
@@ -93,7 +91,7 @@ On All Transactions page you can manage all of yours transactions. Filter them b
 
 ![All Transactions Page](./Screenshots/all-transactions-page.jpeg)
 
-*NEW Users can write messages to support team. Every Admin can see users messages and reply to them. Messages can be deleted both from users and admins. They are stored in separated database (MongoDB).
+Users can write messages to support team. Every Admin can see users messages and reply to them. Messages can be deleted both from users and admins. They are stored in separated database (MongoDB).
 
 ![Create Message Page](./Screenshots/create-message-page.jpeg)
 
