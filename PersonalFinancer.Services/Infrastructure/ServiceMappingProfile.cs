@@ -21,6 +21,7 @@
 			CreateMap<Account, AccountServiceModel>();
 			CreateMap<Account, AccountCardServiceModel>();
 			CreateMap<Account, AccountCardServiceModel>();
+
 			CreateMap<AccountFormShortServiceModel, Account>()
 				.ForMember(m => m.Name, mf => mf.MapFrom(s => s.Name.Trim()));
 
@@ -31,11 +32,14 @@
 					.MapFrom(s => s.Category.Name + (s.Category.IsDeleted ? " (Deleted)" : string.Empty)))
 				.ForMember(m => m.AccountName, mf => mf
 					.MapFrom(s => s.Account.Name + (s.Account.IsDeleted ? " (Deleted)" : string.Empty)));
+
 			CreateMap<TransactionFormShortServiceModel, Transaction>().ReverseMap()
 				.ForMember(m => m.Refference, mf => mf.MapFrom(s => s.Refference.Trim()));
+
 			CreateMap<Transaction, TransactionTableServiceModel>();
 
 			CreateMap<ApplicationUser, UserServiceModel>();
+
 			CreateMap<ApplicationUser, UserDetailsServiceModel>()
 				.ForMember(m => m.Accounts, mf => mf
 					.MapFrom(s => s.Accounts.Where(a => !a.IsDeleted).OrderBy(a => a.Name)));

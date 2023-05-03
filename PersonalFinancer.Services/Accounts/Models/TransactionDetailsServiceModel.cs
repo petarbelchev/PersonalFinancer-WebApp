@@ -12,7 +12,7 @@
 
         public decimal Amount { get; init; }
 
-        public DateTime CreatedOn { get; init; }
+        public DateTime CreatedOn { get; set; }
 
         public string CategoryName { get; init; } = null!;
 

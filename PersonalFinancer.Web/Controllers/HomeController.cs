@@ -26,8 +26,9 @@
 
 			if (User.Identity?.IsAuthenticated ?? false)
 			{
-				DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-				DateTime endDate = DateTime.UtcNow;
+				DateTime startDate = DateTime.Now.AddMonths(-1);
+				DateTime endDate = DateTime.Now;
+
 				UserDashboardServiceModel userDashboardData = await userService
 					.GetUserDashboardData(User.Id(), startDate, endDate);
 
@@ -50,13 +51,10 @@
 		[HttpPost]
 		public async Task<IActionResult> Index(DateFilterModel inputModel)
 		{
-			DateTime startDate = inputModel.StartDate.ToUniversalTime();
-			DateTime endDate = inputModel.EndDate.ToUniversalTime();
-
 			var viewModel = new UserDashboardViewModel
 			{
-				StartDate = startDate,
-				EndDate = endDate
+				StartDate = inputModel.StartDate.ToUniversalTime(),
+				EndDate = inputModel.EndDate.ToUniversalTime()
 			};
 
 			if (!ModelState.IsValid)

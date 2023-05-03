@@ -75,8 +75,8 @@
 
 		public async Task<IActionResult> AccountDetails(string id)
 		{
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
+			DateTime startDate = DateTime.Now.AddMonths(-1);
+			DateTime endDate = DateTime.Now;
 
 			try
 			{

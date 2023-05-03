@@ -258,8 +258,8 @@
 		public async Task<AccountDetailsServiceModel> GetAccountDetails(
 			string id, DateTime startDate, DateTime endDate, string userId, bool isUserAdmin)
 		{
-			startDate = startDate.ToUniversalTime();
-			endDate = endDate.ToUniversalTime();
+			DateTime startDateUtc = startDate.ToUniversalTime();
+			DateTime endDateUtc = endDate.ToUniversalTime();
 
 			return await accountsRepo.All()
 				.Where(a => a.Id == id && !a.IsDeleted
@@ -274,9 +274,9 @@
 					StartDate = startDate,
 					EndDate = endDate,
 					TotalAccountTransactions = a.Transactions
-						.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+						.Count(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc),
 					Transactions = a.Transactions
-						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 						.OrderByDescending(t => t.CreatedOn)
 						.Take(PaginationConstants.TransactionsPerPage)
 						.Select(t => new TransactionTableServiceModel
@@ -338,8 +338,8 @@
 		public async Task<TransactionsServiceModel> GetAccountTransactions(
 			string id, DateTime startDate, DateTime endDate, int page)
 		{
-			startDate = startDate.ToUniversalTime();
-			endDate = endDate.ToUniversalTime();
+			DateTime startDateUtc = startDate.ToUniversalTime();
+			DateTime endDateUtc = endDate.ToUniversalTime();
 
 			var accountTransactions = await accountsRepo.All()
 				.Where(a => a.Id == id && !a.IsDeleted)
@@ -348,7 +348,7 @@
 					StartDate = startDate,
 					EndDate = endDate,
 					Transactions = a.Transactions
-						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 						.OrderByDescending(t => t.CreatedOn)
 						.Skip(PaginationConstants.TransactionsPerPage * (page - 1))
 						.Take(PaginationConstants.TransactionsPerPage)
@@ -365,7 +365,7 @@
 							Refference = t.Refference
 						}),
 					TotalTransactionsCount = a.Transactions
-						.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+						.Count(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc),
 				})
 				.FirstAsync();
 
@@ -489,6 +489,8 @@
 
 			if (!isUserAdmin && transaction.OwnerId != ownerId)
 				throw new ArgumentException("User is not transaction's owner.");
+
+			transaction.CreatedOn = transaction.CreatedOn.ToLocalTime();
 
 			return transaction;
 		}

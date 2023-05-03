@@ -1,13 +1,15 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
+	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 	using System.Text;
 
-	public class BaseApiController : ControllerBase
+	[Authorize]
+	public abstract class BaseApiController : ControllerBase
 	{
-		public string GetErrors(ModelStateDictionary.ValueEnumerable modelStateValues)
+		protected string GetErrors(ModelStateDictionary.ValueEnumerable modelStateValues)
 		{
 			var errors = new StringBuilder();
 

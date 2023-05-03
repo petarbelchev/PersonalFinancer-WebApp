@@ -160,10 +160,11 @@
 			return accountsCount;
 		}
 
-		public async Task<TransactionsServiceModel> GetUserTransactions(string userId, DateTime startDate, DateTime endDate, int page = 1)
+		public async Task<TransactionsServiceModel> GetUserTransactions(
+			string userId, DateTime startDate, DateTime endDate, int page = 1)
 		{
-			startDate = TimeZoneInfo.ConvertTimeToUtc(startDate);
-			endDate = TimeZoneInfo.ConvertTimeToUtc(endDate);
+			DateTime startDateUtc = startDate.ToUniversalTime();
+			DateTime endDateUtc = endDate.ToUniversalTime();
 
 			TransactionsServiceModel userTransactions = await usersRepo.All()
 				.Where(u => u.Id == userId)
@@ -172,9 +173,9 @@
 					StartDate = startDate,
 					EndDate = endDate,
 					TotalTransactionsCount = u.Transactions
-						.Count(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+						.Count(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc),
 					Transactions = u.Transactions
-						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 						.OrderByDescending(t => t.CreatedOn)
 						.Skip(PaginationConstants.TransactionsPerPage * (page - 1))
 						.Take(PaginationConstants.TransactionsPerPage)
@@ -196,8 +197,12 @@
 			return userTransactions;
 		}
 
-		public async Task<UserDashboardServiceModel> GetUserDashboardData(string userId, DateTime startDate, DateTime endDate)
+		public async Task<UserDashboardServiceModel> GetUserDashboardData(
+			string userId, DateTime startDate, DateTime endDate)
 		{
+			DateTime startDateUtc = startDate.ToUniversalTime();
+			DateTime endDateUtc = endDate.ToUniversalTime();
+
 			var dto = await usersRepo.All()
 				.Where(u => u.Id == userId)
 				.Select(u => new UserDashboardServiceModel
@@ -212,7 +217,7 @@
 							CurrencyName = a.Currency.Name
 						}),
 					LastTransactions = u.Transactions
-						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 						.OrderByDescending(t => t.CreatedOn)
 						.Take(5)
 						.Select(t => new TransactionTableServiceModel
@@ -226,7 +231,7 @@
 							CategoryName = t.Category.Name
 						}),
 					CurrenciesCashFlow = u.Transactions
-						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 						.GroupBy(t => t.Account.Currency.Name)
 						.Select(t => new CurrencyCashFlowServiceModel
 						{

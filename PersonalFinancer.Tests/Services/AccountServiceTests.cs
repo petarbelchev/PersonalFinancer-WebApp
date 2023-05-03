@@ -1051,8 +1051,11 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetAccountDetails_ShouldReturnAccountDetails_WithValidId()
 		{
 			//Arrange
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
+			DateTime startDate = DateTime.Now.AddMonths(-1);
+			DateTime endDate = DateTime.Now;
+			DateTime startDateUtc = startDate.ToUniversalTime();
+			DateTime endDateUtc = endDate.ToUniversalTime();
+
 
 			AccountDetailsServiceModel? expected = await accountsRepo.All()
 				.Where(a => a.Id == Account1User1.Id && !a.IsDeleted)
@@ -1065,10 +1068,10 @@ namespace PersonalFinancer.Tests.Services
 					CurrencyName = a.Currency.Name,
 					StartDate = startDate,
 					EndDate = endDate,
-					TotalAccountTransactions = a.Transactions.Count(t =>
-						t.CreatedOn >= startDate && t.CreatedOn <= endDate),
+					TotalAccountTransactions = a.Transactions
+						.Count(t =>	t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc),
 					Transactions = a.Transactions
-						.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 						.OrderByDescending(t => t.CreatedOn)
 						.Take(TransactionsPerPage)
 						.Select(t => new TransactionTableServiceModel
@@ -1076,7 +1079,7 @@ namespace PersonalFinancer.Tests.Services
 							Id = t.Id,
 							Amount = t.Amount,
 							AccountCurrencyName = a.Currency.Name,
-							CreatedOn = t.CreatedOn,
+							CreatedOn = t.CreatedOn.ToLocalTime(),
 							CategoryName = t.Category.Name,
 							TransactionType = t.TransactionType.ToString(),
 							Refference = t.Refference
@@ -1294,8 +1297,10 @@ namespace PersonalFinancer.Tests.Services
 		public async Task GetAccountTransactions_ShouldReturnCorrectData()
 		{
 			//Arrange
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
+			DateTime startDate = DateTime.Now.AddMonths(-1);
+			DateTime endDate = DateTime.Now;
+			DateTime startDateUtc = startDate.ToUniversalTime();
+			DateTime endDateUtc = endDate.ToUniversalTime();
 			int page = 1;
 
 			var expect = new TransactionsServiceModel
@@ -1304,14 +1309,14 @@ namespace PersonalFinancer.Tests.Services
 				EndDate = endDate
 			};
 			expect.Transactions = await transactionsRepo.All()
-					.Where(t => t.AccountId == Account1User1.Id && t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+					.Where(t => t.AccountId == Account1User1.Id && t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 					.OrderByDescending(t => t.CreatedOn)
 					.Take(TransactionsPerPage)
 					.Select(t => new TransactionTableServiceModel
 					{
 						Id = t.Id,
 						Amount = t.Amount,
-						CreatedOn = t.CreatedOn,
+						CreatedOn = t.CreatedOn.ToLocalTime(),
 						AccountCurrencyName = t.Account.Currency.Name,
 						CategoryName = t.Category.Name + (t.Category.IsDeleted ?
 							" (Deleted)"
@@ -1322,7 +1327,7 @@ namespace PersonalFinancer.Tests.Services
 					.ToListAsync();
 
 			expect.TotalTransactionsCount = await transactionsRepo.All().CountAsync(t => 
-				t.AccountId == Account1User1.Id && t.CreatedOn >= startDate && t.CreatedOn <= endDate);
+				t.AccountId == Account1User1.Id && t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc);
 
 			//Act
 			var actual = await accountService.GetAccountTransactions(Account1User1.Id, startDate, endDate, page);
@@ -1392,7 +1397,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(transactionFormModel.Refference, Is.EqualTo(Transaction2User1.Refference));
 			Assert.That(transactionFormModel.TransactionType, Is.EqualTo(Transaction2User1.TransactionType));
 			Assert.That(transactionFormModel.IsInitialBalance, Is.EqualTo(Transaction2User1.IsInitialBalance));
-			Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(Transaction2User1.CreatedOn));
+			Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(Transaction2User1.CreatedOn.ToLocalTime()));
 			Assert.That(transactionFormModel.UserAccounts.Count(), Is.EqualTo(orderedUserAccounts.Count));
 			Assert.That(transactionFormModel.UserCategories.Count(), Is.EqualTo(orderedUserCategories.Count));
 
@@ -1430,7 +1435,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(transactionFormModel.Refference, Is.EqualTo(Transaction1User1.Refference));
 			Assert.That(transactionFormModel.TransactionType, Is.EqualTo(Transaction1User1.TransactionType));
 			Assert.That(transactionFormModel.IsInitialBalance, Is.EqualTo(Transaction1User1.IsInitialBalance));
-			Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(Transaction1User1.CreatedOn));
+			Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(Transaction1User1.CreatedOn.ToLocalTime()));
 			Assert.That(transactionFormModel.UserAccounts.Count(), Is.EqualTo(1));
 			Assert.That(transactionFormModel.UserAccounts.First().Name, Is.EqualTo(Account1User1.Name));
 			Assert.That(transactionFormModel.UserCategories.Count(), Is.EqualTo(1));
@@ -1461,7 +1466,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(transactionFormModel.Refference, Is.EqualTo(Transaction1User1.Refference));
 			Assert.That(transactionFormModel.OwnerId, Is.EqualTo(Transaction1User1.OwnerId));
 			Assert.That(transactionFormModel.AccountCurrencyName, Is.EqualTo(Transaction1User1.Account.Currency.Name));
-			Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(Transaction1User1.CreatedOn));
+			Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(Transaction1User1.CreatedOn.ToLocalTime()));
 			Assert.That(transactionFormModel.TransactionType, Is.EqualTo(Transaction1User1.TransactionType.ToString()));
 		}
 
@@ -1499,7 +1504,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(transactionFormModel.Refference, Is.EqualTo(Transaction1User1.Refference));
 			Assert.That(transactionFormModel.OwnerId, Is.EqualTo(Transaction1User1.OwnerId));
 			Assert.That(transactionFormModel.AccountCurrencyName, Is.EqualTo(Transaction1User1.Account.Currency.Name));
-			Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(Transaction1User1.CreatedOn));
+			Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(Transaction1User1.CreatedOn.ToLocalTime()));
 			Assert.That(transactionFormModel.TransactionType, Is.EqualTo(Transaction1User1.TransactionType.ToString()));
 		}
 

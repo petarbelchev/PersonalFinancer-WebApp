@@ -37,8 +37,8 @@
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> All()
 		{
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
+			DateTime startDate = DateTime.Now.AddMonths(-1);
+			DateTime endDate = DateTime.Now;
 
 			UserTransactionsViewModel viewModel =
 				await PrepareUserTransactionsViewModel(User.Id(), startDate, endDate);

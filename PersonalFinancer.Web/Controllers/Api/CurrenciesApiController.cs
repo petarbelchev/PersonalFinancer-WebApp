@@ -1,6 +1,5 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 
 	using Data.Models;
@@ -11,7 +10,6 @@
 
 	using Web.Infrastructure;
 
-	[Authorize]
 	[Route("api/currencies")]
 	[ApiController]
 	public class CurrenciesApiController : BaseApiController
