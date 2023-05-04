@@ -172,7 +172,7 @@ namespace PersonalFinancer.Tests.Services
 				.OrderBy(at => at.Name)
 				.Select(at => mapper.Map<AccountTypeServiceModel>(at))
 				.ToArrayAsync();
-			
+
 			CurrencyServiceModel[] expectedCurrencies = await currenciesRepo.All()
 				.Where(c => c.OwnerId == User1.Id && !c.IsDeleted)
 				.OrderBy(c => c.Name)
@@ -194,7 +194,7 @@ namespace PersonalFinancer.Tests.Services
 				Assert.That(actual.AccountTypes.ElementAt(i).Name,
 					Is.EqualTo(expectedAccTypes[i].Name));
 			}
-			
+
 			for (int i = 0; i < expectedCurrencies.Length; i++)
 			{
 				Assert.That(actual.Currencies.ElementAt(i).Id,
@@ -274,7 +274,7 @@ namespace PersonalFinancer.Tests.Services
 
 			var expectedCurrenciesCashFlow = await transactionsRepo.All()
 				.Where(t => t.OwnerId == User1.Id
-					&& t.CreatedOn >= startDate	&& t.CreatedOn <= endDate)
+					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 				.GroupBy(t => t.Account.Currency.Name)
 				.Select(t => new CurrencyCashFlowServiceModel
 				{
@@ -282,13 +282,20 @@ namespace PersonalFinancer.Tests.Services
 					Incomes = t.Where(t => t.TransactionType == TransactionType.Income)
 						.Sum(t => t.Amount),
 					Expenses = t.Where(t => t.TransactionType == TransactionType.Expense)
-						.Sum(t => t.Amount)
+						.Sum(t => t.Amount),
+					ExpensesByCategories = t.Where(t => t.TransactionType == TransactionType.Expense)
+						.GroupBy(t => t.Category.Name)
+						.Select(t => new CategoryExpensesServiceModel
+						{
+							CategoryName = t.Key,
+							ExpensesAmount = t.Where(t => t.TransactionType == TransactionType.Expense).Sum(t => t.Amount)
+						})
 				})
 				.OrderBy(c => c.Name)
 				.ToListAsync();
 
 			var expectedLastFiveTransaction = await transactionsRepo.All()
-				.Where(t =>	t.Account.OwnerId == User1.Id 
+				.Where(t => t.Account.OwnerId == User1.Id
 					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 				.OrderByDescending(t => t.CreatedOn)
 				.Take(5)
@@ -334,6 +341,22 @@ namespace PersonalFinancer.Tests.Services
 
 				Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Expenses,
 					Is.EqualTo(expectedCurrenciesCashFlow[i].Expenses));
+
+				for (int y = 0; y < expectedCurrenciesCashFlow.Count; y++)
+				{
+					var actualCategories = actual.CurrenciesCashFlow.ElementAt(y).ExpensesByCategories;
+					var expectedCategories = expectedCurrenciesCashFlow[y].ExpensesByCategories;
+
+					Assert.That(actualCategories.Count(), Is.EqualTo(expectedCategories.Count()));
+
+					for (int z = 0; z < expectedCategories.Count(); z++)
+					{
+						Assert.That(actualCategories.ElementAt(z).CategoryName,
+							Is.EqualTo(expectedCategories.ElementAt(i).CategoryName));
+						Assert.That(actualCategories.ElementAt(z).ExpensesAmount,
+							Is.EqualTo(expectedCategories.ElementAt(i).ExpensesAmount));
+					}
+				}
 			}
 		}
 

@@ -304,30 +304,8 @@
 			string accountId, string userId, bool isUserAdmin)
 		{
 			return await accountsRepo.All()
-				.Where(a => a.Id == accountId
-							&& (isUserAdmin || a.OwnerId == userId))
-				.Select(a => new AccountFormServiceModel
-				{
-					Name = a.Name,
-					CurrencyId = a.CurrencyId,
-					AccountTypeId = a.AccountTypeId,
-					OwnerId = a.OwnerId,
-					Balance = a.Balance,
-					Currencies = a.Owner.Currencies
-						.Where(c => !c.IsDeleted)
-						.Select(c => new CurrencyServiceModel
-						{
-							Id = c.Id,
-							Name = c.Name
-						}),
-					AccountTypes = a.Owner.AccountTypes
-						.Where(at => !at.IsDeleted)
-						.Select(at => new AccountTypeServiceModel
-						{
-							Id = at.Id,
-							Name = at.Name
-						})
-				})
+				.Where(a => a.Id == accountId && (isUserAdmin || a.OwnerId == userId))
+				.ProjectTo<AccountFormServiceModel>(mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
@@ -539,12 +517,7 @@
 		{
 			return await accountsRepo.All()
 				.Where(a => a.Id == accountId)
-				.Select(a => new AccountDetailsShortServiceModel
-				{
-					Name = a.Name,
-					Balance = a.Balance,
-					CurrencyName = a.Currency.Name
-				})
+				.ProjectTo<AccountDetailsShortServiceModel>(mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 	}

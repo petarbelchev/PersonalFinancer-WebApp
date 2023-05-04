@@ -21,11 +21,18 @@
 			CreateMap<Account, AccountServiceModel>();
 			CreateMap<Account, AccountCardServiceModel>();
 			CreateMap<Account, AccountCardServiceModel>();
-
+			CreateMap<Account, AccountDetailsShortServiceModel>();
 			CreateMap<AccountFormShortServiceModel, Account>()
 				.ForMember(m => m.Name, mf => mf.MapFrom(s => s.Name.Trim()));
 
 			CreateMap<AccountType, AccountTypeServiceModel>();
+
+			CreateMap<Account, AccountFormServiceModel>()
+				.ForMember(m => m.Currencies, mf => mf
+					.MapFrom(s => s.Owner.Currencies.Where(c => !c.IsDeleted)))
+				.ForMember(m => m.AccountTypes, mf => mf
+					.MapFrom(s => s.Owner.AccountTypes.Where(at => !at.IsDeleted)));
+
 
 			CreateMap<Transaction, TransactionDetailsServiceModel>()
 				.ForMember(m => m.CategoryName, mf => mf
