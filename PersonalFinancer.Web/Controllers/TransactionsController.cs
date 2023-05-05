@@ -66,7 +66,7 @@
 				await usersService.GetUserAccountsAndCategories(User.Id());
 
 			var viewModel = mapper.Map<TransactionFormModel>(userData);
-			viewModel.CreatedOn = DateTime.UtcNow;
+			viewModel.CreatedOn = DateTime.Now;
 
 			return View(viewModel);
 		}
