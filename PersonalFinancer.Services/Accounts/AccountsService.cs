@@ -271,6 +271,7 @@
 					OwnerId = a.OwnerId,
 					Balance = a.Balance,
 					CurrencyName = a.Currency.Name,
+					AccountTypeName = a.AccountType.Name,
 					StartDate = startDate,
 					EndDate = endDate,
 					TotalAccountTransactions = a.Transactions

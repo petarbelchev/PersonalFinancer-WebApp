@@ -16,7 +16,9 @@
 
 		public string CurrencyName { get; set; } = null!;
 
-		public DateTime StartDate { get; set; }
+        public string AccountTypeName { get; set; } = null!;
+
+        public DateTime StartDate { get; set; }
 
 		public DateTime EndDate { get; set; }
 

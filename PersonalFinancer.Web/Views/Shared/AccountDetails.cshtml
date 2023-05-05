@@ -12,8 +12,8 @@
 			<img src="/icons/icons8-wallet-64.png" style="max-width: fit-content;">
 		</div>
 		<div class="p-2 flex-grow-1 bd-highlight">
-			<h1 class="display-6 fs-3"><b>@Model.Name</b></h1>
-			<p class="display-6 fs-4" style="font-size: xx-large;" id="balanceField">Balance: @Model.Balance @Model.CurrencyName</p>
+			<h1 class="display-6 fs-3"><b>@Model.Name</b> (@Model.AccountTypeName)</h1>
+			<p class="display-6 fs-4" style="font-size: xx-large;" id="balanceField">@Model.Balance @Model.CurrencyName</p>
 		</div>
 		<div class="p-2 bd-highlight">
 			<a asp-controller="Accounts" asp-action="EditAccount" asp-route-id="@Model.Id"

@@ -1066,6 +1066,7 @@ namespace PersonalFinancer.Tests.Services
 					Balance = a.Balance,
 					OwnerId = User1.Id,
 					CurrencyName = a.Currency.Name,
+					AccountTypeName = a.AccountType.Name,
 					StartDate = startDate,
 					EndDate = endDate,
 					TotalAccountTransactions = a.Transactions
@@ -1098,6 +1099,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(actual.Name, Is.EqualTo(expected.Name));
 			Assert.That(actual.Balance, Is.EqualTo(expected.Balance));
 			Assert.That(actual.CurrencyName, Is.EqualTo(expected.CurrencyName));
+			Assert.That(actual.AccountTypeName, Is.EqualTo(expected.AccountTypeName));
 			Assert.That(actual.OwnerId, Is.EqualTo(expected.OwnerId));
 			Assert.That(actual.Transactions.Count(), Is.EqualTo(expected.Transactions.Count()));
 
