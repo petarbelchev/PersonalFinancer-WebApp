@@ -1,4 +1,5 @@
 ﻿@using PersonalFinancer.Data.Enums;
+@using System.Globalization;
 
 <table class="table table-hover">
 	<thead>
@@ -22,7 +23,7 @@
 				{
 					<td><img src="/icons/redArrow.png" style="max-width: 25px;"></td>
 				}
-				<td>@transaction.CreatedOn</td>
+				<td>@transaction.CreatedOn.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
 				<td>@transaction.CategoryName</td>
 				<td>@transaction.Amount @transaction.AccountCurrencyName</td>
 				<td>@transaction.Refference</td>

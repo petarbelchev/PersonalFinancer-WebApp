@@ -1,4 +1,5 @@
 ﻿@using PersonalFinancer.Services.Accounts.Models;
+@using System.Globalization;
 @model TransactionDetailsServiceModel
 @{
 	ViewData["Title"] = "Transaction Details";
@@ -10,7 +11,7 @@
 		<ul class="list-group list-group-flush">
 			<li class="list-group-item d-flex justify-content-between">
 				<div class="p-2"><span>Created On: </span></div>
-				<div class="p-2"><span>@Model.CreatedOn</span></div>
+				<div class="p-2"><span>@Model.CreatedOn.ToString("f", CultureInfo.GetCultureInfo("en-US"))</span></div>
 			</li>
 			<li class="list-group-item d-flex justify-content-between">
 				<span class="p-2">Refference: </span>
