@@ -426,7 +426,11 @@ namespace PersonalFinancer.Tests.Services
 
 			repoMock.Setup(x => x
 				.DeleteOneAsync(message.Id))
-				.Callback(() => fakeCollection.Remove(message));
+				.ReturnsAsync(() =>
+				{
+					fakeCollection.Remove(message);
+					return new DeleteResult.Acknowledged(1);
+				});
 
 			//Act
 			await service.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: false);
@@ -456,7 +460,11 @@ namespace PersonalFinancer.Tests.Services
 
 			repoMock.Setup(x => x
 				.DeleteOneAsync(message.Id))
-				.Callback(() => fakeCollection.Remove(message));
+				.ReturnsAsync(() =>
+				{
+					fakeCollection.Remove(message);
+					return new DeleteResult.Acknowledged(1);
+				});
 
 			//Act
 			await service.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: true);
