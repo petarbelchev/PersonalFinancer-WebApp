@@ -45,8 +45,8 @@ else
 	<script>
 		let params = {
 			id: '@Model.Id',
-			startDate: '@Model.StartDate.ToString("O")',
-			endDate: '@Model.EndDate.ToString("O")',
+			startDate: '@Model.StartDate.ToString("yyyy-MM-ddTHH:mm")',
+			endDate: '@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")',
 			url: '@Model.ApiTransactionsEndpoint',
 			pages: @Model.Pagination.Pages
 		}
