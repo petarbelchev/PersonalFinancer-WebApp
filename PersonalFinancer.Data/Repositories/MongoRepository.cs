@@ -1,15 +1,15 @@
 ﻿namespace PersonalFinancer.Data.Repositories
 {
-    using MongoDB.Driver;
-    using MongoDB.Driver.Linq;
+	using MongoDB.Driver;
+	using MongoDB.Driver.Linq;
 
-    using Microsoft.EntityFrameworkCore;
+	using Microsoft.EntityFrameworkCore;
 
-    using System.Linq.Expressions;
+	using System.Linq.Expressions;
 
-    using Data.Contracts;
+	using Data.Contracts;
 
-    public class MongoRepository<T> : IMongoRepository<T> where T : MongoDocument
+	public class MongoRepository<T> : IMongoRepository<T> where T : MongoDocument
 	{
 		private IMongoCollection<T> collection;
 
@@ -21,26 +21,18 @@
 
 		public async Task<IEnumerable<TProjected>> FindAsync<TProjected>(
 			Expression<Func<T, TProjected>> projectionExpression)
-		{
-			var result = await collection
+			=> await collection
 				.Find(Builders<T>.Filter.Empty)
 				.Project(projectionExpression)
 				.ToListAsync();
 
-			return result;
-		}
-		
 		public async Task<IEnumerable<TProjected>> FindAsync<TProjected>(
 			Expression<Func<T, bool>> filterExpression,
 			Expression<Func<T, TProjected>> projectionExpression)
-		{
-			var result = await collection
+			=> await collection
 				.Find(filterExpression)
 				.Project(projectionExpression)
 				.ToListAsync();
-
-			return result;
-		}
 
 		/// <summary>
 		/// Throws InvalidOperationException when Document not found with the given filter.
@@ -49,34 +41,23 @@
 		public async Task<TProjected> FindOneAsync<TProjected>(
 			Expression<Func<T, bool>> filterExpression,
 			Expression<Func<T, TProjected>> projectionExpression)
-		{
-			var result = await collection
+			=> await collection
 				.Find(filterExpression)
 				.Project(projectionExpression)
 				.FirstAsync();
 
-			return result;
-		}
-
+		/// <summary>
+		/// Gets a value indicating whether the result is acknowledged.
+		/// </summary>
 		public async Task<DeleteResult> DeleteOneAsync(string documentId)
-		{
-			var result = await collection.DeleteOneAsync(x => x.Id == documentId);
-			return result;
-		}
+			=> await collection.DeleteOneAsync(x => x.Id == documentId);
 
 		public async Task<UpdateResult> UpdateOneAsync(
 			Expression<Func<T, bool>> filterExpression,
 			UpdateDefinition<T> update)
-		{
-			var result = await collection.UpdateOneAsync(filterExpression, update);
-			return result;
-		}
+			=> await collection.UpdateOneAsync(filterExpression, update);
 
 		public async Task<bool> IsUserDocumentAuthor(string documentId, string authorId)
-		{
-			bool result = await collection.AsQueryable().AnyAsync(x => x.Id == documentId && x.AuthorId == authorId);
-
-			return result;
-		}
+			=> await collection.AsQueryable().AnyAsync(x => x.Id == documentId && x.AuthorId == authorId);
 	}
 }

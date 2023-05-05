@@ -62,6 +62,7 @@
 			return RedirectToAction(nameof(MessageDetails), new { id = newMessageId });
 		}
 
+		[HttpPost]
 		public async Task<IActionResult> Delete(string id)
 		{
 			try

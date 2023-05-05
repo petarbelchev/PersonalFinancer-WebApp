@@ -23,7 +23,10 @@
 		Task<TProjected> FindOneAsync<TProjected>(
 			Expression<Func<T, bool>> filterExpression,
 			Expression<Func<T, TProjected>> projectionExpression);
-
+		
+		/// <summary>
+		/// Gets a value indicating whether the result is acknowledged.
+		/// </summary>
 		Task<DeleteResult> DeleteOneAsync(string documentId);
 
 		Task<UpdateResult> UpdateOneAsync(

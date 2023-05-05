@@ -120,7 +120,10 @@
 			if (!isUserAdmin && !await repo.IsUserDocumentAuthor(messageId, userId))
 				throw new ArgumentException("The User is not Authorized to delete the message.");
 
-			await repo.DeleteOneAsync(messageId);
+			var result = await repo.DeleteOneAsync(messageId);
+
+			if (!result.IsAcknowledged)
+				throw new InvalidOperationException("Delete a message was unsuccessful.");
 		}
 	}
 }
