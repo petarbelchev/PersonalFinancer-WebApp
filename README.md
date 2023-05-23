@@ -4,12 +4,12 @@
 You can use user with test data - email: petar@mail.com, password: petar123
 
 ## Overview
-Personal Financer is Web Application that give on his users the ability to record their incomes and expenses structured on Accounts and Transactions.
+Personal Financer is a web application that provides its users with the ability to record their incomes and expenses structured into accounts and transactions.
 
 ![User Dashboard Page](./Screenshots/user-dashboard-page.jpeg)
 
 ## Motivation
-I created this project to practice my skills and also will be a defense project for [**ASP.NET Advanced**](https://softuni.bg/trainings/4107/asp-net-advanced-june-2023) course at [SoftUni](https://softuni.bg/ "SoftUni") (June 2023).
+I created this project to practice my skills, and it will also serve as my defense project for the [**ASP.NET Advanced**](https://softuni.bg/trainings/4107/asp-net-advanced-june-2023) course at [SoftUni](https://softuni.bg/ "SoftUni") (June 2023).
 
 ## Used Tech/Frameworks
 - ASP.NET Core 6
@@ -41,57 +41,55 @@ The Migrations will seed the Database with:
 - User with accounts and transactions for easy and fast tests - email: petar@mail.com, password: petar123
 
 ## Features
-Personal Financer is a website for record your cash flow and analyze it.
+Personal Financer is a website for recording your cash flow and analyzing it.
 
 ![Welcome Guest Page](./Screenshots/welcome-page.jpeg)
 
 ![No Accounts Page](./Screenshots/home-page-no-accounts.jpeg)
 
-You can create your own Accounts with Name, Balance, Account Type and Currency.
+You can create your own accounts with name, balance, account type and currency.
 
 ![Create Account Page](./Screenshots/create-account-page.jpeg)
 
-When click on 'Create New Account Type' or 'Create New Currency' you can create or delete your own Account Types and Currencies. If 'Delete' buttons are clicked selected Account Type or Currency will be deleted after confimation. (This feature use AJAX and Web APIs)
+When you click on 'Create New Account Type' or 'Create New Currency', you can create or delete your own account types and currencies. If the 'Delete' buttons are clicked, the selected account type or currency will be deleted after confirmation. This feature utilizes AJAX and Web APIs.
 
 ![Create Delete Types](./Screenshots/create-delete-account-type-or-currency.jpeg)
 
-When Account is created you will be redirected to the new Account Details page. Personal Financer App automatically made Initial Balance Transaction with Amount gived as Account Balance from you.
+When an account is created, you will be redirected to the new Account Details page. The Personal Financer app automatically creates an Initial Balance Transaction with the amount provided as the Account Balance by you.
 
 ![New Account Details Page](./Screenshots/new-account-page.jpeg)
 
-Details page gives options for Edit and Delete Account, filter transactions for given period and shows them on separated pages by 10 on each one. Pages are changed again with AJAX requests and Web APIs on backend.
+The Details page provides options to Edit and Delete the account, filter transactions for a given period, and display them on separate pages, with 10 transactions per page. The page navigation is handled through AJAX requests and Web APIs on the backend.
 
 ![Account Details Page](./Screenshots/account-details-page.jpeg)
 
-On Edit Account page you can change Name, Balance, Account Type and Currency of the account. 
-When you change Balance of the account, the App automatically will change the Initial Balance Transaction or create it, if the account was created with zero balance, so all incomes and expenses to be equal to the new balance.
+On the Edit Account page, you can change the name, balance, account type, and currency of the account. When you change the balance of the account, the app will automatically update the Initial Balance Transaction or create it if the account was initially created with a zero balance. This ensures that all incomes and expenses are adjusted to match the new balance.
 
 ![Edit Account Page](./Screenshots/edit-account-page.jpeg)
 
-If you press 'Delete Account' you will be redirected to confirm your decision. You have option also to delete all transactions releated with the account or leave then to stay on your records.
+If you press 'Delete Account', you will be redirected to confirm your decision. You also have the option to delete all transactions related to the account or leave them to remain in your records.
 
 ![Delete Account Confirm Page](./Screenshots/confirm-delete-account-page.jpeg)
 
-On Create Transaction page you can create transaction with Amount, Date, Category, Account, Transaction Type and Payment Refference.
-The App gives an option for adding and removing Categories (again with AJAX and Web API).
+On the Create Transaction page, you can create a transaction with the following details: amount, date, category, account, transaction type, and payment reference. The app provides an option to add and remove categories, utilizing AJAX and Web API.
 
 ![Create Transaction Page](./Screenshots/create-transaction-page.jpeg)
 
-When Transaction is created you will be redirected to Transaction Details page. There the App gives an options for Edit and Delete transaction.
+When a transaction is created, you will be redirected to the Transaction Details page. There, the app provides options to edit and delete the transaction.
 
 ![Transaction Details Page](./Screenshots/transaction-details-page.jpeg)
 
-You can change everything on transactions data including the Account. That will automatically change Balance on both accounts.
+You can change any data on transactions, including the account. This will automatically update the balance on both accounts.
 
 ![Edit Transaction Page](./Screenshots/edit-transaction-page.jpeg)
 
 ![Edited Transaction Message](./Screenshots/edited-transaction-message.jpeg)
 
-On All Transactions page you can manage all of yours transactions. Filter them by specific period e.g.
+On the All Transactions page, you can manage all of your transactions and filter them by a specific period, for example.
 
 ![All Transactions Page](./Screenshots/all-transactions-page.jpeg)
 
-Users can write messages to support team. Every Admin can see users messages and reply to them. Messages can be deleted both from users and admins. They are stored in separated database (MongoDB).
+Users can write messages to the support team. Every admin can see users messages and reply to them. Messages can be deleted by both users and admins. They are stored in a separate database (MongoDB).
 
 ![Create Message Page](./Screenshots/create-message-page.jpeg)
 
@@ -99,12 +97,12 @@ Users can write messages to support team. Every Admin can see users messages and
 
 ![Message Details Page](./Screenshots/message-details-page.jpeg)
 
-Personal Financer has a two roles - User and Admin.
-Here what Admin can do.
+Personal Financer has two roles - User and Admin.
+Here's what an Admin can do.
 
 ![Admin Home Page](./Screenshots/admin-homepage.jpeg)
 
-Admin can manage all users and their accounts. He can Edit and Delete accounts and transactions. The Administrator has information about the number of users and accounts. When press "More statistics" button on Home page makes AJAX request and receive more fresh data from the server about amount of all transactions maded by users grouped by currencies.
+An admin can manage all users and their accounts. They can edit and delete accounts and transactions. The administrator has access to information about the number of users and accounts. When the 'More statistics' button on the Home page is pressed, an AJAX request is made to the server to retrieve up-to-date data on the total amount of transactions made by users, grouped by currencies.
 
 ![More statistics](./Screenshots/admin-more-statistics.jpeg)
 
@@ -114,7 +112,7 @@ Admin can manage all users and their accounts. He can Edit and Delete accounts a
 
 ![All Users Page](./Screenshots/user-details-page.jpeg)
 
-Personal Financer is responsive - can be used comfortable on different devices.
+Personal Financer is responsive and can be comfortably used on different devices.
 
 ![Mobile View Dashboard](./Screenshots/mobile-view-dashboard.jpeg)
 ![Mobile View Account Details](./Screenshots/mobile-view-account-details.jpeg)
