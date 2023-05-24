@@ -28,7 +28,7 @@ I created this project to practice my skills, and it will also serve as my defen
 - Microsoft SQL Server
 - MongoDB (for Messages)
 
-## How Run the Project
+## How to Run the Project
 The Project can be easy tested locally. All you need to do:
 1. Create appsettings.json file with the configurations:
 
