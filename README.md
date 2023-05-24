@@ -40,12 +40,30 @@ The Migrations will seed the Database with:
 - Admin - email: admin@admin.com, password: admin123
 - User with accounts and transactions for easy and fast tests - email: petar@mail.com, password: petar123
 
+## Database Diagram
+
+![Database Diagram](./Screenshots/database-diagram.png)
+
 ## Features
+
+- [Create, edit and delete accounts, account types and currencies](#accounts-with-type-and-currency)
+- [Create, edit and delete transactions and categories](#transactions-with-category)
+- [User Dashboard](#user-dashboard)
+- [All Transactions page](#all-transactions-page)
+- [Messages](#messages)
+- [User Roles](#user-roles)
+- [Responsive design](#responsive-design)
+
+
 Personal Financer is a website for recording your cash flow and analyzing it.
 
 ![Welcome Guest Page](./Screenshots/welcome-page.jpeg)
 
 ![No Accounts Page](./Screenshots/home-page-no-accounts.jpeg)
+
+[Back to Features <<](#features)
+
+### Accounts with Type and Currency
 
 You can create your own accounts with name, balance, account type and currency.
 
@@ -71,6 +89,10 @@ If you press 'Delete Account', you will be redirected to confirm your decision. 
 
 ![Delete Account Confirm Page](./Screenshots/confirm-delete-account-page.jpeg)
 
+[Back to Features <<](#features)
+
+### Transactions with Category
+
 On the Create Transaction page, you can create a transaction with the following details: amount, date, category, account, transaction type, and payment reference. The app provides an option to add and remove categories, utilizing AJAX and Web API.
 
 ![Create Transaction Page](./Screenshots/create-transaction-page.jpeg)
@@ -85,9 +107,29 @@ You can change any data on transactions, including the account. This will automa
 
 ![Edited Transaction Message](./Screenshots/edited-transaction-message.jpeg)
 
+[Back to Features <<](#features)
+
+### User Dashboard
+
+The Dashboard page provides the user with the following information:
+- A section displaying the user's accounts.
+- The last five transactions made from all accounts.
+- Cash flow for the selected period.
+- Expenses structure.
+
+![User Dashboard Page](./Screenshots/user-dashboard-page.jpeg)
+
+[Back to Features <<](#features)
+
+### All transactions page
+
 On the All Transactions page, you can manage all of your transactions and filter them by a specific period, for example.
 
 ![All Transactions Page](./Screenshots/all-transactions-page.jpeg)
+
+[Back to Features <<](#features)
+
+### Messages
 
 Users can write messages to the support team. Every admin can see users messages and reply to them. Messages can be deleted by both users and admins. They are stored in a separate database (MongoDB).
 
@@ -96,6 +138,10 @@ Users can write messages to the support team. Every admin can see users messages
 ![User Messages Page](./Screenshots/user-messages.jpeg)
 
 ![Message Details Page](./Screenshots/message-details-page.jpeg)
+
+[Back to Features <<](#features)
+
+### User Roles
 
 Personal Financer has two roles - User and Admin.
 Here's what an Admin can do.
@@ -111,6 +157,10 @@ An admin can manage all users and their accounts. They can edit and delete accou
 ![All Users Page](./Screenshots/all-accounts-page.jpeg)
 
 ![All Users Page](./Screenshots/user-details-page.jpeg)
+
+[Back to Features <<](#features)
+
+### Responsive design
 
 Personal Financer is responsive and can be comfortably used on different devices.
 
