@@ -69,7 +69,7 @@ You can create your own accounts with name, balance, account type and currency.
 
 ![Create Account Page](./Screenshots/create-account-page.jpeg)
 
-When you click on 'Create New Account Type' or 'Create New Currency', you can create or delete your own account types and currencies. If the 'Delete' buttons are clicked, the selected account type or currency will be deleted after confirmation. This feature utilizes AJAX and Web APIs.
+When you click on 'Create New Account Type' or 'Create New Currency', you can create your own account types and currencies. If the 'Delete' buttons are clicked, the selected account type or currency will be deleted after confirmation. This feature utilizes AJAX and Web APIs.
 
 ![Create Delete Types](./Screenshots/create-delete-account-type-or-currency.jpeg)
 
@@ -112,10 +112,10 @@ You can change any data on transactions, including the account. This will automa
 ### User Dashboard
 
 The Dashboard page provides the user with the following information:
-- A section displaying the user's accounts.
-- The last five transactions made from all accounts.
-- Cash flow for the selected period.
-- Expenses structure.
+- A section displaying the user's accounts;
+- The last five transactions made from all accounts;
+- Cash flow for the selected period;
+- Expenses structure for the selected period.
 
 ![User Dashboard Page](./Screenshots/user-dashboard-page.jpeg)
 
@@ -167,3 +167,7 @@ Personal Financer is responsive and can be comfortably used on different devices
 ![Mobile View Dashboard](./Screenshots/mobile-view-dashboard.jpeg)
 ![Mobile View Account Details](./Screenshots/mobile-view-account-details.jpeg)
 ![Mobile View Create Transaction](./Screenshots/mobile-view-create-transaction.jpeg)
+
+[Back to Features <<](#features)
+
+[Back in the beginning <<](#personal-financer)
