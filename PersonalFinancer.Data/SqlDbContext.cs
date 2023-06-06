@@ -1,11 +1,10 @@
-﻿namespace PersonalFinancer.Data
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using PersonalFinancer.Data.Configurations;
+using PersonalFinancer.Data.Models;
+
+namespace PersonalFinancer.Data
 {
-	using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-	using Microsoft.EntityFrameworkCore;
-
-	using Data.Configurations;
-	using Data.Models;
-
 	public class SqlDbContext : IdentityDbContext<ApplicationUser>
 	{
 		private bool seed;

@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Data.Repositories;
-
-using PersonalFinancer.Services.ApiService.Models;
 using PersonalFinancer.Services.ApiService;
+using PersonalFinancer.Services.ApiService.Models;
 using PersonalFinancer.Services.Shared.Models;
 
 namespace PersonalFinancer.Tests.Services

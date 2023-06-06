@@ -1,12 +1,10 @@
-﻿namespace PersonalFinancer.Web.Models.Transaction
+﻿using PersonalFinancer.Services.Shared.Models;
+using PersonalFinancer.Web.Models.Shared;
+using static PersonalFinancer.Data.Constants;
+
+namespace PersonalFinancer.Web.Models.Transaction
 {
-    using Services.Shared.Models;
-
-    using Web.Models.Shared;
-
-    using static Data.Constants;
-
-    public class UserTransactionsViewModel : DateFilterModel
+	public class UserTransactionsViewModel : DateFilterModel
     {
         public string Id { get; set; } = null!;
 

@@ -1,7 +1,7 @@
-﻿namespace PersonalFinancer.Services.Accounts.Models
+﻿using PersonalFinancer.Data.Enums;
+
+namespace PersonalFinancer.Services.Accounts.Models
 {
-	using Data.Enums;
-	
 	public class TransactionFormShortServiceModel
 	{
 		public decimal Amount { get; set; }
@@ -18,6 +18,6 @@
 
 		public TransactionType TransactionType { get; set; }
 
-        public bool IsInitialBalance { get; set; }
-    }
+		public bool IsInitialBalance { get; set; }
+	}
 }

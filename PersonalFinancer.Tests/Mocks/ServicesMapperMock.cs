@@ -1,9 +1,8 @@
-﻿namespace PersonalFinancer.Tests.Mocks
+﻿using AutoMapper;
+using PersonalFinancer.Services.Infrastructure;
+
+namespace PersonalFinancer.Tests.Mocks
 {
-	using AutoMapper;
-
-	using PersonalFinancer.Services.Infrastructure;
-
 	static class ServicesMapperMock
 	{
 		public static IMapper Instance

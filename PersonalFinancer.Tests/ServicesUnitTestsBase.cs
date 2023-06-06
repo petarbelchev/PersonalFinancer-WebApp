@@ -1,15 +1,11 @@
 ﻿using AutoMapper;
-
 using Microsoft.Extensions.Caching.Memory;
-
 using NUnit.Framework;
-
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
-using static PersonalFinancer.Data.Constants.CategoryConstants;
-
 using PersonalFinancer.Tests.Mocks;
+using static PersonalFinancer.Data.Constants.CategoryConstants;
 
 namespace PersonalFinancer.Tests
 {

@@ -1,14 +1,13 @@
 ﻿using AutoMapper;
-using Moq;
-using NUnit.Framework;
-using System.Security.Claims;
-
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.User;
-using PersonalFinancer.Tests.Mocks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
+using Moq;
+using NUnit.Framework;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Tests.Mocks;
+using System.Security.Claims;
 
 namespace PersonalFinancer.Tests
 {

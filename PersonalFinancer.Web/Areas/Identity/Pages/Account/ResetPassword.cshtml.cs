@@ -1,17 +1,14 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
+using PersonalFinancer.Data.Models;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using static PersonalFinancer.Data.Constants;
+
+namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	using Microsoft.AspNetCore.Identity;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.RazorPages;
-	using Microsoft.AspNetCore.WebUtilities;
-
-    using System.ComponentModel.DataAnnotations;
-	using System.Text;
-	using System.Threading.Tasks;
-
-    using Data.Models;
-	using static Data.Constants;
-
 	public class ResetPasswordModel : PageModel
 	{
 		private readonly UserManager<ApplicationUser> userManager;

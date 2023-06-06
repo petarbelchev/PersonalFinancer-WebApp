@@ -3,17 +3,14 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Contracts;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Data.Repositories;
-
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.ApiService;
 using PersonalFinancer.Services.Messages;
 using PersonalFinancer.Services.User;
-
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Infrastructure;
 using PersonalFinancer.Web.Infrastructure.EmailSender;

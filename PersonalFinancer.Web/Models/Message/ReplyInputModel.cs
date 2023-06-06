@@ -1,7 +1,7 @@
-﻿namespace PersonalFinancer.Web.Models.Message
-{
-	using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
+namespace PersonalFinancer.Web.Models.Message
+{
 	public class ReplyInputModel
 	{
 		[Required]

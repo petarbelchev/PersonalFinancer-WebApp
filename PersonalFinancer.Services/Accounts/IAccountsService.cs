@@ -1,9 +1,9 @@
-﻿namespace PersonalFinancer.Services.Accounts
-{
-    using Services.Accounts.Models;
-    using Services.Shared.Models;
+﻿using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Shared.Models;
 
-    public interface IAccountsService
+namespace PersonalFinancer.Services.Accounts
+{
+	public interface IAccountsService
 	{
 		/// <summary>
 		/// Throws ArgumentException when User already have Account with the given name.
@@ -26,7 +26,7 @@
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task DeleteAccount(string accountId, string userId, bool isUserAdmin, bool shouldDeleteTransactions = false);
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist
 		/// and ArgumentException when User is not owner or Administrator.
@@ -89,7 +89,7 @@
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<string> GetOwnerId(string accountId);
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction does not exist
 		/// and ArgumentException when the User is not owner or Administrator.

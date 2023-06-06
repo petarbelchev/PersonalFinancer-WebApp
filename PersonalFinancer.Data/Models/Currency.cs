@@ -1,11 +1,11 @@
-﻿namespace PersonalFinancer.Data.Models
-{
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using PersonalFinancer.Data.Contracts;
-    using static Data.Constants.CurrencyConstants;
+﻿using PersonalFinancer.Data.Contracts;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using static PersonalFinancer.Data.Constants.CurrencyConstants;
 
-    public class Currency : ApiEntity
+namespace PersonalFinancer.Data.Models
+{
+	public class Currency : ApiEntity
 	{
 		[Key]
 		public override string Id { get; set; } = null!;

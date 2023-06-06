@@ -1,15 +1,12 @@
-﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.User;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	using AutoMapper;
-
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-
-	using Services.Accounts;
-	using Services.User;
-
-	using static Data.Constants.RoleConstants;
-
 	[Area("Admin")]
 	[Authorize(Roles = AdminRoleName)]
 	public class TransactionsController : Web.Controllers.TransactionsController

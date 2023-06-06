@@ -1,7 +1,7 @@
-﻿namespace PersonalFinancer.Web.Models.Account
-{
-	using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
+namespace PersonalFinancer.Web.Models.Account
+{
 	public class AccountTransactionsInputModel
 	{
 		[Required]

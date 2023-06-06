@@ -5,14 +5,13 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Moq;
 using NUnit.Framework;
-using System.Security.Claims;
-
 using PersonalFinancer.Services.Messages;
 using PersonalFinancer.Services.Messages.Models;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Tests.Mocks;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Models.Message;
+using System.Security.Claims;
 using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Tests.Controllers

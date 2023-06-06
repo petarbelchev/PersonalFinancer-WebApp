@@ -1,20 +1,16 @@
-﻿namespace PersonalFinancer.Web.Controllers.Api
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Shared.Models;
+using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Account;
+using PersonalFinancer.Web.Models.Shared;
+using System.Globalization;
+using static PersonalFinancer.Data.Constants;
+
+namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-
-	using System.Globalization;
-	
-	using Services.Accounts;
-	using Services.Accounts.Models;
-	using Services.Shared.Models;
-	
-	using Web.Infrastructure;
-	using Web.Models.Account;
-	using Web.Models.Shared;
-	
-	using static Data.Constants;
-
 	[Authorize]
 	[Route("api/accounts")]
 	[ApiController]

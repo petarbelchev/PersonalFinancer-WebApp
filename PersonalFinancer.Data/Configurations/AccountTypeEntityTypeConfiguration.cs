@@ -1,11 +1,10 @@
-﻿namespace PersonalFinancer.Data.Configurations
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using PersonalFinancer.Data.Models;
+using static PersonalFinancer.Data.Constants.SeedConstants;
+
+namespace PersonalFinancer.Data.Configurations
 {
-	using Microsoft.EntityFrameworkCore;
-	using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-	using Data.Models;
-	using static Data.Constants.SeedConstants;
-
 	internal class AccountTypeEntityTypeConfiguration : IEntityTypeConfiguration<AccountType>
 	{
 		public void Configure(EntityTypeBuilder<AccountType> builder)

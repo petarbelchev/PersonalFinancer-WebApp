@@ -1,20 +1,16 @@
-﻿namespace PersonalFinancer.Web.Controllers
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Services.User.Models;
+using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Account;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Controllers
 {
-	using AutoMapper;
-
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-
-	using Services.Accounts;
-	using Services.Accounts.Models;
-	using Services.User;
-	using Services.User.Models;
-
-	using Web.Infrastructure;
-	using Web.Models.Account;
-
-	using static Data.Constants.RoleConstants;
-
 	[Authorize]
 	public class AccountsController : Controller
 	{
@@ -186,7 +182,7 @@
 		{
 			try
 			{
-				AccountFormServiceModel accountData = 
+				AccountFormServiceModel accountData =
 					await accountService.GetAccountFormData(id, User.Id(), User.IsAdmin());
 
 				var viewModel = mapper.Map<AccountFormViewModel>(accountData);
@@ -210,8 +206,8 @@
 				return View(inputModel);
 			}
 
-			string ownerId = User.IsAdmin() ? 
-				await accountService.GetOwnerId(id) 
+			string ownerId = User.IsAdmin() ?
+				await accountService.GetOwnerId(id)
 				: User.Id();
 
 			if (inputModel.OwnerId != ownerId)
@@ -222,7 +218,7 @@
 				var serviceModel = mapper.Map<AccountFormShortServiceModel>(inputModel);
 				await accountService.EditAccount(id, serviceModel);
 
-				TempData["successMsg"] = User.IsAdmin() ? 
+				TempData["successMsg"] = User.IsAdmin() ?
 					"You successfully edited user's account!"
 					: "Your account was successfully edited!";
 
@@ -252,7 +248,7 @@
 			viewModel.AccountTypes = userData.AccountTypes;
 			viewModel.Currencies = userData.Currencies;
 		}
-		
+
 		/// <summary>
 		/// Throws InvalidOperationException when Account does not exist
 		/// or User is not owner or Administrator.

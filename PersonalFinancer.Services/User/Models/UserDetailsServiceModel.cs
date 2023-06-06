@@ -1,7 +1,7 @@
-﻿namespace PersonalFinancer.Services.User.Models
-{
-	using Services.Shared.Models;
+﻿using PersonalFinancer.Services.Shared.Models;
 
+namespace PersonalFinancer.Services.User.Models
+{
 	public class UserDetailsServiceModel : UserServiceModel
 	{
 		public string PhoneNumber { get; set; } = null!;

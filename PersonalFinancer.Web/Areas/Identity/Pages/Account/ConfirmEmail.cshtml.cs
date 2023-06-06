@@ -1,14 +1,13 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
+using PersonalFinancer.Data.Models;
+using System.Text;
+
+namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.AspNetCore.WebUtilities;
-    using System.Text;
-
-    using Data.Models;
-
-    public class ConfirmEmailModel : PageModel
+	public class ConfirmEmailModel : PageModel
     {
         private readonly UserManager<ApplicationUser> userManager;
 

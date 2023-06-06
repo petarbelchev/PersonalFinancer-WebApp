@@ -1,17 +1,14 @@
-﻿namespace PersonalFinancer.Services.ApiService
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using PersonalFinancer.Data.Contracts;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Repositories;
+using PersonalFinancer.Services.ApiService.Models;
+using static PersonalFinancer.Data.Constants;
+
+namespace PersonalFinancer.Services.ApiService
 {
-    using AutoMapper;
-
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Caching.Memory;
-
-    using Data.Contracts;
-    using Data.Models;
-	using Data.Repositories;
-    using static Data.Constants;
-
-    using Services.ApiService.Models;
-
 	public class ApiService<T> : IApiService<T> where T : ApiEntity, new()
     {
         private readonly IEfRepository<T> repo;

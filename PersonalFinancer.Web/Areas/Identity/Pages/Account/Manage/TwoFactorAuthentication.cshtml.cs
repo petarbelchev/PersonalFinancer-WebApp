@@ -1,16 +1,11 @@
 ﻿#nullable disable
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using PersonalFinancer.Data.Models;
 
 namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
 {
-	using Microsoft.AspNetCore.Identity;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.RazorPages;
-	using Microsoft.Extensions.Logging;
-    
-	using System.Threading.Tasks;
-
-    using Data.Models;
-
 	public class TwoFactorAuthenticationModel : PageModel
 	{
 		private readonly UserManager<ApplicationUser> userManager;

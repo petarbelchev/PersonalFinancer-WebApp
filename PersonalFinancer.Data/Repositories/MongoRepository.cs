@@ -1,14 +1,11 @@
-﻿namespace PersonalFinancer.Data.Repositories
+﻿using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using PersonalFinancer.Data.Contracts;
+using System.Linq.Expressions;
+
+namespace PersonalFinancer.Data.Repositories
 {
-	using MongoDB.Driver;
-	using MongoDB.Driver.Linq;
-
-	using Microsoft.EntityFrameworkCore;
-
-	using System.Linq.Expressions;
-
-	using Data.Contracts;
-
 	public class MongoRepository<T> : IMongoRepository<T> where T : MongoDocument
 	{
 		private IMongoCollection<T> collection;

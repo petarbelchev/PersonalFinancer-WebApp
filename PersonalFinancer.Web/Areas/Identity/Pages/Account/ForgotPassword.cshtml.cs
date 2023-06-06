@@ -1,18 +1,16 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
-{
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Identity.UI.Services;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.AspNetCore.WebUtilities;
-    
-    using System.ComponentModel.DataAnnotations;
-    using System.Text;
-    using System.Text.Encodings.Web;
-    
-    using Data.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
+using PersonalFinancer.Data.Models;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
 
-    public class ForgotPasswordModel : PageModel
+namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+{
+	public class ForgotPasswordModel : PageModel
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IEmailSender emailSender;

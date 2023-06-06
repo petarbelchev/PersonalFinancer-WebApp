@@ -1,7 +1,7 @@
-﻿namespace PersonalFinancer.Web.ModelBinders
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+
+namespace PersonalFinancer.Web.ModelBinders
 {
-	using Microsoft.AspNetCore.Mvc.ModelBinding;
-	
 	public class DecimalModelBinder : IModelBinder
 	{
 		public Task BindModelAsync(ModelBindingContext bindingContext)

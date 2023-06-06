@@ -1,8 +1,8 @@
-﻿namespace PersonalFinancer.Services.User
-{
-	using Services.Shared.Models;
-	using Services.User.Models;
+﻿using PersonalFinancer.Services.Shared.Models;
+using PersonalFinancer.Services.User.Models;
 
+namespace PersonalFinancer.Services.User
+{
 	public interface IUsersService
 	{
 		/// <summary>

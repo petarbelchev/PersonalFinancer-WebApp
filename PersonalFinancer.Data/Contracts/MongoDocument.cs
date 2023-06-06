@@ -1,8 +1,8 @@
-﻿namespace PersonalFinancer.Data.Contracts
-{
-	using MongoDB.Bson;
-	using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
+namespace PersonalFinancer.Data.Contracts
+{
 	public class MongoDocument
 	{
 		[BsonId]

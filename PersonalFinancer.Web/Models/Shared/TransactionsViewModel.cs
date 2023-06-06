@@ -1,10 +1,9 @@
-﻿namespace PersonalFinancer.Web.Models.Shared
+﻿using PersonalFinancer.Services.Shared.Models;
+using static PersonalFinancer.Data.Constants;
+
+namespace PersonalFinancer.Web.Models.Shared
 {
-    using Services.Shared.Models;
-
-    using static Data.Constants;
-
-    public class TransactionsViewModel
+	public class TransactionsViewModel
     {
         public IEnumerable<TransactionTableServiceModel> Transactions { get; set; } = null!;
 

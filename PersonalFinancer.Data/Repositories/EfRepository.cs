@@ -1,9 +1,7 @@
-﻿namespace PersonalFinancer.Data.Repositories
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace PersonalFinancer.Data.Repositories
 {
-	using Microsoft.EntityFrameworkCore;
-
-	using Data;
-
 	public class EfRepository<T> : IEfRepository<T> where T : class
 	{
 		private readonly SqlDbContext context;

@@ -1,15 +1,11 @@
-﻿namespace PersonalFinancer.Web.Models.Account
+﻿using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Services.Shared.Models;
+using PersonalFinancer.Web.ModelBinders;
+using System.ComponentModel.DataAnnotations;
+using static PersonalFinancer.Data.Constants.AccountConstants;
+
+namespace PersonalFinancer.Web.Models.Account
 {
-	using Microsoft.AspNetCore.Mvc;
-
-	using System.ComponentModel.DataAnnotations;
-
-	using Services.Shared.Models;
-	
-	using Web.ModelBinders;
-	
-	using static Data.Constants.AccountConstants;
-
 	public class AccountFormViewModel
 	{
 		[Required(ErrorMessage = "Account name is required.")]

@@ -1,22 +1,18 @@
-﻿namespace PersonalFinancer.Web.Controllers
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.Shared.Models;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Services.User.Models;
+using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Shared;
+using PersonalFinancer.Web.Models.Transaction;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Controllers
 {
-	using AutoMapper;
-
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-
-	using Services.Accounts;
-	using Services.Accounts.Models;
-	using Services.Shared.Models;
-	using Services.User;
-	using Services.User.Models;
-
-	using Web.Infrastructure;
-	using Web.Models.Shared;
-	using Web.Models.Transaction;
-
-	using static Data.Constants.RoleConstants;
-
 	[Authorize]
 	public class TransactionsController : Controller
 	{

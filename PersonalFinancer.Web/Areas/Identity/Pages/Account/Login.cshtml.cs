@@ -1,14 +1,12 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using PersonalFinancer.Data.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	using Microsoft.AspNetCore.Authentication;
-	using Microsoft.AspNetCore.Identity;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.RazorPages;
-
-	using System.ComponentModel.DataAnnotations;
-
-	using PersonalFinancer.Data.Models;
-
 	public class LoginModel : PageModel
 	{
 		private readonly SignInManager<ApplicationUser> signInManager;

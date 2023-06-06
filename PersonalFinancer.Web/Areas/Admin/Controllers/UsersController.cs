@@ -1,15 +1,12 @@
-﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Services.User.Models;
+using PersonalFinancer.Web.Models.User;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	
-	using Services.User;
-	using Services.User.Models;
-	
-	using Web.Models.User;
-
-	using static Data.Constants.RoleConstants;
-
 	[Area("Admin")]
 	[Authorize(Roles = AdminRoleName)]
 	public class UsersController : Controller

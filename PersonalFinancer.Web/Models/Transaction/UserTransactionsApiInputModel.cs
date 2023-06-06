@@ -1,8 +1,8 @@
-﻿namespace PersonalFinancer.Web.Models.Transaction
-{
-    using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-    public class UserTransactionsApiInputModel
+namespace PersonalFinancer.Web.Models.Transaction
+{
+	public class UserTransactionsApiInputModel
     {
         [Required]
         public string Id { get; set; } = null!;

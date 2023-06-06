@@ -1,19 +1,15 @@
-﻿namespace PersonalFinancer.Web.Controllers
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Services.Messages;
+using PersonalFinancer.Services.Messages.Models;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Message;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Controllers
 {
-	using AutoMapper;
-
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-
-	using Services.Messages;
-	using Services.Messages.Models;
-	using Services.User;
-
-	using Web.Infrastructure;
-	using Web.Models.Message;
-
-	using static Data.Constants.RoleConstants;
-
 	[Authorize]
 	public class MessagesController : Controller
 	{

@@ -1,26 +1,22 @@
-﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Services.Accounts;
+using PersonalFinancer.Services.Accounts.Models;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Web.Models.Account;
+using static PersonalFinancer.Data.Constants.RoleConstants;
+
+namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	using AutoMapper;
-
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-
-	using Services.Accounts;
-	using Services.Accounts.Models;
-	using Services.User;
-
-	using Web.Models.Account;
-
-	using static Data.Constants.RoleConstants;
-
 	[Area("Admin")]
 	[Authorize(Roles = AdminRoleName)]
 	public class AccountsController : Web.Controllers.AccountsController
 	{
 		public AccountsController(
-			IAccountsService accountService, 
+			IAccountsService accountService,
 			IUsersService usersService,
-			IMapper mapper) 
+			IMapper mapper)
 			: base(accountService, mapper, usersService)
 		{ }
 

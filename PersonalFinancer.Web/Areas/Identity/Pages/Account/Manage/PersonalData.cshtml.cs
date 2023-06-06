@@ -1,12 +1,11 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
-{
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    
-    using Data.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using PersonalFinancer.Data.Models;
 
-    public class PersonalDataModel : PageModel
+namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
+{
+	public class PersonalDataModel : PageModel
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly ILogger<PersonalDataModel> logger;

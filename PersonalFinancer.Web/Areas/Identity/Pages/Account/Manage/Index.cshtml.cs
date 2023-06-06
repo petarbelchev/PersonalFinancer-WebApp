@@ -1,15 +1,12 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using PersonalFinancer.Data.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
 {
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-
-    using System.ComponentModel.DataAnnotations;
-    using System.Threading.Tasks;
-
-    using Data.Models;
-
-    public class IndexModel : PageModel
+	public class IndexModel : PageModel
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;

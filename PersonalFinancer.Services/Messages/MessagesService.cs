@@ -1,15 +1,12 @@
-﻿namespace PersonalFinancer.Services.Messages
+﻿using AutoMapper;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Repositories;
+using PersonalFinancer.Services.Messages.Models;
+
+namespace PersonalFinancer.Services.Messages
 {
-	using AutoMapper;
-
-	using MongoDB.Driver;
-	using MongoDB.Driver.Linq;
-
-	using Data.Models;
-	using Data.Repositories;
-
-	using Services.Messages.Models;
-
 	public class MessagesService : IMessagesService
 	{
 		private readonly IMongoRepository<Message> repo;
@@ -39,7 +36,7 @@
 		public async Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(string userId)
 		{
 			var messages = await repo.FindAsync(
-				x => x.AuthorId == userId, 
+				x => x.AuthorId == userId,
 				m => new MessageOutputServiceModel
 				{
 					Id = m.Id,

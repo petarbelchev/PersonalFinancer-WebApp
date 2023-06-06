@@ -1,16 +1,12 @@
-﻿namespace PersonalFinancer.Web.Models.Transaction
+﻿using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Services.Shared.Models;
+using PersonalFinancer.Web.ModelBinders;
+using System.ComponentModel.DataAnnotations;
+using static PersonalFinancer.Data.Constants.TransactionConstants;
+
+namespace PersonalFinancer.Web.Models.Transaction
 {
-	using Microsoft.AspNetCore.Mvc;
-
-	using System.ComponentModel.DataAnnotations;
-
-	using Data.Enums;
-	using static Data.Constants.TransactionConstants;
-
-	using Services.Shared.Models;
-
-	using Web.ModelBinders;
-
 	public class TransactionFormModel
 	{
 		[Required(ErrorMessage = "Plaese enter an Amount.")]

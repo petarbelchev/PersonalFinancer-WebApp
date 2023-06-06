@@ -1,17 +1,15 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
+using PersonalFinancer.Data.Models;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
+
+namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
 {
-	using Microsoft.AspNetCore.Identity;
-	using Microsoft.AspNetCore.Identity.UI.Services;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.RazorPages;
-	using Microsoft.AspNetCore.WebUtilities;
-	
-	using System.ComponentModel.DataAnnotations;
-	using System.Text;
-	using System.Text.Encodings.Web;
-
-	using Data.Models;
-
 	public class EmailModel : PageModel
 	{
 		private readonly UserManager<ApplicationUser> userManager;
@@ -37,10 +35,10 @@
 
 		public class InputModel
 		{
-            [Required(ErrorMessage = "Email address is required.")]
-            [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
-            [Display(Name = "New Email")]
-            public string NewEmail { get; set; } = null!;
+			[Required(ErrorMessage = "Email address is required.")]
+			[EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+			[Display(Name = "New Email")]
+			public string NewEmail { get; set; } = null!;
 		}
 
 		private async Task LoadAsync(ApplicationUser user)

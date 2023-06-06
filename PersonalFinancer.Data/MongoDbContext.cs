@@ -1,13 +1,11 @@
-﻿namespace PersonalFinancer.Data
+﻿using Microsoft.Extensions.Options;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Driver;
+using PersonalFinancer.Data.Contracts;
+
+namespace PersonalFinancer.Data
 {
-    using Microsoft.Extensions.Options;
-
-    using MongoDB.Bson.Serialization.Conventions;
-    using MongoDB.Driver;
-
-    using Data.Contracts;
-
-    public class MongoDbContext : IMongoDbContext
+	public class MongoDbContext : IMongoDbContext
 	{
 		private IMongoClient client;
 		private IMongoDatabase database;

@@ -1,7 +1,7 @@
-﻿namespace PersonalFinancer.Services.Shared.Models
-{
-	using Services.User.Models;
+﻿using PersonalFinancer.Services.User.Models;
 
+namespace PersonalFinancer.Services.Shared.Models
+{
 	public class CurrencyCashFlowServiceModel
 	{
 		public string Name { get; set; } = null!;

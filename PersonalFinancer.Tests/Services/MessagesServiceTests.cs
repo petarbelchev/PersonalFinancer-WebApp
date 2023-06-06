@@ -1,14 +1,10 @@
 ﻿using AutoMapper;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-
 using Moq;
-
 using NUnit.Framework;
-
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Data.Repositories;
-
 using PersonalFinancer.Services.Messages;
 using PersonalFinancer.Services.Messages.Models;
 using PersonalFinancer.Tests.Mocks;

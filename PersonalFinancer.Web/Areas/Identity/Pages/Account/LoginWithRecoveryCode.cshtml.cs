@@ -1,17 +1,12 @@
 ﻿#nullable disable
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using PersonalFinancer.Data.Models;
+using System.ComponentModel.DataAnnotations;
+
 namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	using Microsoft.AspNetCore.Identity;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.RazorPages;
-	using Microsoft.Extensions.Logging;
-    
-	using System;
-	using System.ComponentModel.DataAnnotations;
-	using System.Threading.Tasks;
-
-    using Data.Models;
-
 	public class LoginWithRecoveryCodeModel : PageModel
 	{
 		private readonly SignInManager<ApplicationUser> signInManager;

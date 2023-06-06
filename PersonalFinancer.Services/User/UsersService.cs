@@ -1,19 +1,16 @@
-﻿namespace PersonalFinancer.Services.User
-{	
-	using AutoMapper;
-	using AutoMapper.QueryableExtensions;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Repositories;
+using PersonalFinancer.Services.Shared.Models;
+using PersonalFinancer.Services.User.Models;
+using static PersonalFinancer.Data.Constants;
 
-	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.Caching.Memory;
-
-	using Data.Enums;
-	using Data.Models;
-	using Data.Repositories;
-	using static Data.Constants;
-	
-	using Services.Shared.Models;
-	using Services.User.Models;
-
+namespace PersonalFinancer.Services.User
+{
 	public class UsersService : IUsersService
 	{
 		private readonly IEfRepository<ApplicationUser> usersRepo;

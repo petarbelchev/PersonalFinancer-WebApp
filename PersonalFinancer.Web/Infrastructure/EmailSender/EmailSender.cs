@@ -1,13 +1,11 @@
-﻿namespace PersonalFinancer.Web.Infrastructure.EmailSender
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Options;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+
+namespace PersonalFinancer.Web.Infrastructure.EmailSender
 {
-    using Microsoft.AspNetCore.Identity.UI.Services;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
-
-    using SendGrid;
-    using SendGrid.Helpers.Mail;
-
-    public class EmailSender : IEmailSender
+	public class EmailSender : IEmailSender
     {
         private readonly ILogger<EmailSender> logger;
 

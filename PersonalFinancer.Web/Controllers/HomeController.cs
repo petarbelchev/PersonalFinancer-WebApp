@@ -1,17 +1,14 @@
-﻿namespace PersonalFinancer.Web.Controllers
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PersonalFinancer.Services.User;
+using PersonalFinancer.Services.User.Models;
+using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Models.Home;
+using PersonalFinancer.Web.Models.Shared;
+using static PersonalFinancer.Data.Constants.HostConstants;
+
+namespace PersonalFinancer.Web.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	
-	using Services.User;
-	using Services.User.Models;
-
-	using Web.Infrastructure;
-	using Web.Models.Home;
-	using Web.Models.Shared;
-
-	using static Data.Constants.HostConstants;
-
 	public class HomeController : Controller
 	{
 		private readonly IUsersService userService;

@@ -1,11 +1,11 @@
-﻿namespace PersonalFinancer.Data.Models
-{
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using PersonalFinancer.Data.Contracts;
-    using static Data.Constants.CategoryConstants;
+﻿using PersonalFinancer.Data.Contracts;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using static PersonalFinancer.Data.Constants.CategoryConstants;
 
-    public class Category : ApiEntity
+namespace PersonalFinancer.Data.Models
+{
+	public class Category : ApiEntity
 	{
 		[Key]
 		public override string Id { get; set; } = null!;
@@ -20,7 +20,7 @@
 
 		public override bool IsDeleted { get; set; }
 
-		public ICollection<Transaction> Transactions { get; set; } 
+		public ICollection<Transaction> Transactions { get; set; }
 			= new HashSet<Transaction>();
 	}
 }
