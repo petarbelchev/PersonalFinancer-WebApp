@@ -18,7 +18,7 @@ namespace PersonalFinancer.Tests.Controllers
 	{
 		private AccountsController controller;
 
-		private UserAccountTypesAndCurrenciesServiceModel expAccTypesAndCurrencies = new ()
+		private readonly UserAccountTypesAndCurrenciesServiceModel expAccTypesAndCurrencies = new ()
 			{
 				AccountTypes = new AccountTypeServiceModel[]
 				{
@@ -47,7 +47,7 @@ namespace PersonalFinancer.Tests.Controllers
 					}
 				}
 			};
-		private AccountDetailsServiceModel expAccDetailsDto = new ()
+		private readonly AccountDetailsServiceModel expAccDetailsDto = new ()
 		{
 			Id = "account id",
 			Balance = 100,
@@ -1035,7 +1035,7 @@ namespace PersonalFinancer.Tests.Controllers
 			}
 		}
 
-		private void CheckAccountDetailsViewModel(
+		private static void CheckAccountDetailsViewModel(
 			AccountDetailsViewModel? viewModel,
 			AccountDetailsServiceModel serviceModel,
 			bool isUserAdmin, bool isPostRequest = false)

@@ -9,16 +9,13 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 	public class LoginWith2faModel : PageModel
 	{
 		private readonly SignInManager<ApplicationUser> signInManager;
-		private readonly UserManager<ApplicationUser> userManager;
 		private readonly ILogger<LoginWith2faModel> logger;
 
 		public LoginWith2faModel(
 			SignInManager<ApplicationUser> signInManager,
-			UserManager<ApplicationUser> userManager,
 			ILogger<LoginWith2faModel> logger)
 		{
 			this.signInManager = signInManager;
-			this.userManager = userManager;
 			this.logger = logger;
 		}
 
@@ -43,7 +40,6 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 
 		public async Task<IActionResult> OnGetAsync(bool rememberMe, string? returnUrl = null)
 		{
-			// Ensure the user has gone through the username & password screen first
 			var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
 
 			if (user == null)
@@ -64,7 +60,7 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 				return Page();
 			}
 
-			returnUrl = returnUrl ?? Url.Content("~/");
+			returnUrl ??= Url.Content("~/");
 
 			var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
 			if (user == null)
@@ -75,8 +71,6 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 			var authenticatorCode = Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
 
 			var result = await signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, Input.RememberMachine);
-
-			var userId = await userManager.GetUserIdAsync(user);
 
 			if (result.Succeeded)
 			{
@@ -92,6 +86,7 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 			{
 				logger.LogWarning("Invalid authenticator code entered for user with ID '{UserId}'.", user.Id);
 				ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
+
 				return Page();
 			}
 		}

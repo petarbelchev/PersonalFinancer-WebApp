@@ -19,7 +19,7 @@ namespace PersonalFinancer.Tests.Controllers
 	{
 		private TransactionsController controller;
 
-		private TransactionsServiceModel userTransactionsDto = new()
+		private readonly TransactionsServiceModel userTransactionsDto = new()
 		{
 			Transactions = new TransactionTableServiceModel[]
 			{
@@ -46,7 +46,7 @@ namespace PersonalFinancer.Tests.Controllers
 			},
 			TotalTransactionsCount = 10
 		};
-		private UserAccountsAndCategoriesServiceModel userAccAndCatDto = new()
+		private readonly UserAccountsAndCategoriesServiceModel userAccAndCatDto = new()
 		{
 			UserAccounts = new AccountServiceModel[]
 			{
@@ -75,7 +75,7 @@ namespace PersonalFinancer.Tests.Controllers
 				}
 			}
 		};
-		private UserAccountsAndCategoriesServiceModel userAccAndCatDtoInitialTransaction = new()
+		private readonly UserAccountsAndCategoriesServiceModel userAccAndCatDtoInitialTransaction = new()
 		{
 			UserAccounts = new AccountServiceModel[]
 			{
@@ -211,7 +211,7 @@ namespace PersonalFinancer.Tests.Controllers
 
 			CheckUserAccountsAndCategories(model, this.userAccAndCatDto);
 
-			Assert.That(model.TransactionTypes.Count(), Is.EqualTo(2));
+			Assert.That(model.TransactionTypes, Has.Length.EqualTo(2));
 			Assert.That(model.TransactionTypes[0], Is.EqualTo(TransactionType.Income));
 			Assert.That(model.TransactionTypes[1], Is.EqualTo(TransactionType.Expense));
 		}
@@ -250,10 +250,10 @@ namespace PersonalFinancer.Tests.Controllers
 			Assert.That(model, Is.Not.Null);
 
 			CheckTransactionFormModel(model, inputModel);
-			
+
 			CheckUserAccountsAndCategories(model, this.userAccAndCatDto);
 
-			Assert.That(model.TransactionTypes.Count(), Is.EqualTo(2));
+			Assert.That(model.TransactionTypes, Has.Length.EqualTo(2));
 			Assert.That(model.TransactionTypes[0], Is.EqualTo(TransactionType.Income));
 			Assert.That(model.TransactionTypes[1], Is.EqualTo(TransactionType.Expense));
 
@@ -621,7 +621,7 @@ namespace PersonalFinancer.Tests.Controllers
 
 			CheckUserAccountsAndCategories(model, this.userAccAndCatDto);
 
-			Assert.That(model.TransactionTypes.Count(), Is.EqualTo(2));
+			Assert.That(model.TransactionTypes, Has.Length.EqualTo(2));
 			Assert.That(model.TransactionTypes[0], Is.EqualTo(TransactionType.Income));
 			Assert.That(model.TransactionTypes[1], Is.EqualTo(TransactionType.Expense));
 		}
@@ -662,7 +662,7 @@ namespace PersonalFinancer.Tests.Controllers
 
 			CheckUserAccountsAndCategories(model, this.userAccAndCatDtoInitialTransaction);
 
-			Assert.That(model.TransactionTypes.Count(), Is.EqualTo(1));
+			Assert.That(model.TransactionTypes, Has.Length.EqualTo(1));
 			Assert.That(model.TransactionTypes[0], Is.EqualTo(serviceReturnDto.TransactionType));
 		}
 		
@@ -990,7 +990,7 @@ namespace PersonalFinancer.Tests.Controllers
 			}
 		}
 
-		private void CheckUserAccountsAndCategories(
+		private static void CheckUserAccountsAndCategories(
 			TransactionFormModel model, 
 			UserAccountsAndCategoriesServiceModel serviceModel)
 		{
@@ -1017,7 +1017,7 @@ namespace PersonalFinancer.Tests.Controllers
 			}
 		}
 
-		private void CheckTransactionFormModel(TransactionFormModel model, TransactionFormServiceModel serviceModel)
+		private static void CheckTransactionFormModel(TransactionFormModel model, TransactionFormServiceModel serviceModel)
 		{
 			Assert.That(model.Amount, Is.EqualTo(serviceModel.Amount));
 			Assert.That(model.TransactionType, Is.EqualTo(serviceModel.TransactionType));
@@ -1029,7 +1029,7 @@ namespace PersonalFinancer.Tests.Controllers
 			Assert.That(model.IsInitialBalance, Is.EqualTo(serviceModel.IsInitialBalance));
 		}
 				
-		private void CheckTransactionFormModel(TransactionFormModel model, TransactionFormModel inputModel)
+		private static void CheckTransactionFormModel(TransactionFormModel model, TransactionFormModel inputModel)
 		{
 			Assert.That(model.Amount, Is.EqualTo(inputModel.Amount));
 			Assert.That(model.TransactionType, Is.EqualTo(inputModel.TransactionType));

@@ -1,19 +1,12 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using PersonalFinancer.Data;
-using PersonalFinancer.Data.Contracts;
 using PersonalFinancer.Data.Models;
-using PersonalFinancer.Data.Repositories;
 using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.ApiService;
-using PersonalFinancer.Services.Messages;
-using PersonalFinancer.Services.User;
 using PersonalFinancer.Web.Controllers;
-using PersonalFinancer.Web.Infrastructure;
 using PersonalFinancer.Web.Infrastructure.EmailSender;
+using PersonalFinancer.Web.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,22 +39,7 @@ builder.Services.AddControllersWithViews(options =>
 		options.SuppressModelStateInvalidFilter = true;
 	});
 
-builder.Services.AddScoped<IAccountsService, AccountsService>();
-builder.Services.AddScoped<IApiService<AccountType>, ApiService<AccountType>>();
-builder.Services.AddScoped<IApiService<Category>, ApiService<Category>>();
-builder.Services.AddScoped<IApiService<Currency>, ApiService<Currency>>();
-builder.Services.AddScoped<IEfRepository<Account>, EfRepository<Account>>();
-builder.Services.AddScoped<IEfRepository<AccountType>, EfRepository<AccountType>>();
-builder.Services.AddScoped<IEfRepository<ApplicationUser>, EfRepository<ApplicationUser>>();
-builder.Services.AddScoped<IEfRepository<Category>, EfRepository<Category>>();
-builder.Services.AddScoped<IEfRepository<Currency>, EfRepository<Currency>>();
-builder.Services.AddScoped<IEfRepository<Transaction>, EfRepository<Transaction>>();
-builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
-builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
-builder.Services.AddSingleton<IMongoRepository<Message>, MongoRepository<Message>>();
-builder.Services.AddSingleton<IMessagesService, MessagesService>();
-builder.Services.AddScoped<IUsersService, UsersService>();
-builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddServices();
 
 builder.Services.AddAutoMapper(
 	typeof(IAccountsService).Assembly,

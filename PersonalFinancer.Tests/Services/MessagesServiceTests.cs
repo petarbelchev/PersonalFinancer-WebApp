@@ -16,7 +16,7 @@ namespace PersonalFinancer.Tests.Services
 	{
 		private Mock<IMongoRepository<Message>> repoMock;
 		private MessagesService service;
-		private IMapper mapper = ServicesMapperMock.Instance;
+		private readonly IMapper mapper = ServicesMapperMock.Instance;
 
 		[SetUp]
 		public void SetUp()

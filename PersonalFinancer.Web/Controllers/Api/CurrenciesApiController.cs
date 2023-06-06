@@ -3,11 +3,11 @@ using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.ApiService;
 using PersonalFinancer.Services.ApiService.Models;
 using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Infrastructure.Extensions;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-	[Route("api/currencies")]
+    [Route("api/currencies")]
 	[ApiController]
 	public class CurrenciesApiController : BaseApiController
 	{

@@ -22,7 +22,7 @@ namespace PersonalFinancer.Tests.Controllers
 		private Mock<IMessagesService> messagesServiceMock;
 		private Mock<IUsersService> usersServiceMock;
 		protected Mock<ClaimsPrincipal> userMock;
-		private IMapper mapper = ControllersMapperMock.Instance;
+		private readonly IMapper mapper = ControllersMapperMock.Instance;
 		private MessagesController controller;
 		
 		protected string userId = "user Id";
@@ -84,7 +84,7 @@ namespace PersonalFinancer.Tests.Controllers
 			Assert.That(viewResult, Is.Not.Null);
 			var model = viewResult.Model as MessageOutputServiceModel[];
 			Assert.That(model, Is.Not.Null);
-			Assert.That(model.Count(), Is.EqualTo(serviceReturnDto.Length));
+			Assert.That(model, Has.Length.EqualTo(serviceReturnDto.Length));
 
 			for (int i = 0; i < serviceReturnDto.Length; i++)
 			{
@@ -132,7 +132,7 @@ namespace PersonalFinancer.Tests.Controllers
 			Assert.That(viewResult, Is.Not.Null);
 			var model = viewResult.Model as MessageOutputServiceModel[];
 			Assert.That(model, Is.Not.Null);
-			Assert.That(model.Count(), Is.EqualTo(serviceReturnDto.Length));
+			Assert.That(model, Has.Length.EqualTo(serviceReturnDto.Length));
 
 			for (int i = 0; i < serviceReturnDto.Length; i++)
 			{
@@ -559,24 +559,24 @@ namespace PersonalFinancer.Tests.Controllers
 			Assert.That(result.StatusCode, Is.EqualTo(400));
 		}
 			
-		protected void CheckModelStateErrors(
+		protected static void CheckModelStateErrors(
 			ModelStateDictionary modelState, string key, string errorMessage)
 		{
 			Assert.That(modelState.Keys.Count(), Is.EqualTo(1));
 			Assert.That(modelState.Keys.First(), Is.EqualTo(key));
 			Assert.That(modelState.Values.Count(), Is.EqualTo(1));
-			Assert.That(modelState.Values.First().Errors.Count, Is.EqualTo(1));
+			Assert.That(modelState.Values.First().Errors, Has.Count.EqualTo(1));
 
 			Assert.That(modelState.Values.First().Errors.First().ErrorMessage,
 				Is.EqualTo(errorMessage));
 		}
 				
-		protected void CheckRouteValues(RouteValueDictionary routeValues, string key, string value)
+		protected static void CheckRouteValues(RouteValueDictionary routeValues, string key, string value)
 		{			
 			Assert.That(routeValues, Is.Not.Null);
-			Assert.That(routeValues.Keys.Count, Is.EqualTo(1));
+			Assert.That(routeValues.Keys, Has.Count.EqualTo(1));
 			Assert.That(routeValues.ContainsKey(key), Is.True);
-			Assert.That(routeValues.Values.Count, Is.EqualTo(1));
+			Assert.That(routeValues.Values, Has.Count.EqualTo(1));
 			Assert.That(routeValues.Values.First(), Is.EqualTo(value));
 		}
 	}

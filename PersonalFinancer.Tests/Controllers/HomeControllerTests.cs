@@ -15,7 +15,7 @@ namespace PersonalFinancer.Tests.Controllers
 	[TestFixture]
 	internal class HomeControllerTests : ControllersUnitTestsBase
 	{
-		private UserDashboardServiceModel expUserDashboard = new ()
+		private readonly UserDashboardServiceModel expUserDashboard = new ()
 		{
 			Accounts = new AccountCardServiceModel[]
 			{
@@ -51,7 +51,7 @@ namespace PersonalFinancer.Tests.Controllers
 				}
 			}
 		};
-		private AccountCardServiceModel[] expAccountCard = new AccountCardServiceModel[]
+		private readonly AccountCardServiceModel[] expAccountCard = new AccountCardServiceModel[]
 		{
 			new AccountCardServiceModel
 			{
@@ -271,7 +271,7 @@ namespace PersonalFinancer.Tests.Controllers
 			var modelStateErrors = viewResult.ViewData.ModelState.Values.First().Errors;
 			
 			//Assert
-			Assert.That(modelStateErrors.Count, Is.EqualTo(1));
+			Assert.That(modelStateErrors, Has.Count.EqualTo(1));
 			Assert.That(modelStateErrors.First().ErrorMessage, Is.EqualTo(errorMessage));
 
 			Assert.That(actual, Is.Not.Null);
@@ -305,9 +305,9 @@ namespace PersonalFinancer.Tests.Controllers
 			var viewBagValues = viewResult.ViewData.Values;
 
 			//Assert
-			Assert.That(viewResult.ViewData.Count, Is.EqualTo(1));
-			Assert.That(viewBagKeys.Count, Is.EqualTo(1));
-			Assert.That(viewBagValues.Count, Is.EqualTo(1)); 
+			Assert.That(viewResult.ViewData, Has.Count.EqualTo(1));
+			Assert.That(viewBagKeys, Has.Count.EqualTo(1));
+			Assert.That(viewBagValues, Has.Count.EqualTo(1)); 
 			Assert.That(viewBagValues.First(), 
 				Is.EqualTo(HostConstants.BadRequestImgUrl));
 		}
@@ -322,9 +322,9 @@ namespace PersonalFinancer.Tests.Controllers
 			var viewBagValues = viewResult.ViewData.Values;
 
 			//Assert
-			Assert.That(viewResult.ViewData.Count, Is.EqualTo(1));
-			Assert.That(viewBagKeys.Count, Is.EqualTo(1));
-			Assert.That(viewBagValues.Count, Is.EqualTo(1)); 
+			Assert.That(viewResult.ViewData, Has.Count.EqualTo(1));
+			Assert.That(viewBagKeys, Has.Count.EqualTo(1));
+			Assert.That(viewBagValues, Has.Count.EqualTo(1)); 
 			Assert.That(viewBagValues.First(), 
 				Is.EqualTo(HostConstants.InternalServerErrorImgUrl));
 		}

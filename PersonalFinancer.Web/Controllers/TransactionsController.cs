@@ -6,14 +6,14 @@ using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
-using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Shared;
 using PersonalFinancer.Web.Models.Transaction;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {
-	[Authorize]
+    [Authorize]
 	public class TransactionsController : Controller
 	{
 		protected readonly IAccountsService accountsService;

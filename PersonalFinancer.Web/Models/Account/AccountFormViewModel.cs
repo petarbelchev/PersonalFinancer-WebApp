@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.ModelBinders;
+using PersonalFinancer.Web.Infrastructure.ModelBinders;
 using System.ComponentModel.DataAnnotations;
 using static PersonalFinancer.Data.Constants.AccountConstants;
 
 namespace PersonalFinancer.Web.Models.Account
 {
-	public class AccountFormViewModel
+    public class AccountFormViewModel
 	{
 		[Required(ErrorMessage = "Account name is required.")]
 		[StringLength(AccountNameMaxLength, MinimumLength = AccountNameMinLength,

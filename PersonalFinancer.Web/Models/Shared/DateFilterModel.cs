@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PersonalFinancer.Web.ModelBinders;
+using PersonalFinancer.Web.Infrastructure.ModelBinders;
 using System.ComponentModel.DataAnnotations;
 
 namespace PersonalFinancer.Web.Models.Shared
 {
-	public class DateFilterModel : IValidatableObject
+    public class DateFilterModel : IValidatableObject
 	{
 		[Required(ErrorMessage = "Start Date is required.")]
 		[ModelBinder(BinderType = typeof(DateTimeModelBinder))]

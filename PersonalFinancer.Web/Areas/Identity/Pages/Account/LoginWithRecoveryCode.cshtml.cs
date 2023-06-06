@@ -10,16 +10,13 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 	public class LoginWithRecoveryCodeModel : PageModel
 	{
 		private readonly SignInManager<ApplicationUser> signInManager;
-		private readonly UserManager<ApplicationUser> userManager;
 		private readonly ILogger<LoginWithRecoveryCodeModel> logger;
 
 		public LoginWithRecoveryCodeModel(
 			SignInManager<ApplicationUser> signInManager,
-			UserManager<ApplicationUser> userManager,
 			ILogger<LoginWithRecoveryCodeModel> logger)
 		{
 			this.signInManager = signInManager;
-			this.userManager = userManager;
 			this.logger = logger;
 		}
 
@@ -39,8 +36,8 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 
 		public async Task<IActionResult> OnGetAsync(string returnUrl = null)
 		{
-			// Ensure the user has gone through the username & password screen first
 			var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
+
 			if (user == null)
 			{
 				throw new InvalidOperationException($"Unable to load two-factor authentication user.");
@@ -59,6 +56,7 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 			}
 
 			var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
+
 			if (user == null)
 			{
 				throw new InvalidOperationException($"Unable to load two-factor authentication user.");
@@ -68,13 +66,12 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 
 			var result = await signInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);
 
-			var userId = await userManager.GetUserIdAsync(user);
-
 			if (result.Succeeded)
 			{
 				logger.LogInformation("User with ID '{UserId}' logged in with a recovery code.", user.Id);
 				return LocalRedirect(returnUrl ?? Url.Content("~/"));
 			}
+
 			if (result.IsLockedOut)
 			{
 				logger.LogWarning("User account locked out.");

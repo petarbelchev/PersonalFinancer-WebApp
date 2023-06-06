@@ -8,7 +8,7 @@ namespace PersonalFinancer.Data.Repositories
 {
 	public class MongoRepository<T> : IMongoRepository<T> where T : MongoDocument
 	{
-		private IMongoCollection<T> collection;
+		private readonly IMongoCollection<T> collection;
 
 		public MongoRepository(IMongoDbContext context)
 			=> collection = context.GetCollection<T>(typeof(T).Name);

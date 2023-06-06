@@ -13,7 +13,7 @@ namespace PersonalFinancer.Data.Configurations
 			builder.HasData(SeedUsers());
 		}
 
-		private IEnumerable<ApplicationUser> SeedUsers()
+		private static IEnumerable<ApplicationUser> SeedUsers()
 		{
 			var hasher = new PasswordHasher<ApplicationUser>();
 			var users = new List<ApplicationUser>();

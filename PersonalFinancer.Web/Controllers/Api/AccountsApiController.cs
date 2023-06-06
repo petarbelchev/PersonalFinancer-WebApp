@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Account;
 using PersonalFinancer.Web.Models.Shared;
 using System.Globalization;
@@ -11,12 +11,12 @@ using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-	[Authorize]
+    [Authorize]
 	[Route("api/accounts")]
 	[ApiController]
 	public class AccountsApiController : ControllerBase
 	{
-		private IAccountsService accountService;
+		private readonly IAccountsService accountService;
 
 		public AccountsApiController(IAccountsService accountService)
 		{

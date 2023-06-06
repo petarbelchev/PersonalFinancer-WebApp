@@ -7,8 +7,8 @@ namespace PersonalFinancer.Data
 {
 	public class MongoDbContext : IMongoDbContext
 	{
-		private IMongoClient client;
-		private IMongoDatabase database;
+		private readonly IMongoClient client;
+		private readonly IMongoDatabase database;
 
 		public MongoDbContext(IOptions<MongoDbSettings> settings)
 		{

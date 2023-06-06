@@ -2,14 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
-using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Home;
 using PersonalFinancer.Web.Models.Shared;
 using static PersonalFinancer.Data.Constants.HostConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {
-	public class HomeController : Controller
+    public class HomeController : Controller
 	{
 		private readonly IUsersService userService;
 

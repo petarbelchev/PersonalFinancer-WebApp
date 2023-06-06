@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.Messages;
 using PersonalFinancer.Services.Messages.Models;
 using PersonalFinancer.Services.User;
-using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Message;
 using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {
-	[Authorize]
+    [Authorize]
 	public class MessagesController : Controller
 	{
 		private readonly IMessagesService messagesService;

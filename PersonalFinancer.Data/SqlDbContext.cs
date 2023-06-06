@@ -7,7 +7,7 @@ namespace PersonalFinancer.Data
 {
 	public class SqlDbContext : IdentityDbContext<ApplicationUser>
 	{
-		private bool seed;
+		private readonly bool seed;
 
 		public SqlDbContext(DbContextOptions<SqlDbContext> options, bool seed = true)
 			: base(options)

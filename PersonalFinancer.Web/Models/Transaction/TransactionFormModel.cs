@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.ModelBinders;
+using PersonalFinancer.Web.Infrastructure.ModelBinders;
 using System.ComponentModel.DataAnnotations;
 using static PersonalFinancer.Data.Constants.TransactionConstants;
 
 namespace PersonalFinancer.Web.Models.Transaction
 {
-	public class TransactionFormModel
+    public class TransactionFormModel
 	{
 		[Required(ErrorMessage = "Plaese enter an Amount.")]
 		[ModelBinder(BinderType = typeof(DecimalModelBinder))]

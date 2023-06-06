@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User;
-using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Shared;
 using PersonalFinancer.Web.Models.Transaction;
 using System.Globalization;
@@ -11,7 +11,7 @@ using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-	[Authorize]
+    [Authorize]
 	[Route("api/transactions")]
 	[ApiController]
 	public class TransactionsApiController : ControllerBase

@@ -30,7 +30,7 @@ namespace PersonalFinancer.Services.Accounts
 			this.memoryCache = memoryCache;
 		}
 
-		private void ChangeBalance(Account account, decimal amount, TransactionType transactionType)
+		private static void ChangeBalance(Account account, decimal amount, TransactionType transactionType)
 		{
 			if (transactionType == TransactionType.Income)
 				account.Balance += amount;

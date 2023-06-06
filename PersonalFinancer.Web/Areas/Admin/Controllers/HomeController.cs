@@ -2,12 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Web.Areas.Admin.Models.Home;
-using PersonalFinancer.Web.Infrastructure;
+using PersonalFinancer.Web.Infrastructure.Extensions;
 using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	[Area("Admin")]
+    [Area("Admin")]
 	[Authorize(Roles = RoleConstants.AdminRoleName)]
 	public class HomeController : Controller
 	{
