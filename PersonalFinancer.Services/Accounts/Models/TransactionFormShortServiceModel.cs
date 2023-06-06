@@ -1,8 +1,8 @@
-﻿using PersonalFinancer.Data.Enums;
+﻿using PersonalFinancer.Data.Models.Enums;
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class TransactionFormShortServiceModel
+    public class TransactionFormShortServiceModel
 	{
 		public decimal Amount { get; set; }
 

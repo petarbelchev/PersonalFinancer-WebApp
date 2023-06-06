@@ -1,6 +1,7 @@
 ﻿using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Data.Constants;
+using static PersonalFinancer.Services.Infrastructure.Constants;
+using static PersonalFinancer.Web.Infrastructure.Constants;
 
 namespace PersonalFinancer.Web.Models.User
 {

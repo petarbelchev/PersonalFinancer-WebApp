@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
 using NUnit.Framework;
-using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Data.Models.Enums;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User.Models;
@@ -11,6 +11,7 @@ using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Models.Shared;
 using PersonalFinancer.Web.Models.Transaction;
 using static PersonalFinancer.Data.Constants;
+using static PersonalFinancer.Web.Infrastructure.Constants;
 
 namespace PersonalFinancer.Tests.Controllers
 {

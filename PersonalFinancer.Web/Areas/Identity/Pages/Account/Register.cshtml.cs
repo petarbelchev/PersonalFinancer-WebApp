@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using static PersonalFinancer.Data.Constants;
+using static PersonalFinancer.Web.Infrastructure.Constants;
 
 namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {

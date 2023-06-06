@@ -1,4 +1,4 @@
-﻿using PersonalFinancer.Data.Contracts;
+﻿using PersonalFinancer.Data.Models.Contracts;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using static PersonalFinancer.Data.Constants.AccountTypeConstants;

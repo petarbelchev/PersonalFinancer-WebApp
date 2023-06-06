@@ -1,13 +1,13 @@
 ﻿using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Models.Enums;
 using PersonalFinancer.Data.Repositories;
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
-using static PersonalFinancer.Data.Constants.PaginationConstants;
+using static PersonalFinancer.Services.Infrastructure.Constants.PaginationConstants;
 
 namespace PersonalFinancer.Tests.Services
 {
@@ -237,10 +237,10 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(actual, Is.Not.Null);
-			Assert.That(actual.Transactions.Count(), Is.EqualTo(expectedTransactions.Count()));
+			Assert.That(actual.Transactions.Count(), Is.EqualTo(expectedTransactions.Length));
 			Assert.That(actual.TotalTransactionsCount, Is.EqualTo(expectedTotalTransactions));
 
-			for (int i = 0; i < expectedTransactions.Count(); i++)
+			for (int i = 0; i < expectedTransactions.Length; i++)
 			{
 				Assert.That(actual.Transactions.ElementAt(i).Id,
 					Is.EqualTo(expectedTransactions.ElementAt(i).Id));
@@ -303,7 +303,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(actual.Accounts.Count(),
-				Is.EqualTo(expectedAccounts.Count()));
+				Is.EqualTo(expectedAccounts.Count));
 
 			for (int i = 0; i < actual.Accounts.Count(); i++)
 			{
@@ -314,7 +314,7 @@ namespace PersonalFinancer.Tests.Services
 			}
 
 			Assert.That(actual.LastTransactions.Count(),
-				Is.EqualTo(expectedLastFiveTransaction.Count()));
+				Is.EqualTo(expectedLastFiveTransaction.Count));
 
 			for (int i = 0; i < actual.LastTransactions.Count(); i++)
 			{

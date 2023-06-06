@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PersonalFinancer.Data;
+using PersonalFinancer.Data.Configurations;
 using PersonalFinancer.Data.Models;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Web.Controllers;
@@ -11,7 +12,7 @@ using PersonalFinancer.Web.Infrastructure.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<SqlDbContext>(options =>
+builder.Services.AddDbContext<PersonalFinancerDbContext>(options =>
 	options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -28,7 +29,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 	options.Password.RequireNonAlphanumeric = false;
 })
 	.AddRoles<IdentityRole>()
-	.AddEntityFrameworkStores<SqlDbContext>();
+	.AddEntityFrameworkStores<PersonalFinancerDbContext>();
 
 builder.Services.AddControllersWithViews(options =>
 {

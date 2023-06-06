@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using PersonalFinancer.Data.Contracts;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Models.Contracts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.ApiService.Models;
 using PersonalFinancer.Services.Messages.Models;
@@ -9,7 +9,7 @@ using PersonalFinancer.Services.User.Models;
 
 namespace PersonalFinancer.Services.Infrastructure
 {
-	public class ServiceMappingProfile : Profile
+    public class ServiceMappingProfile : Profile
 	{
 		public ServiceMappingProfile()
 		{

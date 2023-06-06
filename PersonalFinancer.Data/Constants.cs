@@ -63,40 +63,6 @@
 			public const string CategoryCacheKeyValue = "categories/";
 		}
 
-		public static class HostConstants
-		{
-			public const string ApiCategoriesUrl = "/api/categories/";
-			public const string ApiTransactionsUrl = "/api/transactions/";
-			public const string ApiAccountTypesUrl = "/api/accounttypes/";
-			public const string ApiCurrencyUrl = "/api/currencies/";
-			public const string ApiAccountsUrl = "/api/accounts/";
-			public const string ApiAccountsCashFlowUrl = "/api/accounts/cashflow";
-			public const string ApiAccountTransactionsUrl = "/api/accounts/transactions";
-			public const string ApiUsersUrl = "/api/users/";
-
-			public const string BadRequestImgUrl = "/images/400BadRequest.webp";
-			public const string InternalServerErrorImgUrl = "/images/500InternalServerError.webp";
-			public const string NotFoundImgUrl = "/images/404NotFound.webp";
-		}
-
-		public static class RoleConstants
-		{
-			public const string AdminRoleName = "Administrator";
-			public const string UserRoleName = "User";
-		}
-
-		public static class PaginationConstants
-		{
-			public const int TransactionsPerPage = 10;
-			public const string TransactionsName = "transactions";
-
-			public const string AccountsName = "accounts";
-			public const int AccountsPerPage = 12;
-
-			public const int UsersPerPage = 10;
-			public const string UsersName = "users";
-		}
-
 		public static class SeedConstants
 		{
 			public const string FirstUserId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e";

@@ -1,15 +1,15 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using PersonalFinancer.Data.Contracts;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Models.Contracts;
 using PersonalFinancer.Data.Repositories;
 using PersonalFinancer.Services.ApiService.Models;
 using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Services.ApiService
 {
-	public class ApiService<T> : IApiService<T> where T : ApiEntity, new()
+    public class ApiService<T> : IApiService<T> where T : ApiEntity, new()
     {
         private readonly IEfRepository<T> repo;
         private readonly IMapper mapper;

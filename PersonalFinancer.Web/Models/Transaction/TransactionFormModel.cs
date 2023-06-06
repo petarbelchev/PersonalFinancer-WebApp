@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PersonalFinancer.Data.Enums;
+using PersonalFinancer.Data.Models.Enums;
 using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Web.Infrastructure.ModelBinders;
 using System.ComponentModel.DataAnnotations;

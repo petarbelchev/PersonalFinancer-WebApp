@@ -1,11 +1,11 @@
-﻿using PersonalFinancer.Data.Enums;
+﻿using PersonalFinancer.Data.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using static PersonalFinancer.Data.Constants.TransactionConstants;
 
 namespace PersonalFinancer.Data.Models
 {
-	public class Transaction
+    public class Transaction
 	{
 		[Key]
 		public string Id { get; set; } = null!;

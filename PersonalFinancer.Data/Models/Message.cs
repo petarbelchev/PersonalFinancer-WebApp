@@ -1,4 +1,4 @@
-﻿using PersonalFinancer.Data.Contracts;
+﻿using PersonalFinancer.Data.Models.Contracts;
 
 namespace PersonalFinancer.Data.Models
 {

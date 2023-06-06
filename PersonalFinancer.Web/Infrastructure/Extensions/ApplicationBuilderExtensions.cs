@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using PersonalFinancer.Data;
-using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Models.Enums;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using System.Security.Cryptography;
 using static PersonalFinancer.Data.Constants;
+using static PersonalFinancer.Web.Infrastructure.Constants;
 
 namespace PersonalFinancer.Web.Infrastructure.Extensions
 {
-    public static class ApplicationBuilderExtensions
+	public static class ApplicationBuilderExtensions
     {
         public static IApplicationBuilder SeedUserRoles(this IApplicationBuilder app)
         {
@@ -47,7 +48,7 @@ namespace PersonalFinancer.Web.Infrastructure.Extensions
         {
             using IServiceScope scope = app.ApplicationServices.CreateScope();
             IServiceProvider services = scope.ServiceProvider;
-            var context = services.GetRequiredService<SqlDbContext>();
+            var context = services.GetRequiredService<PersonalFinancerDbContext>();
 
             if (context.Accounts.Any() || context.Transactions.Any())
             {

@@ -2,17 +2,17 @@
 using Microsoft.Extensions.Caching.Memory;
 using NUnit.Framework;
 using PersonalFinancer.Data;
-using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Models.Enums;
 using PersonalFinancer.Tests.Mocks;
 using static PersonalFinancer.Data.Constants.CategoryConstants;
 
 namespace PersonalFinancer.Tests
 {
-	[TestFixture]
+    [TestFixture]
 	abstract class ServicesUnitTestsBase
 	{
-		protected SqlDbContext sqlDbContext;
+		protected PersonalFinancerDbContext sqlDbContext;
 		protected IMapper mapper;
 		protected IMemoryCache memoryCache;
 

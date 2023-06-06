@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Data
+﻿namespace PersonalFinancer.Data.Configurations
 {
     public class MongoDbSettings
     {

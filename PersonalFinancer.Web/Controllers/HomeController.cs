@@ -5,7 +5,7 @@ using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Home;
 using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Data.Constants.HostConstants;
+using static PersonalFinancer.Web.Infrastructure.Constants.HostConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {

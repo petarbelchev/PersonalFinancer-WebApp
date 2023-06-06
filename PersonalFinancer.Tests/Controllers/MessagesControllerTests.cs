@@ -12,7 +12,7 @@ using PersonalFinancer.Tests.Mocks;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Models.Message;
 using System.Security.Claims;
-using static PersonalFinancer.Data.Constants;
+using static PersonalFinancer.Web.Infrastructure.Constants;
 
 namespace PersonalFinancer.Tests.Controllers
 {

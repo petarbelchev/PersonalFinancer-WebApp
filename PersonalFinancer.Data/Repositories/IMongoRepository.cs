@@ -1,10 +1,10 @@
 ﻿using MongoDB.Driver;
-using PersonalFinancer.Data.Contracts;
+using PersonalFinancer.Data.Models.Contracts;
 using System.Linq.Expressions;
 
 namespace PersonalFinancer.Data.Repositories
 {
-	public interface IMongoRepository<T> where T : MongoDocument
+    public interface IMongoRepository<T> where T : MongoDocument
 	{
 		Task InsertOneAsync(T entity);
 

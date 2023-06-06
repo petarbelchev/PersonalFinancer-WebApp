@@ -10,7 +10,7 @@ using PersonalFinancer.Data;
 
 namespace PersonalFinancer.Data.Migrations
 {
-    [DbContext(typeof(SqlDbContext))]
+    [DbContext(typeof(PersonalFinancerDbContext))]
     partial class SqlDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

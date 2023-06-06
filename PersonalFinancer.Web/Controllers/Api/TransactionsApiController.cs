@@ -7,11 +7,11 @@ using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Shared;
 using PersonalFinancer.Web.Models.Transaction;
 using System.Globalization;
-using static PersonalFinancer.Data.Constants.RoleConstants;
+using static PersonalFinancer.Web.Infrastructure.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {
-    [Authorize]
+	[Authorize]
 	[Route("api/transactions")]
 	[ApiController]
 	public class TransactionsApiController : ControllerBase

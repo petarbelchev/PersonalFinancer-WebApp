@@ -1,16 +1,17 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
-using PersonalFinancer.Data.Contracts;
+using PersonalFinancer.Data.Configurations;
+using PersonalFinancer.Data.Models.Contracts;
 
 namespace PersonalFinancer.Data
 {
-	public class MongoDbContext : IMongoDbContext
+	public class MessagesDbContext : IMongoDbContext
 	{
 		private readonly IMongoClient client;
 		private readonly IMongoDatabase database;
 
-		public MongoDbContext(IOptions<MongoDbSettings> settings)
+		public MessagesDbContext(IOptions<MongoDbSettings> settings)
 		{
 			var camelCaseConvension = new ConventionPack { new CamelCaseElementNameConvention() };
 			ConventionRegistry.Register("camelCase", camelCaseConvension, type => true);

@@ -4,10 +4,10 @@ namespace PersonalFinancer.Data.Repositories
 {
 	public class EfRepository<T> : IEfRepository<T> where T : class
 	{
-		private readonly SqlDbContext context;
+		private readonly PersonalFinancerDbContext context;
 		private readonly DbSet<T> dbSet;
 
-		public EfRepository(SqlDbContext context)
+		public EfRepository(PersonalFinancerDbContext context)
 		{
 			this.context = context;
 			this.dbSet = context.Set<T>();

@@ -1,14 +1,14 @@
 ﻿using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using PersonalFinancer.Data.Enums;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Models.Enums;
 using PersonalFinancer.Data.Repositories;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.Accounts.Models;
 using PersonalFinancer.Services.Shared.Models;
 using static PersonalFinancer.Data.Constants.CategoryConstants;
-using static PersonalFinancer.Data.Constants.PaginationConstants;
+using static PersonalFinancer.Services.Infrastructure.Constants.PaginationConstants;
 
 namespace PersonalFinancer.Tests.Services
 {
@@ -57,7 +57,7 @@ namespace PersonalFinancer.Tests.Services
 			Assert.That(newAccount.Balance, Is.EqualTo(inputModel.Balance));
 			Assert.That(newAccount.CurrencyId, Is.EqualTo(inputModel.CurrencyId));
 			Assert.That(newAccount.AccountTypeId, Is.EqualTo(inputModel.AccountTypeId));
-			Assert.That(newAccount.Transactions.Count, Is.EqualTo(1));
+			Assert.That(newAccount.Transactions, Has.Count.EqualTo(1));
 			Assert.That(newAccount.Transactions.First().CategoryId, Is.EqualTo(CatInitialBalance.Id));
 		}
 
@@ -125,7 +125,7 @@ namespace PersonalFinancer.Tests.Services
 				Refference = "Not Initial Balance",
 				TransactionType = TransactionType.Expense
 			};
-			int transactionsCountBefore = Account1User1.Transactions.Count();
+			int transactionsCountBefore = Account1User1.Transactions.Count;
 			decimal balanceBefore = Account1User1.Balance;
 
 			//Act
@@ -134,7 +134,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(transaction, Is.Not.Null);
-			Assert.That(Account1User1.Transactions.Count(), Is.EqualTo(transactionsCountBefore + 1));
+			Assert.That(Account1User1.Transactions, Has.Count.EqualTo(transactionsCountBefore + 1));
 			Assert.That(transaction.Amount, Is.EqualTo(transactionModel.Amount));
 			Assert.That(transaction.CategoryId, Is.EqualTo(transactionModel.CategoryId));
 			Assert.That(transaction.AccountId, Is.EqualTo(transactionModel.AccountId));
@@ -158,7 +158,7 @@ namespace PersonalFinancer.Tests.Services
 				Refference = "Not Initial Balance",
 				TransactionType = TransactionType.Income
 			};
-			int transactionsCountBefore = Account1User1.Transactions.Count();
+			int transactionsCountBefore = Account1User1.Transactions.Count;
 			decimal balanceBefore = Account1User1.Balance;
 
 			//Act
@@ -167,7 +167,7 @@ namespace PersonalFinancer.Tests.Services
 
 			//Assert
 			Assert.That(transaction, Is.Not.Null);
-			Assert.That(Account1User1.Transactions.Count(), Is.EqualTo(transactionsCountBefore + 1));
+			Assert.That(Account1User1.Transactions, Has.Count.EqualTo(transactionsCountBefore + 1));
 			Assert.That(transaction.Amount, Is.EqualTo(transactionModel.Amount));
 			Assert.That(transaction.CategoryId, Is.EqualTo(transactionModel.CategoryId));
 			Assert.That(transaction.AccountId, Is.EqualTo(transactionModel.AccountId));
@@ -230,14 +230,14 @@ namespace PersonalFinancer.Tests.Services
 			var account = await accountsRepo.FindAsync(accId);
 			Assert.That(account, Is.Not.Null);
 			Assert.That(account.IsDeleted, Is.False);
-			Assert.That(account.Transactions.Count, Is.EqualTo(1));
+			Assert.That(account.Transactions, Has.Count.EqualTo(1));
 
 			//Act
 			await accountService.DeleteAccount(accId, User1.Id, isUserAdmin: false, shouldDeleteTransactions: false);
 
 			//Assert that the Account is mark as deleted but Transactions not
 			Assert.That(account.IsDeleted, Is.True);
-			Assert.That(account.Transactions.Count, Is.EqualTo(1));
+			Assert.That(account.Transactions, Has.Count.EqualTo(1));
 		}
 
 		[Test]
@@ -273,7 +273,7 @@ namespace PersonalFinancer.Tests.Services
 			var account = await accountsRepo.FindAsync(accountId);
 			Assert.That(account, Is.Not.Null);
 			Assert.That(account.IsDeleted, Is.False);
-			Assert.That(account.Transactions.Count, Is.EqualTo(1));
+			Assert.That(account.Transactions, Has.Count.EqualTo(1));
 
 			//Arrange
 			int accountsCountBefore = await accountsRepo.All().CountAsync();
@@ -353,7 +353,7 @@ namespace PersonalFinancer.Tests.Services
 			var account = await accountsRepo.FindAsync(accId);
 			Assert.That(account, Is.Not.Null);
 			Assert.That(account.IsDeleted, Is.False);
-			Assert.That(account.Transactions.Count, Is.EqualTo(1));
+			Assert.That(account.Transactions, Has.Count.EqualTo(1));
 
 			//Arrange
 			int accountsCountBefore = await accountsRepo.All().CountAsync();
@@ -400,7 +400,7 @@ namespace PersonalFinancer.Tests.Services
 			var account = await accountsRepo.FindAsync(accId);
 			Assert.That(account, Is.Not.Null);
 			Assert.That(account.IsDeleted, Is.False);
-			Assert.That(account.Transactions.Count, Is.EqualTo(1));
+			Assert.That(account.Transactions, Has.Count.EqualTo(1));
 
 			//Arrange
 			int accountsCountBefore = await accountsRepo.All().CountAsync();
@@ -448,7 +448,7 @@ namespace PersonalFinancer.Tests.Services
 			//Assert
 			Assert.That(Account1User1.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
 			Assert.That(Account1User1.Balance, Is.EqualTo(newBalance));
-			Assert.That(Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
+			Assert.That(Account1User1.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
 			Assert.That(await transactionsRepo.FindAsync(transactionId), Is.Null);
 		}
 
@@ -485,7 +485,7 @@ namespace PersonalFinancer.Tests.Services
 			//Assert
 			Assert.That(Account1User1.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
 			Assert.That(Account1User1.Balance, Is.EqualTo(newBalance));
-			Assert.That(Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
+			Assert.That(Account1User1.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
 			Assert.That(await transactionsRepo.FindAsync(transactionId), Is.Null);
 		}
 
@@ -522,7 +522,7 @@ namespace PersonalFinancer.Tests.Services
 			//Assert
 			Assert.That(Account1User1.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
 			Assert.That(Account1User1.Balance, Is.EqualTo(newBalance));
-			Assert.That(Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
+			Assert.That(Account1User1.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
 			Assert.That(await transactionsRepo.FindAsync(transactionId), Is.Null);
 		}
 
@@ -559,7 +559,7 @@ namespace PersonalFinancer.Tests.Services
 			//Assert
 			Assert.That(Account1User1.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
 			Assert.That(Account1User1.Balance, Is.EqualTo(newBalance));
-			Assert.That(Account1User1.Transactions.Count, Is.EqualTo(transactionsBefore - 1));
+			Assert.That(Account1User1.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
 			Assert.That(await transactionsRepo.FindAsync(transactionId), Is.Null);
 		}
 

@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Data.Contracts
+﻿namespace PersonalFinancer.Data.Models.Contracts
 {
     public abstract class ApiEntity
     {

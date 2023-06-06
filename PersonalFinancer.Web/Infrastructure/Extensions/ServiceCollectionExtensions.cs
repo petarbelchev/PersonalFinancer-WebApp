@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Caching.Memory;
 using PersonalFinancer.Data;
-using PersonalFinancer.Data.Contracts;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Models.Contracts;
 using PersonalFinancer.Data.Repositories;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.ApiService;
@@ -26,7 +26,7 @@ namespace PersonalFinancer.Web.Infrastructure.Extensions
             services.AddScoped<IEfRepository<Currency>, EfRepository<Currency>>();
             services.AddScoped<IEfRepository<Transaction>, EfRepository<Transaction>>();
             services.AddSingleton<IMemoryCache, MemoryCache>();
-            services.AddSingleton<IMongoDbContext, MongoDbContext>();
+            services.AddSingleton<IMongoDbContext, MessagesDbContext>();
             services.AddSingleton<IMongoRepository<Message>, MongoRepository<Message>>();
             services.AddSingleton<IMessagesService, MessagesService>();
             services.AddScoped<IUsersService, UsersService>();

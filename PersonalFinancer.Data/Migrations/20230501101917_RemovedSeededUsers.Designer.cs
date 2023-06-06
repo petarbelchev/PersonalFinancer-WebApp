@@ -11,7 +11,7 @@ using PersonalFinancer.Data;
 
 namespace PersonalFinancer.Data.Migrations
 {
-    [DbContext(typeof(SqlDbContext))]
+    [DbContext(typeof(PersonalFinancerDbContext))]
     [Migration("20230501101917_RemovedSeededUsers")]
     partial class RemovedSeededUsers
     {

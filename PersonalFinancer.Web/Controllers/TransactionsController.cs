@@ -9,11 +9,11 @@ using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Shared;
 using PersonalFinancer.Web.Models.Transaction;
-using static PersonalFinancer.Data.Constants.RoleConstants;
+using static PersonalFinancer.Web.Infrastructure.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {
-    [Authorize]
+	[Authorize]
 	public class TransactionsController : Controller
 	{
 		protected readonly IAccountsService accountsService;

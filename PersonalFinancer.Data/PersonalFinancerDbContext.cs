@@ -5,11 +5,11 @@ using PersonalFinancer.Data.Models;
 
 namespace PersonalFinancer.Data
 {
-	public class SqlDbContext : IdentityDbContext<ApplicationUser>
+	public class PersonalFinancerDbContext : IdentityDbContext<ApplicationUser>
 	{
 		private readonly bool seed;
 
-		public SqlDbContext(DbContextOptions<SqlDbContext> options, bool seed = true)
+		public PersonalFinancerDbContext(DbContextOptions<PersonalFinancerDbContext> options, bool seed = true)
 			: base(options)
 		{
 			if (!this.Database.IsRelational())

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Web.Areas.Admin.Models.Home;
 using PersonalFinancer.Web.Infrastructure.Extensions;
-using static PersonalFinancer.Data.Constants;
+using static PersonalFinancer.Web.Infrastructure.Constants;
 
 namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {

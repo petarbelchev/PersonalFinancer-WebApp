@@ -1,12 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using PersonalFinancer.Data.Contracts;
+using PersonalFinancer.Data.Models.Contracts;
 using System.Linq.Expressions;
 
 namespace PersonalFinancer.Data.Repositories
 {
-	public class MongoRepository<T> : IMongoRepository<T> where T : MongoDocument
+    public class MongoRepository<T> : IMongoRepository<T> where T : MongoDocument
 	{
 		private readonly IMongoCollection<T> collection;
 
