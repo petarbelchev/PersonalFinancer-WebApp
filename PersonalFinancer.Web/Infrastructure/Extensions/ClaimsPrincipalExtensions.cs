@@ -15,5 +15,8 @@ namespace PersonalFinancer.Web.Infrastructure.Extensions
 
         public static bool IsAdmin(this ClaimsPrincipal user)
             => user.IsInRole(AdminRoleName);
+
+        public static string GetUserName(this ClaimsPrincipal user)
+            => user.FindFirstValue(ClaimTypes.Name);
     }
 }

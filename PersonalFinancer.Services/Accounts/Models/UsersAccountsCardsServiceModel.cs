@@ -2,7 +2,7 @@
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-    public class UsersAccountCardsServiceModel
+    public class UsersAccountsCardsServiceModel
 	{
 		public IEnumerable<AccountCardServiceModel> Accounts { get; set; } = null!;
 

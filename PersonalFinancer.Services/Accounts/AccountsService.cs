@@ -349,9 +349,9 @@ namespace PersonalFinancer.Services.Accounts
 			return accountTransactions;
 		}
 
-		public async Task<UsersAccountCardsServiceModel> GetAccountCardsData(int page)
+		public async Task<UsersAccountsCardsServiceModel> GetAccountsCardsData(int page)
 		{
-			var outputModel = new UsersAccountCardsServiceModel
+			var outputModel = new UsersAccountsCardsServiceModel
 			{
 				Accounts = await accountsRepo.All()
 					.Where(a => !a.IsDeleted)

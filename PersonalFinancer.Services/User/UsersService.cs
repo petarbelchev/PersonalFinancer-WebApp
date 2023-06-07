@@ -44,7 +44,7 @@ namespace PersonalFinancer.Services.User
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<string> FullName(string userId)
+		public async Task<string> UserFullName(string userId)
 		{
 			string fullName = await usersRepo.All()
 				.Where(u => u.Id == userId)
@@ -152,11 +152,7 @@ namespace PersonalFinancer.Services.User
 		}
 
 		public async Task<int> GetUsersAccountsCount()
-		{
-			int accountsCount = await accountsRepo.All().CountAsync(a => !a.IsDeleted);
-
-			return accountsCount;
-		}
+			=> await accountsRepo.All().CountAsync(a => !a.IsDeleted);
 
 		public async Task<TransactionsServiceModel> GetUserTransactions(
 			string userId, DateTime startDate, DateTime endDate, int page = 1)
@@ -267,6 +263,7 @@ namespace PersonalFinancer.Services.User
 			return result;
 		}
 
-		public async Task<int> UsersCount() => await usersRepo.All().CountAsync();
+		public async Task<int> UsersCount() 
+			=> await usersRepo.All().CountAsync();
 	}
 }

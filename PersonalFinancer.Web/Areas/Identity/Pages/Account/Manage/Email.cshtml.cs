@@ -51,22 +51,21 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
 		public async Task<IActionResult> OnGetAsync()
 		{
 			var user = await userManager.GetUserAsync(User);
+
 			if (user == null)
-			{
 				return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
-			}
 
 			await LoadAsync(user);
+
 			return Page();
 		}
 
 		public async Task<IActionResult> OnPostChangeEmailAsync()
 		{
 			var user = await userManager.GetUserAsync(User);
+
 			if (user == null)
-			{
 				return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
-			}
 
 			if (!ModelState.IsValid)
 			{
@@ -100,10 +99,9 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
 		public async Task<IActionResult> OnPostSendVerificationEmailAsync()
 		{
 			var user = await userManager.GetUserAsync(User);
+
 			if (user == null)
-			{
 				return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
-			}
 
 			if (!ModelState.IsValid)
 			{

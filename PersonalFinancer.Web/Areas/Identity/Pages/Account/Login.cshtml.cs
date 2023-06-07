@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using PersonalFinancer.Data.Models;
 using System.ComponentModel.DataAnnotations;
+using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
@@ -30,12 +31,15 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 
 		public class InputModel
 		{
-			[Required]
-			[EmailAddress]
-			public string Email { get; set; } = null!;
+            [Required(ErrorMessage = "Email address is required.")]
+            [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+            [Display(Name = "Email")]
+            public string Email { get; set; } = null!;
 
-			[Required]
-			[DataType(DataType.Password)]
+            [Required(ErrorMessage = "Password is required.")]
+            [DataType(DataType.Password)]
+            [StringLength(UserConstants.UserPasswordMaxLength, MinimumLength = UserConstants.UserPasswordMinLength,
+                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
 			public string Password { get; set; } = null!;
 
 			[Display(Name = "Remember me?")]
@@ -60,8 +64,9 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 
 			if (ModelState.IsValid)
 			{
+				var user = await signInManager.UserManager.FindByEmailAsync(Input.Email);
 				var result = await signInManager.PasswordSignInAsync(
-					Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+					user , Input.Password, Input.RememberMe, lockoutOnFailure: false);
 
 				if (result.Succeeded)
 				{

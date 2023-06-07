@@ -27,8 +27,8 @@ namespace PersonalFinancer.Web.Controllers.Api
 		[HttpGet("{page}")]
 		public async Task<IActionResult> GetAccounts(int page)
 		{
-			UsersAccountCardsServiceModel usersCardsData =
-				await accountService.GetAccountCardsData(page);
+			UsersAccountsCardsServiceModel usersCardsData =
+				await accountService.GetAccountsCardsData(page);
 
 			var usersCardsModel = new UsersAccountCardsViewModel
 			{

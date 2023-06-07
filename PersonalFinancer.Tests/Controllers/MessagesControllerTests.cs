@@ -200,7 +200,7 @@ namespace PersonalFinancer.Tests.Controllers
 			string newMessage = "new message id";
 
 			this.usersServiceMock.Setup(x => x
-				.FullName(this.userId))
+				.UserFullName(this.userId))
 				.ReturnsAsync(fullName);
 
 			this.messagesServiceMock.Setup(x => 
@@ -466,7 +466,7 @@ namespace PersonalFinancer.Tests.Controllers
 				.Returns(false);
 			
 			this.usersServiceMock.Setup(x => x
-				.FullName(this.userId))
+				.UserFullName(this.userId))
 				.ReturnsAsync(userName);
 
 			//Act
@@ -504,7 +504,7 @@ namespace PersonalFinancer.Tests.Controllers
 				.Returns(false);
 			
 			this.usersServiceMock.Setup(x => x
-				.FullName(this.userId))
+				.UserFullName(this.userId))
 				.ReturnsAsync(userName);
 
 			this.messagesServiceMock.Setup(x => x
@@ -540,7 +540,7 @@ namespace PersonalFinancer.Tests.Controllers
 				.Returns(false);
 			
 			this.usersServiceMock.Setup(x => x
-				.FullName(this.userId))
+				.UserFullName(this.userId))
 				.ReturnsAsync(userName);
 
 			this.messagesServiceMock.Setup(x => x

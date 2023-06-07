@@ -2,7 +2,6 @@
 @using PersonalFinancer.Data.Models;
 @using PersonalFinancer.Services.User;
 @using PersonalFinancer.Web.Infrastructure.Extensions;
-@inject IUsersService userService
 
 <ul class="navbar-nav">
 	@if (User?.Identity?.IsAuthenticated ?? false)
@@ -27,7 +26,7 @@
 		}
 		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-				@await userService.FullName(User.Id())
+				@User.GetUserName()
 			</a>
 			<ul class="dropdown-menu dropdown-menu-end">
 				<li><a class="nav-link btn btn-link dropdown-item text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" 

@@ -41,7 +41,7 @@ namespace PersonalFinancer.Tests.Services
 			string expectedFullName = $"{User1.FirstName} {User1.LastName}";
 
 			//Act
-			string actualFullName = await userService.FullName(User1.Id);
+			string actualFullName = await userService.UserFullName(User1.Id);
 
 			//Assert
 			Assert.That(actualFullName, Is.EqualTo(expectedFullName));
@@ -51,7 +51,7 @@ namespace PersonalFinancer.Tests.Services
 		public void FullName_ShouldThrowException_WithInvalidId()
 		{
 			//Act & Assert
-			Assert.That(async () => await userService.FullName(Guid.NewGuid().ToString()),
+			Assert.That(async () => await userService.UserFullName(Guid.NewGuid().ToString()),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 

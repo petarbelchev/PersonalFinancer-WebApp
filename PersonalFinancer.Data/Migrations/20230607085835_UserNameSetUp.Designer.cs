@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonalFinancer.Data;
 
@@ -11,9 +12,10 @@ using PersonalFinancer.Data;
 namespace PersonalFinancer.Data.Migrations
 {
     [DbContext(typeof(PersonalFinancerDbContext))]
-    partial class SqlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230607085835_UserNameSetUp")]
+    partial class UserNameSetUp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -325,39 +327,39 @@ namespace PersonalFinancer.Data.Migrations
                         {
                             Id = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "9a78bb41-23fa-47fb-90a0-62907ab9e8f5",
+                            ConcurrencyStamp = "5b55326d-4359-43cc-87ac-020190bd037b",
                             Email = "petar@mail.com",
                             EmailConfirmed = true,
                             FirstName = "Petar",
                             LastName = "Petrov",
                             LockoutEnabled = false,
                             NormalizedEmail = "PETAR@MAIL.COM",
-                            NormalizedUserName = "PETAR2023",
-                            PasswordHash = "AQAAAAEAACcQAAAAEKKcpPnikjIz8XFbqVXwactNB5DG/1Q3+6b4zChfzFFGQErJReaI/6a5p8BqJSwvHg==",
+                            NormalizedUserName = "PETAR@MAIL.COM",
+                            PasswordHash = "AQAAAAEAACcQAAAAEAvyvw3yLsNoddmlQFNrCyXYVwr3tw4FyWgb6a9NqObDII8HMymTByRjDS4yM6q/5g==",
                             PhoneNumber = "1234567890",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "c4c98fb3-6ef7-4af0-b8ea-0b1a257eb082",
+                            SecurityStamp = "faedf0c4-5a5d-46f6-b676-3df6b0008074",
                             TwoFactorEnabled = false,
-                            UserName = "petar2023"
+                            UserName = "petar@mail.com"
                         },
                         new
                         {
                             Id = "dea12856-c198-4129-b3f3-b893d8395082",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "205a00be-497b-400c-b6eb-a00762475c14",
+                            ConcurrencyStamp = "c8da0524-4896-4f94-8b7d-decba2d9ed5d",
                             Email = "admin@admin.com",
                             EmailConfirmed = true,
                             FirstName = "Great",
                             LastName = "Admin",
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@ADMIN.COM",
-                            NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAEAACcQAAAAELWShCXkxAcWe+S6VqGEjSzKnoB/Q8wgcPYDKq0ZbPmPcx2eW+0uXO56ztWpuf51LQ==",
+                            NormalizedUserName = "ADMIN@ADMIN.COM",
+                            PasswordHash = "AQAAAAEAACcQAAAAEIc4sUh1KwbLMfdqzuZVRW7RtBhNFUBH9ioSHiN22HT89CSv1qRzNOpQzukTVxDFMA==",
                             PhoneNumber = "0987654321",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "c7a0d380-65a9-4417-84d6-820a36cf3de5",
+                            SecurityStamp = "eecfbb6e-7f71-46d1-9220-f4b2b48f9d69",
                             TwoFactorEnabled = false,
-                            UserName = "admin"
+                            UserName = "admin@admin.com"
                         });
                 });
 

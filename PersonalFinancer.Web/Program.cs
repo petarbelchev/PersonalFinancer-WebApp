@@ -48,7 +48,7 @@ builder.Services.AddAutoMapper(
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-	options.AccessDeniedPath = "/Home/AccessDenied";
+	options.Cookie.HttpOnly = true;
 });
 
 var app = builder.Build();

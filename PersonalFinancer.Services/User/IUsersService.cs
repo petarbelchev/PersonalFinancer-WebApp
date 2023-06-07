@@ -9,7 +9,7 @@ namespace PersonalFinancer.Services.User
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task<string> FullName(string userId);
+		Task<string> UserFullName(string userId);
 
 		Task<UsersServiceModel> GetAllUsers(int page);
 		

@@ -25,8 +25,8 @@ namespace PersonalFinancer.Data.Seeding
 				LastName = "Petrov",
 				Email = "petar@mail.com",
 				NormalizedEmail = "PETAR@MAIL.COM",
-				UserName = "petar@mail.com",
-				NormalizedUserName = "PETAR@MAIL.COM",
+				UserName = "petar2023",
+				NormalizedUserName = "PETAR2023",
 				PhoneNumber = "1234567890",
 				EmailConfirmed = true
 			};
@@ -40,8 +40,8 @@ namespace PersonalFinancer.Data.Seeding
 				LastName = "Admin",
 				Email = "admin@admin.com",
 				NormalizedEmail = "ADMIN@ADMIN.COM",
-				UserName = "admin@admin.com",
-				NormalizedUserName = "ADMIN@ADMIN.COM",
+				UserName = "admin",
+				NormalizedUserName = "ADMIN",
 				PhoneNumber = "0987654321",
 				EmailConfirmed = true
 			};

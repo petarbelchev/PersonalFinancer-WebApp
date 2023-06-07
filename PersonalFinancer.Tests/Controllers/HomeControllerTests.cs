@@ -329,15 +329,5 @@ namespace PersonalFinancer.Tests.Controllers
 			Assert.That(viewBagValues.First(), 
 				Is.EqualTo(HostConstants.InternalServerErrorImgUrl));
 		}
-		
-		[Test]
-		public void AccessDenied_ShouldReturnCorrectViewResult()
-		{
-			//Act
-			ViewResult viewResult = (ViewResult)controller.AccessDenied();
-
-			//Assert
-			Assert.That(viewResult, Is.Not.Null);
-		}
 	}
 }

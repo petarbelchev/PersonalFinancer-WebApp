@@ -1146,7 +1146,7 @@ namespace PersonalFinancer.Tests.Services
 				.CountAsync(a => !a.IsDeleted);
 
 			//Act
-			var actual = await accountService.GetAccountCardsData(1);
+			var actual = await accountService.GetAccountsCardsData(1);
 
 			//Assert
 			Assert.That(actual, Is.Not.Null);

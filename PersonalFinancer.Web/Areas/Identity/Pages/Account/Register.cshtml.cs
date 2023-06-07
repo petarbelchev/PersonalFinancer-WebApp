@@ -15,21 +15,16 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<ApplicationUser> userManager;
-        private readonly IUserStore<ApplicationUser> userStore;
-        private readonly IUserEmailStore<ApplicationUser> emailStore;
         private readonly ILogger<RegisterModel> logger;
         private readonly IEmailSender emailSender;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
-            IUserStore<ApplicationUser> userStore,
             SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
             this.userManager = userManager;
-            this.userStore = userStore;
-            this.emailStore = GetEmailStore();
             this.signInManager = signInManager;
             this.logger = logger;
             this.emailSender = emailSender;
@@ -42,15 +37,21 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+            [Required(ErrorMessage = "Username is required.")]
+            [StringLength(UserConstants.UserNameMaxLength, MinimumLength = UserConstants.UserNameMinLength,
+                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
+            [Display(Name = "Username")]
+            public string UserName { get; set; } = null!;
+
             [Required(ErrorMessage = "First Name is required.")]
             [StringLength(UserConstants.UserFirstNameMaxLength, MinimumLength = UserConstants.UserFirstNameMinLength,
-                ErrorMessage = "First name must be between {2} and {1} characters long.")]
+                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
             [Display(Name = "First Name")]
             public string FirstName { get; set; } = null!;
 
             [Required(ErrorMessage = "Last Name is required.")]
             [StringLength(UserConstants.UserLastNameMaxLength, MinimumLength = UserConstants.UserLastNameMinLength,
-                ErrorMessage = "Last name must be between {2} and {1} characters long.")]
+                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
             [Display(Name = "Last Name")]
             public string LastName { get; set; } = null!;
 
@@ -62,17 +63,17 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
             [Required(ErrorMessage = "Password is required.")]
             [DataType(DataType.Password)]
             [StringLength(UserConstants.UserPasswordMaxLength, MinimumLength = UserConstants.UserPasswordMinLength,
-                ErrorMessage = "Password must be between {2} and {1} characters long.")]
+                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
             public string Password { get; set; } = null!;
 
             [Required(ErrorMessage = "Confirm Password is required.")]
             [DataType(DataType.Password)]
-            [Compare(nameof(Password), ErrorMessage = "Password do not match.")]
+            [Compare(nameof(Password), ErrorMessage = "The {0} do not match.")]
             [Display(Name = "Confirm Password")]
             public string ConfirmPassword { get; set; } = null!;
 
             [DataType(DataType.PhoneNumber)]
-            [RegularExpression(@"^\d{10}$", ErrorMessage = "Phone number must be 10 digits.")]
+            [RegularExpression(@"^\d{10}$", ErrorMessage = "The {0} must be 10 digits.")]
             [Display(Name = "Phone number")]
             public string? PhoneNumber { get; set; }
         }
@@ -91,14 +92,13 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
             {
                 var user = new ApplicationUser
                 {
+                    UserName = Input.UserName,
                     FirstName = Input.FirstName,
                     LastName = Input.LastName,
                     Email = Input.Email,
                     PhoneNumber = Input.PhoneNumber
                 };
 
-                await userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-                await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var creationResult = await userManager.CreateAsync(user, Input.Password);
 
                 if (creationResult.Succeeded)
@@ -135,14 +135,6 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
             }
 
             return Page();
-        }
-
-        private IUserEmailStore<ApplicationUser> GetEmailStore()
-        {
-            if (!userManager.SupportsUserEmail)
-                throw new NotSupportedException("The default UI requires a user store with email support.");
-
-            return (IUserEmailStore<ApplicationUser>)userStore;
         }
     }
 }

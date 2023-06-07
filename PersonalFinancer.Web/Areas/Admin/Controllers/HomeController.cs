@@ -23,7 +23,7 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 			{
 				RegisteredUsers = await userService.UsersCount(),
 				CreatedAccounts = await userService.GetUsersAccountsCount(),
-				AdminFullName = await userService.FullName(User.Id()),
+				AdminFullName = await userService.UserFullName(User.Id()),
 				AccountsCashFlowEndpoint = HostConstants.ApiAccountsCashFlowUrl
 			});
 		}

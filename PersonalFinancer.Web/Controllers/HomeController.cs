@@ -80,7 +80,5 @@ namespace PersonalFinancer.Web.Controllers
 
 			return View();
 		}
-
-		public IActionResult AccessDenied() => View();
 	}
 }

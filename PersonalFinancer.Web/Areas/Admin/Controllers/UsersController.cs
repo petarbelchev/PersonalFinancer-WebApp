@@ -27,6 +27,15 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 		}
 
 		public async Task<IActionResult> Details(string id)
-			=> View(await userService.UserDetails(id));
+		{
+			try
+			{
+				return View(await userService.UserDetails(id));
+			}
+			catch (InvalidOperationException)
+			{
+				return BadRequest();
+			}
+		}
 	}
 }

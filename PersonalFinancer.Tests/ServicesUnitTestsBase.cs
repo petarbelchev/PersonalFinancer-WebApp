@@ -67,18 +67,18 @@ namespace PersonalFinancer.Tests
 			User1 = new ApplicationUser
 			{
 				Id = user1Id,
+				UserName = "petar",
 				FirstName = "Petar",
 				LastName = "Petrov",
-				Email = "petar@mail.com",
-				UserName = "petar@mail.com",
+				Email = "petar@mail.com"
 			};
 			User2 = new ApplicationUser
 			{
 				Id = user2Id,
+				UserName = "todor",
 				FirstName = "Todor",
 				LastName = "Todorov",
-				Email = "todor@mail.com",
-				UserName = "todor@mail.com",
+				Email = "todor@mail.com"
 			};
 
 			await sqlDbContext.Users.AddRangeAsync(User1, User2);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PersonalFinancer.Data.Models;
+using static PersonalFinancer.Data.Constants.UserConstants;
 
 namespace PersonalFinancer.Data.Configurations
 {
@@ -8,6 +9,11 @@ namespace PersonalFinancer.Data.Configurations
 	{
 		public void Configure(EntityTypeBuilder<ApplicationUser> builder)
 		{
+			builder
+				.Property(p => p.UserName)
+				.HasMaxLength(UserNameMaxLength)
+				.IsRequired();
+
 			builder
 				.HasMany(a => a.Transactions)
 				.WithOne(a => a.Owner)

@@ -99,7 +99,7 @@ namespace PersonalFinancer.Services.Accounts
 		Task<TransactionDetailsServiceModel> GetTransactionDetails(
 			string transactionId, string ownerId, bool isUserAdmin);
 
-		Task<UsersAccountCardsServiceModel> GetAccountCardsData(int page);
+		Task<UsersAccountsCardsServiceModel> GetAccountsCardsData(int page);
 
 		Task<IEnumerable<CurrencyCashFlowServiceModel>> GetCurrenciesCashFlow();
 

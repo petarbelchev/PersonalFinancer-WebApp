@@ -22,8 +22,8 @@ namespace PersonalFinancer.Web.Areas.Admin.Controllers
 
 		public async Task<IActionResult> Index(int page = 1)
 		{
-			UsersAccountCardsServiceModel usersAccountCardsData =
-				await accountService.GetAccountCardsData(page);
+			UsersAccountsCardsServiceModel usersAccountCardsData =
+				await accountService.GetAccountsCardsData(page);
 
 			var viewModel = new UsersAccountCardsViewModel
 			{

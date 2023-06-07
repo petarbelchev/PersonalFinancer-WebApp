@@ -50,7 +50,7 @@ namespace PersonalFinancer.Web.Controllers
 				.CreateAsync(new MessageInputServiceModel
 				{
 					AuthorId = User.Id(),
-					AuthorName = await usersService.FullName(User.Id()),
+					AuthorName = await usersService.UserFullName(User.Id()),
 					Subject = model.Subject,
 					Content = model.Content
 				});
@@ -114,7 +114,7 @@ namespace PersonalFinancer.Web.Controllers
 				{
 					MessageId = inputModel.Id,
 					AuthorId = User.Id(),
-					AuthorName = await usersService.FullName(User.Id()),
+					AuthorName = await usersService.UserFullName(User.Id()),
 					IsAuthorAdmin = User.IsAdmin(),
 					Content = inputModel.ReplyContent
 				});
