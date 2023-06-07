@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using static PersonalFinancer.Web.Infrastructure.Constants.RoleConstants;
+using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Infrastructure.Extensions
 {

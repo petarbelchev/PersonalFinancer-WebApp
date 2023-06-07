@@ -7,7 +7,7 @@ using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Account;
 using PersonalFinancer.Web.Models.Shared;
 using System.Globalization;
-using static PersonalFinancer.Web.Infrastructure.Constants;
+using static PersonalFinancer.Data.Constants;
 
 namespace PersonalFinancer.Web.Controllers.Api
 {

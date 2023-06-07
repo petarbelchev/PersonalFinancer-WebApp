@@ -85,7 +85,7 @@ app.UseEndpoints(endpoints =>
 
 app.MapRazorPages();
 
-app.SeedUserRoles();
+app.SeedRoles();
 app.SeedAccountsAndTransactions();
 
 app.Run();

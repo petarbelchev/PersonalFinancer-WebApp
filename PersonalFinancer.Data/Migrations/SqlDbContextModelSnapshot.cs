@@ -195,7 +195,7 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Accounts");
+                    b.ToTable("Accounts", (string)null);
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.AccountType", b =>
@@ -219,7 +219,7 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("AccountTypes");
+                    b.ToTable("AccountTypes", (string)null);
 
                     b.HasData(
                         new
@@ -381,7 +381,7 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
 
                     b.HasData(
                         new
@@ -463,7 +463,7 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Currencies");
+                    b.ToTable("Currencies", (string)null);
 
                     b.HasData(
                         new
@@ -531,7 +531,7 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Transactions", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

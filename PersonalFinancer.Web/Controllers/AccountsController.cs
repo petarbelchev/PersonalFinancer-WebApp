@@ -7,7 +7,7 @@ using PersonalFinancer.Services.User;
 using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Account;
-using static PersonalFinancer.Web.Infrastructure.Constants.RoleConstants;
+using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {

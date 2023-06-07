@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PersonalFinancer.Data.Models;
 using static PersonalFinancer.Data.Constants.SeedConstants;
 
-namespace PersonalFinancer.Data.Configurations
+namespace PersonalFinancer.Data.Seeding
 {
-	internal class UserEntityTypeConfiguration : IEntityTypeConfiguration<ApplicationUser>
+	internal class UsersSeedConfiguration : IEntityTypeConfiguration<ApplicationUser>
 	{
 		public void Configure(EntityTypeBuilder<ApplicationUser> builder)
 		{

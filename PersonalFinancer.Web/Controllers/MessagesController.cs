@@ -6,7 +6,7 @@ using PersonalFinancer.Services.Messages.Models;
 using PersonalFinancer.Services.User;
 using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Message;
-using static PersonalFinancer.Web.Infrastructure.Constants.RoleConstants;
+using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {

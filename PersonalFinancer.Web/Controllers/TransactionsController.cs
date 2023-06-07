@@ -9,7 +9,7 @@ using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Infrastructure.Extensions;
 using PersonalFinancer.Web.Models.Shared;
 using PersonalFinancer.Web.Models.Transaction;
-using static PersonalFinancer.Web.Infrastructure.Constants.RoleConstants;
+using static PersonalFinancer.Data.Constants.RoleConstants;
 
 namespace PersonalFinancer.Web.Controllers
 {

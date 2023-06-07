@@ -44,12 +44,10 @@
 		public class TransactionConstants
 		{
 			public const int TransactionRefferenceMaxLength = 100;
-			public const int TransactionRefferenceMinLength = 4;
-			
+			public const int TransactionRefferenceMinLength = 4;			
 
 			public const double TransactionMaxValue = 100_000.00;
 			public const double TransactionMinValue = 0.01;
-
 		}
 
 		public class CategoryConstants
@@ -88,6 +86,12 @@
 			public const string BankBgnAccountId = "ba7def5d-b00c-4e05-8d0b-5df2c47273b5";
 			public const string BankEurAccountId = "44c67e3a-2dfe-491c-b7fc-eb78fe8b8946";
 			public const string BankUsdAccountId = "303430dc-63a3-4436-8907-a274ec29f608";
+		}
+
+		public static class RoleConstants
+		{
+			public const string AdminRoleName = "Administrator";
+			public const string UserRoleName = "User";
 		}
 	}
 }

@@ -8,6 +8,7 @@ using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Models.Home;
 using PersonalFinancer.Web.Models.Shared;
+using static PersonalFinancer.Data.Constants;
 using static PersonalFinancer.Web.Infrastructure.Constants;
 
 namespace PersonalFinancer.Tests.Controllers

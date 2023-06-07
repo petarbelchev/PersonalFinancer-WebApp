@@ -2,26 +2,25 @@
 using Microsoft.EntityFrameworkCore;
 using PersonalFinancer.Data.Configurations;
 using PersonalFinancer.Data.Models;
+using PersonalFinancer.Data.Seeding;
 
 namespace PersonalFinancer.Data
 {
 	public class PersonalFinancerDbContext : IdentityDbContext<ApplicationUser>
 	{
-		private readonly bool seed;
+		private readonly bool shouldSeedDb;
 
-		public PersonalFinancerDbContext(DbContextOptions<PersonalFinancerDbContext> options, bool seed = true)
+		public PersonalFinancerDbContext(
+			DbContextOptions<PersonalFinancerDbContext> options, 
+			bool shouldSeedDb = true)
 			: base(options)
 		{
 			if (!this.Database.IsRelational())
 			{
 				this.Database.EnsureCreated();
 			}
-			else
-			{
-				this.Database.Migrate();
-			}
 
-			this.seed = seed;
+			this.shouldSeedDb = shouldSeedDb;
 		}
 
 		public DbSet<Account> Accounts { get; set; } = null!;
@@ -38,32 +37,17 @@ namespace PersonalFinancer.Data
 		{
 			base.OnModelCreating(builder);
 
-			builder.Entity<ApplicationUser>(b =>
-			{
-				b.HasMany(a => a.Transactions).WithOne(a => a.Owner).OnDelete(DeleteBehavior.Restrict);
-			});
+			builder.ApplyConfiguration(new UserEntityConfiguration());
+			builder.ApplyConfiguration(new AccountTypeEntityConfiguration());
+			builder.ApplyConfiguration(new CurrencyEntityConfiguration());
+			builder.ApplyConfiguration(new CategoryEntityConfiguration());
 
-			builder.Entity<Currency>(b =>
+			if (shouldSeedDb)
 			{
-				b.HasMany(c => c.Accounts).WithOne(a => a.Currency).OnDelete(DeleteBehavior.Restrict);
-			});
-
-			builder.Entity<AccountType>(b =>
-			{
-				b.HasMany(a => a.Accounts).WithOne(a => a.AccountType).OnDelete(DeleteBehavior.Restrict);
-			});
-
-			builder.Entity<Category>(b =>
-			{
-				b.HasMany(c => c.Transactions).WithOne(t => t.Category).OnDelete(DeleteBehavior.Restrict);
-			});
-
-			if (this.seed)
-			{
-				builder.ApplyConfiguration(new UserEntityTypeConfiguration());
-				builder.ApplyConfiguration(new AccountTypeEntityTypeConfiguration());
-				builder.ApplyConfiguration(new CurrencyTypeEntityTypeConfiguration());
-				builder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
+				builder.ApplyConfiguration(new UsersSeedConfiguration());
+				builder.ApplyConfiguration(new AccountTypeSeedConfiguration());
+				builder.ApplyConfiguration(new CurrencySeedConfiguration());
+				builder.ApplyConfiguration(new CategorySeedConfiguration());
 			}
 		}
 	}

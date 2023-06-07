@@ -9,6 +9,7 @@ using PersonalFinancer.Services.Shared.Models;
 using PersonalFinancer.Services.User.Models;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Models.Account;
+using static PersonalFinancer.Data.Constants;
 using static PersonalFinancer.Services.Infrastructure.Constants;
 using static PersonalFinancer.Web.Infrastructure.Constants;
 

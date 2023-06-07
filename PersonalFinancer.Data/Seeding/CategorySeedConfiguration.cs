@@ -4,9 +4,9 @@ using PersonalFinancer.Data.Models;
 using static PersonalFinancer.Data.Constants.CategoryConstants;
 using static PersonalFinancer.Data.Constants.SeedConstants;
 
-namespace PersonalFinancer.Data.Configurations
+namespace PersonalFinancer.Data.Seeding
 {
-	internal class CategoryEntityTypeConfiguration : IEntityTypeConfiguration<Category>
+	internal class CategorySeedConfiguration : IEntityTypeConfiguration<Category>
 	{
 		public void Configure(EntityTypeBuilder<Category> builder)
 		{

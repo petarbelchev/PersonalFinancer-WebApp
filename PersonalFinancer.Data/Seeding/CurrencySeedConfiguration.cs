@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using PersonalFinancer.Data.Models;
 using static PersonalFinancer.Data.Constants.SeedConstants;
 
-namespace PersonalFinancer.Data.Configurations
+namespace PersonalFinancer.Data.Seeding
 {
-	internal class CurrencyTypeEntityTypeConfiguration : IEntityTypeConfiguration<Currency>
+	internal class CurrencySeedConfiguration : IEntityTypeConfiguration<Currency>
 	{
 		public void Configure(EntityTypeBuilder<Currency> builder)
 		{
