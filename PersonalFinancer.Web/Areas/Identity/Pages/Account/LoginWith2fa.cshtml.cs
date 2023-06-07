@@ -43,9 +43,7 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 			var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
 
 			if (user == null)
-			{
 				throw new InvalidOperationException($"Unable to load two-factor authentication user.");
-			}
 
 			ReturnUrl = returnUrl;
 			RememberMe = rememberMe;
@@ -56,17 +54,14 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 		public async Task<IActionResult> OnPostAsync(bool rememberMe, string? returnUrl = null)
 		{
 			if (!ModelState.IsValid)
-			{
 				return Page();
-			}
 
 			returnUrl ??= Url.Content("~/");
 
 			var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
+
 			if (user == null)
-			{
 				throw new InvalidOperationException($"Unable to load two-factor authentication user.");
-			}
 
 			var authenticatorCode = Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
 

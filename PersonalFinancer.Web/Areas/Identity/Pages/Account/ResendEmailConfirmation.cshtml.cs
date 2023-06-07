@@ -42,9 +42,7 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
-            {
                 return Page();
-            }
 
             var user = await userManager.FindByEmailAsync(Input.Email);
 

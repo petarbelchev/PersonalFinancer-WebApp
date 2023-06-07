@@ -8,7 +8,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using static PersonalFinancer.Data.Constants;
-using static PersonalFinancer.Web.Infrastructure.Constants;
 
 namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
@@ -130,22 +129,19 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
                         return LocalRedirect(returnUrl);
                     }
                 }
+
                 foreach (var error in creationResult.Errors)
-                {
                     ModelState.AddModelError(string.Empty, error.Description);
-                }
             }
 
-            // If we got this far, something failed, redisplay form
             return Page();
         }
 
         private IUserEmailStore<ApplicationUser> GetEmailStore()
         {
             if (!userManager.SupportsUserEmail)
-            {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
-            }
+
             return (IUserEmailStore<ApplicationUser>)userStore;
         }
     }
