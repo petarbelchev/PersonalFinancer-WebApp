@@ -1,8 +1,8 @@
-﻿using System.Security.Claims;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Infrastructure.Extensions
+﻿namespace PersonalFinancer.Web.Infrastructure.Extensions
 {
+    using System.Security.Claims;
+    using static PersonalFinancer.Data.Constants.RoleConstants;
+
     public static class ClaimsPrincipalExtensions
     {
         /// <summary>
@@ -10,8 +10,8 @@ namespace PersonalFinancer.Web.Infrastructure.Extensions
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public static string Id(this ClaimsPrincipal user)
-            => user.FindFirstValue(ClaimTypes.NameIdentifier);
+        public static Guid Id(this ClaimsPrincipal user)
+            => Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier));
 
         public static bool IsAdmin(this ClaimsPrincipal user)
             => user.IsInRole(AdminRoleName);

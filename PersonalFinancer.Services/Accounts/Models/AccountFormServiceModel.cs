@@ -1,11 +1,11 @@
-﻿using PersonalFinancer.Services.Shared.Models;
-
-namespace PersonalFinancer.Services.Accounts.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class AccountFormServiceModel : AccountFormShortServiceModel
-	{
-		public IEnumerable<CurrencyServiceModel> Currencies { get; set; } = null!;
+    using PersonalFinancer.Services.Shared.Models;
 
-		public IEnumerable<AccountTypeServiceModel> AccountTypes { get; set; } = null!;
-	}
+    public class AccountFormServiceModel : AccountFormShortServiceModel
+    {
+        public IEnumerable<CurrencyServiceModel> Currencies { get; set; } = null!;
+
+        public IEnumerable<AccountTypeServiceModel> AccountTypes { get; set; } = null!;
+    }
 }

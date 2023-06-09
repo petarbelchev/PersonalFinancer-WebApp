@@ -2,7 +2,7 @@
 {
     public class CategoryServiceModel
     {
-        public string Id { get; set; } = null!;
+        public Guid Id { get; set; }
 
         public string Name { get; init; } = null!;
     }

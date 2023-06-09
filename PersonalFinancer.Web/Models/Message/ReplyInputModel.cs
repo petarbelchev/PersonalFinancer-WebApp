@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PersonalFinancer.Web.Models.Message
+﻿namespace PersonalFinancer.Web.Models.Message
 {
-	public class ReplyInputModel
+    using System.ComponentModel.DataAnnotations;
+
+    public class ReplyInputModel
 	{
 		[Required]
 		public string Id { get; set; } = null!;

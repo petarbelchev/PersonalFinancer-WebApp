@@ -1,17 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using PersonalFinancer.Data.Models;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using System.Text.Encodings.Web;
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	public class RegisterModel : PageModel
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Identity.UI.Services;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.WebUtilities;
+    using PersonalFinancer.Data.Models;
+    using System.ComponentModel.DataAnnotations;
+    using System.Text;
+    using System.Text.Encodings.Web;
+    using static PersonalFinancer.Data.Constants;
+
+    public class RegisterModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<ApplicationUser> userManager;
@@ -78,63 +78,59 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
             public string? PhoneNumber { get; set; }
         }
 
-
-        public void OnGetAsync(string? returnUrl = null)
-        {
-            ReturnUrl = returnUrl;
-        }
+        public void OnGetAsync(string? returnUrl = null) => this.ReturnUrl = returnUrl;
 
         public async Task<IActionResult> OnPostAsync(string? returnUrl)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl ??= this.Url.Content("~/");
 
-            if (ModelState.IsValid)
+            if (this.ModelState.IsValid)
             {
                 var user = new ApplicationUser
                 {
-                    UserName = Input.UserName,
-                    FirstName = Input.FirstName,
-                    LastName = Input.LastName,
-                    Email = Input.Email,
-                    PhoneNumber = Input.PhoneNumber
+                    UserName = this.Input.UserName,
+                    FirstName = this.Input.FirstName,
+                    LastName = this.Input.LastName,
+                    Email = this.Input.Email,
+                    PhoneNumber = this.Input.PhoneNumber
                 };
 
-                var creationResult = await userManager.CreateAsync(user, Input.Password);
+                IdentityResult creationResult = await this.userManager.CreateAsync(user, this.Input.Password);
 
                 if (creationResult.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(user, RoleConstants.UserRoleName);
-                    logger.LogInformation("User created a new account with password.");
+                    _ = await this.userManager.AddToRoleAsync(user, RoleConstants.UserRoleName);
+                    this.logger.LogInformation("User created a new account with password.");
 
-                    if (userManager.Options.SignIn.RequireConfirmedAccount)
+                    if (this.userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        string code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                        string code = await this.userManager.GenerateEmailConfirmationTokenAsync(user);
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-                        var callbackUrl = Url.Page(
-                            "/Account/ConfirmEmail",
-                            pageHandler: null,
-                            values: new { area = "Identity", userId = user.Id, code, returnUrl },
-                            protocol: Request.Scheme);
+                        string? callbackUrl = this.Url.Page(
+                          "/Account/ConfirmEmail",
+                          pageHandler: null,
+                          values: new { area = "Identity", userId = user.Id, code, returnUrl },
+                          protocol: this.Request.Scheme);
 
-                        await emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Thank you for your registration, {Input.FirstName}! Let's your finances improving begin! " +
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl!)}'>clicking here</a>.");
+                        await this.emailSender.SendEmailAsync(this.Input.Email, "Confirm your email",
+                          $"Thank you for your registration, {this.Input.FirstName}! Let's your finances improving begin! " +
+                          $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl!)}'>clicking here</a>.");
 
-                        return RedirectToPage("RegisterConfirmation");
+                        return this.RedirectToPage("RegisterConfirmation");
                     }
                     else
                     {
-                        await signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
+                        await this.signInManager.SignInAsync(user, isPersistent: false);
+                        return this.LocalRedirect(returnUrl);
                     }
                 }
 
-                foreach (var error in creationResult.Errors)
-                    ModelState.AddModelError(string.Empty, error.Description);
+                foreach (IdentityError? error in creationResult.Errors)
+                    this.ModelState.AddModelError(string.Empty, error.Description);
             }
 
-            return Page();
+            return this.Page();
         }
     }
 }

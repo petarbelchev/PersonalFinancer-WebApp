@@ -1,27 +1,27 @@
-﻿using Microsoft.Extensions.Options;
-using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Driver;
-using PersonalFinancer.Data.Configurations;
-using PersonalFinancer.Data.Models.Contracts;
-
-namespace PersonalFinancer.Data
+﻿namespace PersonalFinancer.Data
 {
-	public class MessagesDbContext : IMongoDbContext
-	{
-		private readonly IMongoClient client;
-		private readonly IMongoDatabase database;
+    using Microsoft.Extensions.Options;
+    using MongoDB.Bson.Serialization.Conventions;
+    using MongoDB.Driver;
+    using PersonalFinancer.Data.Configurations;
+    using PersonalFinancer.Data.Models.Contracts;
 
-		public MessagesDbContext(IOptions<MongoDbSettings> settings)
-		{
-			var camelCaseConvension = new ConventionPack { new CamelCaseElementNameConvention() };
-			ConventionRegistry.Register("camelCase", camelCaseConvension, type => true);
+    public class MessagesDbContext : IMongoDbContext
+    {
+        private readonly IMongoClient client;
+        private readonly IMongoDatabase database;
 
-			client = new MongoClient(settings.Value.ConnectionString);
+        public MessagesDbContext(IOptions<MongoDbSettings> settings)
+        {
+            var camelCaseConvension = new ConventionPack { new CamelCaseElementNameConvention() };
+            ConventionRegistry.Register("camelCase", camelCaseConvension, type => true);
 
-			database = client.GetDatabase(settings.Value.DatabaseName);
-		}
+            this.client = new MongoClient(settings.Value.ConnectionString);
 
-		public IMongoCollection<T> GetCollection<T>(string name)
-			=> database.GetCollection<T>(name);
-	}
+            this.database = this.client.GetDatabase(settings.Value.DatabaseName);
+        }
+
+        public IMongoCollection<T> GetCollection<T>(string name)
+           => this.database.GetCollection<T>(name);
+    }
 }

@@ -2,7 +2,7 @@
 {
     public class MessageInputServiceModel
     {
-        public string AuthorId { get; set; } = null!;
+        public Guid AuthorId { get; set; }
 
         public string AuthorName { get; set; } = null!;
 

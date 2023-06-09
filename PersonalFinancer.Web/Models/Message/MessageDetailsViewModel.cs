@@ -1,9 +1,9 @@
-﻿using PersonalFinancer.Services.Messages.Models;
-using System.ComponentModel.DataAnnotations;
-
-namespace PersonalFinancer.Web.Models.Message
+﻿namespace PersonalFinancer.Web.Models.Message
 {
-	public class MessageDetailsViewModel
+    using PersonalFinancer.Services.Messages.Models;
+    using System.ComponentModel.DataAnnotations;
+
+    public class MessageDetailsViewModel
 	{
         public string Id { get; set; } = null!;
 

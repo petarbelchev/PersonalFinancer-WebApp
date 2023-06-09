@@ -1,31 +1,31 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using PersonalFinancer.Services.User;
-using PersonalFinancer.Web.Areas.Admin.Models.Home;
-using PersonalFinancer.Web.Infrastructure.Extensions;
-using static PersonalFinancer.Data.Constants;
-using static PersonalFinancer.Web.Infrastructure.Constants;
-
-namespace PersonalFinancer.Web.Areas.Admin.Controllers
+﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	[Area("Admin")]
-	[Authorize(Roles = RoleConstants.AdminRoleName)]
-	public class HomeController : Controller
-	{
-		private readonly IUsersService userService;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Web.Areas.Admin.Models.Home;
+    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using static PersonalFinancer.Data.Constants;
+    using static PersonalFinancer.Web.Infrastructure.Constants;
 
-		public HomeController(IUsersService userService)
-			=> this.userService = userService;
+    [Area("Admin")]
+    [Authorize(Roles = RoleConstants.AdminRoleName)]
+    public class HomeController : Controller
+    {
+        private readonly IUsersService userService;
 
-		public async Task<IActionResult> Index()
-		{
-			return View(new AdminDashboardViewModel
-			{
-				RegisteredUsers = await userService.UsersCount(),
-				CreatedAccounts = await userService.GetUsersAccountsCount(),
-				AdminFullName = await userService.UserFullName(User.Id()),
-				AccountsCashFlowEndpoint = HostConstants.ApiAccountsCashFlowUrl
-			});
-		}
-	}
+        public HomeController(IUsersService userService)
+            => this.userService = userService;
+
+        public async Task<IActionResult> Index()
+        {
+            return this.View(new AdminDashboardViewModel
+            {
+                RegisteredUsers = await this.userService.UsersCount(),
+                CreatedAccounts = await this.userService.GetUsersAccountsCount(),
+                AdminFullName = await this.userService.UserFullName(this.User.Id()),
+                AccountsCashFlowEndpoint = HostConstants.ApiAccountsCashFlowUrl
+            });
+        }
+    }
 }

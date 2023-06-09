@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	[AllowAnonymous]
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+
+    [AllowAnonymous]
 	public class ResetPasswordConfirmationModel : PageModel
 	{
 		public void OnGet()

@@ -1,26 +1,24 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.Text;
-
-namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	[Authorize]
-	public abstract class BaseApiController : ControllerBase
-	{
-		protected string GetErrors(ModelStateDictionary.ValueEnumerable modelStateValues)
-		{
-			var errors = new StringBuilder();
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.ModelBinding;
+    using System.Text;
 
-			foreach (var modelStateVal in modelStateValues)
-			{
-				foreach (var error in modelStateVal.Errors)
-				{
-					errors.AppendLine(error.ErrorMessage);
-				}
-			}
+    [Authorize]
+    public abstract class BaseApiController : ControllerBase
+    {
+        protected string GetErrors(ModelStateDictionary.ValueEnumerable modelStateValues)
+        {
+            var errors = new StringBuilder();
 
-			return errors.ToString().TrimEnd();
-		}
-	}
+            foreach (ModelStateEntry modelStateVal in modelStateValues)
+            {
+                foreach (ModelError error in modelStateVal.Errors)
+                    _ = errors.AppendLine(error.ErrorMessage);
+            }
+
+            return errors.ToString().TrimEnd();
+        }
+    }
 }

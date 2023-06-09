@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Infrastructure.ModelBinders;
-using System.ComponentModel.DataAnnotations;
-using static PersonalFinancer.Data.Constants.AccountConstants;
-
-namespace PersonalFinancer.Web.Models.Account
+﻿namespace PersonalFinancer.Web.Models.Account
 {
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Web.Infrastructure.ModelBinders;
+    using System.ComponentModel.DataAnnotations;
+    using static PersonalFinancer.Data.Constants.AccountConstants;
+
     public class AccountFormViewModel
 	{
 		[Required(ErrorMessage = "Account name is required.")]
@@ -17,19 +17,20 @@ namespace PersonalFinancer.Web.Models.Account
 		[Range(AccountInitialBalanceMinValue, AccountInitialBalanceMaxValue,
 			ErrorMessage = "Ballace must be a number between {1} and {2}")]
 		public decimal Balance { get; set; }
-
-		public string OwnerId { get; set; } = null!;
+		
+		[Required(ErrorMessage = "Owner Id name is required.")]
+		public Guid? OwnerId { get; set; }
 
 		[Required(ErrorMessage = "Account Type name is required.")]
 		[Display(Name = "Account Type")]
-		public string AccountTypeId { get; set; } = null!;
+		public Guid? AccountTypeId { get; set; }
 
 		public IEnumerable<AccountTypeServiceModel> AccountTypes { get; set; }
 			= new List<AccountTypeServiceModel>();
 
 		[Required(ErrorMessage = "Currency name is required.")]
 		[Display(Name = "Currency")]
-		public string CurrencyId { get; set; } = null!;
+		public Guid? CurrencyId { get; set; }
 
 		public IEnumerable<CurrencyServiceModel> Currencies { get; set; }
 			= new List<CurrencyServiceModel>();

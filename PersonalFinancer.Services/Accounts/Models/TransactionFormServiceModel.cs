@@ -1,8 +1,8 @@
-﻿using PersonalFinancer.Services.Shared.Models;
-
-namespace PersonalFinancer.Services.Accounts.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class TransactionFormServiceModel : TransactionFormShortServiceModel
+    using PersonalFinancer.Services.Shared.Models;
+
+    public class TransactionFormServiceModel : TransactionFormShortServiceModel
 	{
 		public IEnumerable<AccountServiceModel> UserAccounts { get; set; } = null!;
 

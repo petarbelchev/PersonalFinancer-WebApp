@@ -1,32 +1,31 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using PersonalFinancer.Data.Models;
-
-namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	public class LogoutModel : PageModel
-	{
-		private readonly SignInManager<ApplicationUser> signInManager;
-		private readonly ILogger<LogoutModel> logger;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using PersonalFinancer.Data.Models;
 
-		public LogoutModel(
-			SignInManager<ApplicationUser> signInManager,
-			ILogger<LogoutModel> logger)
-		{
-			this.signInManager = signInManager;
-			this.logger = logger;
-		}
+    public class LogoutModel : PageModel
+    {
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly ILogger<LogoutModel> logger;
 
-		public async Task<IActionResult> OnPost(string? returnUrl = null)
-		{
-			await signInManager.SignOutAsync();
-			logger.LogInformation("User logged out.");
+        public LogoutModel(
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<LogoutModel> logger)
+        {
+            this.signInManager = signInManager;
+            this.logger = logger;
+        }
 
-			if (returnUrl != null)
-				return LocalRedirect(returnUrl);
-			else
-				return RedirectToPage();
-		}
-	}
+        public async Task<IActionResult> OnPost(string? returnUrl = null)
+        {
+            await this.signInManager.SignOutAsync();
+            this.logger.LogInformation("User logged out.");
+
+            return returnUrl != null 
+                ? this.LocalRedirect(returnUrl) 
+                : this.RedirectToPage();
+        }
+    }
 }

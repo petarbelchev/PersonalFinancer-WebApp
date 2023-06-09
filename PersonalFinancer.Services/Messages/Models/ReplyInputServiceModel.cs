@@ -4,7 +4,7 @@
 	{
         public string MessageId { get; set; } = null!;
 
-        public string AuthorId { get; set; } = null!;
+        public Guid AuthorId { get; set; }
 
         public bool IsAuthorAdmin { get; set; }
 

@@ -1,21 +1,21 @@
-﻿using PersonalFinancer.Services.Shared.Models;
-
-namespace PersonalFinancer.Services.Accounts.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class AccountDetailsServiceModel : AccountDetailsShortServiceModel
-	{
-		public string Id { get; set; } = null!;
+    using PersonalFinancer.Services.Shared.Models;
 
-		public string OwnerId { get; set; } = null!;
+    public class AccountDetailsServiceModel : AccountDetailsShortServiceModel
+    {
+        public Guid Id { get; set; }
 
-		public string AccountTypeName { get; set; } = null!;
+        public Guid OwnerId { get; set; }
 
-		public DateTime StartDate { get; set; }
+        public string AccountTypeName { get; set; } = null!;
 
-		public DateTime EndDate { get; set; }
+        public DateTime StartDate { get; set; }
 
-		public IEnumerable<TransactionTableServiceModel> Transactions { get; set; } = null!;
+        public DateTime EndDate { get; set; }
 
-		public int TotalAccountTransactions { get; set; }
-	}
+        public IEnumerable<TransactionTableServiceModel> Transactions { get; set; } = null!;
+
+        public int TotalAccountTransactions { get; set; }
+    }
 }

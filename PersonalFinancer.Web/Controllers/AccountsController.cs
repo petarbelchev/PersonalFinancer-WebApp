@@ -1,279 +1,292 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.User;
-using PersonalFinancer.Services.User.Models;
-using PersonalFinancer.Web.Infrastructure.Extensions;
-using PersonalFinancer.Web.Models.Account;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
-	[Authorize]
-	public class AccountsController : Controller
-	{
-		protected readonly IAccountsService accountService;
-		protected readonly IUsersService usersService;
-		protected readonly IMapper mapper;
+    using AutoMapper;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Models.Account;
+    using System.ComponentModel.DataAnnotations;
+    using static PersonalFinancer.Data.Constants.RoleConstants;
 
-		public AccountsController(
-			IAccountsService accountService,
-			IMapper mapper,
-			IUsersService usersService)
-		{
-			this.accountService = accountService;
-			this.mapper = mapper;
-			this.usersService = usersService;
-		}
+    [Authorize]
+    public class AccountsController : Controller
+    {
+        protected readonly IAccountsService accountService;
+        protected readonly IUsersService usersService;
+        protected readonly IMapper mapper;
 
-		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Create()
-		{
-			var viewModel = new AccountFormViewModel { OwnerId = User.Id() };
-			await PrepareAccountFormViewModel(viewModel);
+        public AccountsController(
+            IAccountsService accountService,
+            IMapper mapper,
+            IUsersService usersService)
+        {
+            this.accountService = accountService;
+            this.mapper = mapper;
+            this.usersService = usersService;
+        }
 
-			return View(viewModel);
-		}
+        [Authorize(Roles = UserRoleName)]
+        public async Task<IActionResult> Create()
+        {
+            var viewModel = new AccountFormViewModel { OwnerId = this.User.Id() };
+            await this.PrepareAccountFormViewModel(viewModel);
 
-		[Authorize(Roles = UserRoleName)]
-		[HttpPost]
-		public async Task<IActionResult> Create(AccountFormViewModel inputModel)
-		{
-			if (!ModelState.IsValid)
-			{
-				await PrepareAccountFormViewModel(inputModel);
+            return this.View(viewModel);
+        }
 
-				return View(inputModel);
-			}
+        [Authorize(Roles = UserRoleName)]
+        [HttpPost]
+        public async Task<IActionResult> Create(AccountFormViewModel inputModel)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                await this.PrepareAccountFormViewModel(inputModel);
 
-			if (inputModel.OwnerId != User.Id())
-				return BadRequest();
+                return this.View(inputModel);
+            }
 
-			try
-			{
-				var accountServiceModel = mapper.Map<AccountFormShortServiceModel>(inputModel);
-				string newAccountId = await accountService.CreateAccount(accountServiceModel);
-				TempData["successMsg"] = "You create a new account successfully!";
+            if (inputModel.OwnerId != this.User.Id())
+                return this.BadRequest();
 
-				return RedirectToAction(nameof(AccountDetails), new { id = newAccountId });
-			}
-			catch (ArgumentException)
-			{
-				ModelState.AddModelError(nameof(inputModel.Name),
-					"You already have Account with that name.");
-				await PrepareAccountFormViewModel(inputModel);
+            try
+            {
+                AccountFormShortServiceModel accountServiceModel = 
+                    this.mapper.Map<AccountFormShortServiceModel>(inputModel);
 
-				return View(inputModel);
-			}
-		}
+                Guid newAccountId = await this.accountService.CreateAccount(accountServiceModel);
+                this.TempData["successMsg"] = "You create a new account successfully!";
 
-		public async Task<IActionResult> AccountDetails(string id)
-		{
-			DateTime startDate = DateTime.Now.AddMonths(-1);
-			DateTime endDate = DateTime.Now;
+                return this.RedirectToAction(nameof(AccountDetails), new { id = newAccountId });
+            }
+            catch (ArgumentException)
+            {
+                this.ModelState.AddModelError(nameof(inputModel.Name),
+                    "You already have Account with that name.");
+                await this.PrepareAccountFormViewModel(inputModel);
 
-			try
-			{
-				AccountDetailsViewModel viewModel = await GetAccountDetailsViewModel(
-					id, startDate, endDate, User.Id(), User.IsAdmin());
+                return this.View(inputModel);
+            }
+        }
 
-				return View(viewModel);
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
+        public async Task<IActionResult> AccountDetails(Guid id)
+        {
+            var inputModel = new AccountDetailsInputModel
+            {
+                Id = id,
+                StartDate = DateTime.Now.AddMonths(-1),
+                EndDate = DateTime.Now
+            };
 
-		[HttpPost]
-		public async Task<IActionResult> AccountDetails(AccountDetailsInputModel inputModel)
-		{
-			if (!ModelState.IsValid)
-			{
-				try
-				{
-					AccountDetailsShortServiceModel accShortDetails =
-						await accountService.GetAccountShortDetails(inputModel.Id);
+            try
+            {
+                AccountDetailsViewModel viewModel =
+                    await this.GetAccountDetailsViewModel(inputModel, this.User.Id(), this.User.IsAdmin());
 
-					var viewModel = mapper.Map<AccountDetailsViewModel>(accShortDetails);
+                return this.View(viewModel);
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
 
-					return View(viewModel);
-				}
-				catch (Exception)
-				{
-					return BadRequest();
-				}
-			}
+        [HttpPost]
+        public async Task<IActionResult> AccountDetails(AccountDetailsInputModel inputModel)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                try
+                {
+                    AccountDetailsShortServiceModel accShortDetails =
+                        await this.accountService.GetAccountShortDetails(inputModel.Id);
 
-			try
-			{
-				AccountDetailsViewModel viewModel = await GetAccountDetailsViewModel(
-					inputModel.Id, inputModel.StartDate, inputModel.EndDate, User.Id(), User.IsAdmin());
+                    AccountDetailsViewModel viewModel = this.mapper.Map<AccountDetailsViewModel>(accShortDetails);
 
-				return View(viewModel);
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
+                    return this.View(viewModel);
+                }
+                catch (Exception)
+                {
+                    return this.BadRequest();
+                }
+            }
 
-		public async Task<IActionResult> Delete(string id)
-		{
-			if (!ModelState.IsValid)
-				return BadRequest();
+            try
+            {
+                AccountDetailsViewModel viewModel =
+                    await this.GetAccountDetailsViewModel(inputModel, this.User.Id(), this.User.IsAdmin());
 
-			try
-			{
-				string accountName = await accountService
-					.GetAccountName(id, User.Id(), User.IsAdmin());
+                return this.View(viewModel);
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
 
-				var viewModel = new DeleteAccountViewModel { Name = accountName };
+        public async Task<IActionResult> Delete([Required] Guid? id)
+        {
+            if (!this.ModelState.IsValid)
+                return this.BadRequest();
 
-				return View(viewModel);
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
+            try
+            {
+                string accountName = await this.accountService
+                    .GetAccountName(id, this.User.Id(), this.User.IsAdmin());
 
-		[HttpPost]
-		public async Task<IActionResult> Delete(DeleteAccountInputModel inputModel)
-		{
-			if (!ModelState.IsValid)
-				return BadRequest();
+                var viewModel = new DeleteAccountViewModel { Name = accountName };
 
-			if (inputModel.ConfirmButton == "reject")
-				return LocalRedirect(inputModel.ReturnUrl);
+                return this.View(viewModel);
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
 
-			try
-			{
-				await accountService.DeleteAccount(inputModel.Id, User.Id(), User.IsAdmin(),
-					inputModel.ShouldDeleteTransactions ?? false);
+        [HttpPost]
+        public async Task<IActionResult> Delete(DeleteAccountInputModel inputModel)
+        {
+            if (!this.ModelState.IsValid)
+                return this.BadRequest();
 
-				if (User.IsAdmin())
-				{
-					TempData["successMsg"] = "You successfully delete user's account!";
-					string ownerId = await accountService.GetOwnerId(inputModel.Id);
+            if (inputModel.ConfirmButton == "reject")
+                return this.LocalRedirect(inputModel.ReturnUrl);
 
-					return LocalRedirect("/Admin/Users/Details/" + ownerId);
-				}
-				else
-				{
-					TempData["successMsg"] = "Your account was successfully deleted!";
+            try
+            {
+                await this.accountService.DeleteAccount(
+                    inputModel.Id, this.User.Id(), this.User.IsAdmin(),
+                    inputModel.ShouldDeleteTransactions ?? false);
 
-					return RedirectToAction("Index", "Home");
-				}
-			}
-			catch (ArgumentException)
-			{
-				return Unauthorized();
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
+                if (this.User.IsAdmin())
+                {
+                    this.TempData["successMsg"] = "You successfully delete user's account!";
+                    Guid ownerId = await this.accountService.GetOwnerId(inputModel.Id);
 
-		public async Task<IActionResult> EditAccount(string id)
-		{
-			try
-			{
-				AccountFormServiceModel accountData =
-					await accountService.GetAccountFormData(id, User.Id(), User.IsAdmin());
+                    return this.LocalRedirect("/Admin/Users/Details/" + ownerId);
+                }
+                else
+                {
+                    this.TempData["successMsg"] = "Your account was successfully deleted!";
 
-				var viewModel = mapper.Map<AccountFormViewModel>(accountData);
+                    return this.RedirectToAction("Index", "Home");
+                }
+            }
+            catch (ArgumentException)
+            {
+                return this.Unauthorized();
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
 
-				return View(viewModel);
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
+        public async Task<IActionResult> EditAccount([Required] Guid? id)
+        {
+            if (!this.ModelState.IsValid)
+                return this.BadRequest();
 
-		[HttpPost]
-		public async Task<IActionResult> EditAccount(
-			string id, AccountFormViewModel inputModel, string returnUrl)
-		{
-			if (!ModelState.IsValid)
-			{
-				await PrepareAccountFormViewModel(inputModel);
+            try
+            {
+                AccountFormServiceModel accountData = await this.accountService
+                    .GetAccountFormData(id, this.User.Id(), this.User.IsAdmin());
 
-				return View(inputModel);
-			}
+                AccountFormViewModel viewModel = this.mapper.Map<AccountFormViewModel>(accountData);
 
-			string ownerId = User.IsAdmin() ?
-				await accountService.GetOwnerId(id)
-				: User.Id();
+                return this.View(viewModel);
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
 
-			if (inputModel.OwnerId != ownerId)
-				return BadRequest();
+        [HttpPost]
+        public async Task<IActionResult> EditAccount(
+            [Required] Guid? id, AccountFormViewModel inputModel, string returnUrl)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                await this.PrepareAccountFormViewModel(inputModel);
 
-			try
-			{
-				var serviceModel = mapper.Map<AccountFormShortServiceModel>(inputModel);
-				await accountService.EditAccount(id, serviceModel);
+                return this.View(inputModel);
+            }
 
-				TempData["successMsg"] = User.IsAdmin() ?
-					"You successfully edited user's account!"
-					: "Your account was successfully edited!";
+            Guid ownerId = this.User.IsAdmin()
+                ? await this.accountService.GetOwnerId(id)
+                : this.User.Id();
 
-				return LocalRedirect(returnUrl);
-			}
-			catch (ArgumentException)
-			{
-				ModelState.AddModelError(nameof(inputModel.Name), User.IsAdmin() ?
-					$"The user already have Account with \"{inputModel.Name}\" name."
-					: $"You already have Account with \"{inputModel.Name}\" name.");
+            if (inputModel.OwnerId != ownerId)
+                return this.BadRequest();
 
-				await PrepareAccountFormViewModel(inputModel);
+            try
+            {
+                AccountFormShortServiceModel serviceModel = 
+                    this.mapper.Map<AccountFormShortServiceModel>(inputModel);
+                
+                await this.accountService.EditAccount(id, serviceModel);
 
-				return View(inputModel);
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
+                this.TempData["successMsg"] = this.User.IsAdmin() ?
+                    "You successfully edited user's account!"
+                    : "Your account was successfully edited!";
 
-		private async Task PrepareAccountFormViewModel(AccountFormViewModel viewModel)
-		{
-			UserAccountTypesAndCurrenciesServiceModel userData =
-				await usersService.GetUserAccountTypesAndCurrencies(viewModel.OwnerId);
+                return this.LocalRedirect(returnUrl);
+            }
+            catch (ArgumentException)
+            {
+                this.ModelState.AddModelError(nameof(inputModel.Name), this.User.IsAdmin() ?
+                    $"The user already have Account with \"{inputModel.Name}\" name."
+                    : $"You already have Account with \"{inputModel.Name}\" name.");
 
-			viewModel.AccountTypes = userData.AccountTypes;
-			viewModel.Currencies = userData.Currencies;
-		}
+                await this.PrepareAccountFormViewModel(inputModel);
 
-		/// <summary>
-		/// Throws InvalidOperationException when Account does not exist
-		/// or User is not owner or Administrator.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
-		private async Task<AccountDetailsViewModel> GetAccountDetailsViewModel(
-			string accountId, DateTime startDate, DateTime endDate, string userId, bool isUserAdmin)
-		{
-			AccountDetailsServiceModel accountDetails = await accountService
-				.GetAccountDetails(accountId, startDate, endDate, userId, isUserAdmin);
+                return this.View(inputModel);
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
 
-			var viewModel = mapper.Map<AccountDetailsViewModel>(accountDetails);
-			viewModel.Pagination.TotalElements = accountDetails.TotalAccountTransactions;
+        private async Task PrepareAccountFormViewModel(AccountFormViewModel viewModel)
+        {
+            UserAccountTypesAndCurrenciesServiceModel userData =
+                await this.usersService.GetUserAccountTypesAndCurrencies(viewModel.OwnerId);
 
-			if (isUserAdmin)
-			{
-				viewModel.Routing.Area = "Admin";
-				viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + accountId;
-			}
-			else
-			{
-				viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + accountId;
-			}
+            viewModel.AccountTypes = userData.AccountTypes;
+            viewModel.Currencies = userData.Currencies;
+        }
 
-			return viewModel;
-		}
-	}
+        /// <summary>
+        /// Throws InvalidOperationException when Account does not exist
+        /// or User is not owner or Administrator.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        private async Task<AccountDetailsViewModel> GetAccountDetailsViewModel(
+            AccountDetailsInputModel model, Guid userId, bool isUserAdmin)
+        {
+            AccountDetailsServiceModel accountDetails = await this.accountService
+                .GetAccountDetails(model.Id, model.StartDate, model.EndDate, userId, isUserAdmin);
+
+            AccountDetailsViewModel viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
+            viewModel.Pagination.TotalElements = accountDetails.TotalAccountTransactions;
+
+            if (isUserAdmin)
+            {
+                viewModel.Routing.Area = "Admin";
+                viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + model.Id;
+            }
+            else
+            {
+                viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + model.Id;
+            }
+
+            return viewModel;
+        }
+    }
 }

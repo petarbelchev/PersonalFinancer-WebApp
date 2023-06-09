@@ -12,46 +12,48 @@ using PersonalFinancer.Data;
 namespace PersonalFinancer.Data.Migrations
 {
     [DbContext(typeof(PersonalFinancerDbContext))]
-    [Migration("20230607085835_UserNameSetUp")]
-    partial class UserNameSetUp
+    [Migration("20230608155537_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.15")
+                .HasAnnotation("ProductVersion", "6.0.16")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
                     b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -65,9 +67,8 @@ namespace PersonalFinancer.Data.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -76,7 +77,7 @@ namespace PersonalFinancer.Data.Migrations
                     b.ToTable("AspNetRoleClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -90,9 +91,8 @@ namespace PersonalFinancer.Data.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -101,7 +101,7 @@ namespace PersonalFinancer.Data.Migrations
                     b.ToTable("AspNetUserClaims", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasMaxLength(128)
@@ -114,9 +114,8 @@ namespace PersonalFinancer.Data.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -125,13 +124,13 @@ namespace PersonalFinancer.Data.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -140,10 +139,10 @@ namespace PersonalFinancer.Data.Migrations
                     b.ToTable("AspNetUserRoles", (string)null);
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LoginProvider")
                         .HasMaxLength(128)
@@ -163,31 +162,29 @@ namespace PersonalFinancer.Data.Migrations
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Account", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AccountTypeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("AccountTypeId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("CurrencyId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("CurrencyId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("OwnerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -202,55 +199,33 @@ namespace PersonalFinancer.Data.Migrations
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.AccountType", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("OwnerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OwnerId");
 
                     b.ToTable("AccountTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "f4c3803a-7ed5-4d78-9038-7b21bf08a040",
-                            IsDeleted = false,
-                            Name = "Cash",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = "1dfe1780-daed-4198-8360-378aa33c5411",
-                            IsDeleted = false,
-                            Name = "Bank",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = "daef2351-e2e9-43b9-b908-8d7d00bf3df6",
-                            IsDeleted = false,
-                            Name = "Savings",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        });
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.ApplicationUser", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
@@ -287,14 +262,16 @@ namespace PersonalFinancer.Data.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
@@ -317,56 +294,16 @@ namespace PersonalFinancer.Data.Migrations
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "5b55326d-4359-43cc-87ac-020190bd037b",
-                            Email = "petar@mail.com",
-                            EmailConfirmed = true,
-                            FirstName = "Petar",
-                            LastName = "Petrov",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "PETAR@MAIL.COM",
-                            NormalizedUserName = "PETAR@MAIL.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEAvyvw3yLsNoddmlQFNrCyXYVwr3tw4FyWgb6a9NqObDII8HMymTByRjDS4yM6q/5g==",
-                            PhoneNumber = "1234567890",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "faedf0c4-5a5d-46f6-b676-3df6b0008074",
-                            TwoFactorEnabled = false,
-                            UserName = "petar@mail.com"
-                        },
-                        new
-                        {
-                            Id = "dea12856-c198-4129-b3f3-b893d8395082",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "c8da0524-4896-4f94-8b7d-decba2d9ed5d",
-                            Email = "admin@admin.com",
-                            EmailConfirmed = true,
-                            FirstName = "Great",
-                            LastName = "Admin",
-                            LockoutEnabled = false,
-                            NormalizedEmail = "ADMIN@ADMIN.COM",
-                            NormalizedUserName = "ADMIN@ADMIN.COM",
-                            PasswordHash = "AQAAAAEAACcQAAAAEIc4sUh1KwbLMfdqzuZVRW7RtBhNFUBH9ioSHiN22HT89CSv1qRzNOpQzukTVxDFMA==",
-                            PhoneNumber = "0987654321",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "eecfbb6e-7f71-46d1-9220-f4b2b48f9d69",
-                            TwoFactorEnabled = false,
-                            UserName = "admin@admin.com"
-                        });
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Category", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -376,79 +313,21 @@ namespace PersonalFinancer.Data.Migrations
                         .HasMaxLength(25)
                         .HasColumnType("nvarchar(25)");
 
-                    b.Property<string>("OwnerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "e241b89f-b094-4f79-bb09-efc6f47c2cb3",
-                            IsDeleted = false,
-                            Name = "Initial Balance",
-                            OwnerId = "dea12856-c198-4129-b3f3-b893d8395082"
-                        },
-                        new
-                        {
-                            Id = "93cebd34-a9f5-4862-a8c9-3b6eea63e94c",
-                            IsDeleted = false,
-                            Name = "Food & Drink",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = "d59cbb57-3b9e-4b37-9b74-a375eecba8c8",
-                            IsDeleted = false,
-                            Name = "Utilities",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = "b58a7947-eecf-40d0-b84e-c6947fcbfd86",
-                            IsDeleted = false,
-                            Name = "Transport",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = "96e441e3-c5a6-427f-bb32-85940242d9ee",
-                            IsDeleted = false,
-                            Name = "Medical & Healthcare",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = "081a7be8-15c4-426e-872c-dfaf805e3fec",
-                            IsDeleted = false,
-                            Name = "Salary",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = "e03634d5-1970-4e01-8568-42756e9ad973",
-                            IsDeleted = false,
-                            Name = "Money Transfer",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = "459dc945-0d2c-4a07-a2aa-55b4c5e57f9f",
-                            IsDeleted = false,
-                            Name = "Dividents",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        });
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Currency", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -458,55 +337,30 @@ namespace PersonalFinancer.Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<string>("OwnerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Currencies");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "3bf454ad-941b-4ab6-a1ad-c212bfc46e7d",
-                            IsDeleted = false,
-                            Name = "BGN",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = "dab2761d-acb1-43bc-b56b-0d9c241c8882",
-                            IsDeleted = false,
-                            Name = "EUR",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        },
-                        new
-                        {
-                            Id = "2f2c29e5-4463-4d5d-bfd2-e0f973c24e8f",
-                            IsDeleted = false,
-                            Name = "USD",
-                            OwnerId = "6d5800ce-d726-4fc8-83d9-d6b3ac1f591e"
-                        });
                 });
 
             modelBuilder.Entity("PersonalFinancer.Data.Models.Transaction", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AccountId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("CategoryId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
@@ -514,9 +368,8 @@ namespace PersonalFinancer.Data.Migrations
                     b.Property<bool>("IsInitialBalance")
                         .HasColumnType("bit");
 
-                    b.Property<string>("OwnerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Refference")
                         .IsRequired()
@@ -537,16 +390,16 @@ namespace PersonalFinancer.Data.Migrations
                     b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
                     b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", null)
                         .WithMany()
@@ -555,7 +408,7 @@ namespace PersonalFinancer.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
                     b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", null)
                         .WithMany()
@@ -564,9 +417,9 @@ namespace PersonalFinancer.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -579,7 +432,7 @@ namespace PersonalFinancer.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
                     b.HasOne("PersonalFinancer.Data.Models.ApplicationUser", null)
                         .WithMany()

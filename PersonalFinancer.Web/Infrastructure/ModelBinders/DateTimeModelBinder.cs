@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-
-namespace PersonalFinancer.Web.Infrastructure.ModelBinders
+﻿namespace PersonalFinancer.Web.Infrastructure.ModelBinders
 {
+    using Microsoft.AspNetCore.Mvc.ModelBinding;
+
     public class DateTimeModelBinder : IModelBinder
     {
         public Task BindModelAsync(ModelBindingContext bindingContext)

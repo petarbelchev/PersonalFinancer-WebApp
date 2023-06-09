@@ -6,10 +6,10 @@
 
 		public decimal Balance { get; set; }
 
-		public string OwnerId { get; set; } = null!;
+		public Guid OwnerId { get; set; }
 
-		public string AccountTypeId { get; set; } = null!;
+		public Guid AccountTypeId { get; set; }
 
-		public string CurrencyId { get; set; } = null!;
+		public Guid CurrencyId { get; set; }
 	}
 }

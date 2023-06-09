@@ -1,18 +1,18 @@
-﻿using PersonalFinancer.Data.Models.Contracts;
-
-namespace PersonalFinancer.Data.Models
+﻿namespace PersonalFinancer.Data.Models
 {
-	public class Message : MongoDocument
-	{
-		public string AuthorName { get; set; } = null!;
+    using PersonalFinancer.Data.Models.Contracts;
 
-		public DateTime CreatedOn { get; set; }
+    public class Message : MongoDocument
+    {
+        public string AuthorName { get; set; } = null!;
 
-		public string Subject { get; set; } = null!;
+        public DateTime CreatedOn { get; set; }
 
-		public string Content { get; set; } = null!;
+        public string Subject { get; set; } = null!;
 
-		public ICollection<Reply> Replies { get; set; }
-			= new List<Reply>();
-	}
+        public string Content { get; set; } = null!;
+
+        public ICollection<Reply> Replies { get; set; }
+           = new List<Reply>();
+    }
 }

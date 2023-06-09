@@ -1,15 +1,15 @@
-﻿using PersonalFinancer.Services.User.Models;
-
-namespace PersonalFinancer.Services.Shared.Models
+﻿namespace PersonalFinancer.Services.Shared.Models
 {
-	public class CurrencyCashFlowServiceModel
-	{
-		public string Name { get; set; } = null!;
+    using PersonalFinancer.Services.User.Models;
 
-		public decimal Incomes { get; set; }
+    public class CurrencyCashFlowServiceModel
+    {
+        public string Name { get; set; } = null!;
 
-		public decimal Expenses { get; set; }
+        public decimal Incomes { get; set; }
 
-		public IEnumerable<CategoryExpensesServiceModel> ExpensesByCategories { get; set; } = null!;
-	}
+        public decimal Expenses { get; set; }
+
+        public IEnumerable<CategoryExpensesServiceModel> ExpensesByCategories { get; set; } = null!;
+    }
 }

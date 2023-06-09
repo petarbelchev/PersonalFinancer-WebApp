@@ -1,37 +1,37 @@
-﻿using MongoDB.Driver;
-using PersonalFinancer.Services.Messages.Models;
-
-namespace PersonalFinancer.Services.Messages
+﻿namespace PersonalFinancer.Services.Messages
 {
-	public interface IMessagesService
-	{
-		Task<IEnumerable<MessageOutputServiceModel>> GetAllAsync();
+    using MongoDB.Driver;
+    using PersonalFinancer.Services.Messages.Models;
 
-		Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(string userId);
+    public interface IMessagesService
+    {
+        Task<IEnumerable<MessageOutputServiceModel>> GetAllAsync();
 
-		/// <summary>
-		/// Throws InvalidOperationException when Message does not exist
-		/// or User is not owner or Administrator
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
-		Task<MessageDetailsServiceModel> GetMessageAsync(string id, string userId, bool isUserAdmin);
+        Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(Guid userId);
 
-		Task<string> CreateAsync(MessageInputServiceModel model);
+        /// <summary>
+        /// Throws InvalidOperationException when Message does not exist
+        /// or User is not owner or Administrator
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        Task<MessageDetailsServiceModel> GetMessageAsync(string id, Guid userId, bool isUserAdmin);
 
-		/// <summary>
-		/// Throws ArgumentException when the User is not Authorized 
-		/// and InvalidOperationException when adding a reply was unsuccessful.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		Task<UpdateResult> AddReplyAsync(ReplyInputServiceModel model);
+        Task<string> CreateAsync(MessageInputServiceModel model);
 
-		/// <summary>
-		/// Throws ArgumentException when the User is not Authorized 
-		/// and InvalidOperationException when deleting a message was unsuccessful.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
-		Task RemoveAsync(string messageId, string userId, bool isUserAdmin);
-	}
+        /// <summary>
+        /// Throws ArgumentException when the User is not Authorized 
+        /// and InvalidOperationException when adding a reply was unsuccessful.
+        /// </summary>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        Task<UpdateResult> AddReplyAsync(ReplyInputServiceModel model);
+
+        /// <summary>
+        /// Throws ArgumentException when the User is not Authorized 
+        /// and InvalidOperationException when deleting a message was unsuccessful.
+        /// </summary>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="InvalidOperationException"></exception>
+        Task RemoveAsync(string messageId, Guid userId, bool isUserAdmin);
+    }
 }

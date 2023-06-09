@@ -1,37 +1,37 @@
-﻿using AutoMapper;
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Messages.Models;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User.Models;
-using PersonalFinancer.Web.Models.Account;
-using PersonalFinancer.Web.Models.Message;
-using PersonalFinancer.Web.Models.Shared;
-using PersonalFinancer.Web.Models.Transaction;
-
-namespace PersonalFinancer.Web.Infrastructure
+﻿namespace PersonalFinancer.Web.Infrastructure
 {
-	public class ControllerMappingProfile : Profile
-	{
-		public ControllerMappingProfile()
-		{
-			CreateMap<Account, DeleteAccountViewModel>();
-			CreateMap<Account, AccountFormViewModel>();
-			CreateMap<AccountDetailsServiceModel, AccountDetailsViewModel>();
-			CreateMap<AccountFormServiceModel, AccountFormViewModel>();
-			CreateMap<AccountFormViewModel, AccountFormShortServiceModel>();
-			CreateMap<AccountDetailsShortServiceModel, AccountDetailsViewModel>();
+    using AutoMapper;
+    using PersonalFinancer.Data.Models;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.Messages.Models;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Models.Account;
+    using PersonalFinancer.Web.Models.Message;
+    using PersonalFinancer.Web.Models.Shared;
+    using PersonalFinancer.Web.Models.Transaction;
 
-			CreateMap<Transaction, TransactionFormModel>();
-			CreateMap<TransactionFormModel, TransactionFormShortServiceModel>();
-			CreateMap<TransactionFormServiceModel, TransactionFormModel>();
-			CreateMap<TransactionsServiceModel, UserTransactionsViewModel>();
-			CreateMap<DateFilterModel, UserTransactionsViewModel>();
-			CreateMap<UserAccountsAndCategoriesServiceModel, TransactionFormModel>();
+    public class ControllerMappingProfile : Profile
+    {
+        public ControllerMappingProfile()
+        {
+            _ = this.CreateMap<Account, DeleteAccountViewModel>();
+            _ = this.CreateMap<Account, AccountFormViewModel>();
+            _ = this.CreateMap<AccountDetailsServiceModel, AccountDetailsViewModel>();
+            _ = this.CreateMap<AccountFormServiceModel, AccountFormViewModel>();
+            _ = this.CreateMap<AccountFormViewModel, AccountFormShortServiceModel>();
+            _ = this.CreateMap<AccountDetailsShortServiceModel, AccountDetailsViewModel>();
 
-			CreateMap<ApplicationUser, AccountFormViewModel>();
+            _ = this.CreateMap<Transaction, TransactionFormModel>();
+            _ = this.CreateMap<TransactionFormModel, TransactionFormShortServiceModel>();
+            _ = this.CreateMap<TransactionFormServiceModel, TransactionFormModel>();
+            _ = this.CreateMap<TransactionsServiceModel, UserTransactionsViewModel>();
+            _ = this.CreateMap<DateFilterModel, UserTransactionsViewModel>();
+            _ = this.CreateMap<UserAccountsAndCategoriesServiceModel, TransactionFormModel>();
 
-			CreateMap<MessageDetailsServiceModel, MessageDetailsViewModel>();
-		}
-	}
+            _ = this.CreateMap<ApplicationUser, AccountFormViewModel>();
+
+            _ = this.CreateMap<MessageDetailsServiceModel, MessageDetailsViewModel>();
+        }
+    }
 }

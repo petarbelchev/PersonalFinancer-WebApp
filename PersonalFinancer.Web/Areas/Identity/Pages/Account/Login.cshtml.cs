@@ -1,36 +1,36 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using PersonalFinancer.Data.Models;
-using System.ComponentModel.DataAnnotations;
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	public class LoginModel : PageModel
-	{
-		private readonly SignInManager<ApplicationUser> signInManager;
-		private readonly ILogger<LoginModel> logger;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using PersonalFinancer.Data.Models;
+    using System.ComponentModel.DataAnnotations;
+    using static PersonalFinancer.Data.Constants;
 
-		public LoginModel(
-			SignInManager<ApplicationUser> signInManager,
-			ILogger<LoginModel> logger)
-		{
-			this.signInManager = signInManager;
-			this.logger = logger;
-		}
+    public class LoginModel : PageModel
+    {
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly ILogger<LoginModel> logger;
 
-		[BindProperty]
-		public InputModel Input { get; set; } = null!;
+        public LoginModel(
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<LoginModel> logger)
+        {
+            this.signInManager = signInManager;
+            this.logger = logger;
+        }
 
-		public string ReturnUrl { get; set; } = null!;
+        [BindProperty]
+        public InputModel Input { get; set; } = null!;
 
-		[TempData]
-		public string ErrorMessage { get; set; } = null!;
+        public string ReturnUrl { get; set; } = null!;
 
-		public class InputModel
-		{
+        [TempData]
+        public string ErrorMessage { get; set; } = null!;
+
+        public class InputModel
+        {
             [Required(ErrorMessage = "Email address is required.")]
             [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
             [Display(Name = "Email")]
@@ -40,56 +40,56 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
             [DataType(DataType.Password)]
             [StringLength(UserConstants.UserPasswordMaxLength, MinimumLength = UserConstants.UserPasswordMinLength,
                 ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
-			public string Password { get; set; } = null!;
+            public string Password { get; set; } = null!;
 
-			[Display(Name = "Remember me?")]
-			public bool RememberMe { get; set; }
-		}
+            [Display(Name = "Remember me?")]
+            public bool RememberMe { get; set; }
+        }
 
-		public async Task OnGetAsync(string? returnUrl = null)
-		{
-			if (!string.IsNullOrEmpty(ErrorMessage))
-				ModelState.AddModelError(string.Empty, ErrorMessage);
+        public async Task OnGetAsync(string? returnUrl = null)
+        {
+            if (!string.IsNullOrEmpty(this.ErrorMessage))
+                this.ModelState.AddModelError(string.Empty, this.ErrorMessage);
 
-			returnUrl ??= Url.Content("~/");
+            returnUrl ??= this.Url.Content("~/");
 
-			await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            await this.HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-			ReturnUrl = returnUrl;
-		}
+            this.ReturnUrl = returnUrl;
+        }
 
-		public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
-		{
-			returnUrl ??= Url.Content("~/");
+        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
+        {
+            returnUrl ??= this.Url.Content("~/");
 
-			if (ModelState.IsValid)
-			{
-				var user = await signInManager.UserManager.FindByEmailAsync(Input.Email);
-				var result = await signInManager.PasswordSignInAsync(
-					user , Input.Password, Input.RememberMe, lockoutOnFailure: false);
+            if (this.ModelState.IsValid)
+            {
+                ApplicationUser user = await this.signInManager.UserManager.FindByEmailAsync(this.Input.Email);
+                Microsoft.AspNetCore.Identity.SignInResult result = await this.signInManager.PasswordSignInAsync(
+                    user, this.Input.Password, this.Input.RememberMe, lockoutOnFailure: false);
 
-				if (result.Succeeded)
-				{
-					logger.LogInformation("User logged in.");
-					return LocalRedirect(returnUrl);
-				}
+                if (result.Succeeded)
+                {
+                    this.logger.LogInformation("User logged in.");
+                    return this.LocalRedirect(returnUrl);
+                }
 
-				if (result.RequiresTwoFactor)
-					return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, Input.RememberMe });
+                if (result.RequiresTwoFactor)
+                    return this.RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, this.Input.RememberMe });
 
-				if (result.IsLockedOut)
-				{
-					logger.LogWarning("User account locked out.");
-					return RedirectToPage("./Lockout");
-				}
-				else
-				{
-					ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-					return Page();
-				}
-			}
+                if (result.IsLockedOut)
+                {
+                    this.logger.LogWarning("User account locked out.");
+                    return this.RedirectToPage("./Lockout");
+                }
+                else
+                {
+                    this.ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return this.Page();
+                }
+            }
 
-			return Page();
-		}
-	}
+            return this.Page();
+        }
+    }
 }

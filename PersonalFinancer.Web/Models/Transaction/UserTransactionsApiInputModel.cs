@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PersonalFinancer.Web.Models.Transaction
+﻿namespace PersonalFinancer.Web.Models.Transaction
 {
-	public class UserTransactionsApiInputModel
+    using System.ComponentModel.DataAnnotations;
+
+    public class UserTransactionsApiInputModel
     {
         [Required]
-        public string Id { get; set; } = null!;
+        public Guid? Id { get; set; }
 
         [Required]
         public string StartDate { get; set; } = null!;

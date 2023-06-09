@@ -1,333 +1,354 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
-using NUnit.Framework;
-using PersonalFinancer.Data.Models.Enums;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User.Models;
-using PersonalFinancer.Web.Controllers;
-using PersonalFinancer.Web.Models.Home;
-using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Data.Constants;
-using static PersonalFinancer.Web.Infrastructure.Constants;
-
-namespace PersonalFinancer.Tests.Controllers
+﻿namespace PersonalFinancer.Tests.Controllers
 {
-	[TestFixture]
-	internal class HomeControllerTests : ControllersUnitTestsBase
-	{
-		private readonly UserDashboardServiceModel expUserDashboard = new ()
-		{
-			Accounts = new AccountCardServiceModel[]
-			{
-				new AccountCardServiceModel
-				{
-					Id = "Test ID",
-					Balance = 100,
-					CurrencyName = "Test Currency",
-					Name = "Test Name",
-					OwnerId = "Test Owner Id"
-				}
-			},
-			CurrenciesCashFlow = new CurrencyCashFlowServiceModel[]
-			{
-				new CurrencyCashFlowServiceModel
-				{
-					Name = "Test Currency",
-					Incomes = 200,
-					Expenses = 100
-				}
-			},
-			LastTransactions = new TransactionTableServiceModel[]
-			{
-				new TransactionTableServiceModel
-				{
-					Id = "Test Id",
-					AccountCurrencyName = "Test Currency",
-					Amount = 100,
-					CategoryName = "Test Category",
-					CreatedOn = DateTime.UtcNow,
-					Refference = "Test Refference",
-					TransactionType = TransactionType.Expense.ToString()
-				}
-			}
-		};
-		private readonly AccountCardServiceModel[] expAccountCard = new AccountCardServiceModel[]
-		{
-			new AccountCardServiceModel
-			{
-				Id = "Test Id",
-				Balance = 150,
-				CurrencyName = "Test Currency Name",
-				Name = "Test Name",
-				OwnerId = "Test Owner Id"
-			}
-		};
-				
-		private HomeController controller;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Moq;
+    using NUnit.Framework;
+    using PersonalFinancer.Data.Models.Enums;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Controllers;
+    using PersonalFinancer.Web.Models.Home;
+    using PersonalFinancer.Web.Models.Shared;
+    using static PersonalFinancer.Data.Constants;
+    using static PersonalFinancer.Web.Infrastructure.Constants;
 
-		[SetUp]
-		public void SetUp()
-		{
-			this.usersServiceMock.Setup(x => x.GetUserDashboardData(
-					userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-				.ReturnsAsync(expUserDashboard);					
+    [TestFixture]
+    internal class HomeControllerTests : ControllersUnitTestsBase
+    {
+        private readonly UserDashboardServiceModel expUserDashboard = new()
+        {
+            Accounts = new AccountCardServiceModel[]
+            {
+                new AccountCardServiceModel
+                {
+                    Id = Guid.NewGuid(),
+                    Balance = 100,
+                    CurrencyName = "Test Currency",
+                    Name = "Test Name",
+                    OwnerId = Guid.NewGuid()
+                }
+            },
+            CurrenciesCashFlow = new CurrencyCashFlowServiceModel[]
+            {
+                new CurrencyCashFlowServiceModel
+                {
+                    Name = "Test Currency",
+                    Incomes = 200,
+                    Expenses = 100
+                }
+            },
+            LastTransactions = new TransactionTableServiceModel[]
+            {
+                new TransactionTableServiceModel
+                {
+                    Id = Guid.NewGuid(),
+                    AccountCurrencyName = "Test Currency",
+                    Amount = 100,
+                    CategoryName = "Test Category",
+                    CreatedOn = DateTime.UtcNow,
+                    Refference = "Test Refference",
+                    TransactionType = TransactionType.Expense.ToString()
+                }
+            }
+        };
+        private readonly AccountCardServiceModel[] expAccountCard = new AccountCardServiceModel[]
+        {
+            new AccountCardServiceModel
+            {
+                Id = Guid.NewGuid(),
+                Balance = 150,
+                CurrencyName = "Test Currency Name",
+                Name = "Test Name",
+                OwnerId = Guid.NewGuid()
+            }
+        };
 
-			this.usersServiceMock.Setup(x => x.GetUserAccounts(userId))
-				.ReturnsAsync(expAccountCard);
-			
-			controller = new HomeController(this.usersServiceMock.Object);
+        private HomeController controller;
 
-			controller.ControllerContext = new ControllerContext
-			{
-				HttpContext = new DefaultHttpContext
-				{
-					User = userMock.Object
-				}
-			};
-		}
+        [SetUp]
+        public void SetUp()
+        {
+            _ = this.usersServiceMock.Setup(x => x.GetUserDashboardData(
+                    this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+                .ReturnsAsync(this.expUserDashboard);
 
-		[Test]
-		public async Task Index_ShouldReturnCorrectModel_WhenUserIsAuthenticatedUser()
-		{
-			//Arrange			
-			userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
-			userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(true);
+            _ = this.usersServiceMock.Setup(x => x.GetUserAccounts(this.userId))
+                .ReturnsAsync(this.expAccountCard);
 
-			//Act
-			ViewResult viewResult = (ViewResult)await controller.Index();
-			var actual = viewResult.Model as UserDashboardViewModel;
+            this.controller = new HomeController(this.usersServiceMock.Object)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext
+                    {
+                        User = this.userMock.Object
+                    }
+                }
+            };
+        }
 
-			//Assert
-			Assert.That(actual, Is.Not.Null);
+        [Test]
+        public async Task Index_ShouldReturnCorrectModel_WhenUserIsAuthenticatedUser()
+        {
+            //Arrange			
+            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            _ = this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(true);
 
-			Assert.That(actual.Accounts.Count(),
-				Is.EqualTo(expUserDashboard.Accounts.Count()));
+            //Act
+            var viewResult = (ViewResult)await this.controller.Index();
+            var actual = viewResult.Model as UserDashboardViewModel;
 
-			for (int i = 0; i < expUserDashboard.Accounts.Count(); i++)
-			{
-				Assert.That(actual.Accounts.ElementAt(i).Id,
-					Is.EqualTo(expUserDashboard.Accounts.ElementAt(i).Id));
-				Assert.That(actual.Accounts.ElementAt(i).Name,
-					Is.EqualTo(expUserDashboard.Accounts.ElementAt(i).Name));
-				Assert.That(actual.Accounts.ElementAt(i).CurrencyName,
-					Is.EqualTo(expUserDashboard.Accounts.ElementAt(i).CurrencyName));
-				Assert.That(actual.Accounts.ElementAt(i).Balance,
-					Is.EqualTo(expUserDashboard.Accounts.ElementAt(i).Balance));
-				Assert.That(actual.Accounts.ElementAt(i).OwnerId,
-					Is.EqualTo(expUserDashboard.Accounts.ElementAt(i).OwnerId));
-			}
+            //Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(actual, Is.Not.Null);
 
-			Assert.That(actual.CurrenciesCashFlow.Count(),
-				Is.EqualTo(expUserDashboard.CurrenciesCashFlow.Count()));
+                Assert.That(actual!.Accounts.Count(),
+                    Is.EqualTo(this.expUserDashboard.Accounts.Count()));
 
-			for (int i = 0; i < expUserDashboard.CurrenciesCashFlow.Count(); i++)
-			{
-				Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Name,
-					Is.EqualTo(expUserDashboard.CurrenciesCashFlow.ElementAt(i).Name));
-				Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Incomes,
-					Is.EqualTo(expUserDashboard.CurrenciesCashFlow.ElementAt(i).Incomes));
-				Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Expenses,
-					Is.EqualTo(expUserDashboard.CurrenciesCashFlow.ElementAt(i).Expenses));
-			}
+                for (int i = 0; i < this.expUserDashboard.Accounts.Count(); i++)
+                {
+                    Assert.That(actual.Accounts.ElementAt(i).Id,
+                        Is.EqualTo(this.expUserDashboard.Accounts.ElementAt(i).Id));
+                    Assert.That(actual.Accounts.ElementAt(i).Name,
+                        Is.EqualTo(this.expUserDashboard.Accounts.ElementAt(i).Name));
+                    Assert.That(actual.Accounts.ElementAt(i).CurrencyName,
+                        Is.EqualTo(this.expUserDashboard.Accounts.ElementAt(i).CurrencyName));
+                    Assert.That(actual.Accounts.ElementAt(i).Balance,
+                        Is.EqualTo(this.expUserDashboard.Accounts.ElementAt(i).Balance));
+                    Assert.That(actual.Accounts.ElementAt(i).OwnerId,
+                        Is.EqualTo(this.expUserDashboard.Accounts.ElementAt(i).OwnerId));
+                }
 
-			Assert.That(actual.Transactions.Count(),
-				Is.EqualTo(expUserDashboard.LastTransactions.Count()));
+                Assert.That(actual.CurrenciesCashFlow.Count(),
+                    Is.EqualTo(this.expUserDashboard.CurrenciesCashFlow.Count()));
 
-			for (int i = 0; i < expUserDashboard.LastTransactions.Count(); i++)
-			{
-				Assert.That(actual.Transactions.ElementAt(i).Amount,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).Amount));
-				Assert.That(actual.Transactions.ElementAt(i).Refference,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).Refference));
-				Assert.That(actual.Transactions.ElementAt(i).TransactionType,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).TransactionType));
-				Assert.That(actual.Transactions.ElementAt(i).AccountCurrencyName,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).AccountCurrencyName));
-				Assert.That(actual.Transactions.ElementAt(i).CategoryName,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).CategoryName));
-				Assert.That(actual.Transactions.ElementAt(i).CreatedOn,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).CreatedOn));
-				Assert.That(actual.Transactions.ElementAt(i).Id,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).Id));
-			}
-		}
+                for (int i = 0; i < this.expUserDashboard.CurrenciesCashFlow.Count(); i++)
+                {
+                    Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Name,
+                        Is.EqualTo(this.expUserDashboard.CurrenciesCashFlow.ElementAt(i).Name));
+                    Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Incomes,
+                        Is.EqualTo(this.expUserDashboard.CurrenciesCashFlow.ElementAt(i).Incomes));
+                    Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Expenses,
+                        Is.EqualTo(this.expUserDashboard.CurrenciesCashFlow.ElementAt(i).Expenses));
+                }
 
-		[Test]
-		public async Task Index_ShouldReturnEmptyResult_WhenUserIsNotAuthenticated()
-		{
-			//Arrange
-			userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
-			userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(false);
+                Assert.That(actual.Transactions.Count(),
+                    Is.EqualTo(this.expUserDashboard.LastTransactions.Count()));
 
-			//Act
-			ViewResult viewResult = (ViewResult)await controller.Index();
+                for (int i = 0; i < this.expUserDashboard.LastTransactions.Count(); i++)
+                {
+                    Assert.That(actual.Transactions.ElementAt(i).Amount,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Amount));
+                    Assert.That(actual.Transactions.ElementAt(i).Refference,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Refference));
+                    Assert.That(actual.Transactions.ElementAt(i).TransactionType,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).TransactionType));
+                    Assert.That(actual.Transactions.ElementAt(i).AccountCurrencyName,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).AccountCurrencyName));
+                    Assert.That(actual.Transactions.ElementAt(i).CategoryName,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).CategoryName));
+                    Assert.That(actual.Transactions.ElementAt(i).CreatedOn,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).CreatedOn));
+                    Assert.That(actual.Transactions.ElementAt(i).Id,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Id));
+                }
+            });
+        }
 
-			//Assert
-			Assert.That(viewResult, Is.Not.Null);
-			Assert.That(viewResult.Model, Is.Null);
-		}
+        [Test]
+        public async Task Index_ShouldReturnEmptyResult_WhenUserIsNotAuthenticated()
+        {
+            //Arrange
+            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            _ = this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(false);
 
-		[Test]
-		public async Task Index_ShouldRedirectToAdminArea_WhenUserIsAdmin()
-		{
-			//Arrange
-			userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
+            //Act
+            var viewResult = (ViewResult)await this.controller.Index();
 
-			//Act
-			LocalRedirectResult redirectResult =
-				(LocalRedirectResult)await controller.Index();
+            //Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(viewResult, Is.Not.Null);
+                Assert.That(viewResult.Model, Is.Null);
+            });
+        }
 
-			//Assert
-			Assert.That(redirectResult, Is.Not.Null);
-			Assert.That(redirectResult.Url, Is.EqualTo("/Admin"));
-		}
+        [Test]
+        public async Task Index_ShouldRedirectToAdminArea_WhenUserIsAdmin()
+        {
+            //Arrange
+            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
 
-		[Test]
-		public async Task Index_ShouldReturnCorrectViewModel_WhenInputIsValid()
-		{
-			//Arrange
-			var inputModel = new DateFilterModel
-			{
-				StartDate = DateTime.UtcNow.AddDays(-1),
-				EndDate = DateTime.UtcNow
-			};
+            //Act
+            var redirectResult = (LocalRedirectResult)await this.controller.Index();
 
-			//Act
-			ViewResult viewResult = (ViewResult)await controller.Index(inputModel);
+            //Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(redirectResult, Is.Not.Null);
+                Assert.That(redirectResult.Url, Is.EqualTo("/Admin"));
+            });
+        }
 
-			//Assert
-			Assert.That(viewResult, Is.Not.Null);
+        [Test]
+        public async Task Index_ShouldReturnCorrectViewModel_WhenInputIsValid()
+        {
+            //Arrange
+            var inputModel = new DateFilterModel
+            {
+                StartDate = DateTime.UtcNow.AddDays(-1),
+                EndDate = DateTime.UtcNow
+            };
 
-			var actual = viewResult.Model as UserDashboardViewModel;
-			Assert.That(actual, Is.Not.Null);
+            //Act
+            var viewResult = (ViewResult)await this.controller.Index(inputModel);
 
-			Assert.That(actual.Accounts.Count(),
-				Is.EqualTo(expUserDashboard.Accounts.Count()));
+            //Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(viewResult, Is.Not.Null);
 
-			for (int i = 0; i < expUserDashboard.Accounts.Count(); i++)
-			{
-				Assert.That(actual.Accounts.ElementAt(i).Id,
-					Is.EqualTo(expUserDashboard.Accounts.ElementAt(i).Id));
-				Assert.That(actual.Accounts.ElementAt(i).Name,
-					Is.EqualTo(expUserDashboard.Accounts.ElementAt(i).Name));
-				Assert.That(actual.Accounts.ElementAt(i).CurrencyName,
-					Is.EqualTo(expUserDashboard.Accounts.ElementAt(i).CurrencyName));
-				Assert.That(actual.Accounts.ElementAt(i).Balance,
-					Is.EqualTo(expUserDashboard.Accounts.ElementAt(i).Balance));
-				Assert.That(actual.Accounts.ElementAt(i).OwnerId,
-					Is.EqualTo(expUserDashboard.Accounts.ElementAt(i).OwnerId));
-			}
+                var actual = viewResult.Model as UserDashboardViewModel;
+                Assert.That(actual, Is.Not.Null);
 
-			Assert.That(actual.CurrenciesCashFlow.Count(),
-				Is.EqualTo(expUserDashboard.CurrenciesCashFlow.Count()));
+                Assert.That(actual!.Accounts.Count(),
+                    Is.EqualTo(this.expUserDashboard.Accounts.Count()));
 
-			for (int i = 0; i < expUserDashboard.CurrenciesCashFlow.Count(); i++)
-			{
-				Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Name,
-					Is.EqualTo(expUserDashboard.CurrenciesCashFlow.ElementAt(i).Name));
-				Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Incomes,
-					Is.EqualTo(expUserDashboard.CurrenciesCashFlow.ElementAt(i).Incomes));
-				Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Expenses,
-					Is.EqualTo(expUserDashboard.CurrenciesCashFlow.ElementAt(i).Expenses));
-			}
+                for (int i = 0; i < this.expUserDashboard.Accounts.Count(); i++)
+                {
+                    Assert.That(actual.Accounts.ElementAt(i).Id,
+                        Is.EqualTo(this.expUserDashboard.Accounts.ElementAt(i).Id));
+                    Assert.That(actual.Accounts.ElementAt(i).Name,
+                        Is.EqualTo(this.expUserDashboard.Accounts.ElementAt(i).Name));
+                    Assert.That(actual.Accounts.ElementAt(i).CurrencyName,
+                        Is.EqualTo(this.expUserDashboard.Accounts.ElementAt(i).CurrencyName));
+                    Assert.That(actual.Accounts.ElementAt(i).Balance,
+                        Is.EqualTo(this.expUserDashboard.Accounts.ElementAt(i).Balance));
+                    Assert.That(actual.Accounts.ElementAt(i).OwnerId,
+                        Is.EqualTo(this.expUserDashboard.Accounts.ElementAt(i).OwnerId));
+                }
 
-			Assert.That(actual.Transactions.Count(),
-				Is.EqualTo(expUserDashboard.LastTransactions.Count()));
+                Assert.That(actual.CurrenciesCashFlow.Count(),
+                    Is.EqualTo(this.expUserDashboard.CurrenciesCashFlow.Count()));
 
-			for (int i = 0; i < expUserDashboard.LastTransactions.Count(); i++)
-			{
-				Assert.That(actual.Transactions.ElementAt(i).Amount,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).Amount));
-				Assert.That(actual.Transactions.ElementAt(i).Refference,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).Refference));
-				Assert.That(actual.Transactions.ElementAt(i).TransactionType,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).TransactionType));
-				Assert.That(actual.Transactions.ElementAt(i).AccountCurrencyName,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).AccountCurrencyName));
-				Assert.That(actual.Transactions.ElementAt(i).CategoryName,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).CategoryName));
-				Assert.That(actual.Transactions.ElementAt(i).CreatedOn,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).CreatedOn));
-				Assert.That(actual.Transactions.ElementAt(i).Id,
-					Is.EqualTo(expUserDashboard.LastTransactions.ElementAt(i).Id));
-			}
-		}
+                for (int i = 0; i < this.expUserDashboard.CurrenciesCashFlow.Count(); i++)
+                {
+                    Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Name,
+                        Is.EqualTo(this.expUserDashboard.CurrenciesCashFlow.ElementAt(i).Name));
+                    Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Incomes,
+                        Is.EqualTo(this.expUserDashboard.CurrenciesCashFlow.ElementAt(i).Incomes));
+                    Assert.That(actual.CurrenciesCashFlow.ElementAt(i).Expenses,
+                        Is.EqualTo(this.expUserDashboard.CurrenciesCashFlow.ElementAt(i).Expenses));
+                }
 
-		[Test]
-		public async Task Index_ShouldReturnCorrectViewModel_WhenInputIsInvalid()
-		{
-			//Arrange
-			var inputModel = new DateFilterModel
-			{
-				StartDate = DateTime.UtcNow,
-				EndDate = DateTime.UtcNow.AddDays(-1)
-			};
-			string errorMessage = "error message";
+                Assert.That(actual.Transactions.Count(),
+                    Is.EqualTo(this.expUserDashboard.LastTransactions.Count()));
 
-			//Act
-			controller.ModelState.AddModelError("error", errorMessage);
-			ViewResult viewResult = (ViewResult)await controller.Index(inputModel);
-			var actual = viewResult.Model as UserDashboardViewModel;
-			var modelStateErrors = viewResult.ViewData.ModelState.Values.First().Errors;
-			
-			//Assert
-			Assert.That(modelStateErrors, Has.Count.EqualTo(1));
-			Assert.That(modelStateErrors.First().ErrorMessage, Is.EqualTo(errorMessage));
+                for (int i = 0; i < this.expUserDashboard.LastTransactions.Count(); i++)
+                {
+                    Assert.That(actual.Transactions.ElementAt(i).Amount,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Amount));
+                    Assert.That(actual.Transactions.ElementAt(i).Refference,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Refference));
+                    Assert.That(actual.Transactions.ElementAt(i).TransactionType,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).TransactionType));
+                    Assert.That(actual.Transactions.ElementAt(i).AccountCurrencyName,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).AccountCurrencyName));
+                    Assert.That(actual.Transactions.ElementAt(i).CategoryName,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).CategoryName));
+                    Assert.That(actual.Transactions.ElementAt(i).CreatedOn,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).CreatedOn));
+                    Assert.That(actual.Transactions.ElementAt(i).Id,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Id));
+                }
+            });
+        }
 
-			Assert.That(actual, Is.Not.Null);
-			Assert.That(actual.CurrenciesCashFlow.Count, Is.EqualTo(0));
-			Assert.That(actual.Transactions.Count, Is.EqualTo(0));
-			Assert.That(actual.StartDate, Is.EqualTo(inputModel.StartDate));
-			Assert.That(actual.EndDate, Is.EqualTo(inputModel.EndDate));
-			Assert.That(actual.Accounts.Count, Is.EqualTo(expAccountCard.Length));
+        [Test]
+        public async Task Index_ShouldReturnCorrectViewModel_WhenInputIsInvalid()
+        {
+            //Arrange
+            var inputModel = new DateFilterModel
+            {
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(-1)
+            };
+            string errorMessage = "error message";
 
-			for (int i = 0; i < expAccountCard.Length; i++)
-			{
-				Assert.That(actual.Accounts.ElementAt(i).Id, 
-					Is.EqualTo(expAccountCard[i].Id));
-				Assert.That(actual.Accounts.ElementAt(i).Name, 
-					Is.EqualTo(expAccountCard[i].Name));
-				Assert.That(actual.Accounts.ElementAt(i).Balance, 
-					Is.EqualTo(expAccountCard[i].Balance));
-				Assert.That(actual.Accounts.ElementAt(i).CurrencyName, 
-					Is.EqualTo(expAccountCard[i].CurrencyName));
-				Assert.That(actual.Accounts.ElementAt(i).OwnerId, 
-					Is.EqualTo(expAccountCard[i].OwnerId));
-			}
-		}
+            //Act
+            this.controller.ModelState.AddModelError("error", errorMessage);
+            var viewResult = (ViewResult)await this.controller.Index(inputModel);
+            var actual = viewResult.Model as UserDashboardViewModel;
+            Microsoft.AspNetCore.Mvc.ModelBinding.ModelErrorCollection modelStateErrors = viewResult.ViewData.ModelState.Values.First().Errors;
 
-		[Test]
-		public void Error_ShouldReturnCorrectErrorImgUrl_WhenStatusCodeIs400()
-		{
-			//Act
-			ViewResult viewResult = (ViewResult)controller.Error(400);
-			var viewBagKeys = viewResult.ViewData.Keys;
-			var viewBagValues = viewResult.ViewData.Values;
+            //Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(modelStateErrors, Has.Count.EqualTo(1));
+                Assert.That(modelStateErrors.First().ErrorMessage, Is.EqualTo(errorMessage));
 
-			//Assert
-			Assert.That(viewResult.ViewData, Has.Count.EqualTo(1));
-			Assert.That(viewBagKeys, Has.Count.EqualTo(1));
-			Assert.That(viewBagValues, Has.Count.EqualTo(1)); 
-			Assert.That(viewBagValues.First(), 
-				Is.EqualTo(HostConstants.BadRequestImgUrl));
-		}
-		
-		[Test]
-		public void Error_ShouldReturnCorrectErrorImgUrl_WhenStatusCodeIsNot400()
-		{
-			//Act
-			IActionResult result = controller.Error(500);
-			ViewResult viewResult = (ViewResult)result;
-			var viewBagKeys = viewResult.ViewData.Keys;
-			var viewBagValues = viewResult.ViewData.Values;
+                Assert.That(actual, Is.Not.Null);
+                Assert.That(actual!.CurrenciesCashFlow.Count, Is.EqualTo(0));
+                Assert.That(actual.Transactions.Count, Is.EqualTo(0));
+                Assert.That(actual.StartDate, Is.EqualTo(inputModel.StartDate));
+                Assert.That(actual.EndDate, Is.EqualTo(inputModel.EndDate));
+                Assert.That(actual.Accounts.Count, Is.EqualTo(this.expAccountCard.Length));
 
-			//Assert
-			Assert.That(viewResult.ViewData, Has.Count.EqualTo(1));
-			Assert.That(viewBagKeys, Has.Count.EqualTo(1));
-			Assert.That(viewBagValues, Has.Count.EqualTo(1)); 
-			Assert.That(viewBagValues.First(), 
-				Is.EqualTo(HostConstants.InternalServerErrorImgUrl));
-		}
-	}
+                for (int i = 0; i < this.expAccountCard.Length; i++)
+                {
+                    Assert.That(actual.Accounts.ElementAt(i).Id,
+                        Is.EqualTo(this.expAccountCard[i].Id));
+                    Assert.That(actual.Accounts.ElementAt(i).Name,
+                        Is.EqualTo(this.expAccountCard[i].Name));
+                    Assert.That(actual.Accounts.ElementAt(i).Balance,
+                        Is.EqualTo(this.expAccountCard[i].Balance));
+                    Assert.That(actual.Accounts.ElementAt(i).CurrencyName,
+                        Is.EqualTo(this.expAccountCard[i].CurrencyName));
+                    Assert.That(actual.Accounts.ElementAt(i).OwnerId,
+                        Is.EqualTo(this.expAccountCard[i].OwnerId));
+                }
+            });
+        }
+
+        [Test]
+        public void Error_ShouldReturnCorrectErrorImgUrl_WhenStatusCodeIs400()
+        {
+            //Act
+            var viewResult = (ViewResult)this.controller.Error(400);
+            ICollection<string> viewBagKeys = viewResult.ViewData.Keys;
+            ICollection<object?> viewBagValues = viewResult.ViewData.Values;
+
+            //Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(viewResult.ViewData, Has.Count.EqualTo(1));
+                Assert.That(viewBagKeys, Has.Count.EqualTo(1));
+                Assert.That(viewBagValues, Has.Count.EqualTo(1));
+                Assert.That(viewBagValues.First(),
+                    Is.EqualTo(HostConstants.BadRequestImgUrl));
+            });
+        }
+
+        [Test]
+        public void Error_ShouldReturnCorrectErrorImgUrl_WhenStatusCodeIsNot400()
+        {
+            //Act
+            IActionResult result = this.controller.Error(500);
+            var viewResult = (ViewResult)result;
+            ICollection<string> viewBagKeys = viewResult.ViewData.Keys;
+            ICollection<object?> viewBagValues = viewResult.ViewData.Values;
+
+            //Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(viewResult.ViewData, Has.Count.EqualTo(1));
+                Assert.That(viewBagKeys, Has.Count.EqualTo(1));
+                Assert.That(viewBagValues, Has.Count.EqualTo(1));
+                Assert.That(viewBagValues.First(),
+                    Is.EqualTo(HostConstants.InternalServerErrorImgUrl));
+            });
+        }
+    }
 }

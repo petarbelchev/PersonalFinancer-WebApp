@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using PersonalFinancer.Data.Models;
-using System.Text;
-
-namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	public class ConfirmEmailModel : PageModel
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.WebUtilities;
+    using PersonalFinancer.Data.Models;
+    using System.Text;
+
+    public class ConfirmEmailModel : PageModel
     {
         private readonly UserManager<ApplicationUser> userManager;
 
@@ -19,19 +19,19 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnGetAsync(string userId, string code)
         {
             if (userId == null || code == null)
-                return RedirectToPage("/Index");
+                return this.RedirectToPage("/Index");
 
-            var user = await userManager.FindByIdAsync(userId);
+            ApplicationUser user = await this.userManager.FindByIdAsync(userId);
 
             if (user == null)
-                return NotFound($"Unable to load user with ID '{userId}'.");
+                return this.NotFound($"Unable to load user with ID '{userId}'.");
 
             code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-            var result = await userManager.ConfirmEmailAsync(user, code);
+            IdentityResult result = await this.userManager.ConfirmEmailAsync(user, code);
 
-            IsConfirmed = result.Succeeded;
+            this.IsConfirmed = result.Succeeded;
 
-            return Page();
+            return this.Page();
         }
     }
 }

@@ -1,16 +1,16 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using PersonalFinancer.Data.Models;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using System.Text.Encodings.Web;
-
-namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	public class ForgotPasswordModel : PageModel
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Identity.UI.Services;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.WebUtilities;
+    using PersonalFinancer.Data.Models;
+    using System.ComponentModel.DataAnnotations;
+    using System.Text;
+    using System.Text.Encodings.Web;
+
+    public class ForgotPasswordModel : PageModel
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IEmailSender emailSender;
@@ -35,30 +35,31 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (ModelState.IsValid)
+            if (this.ModelState.IsValid)
             {
-                var user = await userManager.FindByEmailAsync(Input.Email);
+                ApplicationUser user = await this.userManager.FindByEmailAsync(this.Input.Email);
 
-                if (user == null || !await userManager.IsEmailConfirmedAsync(user))
-                    return RedirectToPage("./ForgotPasswordConfirmation");
+                if (user == null || !await this.userManager.IsEmailConfirmedAsync(user))
+                    return this.RedirectToPage("./ForgotPasswordConfirmation");
 
-                var code = await userManager.GeneratePasswordResetTokenAsync(user);
+                string code = await this.userManager.GeneratePasswordResetTokenAsync(user);
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                var callbackUrl = Url.Page(
+
+                string? callbackUrl = this.Url.Page(
                     "/Account/ResetPassword",
                     pageHandler: null,
                     values: new { area = "Identity", code },
-                    protocol: Request.Scheme);
+                    protocol: this.Request.Scheme);
 
-                await emailSender.SendEmailAsync(
-                    Input.Email,
+                await this.emailSender.SendEmailAsync(
+                    this.Input.Email,
                     "Reset Password",
                     $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl!)}'>clicking here</a>.");
 
-                return RedirectToPage("./ForgotPasswordConfirmation");
+                return this.RedirectToPage("./ForgotPasswordConfirmation");
             }
 
-            return Page();
+            return this.Page();
         }
     }
 }

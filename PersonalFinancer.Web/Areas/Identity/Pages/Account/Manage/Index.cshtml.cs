@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using PersonalFinancer.Data.Models;
-using System.ComponentModel.DataAnnotations;
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
 {
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using PersonalFinancer.Data.Models;
+    using System.ComponentModel.DataAnnotations;
+    using static PersonalFinancer.Data.Constants;
+
     public class IndexModel : PageModel
     {
         private readonly UserManager<ApplicationUser> userManager;
@@ -54,12 +54,12 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await userManager.GetUserAsync(User);
+            ApplicationUser user = await this.userManager.GetUserAsync(this.User);
 
             if (user == null)
-                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
-            
-            Input = new InputModel
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
+
+            this.Input = new InputModel
             {
                 UserName = user.UserName,
                 FirstName = user.FirstName,
@@ -67,30 +67,30 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
                 PhoneNumber = user.PhoneNumber
             };
 
-            return Page();
+            return this.Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await userManager.GetUserAsync(User);
+            ApplicationUser user = await this.userManager.GetUserAsync(this.User);
 
             if (user == null)
-                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
 
-            if (!ModelState.IsValid)
-                return Page();
+            if (!this.ModelState.IsValid)
+                return this.Page();
 
-            user.UserName = Input.UserName;
-            user.FirstName = Input.FirstName;
-            user.LastName = Input.LastName;
-            user.PhoneNumber = Input.PhoneNumber;
+            user.UserName = this.Input.UserName;
+            user.FirstName = this.Input.FirstName;
+            user.LastName = this.Input.LastName;
+            user.PhoneNumber = this.Input.PhoneNumber;
 
-            await userManager.UpdateAsync(user);
+            _ = await this.userManager.UpdateAsync(user);
 
-            await signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
+            await this.signInManager.RefreshSignInAsync(user);
+            this.StatusMessage = "Your profile has been updated";
 
-            return RedirectToPage();
+            return this.RedirectToPage();
         }
     }
 }

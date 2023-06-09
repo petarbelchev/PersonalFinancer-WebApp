@@ -1,11 +1,11 @@
-﻿using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Services.Infrastructure.Constants;
-using static PersonalFinancer.Web.Infrastructure.Constants;
-
-namespace PersonalFinancer.Web.Models.Account
+﻿namespace PersonalFinancer.Web.Models.Account
 {
-	public class UsersAccountCardsViewModel
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Web.Models.Shared;
+    using static PersonalFinancer.Services.Infrastructure.Constants;
+    using static PersonalFinancer.Web.Infrastructure.Constants;
+
+    public class UsersAccountCardsViewModel
 	{
 		public IEnumerable<AccountCardServiceModel> Accounts { get; set; } = null!;
 

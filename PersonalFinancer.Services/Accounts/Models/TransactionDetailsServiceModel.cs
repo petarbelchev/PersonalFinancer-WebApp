@@ -2,9 +2,9 @@
 {
     public class TransactionDetailsServiceModel
     {
-        public string Id { get; set; } = null!;
+        public Guid Id { get; set; }
 
-        public string OwnerId { get; set; } = null!;
+        public Guid OwnerId { get; set; }
 
         public string AccountName { get; init; } = null!;
 

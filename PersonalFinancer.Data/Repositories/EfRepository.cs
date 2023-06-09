@@ -1,31 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore;
-
-namespace PersonalFinancer.Data.Repositories
+﻿namespace PersonalFinancer.Data.Repositories
 {
-	public class EfRepository<T> : IEfRepository<T> where T : class
-	{
-		private readonly PersonalFinancerDbContext context;
-		private readonly DbSet<T> dbSet;
+    using Microsoft.EntityFrameworkCore;
 
-		public EfRepository(PersonalFinancerDbContext context)
-		{
-			this.context = context;
-			this.dbSet = context.Set<T>();
-		}
+    public class EfRepository<T> : IEfRepository<T> where T : class
+    {
+        private readonly PersonalFinancerDbContext context;
+        private readonly DbSet<T> dbSet;
 
-		public async Task AddAsync(T entity)
-			=> await dbSet.AddAsync(entity);
+        public EfRepository(PersonalFinancerDbContext context)
+        {
+            this.context = context;
+            this.dbSet = context.Set<T>();
+        }
 
-		public IQueryable<T> All()
-			=> dbSet.AsQueryable();
+        public async Task AddAsync(T entity)
+           => await this.dbSet.AddAsync(entity);
 
-		public async Task<T?> FindAsync(string id)
-			=> await dbSet.FindAsync(id);
+        public IQueryable<T> All()
+           => this.dbSet.AsQueryable();
 
-		public void Remove(T entity)
-			=> dbSet.Remove(entity);
+        public async Task<T?> FindAsync(Guid id)
+           => await this.dbSet.FindAsync(id);
 
-		public async Task<int> SaveChangesAsync()
-			=> await context.SaveChangesAsync();
-	}
+        public void Remove(T entity)
+           => this.dbSet.Remove(entity);
+
+        public async Task<int> SaveChangesAsync()
+           => await this.context.SaveChangesAsync();
+    }
 }

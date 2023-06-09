@@ -1,223 +1,224 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.Accounts.Models;
-using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Services.User;
-using PersonalFinancer.Services.User.Models;
-using PersonalFinancer.Web.Infrastructure.Extensions;
-using PersonalFinancer.Web.Models.Shared;
-using PersonalFinancer.Web.Models.Transaction;
-using static PersonalFinancer.Data.Constants.RoleConstants;
-
-namespace PersonalFinancer.Web.Controllers
+﻿namespace PersonalFinancer.Web.Controllers
 {
-	[Authorize]
-	public class TransactionsController : Controller
-	{
-		protected readonly IAccountsService accountsService;
-		protected readonly IUsersService usersService;
-		protected readonly IMapper mapper;
+    using AutoMapper;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Models.Shared;
+    using PersonalFinancer.Web.Models.Transaction;
+    using static PersonalFinancer.Data.Constants.RoleConstants;
 
-		public TransactionsController(
-			IAccountsService accountsService,
-			IUsersService usersService,
-			IMapper mapper)
-		{
-			this.accountsService = accountsService;
-			this.usersService = usersService;
-			this.mapper = mapper;
-		}
+    [Authorize]
+    public class TransactionsController : Controller
+    {
+        protected readonly IAccountsService accountsService;
+        protected readonly IUsersService usersService;
+        protected readonly IMapper mapper;
 
-		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> All()
-		{
-			DateTime startDate = DateTime.Now.AddMonths(-1);
-			DateTime endDate = DateTime.Now;
+        public TransactionsController(
+            IAccountsService accountsService,
+            IUsersService usersService,
+            IMapper mapper)
+        {
+            this.accountsService = accountsService;
+            this.usersService = usersService;
+            this.mapper = mapper;
+        }
 
-			UserTransactionsViewModel viewModel =
-				await PrepareUserTransactionsViewModel(User.Id(), startDate, endDate);
+        [Authorize(Roles = UserRoleName)]
+        public async Task<IActionResult> All()
+        {
+            DateTime startDate = DateTime.Now.AddMonths(-1);
+            DateTime endDate = DateTime.Now;
 
-			return View(viewModel);
-		}
+            UserTransactionsViewModel viewModel =
+                await this.PrepareUserTransactionsViewModel(this.User.Id(), startDate, endDate);
 
-		[Authorize(Roles = UserRoleName)]
-		[HttpPost]
-		public async Task<IActionResult> All(DateFilterModel inputModel)
-		{
-			if (!ModelState.IsValid)
-				return View(mapper.Map<UserTransactionsViewModel>(inputModel));
+            return this.View(viewModel);
+        }
 
-			UserTransactionsViewModel viewModel = await PrepareUserTransactionsViewModel(
-				User.Id(), inputModel.StartDate, inputModel.EndDate);
+        [Authorize(Roles = UserRoleName)]
+        [HttpPost]
+        public async Task<IActionResult> All(DateFilterModel inputModel)
+        {
+            if (!this.ModelState.IsValid)
+                return this.View(this.mapper.Map<UserTransactionsViewModel>(inputModel));
 
-			return View(viewModel);
-		}
+            UserTransactionsViewModel viewModel = await this.PrepareUserTransactionsViewModel(
+                this.User.Id(), inputModel.StartDate, inputModel.EndDate);
 
-		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> Create()
-		{
-			UserAccountsAndCategoriesServiceModel userData =
-				await usersService.GetUserAccountsAndCategories(User.Id());
+            return this.View(viewModel);
+        }
 
-			var viewModel = mapper.Map<TransactionFormModel>(userData);
-			viewModel.CreatedOn = DateTime.Now;
+        [Authorize(Roles = UserRoleName)]
+        public async Task<IActionResult> Create()
+        {
+            UserAccountsAndCategoriesServiceModel userData =
+                await this.usersService.GetUserAccountsAndCategories(this.User.Id());
 
-			return View(viewModel);
-		}
+            TransactionFormModel viewModel = this.mapper.Map<TransactionFormModel>(userData);
+            viewModel.CreatedOn = DateTime.Now;
 
-		[Authorize(Roles = UserRoleName)]
-		[HttpPost]
-		public async Task<IActionResult> Create(TransactionFormModel inputModel)
-		{
-			if (!ModelState.IsValid)
-			{
-				await PrepareTransactionFormModelForReturn(inputModel);
+            return this.View(viewModel);
+        }
 
-				return View(inputModel);
-			}
+        [Authorize(Roles = UserRoleName)]
+        [HttpPost]
+        public async Task<IActionResult> Create(TransactionFormModel inputModel)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                await this.PrepareTransactionFormModelForReturn(inputModel);
 
-			if (inputModel.OwnerId != User.Id())
-				return BadRequest();
+                return this.View(inputModel);
+            }
 
-			try
-			{
-				var serviceModel = mapper.Map<TransactionFormShortServiceModel>(inputModel);
-				string newTransactionId = await accountsService.CreateTransaction(serviceModel);
-				TempData["successMsg"] = "You create a new transaction successfully!";
+            if (inputModel.OwnerId != this.User.Id())
+                return this.BadRequest();
 
-				return RedirectToAction(nameof(TransactionDetails), new { id = newTransactionId });
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
+            try
+            {
+                TransactionFormShortServiceModel serviceModel = 
+                    this.mapper.Map<TransactionFormShortServiceModel>(inputModel);
+                
+                Guid newTransactionId = await this.accountsService.CreateTransaction(serviceModel);
+                this.TempData["successMsg"] = "You create a new transaction successfully!";
 
-		[HttpPost]
-		public async Task<IActionResult> Delete(string id, string? returnUrl = null)
-		{
-			try
-			{
-				await accountsService.DeleteTransaction(id, User.Id(), User.IsAdmin());
+                return this.RedirectToAction(nameof(TransactionDetails), new { id = newTransactionId });
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
 
-				TempData["successMsg"] = User.IsAdmin() ?
-					"You successfully delete a user's transaction!"
-					: "Your transaction was successfully deleted!";
-			}
-			catch (ArgumentException)
-			{
-				return Unauthorized();
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
+        [HttpPost]
+        public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
+        {
+            try
+            {
+                _ = await this.accountsService.DeleteTransaction(id, this.User.Id(), this.User.IsAdmin());
 
-			if (returnUrl != null)
-				return LocalRedirect(returnUrl);
-			else
-				return RedirectToAction("Index", "Home");
-		}
+                this.TempData["successMsg"] = this.User.IsAdmin() ?
+                    "You successfully delete a user's transaction!"
+                    : "Your transaction was successfully deleted!";
+            }
+            catch (ArgumentException)
+            {
+                return this.Unauthorized();
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
 
-		public async Task<IActionResult> TransactionDetails(string id)
-		{
-			try
-			{
-				return View(await accountsService
-					.GetTransactionDetails(id, User.Id(), User.IsAdmin()));
-			}
-			catch (ArgumentException)
-			{
-				return Unauthorized();
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
+            return returnUrl != null 
+                ? this.LocalRedirect(returnUrl) 
+                : this.RedirectToAction("Index", "Home");
+        }
 
-		public async Task<IActionResult> EditTransaction(string id)
-		{
-			try
-			{
-				TransactionFormServiceModel transactionData =
-					await accountsService.GetTransactionFormData(id);
+        public async Task<IActionResult> TransactionDetails(Guid id)
+        {
+            try
+            {
+                return this.View(await this.accountsService
+                    .GetTransactionDetails(id, this.User.Id(), this.User.IsAdmin()));
+            }
+            catch (ArgumentException)
+            {
+                return this.Unauthorized();
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
 
-				if (!User.IsAdmin() && User.Id() != transactionData.OwnerId)
-					return Unauthorized();
+        public async Task<IActionResult> EditTransaction(Guid id)
+        {
+            try
+            {
+                TransactionFormServiceModel transactionData =
+                    await this.accountsService.GetTransactionFormData(id);
 
-				var viewModel = mapper.Map<TransactionFormModel>(transactionData);
+                if (!this.User.IsAdmin() && this.User.Id() != transactionData.OwnerId)
+                    return this.Unauthorized();
 
-				return View(viewModel);
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
+                TransactionFormModel viewModel = this.mapper.Map<TransactionFormModel>(transactionData);
 
-		[HttpPost]
-		public async Task<IActionResult> EditTransaction(string id, TransactionFormModel inputModel)
-		{
-			if (!ModelState.IsValid)
-			{
-				await PrepareTransactionFormModelForReturn(inputModel);
+                return this.View(viewModel);
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
 
-				return View(inputModel);
-			}
+        [HttpPost]
+        public async Task<IActionResult> EditTransaction(Guid id, TransactionFormModel inputModel)
+        {
+            if (!this.ModelState.IsValid)
+            {
+                await this.PrepareTransactionFormModelForReturn(inputModel);
 
-			string ownerId = User.IsAdmin() ?
-				await accountsService.GetOwnerId(inputModel.AccountId)
-				: User.Id();
+                return this.View(inputModel);
+            }
 
-			if (inputModel.OwnerId != ownerId)
-				return Unauthorized();
+            Guid ownerId = this.User.IsAdmin()
+                ? await this.accountsService.GetOwnerId(inputModel.AccountId)
+                : this.User.Id();
 
-			var serviceModel = mapper.Map<TransactionFormShortServiceModel>(inputModel);
+            if (inputModel.OwnerId != ownerId)
+                return this.Unauthorized();
 
-			try
-			{
-				await accountsService.EditTransaction(id, serviceModel);
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
+            TransactionFormShortServiceModel serviceModel = this.mapper.Map<TransactionFormShortServiceModel>(inputModel);
 
-			if (User.IsAdmin())
-			{
-				TempData["successMsg"] = "You successfully edit User's transaction!";
-				return RedirectToAction("AccountDetails", "Accounts", new { id = inputModel.AccountId });
-			}
-			else
-			{
-				TempData["successMsg"] = "Your transaction was successfully edited!";
-				return RedirectToAction(nameof(TransactionDetails), new { id });
-			}
-		}
+            try
+            {
+                await this.accountsService.EditTransaction(id, serviceModel);
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
 
-		private async Task PrepareTransactionFormModelForReturn(TransactionFormModel formModel)
-		{
-			UserAccountsAndCategoriesServiceModel userData =
-				await usersService.GetUserAccountsAndCategories(formModel.OwnerId);
+            if (this.User.IsAdmin())
+            {
+                this.TempData["successMsg"] = "You successfully edit User's transaction!";
+                return this.RedirectToAction("AccountDetails", "Accounts", new { id = inputModel.AccountId });
+            }
+            else
+            {
+                this.TempData["successMsg"] = "Your transaction was successfully edited!";
+                return this.RedirectToAction(nameof(TransactionDetails), new { id });
+            }
+        }
 
-			formModel.UserCategories = userData.UserCategories;
-			formModel.UserAccounts = userData.UserAccounts;
-		}
+        private async Task PrepareTransactionFormModelForReturn(TransactionFormModel formModel)
+        {
+            UserAccountsAndCategoriesServiceModel userData =
+                await this.usersService.GetUserAccountsAndCategories(formModel.OwnerId);
 
-		private async Task<UserTransactionsViewModel> PrepareUserTransactionsViewModel(
-			string userId, DateTime startDate, DateTime endDate)
-		{
-			TransactionsServiceModel userTransactions =
-				await usersService.GetUserTransactions(userId, startDate, endDate);
+            formModel.UserCategories = userData.UserCategories;
+            formModel.UserAccounts = userData.UserAccounts;
+        }
 
-			var viewModel = mapper.Map<UserTransactionsViewModel>(userTransactions);
-			viewModel.Id = userId;
-			viewModel.Pagination.TotalElements = userTransactions.TotalTransactionsCount;
+        private async Task<UserTransactionsViewModel> PrepareUserTransactionsViewModel(
+            Guid userId, DateTime startDate, DateTime endDate)
+        {
+            TransactionsServiceModel userTransactions =
+                await this.usersService.GetUserTransactions(userId, startDate, endDate);
 
-			return viewModel;
-		}
-	}
+            UserTransactionsViewModel viewModel = this.mapper.Map<UserTransactionsViewModel>(userTransactions);
+            viewModel.Id = userId;
+            viewModel.Pagination.TotalElements = userTransactions.TotalTransactionsCount;
+
+            return viewModel;
+        }
+    }
 }

@@ -1,16 +1,16 @@
-﻿using PersonalFinancer.Data.Models.Enums;
-
-namespace PersonalFinancer.Services.Accounts.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
+    using PersonalFinancer.Data.Models.Enums;
+
     public class TransactionFormShortServiceModel
 	{
 		public decimal Amount { get; set; }
 
-		public string OwnerId { get; set; } = null!;
+		public Guid OwnerId { get; set; }
 
-		public string CategoryId { get; set; } = null!;
+		public Guid CategoryId { get; set; }
 
-		public string AccountId { get; set; } = null!;
+		public Guid AccountId { get; set; }
 
 		public DateTime CreatedOn { get; set; }
 

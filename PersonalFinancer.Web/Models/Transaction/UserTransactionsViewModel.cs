@@ -1,13 +1,13 @@
-﻿using PersonalFinancer.Services.Shared.Models;
-using PersonalFinancer.Web.Models.Shared;
-using static PersonalFinancer.Services.Infrastructure.Constants;
-using static PersonalFinancer.Web.Infrastructure.Constants;
-
-namespace PersonalFinancer.Web.Models.Transaction
+﻿namespace PersonalFinancer.Web.Models.Transaction
 {
-	public class UserTransactionsViewModel : DateFilterModel
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Web.Models.Shared;
+    using static PersonalFinancer.Services.Infrastructure.Constants;
+    using static PersonalFinancer.Web.Infrastructure.Constants;
+
+    public class UserTransactionsViewModel : DateFilterModel
     {
-        public string Id { get; set; } = null!;
+        public Guid Id { get; set; }
 
         public IEnumerable<TransactionTableServiceModel> Transactions { get; set; }
             = new List<TransactionTableServiceModel>();

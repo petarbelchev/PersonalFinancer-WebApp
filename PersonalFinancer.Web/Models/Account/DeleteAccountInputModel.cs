@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace PersonalFinancer.Web.Models.Account
+﻿namespace PersonalFinancer.Web.Models.Account
 {
-	public class DeleteAccountInputModel
+    using System.ComponentModel.DataAnnotations;
+
+    public class DeleteAccountInputModel
 	{
 		[Required]
-		public string Id { get; set; } = null!;
+		public Guid? Id { get; set; }
 
 		[Required]
 		public bool? ShouldDeleteTransactions { get; set; }

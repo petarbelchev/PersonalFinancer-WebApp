@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Options;
-
-namespace PersonalFinancer.Tests.Mocks
+﻿namespace PersonalFinancer.Tests.Mocks
 {
-	public class MemoryCacheMock
+    using Microsoft.Extensions.Caching.Memory;
+    using Microsoft.Extensions.Options;
+
+    public class MemoryCacheMock
 	{
 		public static MemoryCache Instance
 		{

@@ -1,26 +1,26 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using PersonalFinancer.Data.Models;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using static PersonalFinancer.Data.Constants;
-
-namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	public class ResetPasswordModel : PageModel
-	{
-		private readonly UserManager<ApplicationUser> userManager;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.WebUtilities;
+    using PersonalFinancer.Data.Models;
+    using System.ComponentModel.DataAnnotations;
+    using System.Text;
+    using static PersonalFinancer.Data.Constants;
 
-		public ResetPasswordModel(UserManager<ApplicationUser> userManager)
-			=> this.userManager = userManager;
+    public class ResetPasswordModel : PageModel
+    {
+        private readonly UserManager<ApplicationUser> userManager;
 
-		[BindProperty]
-		public InputModel Input { get; set; } = null!;
+        public ResetPasswordModel(UserManager<ApplicationUser> userManager)
+            => this.userManager = userManager;
 
-		public class InputModel
-		{
+        [BindProperty]
+        public InputModel Input { get; set; } = null!;
+
+        public class InputModel
+        {
             [Required(ErrorMessage = "Email address is required.")]
             [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
             [Display(Name = "Email")]
@@ -38,46 +38,46 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
             [Display(Name = "Confirm Password")]
             public string ConfirmPassword { get; set; } = null!;
 
-			[Required]
-			public string Code { get; set; } = null!;
-		}
+            [Required]
+            public string Code { get; set; } = null!;
+        }
 
-		public IActionResult OnGet(string? code = null)
-		{
-			if (code == null)
-			{
-				return BadRequest("A code must be supplied for password reset.");
-			}
-			else
-			{
-				Input = new InputModel
-				{
-					Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code))
-				};
+        public IActionResult OnGet(string? code = null)
+        {
+            if (code == null)
+            {
+                return this.BadRequest("A code must be supplied for password reset.");
+            }
+            else
+            {
+                this.Input = new InputModel
+                {
+                    Code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code))
+                };
 
-				return Page();
-			}
-		}
+                return this.Page();
+            }
+        }
 
-		public async Task<IActionResult> OnPostAsync()
-		{
-			if (!ModelState.IsValid)
-				return Page();
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (!this.ModelState.IsValid)
+                return this.Page();
 
-			var user = await userManager.FindByEmailAsync(Input.Email);
+            ApplicationUser user = await this.userManager.FindByEmailAsync(this.Input.Email);
 
-			if (user == null)
-				return RedirectToPage("./ResetPasswordConfirmation");
+            if (user == null)
+                return this.RedirectToPage("./ResetPasswordConfirmation");
 
-			var result = await userManager.ResetPasswordAsync(user, Input.Code, Input.Password);
+            IdentityResult result = await this.userManager.ResetPasswordAsync(user, this.Input.Code, this.Input.Password);
 
-			if (result.Succeeded)
-				return RedirectToPage("./ResetPasswordConfirmation");
+            if (result.Succeeded)
+                return this.RedirectToPage("./ResetPasswordConfirmation");
 
-			foreach (var error in result.Errors)
-				ModelState.AddModelError(string.Empty, error.Description);
+            foreach (IdentityError? error in result.Errors)
+                this.ModelState.AddModelError(string.Empty, error.Description);
 
-			return Page();
-		}
-	}
+            return this.Page();
+        }
+    }
 }
