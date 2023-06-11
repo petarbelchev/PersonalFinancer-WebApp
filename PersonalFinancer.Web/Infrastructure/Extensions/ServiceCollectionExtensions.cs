@@ -4,7 +4,6 @@
     using Microsoft.Extensions.Caching.Memory;
     using PersonalFinancer.Data;
     using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Models.Contracts;
     using PersonalFinancer.Data.Repositories;
     using PersonalFinancer.Services.Accounts;
     using PersonalFinancer.Services.ApiService;

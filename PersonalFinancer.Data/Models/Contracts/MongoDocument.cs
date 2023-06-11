@@ -9,7 +9,6 @@
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; } = null!;
 
-        [BsonGuidRepresentation(GuidRepresentation.Standard)]
-        public Guid AuthorId { get; set; }
+        public string AuthorId { get; set; } = null!;
     }
 }

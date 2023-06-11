@@ -3,6 +3,7 @@
     using Microsoft.EntityFrameworkCore;
     using MongoDB.Driver;
     using MongoDB.Driver.Linq;
+    using PersonalFinancer.Data;
     using PersonalFinancer.Data.Models.Contracts;
     using System.Linq.Expressions;
 
@@ -54,7 +55,7 @@
            UpdateDefinition<T> update)
            => await this.collection.UpdateOneAsync(filterExpression, update);
 
-        public async Task<bool> IsUserDocumentAuthor(string documentId, Guid authorId)
+        public async Task<bool> IsUserDocumentAuthor(string documentId, string authorId)
            => await this.collection
               .AsQueryable()
               .AnyAsync(x => x.Id == documentId && x.AuthorId == authorId);

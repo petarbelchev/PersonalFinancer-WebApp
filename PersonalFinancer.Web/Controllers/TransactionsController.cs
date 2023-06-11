@@ -37,7 +37,7 @@
             DateTime endDate = DateTime.Now;
 
             UserTransactionsViewModel viewModel =
-                await this.PrepareUserTransactionsViewModel(this.User.Id(), startDate, endDate);
+                await this.PrepareUserTransactionsViewModel(this.User.IdToGuid(), startDate, endDate);
 
             return this.View(viewModel);
         }
@@ -50,7 +50,7 @@
                 return this.View(this.mapper.Map<UserTransactionsViewModel>(inputModel));
 
             UserTransactionsViewModel viewModel = await this.PrepareUserTransactionsViewModel(
-                this.User.Id(), inputModel.StartDate, inputModel.EndDate);
+                this.User.IdToGuid(), inputModel.StartDate, inputModel.EndDate);
 
             return this.View(viewModel);
         }
@@ -59,7 +59,7 @@
         public async Task<IActionResult> Create()
         {
             UserAccountsAndCategoriesServiceModel userData =
-                await this.usersService.GetUserAccountsAndCategories(this.User.Id());
+                await this.usersService.GetUserAccountsAndCategories(this.User.IdToGuid());
 
             TransactionFormModel viewModel = this.mapper.Map<TransactionFormModel>(userData);
             viewModel.CreatedOn = DateTime.Now;
@@ -78,7 +78,7 @@
                 return this.View(inputModel);
             }
 
-            if (inputModel.OwnerId != this.User.Id())
+            if (inputModel.OwnerId != this.User.IdToGuid())
                 return this.BadRequest();
 
             try
@@ -102,7 +102,7 @@
         {
             try
             {
-                _ = await this.accountsService.DeleteTransaction(id, this.User.Id(), this.User.IsAdmin());
+                _ = await this.accountsService.DeleteTransaction(id, this.User.IdToGuid(), this.User.IsAdmin());
 
                 this.TempData["successMsg"] = this.User.IsAdmin() ?
                     "You successfully delete a user's transaction!"
@@ -127,7 +127,7 @@
             try
             {
                 return this.View(await this.accountsService
-                    .GetTransactionDetails(id, this.User.Id(), this.User.IsAdmin()));
+                    .GetTransactionDetails(id, this.User.IdToGuid(), this.User.IsAdmin()));
             }
             catch (ArgumentException)
             {
@@ -146,7 +146,7 @@
                 TransactionFormServiceModel transactionData =
                     await this.accountsService.GetTransactionFormData(id);
 
-                if (!this.User.IsAdmin() && this.User.Id() != transactionData.OwnerId)
+                if (!this.User.IsAdmin() && this.User.IdToGuid() != transactionData.OwnerId)
                     return this.Unauthorized();
 
                 TransactionFormModel viewModel = this.mapper.Map<TransactionFormModel>(transactionData);
@@ -171,7 +171,7 @@
 
             Guid ownerId = this.User.IsAdmin()
                 ? await this.accountsService.GetOwnerId(inputModel.AccountId)
-                : this.User.Id();
+                : this.User.IdToGuid();
 
             if (inputModel.OwnerId != ownerId)
                 return this.Unauthorized();

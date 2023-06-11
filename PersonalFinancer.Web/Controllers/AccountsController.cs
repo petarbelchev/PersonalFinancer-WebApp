@@ -32,7 +32,7 @@
         [Authorize(Roles = UserRoleName)]
         public async Task<IActionResult> Create()
         {
-            var viewModel = new AccountFormViewModel { OwnerId = this.User.Id() };
+            var viewModel = new AccountFormViewModel { OwnerId = this.User.IdToGuid() };
             await this.PrepareAccountFormViewModel(viewModel);
 
             return this.View(viewModel);
@@ -49,7 +49,7 @@
                 return this.View(inputModel);
             }
 
-            if (inputModel.OwnerId != this.User.Id())
+            if (inputModel.OwnerId != this.User.IdToGuid())
                 return this.BadRequest();
 
             try
@@ -84,7 +84,7 @@
             try
             {
                 AccountDetailsViewModel viewModel =
-                    await this.GetAccountDetailsViewModel(inputModel, this.User.Id(), this.User.IsAdmin());
+                    await this.GetAccountDetailsViewModel(inputModel, this.User.IdToGuid(), this.User.IsAdmin());
 
                 return this.View(viewModel);
             }
@@ -117,7 +117,7 @@
             try
             {
                 AccountDetailsViewModel viewModel =
-                    await this.GetAccountDetailsViewModel(inputModel, this.User.Id(), this.User.IsAdmin());
+                    await this.GetAccountDetailsViewModel(inputModel, this.User.IdToGuid(), this.User.IsAdmin());
 
                 return this.View(viewModel);
             }
@@ -135,7 +135,7 @@
             try
             {
                 string accountName = await this.accountService
-                    .GetAccountName(id, this.User.Id(), this.User.IsAdmin());
+                    .GetAccountName(id, this.User.IdToGuid(), this.User.IsAdmin());
 
                 var viewModel = new DeleteAccountViewModel { Name = accountName };
 
@@ -159,7 +159,7 @@
             try
             {
                 await this.accountService.DeleteAccount(
-                    inputModel.Id, this.User.Id(), this.User.IsAdmin(),
+                    inputModel.Id, this.User.IdToGuid(), this.User.IsAdmin(),
                     inputModel.ShouldDeleteTransactions ?? false);
 
                 if (this.User.IsAdmin())
@@ -194,7 +194,7 @@
             try
             {
                 AccountFormServiceModel accountData = await this.accountService
-                    .GetAccountFormData(id, this.User.Id(), this.User.IsAdmin());
+                    .GetAccountFormData(id, this.User.IdToGuid(), this.User.IsAdmin());
 
                 AccountFormViewModel viewModel = this.mapper.Map<AccountFormViewModel>(accountData);
 
@@ -219,7 +219,7 @@
 
             Guid ownerId = this.User.IsAdmin()
                 ? await this.accountService.GetOwnerId(id)
-                : this.User.Id();
+                : this.User.IdToGuid();
 
             if (inputModel.OwnerId != ownerId)
                 return this.BadRequest();

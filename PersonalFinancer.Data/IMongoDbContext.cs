@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Data.Models.Contracts
+﻿namespace PersonalFinancer.Data
 {
     using MongoDB.Driver;
 

@@ -7,14 +7,14 @@
     {
         Task<IEnumerable<MessageOutputServiceModel>> GetAllAsync();
 
-        Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(Guid userId);
+        Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(string userId);
 
         /// <summary>
         /// Throws InvalidOperationException when Message does not exist
         /// or User is not owner or Administrator
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        Task<MessageDetailsServiceModel> GetMessageAsync(string id, Guid userId, bool isUserAdmin);
+        Task<MessageDetailsServiceModel> GetMessageAsync(string id, string userId, bool isUserAdmin);
 
         Task<string> CreateAsync(MessageInputServiceModel model);
 
@@ -32,6 +32,6 @@
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        Task RemoveAsync(string messageId, Guid userId, bool isUserAdmin);
+        Task RemoveAsync(string messageId, string userId, bool isUserAdmin);
     }
 }

@@ -27,7 +27,7 @@
                 DateTime endDate = DateTime.Now;
 
                 UserDashboardServiceModel userDashboardData = await this.userService
-                    .GetUserDashboardData(this.User.Id(), startDate, endDate);
+                    .GetUserDashboardData(this.User.IdToGuid(), startDate, endDate);
 
                 var viewModel = new UserDashboardViewModel
                 {
@@ -56,12 +56,12 @@
 
             if (!this.ModelState.IsValid)
             {
-                viewModel.Accounts = await this.userService.GetUserAccounts(this.User.Id());
+                viewModel.Accounts = await this.userService.GetUserAccounts(this.User.IdToGuid());
                 return this.View(viewModel);
             }
 
             UserDashboardServiceModel userDashboardData =
-                await this.userService.GetUserDashboardData(this.User.Id(), viewModel.StartDate, viewModel.EndDate);
+                await this.userService.GetUserDashboardData(this.User.IdToGuid(), viewModel.StartDate, viewModel.EndDate);
             
             viewModel.Accounts = userDashboardData.Accounts;
             viewModel.Transactions = userDashboardData.LastTransactions;

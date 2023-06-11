@@ -4,7 +4,6 @@
     using MongoDB.Bson.Serialization.Conventions;
     using MongoDB.Driver;
     using PersonalFinancer.Data.Configurations;
-    using PersonalFinancer.Data.Models.Contracts;
 
     public class MessagesDbContext : IMongoDbContext
     {
@@ -17,7 +16,6 @@
             ConventionRegistry.Register("camelCase", camelCaseConvension, type => true);
 
             this.client = new MongoClient(settings.Value.ConnectionString);
-
             this.database = this.client.GetDatabase(settings.Value.DatabaseName);
         }
 

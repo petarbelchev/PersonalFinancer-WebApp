@@ -87,7 +87,7 @@
                 }
             };
 
-            var userId = Guid.NewGuid();
+            string userId = Guid.NewGuid().ToString();
 
             _ = this.repoMock.Setup(x => x.FindAsync(
                 m => m.AuthorId == userId,
@@ -142,7 +142,7 @@
 
             string messageId = Guid.NewGuid().ToString();
             bool isUserAdmin = false;
-            var userId = Guid.NewGuid();
+            string userId = Guid.NewGuid().ToString();
 
             _ = this.repoMock.Setup(x => x.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
@@ -210,7 +210,7 @@
 
             string messageId = Guid.NewGuid().ToString();
             bool isUserAdmin = true;
-            var userId = Guid.NewGuid();
+            string userId = Guid.NewGuid().ToString();
 
             _ = this.repoMock.Setup(x => x.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
@@ -260,7 +260,7 @@
             //Arrange
             string messageId = Guid.NewGuid().ToString();
             bool isUserAdmin = false;
-            var notAuthorId = Guid.NewGuid();
+            string notAuthorId = Guid.NewGuid().ToString();
 
             _ = this.repoMock.Setup(x => x.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == notAuthorId),
@@ -293,7 +293,7 @@
 
             var inputModel = new MessageInputServiceModel
             {
-                AuthorId = Guid.NewGuid(),
+                AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",
                 Subject = "Test Subject",
                 Content = "Test Content"
@@ -331,7 +331,7 @@
             //Arrange
             var inputModel = new ReplyInputServiceModel
             {
-                AuthorId = Guid.NewGuid(),
+                AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",
                 MessageId = "Test Message Id",
                 Content = "Test Content",
@@ -368,7 +368,7 @@
             //Arrange
             var inputModel = new ReplyInputServiceModel
             {
-                AuthorId = Guid.NewGuid(),
+                AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",
                 MessageId = "Test Message Id",
                 Content = "Test Content",
@@ -405,7 +405,7 @@
             //Arrange
             var inputModel = new ReplyInputServiceModel
             {
-                AuthorId = Guid.NewGuid(),
+                AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",
                 MessageId = "Test Message Id",
                 Content = "Test Content",
@@ -429,7 +429,7 @@
             var message = new Message
             {
                 Id = "Test Message Id",
-                AuthorId = Guid.NewGuid(),
+                AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",
                 CreatedOn = DateTime.UtcNow,
                 Subject = "Test Message Subject",
@@ -463,7 +463,7 @@
             var message = new Message
             {
                 Id = "Test Message Id",
-                AuthorId = Guid.NewGuid(),
+                AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",
                 CreatedOn = DateTime.UtcNow,
                 Subject = "Test Message Subject",
@@ -497,7 +497,7 @@
             var message = new Message
             {
                 Id = "Test Message Id",
-                AuthorId = Guid.NewGuid(),
+                AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",
                 CreatedOn = DateTime.UtcNow,
                 Subject = "Test Message Subject",

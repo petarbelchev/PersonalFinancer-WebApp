@@ -33,7 +33,7 @@
             return messages;
         }
 
-        public async Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(Guid userId)
+        public async Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(string userId)
         {
             IEnumerable<MessageOutputServiceModel> messages = await this.repo.FindAsync(
                 x => x.AuthorId == userId,
@@ -53,7 +53,7 @@
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<MessageDetailsServiceModel> GetMessageAsync(
-            string messageId, Guid userId, bool isUserAdmin)
+            string messageId, string userId, bool isUserAdmin)
         {
             MessageDetailsServiceModel message = await this.repo.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
@@ -112,7 +112,7 @@
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task RemoveAsync(string messageId, Guid userId, bool isUserAdmin)
+        public async Task RemoveAsync(string messageId, string userId, bool isUserAdmin)
         {
             if (!isUserAdmin && !await this.repo.IsUserDocumentAuthor(messageId, userId))
                 throw new ArgumentException("The User is not Authorized to delete the message.");

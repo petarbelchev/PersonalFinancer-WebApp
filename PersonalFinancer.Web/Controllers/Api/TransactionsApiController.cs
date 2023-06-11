@@ -37,7 +37,7 @@
             try
             {
                 decimal newBalance = await this.accountService
-                    .DeleteTransaction(id, this.User.Id(), this.User.IsAdmin());
+                    .DeleteTransaction(id, this.User.IdToGuid(), this.User.IsAdmin());
 
                 return this.Ok(new { newBalance });
             }
@@ -64,7 +64,7 @@
             if (!this.ModelState.IsValid || !isStartDateValid || !isEndDateValid || startDate > endDate)
                 return this.BadRequest();
 
-            if (inputModel.Id != this.User.Id())
+            if (inputModel.Id != this.User.IdToGuid())
                 return this.Unauthorized();
 
             try

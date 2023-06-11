@@ -32,6 +32,6 @@
            Expression<Func<T, bool>> filterExpression,
            UpdateDefinition<T> update);
 
-        Task<bool> IsUserDocumentAuthor(string documentId, Guid authorId);
+        Task<bool> IsUserDocumentAuthor(string documentId, string authorId);
     }
 }

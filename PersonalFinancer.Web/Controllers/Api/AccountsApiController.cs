@@ -57,7 +57,7 @@
             if (!this.ModelState.IsValid || !isStartDateValid || !isEndDateValid || startDate > endDate)
                 return this.BadRequest();
 
-            if (!this.User.IsAdmin() && inputModel.OwnerId != this.User.Id())
+            if (!this.User.IsAdmin() && inputModel.OwnerId != this.User.IdToGuid())
                 return this.Unauthorized();
 
             try

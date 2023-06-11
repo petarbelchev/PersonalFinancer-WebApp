@@ -23,7 +23,7 @@
             {
                 RegisteredUsers = await this.userService.UsersCount(),
                 CreatedAccounts = await this.userService.GetUsersAccountsCount(),
-                AdminFullName = await this.userService.UserFullName(this.User.Id()),
+                AdminFullName = await this.userService.UserFullName(this.User.IdToGuid()),
                 AccountsCashFlowEndpoint = HostConstants.ApiAccountsCashFlowUrl
             });
         }

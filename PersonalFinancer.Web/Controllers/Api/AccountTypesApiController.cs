@@ -47,7 +47,7 @@
             {
                 await this.apiService.DeleteEntity(
                     id ?? throw new InvalidOperationException(),
-                    this.User.Id(), this.User.IsAdmin());
+                    this.User.IdToGuid(), this.User.IsAdmin());
 
                 return this.NoContent();
             }

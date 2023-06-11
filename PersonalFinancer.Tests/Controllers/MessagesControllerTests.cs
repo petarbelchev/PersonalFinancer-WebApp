@@ -25,7 +25,7 @@
         private readonly IMapper mapper = ControllersMapperMock.Instance;
         private MessagesController controller;
 
-        protected Guid userId = Guid.NewGuid();
+        protected string userId = Guid.NewGuid().ToString();
 
         [SetUp]
         public void SetUp()
@@ -212,7 +212,7 @@
             string newMessage = "new message id";
 
             _ = this.usersServiceMock.Setup(x => x
-                .UserFullName(this.userId))
+                .UserFullName(Guid.Parse(this.userId)))
                 .ReturnsAsync(fullName);
 
             _ = this.messagesServiceMock.Setup(x =>
@@ -490,7 +490,7 @@
                 .Returns(false);
 
             _ = this.usersServiceMock.Setup(x => x
-                .UserFullName(this.userId))
+                .UserFullName(Guid.Parse(this.userId)))
                 .ReturnsAsync(userName);
 
             //Act
@@ -531,7 +531,7 @@
                 .Returns(false);
 
             _ = this.usersServiceMock.Setup(x => x
-                .UserFullName(this.userId))
+                .UserFullName(Guid.Parse(this.userId)))
                 .ReturnsAsync(userName);
 
             _ = this.messagesServiceMock.Setup(x => x
@@ -567,7 +567,7 @@
                 .Returns(false);
 
             _ = this.usersServiceMock.Setup(x => x
-                .UserFullName(this.userId))
+                .UserFullName(Guid.Parse(this.userId)))
                 .ReturnsAsync(userName);
 
             _ = this.messagesServiceMock.Setup(x => x
