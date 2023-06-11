@@ -367,3 +367,5 @@ FodyWeavers.xsd
 /PersonalFinancer.Web/appsettings.Production.json
 /PersonalFinancer.Web/Properties/ServiceDependencies/financer - Web Deploy
 /PersonalFinancer.Web/Properties/serviceDependencies.financer - Web Deploy.json
+/PersonalFinancer.Web/appsettings.Development.json
+/PersonalFinancer.Web/appsettings.Production.json

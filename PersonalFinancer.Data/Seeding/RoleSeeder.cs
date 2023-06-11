@@ -1,25 +1,25 @@
 ﻿namespace PersonalFinancer.Data.Seeding
 {
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.Extensions.DependencyInjection;
-    using System;
-    using System.Threading.Tasks;
-    using static PersonalFinancer.Data.Constants;
+	using Microsoft.AspNetCore.Identity;
+	using System;
+	using System.Threading.Tasks;
+	using static PersonalFinancer.Data.Constants;
 
-    public class RoleSeeder : ISeeder
-    {
-        public async Task SeedAsync(PersonalFinancerDbContext dbContext, IServiceProvider serviceProvider)
-        {
-            RoleManager<IdentityRole<Guid>> roleManager =
-               serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+	public static class RoleSeeder
+	{
+		public static async Task SeedAsync(RoleManager<IdentityRole<Guid>> roleManager)
+		{
+			if (!await roleManager.RoleExistsAsync(RoleConstants.AdminRoleName))
+			{
+				var adminRole = new IdentityRole<Guid> { Name = RoleConstants.AdminRoleName };
+				_ = await roleManager.CreateAsync(adminRole);
+			}
 
-            if (await roleManager.RoleExistsAsync(RoleConstants.AdminRoleName))
-                return;
-
-            var adminRole = new IdentityRole<Guid> { Name = RoleConstants.AdminRoleName };
-            var userRole = new IdentityRole<Guid> { Name = RoleConstants.UserRoleName };
-            _ = await roleManager.CreateAsync(adminRole);
-            _ = await roleManager.CreateAsync(userRole);
-        }
-    }
+			if (!await roleManager.RoleExistsAsync(RoleConstants.UserRoleName))
+			{
+				var userRole = new IdentityRole<Guid> { Name = RoleConstants.UserRoleName };
+				_ = await roleManager.CreateAsync(userRole);
+			}
+		}
+	}
 }

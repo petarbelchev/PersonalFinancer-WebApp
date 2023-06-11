@@ -1,25 +1,19 @@
 ﻿namespace PersonalFinancer.Data.Seeding
 {
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.Extensions.DependencyInjection;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Models.Enums;
-    using System.Security.Cryptography;
-    using static PersonalFinancer.Data.Constants;
+	using Microsoft.EntityFrameworkCore;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Models.Enums;
+	using System.Security.Cryptography;
+	using static PersonalFinancer.Data.Constants;
 
-    public class TransactionSeeder : ISeeder
+	public class TransactionSeeder : IUserDataSeeder
     {
-        public async Task SeedAsync(PersonalFinancerDbContext dbContext, IServiceProvider serviceProvider)
-        {
-            if (dbContext.Transactions.Any())
-                return;
+        public async Task SeedAsync(PersonalFinancerDbContext dbContext, ApplicationUser user)
+		{
+			if (await dbContext.Accounts.AnyAsync(a => a.OwnerId == user.Id && a.Balance != 0))
+				return;
 
-            UserManager<ApplicationUser> userManager =
-                serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-            ApplicationUser user = await userManager.FindByEmailAsync(SeedConstants.FirstUserEmail);
-
-            var cashBgnAccId = Guid.Parse(SeedConstants.CashBgnAccountId);
+			var cashBgnAccId = Guid.Parse(SeedConstants.CashBgnAccountId);
             var bankBgnAccId = Guid.Parse(SeedConstants.BankBgnAccountId);
             var euroSavingsAccId = Guid.Parse(SeedConstants.BankEurAccountId);
             var usdSavingsAccId = Guid.Parse(SeedConstants.BankUsdAccountId);

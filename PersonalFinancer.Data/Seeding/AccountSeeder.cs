@@ -1,21 +1,15 @@
 ﻿namespace PersonalFinancer.Data.Seeding
 {
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.Extensions.DependencyInjection;
-    using PersonalFinancer.Data.Models;
-    using static PersonalFinancer.Data.Constants;
+	using Microsoft.EntityFrameworkCore;
+	using PersonalFinancer.Data.Models;
+	using static PersonalFinancer.Data.Constants;
 
-    public class AccountSeeder : ISeeder
+	public class AccountSeeder : IUserDataSeeder
     {
-        public async Task SeedAsync(PersonalFinancerDbContext dbContext, IServiceProvider serviceProvider)
+        public async Task SeedAsync(PersonalFinancerDbContext dbContext, ApplicationUser user)
         {
-            if (dbContext.Accounts.Any())
+            if (await dbContext.Accounts.AnyAsync(a => a.OwnerId == user.Id))
                 return;
-
-            UserManager<ApplicationUser> userManager =
-               serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-            ApplicationUser user = await userManager.FindByEmailAsync(SeedConstants.FirstUserEmail);
 
             var accounts = new Account[]
             {

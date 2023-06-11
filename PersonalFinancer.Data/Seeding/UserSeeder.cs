@@ -1,69 +1,59 @@
 ﻿namespace PersonalFinancer.Data.Seeding
 {
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.Extensions.DependencyInjection;
-    using PersonalFinancer.Data.Models;
-    using System;
-    using System.Threading.Tasks;
-    using static PersonalFinancer.Data.Constants;
+	using Microsoft.AspNetCore.Identity;
+	using PersonalFinancer.Data.Models;
+	using System.Threading.Tasks;
+	using static PersonalFinancer.Data.Constants;
 
-    public class UserSeeder : ISeeder
-    {
-        public async Task SeedAsync(PersonalFinancerDbContext dbContext, IServiceProvider serviceProvider)
-        {
-            UserManager<ApplicationUser> userManager =
-                serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+	public static class UserSeeder
+	{
+		public static async Task SeedAsync(UserManager<ApplicationUser> userManager)
+		{
+			ApplicationUser? admin = await userManager.FindByEmailAsync(SeedConstants.AdminEmail);
 
-            ApplicationUser? admin = await userManager.FindByEmailAsync(SeedConstants.AdminEmail);
+			if (admin == null)
+			{
+				admin = new ApplicationUser
+				{
+					FirstName = "Great",
+					LastName = "Admin",
+					Email = "admin@admin.com",
+					NormalizedEmail = "ADMIN@ADMIN.COM",
+					UserName = "admin",
+					NormalizedUserName = "ADMIN",
+					PhoneNumber = "0987654321",
+					EmailConfirmed = true,
+				};
 
-            if (admin != null)
-                return;
+				IdentityResult creationResult =
+				   await userManager.CreateAsync(admin, SeedConstants.AdminPassword);
 
-            admin = new ApplicationUser
-            {
-                FirstName = "Great",
-                LastName = "Admin",
-                Email = "admin@admin.com",
-                NormalizedEmail = "ADMIN@ADMIN.COM",
-                UserName = "admin",
-                NormalizedUserName = "ADMIN",
-                PhoneNumber = "0987654321",
-                EmailConfirmed = true,
-            };
+				if (creationResult.Succeeded)
+					_ = await userManager.AddToRoleAsync(admin, RoleConstants.AdminRoleName);
+			}
 
-            IdentityResult creationResult =
-               await userManager.CreateAsync(admin, SeedConstants.AdminPassword);
+			ApplicationUser? testUser = await userManager.FindByEmailAsync(SeedConstants.FirstUserEmail);
 
-            if (creationResult.Succeeded)
-            {
-                _ = await userManager.AddToRoleAsync(admin, RoleConstants.AdminRoleName);
+			if (testUser == null)
+			{
+				testUser = new ApplicationUser
+				{
+					FirstName = "Petar",
+					LastName = "Petrov",
+					Email = "petar@mail.com",
+					NormalizedEmail = "PETAR@MAIL.COM",
+					UserName = "petar",
+					NormalizedUserName = "PETAR2023",
+					PhoneNumber = "1234567890",
+					EmailConfirmed = true,
+				};
 
-                _ = dbContext.Categories.Add(new Category
-                {
-                    Id = Guid.Parse(CategoryConstants.InitialBalanceCategoryId),
-                    Name = CategoryConstants.CategoryInitialBalanceName,
-                    OwnerId = admin.Id,
-                });
+				IdentityResult creationResult = 
+					await userManager.CreateAsync(testUser, SeedConstants.FirstUserPassword);
 
-                _ = await dbContext.SaveChangesAsync();
-            }
-
-            var firstUser = new ApplicationUser
-            {
-                FirstName = "Petar",
-                LastName = "Petrov",
-                Email = "petar@mail.com",
-                NormalizedEmail = "PETAR@MAIL.COM",
-                UserName = "petar",
-                NormalizedUserName = "PETAR2023",
-                PhoneNumber = "1234567890",
-                EmailConfirmed = true,
-            };
-
-            creationResult = await userManager.CreateAsync(firstUser, SeedConstants.FirstUserPassword);
-
-            if (creationResult.Succeeded)
-                _ = await userManager.AddToRoleAsync(firstUser, RoleConstants.UserRoleName);
-        }
-    }
+				if (creationResult.Succeeded)
+					_ = await userManager.AddToRoleAsync(testUser, RoleConstants.UserRoleName);
+			}			
+		}
+	}
 }

@@ -1,23 +1,17 @@
 ﻿namespace PersonalFinancer.Data.Seeding
 {
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.Extensions.DependencyInjection;
-    using PersonalFinancer.Data.Models;
-    using static PersonalFinancer.Data.Constants;
+	using Microsoft.EntityFrameworkCore;
+	using PersonalFinancer.Data.Models;
+	using static PersonalFinancer.Data.Constants;
 
-    public class CategorySeeder : ISeeder
+	public class CategorySeeder : IUserDataSeeder
     {
-        public async Task SeedAsync(PersonalFinancerDbContext dbContext, IServiceProvider serviceProvider)
+        public async Task SeedAsync(PersonalFinancerDbContext dbContext, ApplicationUser user)
         {
-            if (dbContext.Categories.Any(c => c.Id != Guid.Parse(CategoryConstants.InitialBalanceCategoryId)))
-                return;
+			if (await dbContext.Categories.AnyAsync(c => c.OwnerId == user.Id))
+				return;
 
-            UserManager<ApplicationUser> userManager =
-               serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-            ApplicationUser user = await userManager.FindByEmailAsync(SeedConstants.FirstUserEmail);
-
-            var categories = new Category[]
+			var categories = new Category[]
             {
                 new Category
                 {
