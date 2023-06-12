@@ -1,14 +1,13 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
-	using Services.Shared.Models;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Web.Models.Shared;
+    using static PersonalFinancer.Services.Infrastructure.Constants;
+    using static PersonalFinancer.Web.Infrastructure.Constants;
 
-	using Web.Models.Shared;
-	
-	using static Data.Constants;
-
-	public class AccountDetailsViewModel
+    public class AccountDetailsViewModel
 	{
-		public string Id { get; set; } = null!;
+		public Guid Id { get; set; }
 
 		public string Name { get; set; } = null!;
 
@@ -22,7 +21,7 @@
 
 		public DateTime EndDate { get; set; }
 
-		public string OwnerId { get; set; } = null!;
+		public Guid OwnerId { get; set; }
 
 		public IEnumerable<TransactionTableServiceModel> Transactions { get; set; }
 			= new List<TransactionTableServiceModel>();

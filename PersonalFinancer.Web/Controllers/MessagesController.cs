@@ -1,138 +1,134 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-	using AutoMapper;
+    using AutoMapper;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.Messages;
+    using PersonalFinancer.Services.Messages.Models;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Models.Message;
+    using static PersonalFinancer.Data.Constants.RoleConstants;
 
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
+    [Authorize]
+    public class MessagesController : Controller
+    {
+        private readonly IMessagesService messagesService;
+        private readonly IUsersService usersService;
+        private readonly IMapper mapper;
 
-	using Services.Messages;
-	using Services.Messages.Models;
-	using Services.User;
+        public MessagesController(
+            IMessagesService messagesService,
+            IUsersService usersService,
+            IMapper mapper)
+        {
+            this.messagesService = messagesService;
+            this.usersService = usersService;
+            this.mapper = mapper;
+        }
 
-	using Web.Infrastructure;
-	using Web.Models.Message;
+        public async Task<IActionResult> AllMessages()
+        {
+            IEnumerable<MessageOutputServiceModel> messages = this.User.IsAdmin()
+                ? await this.messagesService.GetAllAsync()
+                : await this.messagesService.GetUserMessagesAsync(this.User.Id());
 
-	using static Data.Constants.RoleConstants;
+            return this.View(messages);
+        }
 
-	[Authorize]
-	public class MessagesController : Controller
-	{
-		private readonly IMessagesService messagesService;
-		private readonly IUsersService usersService;
-		private readonly IMapper mapper;
+        [Authorize(Roles = UserRoleName)]
+        public IActionResult Create() => this.View(new MessageInputModel());
 
-		public MessagesController(
-			IMessagesService messagesService,
-			IUsersService usersService,
-			IMapper mapper)
-		{
-			this.messagesService = messagesService;
-			this.usersService = usersService;
-			this.mapper = mapper;
-		}
+        [Authorize(Roles = UserRoleName)]
+        [HttpPost]
+        public async Task<IActionResult> Create(MessageInputModel model)
+        {
+            if (!this.ModelState.IsValid)
+                return this.View(model);
 
-		public async Task<IActionResult> AllMessages()
-		{
-			var messages = User.IsAdmin()
-				? await messagesService.GetAllAsync()
-				: await messagesService.GetUserMessagesAsync(User.Id());
+            string newMessageId = await this.messagesService
+                .CreateAsync(new MessageInputServiceModel
+                {
+                    AuthorId = this.User.Id(),
+                    AuthorName = await this.usersService.UserFullName(this.User.IdToGuid()),
+                    Subject = model.Subject,
+                    Content = model.Content
+                });
 
-			return View(messages);
-		}
+            return this.RedirectToAction(nameof(MessageDetails), new { id = newMessageId });
+        }
 
-		[Authorize(Roles = UserRoleName)]
-		public IActionResult Create() => View(new MessageInputModel());
+        [HttpPost]
+        public async Task<IActionResult> Delete(string id)
+        {
+            try
+            {
+                await this.messagesService.RemoveAsync(id, this.User.Id(), this.User.IsAdmin());
+            }
+            catch (ArgumentException)
+            {
+                return this.Unauthorized();
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
 
-		[Authorize(Roles = UserRoleName)]
-		[HttpPost]
-		public async Task<IActionResult> Create(MessageInputModel model)
-		{
-			if (!ModelState.IsValid)
-				return View(model);
+            return this.RedirectToAction(nameof(AllMessages));
+        }
 
-			string newMessageId = await messagesService
-				.CreateAsync(new MessageInputServiceModel
-				{
-					AuthorId = User.Id(),
-					AuthorName = await usersService.FullName(User.Id()),
-					Subject = model.Subject,
-					Content = model.Content
-				});
+        public async Task<IActionResult> MessageDetails(string id)
+        {
+            try
+            {
+                MessageDetailsServiceModel message =
+                    await this.messagesService.GetMessageAsync(id, this.User.Id(), this.User.IsAdmin());
 
-			return RedirectToAction(nameof(MessageDetails), new { id = newMessageId });
-		}
+                MessageDetailsViewModel viewModel = this.mapper.Map<MessageDetailsViewModel>(message);
 
-		[HttpPost]
-		public async Task<IActionResult> Delete(string id)
-		{
-			try
-			{
-				await messagesService.RemoveAsync(id, User.Id(), User.IsAdmin());
-			}
-			catch (ArgumentException)
-			{
-				return Unauthorized();
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
+                return this.View(viewModel);
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
 
-			return RedirectToAction(nameof(AllMessages));
-		}
+        [HttpPost]
+        public async Task<IActionResult> MessageDetails(ReplyInputModel inputModel)
+        {
+            try
+            {
+                if (!this.ModelState.IsValid)
+                {
+                    MessageDetailsServiceModel message =
+                        await this.messagesService.GetMessageAsync(inputModel.Id, this.User.Id(), this.User.IsAdmin());
 
-		public async Task<IActionResult> MessageDetails(string id)
-		{
-			try
-			{
-				MessageDetailsServiceModel message =
-					await messagesService.GetMessageAsync(id, User.Id(), User.IsAdmin());
+                    MessageDetailsViewModel viewModel = this.mapper.Map<MessageDetailsViewModel>(message);
+                    viewModel.ReplyContent = inputModel.ReplyContent;
 
-				var viewModel = mapper.Map<MessageDetailsViewModel>(message);
+                    return this.View(viewModel);
+                }
 
-				return View(viewModel);
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
+                _ = await this.messagesService.AddReplyAsync(new ReplyInputServiceModel
+                {
+                    MessageId = inputModel.Id,
+                    AuthorId = this.User.Id(),
+                    AuthorName = await this.usersService.UserFullName(this.User.IdToGuid()),
+                    IsAuthorAdmin = this.User.IsAdmin(),
+                    Content = inputModel.ReplyContent
+                });
 
-		[HttpPost]
-		public async Task<IActionResult> MessageDetails(ReplyInputModel inputModel)
-		{
-			try
-			{
-				if (!ModelState.IsValid)
-				{
-					MessageDetailsServiceModel message =
-						await messagesService.GetMessageAsync(inputModel.Id, User.Id(), User.IsAdmin());
-
-					var viewModel = mapper.Map<MessageDetailsViewModel>(message);
-					viewModel.ReplyContent = inputModel.ReplyContent;
-
-					return View(viewModel);
-				}
-
-				await messagesService.AddReplyAsync(new ReplyInputServiceModel
-				{
-					MessageId = inputModel.Id,
-					AuthorId = User.Id(),
-					AuthorName = await usersService.FullName(User.Id()),
-					IsAuthorAdmin = User.IsAdmin(),
-					Content = inputModel.ReplyContent
-				});
-
-				return RedirectToAction(nameof(MessageDetails), new { inputModel.Id });
-			}
-			catch (ArgumentException)
-			{
-				return Unauthorized();
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
-	}
+                return this.RedirectToAction(nameof(MessageDetails), new { inputModel.Id });
+            }
+            catch (ArgumentException)
+            {
+                return this.Unauthorized();
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
+    }
 }

@@ -1,36 +1,36 @@
 ﻿namespace PersonalFinancer.Services.User
 {
-	using Services.Shared.Models;
-	using Services.User.Models;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Services.User.Models;
 
-	public interface IUsersService
-	{
-		/// <summary>
-		/// Throws InvalidOperationException if User does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
-		Task<string> FullName(string userId);
+    public interface IUsersService
+    {
+        /// <summary>
+        /// Throws InvalidOperationException if User does not exist.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        Task<string> UserFullName(Guid userId);
 
-		Task<UsersServiceModel> GetAllUsers(int page);
-		
-		Task<UserAccountsAndCategoriesServiceModel> GetUserAccountsAndCategories(string userId);
-		
-		Task<UserAccountTypesAndCurrenciesServiceModel> GetUserAccountTypesAndCurrencies(string userId);
+        Task<UsersServiceModel> GetAllUsers(int page);
 
-		Task<IEnumerable<AccountCardServiceModel>> GetUserAccounts(string userId);
+        Task<UserAccountsAndCategoriesServiceModel> GetUserAccountsAndCategories(Guid? userId);
 
-		Task<int> GetUsersAccountsCount();
-		
-		Task<TransactionsServiceModel> GetUserTransactions(string userId, DateTime startDate, DateTime endDate, int page = 1);
+        Task<UserAccountTypesAndCurrenciesServiceModel> GetUserAccountTypesAndCurrencies(Guid? userId);
 
-		Task<UserDashboardServiceModel> GetUserDashboardData(string userId, DateTime startDate, DateTime endDate);
+        Task<IEnumerable<AccountCardServiceModel>> GetUserAccounts(Guid userId);
 
-		/// <summary>
-		/// Throws InvalidOperationException if User does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
-		Task<UserDetailsServiceModel> UserDetails(string userId);
+        Task<int> GetUsersAccountsCount();
 
-		Task<int> UsersCount();
-	}
+        Task<TransactionsServiceModel> GetUserTransactions(Guid? userId, DateTime startDate, DateTime endDate, int page = 1);
+
+        Task<UserDashboardServiceModel> GetUserDashboardData(Guid userId, DateTime startDate, DateTime endDate);
+
+        /// <summary>
+        /// Throws InvalidOperationException if User does not exist.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"></exception>
+        Task<UserDetailsServiceModel> UserDetails(Guid? userId);
+
+        Task<int> UsersCount();
+    }
 }

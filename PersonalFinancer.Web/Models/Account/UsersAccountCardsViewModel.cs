@@ -1,10 +1,9 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
-    using Services.Shared.Models;
-
-    using Web.Models.Shared;
-
-    using static Data.Constants;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Web.Models.Shared;
+    using static PersonalFinancer.Services.Infrastructure.Constants;
+    using static PersonalFinancer.Web.Infrastructure.Constants;
 
     public class UsersAccountCardsViewModel
 	{

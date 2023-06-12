@@ -1,42 +1,38 @@
 ﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	using AutoMapper;
+    using AutoMapper;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Web.Models.Account;
+    using static PersonalFinancer.Data.Constants.RoleConstants;
 
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
+    [Area("Admin")]
+    [Authorize(Roles = AdminRoleName)]
+    public class AccountsController : Web.Controllers.AccountsController
+    {
+        public AccountsController(
+            IAccountsService accountService,
+            IUsersService usersService,
+            IMapper mapper)
+            : base(accountService, mapper, usersService)
+        { }
 
-	using Services.Accounts;
-	using Services.Accounts.Models;
-	using Services.User;
+        public async Task<IActionResult> Index(int page = 1)
+        {
+            UsersAccountsCardsServiceModel usersAccountCardsData =
+                await this.accountService.GetAccountsCardsData(page);
 
-	using Web.Models.Account;
+            var viewModel = new UsersAccountCardsViewModel
+            {
+                Accounts = usersAccountCardsData.Accounts
+            };
+            viewModel.Pagination.Page = page;
+            viewModel.Pagination.TotalElements = usersAccountCardsData.TotalUsersAccountsCount;
 
-	using static Data.Constants.RoleConstants;
-
-	[Area("Admin")]
-	[Authorize(Roles = AdminRoleName)]
-	public class AccountsController : Web.Controllers.AccountsController
-	{
-		public AccountsController(
-			IAccountsService accountService, 
-			IUsersService usersService,
-			IMapper mapper) 
-			: base(accountService, mapper, usersService)
-		{ }
-
-		public async Task<IActionResult> Index(int page = 1)
-		{
-			UsersAccountCardsServiceModel usersAccountCardsData =
-				await accountService.GetAccountCardsData(page);
-
-			var viewModel = new UsersAccountCardsViewModel
-			{
-				Accounts = usersAccountCardsData.Accounts
-			};
-			viewModel.Pagination.Page = page;
-			viewModel.Pagination.TotalElements = usersAccountCardsData.TotalUsersAccountsCount;
-
-			return View(viewModel);
-		}
-	}
+            return this.View(viewModel);
+        }
+    }
 }

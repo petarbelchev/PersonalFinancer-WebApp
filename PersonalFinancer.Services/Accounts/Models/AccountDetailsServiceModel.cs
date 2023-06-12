@@ -1,12 +1,12 @@
 ﻿namespace PersonalFinancer.Services.Accounts.Models
 {
-	using Services.Shared.Models;
+    using PersonalFinancer.Services.Shared.Models;
 
-	public class AccountDetailsServiceModel : AccountDetailsShortServiceModel
-	{
-		public string Id { get; set; } = null!;
+    public class AccountDetailsServiceModel : AccountDetailsShortServiceModel
+    {
+        public Guid Id { get; set; }
 
-        public string OwnerId { get; set; } = null!;
+        public Guid OwnerId { get; set; }
 
         public string AccountTypeName { get; set; } = null!;
 

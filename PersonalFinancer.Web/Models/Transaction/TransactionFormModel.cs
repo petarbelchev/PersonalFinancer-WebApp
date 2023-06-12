@@ -1,63 +1,60 @@
 ﻿namespace PersonalFinancer.Web.Models.Transaction
 {
-	using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Data.Models.Enums;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Web.Infrastructure.ModelBinders;
+    using System.ComponentModel.DataAnnotations;
+    using static PersonalFinancer.Data.Constants.TransactionConstants;
 
-	using System.ComponentModel.DataAnnotations;
+    public class TransactionFormModel
+    {
+        [Required(ErrorMessage = "Plaese enter an Amount.")]
+        [ModelBinder(BinderType = typeof(DecimalModelBinder))]
+        [Range(TransactionMinValue, TransactionMaxValue,
+            ErrorMessage = "Amount must be a number between {1} and {2}.")]
+        public decimal Amount { get; set; }
 
-	using Data.Enums;
-	using static Data.Constants.TransactionConstants;
+        [Required(ErrorMessage = "Owner Id is required.")]
+        public Guid? OwnerId { get; set; }
 
-	using Services.Shared.Models;
+        [Required(ErrorMessage = "Category is required.")]
+        [Display(Name = "Category")]
+        public Guid? CategoryId { get; set; }
 
-	using Web.ModelBinders;
+        public IEnumerable<CategoryServiceModel> UserCategories { get; set; }
+            = new List<CategoryServiceModel>();
 
-	public class TransactionFormModel
-	{
-		[Required(ErrorMessage = "Plaese enter an Amount.")]
-		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
-		[Range(TransactionMinValue, TransactionMaxValue,
-			ErrorMessage = "Amount must be a number between {1} and {2}.")]
-		public decimal Amount { get; set; }
+        [Required(ErrorMessage = "Account is required.")]
+        [Display(Name = "Account")]
+        public Guid? AccountId { get; set; }
 
-		[Required]
-		public string OwnerId { get; set; } = null!;
+        public IEnumerable<AccountServiceModel> UserAccounts { get; set; }
+            = new List<AccountServiceModel>();
 
-		[Required(ErrorMessage = "Category is required.")]
-		[Display(Name = "Category")]
-		public string CategoryId { get; set; } = null!;
+        [Required(ErrorMessage = "Date is required.")]
+        [Display(Name = "Date")]
+        [DataType(DataType.DateTime, ErrorMessage = "Please enter a valid Date.")]
+        public DateTime CreatedOn { get; set; }
 
-		public IEnumerable<CategoryServiceModel> UserCategories { get; set; }
-			= new List<CategoryServiceModel>();
+        [Required(ErrorMessage = "Payment Refference is required.")]
+        [StringLength(TransactionRefferenceMaxLength,
+            MinimumLength = TransactionRefferenceMinLength,
+            ErrorMessage = "Payment Refference must be between {2} and {1} characters long.")]
+        [Display(Name = "Payment Refference")]
+        public string Refference { get; set; } = null!;
 
-		[Display(Name = "Account")]
-		public string AccountId { get; set; } = null!;
+        [Display(Name = "Transaction Type")]
+        public TransactionType TransactionType { get; set; }
 
-		public IEnumerable<AccountServiceModel> UserAccounts { get; set; }
-			= new List<AccountServiceModel>();
+        public TransactionType[] TransactionTypes => this.IsInitialBalance ?
+            new TransactionType[] { TransactionType.Income }
+            : new TransactionType[]
+            {
+                TransactionType.Income,
+                TransactionType.Expense
+            };
 
-		[Required(ErrorMessage = "Date is required.")]
-		[Display(Name = "Date")]
-		[DataType(DataType.DateTime, ErrorMessage = "Please enter a valid Date.")]
-		public DateTime CreatedOn { get; set; }
-
-		[Required(ErrorMessage = "Payment Refference is required.")]
-		[StringLength(TransactionRefferenceMaxLength,
-			MinimumLength = TransactionRefferenceMinLength,
-			ErrorMessage = "Payment Refference must be between {2} and {1} characters long.")]
-		[Display(Name = "Payment Refference")]
-		public string Refference { get; set; } = null!;
-
-		[Display(Name = "Transaction Type")]
-		public TransactionType TransactionType { get; set; }
-
-		public TransactionType[] TransactionTypes => IsInitialBalance ?
-			new TransactionType[] { TransactionType.Income }
-			: new TransactionType[]
-			{
-				TransactionType.Income,
-				TransactionType.Expense
-			};
-
-		public bool IsInitialBalance { get; set; }
-	}
+        public bool IsInitialBalance { get; set; }
+    }
 }

@@ -1,35 +1,33 @@
 ﻿namespace PersonalFinancer.Web.Models.Shared
 {
-	using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Web.Infrastructure.ModelBinders;
+    using System.ComponentModel.DataAnnotations;
 
-	using System.ComponentModel.DataAnnotations;
+    public class DateFilterModel : IValidatableObject
+    {
+        [Required(ErrorMessage = "Start Date is required.")]
+        [ModelBinder(BinderType = typeof(DateTimeModelBinder))]
+        [Display(Name = "From")]
+        public DateTime StartDate { get; set; }
 
-	using Web.ModelBinders;
+        [Required(ErrorMessage = "End Date is required.")]
+        [ModelBinder(BinderType = typeof(DateTimeModelBinder))]
+        [Display(Name = "To")]
+        public DateTime EndDate { get; set; }
 
-	public class DateFilterModel : IValidatableObject
-	{
-		[Required(ErrorMessage = "Start Date is required.")]
-		[ModelBinder(BinderType = typeof(DateTimeModelBinder))]
-		[Display(Name = "From")]
-		public DateTime StartDate { get; set; }
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (this.StartDate > this.EndDate)
+            {
+                yield return new ValidationResult(
+                    "Start Date must be before End Date.",
+                    new[] { "StartDate" });
 
-		[Required(ErrorMessage = "End Date is required.")]
-		[ModelBinder(BinderType = typeof(DateTimeModelBinder))]
-		[Display(Name = "To")]
-		public DateTime EndDate { get; set; }
-
-		public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-		{
-			if (StartDate > EndDate)
-			{
-				yield return new ValidationResult(
-					"Start Date must be before End Date.",
-					new[] { "StartDate" });
-
-				yield return new ValidationResult(
-					"End Date must be after Start Date.",
-					new[] { "EndDate" });
-			}
-		}
-	}
+                yield return new ValidationResult(
+                    "End Date must be after Start Date.",
+                    new[] { "EndDate" });
+            }
+        }
+    }
 }

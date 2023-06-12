@@ -5,7 +5,7 @@
     public class UserTransactionsApiInputModel
     {
         [Required]
-        public string Id { get; set; } = null!;
+        public Guid? Id { get; set; }
 
         [Required]
         public string StartDate { get; set; } = null!;

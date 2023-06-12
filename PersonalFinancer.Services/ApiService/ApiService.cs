@@ -1,18 +1,15 @@
 ﻿namespace PersonalFinancer.Services.ApiService
 {
     using AutoMapper;
-
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
+    using PersonalFinancer.Data.Models;
+    using PersonalFinancer.Data.Models.Contracts;
+    using PersonalFinancer.Data.Repositories;
+    using PersonalFinancer.Services.ApiService.Models;
+    using static PersonalFinancer.Data.Constants;
 
-    using Data.Contracts;
-    using Data.Models;
-	using Data.Repositories;
-    using static Data.Constants;
-
-    using Services.ApiService.Models;
-
-	public class ApiService<T> : IApiService<T> where T : ApiEntity, new()
+    public class ApiService<T> : IApiService<T> where T : ApiEntity, new()
     {
         private readonly IEfRepository<T> repo;
         private readonly IMapper mapper;
@@ -32,10 +29,10 @@
         /// Throws ArgumentException if you try to create Entity with existing name.
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<ApiOutputServiceModel> CreateEntity(IApiInputServiceModel model)
+        public async Task<ApiOutputServiceModel> CreateEntity(string name, Guid ownerId)
         {
-            T? entity = await repo.All().FirstOrDefaultAsync(
-                x => x.Name == model.Name && x.OwnerId == model.OwnerId);
+            T? entity = await this.repo.All().FirstOrDefaultAsync(
+                x => x.Name == name && x.OwnerId == ownerId);
 
             if (entity != null)
             {
@@ -43,25 +40,24 @@
                     throw new ArgumentException("Entity with the same name exist.");
 
                 entity.IsDeleted = false;
-                entity.Name = model.Name.Trim();
+                entity.Name = name.Trim();
             }
             else
             {
                 entity = new T
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = model.Name.Trim(),
-                    OwnerId = model.OwnerId
+                    Name = name.Trim(),
+                    OwnerId = ownerId
                 };
 
-                await repo.AddAsync(entity);
+                await this.repo.AddAsync(entity);
             }
 
-            await repo.SaveChangesAsync();
+            _ = await this.repo.SaveChangesAsync();
 
-            ClearCache(entity.GetType().Name, entity.OwnerId);
+            this.ClearCache(entity.GetType().Name, ownerId);
 
-            var outputModel = mapper.Map<ApiOutputServiceModel>(entity);
+            ApiOutputServiceModel outputModel = this.mapper.Map<ApiOutputServiceModel>(entity);
 
             return outputModel;
         }
@@ -72,13 +68,11 @@
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task DeleteEntity(string entityId, string userId, bool isUserAdmin)
+        public async Task DeleteEntity(Guid entityId, Guid userId, bool isUserAdmin)
         {
-            T? entity = await repo.FindAsync(entityId);
-
-            if (entity == null)
-                throw new InvalidOperationException("Entity does not exist.");
-
+            T? entity = await this.repo.FindAsync(entityId) 
+                ?? throw new InvalidOperationException("Entity does not exist.");
+            
             if (isUserAdmin)
                 userId = entity.OwnerId;
 
@@ -87,19 +81,19 @@
 
             entity.IsDeleted = true;
 
-            await repo.SaveChangesAsync();
+            _ = await this.repo.SaveChangesAsync();
 
-            ClearCache(entity.GetType().Name, userId);
+            this.ClearCache(entity.GetType().Name, userId);
         }
 
-        private void ClearCache(string typeName, string ownerId)
+        private void ClearCache(string typeName, Guid ownerId)
         {
             if (typeName == nameof(AccountType))
-                memoryCache.Remove(AccountTypeConstants.AccTypeCacheKeyValue + ownerId);
+                this.memoryCache.Remove(AccountTypeConstants.AccTypeCacheKeyValue + ownerId);
             else if (typeName == nameof(Category))
-                memoryCache.Remove(CategoryConstants.CategoryCacheKeyValue + ownerId);
+                this.memoryCache.Remove(CategoryConstants.CategoryCacheKeyValue + ownerId);
             else if (typeName == nameof(Currency))
-                memoryCache.Remove(CurrencyConstants.CurrencyCacheKeyValue + ownerId);
+                this.memoryCache.Remove(CurrencyConstants.CurrencyCacheKeyValue + ownerId);
         }
     }
 }

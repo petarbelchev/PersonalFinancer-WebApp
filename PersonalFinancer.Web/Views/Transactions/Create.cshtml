@@ -1,8 +1,8 @@
-﻿@using PersonalFinancer.Data.Enums
+﻿@using PersonalFinancer.Data.Models.Enums;
 @using PersonalFinancer.Web.Infrastructure;
 @using PersonalFinancer.Web.Models.Account;
 @using PersonalFinancer.Web.Models.Transaction;
-@using static PersonalFinancer.Data.Constants.HostConstants
+@using static PersonalFinancer.Web.Infrastructure.Constants.HostConstants
 @model TransactionFormModel
 @{
 	ViewData["Title"] = "Create Transaction";
@@ -71,7 +71,7 @@
 
 	@section Scripts {
 	<partial name="_ValidationScriptsPartial" />
-	<script src="/js/createDeleteAjax.js"></script>
+	<script src="~/js/createDeleteAjax.js"></script>
 	}
 }
 else

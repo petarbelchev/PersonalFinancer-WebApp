@@ -1,71 +1,62 @@
-﻿#nullable disable
-
-namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
 {
-	using Microsoft.AspNetCore.Identity;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.RazorPages;
-	using Microsoft.Extensions.Logging;
-    
-	using System.Threading.Tasks;
+#nullable disable
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using PersonalFinancer.Data.Models;
 
-    using Data.Models;
+    public class TwoFactorAuthenticationModel : PageModel
+    {
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
 
-	public class TwoFactorAuthenticationModel : PageModel
-	{
-		private readonly UserManager<ApplicationUser> userManager;
-		private readonly SignInManager<ApplicationUser> signInManager;
-		private readonly ILogger<TwoFactorAuthenticationModel> logger;
+        public TwoFactorAuthenticationModel(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager)
+        {
+            this.userManager = userManager;
+            this.signInManager = signInManager;
+        }
 
-		public TwoFactorAuthenticationModel(
-			UserManager<ApplicationUser> userManager, 
-			SignInManager<ApplicationUser> signInManager, 
-			ILogger<TwoFactorAuthenticationModel> logger)
-		{
-			this.userManager = userManager;
-			this.signInManager = signInManager;
-			this.logger = logger;
-		}
+        public bool HasAuthenticator { get; set; }
 
-		public bool HasAuthenticator { get; set; }
+        public int RecoveryCodesLeft { get; set; }
 
-		public int RecoveryCodesLeft { get; set; }
+        [BindProperty]
+        public bool Is2faEnabled { get; set; }
 
-		[BindProperty]
-		public bool Is2faEnabled { get; set; }
+        public bool IsMachineRemembered { get; set; }
 
-		public bool IsMachineRemembered { get; set; }
+        [TempData]
+        public string StatusMessage { get; set; }
 
-		[TempData]
-		public string StatusMessage { get; set; }
+        public async Task<IActionResult> OnGetAsync()
+        {
+            ApplicationUser user = await this.userManager.GetUserAsync(this.User);
 
-		public async Task<IActionResult> OnGetAsync()
-		{
-			var user = await userManager.GetUserAsync(User);
-			if (user == null)
-			{
-				return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
-			}
+            if (user == null)
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
 
-			HasAuthenticator = await userManager.GetAuthenticatorKeyAsync(user) != null;
-			Is2faEnabled = await userManager.GetTwoFactorEnabledAsync(user);
-			IsMachineRemembered = await signInManager.IsTwoFactorClientRememberedAsync(user);
-			RecoveryCodesLeft = await userManager.CountRecoveryCodesAsync(user);
+            this.HasAuthenticator = await this.userManager.GetAuthenticatorKeyAsync(user) != null;
+            this.Is2faEnabled = await this.userManager.GetTwoFactorEnabledAsync(user);
+            this.IsMachineRemembered = await this.signInManager.IsTwoFactorClientRememberedAsync(user);
+            this.RecoveryCodesLeft = await this.userManager.CountRecoveryCodesAsync(user);
 
-			return Page();
-		}
+            return this.Page();
+        }
 
-		public async Task<IActionResult> OnPostAsync()
-		{
-			var user = await userManager.GetUserAsync(User);
-			if (user == null)
-			{
-				return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
-			}
+        public async Task<IActionResult> OnPostAsync()
+        {
+            ApplicationUser user = await this.userManager.GetUserAsync(this.User);
 
-			await signInManager.ForgetTwoFactorClientAsync();
-			StatusMessage = "The current browser has been forgotten. When you login again from this browser you will be prompted for your 2fa code.";
-			return RedirectToPage();
-		}
-	}
+            if (user == null)
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
+
+            await this.signInManager.ForgetTwoFactorClientAsync();
+            this.StatusMessage = "The current browser has been forgotten. When you login again from this browser you will be prompted for your 2fa code.";
+
+            return this.RedirectToPage();
+        }
+    }
 }

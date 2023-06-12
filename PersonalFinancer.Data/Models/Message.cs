@@ -1,9 +1,9 @@
 ﻿namespace PersonalFinancer.Data.Models
 {
-	using Data.Contracts;
+    using PersonalFinancer.Data.Models.Contracts;
 
-	public class Message : MongoDocument
-	{
+    public class Message : MongoDocument
+    {
         public string AuthorName { get; set; } = null!;
 
         public DateTime CreatedOn { get; set; }
@@ -12,7 +12,7 @@
 
         public string Content { get; set; } = null!;
 
-        public ICollection<Reply> Replies { get; set; } 
-			= new List<Reply>();
+        public ICollection<Reply> Replies { get; set; }
+           = new List<Reply>();
     }
 }

@@ -1,224 +1,224 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
-
-using PersonalFinancer.Data.Models;
-using PersonalFinancer.Data.Repositories;
-
-using PersonalFinancer.Services.ApiService.Models;
-using PersonalFinancer.Services.ApiService;
-using PersonalFinancer.Services.Shared.Models;
-
-namespace PersonalFinancer.Tests.Services
+﻿namespace PersonalFinancer.Tests.Services
 {
-	internal class CategoryServiceTests : ServicesUnitTestsBase
-	{
-		private IEfRepository<Category> repo;
-		private ApiService<Category> categoryService;
+    using Microsoft.EntityFrameworkCore;
+    using NUnit.Framework;
+    using PersonalFinancer.Data.Models;
+    using PersonalFinancer.Data.Repositories;
+    using PersonalFinancer.Services.ApiService;
+    using PersonalFinancer.Services.ApiService.Models;
 
-		[SetUp]
-		public void SetUp()
-		{
-			repo = new EfRepository<Category>(this.sqlDbContext);
-			categoryService = new ApiService<Category>(repo, this.mapper, this.memoryCache);
-		}
+    internal class CategoryServiceTests : ServicesUnitTestsBase
+    {
+        private IEfRepository<Category> repo;
+        private ApiService<Category> categoryService;
 
-		[Test]
-		public async Task CreateEntity_ShouldAddNewCategory_WithValidParams()
-		{
-			//Arrange
-			var inputModel = new CategoryInputModel
-			{
-				Name = "NewCategory",
-				OwnerId = this.User1.Id
-			};
-			int countBefore = await repo.All().CountAsync();
+        [SetUp]
+        public void SetUp()
+        {
+            this.repo = new EfRepository<Category>(this.sqlDbContext);
+            this.categoryService = new ApiService<Category>(this.repo, this.mapper, this.memoryCache);
+        }
 
-			//Act
-			ApiOutputServiceModel actual =
-				await categoryService.CreateEntity(inputModel);
+        [Test]
+        public async Task CreateEntity_ShouldAddNewCategory_WithValidParams()
+        {
+            //Arrange
+            string categoryName = "NewCategory";
+            Guid ownerId = this.User1.Id;
+            int countBefore = await this.repo.All().CountAsync();
 
-			int countAfter = await repo.All().CountAsync();
+            //Act
+            ApiOutputServiceModel actual =
+                await this.categoryService.CreateEntity(categoryName, ownerId);
 
-			//Assert
-			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
-			Assert.That(actual, Is.Not.Null);
-			Assert.That(actual.Id, Is.Not.Null);
-			Assert.That(actual.Name, Is.EqualTo(inputModel.Name));
-		}
+            int countAfter = await this.repo.All().CountAsync();
 
-		[Test]
-		public async Task CreateEntity_ShouldRecreateDeletedBeforeCategory_WithValidParams()
-		{
-			//Arrange
-			var deletedCategory = new Category
-			{
-				Id = Guid.NewGuid().ToString(),
-				Name = "DeletedCategory",
-				OwnerId = this.User1.Id,
-				IsDeleted = true
-			};
-			await repo.AddAsync(deletedCategory);
-			await repo.SaveChangesAsync();
-			int countBefore = await repo.All().CountAsync();
+            //Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(countAfter, Is.EqualTo(countBefore + 1));
+                Assert.That(actual, Is.Not.Null);
+                Assert.That(actual.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(actual.Name, Is.EqualTo(categoryName));
+            });
+        }
 
-			var inputModel = new CategoryInputModel
-			{
-				Name = deletedCategory.Name,
-				OwnerId = this.User1.Id
-			};
+        [Test]
+        public async Task CreateEntity_ShouldRecreateDeletedBeforeCategory_WithValidParams()
+        {
+            //Arrange
+            var deletedCategory = new Category
+            {
+                Id = Guid.NewGuid(),
+                Name = "DeletedCategory",
+                OwnerId = this.User1.Id,
+                IsDeleted = true
+            };
+            await this.repo.AddAsync(deletedCategory);
+            _ = await this.repo.SaveChangesAsync();
+            int countBefore = await this.repo.All().CountAsync();
 
-			//Assert
-			Assert.That(async () =>
-			{
-				var deletedAcc = await repo.FindAsync(deletedCategory.Id);
-				Assert.That(deletedAcc, Is.Not.Null);
-				return deletedAcc.IsDeleted;
-			},
-			Is.True);
+            string categoryName = deletedCategory.Name;
+            Guid ownerId = this.User1.Id;
 
-			//Act
-			ApiOutputServiceModel result =
-				await categoryService.CreateEntity(inputModel);
+            //Assert
+            Category? deletedAcc = await this.repo.FindAsync(deletedCategory.Id);
+            Assert.That(deletedAcc, Is.Not.Null);
+            Assert.That(deletedAcc.IsDeleted, Is.True);
 
-			int countAfter = await repo.All().CountAsync();
+            //Act
+            ApiOutputServiceModel result =
+                await this.categoryService.CreateEntity(categoryName, ownerId);
 
-			//Assert
-			Assert.That(countAfter, Is.EqualTo(countBefore));
-			Assert.That(result, Is.Not.Null);
-			Assert.That(result.Id, Is.EqualTo(deletedCategory.Id));
-			Assert.That(result.Name, Is.EqualTo(deletedCategory.Name));
-		}
+            int countAfter = await this.repo.All().CountAsync();
 
-		[Test]
-		public async Task CreateEntity_ShouldAddNewCategoryWhenAnotherUserHaveTheSameCategory()
-		{
-			//Arrange
-			var user2Category = new Category
-			{
-				Id = Guid.NewGuid().ToString(),
-				Name = "User2Category",
-				OwnerId = this.User2.Id
-			};
+            //Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(countAfter, Is.EqualTo(countBefore));
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result.Id, Is.EqualTo(deletedCategory.Id));
+                Assert.That(result.Name, Is.EqualTo(deletedCategory.Name));
+            });
+        }
 
-			await repo.AddAsync(user2Category);
-			await repo.SaveChangesAsync();
-			int countBefore = await repo.All().CountAsync();
+        [Test]
+        public async Task CreateEntity_ShouldAddNewCategoryWhenAnotherUserHaveTheSameCategory()
+        {
+            //Arrange
+            var user2Category = new Category
+            {
+                Id = Guid.NewGuid(),
+                Name = "User2Category",
+                OwnerId = this.User2.Id
+            };
 
-			var inputModel = new CategoryInputModel
-			{
-				Name = user2Category.Name,
-				OwnerId = this.User1.Id
-			};
+            await this.repo.AddAsync(user2Category);
+            _ = await this.repo.SaveChangesAsync();
+            int countBefore = await this.repo.All().CountAsync();
 
-			//Assert
-			Assert.That(await repo.FindAsync(user2Category.Id), Is.Not.Null);
+            string categoryName = user2Category.Name;
+            Guid ownerId = this.User1.Id;
 
-			//Act
-			ApiOutputServiceModel result =
-				await categoryService.CreateEntity(inputModel);
+            //Assert
+            Assert.That(await this.repo.FindAsync(user2Category.Id), Is.Not.Null);
 
-			int countAfter = await repo.All().CountAsync();
+            //Act
+            ApiOutputServiceModel result =
+                await this.categoryService.CreateEntity(categoryName, ownerId);
 
-			//Assert
-			Assert.That(countAfter, Is.EqualTo(countBefore + 1));
-			Assert.That(result.Id, Is.Not.Null);
-			Assert.That(result.Id, Is.Not.EqualTo(user2Category.Id));
-			Assert.That(result.Name, Is.EqualTo(user2Category.Name));
-		}
+            int countAfter = await this.repo.All().CountAsync();
 
-		[Test]
-		public void CreateEntity_ShouldThrowException_WhenCategoryExist()
-		{
-			//Arrange
-			var inputModel = new CategoryInputModel
-			{
-				Name = this.Cat2User1.Name,
-				OwnerId = this.User1.Id
-			};
+            //Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(countAfter, Is.EqualTo(countBefore + 1));
+                Assert.That(result.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(result.Id, Is.Not.EqualTo(user2Category.Id));
+                Assert.That(result.Name, Is.EqualTo(user2Category.Name));
+            });
+        }
 
-			//Act & Assert
-			Assert.That(async () => await categoryService.CreateEntity(inputModel),
-				Throws.TypeOf<ArgumentException>().With.Message
-					.EqualTo("Entity with the same name exist."));
-		}
+        [Test]
+        public void CreateEntity_ShouldThrowException_WhenCategoryExist()
+        {
+            //Arrange
+            string categoryName = this.Cat2User1.Name;
+            Guid ownerId = this.User1.Id;
 
-		[Test]
-		public async Task DeleteEntity_ShouldMarkCategoryAsDeleted_WithValidParams()
-		{
-			//Arrange
-			var newCategory = new Category()
-			{
-				Id = Guid.NewGuid().ToString(),
-				Name = "NewCategory",
-				OwnerId = this.User1.Id
-			};
-			await repo.AddAsync(newCategory);
-			await repo.SaveChangesAsync();
+            //Act & Assert
+            Assert.That(async () => await this.categoryService.CreateEntity(categoryName, ownerId),
+            Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Entity with the same name exist."));
+        }
 
-			//Assert
-			Assert.That(await repo.FindAsync(newCategory.Id), Is.Not.Null);
-			Assert.That(newCategory.IsDeleted, Is.False);
+        [Test]
+        public async Task DeleteEntity_ShouldMarkCategoryAsDeleted_WithValidParams()
+        {
+            //Arrange
+            var newCategory = new Category()
+            {
+                Id = Guid.NewGuid(),
+                Name = "NewCategory",
+                OwnerId = this.User1.Id
+            };
+            await this.repo.AddAsync(newCategory);
+            _ = await this.repo.SaveChangesAsync();
 
-			//Act
-			await categoryService.DeleteEntity(newCategory.Id, this.User1.Id, isUserAdmin: false);
+            //Assert
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await this.repo.FindAsync(newCategory.Id), Is.Not.Null);
+                Assert.That(newCategory.IsDeleted, Is.False);
+            });
 
-			//Assert
-			Assert.That(newCategory.IsDeleted, Is.True);
-			Assert.That(await repo.FindAsync(newCategory.Id), Is.Not.Null);
-		}
-		
-		[Test]
-		public async Task DeleteEntity_ShouldMarkCategoryAsDeleted_WhenUserIsAdmin()
-		{
-			//Arrange
-			var newCategory = new Category()
-			{
-				Id = Guid.NewGuid().ToString(),
-				Name = "NewCategory",
-				OwnerId = this.User1.Id
-			};
-			await repo.AddAsync(newCategory);
-			await repo.SaveChangesAsync();
+            //Act
+            await this.categoryService.DeleteEntity(newCategory.Id, this.User1.Id, isUserAdmin: false);
 
-			//Assert
-			Assert.That(await repo.FindAsync(newCategory.Id), Is.Not.Null);
-			Assert.That(newCategory.IsDeleted, Is.False);
+            //Assert
+            Assert.Multiple(async () =>
+            {
+                Assert.That(newCategory.IsDeleted, Is.True);
+                Assert.That(await this.repo.FindAsync(newCategory.Id), Is.Not.Null);
+            });
+        }
 
-			//Act
-			await categoryService.DeleteEntity(newCategory.Id, this.User2.Id, isUserAdmin: true);
+        [Test]
+        public async Task DeleteEntity_ShouldMarkCategoryAsDeleted_WhenUserIsAdmin()
+        {
+            //Arrange
+            var newCategory = new Category()
+            {
+                Id = Guid.NewGuid(),
+                Name = "NewCategory",
+                OwnerId = this.User1.Id
+            };
+            await this.repo.AddAsync(newCategory);
+            _ = await this.repo.SaveChangesAsync();
 
-			//Assert
-			Assert.That(newCategory.IsDeleted, Is.True);
-			Assert.That(await repo.FindAsync(newCategory.Id), Is.Not.Null);
-		}
+            //Assert
+            Assert.Multiple(async () =>
+            {
+                Assert.That(await this.repo.FindAsync(newCategory.Id), Is.Not.Null);
+                Assert.That(newCategory.IsDeleted, Is.False);
+            });
 
-		[Test]
-		public void DeleteEntity_ShouldThrowException_WhenCategoryNotExist()
-		{
-			//Act & Assert
-			Assert.That(async () => await categoryService.DeleteEntity(
-				Guid.NewGuid().ToString(), this.User1.Id, isUserAdmin: false),
-			Throws.TypeOf<InvalidOperationException>());
-		}
+            //Act
+            await this.categoryService.DeleteEntity(newCategory.Id, this.User2.Id, isUserAdmin: true);
 
-		[Test]
-		public async Task DeleteEntity_ShouldThrowException_WhenUserIsNotOwner()
-		{
-			//Arrange
-			var user2Category = new Category()
-			{
-				Id = Guid.NewGuid().ToString(),
-				Name = "ForDelete",
-				OwnerId = this.User2.Id
-			};
-			await repo.AddAsync(user2Category);
-			await repo.SaveChangesAsync();
+            //Assert
+            Assert.Multiple(async () =>
+            {
+                Assert.That(newCategory.IsDeleted, Is.True);
+                Assert.That(await this.repo.FindAsync(newCategory.Id), Is.Not.Null);
+            });
+        }
 
-			//Act & Assert
-			Assert.That(async () => await categoryService
-				.DeleteEntity(user2Category.Id, this.User1.Id, isUserAdmin: false),
-			Throws.TypeOf<ArgumentException>()
-					.With.Message.EqualTo("Unauthorized."));
-		}
-	}
+        [Test]
+        public void DeleteEntity_ShouldThrowException_WhenCategoryNotExist()
+        {
+            //Act & Assert
+            Assert.That(async () => await this.categoryService
+                  .DeleteEntity(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
+            Throws.TypeOf<InvalidOperationException>());
+        }
+
+        [Test]
+        public async Task DeleteEntity_ShouldThrowException_WhenUserIsNotOwner()
+        {
+            //Arrange
+            var user2Category = new Category()
+            {
+                Id = Guid.NewGuid(),
+                Name = "ForDelete",
+                OwnerId = this.User2.Id
+            };
+            await this.repo.AddAsync(user2Category);
+            _ = await this.repo.SaveChangesAsync();
+
+            //Act & Assert
+            Assert.That(async () => await this.categoryService
+                  .DeleteEntity(user2Category.Id, this.User1.Id, isUserAdmin: false),
+            Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Unauthorized."));
+        }
+    }
 }

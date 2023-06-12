@@ -4,10 +4,10 @@
     using Microsoft.AspNetCore.Mvc.RazorPages;
 
     [AllowAnonymous]
-    public class ResetPasswordConfirmationModel : PageModel
-    {
-        public void OnGet()
-        {
-        }
-    }
+	public class ResetPasswordConfirmationModel : PageModel
+	{
+		public void OnGet()
+		{
+		}
+	}
 }

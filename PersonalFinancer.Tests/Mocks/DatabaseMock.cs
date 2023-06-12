@@ -1,19 +1,18 @@
 ﻿namespace PersonalFinancer.Tests.Mocks
 {
-	using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
+    using PersonalFinancer.Data;
 
-	using Data;
-
-	static class DatabaseMock
+    static class DatabaseMock
 	{
-		public static SqlDbContext Instance
+		public static PersonalFinancerDbContext Instance
 		{
 			get
 			{
-				var dbContextOptionsBuilder = new DbContextOptionsBuilder<SqlDbContext>()
+				var dbContextOptionsBuilder = new DbContextOptionsBuilder<PersonalFinancerDbContext>()
 					.UseInMemoryDatabase("PersonalFinancerInMemoryDb" + DateTime.Now.Ticks.ToString()).Options;
 
-				return new SqlDbContext(dbContextOptionsBuilder, false);
+				return new PersonalFinancerDbContext(dbContextOptionsBuilder);
 			}
 		}
 	}

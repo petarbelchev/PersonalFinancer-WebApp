@@ -1,16 +1,14 @@
-﻿#nullable disable
-namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
+﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
 {
+#nullable disable
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    
+    using PersonalFinancer.Data.Models;
     using System.ComponentModel.DataAnnotations;
     using System.Globalization;
     using System.Text;
     using System.Text.Encodings.Web;
-    
-    using Data.Models;
 
     public class EnableAuthenticatorModel : PageModel
     {
@@ -54,91 +52,88 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var user = await userManager.GetUserAsync(User);
+            ApplicationUser user = await this.userManager.GetUserAsync(this.User);
+
             if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
-            }
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
 
-            await LoadSharedKeyAndQrCodeUriAsync(user);
+            await this.LoadSharedKeyAndQrCodeUriAsync(user);
 
-            return Page();
+            return this.Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var user = await userManager.GetUserAsync(User);
+            ApplicationUser user = await this.userManager.GetUserAsync(this.User);
+            
             if (user == null)
+                return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
+
+            if (!this.ModelState.IsValid)
             {
-                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
+                await this.LoadSharedKeyAndQrCodeUriAsync(user);
+                return this.Page();
             }
 
-            if (!ModelState.IsValid)
-            {
-                await LoadSharedKeyAndQrCodeUriAsync(user);
-                return Page();
-            }
+            string verificationCode = this.Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-            // Strip spaces and hyphens
-            var verificationCode = Input.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
-
-            var is2faTokenValid = await userManager.VerifyTwoFactorTokenAsync(
-                user, userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+            bool is2faTokenValid = await this.userManager.VerifyTwoFactorTokenAsync(
+                user, this.userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
 
             if (!is2faTokenValid)
             {
-                ModelState.AddModelError("Input.Code", "Verification code is invalid.");
-                await LoadSharedKeyAndQrCodeUriAsync(user);
-                return Page();
+                this.ModelState.AddModelError("Input.Code", "Verification code is invalid.");
+                await this.LoadSharedKeyAndQrCodeUriAsync(user);
+                return this.Page();
             }
 
-            await userManager.SetTwoFactorEnabledAsync(user, true);
-            var userId = await userManager.GetUserIdAsync(user);
-            logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
+            _ = await this.userManager.SetTwoFactorEnabledAsync(user, true);
+            string userId = await this.userManager.GetUserIdAsync(user);
+            this.logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
+            this.StatusMessage = "Your authenticator app has been verified.";
 
-            StatusMessage = "Your authenticator app has been verified.";
-
-            if (await userManager.CountRecoveryCodesAsync(user) == 0)
+            if (await this.userManager.CountRecoveryCodesAsync(user) == 0)
             {
-                var recoveryCodes = await userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-                RecoveryCodes = recoveryCodes.ToArray();
-                return RedirectToPage("./ShowRecoveryCodes");
+                IEnumerable<string> recoveryCodes = await this.userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+                this.RecoveryCodes = recoveryCodes.ToArray();
+                return this.RedirectToPage("./ShowRecoveryCodes");
             }
             else
             {
-                return RedirectToPage("./TwoFactorAuthentication");
+                return this.RedirectToPage("./TwoFactorAuthentication");
             }
         }
 
         private async Task LoadSharedKeyAndQrCodeUriAsync(ApplicationUser user)
         {
             // Load the authenticator key & QR code URI to display on the form
-            var unformattedKey = await userManager.GetAuthenticatorKeyAsync(user);
+            string unformattedKey = await this.userManager.GetAuthenticatorKeyAsync(user);
+
             if (string.IsNullOrEmpty(unformattedKey))
             {
-                await userManager.ResetAuthenticatorKeyAsync(user);
-                unformattedKey = await userManager.GetAuthenticatorKeyAsync(user);
+                _ = await this.userManager.ResetAuthenticatorKeyAsync(user);
+                unformattedKey = await this.userManager.GetAuthenticatorKeyAsync(user);
             }
 
-            SharedKey = FormatKey(unformattedKey);
+            this.SharedKey = this.FormatKey(unformattedKey);
 
-            var email = await userManager.GetEmailAsync(user);
-            AuthenticatorUri = GenerateQrCodeUri(email, unformattedKey);
+            string email = await this.userManager.GetEmailAsync(user);
+            this.AuthenticatorUri = this.GenerateQrCodeUri(email, unformattedKey);
         }
 
         private string FormatKey(string unformattedKey)
         {
             var result = new StringBuilder();
             int currentPosition = 0;
+
             while (currentPosition + 4 < unformattedKey.Length)
             {
-                result.Append(unformattedKey.AsSpan(currentPosition, 4)).Append(' ');
+                _ = result.Append(unformattedKey.AsSpan(currentPosition, 4)).Append(' ');
                 currentPosition += 4;
             }
+
             if (currentPosition < unformattedKey.Length)
-            {
-                result.Append(unformattedKey.AsSpan(currentPosition));
-            }
+                _ = result.Append(unformattedKey.AsSpan(currentPosition));
 
             return result.ToString().ToLowerInvariant();
         }
@@ -148,8 +143,8 @@ namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
             return string.Format(
                 CultureInfo.InvariantCulture,
                 AuthenticatorUriFormat,
-                urlEncoder.Encode("Personal Financer"),
-                urlEncoder.Encode(email),
+                this.urlEncoder.Encode("Personal Financer"),
+                this.urlEncoder.Encode(email),
                 unformattedKey);
         }
     }

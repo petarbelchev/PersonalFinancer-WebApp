@@ -1,35 +1,45 @@
 ﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	
-	using Services.User;
-	using Services.User.Models;
-	
-	using Web.Models.User;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Models.User;
+    using System.ComponentModel.DataAnnotations;
+    using static PersonalFinancer.Data.Constants.RoleConstants;
 
-	using static Data.Constants.RoleConstants;
+    [Area("Admin")]
+    [Authorize(Roles = AdminRoleName)]
+    public class UsersController : Controller
+    {
+        private readonly IUsersService userService;
 
-	[Area("Admin")]
-	[Authorize(Roles = AdminRoleName)]
-	public class UsersController : Controller
-	{
-		private readonly IUsersService userService;
+        public UsersController(IUsersService userService)
+            => this.userService = userService;
 
-		public UsersController(IUsersService userService)
-			=> this.userService = userService;
+        public async Task<IActionResult> Index(int page = 1)
+        {
+            UsersServiceModel usersData = await this.userService.GetAllUsers(page);
+            var viewModel = new UsersViewModel { Users = usersData.Users };
+            viewModel.Pagination.TotalElements = usersData.TotalUsersCount;
+            viewModel.Pagination.Page = page;
 
-		public async Task<IActionResult> Index(int page = 1)
-		{
-			UsersServiceModel usersData = await userService.GetAllUsers(page);
-			var viewModel = new UsersViewModel { Users = usersData.Users };
-			viewModel.Pagination.TotalElements = usersData.TotalUsersCount;
-			viewModel.Pagination.Page = page;
+            return this.View(viewModel);
+        }
 
-			return View(viewModel);
-		}
+        public async Task<IActionResult> Details([Required] Guid? id)
+        {
+            if (!this.ModelState.IsValid)
+                return this.BadRequest();
 
-		public async Task<IActionResult> Details(string id)
-			=> View(await userService.UserDetails(id));
-	}
+            try
+            {
+                return this.View(await this.userService.UserDetails(id));
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
+    }
 }

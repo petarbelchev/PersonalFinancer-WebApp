@@ -1,8 +1,8 @@
 ﻿namespace PersonalFinancer.Web.Models.Message
 {
-	using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations;
 
-	public class MessageInputModel
+    public class MessageInputModel
 	{
 		[Required(ErrorMessage = "Please enter a subject.")]
 		[StringLength(50, MinimumLength = 10, 

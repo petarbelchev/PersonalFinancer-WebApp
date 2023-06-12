@@ -9,7 +9,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PersonalFinancer.Services",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PersonalFinancer.Web", "PersonalFinancer.Web\PersonalFinancer.Web.csproj", "{E8FBA188-C746-4DC6-B435-4A0361FAD6D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonalFinancer.Tests", "PersonalFinancer.Tests\PersonalFinancer.Tests.csproj", "{E0C44061-D6A3-4F65-8E65-D8F092CF2B6D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PersonalFinancer.Tests", "PersonalFinancer.Tests\PersonalFinancer.Tests.csproj", "{E0C44061-D6A3-4F65-8E65-D8F092CF2B6D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{82239524-8F10-49B7-B44E-21289CDCF042}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,40 +1,39 @@
 ﻿namespace PersonalFinancer.Data.Models
 {
-	using System.ComponentModel.DataAnnotations;
-	using System.ComponentModel.DataAnnotations.Schema;
+    using PersonalFinancer.Data.Models.Enums;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using static PersonalFinancer.Data.Constants.TransactionConstants;
 
-	using Data.Enums;
-	using static Data.Constants.TransactionConstants;
+    public class Transaction
+    {
+        [Key]
+        public Guid Id { get; set; }
 
-	public class Transaction
-	{
-		[Key]
-		public string Id { get; set; } = null!;
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Amount { get; set; }
 
-		[Column(TypeName = "decimal(18,2)")]
-		public decimal Amount { get; set; }
+        [ForeignKey(nameof(Account))]
+        public Guid AccountId { get; set; }
+        public Account Account { get; set; } = null!;
 
-		[ForeignKey(nameof(Account))]
-		public string AccountId { get; set; } = null!;
-		public Account Account { get; set; } = null!;
+        [ForeignKey(nameof(Owner))]
+        public Guid OwnerId { get; set; }
+        public ApplicationUser Owner { get; set; } = null!;
 
-		[ForeignKey(nameof(Owner))]
-		public string OwnerId { get; set; } = null!;
-		public ApplicationUser Owner { get; set; } = null!;
+        [ForeignKey(nameof(Category))]
+        public Guid CategoryId { get; set; }
+        public Category Category { get; set; } = null!;
 
-		[ForeignKey(nameof(Category))]
-		public string CategoryId { get; set; } = null!;
-		public Category Category { get; set; } = null!;
+        public TransactionType TransactionType { get; set; }
 
-		public TransactionType TransactionType { get; set; }
+        [DataType(DataType.DateTime, ErrorMessage = "Plaese enter a valid Date.")]
+        public DateTime CreatedOn { get; set; }
 
-		[DataType(DataType.DateTime, ErrorMessage = "Plaese enter a valid Date.")]
-		public DateTime CreatedOn { get; set; }
+        [MaxLength(TransactionRefferenceMaxLength,
+           ErrorMessage = "Refference max length must be {1} characters long.")]
+        public string Refference { get; set; } = null!;
 
-		[MaxLength(TransactionRefferenceMaxLength,
-			ErrorMessage = "Refference max length must be {1} characters long.")]
-		public string Refference { get; set; } = null!;
-
-		public bool IsInitialBalance { get; set; }
-	}
+        public bool IsInitialBalance { get; set; }
+    }
 }

@@ -1,88 +1,86 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Models.Account;
+    using PersonalFinancer.Web.Models.Shared;
+    using System.Globalization;
+    using static PersonalFinancer.Data.Constants;
 
-	using System.Globalization;
-	
-	using Services.Accounts;
-	using Services.Accounts.Models;
-	using Services.Shared.Models;
-	
-	using Web.Infrastructure;
-	using Web.Models.Account;
-	using Web.Models.Shared;
-	
-	using static Data.Constants;
+    [Authorize]
+    [Route("api/accounts")]
+    [ApiController]
+    public class AccountsApiController : ControllerBase
+    {
+        private readonly IAccountsService accountService;
 
-	[Authorize]
-	[Route("api/accounts")]
-	[ApiController]
-	public class AccountsApiController : ControllerBase
-	{
-		private IAccountsService accountService;
+        public AccountsApiController(IAccountsService accountService)
+            => this.accountService = accountService;
 
-		public AccountsApiController(IAccountsService accountService)
-		{
-			this.accountService = accountService;
-		}
+        [Authorize(Roles = RoleConstants.AdminRoleName)]
+        [HttpGet("{page}")]
+        public async Task<IActionResult> GetAccounts(int page)
+        {
+            UsersAccountsCardsServiceModel usersCardsData =
+                await this.accountService.GetAccountsCardsData(page);
 
-		[Authorize(Roles = RoleConstants.AdminRoleName)]
-		[HttpGet("{page}")]
-		public async Task<IActionResult> GetAccounts(int page)
-		{
-			UsersAccountCardsServiceModel usersCardsData =
-				await accountService.GetAccountCardsData(page);
+            var usersCardsModel = new UsersAccountCardsViewModel
+            {
+                Accounts = usersCardsData.Accounts
+            };
 
-			var usersCardsModel = new UsersAccountCardsViewModel
-			{
-				Accounts = usersCardsData.Accounts
-			};
-			usersCardsModel.Pagination.TotalElements = usersCardsData.TotalUsersAccountsCount;
+            usersCardsModel.Pagination.TotalElements = usersCardsData.TotalUsersAccountsCount;
 
-			return Ok(usersCardsModel);
-		}
+            return this.Ok(usersCardsModel);
+        }
 
-		[Authorize(Roles = RoleConstants.AdminRoleName)]
-		[HttpGet("cashflow")]
-		public async Task<IActionResult> GetAccountsCashFlow()
-			=> Ok(await accountService.GetCurrenciesCashFlow());
+        [Authorize(Roles = RoleConstants.AdminRoleName)]
+        [HttpGet("cashflow")]
+        public async Task<IActionResult> GetAccountsCashFlow()
+            => this.Ok(await this.accountService.GetCurrenciesCashFlow());
 
-		[HttpPost("transactions")]
-		public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
-		{
-			bool isStartDateValid = DateTime.TryParse(
-				inputModel.StartDate, null, DateTimeStyles.None, out DateTime startDate);
+        [HttpPost("transactions")]
+        public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
+        {
+            // TODO: Try to use input model with DateTime props
 
-			bool isEndDateValid = DateTime.TryParse(
-				inputModel.EndDate, null, DateTimeStyles.None, out DateTime endDate);
+            bool isStartDateValid = DateTime.TryParse(
+                inputModel.StartDate, null, DateTimeStyles.None, out DateTime startDate);
 
-			if (!ModelState.IsValid || !isStartDateValid || !isEndDateValid || startDate > endDate)
-				return BadRequest();
+            bool isEndDateValid = DateTime.TryParse(
+                inputModel.EndDate, null, DateTimeStyles.None, out DateTime endDate);
 
-			if (!User.IsAdmin() && inputModel.OwnerId != User.Id())
-				return Unauthorized();
+            if (!this.ModelState.IsValid || !isStartDateValid || !isEndDateValid || startDate > endDate)
+                return this.BadRequest();
 
-			try
-			{
-				TransactionsServiceModel accountTransactions = await accountService
-					.GetAccountTransactions(inputModel.Id, startDate, endDate, inputModel.Page);
+            if (!this.User.IsAdmin() && inputModel.OwnerId != this.User.IdToGuid())
+                return this.Unauthorized();
 
-				var viewModel = new TransactionsViewModel
-				{
-					Transactions = accountTransactions.Transactions
-				};
-				viewModel.Pagination.TotalElements = accountTransactions.TotalTransactionsCount;
-				viewModel.Pagination.Page = inputModel.Page;
-				viewModel.TransactionDetailsUrl =
-					$"{(User.IsAdmin() ? "/Admin" : string.Empty)}/Transactions/TransactionDetails/";
+            try
+            {
+                TransactionsServiceModel accountTransactions = await this.accountService
+                    .GetAccountTransactions(inputModel.Id, startDate, endDate, inputModel.Page);
 
-				return Ok(viewModel);
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
-	}
+                var viewModel = new TransactionsViewModel
+                {
+                    Transactions = accountTransactions.Transactions
+                };
+
+                viewModel.Pagination.TotalElements = accountTransactions.TotalTransactionsCount;
+                viewModel.Pagination.Page = inputModel.Page;
+                viewModel.TransactionDetailsUrl =
+                    $"{(this.User.IsAdmin() ? "/Admin" : string.Empty)}/Transactions/TransactionDetails/";
+
+                return this.Ok(viewModel);
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
+    }
 }

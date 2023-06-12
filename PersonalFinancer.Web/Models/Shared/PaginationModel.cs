@@ -1,45 +1,41 @@
 ﻿namespace PersonalFinancer.Web.Models.Shared
 {
-	public class PaginationModel
-	{
+    public class PaginationModel
+    {
         public string ElementsName { get; set; } = null!;
 
         public int ElementsPerPage { get; set; }
 
-		public int Page { get; set; } = 1;
+        public int Page { get; set; } = 1;
 
-		public int TotalElements { get; set; }
+        public int TotalElements { get; set; }
 
-		public int FirstElement => ElementsPerPage * (Page - 1) + 1;
+        public int FirstElement => (this.ElementsPerPage * (this.Page - 1)) + 1;
 
-		public int LastElement
-		{
-			get
-			{
-				int result = ElementsPerPage * Page;
+        public int LastElement
+        {
+            get
+            {
+                int result = this.ElementsPerPage * this.Page;
 
-				if (result > TotalElements)
-				{
-					result = TotalElements;
-				}
+                if (result > this.TotalElements)
+                    result = this.TotalElements;
 
-				return result;
-			}
-		}
+                return result;
+            }
+        }
 
-		public int Pages
-		{
-			get
-			{
-				int result = TotalElements / ElementsPerPage;
+        public int Pages
+        {
+            get
+            {
+                int result = this.TotalElements / this.ElementsPerPage;
 
-				if (TotalElements % ElementsPerPage != 0)
-				{
-					result++;
-				}
+                if (this.TotalElements % this.ElementsPerPage != 0)
+                    result++;
 
-				return result;
-			}
-		}
-	}
+                return result;
+            }
+        }
+    }
 }

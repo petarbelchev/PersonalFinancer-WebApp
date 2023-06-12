@@ -1,8 +1,7 @@
 ﻿namespace PersonalFinancer.Web.Models.Shared
 {
-    using Services.Shared.Models;
-
-    using static Data.Constants;
+    using PersonalFinancer.Services.Shared.Models;
+    using static PersonalFinancer.Services.Infrastructure.Constants;
 
     public class TransactionsViewModel
     {

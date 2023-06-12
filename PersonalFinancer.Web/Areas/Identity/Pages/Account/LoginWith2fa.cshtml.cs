@@ -9,16 +9,13 @@
     public class LoginWith2faModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> signInManager;
-        private readonly UserManager<ApplicationUser> userManager;
         private readonly ILogger<LoginWith2faModel> logger;
 
         public LoginWith2faModel(
             SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager,
             ILogger<LoginWith2faModel> logger)
         {
             this.signInManager = signInManager;
-            this.userManager = userManager;
             this.logger = logger;
         }
 
@@ -43,56 +40,45 @@
 
         public async Task<IActionResult> OnGetAsync(bool rememberMe, string? returnUrl = null)
         {
-            // Ensure the user has gone through the username & password screen first
-            var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
+            ApplicationUser user = await this.signInManager.GetTwoFactorAuthenticationUserAsync() 
+                ?? throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+            
+            this.ReturnUrl = returnUrl;
+            this.RememberMe = rememberMe;
 
-            if (user == null)
-            {
-                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
-            }
-
-            ReturnUrl = returnUrl;
-            RememberMe = rememberMe;
-
-            return Page();
+            return this.Page();
         }
 
         public async Task<IActionResult> OnPostAsync(bool rememberMe, string? returnUrl = null)
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
+            if (!this.ModelState.IsValid)
+                return this.Page();
 
-            returnUrl = returnUrl ?? Url.Content("~/");
+            returnUrl ??= this.Url.Content("~/");
 
-            var user = await signInManager.GetTwoFactorAuthenticationUserAsync();
-            if (user == null)
-            {
-                throw new InvalidOperationException($"Unable to load two-factor authentication user.");
-            }
+            ApplicationUser user = await this.signInManager.GetTwoFactorAuthenticationUserAsync() 
+                ?? throw new InvalidOperationException($"Unable to load two-factor authentication user.");
+            
+            string authenticatorCode = this.Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
 
-            var authenticatorCode = Input.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
-
-            var result = await signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, Input.RememberMachine);
-
-            var userId = await userManager.GetUserIdAsync(user);
+            Microsoft.AspNetCore.Identity.SignInResult result = await this.signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, this.Input.RememberMachine);
 
             if (result.Succeeded)
             {
-                logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
-                return LocalRedirect(returnUrl);
+                this.logger.LogInformation("User with ID '{UserId}' logged in with 2fa.", user.Id);
+                return this.LocalRedirect(returnUrl);
             }
             else if (result.IsLockedOut)
             {
-                logger.LogWarning("User with ID '{UserId}' account locked out.", user.Id);
-                return RedirectToPage("./Lockout");
+                this.logger.LogWarning("User with ID '{UserId}' account locked out.", user.Id);
+                return this.RedirectToPage("./Lockout");
             }
             else
             {
-                logger.LogWarning("Invalid authenticator code entered for user with ID '{UserId}'.", user.Id);
-                ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
-                return Page();
+                this.logger.LogWarning("Invalid authenticator code entered for user with ID '{UserId}'.", user.Id);
+                this.ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
+
+                return this.Page();
             }
         }
     }

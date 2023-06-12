@@ -1,36 +1,36 @@
-﻿using AutoMapper;
-using Moq;
-using NUnit.Framework;
-using System.Security.Claims;
-
-using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.User;
-using PersonalFinancer.Tests.Mocks;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Routing;
-
-namespace PersonalFinancer.Tests
+﻿namespace PersonalFinancer.Tests
 {
-	[TestFixture]
+    using AutoMapper;
+    using Microsoft.AspNetCore.Mvc.ModelBinding;
+    using Microsoft.AspNetCore.Mvc.ViewFeatures;
+    using Microsoft.AspNetCore.Routing;
+    using Moq;
+    using NUnit.Framework;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Tests.Mocks;
+    using System.Security.Claims;
+
+    [TestFixture]
 	abstract class ControllersUnitTestsBase
 	{
 		protected IMapper mapper = ControllersMapperMock.Instance;
 		protected Mock<IAccountsService> accountsServiceMock;
 		protected Mock<IUsersService> usersServiceMock;
 		protected Mock<ClaimsPrincipal> userMock;
-		
-		protected string userId = "user Id";
+
+		protected Guid userId = Guid.NewGuid();
 
 		[SetUp]
 		protected void SetUpBase()
-		{			
+		{
 			this.accountsServiceMock = new Mock<IAccountsService>();
 			this.usersServiceMock = new Mock<IUsersService>();
 			userMock = new Mock<ClaimsPrincipal>();
 
-			userMock.Setup(x => x.FindFirst(ClaimTypes.NameIdentifier))
-				.Returns(new Claim(ClaimTypes.NameIdentifier, userId));
+			userMock.Setup(x => x
+				.FindFirst(ClaimTypes.NameIdentifier))
+				.Returns(new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
 		}
 
 		protected void CheckModelStateErrors(
@@ -54,8 +54,8 @@ namespace PersonalFinancer.Tests
 			Assert.That(tempData.Values.First(), Is.EqualTo(expectedMessage));
 		}
 
-		protected void CheckRouteValues(RouteValueDictionary routeValues, string key, string value)
-		{			
+		protected void CheckRouteValues(RouteValueDictionary routeValues, string key, Guid value)
+		{
 			Assert.That(routeValues, Is.Not.Null);
 			Assert.That(routeValues.Keys.Count, Is.EqualTo(1));
 			Assert.That(routeValues.ContainsKey(key), Is.True);

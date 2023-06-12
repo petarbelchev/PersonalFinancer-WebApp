@@ -9,7 +9,7 @@
 <div class="row d-flex justify-content-center">
 	<div class="col-lg-8">
 		<div>
-			<div class="card">
+			<div class="card shadow mb-4">
 				<div class="card-header fs-4 d-flex justify-content-between">
 					<span><b>@Model.Subject</b></span>
 					<form method="post" asp-action="Delete" asp-route-id="@Model.Id">
@@ -31,7 +31,7 @@
 
 			@foreach (var reply in Model.Replies)
 			{
-				<div class="card formField">
+				<div class="card formField shadow mb-4">
 					<div class="card-body">
 						<blockquote class="blockquote mb-0">
 							<p>@reply.Content</p>

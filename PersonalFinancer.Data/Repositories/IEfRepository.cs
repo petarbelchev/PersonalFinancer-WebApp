@@ -1,15 +1,15 @@
 ﻿namespace PersonalFinancer.Data.Repositories
 {
-	public interface IEfRepository<T> where T : class
-	{
-		Task AddAsync(T entity);
+    public interface IEfRepository<T> where T : class
+    {
+        Task AddAsync(T entity);
 
-		Task<int> SaveChangesAsync();
+        Task<int> SaveChangesAsync();
 
-		void Remove(T entity);
+        void Remove(T entity);
 
-		IQueryable<T> All();
+        IQueryable<T> All();
 
-		Task<T?> FindAsync(string id);
-	}
+        Task<T?> FindAsync(Guid id);
+    }
 }

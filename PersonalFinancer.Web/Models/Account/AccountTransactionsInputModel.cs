@@ -1,11 +1,11 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
-	using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations;
 
-	public class AccountTransactionsInputModel
+    public class AccountTransactionsInputModel
 	{
 		[Required]
-		public string Id { get; set; } = null!;
+		public Guid? Id { get; set; }
 
 		[Required]
 		public string StartDate { get; set; } = null!;
@@ -17,6 +17,6 @@
 		public int Page { get; set; }
 
 		[Required]
-		public string OwnerId { get; set; } = null!;
+		public Guid? OwnerId { get; set; }
 	}
 }

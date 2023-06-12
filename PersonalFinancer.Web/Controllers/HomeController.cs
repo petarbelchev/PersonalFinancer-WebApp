@@ -1,89 +1,85 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	
-	using Services.User;
-	using Services.User.Models;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Models.Home;
+    using PersonalFinancer.Web.Models.Shared;
+    using static PersonalFinancer.Web.Infrastructure.Constants.HostConstants;
 
-	using Web.Infrastructure;
-	using Web.Models.Home;
-	using Web.Models.Shared;
+    public class HomeController : Controller
+    {
+        private readonly IUsersService userService;
 
-	using static Data.Constants.HostConstants;
+        public HomeController(IUsersService userService)
+            => this.userService = userService;
 
-	public class HomeController : Controller
-	{
-		private readonly IUsersService userService;
+        public async Task<IActionResult> Index()
+        {
+            if (this.User.IsAdmin())
+                return this.LocalRedirect("/Admin");
 
-		public HomeController(IUsersService userService)
-			=> this.userService = userService;
+            if (this.User.Identity?.IsAuthenticated ?? false)
+            {
+                DateTime startDate = DateTime.Now.AddMonths(-1);
+                DateTime endDate = DateTime.Now;
 
-		public async Task<IActionResult> Index()
-		{
-			if (User.IsAdmin())
-				return LocalRedirect("/Admin");
+                UserDashboardServiceModel userDashboardData = await this.userService
+                    .GetUserDashboardData(this.User.IdToGuid(), startDate, endDate);
 
-			if (User.Identity?.IsAuthenticated ?? false)
-			{
-				DateTime startDate = DateTime.Now.AddMonths(-1);
-				DateTime endDate = DateTime.Now;
+                var viewModel = new UserDashboardViewModel
+                {
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    Accounts = userDashboardData.Accounts,
+                    Transactions = userDashboardData.LastTransactions,
+                    CurrenciesCashFlow = userDashboardData.CurrenciesCashFlow
+                };
 
-				UserDashboardServiceModel userDashboardData = await userService
-					.GetUserDashboardData(User.Id(), startDate, endDate);
+                return this.View(viewModel);
+            }
 
-				var viewModel = new UserDashboardViewModel
-				{
-					StartDate = startDate,
-					EndDate = endDate,
-					Accounts = userDashboardData.Accounts,
-					Transactions = userDashboardData.LastTransactions,
-					CurrenciesCashFlow = userDashboardData.CurrenciesCashFlow
-				};
+            return this.View();
+        }
 
-				return View(viewModel);
-			}
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Index(DateFilterModel inputModel)
+        {
+            var viewModel = new UserDashboardViewModel
+            {
+                StartDate = inputModel.StartDate.ToUniversalTime(),
+                EndDate = inputModel.EndDate.ToUniversalTime()
+            };
 
-			return View();
-		}
+            if (!this.ModelState.IsValid)
+            {
+                viewModel.Accounts = await this.userService.GetUserAccounts(this.User.IdToGuid());
+                return this.View(viewModel);
+            }
 
-		[Authorize]
-		[HttpPost]
-		public async Task<IActionResult> Index(DateFilterModel inputModel)
-		{
-			var viewModel = new UserDashboardViewModel
-			{
-				StartDate = inputModel.StartDate.ToUniversalTime(),
-				EndDate = inputModel.EndDate.ToUniversalTime()
-			};
+            UserDashboardServiceModel userDashboardData =
+                await this.userService.GetUserDashboardData(this.User.IdToGuid(), viewModel.StartDate, viewModel.EndDate);
+            
+            viewModel.Accounts = userDashboardData.Accounts;
+            viewModel.Transactions = userDashboardData.LastTransactions;
+            viewModel.CurrenciesCashFlow = userDashboardData.CurrenciesCashFlow;
 
-			if (!ModelState.IsValid)
-			{
-				viewModel.Accounts = await userService.GetUserAccounts(User.Id());
-				return View(viewModel);
-			}
+            return this.View(viewModel);
+        }
 
-			UserDashboardServiceModel userDashboardData =
-				await userService.GetUserDashboardData(User.Id(), viewModel.StartDate, viewModel.EndDate);
-			viewModel.Accounts = userDashboardData.Accounts;
-			viewModel.Transactions = userDashboardData.LastTransactions;
-			viewModel.CurrenciesCashFlow = userDashboardData.CurrenciesCashFlow;
+        public IActionResult Error(int statusCode)
+        {
+            if (statusCode == 400)
+                this.ViewBag.ImgUrl = BadRequestImgUrl;
+            else if (statusCode == 404)
+                this.ViewBag.ImgUrl = NotFoundImgUrl;
+            else
+                this.ViewBag.ImgUrl = InternalServerErrorImgUrl;
 
-			return View(viewModel);
-		}
-
-		public IActionResult Error(int statusCode)
-		{
-			if (statusCode == 400)
-				ViewBag.ImgUrl = BadRequestImgUrl;
-			else if (statusCode == 404)
-				ViewBag.ImgUrl = NotFoundImgUrl;
-			else
-				ViewBag.ImgUrl = InternalServerErrorImgUrl;
-
-			return View();
-		}
-
-		public IActionResult AccessDenied() => View();
-	}
+            return this.View();
+        }
+    }
 }

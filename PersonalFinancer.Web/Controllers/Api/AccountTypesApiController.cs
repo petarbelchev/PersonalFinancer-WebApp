@@ -1,60 +1,64 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
     using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Data.Models;
+    using PersonalFinancer.Services.ApiService;
+    using PersonalFinancer.Services.ApiService.Models;
+    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Models.Api;
+    using System.ComponentModel.DataAnnotations;
 
-    using Data.Models;
+    [Route("api/accounttypes")]
+    [ApiController]
+    public class AccountTypesApiController : BaseApiController
+    {
+        private readonly IApiService<AccountType> apiService;
 
-    using Services.ApiService;
-    using Services.ApiService.Models;
-	using Services.Shared.Models;
+        public AccountTypesApiController(IApiService<AccountType> apiService)
+            => this.apiService = apiService;
 
-    using Web.Infrastructure;
+        [HttpPost]
+        public async Task<ActionResult> Create(AccountTypeInputModel inputModel)
+        {
+            if (!this.ModelState.IsValid)
+                return this.BadRequest(this.GetErrors(this.ModelState.Values));
 
-	[Route("api/accounttypes")]
-	[ApiController]
-	public class AccountTypesApiController : BaseApiController
-	{
-		private readonly IApiService<AccountType> apiService;
+            try
+            {
+                ApiOutputServiceModel model = await this.apiService.CreateEntity(
+                    inputModel.Name,
+                    inputModel.OwnerId ?? throw new InvalidOperationException());
 
-		public AccountTypesApiController(IApiService<AccountType> apiService)
-			=> this.apiService = apiService;
+                return this.Created(string.Empty, model);
+            }
+            catch (ArgumentException)
+            {
+                return this.BadRequest($"Account Type with the name \"{inputModel.Name}\" exist.");
+            }
+        }
 
-		[HttpPost]
-		public async Task<ActionResult> Create(AccountTypeInputModel inputModel)
-		{
-			if (!ModelState.IsValid)
-				return BadRequest(GetErrors(ModelState.Values));
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete([Required] Guid? id)
+        {
+            if (!this.ModelState.IsValid)
+                return this.BadRequest(this.GetErrors(this.ModelState.Values));
 
-			try
-			{
-				ApiOutputServiceModel model =
-					await apiService.CreateEntity(inputModel);
+            try
+            {
+                await this.apiService.DeleteEntity(
+                    id ?? throw new InvalidOperationException(),
+                    this.User.IdToGuid(), this.User.IsAdmin());
 
-				return Created(string.Empty, model);
-			}
-			catch (ArgumentException)
-			{
-				return BadRequest($"Account Type with the name \"{inputModel.Name}\" exist.");
-			}
-		}
-
-		[HttpDelete("{id}")]
-		public async Task<ActionResult> Delete(string id)
-		{
-			try
-			{
-				await apiService.DeleteEntity(id, User.Id(), User.IsAdmin());
-
-				return NoContent();
-			}
-			catch (ArgumentException)
-			{
-				return Unauthorized();
-			}
-			catch (InvalidOperationException)
-			{
-				return BadRequest();
-			}
-		}
-	}
+                return this.NoContent();
+            }
+            catch (ArgumentException)
+            {
+                return this.Unauthorized();
+            }
+            catch (InvalidOperationException)
+            {
+                return this.BadRequest();
+            }
+        }
+    }
 }
