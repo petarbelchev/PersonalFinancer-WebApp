@@ -29,14 +29,13 @@ I created this project to practice my skills, and it will also serve as my defen
 - MongoDB (for Messages)
 
 ## How to Run the Project
+
 The Project can be easy tested locally. All you need to do:
-1. Create appsettings.json file with the configurations:
+1. Populate the appsettings.json file with the required configurations;
+2. Apply the InitialMigration;
+3. That's it! Run the App & Enjoy! :)
 
-![appsettings.json file](./Screenshots/appsettings.png)
-
-2. Run the App & Enjoy! :)
-
-The Migrations will seed the Database with: 
+When the App is fired up its will seed the Database with: 
 - Admin - email: admin@admin.com, password: admin123
 - User with accounts and transactions for easy and fast tests - email: petar@mail.com, password: petar123
 
