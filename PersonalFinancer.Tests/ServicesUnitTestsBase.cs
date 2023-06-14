@@ -210,7 +210,7 @@
                 Amount = 200,
                 CategoryId = Guid.Parse(InitialBalanceCategoryId),
                 CreatedOn = DateTime.UtcNow.AddMonths(-3),
-                Refference = CategoryInitialBalanceName,
+                Reference = CategoryInitialBalanceName,
                 TransactionType = TransactionType.Income,
                 IsInitialBalance = true
             };
@@ -222,7 +222,7 @@
                 Amount = 5.65m,
                 CategoryId = this.Cat2User1.Id,
                 CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                Refference = "Lunch",
+                Reference = "Lunch",
                 TransactionType = TransactionType.Expense
             };
             this.Transaction3User1 = new Transaction()
@@ -233,7 +233,7 @@
                 Amount = 4.80m,
                 CategoryId = transportCatId,
                 CreatedOn = DateTime.UtcNow.AddDays(-2),
-                Refference = "Taxi",
+                Reference = "Taxi",
                 TransactionType = TransactionType.Expense
             };
             // Account 2
@@ -245,7 +245,7 @@
                 Amount = 200,
                 CategoryId = Guid.Parse(InitialBalanceCategoryId),
                 CreatedOn = DateTime.UtcNow.AddMonths(-3),
-                Refference = CategoryInitialBalanceName,
+                Reference = CategoryInitialBalanceName,
                 TransactionType = TransactionType.Income,
                 IsInitialBalance = true
             };
@@ -257,7 +257,7 @@
                 Amount = 750m,
                 CategoryId = salaryCatId,
                 CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                Refference = "Salary",
+                Reference = "Salary",
                 TransactionType = TransactionType.Income
             };
             this.Transaction6User1 = new Transaction()
@@ -268,7 +268,7 @@
                 Amount = 49.99m,
                 CategoryId = transportCatId,
                 CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                Refference = "Flight ticket",
+                Reference = "Flight ticket",
                 TransactionType = TransactionType.Expense
             };
 

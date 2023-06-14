@@ -26,14 +26,14 @@
 		{
 			this.accountsServiceMock = new Mock<IAccountsService>();
 			this.usersServiceMock = new Mock<IUsersService>();
-			userMock = new Mock<ClaimsPrincipal>();
+            this.userMock = new Mock<ClaimsPrincipal>();
 
-			userMock.Setup(x => x
+            this.userMock.Setup(x => x
 				.FindFirst(ClaimTypes.NameIdentifier))
-				.Returns(new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
+				.Returns(new Claim(ClaimTypes.NameIdentifier, this.userId.ToString()));
 		}
 
-		protected void CheckModelStateErrors(
+		protected static void CheckModelStateErrors(
 			ModelStateDictionary modelState, string key, string errorMessage)
 		{
 			Assert.That(modelState.Keys.Count(), Is.EqualTo(1));
@@ -45,7 +45,7 @@
 				Is.EqualTo(errorMessage));
 		}
 
-		protected void CheckTempDataMessage(
+		protected static void CheckTempDataMessage(
 			ITempDataDictionary tempData, string expectedMessage)
 		{
 			Assert.That(tempData.Keys.Count(), Is.EqualTo(1));
@@ -54,7 +54,8 @@
 			Assert.That(tempData.Values.First(), Is.EqualTo(expectedMessage));
 		}
 
-		protected void CheckRouteValues(RouteValueDictionary routeValues, string key, Guid value)
+		protected static void CheckRouteValues(
+			RouteValueDictionary routeValues, string key, Guid value)
 		{
 			Assert.That(routeValues, Is.Not.Null);
 			Assert.That(routeValues.Keys.Count, Is.EqualTo(1));

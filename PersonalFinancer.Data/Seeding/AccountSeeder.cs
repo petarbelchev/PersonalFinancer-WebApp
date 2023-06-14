@@ -43,7 +43,7 @@
                 new Account
                 {
                     Id = Guid.Parse(SeedConstants.BankUsdAccountId),
-                    Name = "Dolar Savings",
+                    Name = "Dollar Savings",
                     Balance = 0,
                     AccountTypeId = Guid.Parse(SeedConstants.FirstUserSavingAccountTypeId),
                     CurrencyId = Guid.Parse(SeedConstants.FirstUserUSDCurrencyId),

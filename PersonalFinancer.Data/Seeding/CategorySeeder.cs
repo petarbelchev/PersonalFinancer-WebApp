@@ -51,8 +51,8 @@
                 },
                 new Category
                 {
-                    Id = Guid.Parse(SeedConstants.DividentsCategoryId),
-                    Name = "Dividents",
+                    Id = Guid.Parse(SeedConstants.DividendsCategoryId),
+                    Name = "Dividends",
                     OwnerId = user.Id,
                 },
             };

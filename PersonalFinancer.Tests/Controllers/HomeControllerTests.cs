@@ -47,7 +47,7 @@
                     Amount = 100,
                     CategoryName = "Test Category",
                     CreatedOn = DateTime.UtcNow,
-                    Refference = "Test Refference",
+                    Reference = "Test Reference",
                     TransactionType = TransactionType.Expense.ToString()
                 }
             }
@@ -141,8 +141,8 @@
                 {
                     Assert.That(actual.Transactions.ElementAt(i).Amount,
                         Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Amount));
-                    Assert.That(actual.Transactions.ElementAt(i).Refference,
-                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Refference));
+                    Assert.That(actual.Transactions.ElementAt(i).Reference,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Reference));
                     Assert.That(actual.Transactions.ElementAt(i).TransactionType,
                         Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).TransactionType));
                     Assert.That(actual.Transactions.ElementAt(i).AccountCurrencyName,
@@ -250,8 +250,8 @@
                 {
                     Assert.That(actual.Transactions.ElementAt(i).Amount,
                         Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Amount));
-                    Assert.That(actual.Transactions.ElementAt(i).Refference,
-                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Refference));
+                    Assert.That(actual.Transactions.ElementAt(i).Reference,
+                        Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).Reference));
                     Assert.That(actual.Transactions.ElementAt(i).TransactionType,
                         Is.EqualTo(this.expUserDashboard.LastTransactions.ElementAt(i).TransactionType));
                     Assert.That(actual.Transactions.ElementAt(i).AccountCurrencyName,

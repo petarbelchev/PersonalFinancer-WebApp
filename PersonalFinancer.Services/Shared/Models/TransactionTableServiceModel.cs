@@ -14,6 +14,6 @@
 
         public string TransactionType { get; set; } = null!;
 
-        public string Refference { get; set; } = null!;
+        public string Reference { get; set; } = null!;
     }
 }

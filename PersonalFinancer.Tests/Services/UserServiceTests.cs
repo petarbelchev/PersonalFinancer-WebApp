@@ -262,8 +262,8 @@
                         Is.EqualTo(expectedTransactions.ElementAt(i).Amount));
                     Assert.That(actual.Transactions.ElementAt(i).CategoryName,
                         Is.EqualTo(expectedTransactions.ElementAt(i).CategoryName));
-                    Assert.That(actual.Transactions.ElementAt(i).Refference,
-                        Is.EqualTo(expectedTransactions.ElementAt(i).Refference));
+                    Assert.That(actual.Transactions.ElementAt(i).Reference,
+                        Is.EqualTo(expectedTransactions.ElementAt(i).Reference));
                     Assert.That(actual.Transactions.ElementAt(i).TransactionType,
                         Is.EqualTo(expectedTransactions.ElementAt(i).TransactionType.ToString()));
                 }

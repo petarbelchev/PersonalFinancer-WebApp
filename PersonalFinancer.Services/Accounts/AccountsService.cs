@@ -62,7 +62,7 @@
                     Amount = newAccount.Balance,
                     CreatedOn = DateTime.UtcNow,
                     TransactionType = TransactionType.Income,
-                    Refference = CategoryConstants.CategoryInitialBalanceName,
+                    Reference = CategoryConstants.CategoryInitialBalanceName,
                     IsInitialBalance = true
                 });
             }
@@ -90,7 +90,7 @@
             Transaction newTransaction = this.mapper.Map<Transaction>(model);
             newTransaction.Id = Guid.NewGuid();
 
-            await transactionsRepo.AddAsync(newTransaction);
+            await this.transactionsRepo.AddAsync(newTransaction);
 
             if (model.TransactionType == TransactionType.Income)
                 account.Balance += newTransaction.Amount;
@@ -188,13 +188,13 @@
                         Amount = amountOfChange,
                         CategoryId = Guid.Parse(CategoryConstants.InitialBalanceCategoryId),
                         CreatedOn = DateTime.UtcNow,
-                        Refference = CategoryConstants.CategoryInitialBalanceName,
+                        Reference = CategoryConstants.CategoryInitialBalanceName,
                         TransactionType = amountOfChange < 0 ? TransactionType.Expense : TransactionType.Income,
                         IsInitialBalance = true,
                         AccountId = account.Id
                     };
 
-                    await transactionsRepo.AddAsync(initialBalance);
+                    await this.transactionsRepo.AddAsync(initialBalance);
                 }
                 else
                 {
@@ -222,12 +222,12 @@
                 || model.TransactionType != transactionInDb.TransactionType
                 || model.Amount != transactionInDb.Amount)
             {
-                TransactionType opositeTransactionType = TransactionType.Income;
+                TransactionType oppositeTransactionType = TransactionType.Income;
 
                 if (transactionInDb.TransactionType == TransactionType.Income)
-                    opositeTransactionType = TransactionType.Expense;
+                    oppositeTransactionType = TransactionType.Expense;
 
-                ChangeBalance(transactionInDb.Account, transactionInDb.Amount, opositeTransactionType);
+                ChangeBalance(transactionInDb.Account, transactionInDb.Amount, oppositeTransactionType);
 
                 if (model.AccountId != transactionInDb.AccountId)
                 {
@@ -238,7 +238,7 @@
                 ChangeBalance(transactionInDb.Account, model.Amount, model.TransactionType);
             }
 
-            transactionInDb.Refference = model.Refference.Trim();
+            transactionInDb.Reference = model.Reference.Trim();
             transactionInDb.AccountId = model.AccountId;
             transactionInDb.CategoryId = model.CategoryId;
             transactionInDb.Amount = model.Amount;
@@ -287,7 +287,7 @@
                                 " (Deleted)"
                                 : string.Empty),
                             TransactionType = t.TransactionType.ToString(),
-                            Refference = t.Refference
+                            Reference = t.Reference
                         })
                 })
                 .FirstAsync();
@@ -338,7 +338,7 @@
                                 " (Deleted)"
                                 : string.Empty),
                             TransactionType = t.TransactionType.ToString(),
-                            Refference = t.Refference
+                            Reference = t.Reference
                         }),
                     TotalTransactionsCount = a.Transactions
                         .Count(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc),
@@ -410,7 +410,7 @@
                     Amount = t.Amount,
                     CreatedOn = t.CreatedOn.ToLocalTime(),
                     TransactionType = t.TransactionType,
-                    Refference = t.Refference,
+                    Reference = t.Reference,
                     IsInitialBalance = t.IsInitialBalance,
                     UserAccounts = t.Account.IsDeleted || t.IsInitialBalance ?
                         new List<AccountServiceModel>()

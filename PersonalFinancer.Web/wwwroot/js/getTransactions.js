@@ -41,7 +41,7 @@ async function getTransactions(page) {
                     })}</td>
 				    <td>${transaction.categoryName}</td>
 				    <td>${transaction.amount.toFixed(2)} ${transaction.accountCurrencyName}</td>
-				    <td>${transaction.refference}</td>
+				    <td>${transaction.reference}</td>
 			    </tr>
             `;
 

@@ -12,8 +12,8 @@
 
         public MessagesDbContext(IOptions<MongoDbSettings> settings)
         {
-            var camelCaseConvension = new ConventionPack { new CamelCaseElementNameConvention() };
-            ConventionRegistry.Register("camelCase", camelCaseConvension, type => true);
+            var camelCaseConvention = new ConventionPack { new CamelCaseElementNameConvention() };
+            ConventionRegistry.Register("camelCase", camelCaseConvention, type => true);
 
             this.client = new MongoClient(settings.Value.ConnectionString);
             this.database = this.client.GetDatabase(settings.Value.DatabaseName);

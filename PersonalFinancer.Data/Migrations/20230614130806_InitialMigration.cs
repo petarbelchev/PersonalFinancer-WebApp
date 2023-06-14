@@ -2,14 +2,14 @@
 
 namespace PersonalFinancer.Data.Migrations
 {
-    using Microsoft.EntityFrameworkCore.Migrations;
     using System;
+    using Microsoft.EntityFrameworkCore.Migrations;
 
     public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -20,7 +20,7 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table => table.PrimaryKey("PK_AspNetRoles", x => x.Id));
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "AspNetUsers",
                 columns: table => new
                 {
@@ -44,7 +44,7 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table => table.PrimaryKey("PK_AspNetUsers", x => x.Id));
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -56,8 +56,8 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
-                    _ = table.ForeignKey(
+                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+                    table.ForeignKey(
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
@@ -65,7 +65,7 @@ namespace PersonalFinancer.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "AccountTypes",
                 columns: table => new
                 {
@@ -76,8 +76,8 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_AccountTypes", x => x.Id);
-                    _ = table.ForeignKey(
+                    table.PrimaryKey("PK_AccountTypes", x => x.Id);
+                    table.ForeignKey(
                         name: "FK_AccountTypes_AspNetUsers_OwnerId",
                         column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
@@ -85,7 +85,7 @@ namespace PersonalFinancer.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
@@ -97,8 +97,8 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
-                    _ = table.ForeignKey(
+                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                    table.ForeignKey(
                         name: "FK_AspNetUserClaims_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
@@ -106,7 +106,7 @@ namespace PersonalFinancer.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
@@ -117,8 +117,8 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
-                    _ = table.ForeignKey(
+                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                    table.ForeignKey(
                         name: "FK_AspNetUserLogins_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
@@ -126,7 +126,7 @@ namespace PersonalFinancer.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
@@ -135,14 +135,14 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
-                    _ = table.ForeignKey(
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    _ = table.ForeignKey(
+                    table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
@@ -150,7 +150,7 @@ namespace PersonalFinancer.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
@@ -161,8 +161,8 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
-                    _ = table.ForeignKey(
+                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
@@ -170,7 +170,7 @@ namespace PersonalFinancer.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
                 {
@@ -181,8 +181,8 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_Categories", x => x.Id);
-                    _ = table.ForeignKey(
+                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.ForeignKey(
                         name: "FK_Categories_AspNetUsers_OwnerId",
                         column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
@@ -190,7 +190,7 @@ namespace PersonalFinancer.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "Currencies",
                 columns: table => new
                 {
@@ -201,8 +201,8 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_Currencies", x => x.Id);
-                    _ = table.ForeignKey(
+                    table.PrimaryKey("PK_Currencies", x => x.Id);
+                    table.ForeignKey(
                         name: "FK_Currencies_AspNetUsers_OwnerId",
                         column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
@@ -210,7 +210,7 @@ namespace PersonalFinancer.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "Accounts",
                 columns: table => new
                 {
@@ -224,20 +224,20 @@ namespace PersonalFinancer.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_Accounts", x => x.Id);
-                    _ = table.ForeignKey(
+                    table.PrimaryKey("PK_Accounts", x => x.Id);
+                    table.ForeignKey(
                         name: "FK_Accounts_AccountTypes_AccountTypeId",
                         column: x => x.AccountTypeId,
                         principalTable: "AccountTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    _ = table.ForeignKey(
+                    table.ForeignKey(
                         name: "FK_Accounts_AspNetUsers_OwnerId",
                         column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    _ = table.ForeignKey(
+                    table.ForeignKey(
                         name: "FK_Accounts_Currencies_CurrencyId",
                         column: x => x.CurrencyId,
                         principalTable: "Currencies",
@@ -245,7 +245,7 @@ namespace PersonalFinancer.Data.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            _ = migrationBuilder.CreateTable(
+            migrationBuilder.CreateTable(
                 name: "Transactions",
                 columns: table => new
                 {
@@ -256,25 +256,25 @@ namespace PersonalFinancer.Data.Migrations
                     CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TransactionType = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Refference = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Reference = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     IsInitialBalance = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_Transactions", x => x.Id);
-                    _ = table.ForeignKey(
+                    table.PrimaryKey("PK_Transactions", x => x.Id);
+                    table.ForeignKey(
                         name: "FK_Transactions_Accounts_AccountId",
                         column: x => x.AccountId,
                         principalTable: "Accounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    _ = table.ForeignKey(
+                    table.ForeignKey(
                         name: "FK_Transactions_AspNetUsers_OwnerId",
                         column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    _ = table.ForeignKey(
+                    table.ForeignKey(
                         name: "FK_Transactions_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
@@ -282,84 +282,84 @@ namespace PersonalFinancer.Data.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_Accounts_AccountTypeId",
                 table: "Accounts",
                 column: "AccountTypeId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_Accounts_CurrencyId",
                 table: "Accounts",
                 column: "CurrencyId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_Accounts_OwnerId",
                 table: "Accounts",
                 column: "OwnerId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_AccountTypes_OwnerId",
                 table: "AccountTypes",
                 column: "OwnerId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
                 column: "NormalizedName",
                 unique: true);
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
                 table: "AspNetUserClaims",
                 column: "UserId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserLogins_UserId",
                 table: "AspNetUserLogins",
                 column: "UserId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserRoles_RoleId",
                 table: "AspNetUserRoles",
                 column: "RoleId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "EmailIndex",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_Categories_OwnerId",
                 table: "Categories",
                 column: "OwnerId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_Currencies_OwnerId",
                 table: "Currencies",
                 column: "OwnerId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_AccountId",
                 table: "Transactions",
                 column: "AccountId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_CategoryId",
                 table: "Transactions",
                 column: "CategoryId");
 
-            _ = migrationBuilder.CreateIndex(
+            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_OwnerId",
                 table: "Transactions",
                 column: "OwnerId");
@@ -367,40 +367,40 @@ namespace PersonalFinancer.Data.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "AspNetUserClaims");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "AspNetUserLogins");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "AspNetUserRoles");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "Transactions");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "Accounts");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "Categories");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "AccountTypes");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "Currencies");
 
-            _ = migrationBuilder.DropTable(
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
         }
     }

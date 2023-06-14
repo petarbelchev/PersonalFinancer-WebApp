@@ -64,7 +64,7 @@
                         Amount = 50,
                         CategoryName = "Category",
                         CreatedOn = DateTime.UtcNow,
-                        Refference = "Test transaction",
+                        Reference = "Test transaction",
                         TransactionType = TransactionType.Expense.ToString()
                     }
                 },
@@ -129,7 +129,7 @@
             {
                 Assert.That(viewResult, Is.Not.Null);
 
-                this.CheckModelStateErrors(
+                CheckModelStateErrors(
                     viewResult.ViewData.ModelState,
                     nameof(inputModel.Balance),
                     "Balance is invalid.");
@@ -198,11 +198,11 @@
             {
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result.ActionName, Is.EqualTo("AccountDetails"));
-                this.CheckTempDataMessage(this.controller.TempData, "You create a new account successfully!");
+                CheckTempDataMessage(this.controller.TempData, "You create a new account successfully!");
             });
 
             Assert.That(result.RouteValues, Is.Not.Null);
-            this.CheckRouteValues(result.RouteValues, "id", newAccId);
+            CheckRouteValues(result.RouteValues, "id", newAccId);
         }
 
         [Test]
@@ -229,7 +229,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(viewResult, Is.Not.Null);
-                this.CheckModelStateErrors(
+                CheckModelStateErrors(
                     viewResult.ViewData.ModelState,
                     nameof(inputModel.Name),
                     "You already have Account with that name.");
@@ -450,7 +450,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(viewResult, Is.Not.Null);
-                this.CheckModelStateErrors(
+                CheckModelStateErrors(
                     viewResult.ViewData.ModelState,
                     nameof(inputModel.StartDate),
                     "Start Date is invalid");
@@ -594,7 +594,7 @@
                 Assert.That(result.ControllerName, Is.EqualTo("Home"));
                 Assert.That(result.ActionName, Is.EqualTo("Index"));
 
-                this.CheckTempDataMessage(this.controller.TempData, "Your account was successfully deleted!");
+                CheckTempDataMessage(this.controller.TempData, "Your account was successfully deleted!");
             });
         }
 
@@ -636,12 +636,12 @@
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result.Url, Is.EqualTo("/Admin/Users/Details/" + ownerId));
 
-                this.CheckTempDataMessage(this.controller.TempData, "You successfully delete user's account!");
+                CheckTempDataMessage(this.controller.TempData, "You successfully delete user's account!");
             });
         }
 
         [Test]
-        public async Task DeleteOnPost_ShouldCatchExcepctionAndReturnUnauthorized_WhenUserIsUnauthorized()
+        public async Task DeleteOnPost_ShouldCatchExceptionAndReturnUnauthorized_WhenUserIsUnauthorized()
         {
             //Arrange
             var inputModel = new DeleteAccountInputModel
@@ -672,7 +672,7 @@
         }
 
         [Test]
-        public async Task DeleteOnPost_ShouldCatchExcepctionAndReturnBadRequest_WhenDeleteWasUnsuccessful()
+        public async Task DeleteOnPost_ShouldCatchExceptionAndReturnBadRequest_WhenDeleteWasUnsuccessful()
         {
             //Arrange
             var inputModel = new DeleteAccountInputModel
@@ -856,7 +856,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(viewResult, Is.Not.Null);
-                this.CheckModelStateErrors(viewResult.ViewData.ModelState, nameof(inputFormModel.Name), "Name is invalid.");
+                CheckModelStateErrors(viewResult.ViewData.ModelState, nameof(inputFormModel.Name), "Name is invalid.");
                 this.CheckAccountFormViewModel(viewResult.Model as AccountFormViewModel, inputFormModel);
             });
         }
@@ -925,7 +925,7 @@
             {
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result.Url, Is.EqualTo(returnUrl));
-                this.CheckTempDataMessage(this.controller.TempData, "Your account was successfully edited!");
+                CheckTempDataMessage(this.controller.TempData, "Your account was successfully edited!");
             });
         }
 
@@ -966,7 +966,7 @@
             {
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result.Url, Is.EqualTo(returnUrl));
-                this.CheckTempDataMessage(this.controller.TempData, "You successfully edited user's account!");
+                CheckTempDataMessage(this.controller.TempData, "You successfully edited user's account!");
             });
         }
 
@@ -1010,7 +1010,7 @@
             {
                 Assert.That(result, Is.Not.Null);
 
-                this.CheckModelStateErrors(result.ViewData.ModelState, nameof(inputFormModel.Name),
+                CheckModelStateErrors(result.ViewData.ModelState, nameof(inputFormModel.Name),
                     $"The user already have Account with \"{inputFormModel.Name}\" name.");
 
                 this.CheckAccountFormViewModel(result.Model as AccountFormViewModel, inputFormModel);
@@ -1055,7 +1055,7 @@
             {
                 Assert.That(result, Is.Not.Null);
 
-                this.CheckModelStateErrors(result.ViewData.ModelState, nameof(inputFormModel.Name),
+                CheckModelStateErrors(result.ViewData.ModelState, nameof(inputFormModel.Name),
                     $"You already have Account with \"{inputFormModel.Name}\" name.");
 
                 this.CheckAccountFormViewModel(result.Model as AccountFormViewModel, inputFormModel);
@@ -1184,8 +1184,8 @@
                     Is.EqualTo(serviceModel.Transactions.ElementAt(i).Id));
                 Assert.That(viewModel.Transactions.ElementAt(i).Amount,
                     Is.EqualTo(serviceModel.Transactions.ElementAt(i).Amount));
-                Assert.That(viewModel.Transactions.ElementAt(i).Refference,
-                    Is.EqualTo(serviceModel.Transactions.ElementAt(i).Refference));
+                Assert.That(viewModel.Transactions.ElementAt(i).Reference,
+                    Is.EqualTo(serviceModel.Transactions.ElementAt(i).Reference));
                 Assert.That(viewModel.Transactions.ElementAt(i).TransactionType,
                     Is.EqualTo(serviceModel.Transactions.ElementAt(i).TransactionType));
                 Assert.That(viewModel.Transactions.ElementAt(i).AccountCurrencyName,

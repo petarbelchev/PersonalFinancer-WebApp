@@ -182,7 +182,7 @@
                                 " (Deleted)"
                                 : string.Empty),
                             CreatedOn = t.CreatedOn.ToLocalTime(),
-                            Refference = t.Refference,
+                            Reference = t.Reference,
                             TransactionType = t.TransactionType.ToString()
                         })
                 })
@@ -221,7 +221,7 @@
                             AccountCurrencyName = t.Account.Currency.Name,
                             CreatedOn = t.CreatedOn.ToLocalTime(),
                             TransactionType = t.TransactionType.ToString(),
-                            Refference = t.Refference,
+                            Reference = t.Reference,
                             CategoryName = t.Category.Name
                         }),
                     CurrenciesCashFlow = u.Transactions

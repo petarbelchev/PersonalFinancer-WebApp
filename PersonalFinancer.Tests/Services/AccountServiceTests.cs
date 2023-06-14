@@ -128,7 +128,7 @@
                 OwnerId = this.User1.Id,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "Not Initial Balance",
+                Reference = "Not Initial Balance",
                 TransactionType = TransactionType.Expense
             };
             int transactionsCountBefore = this.Account1User1.Transactions.Count;
@@ -146,7 +146,7 @@
                 Assert.That(transaction.Amount, Is.EqualTo(transactionModel.Amount));
                 Assert.That(transaction.CategoryId, Is.EqualTo(transactionModel.CategoryId));
                 Assert.That(transaction.AccountId, Is.EqualTo(transactionModel.AccountId));
-                Assert.That(transaction.Refference, Is.EqualTo(transactionModel.Refference));
+                Assert.That(transaction.Reference, Is.EqualTo(transactionModel.Reference));
                 Assert.That(transaction.CreatedOn, Is.EqualTo(transactionModel.CreatedOn));
                 Assert.That(transaction.TransactionType, Is.EqualTo(transactionModel.TransactionType));
                 Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore - transaction.Amount));
@@ -164,7 +164,7 @@
                 OwnerId = this.User1.Id,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "Not Initial Balance",
+                Reference = "Not Initial Balance",
                 TransactionType = TransactionType.Income
             };
             int transactionsCountBefore = this.Account1User1.Transactions.Count;
@@ -182,7 +182,7 @@
                 Assert.That(transaction.Amount, Is.EqualTo(transactionModel.Amount));
                 Assert.That(transaction.CategoryId, Is.EqualTo(transactionModel.CategoryId));
                 Assert.That(transaction.AccountId, Is.EqualTo(transactionModel.AccountId));
-                Assert.That(transaction.Refference, Is.EqualTo(transactionModel.Refference));
+                Assert.That(transaction.Reference, Is.EqualTo(transactionModel.Reference));
                 Assert.That(transaction.CreatedOn, Is.EqualTo(transactionModel.CreatedOn));
                 Assert.That(transaction.TransactionType, Is.EqualTo(transactionModel.TransactionType));
                 Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore + transaction.Amount));
@@ -200,7 +200,7 @@
                 OwnerId = this.User1.Id,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "Not Initial Balance",
+                Reference = "Not Initial Balance",
                 TransactionType = TransactionType.Expense
             };
 
@@ -231,7 +231,7 @@
                         Amount = 200,
                         CategoryId = this.CatInitialBalance.Id,
                         CreatedOn = DateTime.UtcNow,
-                        Refference = "Salary",
+                        Reference = "Salary",
                         TransactionType = TransactionType.Income
                     }
                 }
@@ -280,7 +280,7 @@
                         Amount = 200,
                         CategoryId = this.CatInitialBalance.Id,
                         CreatedOn = DateTime.UtcNow,
-                        Refference = "Salary",
+                        Reference = "Salary",
                         TransactionType = TransactionType.Income
                     }
                 }
@@ -366,7 +366,7 @@
                         Amount = 200,
                         CategoryId = this.CatInitialBalance.Id,
                         CreatedOn = DateTime.UtcNow,
-                        Refference = "Salary",
+                        Reference = "Salary",
                         TransactionType = TransactionType.Income
                     }
                 }
@@ -419,7 +419,7 @@
                         Amount = 200,
                         CategoryId = this.CatInitialBalance.Id,
                         CreatedOn = DateTime.UtcNow,
-                        Refference = "Salary",
+                        Reference = "Salary",
                         TransactionType = TransactionType.Income
                     }
                 }
@@ -464,7 +464,7 @@
                 Amount = 123,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "TestTransaction",
+                Reference = "TestTransaction",
                 TransactionType = TransactionType.Income
             };
             await this.transactionsRepo.AddAsync(transaction);
@@ -504,7 +504,7 @@
                 Amount = 123,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "TestTransaction",
+                Reference = "TestTransaction",
                 TransactionType = TransactionType.Income
             };
             await this.transactionsRepo.AddAsync(transaction);
@@ -544,7 +544,7 @@
                 Amount = 123,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "TestTransaction",
+                Reference = "TestTransaction",
                 TransactionType = TransactionType.Expense
             };
             await this.transactionsRepo.AddAsync(transaction);
@@ -584,7 +584,7 @@
                 Amount = 123,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "TestTransaction",
+                Reference = "TestTransaction",
                 TransactionType = TransactionType.Expense
             };
             await this.transactionsRepo.AddAsync(transaction);
@@ -634,7 +634,7 @@
                 Amount = 10,
                 CreatedOn = DateTime.UtcNow,
                 OwnerId = this.User1.Id,
-                Refference = "For Delete",
+                Reference = "For Delete",
                 TransactionType = TransactionType.Expense
             };
             await this.transactionsRepo.AddAsync(transaction);
@@ -786,7 +786,7 @@
                 AccountId = account.Id,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "Initial Balance",
+                Reference = "Initial Balance",
                 IsInitialBalance = true,
                 TransactionType = TransactionType.Income
             };
@@ -798,7 +798,7 @@
                 AccountId = account.Id,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "Lunch",
+                Reference = "Lunch",
                 TransactionType = TransactionType.Expense
             };
             account.Transactions.Add(initialBalTransaction);
@@ -867,7 +867,7 @@
                 AccountId = account.Id,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "Initial Balance",
+                Reference = "Initial Balance",
                 IsInitialBalance = true,
                 TransactionType = TransactionType.Income
             };
@@ -879,7 +879,7 @@
                 AccountId = account.Id,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "Lunch",
+                Reference = "Lunch",
                 TransactionType = TransactionType.Expense
             };
             account.Transactions.Add(initialBalTransaction);
@@ -962,7 +962,7 @@
             {
                 Assert.That(initialBalTransaction.Amount, Is.EqualTo(100));
                 Assert.That(initialBalTransaction.IsInitialBalance, Is.True);
-                Assert.That(initialBalTransaction.Refference, Is.EqualTo(CategoryInitialBalanceName));
+                Assert.That(initialBalTransaction.Reference, Is.EqualTo(CategoryInitialBalanceName));
                 Assert.That(initialBalTransaction.OwnerId, Is.EqualTo(account.OwnerId));
                 Assert.That(initialBalTransaction.AccountId, Is.EqualTo(account.Id));
                 Assert.That(initialBalTransaction.CategoryId, Is.EqualTo(this.CatInitialBalance.Id));
@@ -1008,7 +1008,7 @@
                 Amount = 123,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "TransactionTypeChanged",
+                Reference = "TransactionTypeChanged",
                 TransactionType = TransactionType.Income
             };
 
@@ -1049,7 +1049,7 @@
                 Amount = 123,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "AccountChanged",
+                Reference = "AccountChanged",
                 TransactionType = TransactionType.Income
             };
 
@@ -1083,7 +1083,7 @@
         }
 
         [Test]
-        public async Task EditTransaction_ShouldEditTransaction_WhenPaymentRefferenceIsChanged()
+        public async Task EditTransaction_ShouldEditTransaction_WhenPaymentReferenceIsChanged()
         {
             //Arrange
             var transaction = new Transaction
@@ -1094,7 +1094,7 @@
                 Amount = 123,
                 CategoryId = this.CatInitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
-                Refference = "First Refference",
+                Reference = "First Reference",
                 TransactionType = TransactionType.Income
             };
 
@@ -1108,15 +1108,15 @@
                 .Where(t => t.Id == transaction.Id)
                 .Select(t => this.mapper.Map<TransactionFormShortServiceModel>(t))
                 .FirstAsync();
-            editTransactionModel.Refference = "Second Refference";
+            editTransactionModel.Reference = "Second Reference";
             await this.accountService.EditTransaction(transaction.Id, editTransactionModel);
 
-            //Assert that only transaction refference is changed
+            //Assert that only transaction reference is changed
             Assert.Multiple(() =>
             {
 
                 Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore));
-                Assert.That(transaction.Refference, Is.EqualTo(editTransactionModel.Refference));
+                Assert.That(transaction.Reference, Is.EqualTo(editTransactionModel.Reference));
                 Assert.That(transaction.CategoryId, Is.EqualTo(editTransactionModel.CategoryId));
                 Assert.That(transaction.AccountId, Is.EqualTo(editTransactionModel.AccountId));
                 Assert.That(transaction.Amount, Is.EqualTo(editTransactionModel.Amount));
@@ -1160,12 +1160,12 @@
                             CreatedOn = t.CreatedOn.ToLocalTime(),
                             CategoryName = t.Category.Name,
                             TransactionType = t.TransactionType.ToString(),
-                            Refference = t.Refference
+                            Reference = t.Reference
                         })
                 })
                 .FirstOrDefaultAsync();
 
-            //Aseert
+            //Assert
             Assert.That(expected, Is.Not.Null);
 
             //Act
@@ -1188,8 +1188,8 @@
                         Is.EqualTo(expected.Transactions.ElementAt(i).Id));
                     Assert.That(actual.Transactions.ElementAt(i).Amount,
                         Is.EqualTo(expected.Transactions.ElementAt(i).Amount));
-                    Assert.That(actual.Transactions.ElementAt(i).Refference,
-                        Is.EqualTo(expected.Transactions.ElementAt(i).Refference));
+                    Assert.That(actual.Transactions.ElementAt(i).Reference,
+                        Is.EqualTo(expected.Transactions.ElementAt(i).Reference));
                     Assert.That(actual.Transactions.ElementAt(i).TransactionType,
                         Is.EqualTo(expected.Transactions.ElementAt(i).TransactionType));
                     Assert.That(actual.Transactions.ElementAt(i).AccountCurrencyName,
@@ -1415,7 +1415,7 @@
                         CategoryName = t.Category.Name + (t.Category.IsDeleted ?
                             " (Deleted)"
                             : string.Empty),
-                        Refference = t.Refference,
+                        Reference = t.Reference,
                         TransactionType = t.TransactionType.ToString()
                     })
                     .ToListAsync(),
@@ -1445,8 +1445,8 @@
                         Is.EqualTo(expect.Transactions.ElementAt(i).AccountCurrencyName));
                     Assert.That(actual.Transactions.ElementAt(i).TransactionType,
                         Is.EqualTo(expect.Transactions.ElementAt(i).TransactionType));
-                    Assert.That(actual.Transactions.ElementAt(i).Refference,
-                        Is.EqualTo(expect.Transactions.ElementAt(i).Refference));
+                    Assert.That(actual.Transactions.ElementAt(i).Reference,
+                        Is.EqualTo(expect.Transactions.ElementAt(i).Reference));
                     Assert.That(actual.Transactions.ElementAt(i).CategoryName,
                         Is.EqualTo(expect.Transactions.ElementAt(i).CategoryName));
                     Assert.That(actual.Transactions.ElementAt(i).CreatedOn,
@@ -1494,7 +1494,7 @@
                 Assert.That(transactionFormModel.AccountId, Is.EqualTo(this.Transaction2User1.AccountId));
                 Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction2User1.Amount));
                 Assert.That(transactionFormModel.CategoryId, Is.EqualTo(this.Transaction2User1.CategoryId));
-                Assert.That(transactionFormModel.Refference, Is.EqualTo(this.Transaction2User1.Refference));
+                Assert.That(transactionFormModel.Reference, Is.EqualTo(this.Transaction2User1.Reference));
                 Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.Transaction2User1.TransactionType));
                 Assert.That(transactionFormModel.IsInitialBalance, Is.EqualTo(this.Transaction2User1.IsInitialBalance));
                 Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.Transaction2User1.CreatedOn.ToLocalTime()));
@@ -1535,7 +1535,7 @@
                 Assert.That(transactionFormModel.AccountId, Is.EqualTo(this.Transaction1User1.AccountId));
                 Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction1User1.Amount));
                 Assert.That(transactionFormModel.CategoryId, Is.EqualTo(this.Transaction1User1.CategoryId));
-                Assert.That(transactionFormModel.Refference, Is.EqualTo(this.Transaction1User1.Refference));
+                Assert.That(transactionFormModel.Reference, Is.EqualTo(this.Transaction1User1.Reference));
                 Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.Transaction1User1.TransactionType));
                 Assert.That(transactionFormModel.IsInitialBalance, Is.EqualTo(this.Transaction1User1.IsInitialBalance));
                 Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.Transaction1User1.CreatedOn.ToLocalTime()));
@@ -1569,7 +1569,7 @@
                 Assert.That(transactionFormModel.AccountName, Is.EqualTo(this.Transaction1User1.Account.Name));
                 Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction1User1.Amount));
                 Assert.That(transactionFormModel.CategoryName, Is.EqualTo(this.Transaction1User1.Category.Name));
-                Assert.That(transactionFormModel.Refference, Is.EqualTo(this.Transaction1User1.Refference));
+                Assert.That(transactionFormModel.Reference, Is.EqualTo(this.Transaction1User1.Reference));
                 Assert.That(transactionFormModel.OwnerId, Is.EqualTo(this.Transaction1User1.OwnerId));
                 Assert.That(transactionFormModel.AccountCurrencyName, Is.EqualTo(this.Transaction1User1.Account.Currency.Name));
                 Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.Transaction1User1.CreatedOn.ToLocalTime()));
@@ -1610,7 +1610,7 @@
                 Assert.That(transactionFormModel.AccountName, Is.EqualTo(this.Transaction1User1.Account.Name));
                 Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction1User1.Amount));
                 Assert.That(transactionFormModel.CategoryName, Is.EqualTo(this.Transaction1User1.Category.Name));
-                Assert.That(transactionFormModel.Refference, Is.EqualTo(this.Transaction1User1.Refference));
+                Assert.That(transactionFormModel.Reference, Is.EqualTo(this.Transaction1User1.Reference));
                 Assert.That(transactionFormModel.OwnerId, Is.EqualTo(this.Transaction1User1.OwnerId));
                 Assert.That(transactionFormModel.AccountCurrencyName, Is.EqualTo(this.Transaction1User1.Account.Currency.Name));
                 Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.Transaction1User1.CreatedOn.ToLocalTime()));

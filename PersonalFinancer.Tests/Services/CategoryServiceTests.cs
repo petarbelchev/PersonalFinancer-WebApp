@@ -64,7 +64,7 @@
             //Assert
             Category? deletedAcc = await this.repo.FindAsync(deletedCategory.Id);
             Assert.That(deletedAcc, Is.Not.Null);
-            Assert.That(deletedAcc.IsDeleted, Is.True);
+            Assert.That(deletedAcc!.IsDeleted, Is.True);
 
             //Act
             ApiOutputServiceModel result =

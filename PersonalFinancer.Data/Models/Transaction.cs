@@ -27,12 +27,12 @@
 
         public TransactionType TransactionType { get; set; }
 
-        [DataType(DataType.DateTime, ErrorMessage = "Plaese enter a valid Date.")]
+        [DataType(DataType.DateTime, ErrorMessage = "Please enter a valid Date.")]
         public DateTime CreatedOn { get; set; }
 
-        [MaxLength(TransactionRefferenceMaxLength,
-           ErrorMessage = "Refference max length must be {1} characters long.")]
-        public string Refference { get; set; } = null!;
+        [MaxLength(TransactionReferenceMaxLength,
+           ErrorMessage = "Reference max length must be {1} characters long.")]
+        public string Reference { get; set; } = null!;
 
         public bool IsInitialBalance { get; set; }
     }

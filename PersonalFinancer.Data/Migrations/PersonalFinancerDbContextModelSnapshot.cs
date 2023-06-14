@@ -369,7 +369,7 @@ namespace PersonalFinancer.Data.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Refference")
+                    b.Property<string>("Reference")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");

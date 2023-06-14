@@ -15,7 +15,7 @@
 
 		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		[Range(AccountInitialBalanceMinValue, AccountInitialBalanceMaxValue,
-			ErrorMessage = "Ballace must be a number between {1} and {2}")]
+			ErrorMessage = "Balance must be a number between {1} and {2}")]
 		public decimal Balance { get; set; }
 		
 		[Required(ErrorMessage = "Owner Id name is required.")]

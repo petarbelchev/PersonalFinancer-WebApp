@@ -56,9 +56,9 @@
 						<select asp-for="@Model.TransactionType" asp-items="@(Html.GetEnumSelectList<TransactionType>())" class="form-select"></select>
 					</div>
 					<div class="form-floating formField">
-						<input type="text" asp-for="@Model.Refference" class="form-control form-control-lg" placeholder=".form-control-lg" />
-						<label asp-for="@Model.Refference" class="form-lebel"></label>
-						<span asp-validation-for="@Model.Refference" class="text-danger"></span>
+						<input type="text" asp-for="@Model.Reference" class="form-control form-control-lg" placeholder=".form-control-lg" />
+						<label asp-for="@Model.Reference" class="form-lebel"></label>
+						<span asp-validation-for="@Model.Reference" class="text-danger"></span>
 					</div>
 					<input type="hidden" asp-for="@Model.OwnerId" />
 					<div>

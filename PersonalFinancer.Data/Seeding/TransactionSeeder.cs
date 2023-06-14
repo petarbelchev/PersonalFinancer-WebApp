@@ -22,7 +22,7 @@
             var salaryCategoryId = Guid.Parse(SeedConstants.SalaryCategoryId);
             var transportCategoryId = Guid.Parse(SeedConstants.TransportCategoryId);
             var medicalHealthcareCategoryId = Guid.Parse(SeedConstants.MedicalHealthcareCategoryId);
-            var dividentsCategoryId = Guid.Parse(SeedConstants.DividentsCategoryId);
+            var dividendsCategoryId = Guid.Parse(SeedConstants.DividendsCategoryId);
             var utilitiesCategoryId = Guid.Parse(SeedConstants.UtilitiesCategoryId);
             var moneyTransferCategoryId = Guid.Parse(SeedConstants.MoneyTransferCategoryId);
             var foodDrinkCategoryId = Guid.Parse(SeedConstants.FoodDrinkCategoryId);
@@ -36,7 +36,7 @@
                     Amount = 2000,
                     CategoryId = initialBalanceCategoryId,
                     CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                    Refference = CategoryConstants.CategoryInitialBalanceName,
+                    Reference = CategoryConstants.CategoryInitialBalanceName,
                     TransactionType = TransactionType.Income,
                     IsInitialBalance = true,
                     OwnerId = user.Id,
@@ -49,7 +49,7 @@
                     Amount = 4000,
                     CategoryId = initialBalanceCategoryId,
                     CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                    Refference = CategoryConstants.CategoryInitialBalanceName,
+                    Reference = CategoryConstants.CategoryInitialBalanceName,
                     TransactionType = TransactionType.Income,
                     IsInitialBalance = true,
                     OwnerId = user.Id,
@@ -62,7 +62,7 @@
                     Amount = 2800,
                     CategoryId = initialBalanceCategoryId,
                     CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                    Refference = CategoryConstants.CategoryInitialBalanceName,
+                    Reference = CategoryConstants.CategoryInitialBalanceName,
                     TransactionType = TransactionType.Income,
                     IsInitialBalance = true,
                     OwnerId = user.Id,
@@ -75,7 +75,7 @@
                     Amount = 3800,
                     CategoryId = initialBalanceCategoryId,
                     CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                    Refference = CategoryConstants.CategoryInitialBalanceName,
+                    Reference = CategoryConstants.CategoryInitialBalanceName,
                     TransactionType = TransactionType.Income,
                     IsInitialBalance = true,
                     OwnerId = user.Id,
@@ -95,7 +95,7 @@
                         Amount = 1500m,
                         CategoryId = salaryCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "Salary",
+                        Reference = "Salary",
                         TransactionType = TransactionType.Income,
                         OwnerId = user.Id,
                     });
@@ -110,7 +110,7 @@
                         Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.63, 2),
                         CategoryId = transportCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "Taxi",
+                        Reference = "Taxi",
                         TransactionType = TransactionType.Expense,
                         OwnerId = user.Id,
                     });
@@ -125,7 +125,7 @@
                         Amount = 14.99m,
                         CategoryId = medicalHealthcareCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "Vitamins",
+                        Reference = "Vitamins",
                         TransactionType = TransactionType.Expense,
                         OwnerId = user.Id,
                     });
@@ -138,9 +138,9 @@
                         Id = Guid.NewGuid(),
                         AccountId = euroSavingsAccId,
                         Amount = 100,
-                        CategoryId = dividentsCategoryId,
+                        CategoryId = dividendsCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "Stocks dividents",
+                        Reference = "Stocks dividends",
                         TransactionType = TransactionType.Income,
                         OwnerId = user.Id,
                     });
@@ -153,9 +153,9 @@
                         Id = Guid.NewGuid(),
                         AccountId = usdSavingsAccId,
                         Amount = 150,
-                        CategoryId = dividentsCategoryId,
+                        CategoryId = dividendsCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "Stocks dividents",
+                        Reference = "Stocks dividends",
                         TransactionType = TransactionType.Income,
                         OwnerId = user.Id,
                     });
@@ -170,7 +170,7 @@
                         Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 4.83, 2),
                         CategoryId = utilitiesCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "Electricity bill",
+                        Reference = "Electricity bill",
                         TransactionType = TransactionType.Expense,
                         OwnerId = user.Id,
                     });
@@ -183,7 +183,7 @@
                     Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.53, 2),
                     CategoryId = foodDrinkCategoryId,
                     CreatedOn = DateTime.UtcNow.AddDays(-i),
-                    Refference = "Lunch",
+                    Reference = "Lunch",
                     TransactionType = TransactionType.Expense,
                     OwnerId = user.Id,
                 });
@@ -197,7 +197,7 @@
                         Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 1.83, 2),
                         CategoryId = utilitiesCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "Water bill",
+                        Reference = "Water bill",
                         TransactionType = TransactionType.Expense,
                         OwnerId = user.Id,
                     });
@@ -212,7 +212,7 @@
                         Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 2.83, 2),
                         CategoryId = utilitiesCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "Phone bill",
+                        Reference = "Phone bill",
                         TransactionType = TransactionType.Expense,
                         OwnerId = user.Id,
                     });
@@ -227,7 +227,7 @@
                         Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.63, 2),
                         CategoryId = transportCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "Taxi",
+                        Reference = "Taxi",
                         TransactionType = TransactionType.Expense,
                         OwnerId = user.Id,
                     });
@@ -247,7 +247,7 @@
                         Amount = 500,
                         CategoryId = moneyTransferCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "ATM Withdraw",
+                        Reference = "ATM Withdraw",
                         TransactionType = TransactionType.Expense,
                         OwnerId = user.Id,
                     });
@@ -259,7 +259,7 @@
                         Amount = 500,
                         CategoryId = moneyTransferCategoryId,
                         CreatedOn = DateTime.UtcNow.AddDays(-i),
-                        Refference = "ATM Withdraw",
+                        Reference = "ATM Withdraw",
                         TransactionType = TransactionType.Income,
                         OwnerId = user.Id,
                     });
@@ -272,20 +272,20 @@
                     Amount = (decimal)Math.Round(RandomNumberGenerator.GetInt32(9, 17) * 0.83, 2),
                     CategoryId = foodDrinkCategoryId,
                     CreatedOn = DateTime.UtcNow.AddDays(-i),
-                    Refference = "Dinner",
+                    Reference = "Dinner",
                     TransactionType = TransactionType.Expense,
                     OwnerId = user.Id,
                 });
             }
 
             foreach (Account account in dbContext.Accounts)
-                account.Balance += this.CalcBalance(account.Id, transactions);
+                account.Balance += CalculateBalance(account.Id, transactions);
 
             await dbContext.Transactions.AddRangeAsync(transactions);
             _ = await dbContext.SaveChangesAsync();
         }
 
-        private decimal CalcBalance(Guid accountId, List<Transaction> transactions)
+        private static decimal CalculateBalance(Guid accountId, List<Transaction> transactions)
         {
             decimal incomes = transactions
                 .Where(t => t.AccountId == accountId && t.TransactionType == TransactionType.Income)

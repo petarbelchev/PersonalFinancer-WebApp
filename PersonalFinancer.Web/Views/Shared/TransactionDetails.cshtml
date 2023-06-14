@@ -10,28 +10,28 @@
 	<div class="card col-11 col-sm-8 col-md-6 col-xl-5">
 		<ul class="list-group list-group-flush">
 			<li class="list-group-item d-flex justify-content-between">
-				<div class="p-2"><span>Created On: </span></div>
-				<div class="p-2"><span>@Model.CreatedOn.ToString("f", CultureInfo.GetCultureInfo("en-US"))</span></div>
-			</li>
-			<li class="list-group-item d-flex justify-content-between">
-				<span class="p-2">Refference: </span>
-				<span class="p-2">@Model.Refference</span>
-			</li>
-			<li class="list-group-item d-flex justify-content-between">
 				<span class="p-2">Amount: </span>
 				<span class="p-2">@Model.Amount @Model.AccountCurrencyName</span>
 			</li>
 			<li class="list-group-item d-flex justify-content-between">
-				<span class="p-2">Account: </span>
-				<span class="p-2">@Model.AccountName</span>
+				<div class="p-2"><span>Created On: </span></div>
+				<div class="p-2"><span>@Model.CreatedOn.ToString("f", CultureInfo.GetCultureInfo("en-US"))</span></div>
 			</li>
 			<li class="list-group-item d-flex justify-content-between">
 				<span class="p-2">Category: </span>
 				<span class="p-2">@Model.CategoryName</span>
 			</li>
 			<li class="list-group-item d-flex justify-content-between">
+				<span class="p-2">Account: </span>
+				<span class="p-2">@Model.AccountName</span>
+			</li>
+			<li class="list-group-item d-flex justify-content-between">
 				<span class="p-2">Type: </span>
 				<span class="p-2">@Model.TransactionType</span>
+			</li>
+			<li class="list-group-item d-flex justify-content-between">
+				<span class="p-2">Reference: </span>
+				<span class="p-2">@Model.Reference</span>
 			</li>
 		</ul>
 		<div style="margin-top:20px;">

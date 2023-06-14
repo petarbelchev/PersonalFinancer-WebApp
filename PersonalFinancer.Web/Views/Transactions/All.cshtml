@@ -5,6 +5,8 @@
 	ViewData["Title"] = "All Transactions";
 }
 
+<h1 class="display-6 text-center">@ViewData["Title"]</h1>
+
 @*DatePicker*@
 <partial name="_DatePickerFormPartial" model='new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }' />
 

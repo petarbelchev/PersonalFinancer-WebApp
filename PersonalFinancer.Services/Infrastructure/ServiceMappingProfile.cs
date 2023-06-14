@@ -39,7 +39,7 @@
                     .MapFrom(s => s.Account.Name + (s.Account.IsDeleted ? " (Deleted)" : string.Empty)));
 
             _ = this.CreateMap<TransactionFormShortServiceModel, Transaction>().ReverseMap()
-                .ForMember(m => m.Refference, mf => mf.MapFrom(s => s.Refference.Trim()));
+                .ForMember(m => m.Reference, mf => mf.MapFrom(s => s.Reference.Trim()));
 
             _ = this.CreateMap<Transaction, TransactionTableServiceModel>();
 

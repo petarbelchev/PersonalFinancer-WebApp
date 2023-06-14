@@ -14,7 +14,7 @@
 
 		public DateTime CreatedOn { get; set; }
 
-		public string Refference { get; set; } = null!;
+		public string Reference { get; set; } = null!;
 
 		public TransactionType TransactionType { get; set; }
 

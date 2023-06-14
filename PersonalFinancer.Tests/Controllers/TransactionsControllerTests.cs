@@ -30,7 +30,7 @@
                     AccountCurrencyName = "Currency",
                     CategoryName = "Category",
                     CreatedOn = DateTime.UtcNow.AddDays(-1),
-                    Refference = "Refference",
+                    Reference = "Reference",
                     TransactionType = TransactionType.Expense.ToString()
                 },
                 new TransactionTableServiceModel
@@ -40,7 +40,7 @@
                     AccountCurrencyName = "Currency2",
                     CategoryName = "Category2",
                     CreatedOn = DateTime.UtcNow,
-                    Refference = "Refference2",
+                    Reference = "Reference2",
                     TransactionType = TransactionType.Expense.ToString()
                 }
             },
@@ -184,7 +184,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(viewResult, Is.Not.Null);
-                this.CheckModelStateErrors(viewResult.ViewData.ModelState, string.Empty, "Model is invalid.");
+                CheckModelStateErrors(viewResult.ViewData.ModelState, string.Empty, "Model is invalid.");
 
                 var model = viewResult.Model as UserTransactionsViewModel;
                 Assert.That(model, Is.Not.Null);
@@ -215,7 +215,7 @@
                 var model = viewResult.Model as TransactionFormModel;
                 Assert.That(model, Is.Not.Null);
                 Assert.That(model!.IsInitialBalance, Is.False);
-                Assert.That(model.Refference, Is.Null);
+                Assert.That(model.Reference, Is.Null);
                 Assert.That(model.OwnerId, Is.EqualTo(this.userAccAndCatDto.OwnerId));
                 Assert.That(model.AccountId, Is.Null);
                 Assert.That(model.Amount, Is.EqualTo(0));
@@ -241,7 +241,7 @@
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
                 OwnerId = this.userId,
-                Refference = "Test Transaction",
+                Reference = "Test Transaction",
                 TransactionType = TransactionType.Expense
             };
 
@@ -272,7 +272,7 @@
                 Assert.That(model.TransactionTypes[0], Is.EqualTo(TransactionType.Income));
                 Assert.That(model.TransactionTypes[1], Is.EqualTo(TransactionType.Expense));
 
-                this.CheckModelStateErrors(viewResult.ViewData.ModelState,
+                CheckModelStateErrors(viewResult.ViewData.ModelState,
                     nameof(inputModel.Amount), "Amount is invalid.");
             });
         }
@@ -289,7 +289,7 @@
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
                 OwnerId = Guid.NewGuid(),
-                Refference = "Test Transaction",
+                Reference = "Test Transaction",
                 TransactionType = TransactionType.Expense
             };
 
@@ -316,7 +316,7 @@
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
                 OwnerId = this.userId,
-                Refference = "Test Transaction",
+                Reference = "Test Transaction",
                 TransactionType = TransactionType.Expense
             };
             var newTransactionId = Guid.NewGuid();
@@ -327,7 +327,7 @@
                     && m.Amount == inputModel.Amount
                     && m.TransactionType == inputModel.TransactionType
                     && m.OwnerId == inputModel.OwnerId
-                    && m.Refference == inputModel.Refference
+                    && m.Reference == inputModel.Reference
                     && m.AccountId == inputModel.AccountId
                     && m.CategoryId == inputModel.CategoryId
                     && m.CreatedOn == inputModel.CreatedOn)))
@@ -346,8 +346,8 @@
                 Assert.That(result.ControllerName, Is.Null);
                 Assert.That(result.ActionName, Is.EqualTo("TransactionDetails"));
                 Assert.That(result.RouteValues, Is.Not.Null);
-                this.CheckRouteValues(result.RouteValues!, "id", newTransactionId);
-                this.CheckTempDataMessage(this.controller.TempData, "You create a new transaction successfully!");
+                CheckRouteValues(result.RouteValues!, "id", newTransactionId);
+                CheckTempDataMessage(this.controller.TempData, "You create a new transaction successfully!");
             });
         }
 
@@ -363,7 +363,7 @@
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
                 OwnerId = this.userId,
-                Refference = "Test Transaction",
+                Reference = "Test Transaction",
                 TransactionType = TransactionType.Expense
             };
 
@@ -373,7 +373,7 @@
                     && m.Amount == inputModel.Amount
                     && m.TransactionType == inputModel.TransactionType
                     && m.OwnerId == inputModel.OwnerId
-                    && m.Refference == inputModel.Refference
+                    && m.Reference == inputModel.Reference
                     && m.AccountId == inputModel.AccountId
                     && m.CategoryId == inputModel.CategoryId
                     && m.CreatedOn == inputModel.CreatedOn)))
@@ -417,7 +417,7 @@
             {
                 Assert.That(result.ControllerName, Is.EqualTo("Home"));
                 Assert.That(result.ActionName, Is.EqualTo("Index"));
-                this.CheckTempDataMessage(this.controller.TempData, "Your transaction was successfully deleted!");
+                CheckTempDataMessage(this.controller.TempData, "Your transaction was successfully deleted!");
             });
         }
 
@@ -446,7 +446,7 @@
             {
                 Assert.That(result.ControllerName, Is.EqualTo("Home"));
                 Assert.That(result.ActionName, Is.EqualTo("Index"));
-                this.CheckTempDataMessage(this.controller.TempData, "You successfully delete a user's transaction!");
+                CheckTempDataMessage(this.controller.TempData, "You successfully delete a user's transaction!");
             });
         }
 
@@ -476,7 +476,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(result.Url, Is.EqualTo(returnUrl));
-                this.CheckTempDataMessage(this.controller.TempData, "Your transaction was successfully deleted!");
+                CheckTempDataMessage(this.controller.TempData, "Your transaction was successfully deleted!");
             });
         }
 
@@ -506,7 +506,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(result.Url, Is.EqualTo(returnUrl));
-                this.CheckTempDataMessage(this.controller.TempData, "You successfully delete a user's transaction!");
+                CheckTempDataMessage(this.controller.TempData, "You successfully delete a user's transaction!");
             });
         }
 
@@ -568,7 +568,7 @@
                 CategoryName = "Category",
                 CreatedOn = DateTime.UtcNow.AddDays(-1),
                 OwnerId = this.userId,
-                Refference = "Refference",
+                Reference = "Reference",
                 TransactionType = TransactionType.Income.ToString()
             };
 
@@ -589,7 +589,7 @@
             {
                 Assert.That(model, Is.Not.Null);
                 Assert.That(model!.Id, Is.EqualTo(serviceReturnDto.Id));
-                Assert.That(model.Refference, Is.EqualTo(serviceReturnDto.Refference));
+                Assert.That(model.Reference, Is.EqualTo(serviceReturnDto.Reference));
                 Assert.That(model.TransactionType, Is.EqualTo(serviceReturnDto.TransactionType));
                 Assert.That(model.AccountCurrencyName, Is.EqualTo(serviceReturnDto.AccountCurrencyName));
                 Assert.That(model.OwnerId, Is.EqualTo(serviceReturnDto.OwnerId));
@@ -652,7 +652,7 @@
                 Amount = 10,
                 CreatedOn = DateTime.UtcNow.AddDays(-1),
                 OwnerId = this.userId,
-                Refference = "Refference",
+                Reference = "Reference",
                 AccountId = Guid.NewGuid(),
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
@@ -697,7 +697,7 @@
                 Amount = 10,
                 CreatedOn = DateTime.UtcNow.AddDays(-1),
                 OwnerId = this.userId,
-                Refference = CategoryConstants.CategoryInitialBalanceName,
+                Reference = CategoryConstants.CategoryInitialBalanceName,
                 AccountId = this.userAccAndCatDtoInitialTransaction.UserAccounts.First().Id,
                 CategoryId = this.userAccAndCatDtoInitialTransaction.UserCategories.First().Id,
                 IsInitialBalance = true,
@@ -742,7 +742,7 @@
                 Amount = 10,
                 CreatedOn = DateTime.UtcNow.AddDays(-1),
                 OwnerId = Guid.NewGuid(),
-                Refference = CategoryConstants.CategoryInitialBalanceName,
+                Reference = CategoryConstants.CategoryInitialBalanceName,
                 AccountId = Guid.NewGuid(),
                 CategoryId = Guid.Parse(CategoryConstants.InitialBalanceCategoryId),
                 IsInitialBalance = true,
@@ -806,7 +806,7 @@
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
                 OwnerId = this.userId,
-                Refference = "Test Transaction",
+                Reference = "Test Transaction",
                 TransactionType = TransactionType.Expense
             };
 
@@ -823,7 +823,7 @@
             {
                 Assert.That(result, Is.Not.Null);
 
-                this.CheckModelStateErrors(result.ViewData.ModelState, nameof(inputModel.Amount), "Amount is invalid.");
+                CheckModelStateErrors(result.ViewData.ModelState, nameof(inputModel.Amount), "Amount is invalid.");
 
                 var model = result.Model as TransactionFormModel;
                 Assert.That(model, Is.Not.Null);
@@ -845,7 +845,7 @@
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
                 OwnerId = this.userId,
-                Refference = "Test Transaction",
+                Reference = "Test Transaction",
                 TransactionType = TransactionType.Expense
             };
 
@@ -862,7 +862,7 @@
             {
                 Assert.That(result, Is.Not.Null);
 
-                this.CheckModelStateErrors(result.ViewData.ModelState, nameof(inputModel.Amount), "Amount is invalid.");
+                CheckModelStateErrors(result.ViewData.ModelState, nameof(inputModel.Amount), "Amount is invalid.");
 
                 var model = result.Model as TransactionFormModel;
                 Assert.That(model, Is.Not.Null);
@@ -884,7 +884,7 @@
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
                 OwnerId = Guid.NewGuid(),
-                Refference = "Test Transaction",
+                Reference = "Test Transaction",
                 TransactionType = TransactionType.Expense
             };
 
@@ -910,7 +910,7 @@
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
                 OwnerId = this.userId,
-                Refference = "Test Transaction",
+                Reference = "Test Transaction",
                 TransactionType = TransactionType.Expense
             };
 
@@ -921,7 +921,7 @@
                     m.IsInitialBalance == inputModel.IsInitialBalance
                     && m.TransactionType == inputModel.TransactionType
                     && m.CreatedOn == inputModel.CreatedOn
-                    && m.Refference == inputModel.Refference
+                    && m.Reference == inputModel.Reference
                     && m.OwnerId == inputModel.OwnerId
                     && m.AccountId == inputModel.AccountId
                     && m.CategoryId == inputModel.CategoryId
@@ -948,7 +948,7 @@
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
                 OwnerId = this.userId,
-                Refference = "Test Transaction",
+                Reference = "Test Transaction",
                 TransactionType = TransactionType.Expense
             };
 
@@ -965,7 +965,7 @@
                     m.IsInitialBalance == inputModel.IsInitialBalance
                     && m.TransactionType == inputModel.TransactionType
                     && m.CreatedOn == inputModel.CreatedOn
-                    && m.Refference == inputModel.Refference
+                    && m.Reference == inputModel.Reference
                     && m.OwnerId == inputModel.OwnerId
                     && m.AccountId == inputModel.AccountId
                     && m.CategoryId == inputModel.CategoryId
@@ -979,9 +979,9 @@
                 Assert.That(result.ActionName, Is.EqualTo("TransactionDetails"));
 
                 Assert.That(result.RouteValues, Is.Not.Null);
-                this.CheckRouteValues(result.RouteValues!, "id", transactionId);
+                CheckRouteValues(result.RouteValues!, "id", transactionId);
 
-                this.CheckTempDataMessage(this.controller.TempData, "Your transaction was successfully edited!");
+                CheckTempDataMessage(this.controller.TempData, "Your transaction was successfully edited!");
             });
         }
 
@@ -999,7 +999,7 @@
                 CategoryId = Guid.NewGuid(),
                 IsInitialBalance = false,
                 OwnerId = ownerId,
-                Refference = "Test Transaction",
+                Reference = "Test Transaction",
                 TransactionType = TransactionType.Expense
             };
 
@@ -1022,7 +1022,7 @@
                     m.IsInitialBalance == inputModel.IsInitialBalance
                     && m.TransactionType == inputModel.TransactionType
                     && m.CreatedOn == inputModel.CreatedOn
-                    && m.Refference == inputModel.Refference
+                    && m.Reference == inputModel.Reference
                     && m.OwnerId == inputModel.OwnerId
                     && m.AccountId == inputModel.AccountId
                     && m.CategoryId == inputModel.CategoryId
@@ -1037,11 +1037,11 @@
                 Assert.That(result.ActionName, Is.EqualTo("AccountDetails"));
 
                 Assert.That(result.RouteValues, Is.Not.Null);
-                this.CheckRouteValues(result.RouteValues!, "id",
+                CheckRouteValues(result.RouteValues!, "id",
                     inputModel.AccountId ?? throw new InvalidOperationException());
             });
 
-            this.CheckTempDataMessage(this.controller.TempData, "You successfully edit User's transaction!");
+            CheckTempDataMessage(this.controller.TempData, "You successfully edit User's transaction!");
         }
 
         private void CheckUserTransactionsViewModel(UserTransactionsViewModel model)
@@ -1058,8 +1058,8 @@
             {
                 Assert.That(model.Transactions.ElementAt(i).Amount,
                     Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).Amount));
-                Assert.That(model.Transactions.ElementAt(i).Refference,
-                    Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).Refference));
+                Assert.That(model.Transactions.ElementAt(i).Reference,
+                    Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).Reference));
                 Assert.That(model.Transactions.ElementAt(i).TransactionType,
                     Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).TransactionType));
                 Assert.That(model.Transactions.ElementAt(i).AccountCurrencyName,
@@ -1104,7 +1104,7 @@
         {
             Assert.That(model.Amount, Is.EqualTo(serviceModel.Amount));
             Assert.That(model.TransactionType, Is.EqualTo(serviceModel.TransactionType));
-            Assert.That(model.Refference, Is.EqualTo(serviceModel.Refference));
+            Assert.That(model.Reference, Is.EqualTo(serviceModel.Reference));
             Assert.That(model.OwnerId, Is.EqualTo(serviceModel.OwnerId));
             Assert.That(model.CreatedOn, Is.EqualTo(serviceModel.CreatedOn));
             Assert.That(model.AccountId, Is.EqualTo(serviceModel.AccountId));
@@ -1116,7 +1116,7 @@
         {
             Assert.That(model.Amount, Is.EqualTo(inputModel.Amount));
             Assert.That(model.TransactionType, Is.EqualTo(inputModel.TransactionType));
-            Assert.That(model.Refference, Is.EqualTo(inputModel.Refference));
+            Assert.That(model.Reference, Is.EqualTo(inputModel.Reference));
             Assert.That(model.OwnerId, Is.EqualTo(inputModel.OwnerId));
             Assert.That(model.CreatedOn, Is.EqualTo(inputModel.CreatedOn));
             Assert.That(model.AccountId, Is.EqualTo(inputModel.AccountId));

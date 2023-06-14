@@ -8,7 +8,7 @@
 			<th scope="col">Date</th>
 			<th scope="col">Category</th>
 			<th scope="col">Amount</th>
-			<th scope="col">Refference</th>
+			<th scope="col">Reference</th>
 		</tr>
 	</thead>
 	<tbody style="vertical-align: text-top;">
@@ -26,7 +26,7 @@
 				<td>@transaction.CreatedOn.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
 				<td>@transaction.CategoryName</td>
 				<td>@transaction.Amount @transaction.AccountCurrencyName</td>
-				<td>@transaction.Refference</td>
+				<td>@transaction.Reference</td>
 			</tr>
 		}
 	</tbody>

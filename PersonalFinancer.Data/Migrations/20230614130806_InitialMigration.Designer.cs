@@ -12,7 +12,7 @@ using PersonalFinancer.Data;
 namespace PersonalFinancer.Data.Migrations
 {
     [DbContext(typeof(PersonalFinancerDbContext))]
-    [Migration("20230608155537_InitialMigration")]
+    [Migration("20230614130806_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -371,7 +371,7 @@ namespace PersonalFinancer.Data.Migrations
                     b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Refference")
+                    b.Property<string>("Reference")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");

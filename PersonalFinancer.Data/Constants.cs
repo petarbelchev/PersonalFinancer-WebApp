@@ -48,8 +48,8 @@
 
         public static class TransactionConstants
         {
-            public const int TransactionRefferenceMaxLength = 100;
-            public const int TransactionRefferenceMinLength = 4;
+            public const int TransactionReferenceMaxLength = 100;
+            public const int TransactionReferenceMinLength = 4;
 
             public const double TransactionMaxValue = 100_000.00;
             public const double TransactionMinValue = 0.01;
@@ -84,7 +84,7 @@
             public const string MedicalHealthcareCategoryId = "96e441e3-c5a6-427f-bb32-85940242d9ee";
             public const string SalaryCategoryId = "081a7be8-15c4-426e-872c-dfaf805e3fec";
             public const string MoneyTransferCategoryId = "e03634d5-1970-4e01-8568-42756e9ad973";
-            public const string DividentsCategoryId = "459dc945-0d2c-4a07-a2aa-55b4c5e57f9f";
+            public const string DividendsCategoryId = "459dc945-0d2c-4a07-a2aa-55b4c5e57f9f";
 
             public const string FirstUserBGNCurrencyId = "3bf454ad-941b-4ab6-a1ad-c212bfc46e7d";
             public const string FirstUserEURCurrencyId = "dab2761d-acb1-43bc-b56b-0d9c241c8882";
