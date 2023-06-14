@@ -32,8 +32,7 @@ I created this project to practice my skills, and it will also serve as my defen
 
 The Project can be easy tested locally. All you need to do:
 1. Populate the appsettings.json file with the required configurations;
-2. Apply the InitialMigration;
-3. That's it! Run the App & Enjoy! :)
+2. That's it! Run the App & Enjoy! :)
 
 When the App is fired up its will seed the Database with: 
 - Admin - email: admin@admin.com, password: admin123
