@@ -236,7 +236,7 @@
                     }
                 }
             });
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             //Assert that the Account and Transactions are created and Account is not deleted
             Account? account = await this.accountsRepo.FindAsync(accId);
@@ -285,7 +285,7 @@
                     }
                 }
             });
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             //Assert that the Account and Transactions are created and Account is not deleted
             Account? account = await this.accountsRepo.FindAsync(accountId);
@@ -336,7 +336,7 @@
                 Name = "For Delete",
                 OwnerId = this.User1.Id
             });
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             //Act & Assert
             Assert.That(async () => await this.accountService.DeleteAccount(
@@ -371,7 +371,7 @@
                     }
                 }
             });
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             //Assert that the Account and Transactions are created and Account is not deleted
             Account? account = await this.accountsRepo.FindAsync(accId);
@@ -424,7 +424,7 @@
                     }
                 }
             });
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             //Assert that the Account and Transactions are created and Account is not deleted
             Account? account = await this.accountsRepo.FindAsync(accId);
@@ -469,7 +469,7 @@
             };
             await this.transactionsRepo.AddAsync(transaction);
             this.Account1User1.Balance += transaction.Amount;
-            _ = await this.transactionsRepo.SaveChangesAsync();
+            await this.transactionsRepo.SaveChangesAsync();
 
             decimal balanceBefore = this.Account1User1.Balance;
             int transactionsBefore = this.Account1User1.Transactions.Count;
@@ -509,7 +509,7 @@
             };
             await this.transactionsRepo.AddAsync(transaction);
             this.Account1User1.Balance += transaction.Amount;
-            _ = await this.transactionsRepo.SaveChangesAsync();
+            await this.transactionsRepo.SaveChangesAsync();
 
             decimal balanceBefore = this.Account1User1.Balance;
             int transactionsBefore = this.Account1User1.Transactions.Count;
@@ -549,7 +549,7 @@
             };
             await this.transactionsRepo.AddAsync(transaction);
             this.Account1User1.Balance -= transaction.Amount;
-            _ = await this.transactionsRepo.SaveChangesAsync();
+            await this.transactionsRepo.SaveChangesAsync();
 
             decimal balanceBefore = this.Account1User1.Balance;
             int transactionsBefore = this.Account1User1.Transactions.Count;
@@ -589,7 +589,7 @@
             };
             await this.transactionsRepo.AddAsync(transaction);
             this.Account1User1.Balance -= transaction.Amount;
-            _ = await this.transactionsRepo.SaveChangesAsync();
+            await this.transactionsRepo.SaveChangesAsync();
 
             decimal balanceBefore = this.Account1User1.Balance;
             int transactionsBefore = this.Account1User1.Transactions.Count;
@@ -638,7 +638,7 @@
                 TransactionType = TransactionType.Expense
             };
             await this.transactionsRepo.AddAsync(transaction);
-            _ = await this.transactionsRepo.SaveChangesAsync();
+            await this.transactionsRepo.SaveChangesAsync();
 
             //Act & Assert
             Assert.That(async () => await this.accountService.DeleteTransaction(id, this.User2.Id, isUserAdmin: false),
@@ -660,7 +660,7 @@
                 OwnerId = this.User1.Id
             };
             await this.accountsRepo.AddAsync(account);
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             var inputModel = new AccountFormShortServiceModel
             {
@@ -700,7 +700,7 @@
                 OwnerId = this.User1.Id
             };
             await this.accountsRepo.AddAsync(account);
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             var inputModel = new AccountFormShortServiceModel
             {
@@ -740,7 +740,7 @@
                 OwnerId = this.User2.Id
             };
             await this.accountsRepo.AddAsync(account);
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             var inputModel = new AccountFormShortServiceModel
             {
@@ -804,7 +804,7 @@
             account.Transactions.Add(initialBalTransaction);
             account.Transactions.Add(expenseTransaction);
             await this.accountsRepo.AddAsync(account);
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             decimal initBalTransactionAmountBefore = initialBalTransaction.Amount;
 
@@ -885,7 +885,7 @@
             account.Transactions.Add(initialBalTransaction);
             account.Transactions.Add(expenseTransaction);
             await this.accountsRepo.AddAsync(account);
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             decimal initBalTransactionAmountBefore = initialBalTransaction.Amount;
 
@@ -940,7 +940,7 @@
                 OwnerId = this.User1.Id
             };
             await this.accountsRepo.AddAsync(account);
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             var inputModel = new AccountFormShortServiceModel
             {
@@ -1014,7 +1014,7 @@
 
             await this.transactionsRepo.AddAsync(transaction);
             this.Account1User1.Balance += transaction.Amount;
-            _ = await this.transactionsRepo.SaveChangesAsync();
+            await this.transactionsRepo.SaveChangesAsync();
             decimal balanceBefore = this.Account1User1.Balance;
 
             TransactionFormShortServiceModel transactionEditModel = await this.transactionsRepo.All()
@@ -1055,7 +1055,7 @@
 
             await this.transactionsRepo.AddAsync(transaction);
             this.Account2User1.Balance += transaction.Amount;
-            _ = await this.transactionsRepo.SaveChangesAsync();
+            await this.transactionsRepo.SaveChangesAsync();
             decimal firstAccBalanceBefore = this.Account2User1.Balance;
             decimal secondAccBalanceBefore = this.Account1User1.Balance;
 
@@ -1100,7 +1100,7 @@
 
             await this.transactionsRepo.AddAsync(transaction);
             this.Account1User1.Balance += transaction.Amount;
-            _ = await this.transactionsRepo.SaveChangesAsync();
+            await this.transactionsRepo.SaveChangesAsync();
             decimal balanceBefore = this.Account1User1.Balance;
 
             //Act

@@ -45,7 +45,7 @@
                 }
             };
 
-            _ = this.repoMock.Setup(x => x.FindAsync(
+            this.repoMock.Setup(x => x.FindAsync(
                 m => new MessageOutputServiceModel
                 {
                     Id = m.Id,
@@ -89,7 +89,7 @@
 
             string userId = Guid.NewGuid().ToString();
 
-            _ = this.repoMock.Setup(x => x.FindAsync(
+            this.repoMock.Setup(x => x.FindAsync(
                 m => m.AuthorId == userId,
                 m => new MessageOutputServiceModel
                 {
@@ -144,7 +144,7 @@
             bool isUserAdmin = false;
             string userId = Guid.NewGuid().ToString();
 
-            _ = this.repoMock.Setup(x => x.FindOneAsync(
+            this.repoMock.Setup(x => x.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
                 m => new MessageDetailsServiceModel
                 {
@@ -212,7 +212,7 @@
             bool isUserAdmin = true;
             string userId = Guid.NewGuid().ToString();
 
-            _ = this.repoMock.Setup(x => x.FindOneAsync(
+            this.repoMock.Setup(x => x.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
                 m => new MessageDetailsServiceModel
                 {
@@ -262,7 +262,7 @@
             bool isUserAdmin = false;
             string notAuthorId = Guid.NewGuid().ToString();
 
-            _ = this.repoMock.Setup(x => x.FindOneAsync(
+            this.repoMock.Setup(x => x.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == notAuthorId),
                 m => new MessageDetailsServiceModel
                 {
@@ -301,7 +301,7 @@
 
             string newMessageId = "New Message Id";
 
-            _ = this.repoMock.Setup(x => x.InsertOneAsync(It.IsAny<Message>()))
+            this.repoMock.Setup(x => x.InsertOneAsync(It.IsAny<Message>()))
                 .Callback((Message message) =>
                 {
                     message.Id = newMessageId;
@@ -339,13 +339,13 @@
             };
 
             var updateResultMock = new Mock<UpdateResult>();
-            _ = updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
+            updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
 
-            _ = this.repoMock.Setup(x => x
+            this.repoMock.Setup(x => x
                 .IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
                 .ReturnsAsync(true);
 
-            _ = this.repoMock.Setup(x => x
+            this.repoMock.Setup(x => x
                 .UpdateOneAsync(
                     x => x.Id == inputModel.MessageId,
                     It.IsAny<UpdateDefinition<Message>>()))
@@ -376,13 +376,13 @@
             };
 
             var updateResultMock = new Mock<UpdateResult>();
-            _ = updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
+            updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
 
-            _ = this.repoMock.Setup(x => x
+            this.repoMock.Setup(x => x
                 .IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
                 .ReturnsAsync(false);
 
-            _ = this.repoMock.Setup(x => x
+            this.repoMock.Setup(x => x
                 .UpdateOneAsync(
                     x => x.Id == inputModel.MessageId,
                     It.IsAny<UpdateDefinition<Message>>()))
@@ -412,7 +412,7 @@
                 IsAuthorAdmin = false
             };
 
-            _ = this.repoMock.Setup(x => x
+            this.repoMock.Setup(x => x
                 .IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
                 .ReturnsAsync(false);
 
@@ -437,15 +437,15 @@
             };
             var fakeCollection = new List<Message> { message };
 
-            _ = this.repoMock.Setup(x => x
+            this.repoMock.Setup(x => x
                 .IsUserDocumentAuthor(message.Id, message.AuthorId))
                 .ReturnsAsync(true);
 
-            _ = this.repoMock.Setup(x => x
+            this.repoMock.Setup(x => x
                 .DeleteOneAsync(message.Id))
                 .ReturnsAsync(() =>
                 {
-                    _ = fakeCollection.Remove(message);
+                    fakeCollection.Remove(message);
                     return new DeleteResult.Acknowledged(1);
                 });
 
@@ -471,15 +471,15 @@
             };
             var fakeCollection = new List<Message> { message };
 
-            _ = this.repoMock.Setup(x => x
+            this.repoMock.Setup(x => x
                 .IsUserDocumentAuthor(message.Id, message.AuthorId))
                 .ReturnsAsync(false);
 
-            _ = this.repoMock.Setup(x => x
+            this.repoMock.Setup(x => x
                 .DeleteOneAsync(message.Id))
                 .ReturnsAsync(() =>
                 {
-                    _ = fakeCollection.Remove(message);
+                    fakeCollection.Remove(message);
                     return new DeleteResult.Acknowledged(1);
                 });
 
@@ -505,7 +505,7 @@
             };
             var fakeCollection = new List<Message> { message };
 
-            _ = this.repoMock.Setup(x => x
+            this.repoMock.Setup(x => x
                 .IsUserDocumentAuthor(message.Id, message.AuthorId))
                 .ReturnsAsync(false);
 

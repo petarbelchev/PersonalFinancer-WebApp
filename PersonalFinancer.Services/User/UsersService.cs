@@ -82,7 +82,7 @@
                     .Select(c => this.mapper.Map<CategoryServiceModel>(c))
                     .ToArrayAsync();
 
-                _ = this.memoryCache.Set(CategoryConstants.CategoryCacheKeyValue + userId, categories, TimeSpan.FromDays(3));
+                this.memoryCache.Set(CategoryConstants.CategoryCacheKeyValue + userId, categories, TimeSpan.FromDays(3));
             }
 
             if (!this.memoryCache.TryGetValue(AccountConstants.AccountCacheKeyValue + userId,
@@ -94,7 +94,7 @@
                     .Select(a => this.mapper.Map<AccountServiceModel>(a))
                     .ToArrayAsync();
 
-                _ = this.memoryCache.Set(AccountConstants.AccountCacheKeyValue + userId, accounts, TimeSpan.FromDays(3));
+                this.memoryCache.Set(AccountConstants.AccountCacheKeyValue + userId, accounts, TimeSpan.FromDays(3));
             }
 
             var userData = new UserAccountsAndCategoriesServiceModel
@@ -118,7 +118,7 @@
                     .Select(at => this.mapper.Map<AccountTypeServiceModel>(at))
                     .ToArrayAsync();
 
-                _ = this.memoryCache.Set(AccountTypeConstants.AccTypeCacheKeyValue + userId, accTypes, TimeSpan.FromDays(3));
+                this.memoryCache.Set(AccountTypeConstants.AccTypeCacheKeyValue + userId, accTypes, TimeSpan.FromDays(3));
             }
 
             if (!this.memoryCache.TryGetValue(CurrencyConstants.CurrencyCacheKeyValue + userId,
@@ -130,7 +130,7 @@
                     .Select(c => this.mapper.Map<CurrencyServiceModel>(c))
                     .ToArrayAsync();
 
-                _ = this.memoryCache.Set(CurrencyConstants.CurrencyCacheKeyValue + userId, currencies, TimeSpan.FromDays(3));
+                this.memoryCache.Set(CurrencyConstants.CurrencyCacheKeyValue + userId, currencies, TimeSpan.FromDays(3));
             }
 
             var userData = new UserAccountTypesAndCurrenciesServiceModel

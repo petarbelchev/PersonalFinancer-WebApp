@@ -85,7 +85,7 @@
             user.LastName = this.Input.LastName;
             user.PhoneNumber = this.Input.PhoneNumber;
 
-            _ = await this.userManager.UpdateAsync(user);
+            await this.userManager.UpdateAsync(user);
 
             await this.signInManager.RefreshSignInAsync(user);
             this.StatusMessage = "Your profile has been updated";

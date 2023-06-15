@@ -58,13 +58,13 @@ using (IServiceScope scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
-    _ = app.UseMigrationsEndPoint();
+    app.UseMigrationsEndPoint();
 }
 else
 {
-    _ = app.UseExceptionHandler("/Home/Error");
-    _ = app.UseStatusCodePagesWithRedirects("/Home/Error?statusCode={0}");
-    _ = app.UseHsts();
+    app.UseExceptionHandler("/Home/Error");
+    app.UseStatusCodePagesWithRedirects("/Home/Error?statusCode={0}");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
@@ -78,11 +78,11 @@ app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
-    _ = endpoints.MapControllerRoute(
+    endpoints.MapControllerRoute(
         name: "Admin",
         pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
-    _ = endpoints.MapDefaultControllerRoute();
+    endpoints.MapDefaultControllerRoute();
 });
 
 app.MapRazorPages();

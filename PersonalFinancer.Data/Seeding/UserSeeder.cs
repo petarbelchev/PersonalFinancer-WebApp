@@ -29,7 +29,7 @@
 				   await userManager.CreateAsync(admin, SeedConstants.AdminPassword);
 
 				if (creationResult.Succeeded)
-					_ = await userManager.AddToRoleAsync(admin, RoleConstants.AdminRoleName);
+					await userManager.AddToRoleAsync(admin, RoleConstants.AdminRoleName);
 			}
 
 			ApplicationUser? testUser = await userManager.FindByEmailAsync(SeedConstants.FirstUserEmail);
@@ -52,7 +52,7 @@
 					await userManager.CreateAsync(testUser, SeedConstants.FirstUserPassword);
 
 				if (creationResult.Succeeded)
-					_ = await userManager.AddToRoleAsync(testUser, RoleConstants.UserRoleName);
+					await userManager.AddToRoleAsync(testUser, RoleConstants.UserRoleName);
 			}			
 		}
 	}

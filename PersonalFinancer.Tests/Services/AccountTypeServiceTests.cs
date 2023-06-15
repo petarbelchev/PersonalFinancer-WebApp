@@ -57,7 +57,7 @@
             };
 
             await this.repo.AddAsync(deletedAccType);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
             int countBefore = await this.repo.All().CountAsync();
             string accountTypeName = deletedAccType.Name;
             Guid ownerId = this.User1.Id;
@@ -94,7 +94,7 @@
             };
 
             await this.repo.AddAsync(user2AccType);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
             int countBefore = await this.repo.All().CountAsync();
 
             string accountTypeName = user2AccType.Name;
@@ -142,7 +142,7 @@
                 OwnerId = this.User1.Id
             };
             await this.repo.AddAsync(newAccType);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Assert
             Assert.Multiple(async () =>
@@ -173,7 +173,7 @@
                 OwnerId = this.User1.Id
             };
             await this.repo.AddAsync(newAccType);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Assert
             Assert.Multiple(async () =>
@@ -213,7 +213,7 @@
                 OwnerId = this.User2.Id
             };
             await this.repo.AddAsync(user2AccType);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Act & Assert
             Assert.That(async () => await this.accountTypeService

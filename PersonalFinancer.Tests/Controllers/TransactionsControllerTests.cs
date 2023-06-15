@@ -115,7 +115,7 @@
         public async Task All_OnGet_ShouldReturnViewModel()
         {
             //Arrange
-            _ = this.usersServiceMock.Setup(x => x
+            this.usersServiceMock.Setup(x => x
                 .GetUserTransactions(this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>(), 1))
                 .ReturnsAsync(this.userTransactionsDto);
 
@@ -145,7 +145,7 @@
             this.userTransactionsDto.StartDate = inputModel.StartDate;
             this.userTransactionsDto.EndDate = inputModel.EndDate;
 
-            _ = this.usersServiceMock.Setup(x => x
+            this.usersServiceMock.Setup(x => x
                 .GetUserTransactions(this.userId, inputModel.StartDate, inputModel.EndDate, 1))
                 .ReturnsAsync(this.userTransactionsDto);
 
@@ -200,7 +200,7 @@
             //Arrange
             this.userAccAndCatDto.OwnerId = this.userId;
 
-            _ = this.usersServiceMock.Setup(x => x
+            this.usersServiceMock.Setup(x => x
                 .GetUserAccountsAndCategories(this.userId))
                 .ReturnsAsync(this.userAccAndCatDto);
 
@@ -247,7 +247,7 @@
 
             this.userAccAndCatDto.OwnerId = this.userId;
 
-            _ = this.usersServiceMock.Setup(x => x
+            this.usersServiceMock.Setup(x => x
                 .GetUserAccountsAndCategories(this.userId))
                 .ReturnsAsync(this.userAccAndCatDto);
 
@@ -321,7 +321,7 @@
             };
             var newTransactionId = Guid.NewGuid();
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .CreateTransaction(It.Is<TransactionFormShortServiceModel>(m =>
                     m.IsInitialBalance == inputModel.IsInitialBalance
                     && m.Amount == inputModel.Amount
@@ -367,7 +367,7 @@
                 TransactionType = TransactionType.Expense
             };
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .CreateTransaction(It.Is<TransactionFormShortServiceModel>(m =>
                     m.IsInitialBalance == inputModel.IsInitialBalance
                     && m.Amount == inputModel.Amount
@@ -398,11 +398,11 @@
             decimal newBalance = 100;
             string? returnUrl = null;
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .DeleteTransaction(transactionId, this.userId, false))
                 .ReturnsAsync(newBalance);
 
@@ -429,9 +429,9 @@
             decimal newBalance = 100;
             string? returnUrl = null;
 
-            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
+            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .DeleteTransaction(transactionId, this.userId, true))
                 .ReturnsAsync(newBalance);
 
@@ -458,11 +458,11 @@
             decimal newBalance = 100;
             string? returnUrl = "return url";
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .DeleteTransaction(transactionId, this.userId, false))
                 .ReturnsAsync(newBalance);
 
@@ -488,11 +488,11 @@
             decimal newBalance = 100;
             string? returnUrl = "return url";
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(true);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .DeleteTransaction(transactionId, this.userId, true))
                 .ReturnsAsync(newBalance);
 
@@ -517,11 +517,11 @@
             var transactionId = Guid.NewGuid();
             string? returnUrl = "return url";
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .DeleteTransaction(transactionId, this.userId, false))
                 .Throws<ArgumentException>();
 
@@ -539,11 +539,11 @@
             var transactionId = Guid.NewGuid();
             string? returnUrl = "return url";
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .DeleteTransaction(transactionId, this.userId, false))
                 .Throws<InvalidOperationException>();
 
@@ -572,11 +572,11 @@
                 TransactionType = TransactionType.Income.ToString()
             };
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .GetTransactionDetails(transactionId, this.userId, false))
                 .ReturnsAsync(serviceReturnDto);
 
@@ -606,11 +606,11 @@
             //Arrange
             var transactionId = Guid.NewGuid();
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .GetTransactionDetails(transactionId, this.userId, false))
                 .Throws<ArgumentException>();
 
@@ -627,11 +627,11 @@
             //Arrange
             var transactionId = Guid.NewGuid();
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .GetTransactionDetails(transactionId, this.userId, false))
                 .Throws<InvalidOperationException>();
 
@@ -661,11 +661,11 @@
                 TransactionType = TransactionType.Income
             };
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .GetTransactionFormData(transactionId))
                 .ReturnsAsync(serviceReturnDto);
 
@@ -706,11 +706,11 @@
                 TransactionType = TransactionType.Income
             };
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .GetTransactionFormData(transactionId))
                 .ReturnsAsync(serviceReturnDto);
 
@@ -761,11 +761,11 @@
                 TransactionType = TransactionType.Income
             };
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .GetTransactionFormData(transactionId))
                 .ReturnsAsync(serviceReturnDto);
 
@@ -782,7 +782,7 @@
             //Arrange
             var transactionId = Guid.NewGuid();
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .GetTransactionFormData(transactionId))
                 .Throws<InvalidOperationException>();
 
@@ -811,7 +811,7 @@
             };
 
             this.controller.ModelState.AddModelError(nameof(inputModel.Amount), "Amount is invalid.");
-            _ = this.usersServiceMock.Setup(x => x
+            this.usersServiceMock.Setup(x => x
                 .GetUserAccountsAndCategories(this.userId))
                 .ReturnsAsync(this.userAccAndCatDto);
 
@@ -850,7 +850,7 @@
             };
 
             this.controller.ModelState.AddModelError(nameof(inputModel.Amount), "Amount is invalid.");
-            _ = this.usersServiceMock.Setup(x => x
+            this.usersServiceMock.Setup(x => x
                 .GetUserAccountsAndCategories(this.userId))
                 .ReturnsAsync(this.userAccAndCatDtoInitialTransaction);
 
@@ -888,7 +888,7 @@
                 TransactionType = TransactionType.Expense
             };
 
-            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
             //Act
             var result = (UnauthorizedResult)await this.controller.EditTransaction(transactionId, inputModel);
@@ -914,9 +914,9 @@
                 TransactionType = TransactionType.Expense
             };
 
-            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
-            _ = this.accountsServiceMock.Setup(x =>
+            this.accountsServiceMock.Setup(x =>
                 x.EditTransaction(transactionId, It.Is<TransactionFormShortServiceModel>(m =>
                     m.IsInitialBalance == inputModel.IsInitialBalance
                     && m.TransactionType == inputModel.TransactionType
@@ -952,7 +952,7 @@
                 TransactionType = TransactionType.Expense
             };
 
-            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
             this.controller.TempData = new TempDataDictionary(
                 new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
@@ -1003,14 +1003,14 @@
                 TransactionType = TransactionType.Expense
             };
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(true);
 
             this.controller.TempData = new TempDataDictionary(
                 new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
-            _ = this.accountsServiceMock.Setup(x => x
+            this.accountsServiceMock.Setup(x => x
                 .GetOwnerId(inputModel.AccountId))
                 .ReturnsAsync(ownerId);
 

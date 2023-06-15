@@ -87,7 +87,7 @@
                 return this.Page();
             }
 
-            _ = await this.userManager.SetTwoFactorEnabledAsync(user, true);
+            await this.userManager.SetTwoFactorEnabledAsync(user, true);
             string userId = await this.userManager.GetUserIdAsync(user);
             this.logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
             this.StatusMessage = "Your authenticator app has been verified.";
@@ -111,7 +111,7 @@
 
             if (string.IsNullOrEmpty(unformattedKey))
             {
-                _ = await this.userManager.ResetAuthenticatorKeyAsync(user);
+                await this.userManager.ResetAuthenticatorKeyAsync(user);
                 unformattedKey = await this.userManager.GetAuthenticatorKeyAsync(user);
             }
 
@@ -128,12 +128,12 @@
 
             while (currentPosition + 4 < unformattedKey.Length)
             {
-                _ = result.Append(unformattedKey.AsSpan(currentPosition, 4)).Append(' ');
+                result.Append(unformattedKey.AsSpan(currentPosition, 4)).Append(' ');
                 currentPosition += 4;
             }
 
             if (currentPosition < unformattedKey.Length)
-                _ = result.Append(unformattedKey.AsSpan(currentPosition));
+                result.Append(unformattedKey.AsSpan(currentPosition));
 
             return result.ToString().ToLowerInvariant();
         }

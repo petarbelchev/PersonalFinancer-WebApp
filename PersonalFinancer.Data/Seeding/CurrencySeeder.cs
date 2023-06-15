@@ -34,7 +34,7 @@
             };
 
             await dbContext.Currencies.AddRangeAsync(currencies);
-            _ = await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
     }
 }

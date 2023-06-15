@@ -68,7 +68,7 @@
             }
 
             await this.accountsRepo.AddAsync(newAccount);
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             this.memoryCache.Remove(AccountConstants.AccountCacheKeyValue + model.OwnerId);
 
@@ -97,7 +97,7 @@
             else if (model.TransactionType == TransactionType.Expense)
                 account.Balance -= newTransaction.Amount;
 
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             return newTransaction.Id;
         }
@@ -122,7 +122,7 @@
             else
                 account.IsDeleted = true;
 
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
 
             this.memoryCache.Remove(AccountConstants.AccountCacheKeyValue + userId);
         }
@@ -148,7 +148,7 @@
 
             ChangeBalance(transaction.Account, transaction.Amount, transaction.TransactionType);
 
-            _ = await this.transactionsRepo.SaveChangesAsync();
+            await this.transactionsRepo.SaveChangesAsync();
 
             return transaction.Account.Balance;
         }
@@ -205,7 +205,7 @@
                 }
             }
 
-            _ = await this.accountsRepo.SaveChangesAsync();
+            await this.accountsRepo.SaveChangesAsync();
         }
 
         /// <summary>
@@ -245,7 +245,7 @@
             transactionInDb.CreatedOn = model.CreatedOn.ToUniversalTime();
             transactionInDb.TransactionType = model.TransactionType;
 
-            _ = await this.transactionsRepo.SaveChangesAsync();
+            await this.transactionsRepo.SaveChangesAsync();
         }
 
         /// <summary>

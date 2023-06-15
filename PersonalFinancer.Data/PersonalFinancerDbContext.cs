@@ -10,7 +10,7 @@
 		: IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 	{
 		public PersonalFinancerDbContext(DbContextOptions<PersonalFinancerDbContext> options) : base(options) 
-			=> _ = this.Database.EnsureCreated();
+			=> this.Database.EnsureCreated();
 
 		public DbSet<Account> Accounts { get; set; } = null!;
 
@@ -26,11 +26,11 @@
 		{
 			base.OnModelCreating(builder);
 
-			_ = builder.ApplyConfiguration(new UserEntityConfiguration());
-			_ = builder.ApplyConfiguration(new UserRoleEntityConfiguration());
-			_ = builder.ApplyConfiguration(new AccountTypeEntityConfiguration());
-			_ = builder.ApplyConfiguration(new CurrencyEntityConfiguration());
-			_ = builder.ApplyConfiguration(new CategoryEntityConfiguration());
+			builder.ApplyConfiguration(new UserEntityConfiguration());
+			builder.ApplyConfiguration(new UserRoleEntityConfiguration());
+			builder.ApplyConfiguration(new AccountTypeEntityConfiguration());
+			builder.ApplyConfiguration(new CurrencyEntityConfiguration());
+			builder.ApplyConfiguration(new CategoryEntityConfiguration());
 		}
 	}
 }

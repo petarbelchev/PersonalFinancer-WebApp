@@ -102,7 +102,7 @@
         {
             try
             {
-                _ = await this.accountsService.DeleteTransaction(id, this.User.IdToGuid(), this.User.IsAdmin());
+                await this.accountsService.DeleteTransaction(id, this.User.IdToGuid(), this.User.IsAdmin());
 
                 this.TempData["successMsg"] = this.User.IsAdmin() ?
                     "You successfully delete a user's transaction!"

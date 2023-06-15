@@ -8,7 +8,7 @@
     {
         public void Configure(EntityTypeBuilder<AccountType> builder)
         {
-            _ = builder
+            builder
                .HasMany(a => a.Accounts)
                .WithOne(a => a.AccountType)
                .OnDelete(DeleteBehavior.Restrict);

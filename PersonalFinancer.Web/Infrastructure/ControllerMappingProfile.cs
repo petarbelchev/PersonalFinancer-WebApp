@@ -15,23 +15,23 @@
     {
         public ControllerMappingProfile()
         {
-            _ = this.CreateMap<Account, DeleteAccountViewModel>();
-            _ = this.CreateMap<Account, AccountFormViewModel>();
-            _ = this.CreateMap<AccountDetailsServiceModel, AccountDetailsViewModel>();
-            _ = this.CreateMap<AccountFormServiceModel, AccountFormViewModel>();
-            _ = this.CreateMap<AccountFormViewModel, AccountFormShortServiceModel>();
-            _ = this.CreateMap<AccountDetailsShortServiceModel, AccountDetailsViewModel>();
+            this.CreateMap<Account, DeleteAccountViewModel>();
+            this.CreateMap<Account, AccountFormViewModel>();
+            this.CreateMap<AccountDetailsServiceModel, AccountDetailsViewModel>();
+            this.CreateMap<AccountFormServiceModel, AccountFormViewModel>();
+            this.CreateMap<AccountFormViewModel, AccountFormShortServiceModel>();
+            this.CreateMap<AccountDetailsShortServiceModel, AccountDetailsViewModel>();
 
-            _ = this.CreateMap<Transaction, TransactionFormModel>();
-            _ = this.CreateMap<TransactionFormModel, TransactionFormShortServiceModel>();
-            _ = this.CreateMap<TransactionFormServiceModel, TransactionFormModel>();
-            _ = this.CreateMap<TransactionsServiceModel, UserTransactionsViewModel>();
-            _ = this.CreateMap<DateFilterModel, UserTransactionsViewModel>();
-            _ = this.CreateMap<UserAccountsAndCategoriesServiceModel, TransactionFormModel>();
+            this.CreateMap<Transaction, TransactionFormModel>();
+            this.CreateMap<TransactionFormModel, TransactionFormShortServiceModel>();
+            this.CreateMap<TransactionFormServiceModel, TransactionFormModel>();
+            this.CreateMap<TransactionsServiceModel, UserTransactionsViewModel>();
+            this.CreateMap<DateFilterModel, UserTransactionsViewModel>();
+            this.CreateMap<UserAccountsAndCategoriesServiceModel, TransactionFormModel>();
 
-            _ = this.CreateMap<ApplicationUser, AccountFormViewModel>();
+            this.CreateMap<ApplicationUser, AccountFormViewModel>();
 
-            _ = this.CreateMap<MessageDetailsServiceModel, MessageDetailsViewModel>();
+            this.CreateMap<MessageDetailsServiceModel, MessageDetailsViewModel>();
         }
     }
 }

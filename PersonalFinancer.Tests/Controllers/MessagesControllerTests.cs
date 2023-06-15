@@ -37,7 +37,7 @@
 
             this.userMock = new Mock<ClaimsPrincipal>();
 
-            _ = this.userMock.Setup(x => x.FindFirst(ClaimTypes.NameIdentifier))
+            this.userMock.Setup(x => x.FindFirst(ClaimTypes.NameIdentifier))
                 .Returns(new Claim(ClaimTypes.NameIdentifier, this.userId.ToString()));
 
             this.controller.ControllerContext = new ControllerContext
@@ -69,11 +69,11 @@
                 }
             };
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.messagesServiceMock.Setup(x => x
+            this.messagesServiceMock.Setup(x => x
                 .GetUserMessagesAsync(this.userId))
                 .ReturnsAsync(serviceReturnDto);
 
@@ -120,11 +120,11 @@
                 }
             };
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(true);
 
-            _ = this.messagesServiceMock.Setup(x => x
+            this.messagesServiceMock.Setup(x => x
                 .GetAllAsync())
                 .ReturnsAsync(serviceReturnDto);
 
@@ -211,11 +211,11 @@
             string fullName = "full name";
             string newMessage = "new message id";
 
-            _ = this.usersServiceMock.Setup(x => x
+            this.usersServiceMock.Setup(x => x
                 .UserFullName(Guid.Parse(this.userId)))
                 .ReturnsAsync(fullName);
 
-            _ = this.messagesServiceMock.Setup(x =>
+            this.messagesServiceMock.Setup(x =>
                 x.CreateAsync(It.Is<MessageInputServiceModel>(m =>
                     m.Subject == inputModel.Subject
                     && m.Content == inputModel.Content
@@ -241,7 +241,7 @@
             //Arrange
             string messageId = "id";
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
@@ -266,11 +266,11 @@
             //Arrange
             string messageId = "id";
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.messagesServiceMock.Setup(x => x
+            this.messagesServiceMock.Setup(x => x
                 .RemoveAsync(messageId, this.userId, false))
                 .Throws<ArgumentException>();
 
@@ -287,11 +287,11 @@
             //Arrange
             string messageId = "id";
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.messagesServiceMock.Setup(x => x
+            this.messagesServiceMock.Setup(x => x
                 .RemoveAsync(messageId, this.userId, false))
                 .Throws<InvalidOperationException>();
 
@@ -326,7 +326,7 @@
                 Subject = "Subject"
             };
 
-            _ = this.messagesServiceMock.Setup(x => x
+            this.messagesServiceMock.Setup(x => x
                 .GetMessageAsync(messageId, this.userId, false))
                 .ReturnsAsync(serviceReturnDto);
 
@@ -366,7 +366,7 @@
             //Arrange
             string messageId = "id";
 
-            _ = this.messagesServiceMock.Setup(x => x
+            this.messagesServiceMock.Setup(x => x
                 .GetMessageAsync(messageId, this.userId, false))
                 .Throws<InvalidOperationException>();
 
@@ -405,11 +405,11 @@
                 Subject = "Subject"
             };
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.messagesServiceMock.Setup(x => x
+            this.messagesServiceMock.Setup(x => x
                 .GetMessageAsync(inputModel.Id, this.userId, false))
                 .ReturnsAsync(serviceReturnDto);
 
@@ -456,11 +456,11 @@
                 ReplyContent = ""
             };
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.messagesServiceMock.Setup(x => x
+            this.messagesServiceMock.Setup(x => x
                 .GetMessageAsync(inputModel.Id, this.userId, false))
                 .Throws<InvalidOperationException>();
 
@@ -485,11 +485,11 @@
 
             string userName = "user name";
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.usersServiceMock.Setup(x => x
+            this.usersServiceMock.Setup(x => x
                 .UserFullName(Guid.Parse(this.userId)))
                 .ReturnsAsync(userName);
 
@@ -526,15 +526,15 @@
 
             string userName = "user name";
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.usersServiceMock.Setup(x => x
+            this.usersServiceMock.Setup(x => x
                 .UserFullName(Guid.Parse(this.userId)))
                 .ReturnsAsync(userName);
 
-            _ = this.messagesServiceMock.Setup(x => x
+            this.messagesServiceMock.Setup(x => x
                 .AddReplyAsync(It.Is<ReplyInputServiceModel>(m =>
                     m.MessageId == inputModel.Id
                     && m.IsAuthorAdmin == false
@@ -562,15 +562,15 @@
 
             string userName = "user name";
 
-            _ = this.userMock.Setup(x => x
+            this.userMock.Setup(x => x
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            _ = this.usersServiceMock.Setup(x => x
+            this.usersServiceMock.Setup(x => x
                 .UserFullName(Guid.Parse(this.userId)))
                 .ReturnsAsync(userName);
 
-            _ = this.messagesServiceMock.Setup(x => x
+            this.messagesServiceMock.Setup(x => x
                 .AddReplyAsync(It.Is<ReplyInputServiceModel>(m =>
                     m.MessageId == inputModel.Id
                     && m.IsAuthorAdmin == false

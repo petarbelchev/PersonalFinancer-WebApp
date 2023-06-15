@@ -276,7 +276,7 @@
                 this.Transaction1User1, this.Transaction2User1, this.Transaction3User1,
                 this.Transaction4User1, this.Transaction5User1, this.Transaction6User1);
 
-            _ = await this.sqlDbContext.SaveChangesAsync();
+            await this.sqlDbContext.SaveChangesAsync();
         }
     }
 }

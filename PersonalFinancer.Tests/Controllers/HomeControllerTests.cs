@@ -69,11 +69,11 @@
         [SetUp]
         public void SetUp()
         {
-            _ = this.usersServiceMock.Setup(x => x.GetUserDashboardData(
+            this.usersServiceMock.Setup(x => x.GetUserDashboardData(
                     this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(this.expUserDashboard);
 
-            _ = this.usersServiceMock.Setup(x => x.GetUserAccounts(this.userId))
+            this.usersServiceMock.Setup(x => x.GetUserAccounts(this.userId))
                 .ReturnsAsync(this.expAccountCard);
 
             this.controller = new HomeController(this.usersServiceMock.Object)
@@ -92,8 +92,8 @@
         public async Task Index_ShouldReturnCorrectModel_WhenUserIsAuthenticatedUser()
         {
             //Arrange			
-            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
-            _ = this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(true);
+            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(true);
 
             //Act
             var viewResult = (ViewResult)await this.controller.Index();
@@ -161,8 +161,8 @@
         public async Task Index_ShouldReturnEmptyResult_WhenUserIsNotAuthenticated()
         {
             //Arrange
-            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
-            _ = this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(false);
+            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(false);
 
             //Act
             var viewResult = (ViewResult)await this.controller.Index();
@@ -179,7 +179,7 @@
         public async Task Index_ShouldRedirectToAdminArea_WhenUserIsAdmin()
         {
             //Arrange
-            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
+            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
 
             //Act
             var redirectResult = (LocalRedirectResult)await this.controller.Index();

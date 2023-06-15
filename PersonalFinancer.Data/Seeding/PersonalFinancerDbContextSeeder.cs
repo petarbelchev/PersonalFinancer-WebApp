@@ -46,7 +46,7 @@
 			{
 				ApplicationUser admin = await userManager.FindByEmailAsync(SeedConstants.AdminEmail);
 
-				_ = await dbContext.Categories.AddAsync(new Category
+				await dbContext.Categories.AddAsync(new Category
 				{
 					Id = initialBalanceCategoryId,
 					Name = CategoryConstants.CategoryInitialBalanceName,

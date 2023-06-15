@@ -15,7 +15,7 @@
             foreach (ModelStateEntry modelStateVal in modelStateValues)
             {
                 foreach (ModelError error in modelStateVal.Errors)
-                    _ = errors.AppendLine(error.ErrorMessage);
+                    errors.AppendLine(error.ErrorMessage);
             }
 
             return errors.ToString().TrimEnd();

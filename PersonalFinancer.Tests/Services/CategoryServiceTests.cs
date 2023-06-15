@@ -55,7 +55,7 @@
                 IsDeleted = true
             };
             await this.repo.AddAsync(deletedCategory);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
             int countBefore = await this.repo.All().CountAsync();
 
             string categoryName = deletedCategory.Name;
@@ -94,7 +94,7 @@
             };
 
             await this.repo.AddAsync(user2Category);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
             int countBefore = await this.repo.All().CountAsync();
 
             string categoryName = user2Category.Name;
@@ -142,7 +142,7 @@
                 OwnerId = this.User1.Id
             };
             await this.repo.AddAsync(newCategory);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Assert
             Assert.Multiple(async () =>
@@ -173,7 +173,7 @@
                 OwnerId = this.User1.Id
             };
             await this.repo.AddAsync(newCategory);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Assert
             Assert.Multiple(async () =>
@@ -213,7 +213,7 @@
                 OwnerId = this.User2.Id
             };
             await this.repo.AddAsync(user2Category);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Act & Assert
             Assert.That(async () => await this.categoryService

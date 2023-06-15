@@ -53,7 +53,7 @@
                 await this.repo.AddAsync(entity);
             }
 
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             this.ClearCache(entity.GetType().Name, ownerId);
 
@@ -81,7 +81,7 @@
 
             entity.IsDeleted = true;
 
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             this.ClearCache(entity.GetType().Name, userId);
         }

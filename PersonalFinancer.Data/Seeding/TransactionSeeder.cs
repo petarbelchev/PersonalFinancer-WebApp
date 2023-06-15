@@ -282,7 +282,7 @@
                 account.Balance += CalculateBalance(account.Id, transactions);
 
             await dbContext.Transactions.AddRangeAsync(transactions);
-            _ = await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
 
         private static decimal CalculateBalance(Guid accountId, List<Transaction> transactions)

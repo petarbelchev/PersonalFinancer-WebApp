@@ -58,7 +58,7 @@
             };
 
             await dbContext.Categories.AddRangeAsync(categories);
-            _ = await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
     }
 }

@@ -110,7 +110,7 @@
                     return this.View(viewModel);
                 }
 
-                _ = await this.messagesService.AddReplyAsync(new ReplyInputServiceModel
+                await this.messagesService.AddReplyAsync(new ReplyInputServiceModel
                 {
                     MessageId = inputModel.Id,
                     AuthorId = this.User.Id(),
