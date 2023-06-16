@@ -7,30 +7,44 @@
     using PersonalFinancer.Data.Repositories;
     using PersonalFinancer.Services.Accounts;
     using PersonalFinancer.Services.ApiService;
-    using PersonalFinancer.Services.Messages;
-    using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.MemoryCacheService;
+	using PersonalFinancer.Services.Messages;
+	using PersonalFinancer.Services.Transactions;
+	using PersonalFinancer.Services.User;
 
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            services.AddScoped<IAccountsService, AccountsService>();
-            services.AddScoped<IApiService<AccountType>, ApiService<AccountType>>();
-            services.AddScoped<IApiService<Category>, ApiService<Category>>();
-            services.AddScoped<IApiService<Currency>, ApiService<Currency>>();
-            services.AddScoped<IEfRepository<Account>, EfRepository<Account>>();
-            services.AddScoped<IEfRepository<AccountType>, EfRepository<AccountType>>();
-            services.AddScoped<IEfRepository<ApplicationUser>, EfRepository<ApplicationUser>>();
-            services.AddScoped<IEfRepository<Category>, EfRepository<Category>>();
-            services.AddScoped<IEfRepository<Currency>, EfRepository<Currency>>();
-            services.AddScoped<IEfRepository<Transaction>, EfRepository<Transaction>>();
-            services.AddSingleton<IMemoryCache, MemoryCache>();
-            services.AddSingleton<IMongoDbContext, MessagesDbContext>();
-            services.AddSingleton<IMongoRepository<Message>, MongoRepository<Message>>();
-            services.AddSingleton<IMessagesService, MessagesService>();
-            services.AddScoped<IUsersService, UsersService>();
-            services.AddTransient<IEmailSender, EmailSender.EmailSender>();
+            services
+                .AddScoped<IAccountsService, AccountsService>()
+                .AddScoped<IUsersService, UsersService>()
+                .AddScoped<ITransactionsInfoService, TransactionsInfoService>()
+                .AddSingleton<IMessagesService, MessagesService>()
 
+                .AddScoped<IApiService<AccountType>, ApiService<AccountType>>()
+                .AddScoped<IApiService<Category>, ApiService<Category>>()
+                .AddScoped<IApiService<Currency>, ApiService<Currency>>()
+            
+                .AddScoped<IEfRepository<Account>, EfRepository<Account>>()
+                .AddScoped<IEfRepository<AccountType>, EfRepository<AccountType>>()
+                .AddScoped<IEfRepository<ApplicationUser>, EfRepository<ApplicationUser>>()
+                .AddScoped<IEfRepository<Category>, EfRepository<Category>>()
+                .AddScoped<IEfRepository<Currency>, EfRepository<Currency>>()
+                .AddScoped<IEfRepository<Transaction>, EfRepository<Transaction>>()
+            
+                .AddSingleton<IMongoRepository<Message>, MongoRepository<Message>>()
+            
+                .AddSingleton<IMongoDbContext, MessagesDbContext>()
+            
+                .AddSingleton<IMemoryCache, MemoryCache>()
+                .AddScoped<IMemoryCacheService<Category>, MemoryCacheService<Category>>()
+                .AddScoped<IMemoryCacheService<Currency>, MemoryCacheService<Currency>>()
+                .AddScoped<IMemoryCacheService<AccountType>, MemoryCacheService<AccountType>>()
+                .AddScoped<IMemoryCacheService<Account>, MemoryCacheService<Account>>()
+
+                .AddTransient<IEmailSender, EmailSender.EmailSender>();
+			
             return services;
         }
     }

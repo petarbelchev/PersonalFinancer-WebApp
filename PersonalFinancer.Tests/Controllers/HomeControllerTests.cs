@@ -69,14 +69,15 @@
         [SetUp]
         public void SetUp()
         {
-            this.usersServiceMock.Setup(x => x.GetUserDashboardData(
-                    this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            this.usersServiceMock.Setup(x => x
+                .GetUserDashboardDataAsync(this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(this.expUserDashboard);
 
-            this.usersServiceMock.Setup(x => x.GetUserAccounts(this.userId))
+            this.accountsServiceMock.Setup(x => x
+                .GetUserAccountsAsync(this.userId))
                 .ReturnsAsync(this.expAccountCard);
 
-            this.controller = new HomeController(this.usersServiceMock.Object)
+            this.controller = new HomeController(this.usersServiceMock.Object, this.accountsServiceMock.Object)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -281,7 +282,7 @@
             this.controller.ModelState.AddModelError("error", errorMessage);
             var viewResult = (ViewResult)await this.controller.Index(inputModel);
             var actual = viewResult.Model as UserDashboardViewModel;
-            Microsoft.AspNetCore.Mvc.ModelBinding.ModelErrorCollection modelStateErrors = viewResult.ViewData.ModelState.Values.First().Errors;
+            var modelStateErrors = viewResult.ViewData.ModelState.Values.First().Errors;
 
             //Assert
             Assert.Multiple(() =>

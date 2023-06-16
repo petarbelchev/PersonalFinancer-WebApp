@@ -21,7 +21,7 @@
         public async Task<ActionResult<UsersViewModel>> AllUsers(int page)
         {
             UsersServiceModel usersData =
-                await this.usersService.GetAllUsers(page);
+                await this.usersService.GetAllUsersAsync(page);
 
             var usersModel = new UsersViewModel { Users = usersData.Users };
             usersModel.Pagination.Page = page;

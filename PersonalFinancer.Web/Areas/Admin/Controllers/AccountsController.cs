@@ -23,7 +23,7 @@
         public async Task<IActionResult> Index(int page = 1)
         {
             UsersAccountsCardsServiceModel usersAccountCardsData =
-                await this.accountService.GetAccountsCardsData(page);
+                await this.accountService.GetAccountsCardsDataAsync(page);
 
             var viewModel = new UsersAccountCardsViewModel
             {

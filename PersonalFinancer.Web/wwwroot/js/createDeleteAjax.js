@@ -18,10 +18,11 @@ for (var div of divs) {
                 newElemDiv.style.display = 'block';
             } else {
                 let inputField = newElemDiv.querySelector('input');
+                let errorMsgField = newElemDiv.querySelector('p');
 
                 for (let elem of selectField.children) {
                     if (elem.innerText.toLowerCase() == inputField.value.toLowerCase().trim()) {
-                        newElemDiv.querySelector('p').textContent = 'You already have this. Try another one!';
+                        errorMsgField.textContent = 'You already have this. Try another one!';
                         return;
                     }
                 }
@@ -48,6 +49,7 @@ for (var div of divs) {
                     selectField.value = data.id;
 
                     newElemDiv.style.display = 'none';
+                    errorMsgField.textContent = '';
                     inputField.value = '';
                     deleteBtnController(selectField, mainDiv.querySelector('.deleteBtn'));
                 } else if (response.status == 400) {

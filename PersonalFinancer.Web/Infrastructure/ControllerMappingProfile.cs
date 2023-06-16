@@ -4,7 +4,7 @@
     using PersonalFinancer.Data.Models;
     using PersonalFinancer.Services.Accounts.Models;
     using PersonalFinancer.Services.Messages.Models;
-    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Services.Transactions.Models;
     using PersonalFinancer.Services.User.Models;
     using PersonalFinancer.Web.Models.Account;
     using PersonalFinancer.Web.Models.Message;

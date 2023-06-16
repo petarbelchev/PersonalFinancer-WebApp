@@ -19,7 +19,7 @@
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            UsersServiceModel usersData = await this.userService.GetAllUsers(page);
+            UsersServiceModel usersData = await this.userService.GetAllUsersAsync(page);
             var viewModel = new UsersViewModel { Users = usersData.Users };
             viewModel.Pagination.TotalElements = usersData.TotalUsersCount;
             viewModel.Pagination.Page = page;
@@ -34,7 +34,9 @@
 
             try
             {
-                return this.View(await this.userService.UserDetails(id));
+                Guid userId = id ?? throw new InvalidOperationException();
+
+                return this.View(await this.userService.UserDetailsAsync(userId));
             }
             catch (InvalidOperationException)
             {

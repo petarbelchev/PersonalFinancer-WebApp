@@ -30,7 +30,7 @@
 
             //Act
             ApiOutputServiceModel actual =
-                await this.accountTypeService.CreateEntity(accountTypeName, ownerId);
+                await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -69,7 +69,7 @@
 
             //Act
             ApiOutputServiceModel result =
-                await this.accountTypeService.CreateEntity(accountTypeName, ownerId);
+                await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
             int countAfter = await this.repo.All().CountAsync();
 
             //Assert
@@ -105,7 +105,7 @@
 
             //Act
             ApiOutputServiceModel result =
-                await this.accountTypeService.CreateEntity(accountTypeName, ownerId);
+                await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -127,7 +127,7 @@
             Guid ownerId = this.User1.Id;
 
             //Act & Assert
-            Assert.That(async () => await this.accountTypeService.CreateEntity(accountTypeName, ownerId),
+            Assert.That(async () => await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Entity with the same name exist."));
         }
 
@@ -152,7 +152,7 @@
             });
 
             //Act
-            await this.accountTypeService.DeleteEntity(newAccType.Id, this.User1.Id, isUserAdmin: false);
+            await this.accountTypeService.DeleteEntityAsync(newAccType.Id, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(async () =>
@@ -183,7 +183,7 @@
             });
 
             //Act
-            await this.accountTypeService.DeleteEntity(newAccType.Id, this.User2.Id, isUserAdmin: true);
+            await this.accountTypeService.DeleteEntityAsync(newAccType.Id, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(async () =>
@@ -198,7 +198,7 @@
         {
             //Act & Assert
             Assert.That(async () => await this.accountTypeService
-                  .DeleteEntity(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
+                  .DeleteEntityAsync(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -217,7 +217,7 @@
 
             //Act & Assert
             Assert.That(async () => await this.accountTypeService
-                  .DeleteEntity(user2AccType.Id, this.User1.Id, isUserAdmin: false),
+                  .DeleteEntityAsync(user2AccType.Id, this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Unauthorized."));
         }
     }

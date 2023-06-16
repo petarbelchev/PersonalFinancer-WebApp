@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using PersonalFinancer.Data;
 using PersonalFinancer.Data.Configurations;
 using PersonalFinancer.Data.Models;
-using PersonalFinancer.Data.Seeding;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.Infrastructure.EmailSender;
@@ -43,18 +42,7 @@ builder.Services.ConfigureApplicationCookie(options => options.Cookie.HttpOnly =
 
 WebApplication app = builder.Build();
 
-using (IServiceScope scope = app.Services.CreateScope())
-{
-    IServiceProvider serviceProvider = scope.ServiceProvider;
-
-    PersonalFinancerDbContext dbContext =
-        serviceProvider.GetRequiredService<PersonalFinancerDbContext>();
-
-    new PersonalFinancerDbContextSeeder()
-        .SeedAsync(dbContext, serviceProvider)
-        .GetAwaiter()
-        .GetResult();
-}
+app.SeedDatabase();
 
 if (app.Environment.IsDevelopment())
 {

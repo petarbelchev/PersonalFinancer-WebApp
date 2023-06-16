@@ -212,7 +212,7 @@
             string newMessage = "new message id";
 
             this.usersServiceMock.Setup(x => x
-                .UserFullName(Guid.Parse(this.userId)))
+                .UserFullNameAsync(Guid.Parse(this.userId)))
                 .ReturnsAsync(fullName);
 
             this.messagesServiceMock.Setup(x =>
@@ -490,7 +490,7 @@
                 .Returns(false);
 
             this.usersServiceMock.Setup(x => x
-                .UserFullName(Guid.Parse(this.userId)))
+                .UserFullNameAsync(Guid.Parse(this.userId)))
                 .ReturnsAsync(userName);
 
             //Act
@@ -531,7 +531,7 @@
                 .Returns(false);
 
             this.usersServiceMock.Setup(x => x
-                .UserFullName(Guid.Parse(this.userId)))
+                .UserFullNameAsync(Guid.Parse(this.userId)))
                 .ReturnsAsync(userName);
 
             this.messagesServiceMock.Setup(x => x
@@ -567,7 +567,7 @@
                 .Returns(false);
 
             this.usersServiceMock.Setup(x => x
-                .UserFullName(Guid.Parse(this.userId)))
+                .UserFullNameAsync(Guid.Parse(this.userId)))
                 .ReturnsAsync(userName);
 
             this.messagesServiceMock.Setup(x => x

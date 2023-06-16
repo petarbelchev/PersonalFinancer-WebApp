@@ -29,7 +29,7 @@
         /// Throws ArgumentException if you try to create Entity with existing name.
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<ApiOutputServiceModel> CreateEntity(string name, Guid ownerId)
+        public async Task<ApiOutputServiceModel> CreateEntityAsync(string name, Guid ownerId)
         {
             T? entity = await this.repo.All().FirstOrDefaultAsync(
                 x => x.Name == name && x.OwnerId == ownerId);
@@ -68,7 +68,7 @@
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task DeleteEntity(Guid entityId, Guid userId, bool isUserAdmin)
+        public async Task DeleteEntityAsync(Guid entityId, Guid userId, bool isUserAdmin)
         {
             T? entity = await this.repo.FindAsync(entityId) 
                 ?? throw new InvalidOperationException("Entity does not exist.");

@@ -50,7 +50,7 @@
                 .CreateAsync(new MessageInputServiceModel
                 {
                     AuthorId = this.User.Id(),
-                    AuthorName = await this.usersService.UserFullName(this.User.IdToGuid()),
+                    AuthorName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
                     Subject = model.Subject,
                     Content = model.Content
                 });
@@ -114,7 +114,7 @@
                 {
                     MessageId = inputModel.Id,
                     AuthorId = this.User.Id(),
-                    AuthorName = await this.usersService.UserFullName(this.User.IdToGuid()),
+                    AuthorName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
                     IsAuthorAdmin = this.User.IsAdmin(),
                     Content = inputModel.ReplyContent
                 });

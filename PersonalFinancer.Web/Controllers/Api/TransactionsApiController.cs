@@ -2,90 +2,63 @@
 {
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.Shared.Models;
-    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.Transactions;
+    using PersonalFinancer.Services.Transactions.Models;
     using PersonalFinancer.Web.Infrastructure.Extensions;
     using PersonalFinancer.Web.Models.Shared;
     using PersonalFinancer.Web.Models.Transaction;
-    using System.ComponentModel.DataAnnotations;
     using System.Globalization;
     using static PersonalFinancer.Data.Constants.RoleConstants;
 
     [Authorize]
-    [Route("api/transactions")]
-    [ApiController]
-    public class TransactionsApiController : BaseApiController
-    {
-        private readonly IAccountsService accountService;
-        private readonly IUsersService usersService;
+	[Route("api/transactions")]
+	[ApiController]
+	public class TransactionsApiController : ControllerBase
+	{
+		private readonly ITransactionsInfoService transactionsInfoService;
 
-        public TransactionsApiController(
-            IAccountsService accountsService,
-            IUsersService usersService)
-        {
-            this.accountService = accountsService;
-            this.usersService = usersService;
-        }
+		public TransactionsApiController(ITransactionsInfoService transactionsInfoService) 
+			=> this.transactionsInfoService = transactionsInfoService;
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTransaction([Required] Guid? id)
-        {
-            if (!this.ModelState.IsValid)
-                return this.BadRequest(this.GetErrors(this.ModelState.Values));
+		[Authorize(Roles = UserRoleName)]
+		[HttpPost]
+		public async Task<IActionResult> GetUserTransactions(UserTransactionsApiInputModel inputModel)
+		{
+			bool isStartDateValid = DateTime.TryParse(
+				inputModel.StartDate, null, DateTimeStyles.None, out DateTime startDate);
 
-            try
-            {
-                decimal newBalance = await this.accountService
-                    .DeleteTransaction(id, this.User.IdToGuid(), this.User.IsAdmin());
+			bool isEndDateValid = DateTime.TryParse(
+				inputModel.EndDate, null, DateTimeStyles.None, out DateTime endDate);
 
-                return this.Ok(new { newBalance });
-            }
-            catch (ArgumentException)
-            {
-                return this.Unauthorized();
-            }
-            catch (InvalidOperationException)
-            {
-                return this.BadRequest();
-            }
-        }
+			if (!this.ModelState.IsValid || !isStartDateValid || !isEndDateValid || startDate > endDate)
+				return this.BadRequest();
 
-        [Authorize(Roles = UserRoleName)]
-        [HttpPost]
-        public async Task<IActionResult> GetUserTransactions(UserTransactionsApiInputModel inputModel)
-        {
-            bool isStartDateValid = DateTime.TryParse(
-                inputModel.StartDate, null, DateTimeStyles.None, out DateTime startDate);
+			Guid userId = this.User.IdToGuid();
 
-            bool isEndDateValid = DateTime.TryParse(
-                inputModel.EndDate, null, DateTimeStyles.None, out DateTime endDate);
+			if (inputModel.Id != userId)
+				return this.Unauthorized();
 
-            if (!this.ModelState.IsValid || !isStartDateValid || !isEndDateValid || startDate > endDate)
-                return this.BadRequest();
+			TransactionsServiceModel userTransactions;
 
-            if (inputModel.Id != this.User.IdToGuid())
-                return this.Unauthorized();
+			try
+			{
+				userTransactions = await this.transactionsInfoService
+					.GetUserTransactionsAsync(userId, startDate, endDate, inputModel.Page);
+			}
+			catch (InvalidOperationException)
+			{
+				return this.BadRequest();
+			}
 
-            try
-            {
-                TransactionsServiceModel userTransactions = await this.usersService
-                    .GetUserTransactions(inputModel.Id, startDate, endDate, inputModel.Page);
+			var userModel = new TransactionsViewModel
+			{
+				Transactions = userTransactions.Transactions
+			};
+			userModel.Pagination.Page = inputModel.Page;
+			userModel.Pagination.TotalElements = userTransactions.TotalTransactionsCount;
+			userModel.TransactionDetailsUrl = "/Transactions/TransactionDetails/";
 
-                var userModel = new TransactionsViewModel
-                {
-                    Transactions = userTransactions.Transactions
-                };
-                userModel.Pagination.Page = inputModel.Page;
-                userModel.Pagination.TotalElements = userTransactions.TotalTransactionsCount;
-                userModel.TransactionDetailsUrl = "/Transactions/TransactionDetails/";
-
-                return this.Ok(userModel);
-            }
-            catch (InvalidOperationException)
-            {
-                return this.BadRequest();
-            }
-        }
-    }
+			return this.Ok(userModel);
+		}
+	}
 }

@@ -45,7 +45,7 @@
             int accountsCountBefore = await this.accountsRepo.All().CountAsync();
 
             //Act
-            Guid newAccountId = await this.accountService.CreateAccount(inputModel);
+            Guid newAccountId = await this.accountService.CreateAccountAsync(inputModel);
             Account newAccount = await this.accountsRepo.All()
                 .Where(a => a.Id == newAccountId)
                 .Include(a => a.Transactions)
@@ -80,7 +80,7 @@
             int accountsCountBefore = await this.accountsRepo.All().CountAsync();
 
             //Act
-            Guid newAccountId = await this.accountService.CreateAccount(newAccountModel);
+            Guid newAccountId = await this.accountService.CreateAccountAsync(newAccountModel);
             Account newAccount = await this.accountsRepo.All()
                 .Where(a => a.Id == newAccountId)
                 .Include(a => a.Transactions)
@@ -112,7 +112,7 @@
             };
 
             // Act & Assert
-            Assert.That(async () => await this.accountService.CreateAccount(newAccountModel),
+            Assert.That(async () => await this.accountService.CreateAccountAsync(newAccountModel),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo(
                 $"The User already have Account with \"{this.Account1User1.Name}\" name."));
         }
@@ -135,7 +135,7 @@
             decimal balanceBefore = this.Account1User1.Balance;
 
             //Act
-            Guid id = await this.accountService.CreateTransaction(transactionModel);
+            Guid id = await this.accountService.CreateTransactionAsync(transactionModel);
             Transaction? transaction = await this.transactionsRepo.FindAsync(id);
 
             //Assert
@@ -171,7 +171,7 @@
             decimal balanceBefore = this.Account1User1.Balance;
 
             //Act
-            Guid id = await this.accountService.CreateTransaction(transactionModel);
+            Guid id = await this.accountService.CreateTransactionAsync(transactionModel);
             Transaction? transaction = await this.transactionsRepo.FindAsync(id);
 
             //Assert
@@ -205,7 +205,7 @@
             };
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.CreateTransaction(inputFormModel),
+            Assert.That(async () => await this.accountService.CreateTransactionAsync(inputFormModel),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -248,7 +248,7 @@
             });
 
             //Act
-            await this.accountService.DeleteAccount(accId, this.User1.Id, isUserAdmin: false, shouldDeleteTransactions: false);
+            await this.accountService.DeleteAccountAsync(accId, this.User1.Id, isUserAdmin: false, shouldDeleteTransactions: false);
 
             //Assert that the Account is mark as deleted but Transactions not
             Assert.Multiple(() =>
@@ -301,7 +301,7 @@
             int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
 
             //Act
-            await this.accountService.DeleteAccount(accountId, this.User1.Id, isUserAdmin: false, shouldDeleteTransactions: true);
+            await this.accountService.DeleteAccountAsync(accountId, this.User1.Id, isUserAdmin: false, shouldDeleteTransactions: true);
 
             //Assert that the Account is deleted but Transactions not
             Assert.Multiple(async () =>
@@ -317,7 +317,7 @@
             //Arrange & Act
 
             //Assert
-            Assert.That(async () => await this.accountService.DeleteAccount(
+            Assert.That(async () => await this.accountService.DeleteAccountAsync(
                 Guid.NewGuid(), this.User1.Id, isUserAdmin: false, shouldDeleteTransactions: true),
             Throws.TypeOf<InvalidOperationException>());
         }
@@ -339,7 +339,7 @@
             await this.accountsRepo.SaveChangesAsync();
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.DeleteAccount(
+            Assert.That(async () => await this.accountService.DeleteAccountAsync(
                 accId, this.User2.Id, isUserAdmin: false, shouldDeleteTransactions: true),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Can't delete someone else account."));
         }
@@ -387,7 +387,7 @@
             int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
 
             //Act
-            await this.accountService.DeleteAccount(accId, this.User2.Id, isUserAdmin: true, shouldDeleteTransactions: true);
+            await this.accountService.DeleteAccountAsync(accId, this.User2.Id, isUserAdmin: true, shouldDeleteTransactions: true);
 
             //Assert that the Account is deleted but Transactions not
             Assert.Multiple(async () =>
@@ -440,7 +440,7 @@
             int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
 
             //Act
-            await this.accountService.DeleteAccount(accId, this.User2.Id, isUserAdmin: true, shouldDeleteTransactions: false);
+            await this.accountService.DeleteAccountAsync(accId, this.User2.Id, isUserAdmin: true, shouldDeleteTransactions: false);
 
             //Assert that the Account is deleted but Transactions not
             Assert.Multiple(async () =>
@@ -479,7 +479,7 @@
             Assert.That(transactionInDb, Is.Not.Null);
 
             //Act
-            decimal newBalance = await this.accountService.DeleteTransaction(transactionId, this.User1.Id, isUserAdmin: false);
+            decimal newBalance = await this.accountService.DeleteTransactionAsync(transactionId, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(async () =>
@@ -519,7 +519,7 @@
             Assert.That(transactionInDb, Is.Not.Null);
 
             //Act
-            decimal newBalance = await this.accountService.DeleteTransaction(transactionId, this.User2.Id, isUserAdmin: true);
+            decimal newBalance = await this.accountService.DeleteTransactionAsync(transactionId, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(async () =>
@@ -559,7 +559,7 @@
             Assert.That(transactionInDb, Is.Not.Null);
 
             //Act
-            decimal newBalance = await this.accountService.DeleteTransaction(transactionId, this.User1.Id, isUserAdmin: false);
+            decimal newBalance = await this.accountService.DeleteTransactionAsync(transactionId, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(async () =>
@@ -599,7 +599,7 @@
             Assert.That(transactionInDb, Is.Not.Null);
 
             //Act
-            decimal newBalance = await this.accountService.DeleteTransaction(transactionId, this.User2.Id, isUserAdmin: true);
+            decimal newBalance = await this.accountService.DeleteTransactionAsync(transactionId, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(async () =>
@@ -617,7 +617,7 @@
             //Arrange
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.DeleteTransaction(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
+            Assert.That(async () => await this.accountService.DeleteTransactionAsync(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -641,7 +641,7 @@
             await this.transactionsRepo.SaveChangesAsync();
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.DeleteTransaction(id, this.User2.Id, isUserAdmin: false),
+            Assert.That(async () => await this.accountService.DeleteTransactionAsync(id, this.User2.Id, isUserAdmin: false),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("User is not transaction's owner"));
         }
 
@@ -672,7 +672,7 @@
             };
 
             //Act
-            await this.accountService.EditAccount(accId, inputModel);
+            await this.accountService.EditAccountAsync(accId, inputModel);
 
             //Assert
             Assert.Multiple(() =>
@@ -712,7 +712,7 @@
             };
 
             //Act
-            await this.accountService.EditAccount(accId, inputModel);
+            await this.accountService.EditAccountAsync(accId, inputModel);
 
             //Assert
             Assert.Multiple(() =>
@@ -752,7 +752,7 @@
             };
 
             //Act
-            await this.accountService.EditAccount(accId, inputModel);
+            await this.accountService.EditAccountAsync(accId, inputModel);
 
             //Assert
             Assert.Multiple(() =>
@@ -829,7 +829,7 @@
             };
 
             //Act
-            await this.accountService.EditAccount(account.Id, inputModel);
+            await this.accountService.EditAccountAsync(account.Id, inputModel);
 
             //Assert
             Assert.Multiple(() =>
@@ -910,7 +910,7 @@
             };
 
             //Act
-            await this.accountService.EditAccount(account.Id, inputModel);
+            await this.accountService.EditAccountAsync(account.Id, inputModel);
 
             //Assert
             Assert.Multiple(() =>
@@ -952,7 +952,7 @@
             };
 
             //Act
-            await this.accountService.EditAccount(account.Id, inputModel);
+            await this.accountService.EditAccountAsync(account.Id, inputModel);
 
             Transaction initialBalTransaction =
                 account.Transactions.First(t => t.IsInitialBalance);
@@ -991,7 +991,7 @@
             };
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.EditAccount(this.Account1User1.Id, inputModel),
+            Assert.That(async () => await this.accountService.EditAccountAsync(this.Account1User1.Id, inputModel),
             Throws.TypeOf<ArgumentException>().With.Message
                   .EqualTo($"The User already have Account with \"{this.Account2User1.Name}\" name."));
         }
@@ -1024,7 +1024,7 @@
 
             //Act
             transactionEditModel.TransactionType = TransactionType.Expense;
-            await this.accountService.EditTransaction(transaction.Id, transactionEditModel);
+            await this.accountService.EditTransactionAsync(transaction.Id, transactionEditModel);
 
             //Assert
             Assert.Multiple(() =>
@@ -1066,7 +1066,7 @@
                 .FirstAsync();
 
             editTransactionModel.AccountId = this.Account1User1.Id;
-            await this.accountService.EditTransaction(transaction.Id, editTransactionModel);
+            await this.accountService.EditTransactionAsync(transaction.Id, editTransactionModel);
 
             //Assert
             Assert.Multiple(() =>
@@ -1109,7 +1109,7 @@
                 .Select(t => this.mapper.Map<TransactionFormShortServiceModel>(t))
                 .FirstAsync();
             editTransactionModel.Reference = "Second Reference";
-            await this.accountService.EditTransaction(transaction.Id, editTransactionModel);
+            await this.accountService.EditTransactionAsync(transaction.Id, editTransactionModel);
 
             //Assert that only transaction reference is changed
             Assert.Multiple(() =>
@@ -1169,7 +1169,7 @@
             Assert.That(expected, Is.Not.Null);
 
             //Act
-            AccountDetailsServiceModel actual = await this.accountService.GetAccountDetails(
+            AccountDetailsServiceModel actual = await this.accountService.GetAccountDetailsAsync(
                 this.Account1User1.Id, startDate, endDate, this.User1.Id, isUserAdmin: false);
 
             //Assert
@@ -1211,7 +1211,7 @@
             DateTime endDate = DateTime.UtcNow;
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.GetAccountDetails(id, startDate, endDate, this.User1.Id, isUserAdmin: false),
+            Assert.That(async () => await this.accountService.GetAccountDetailsAsync(id, startDate, endDate, this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -1230,7 +1230,7 @@
                 .CountAsync(a => !a.IsDeleted);
 
             //Act
-            UsersAccountsCardsServiceModel actual = await this.accountService.GetAccountsCardsData(1);
+            UsersAccountsCardsServiceModel actual = await this.accountService.GetAccountsCardsDataAsync(1);
 
             //Assert
             Assert.Multiple(() =>
@@ -1256,7 +1256,7 @@
         }
 
         [Test]
-        public async Task GetCurrenciesCashFlow_ShouldReturnCorrectData()
+        public async Task GetCashFlowByCurrenciesAsync_ShouldReturnCorrectData()
         {
             //Arrange
             var expectedIncomes = new Dictionary<string, decimal>();
@@ -1287,7 +1287,8 @@
                 });
 
             //Act
-            IEnumerable<CurrencyCashFlowServiceModel> actual = await this.accountService.GetCurrenciesCashFlow();
+            IEnumerable<CurrencyCashFlowServiceModel> actual = 
+                await this.accountService.GetCashFlowByCurrenciesAsync();
 
             //Assert
             Assert.Multiple(() =>
@@ -1312,7 +1313,7 @@
         {
             //Act
             string actualName = await this.accountService
-                .GetAccountName(this.Account1User1.Id, this.User1.Id, isUserAdmin: false);
+                .GetAccountNameAsync(this.Account1User1.Id, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.That(actualName, Is.EqualTo(this.Account1User1.Name));
@@ -1325,17 +1326,30 @@
             var invalidId = Guid.NewGuid();
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.GetAccountName(invalidId, this.User1.Id, isUserAdmin: false),
+            Assert.That(async () => await this.accountService.GetAccountNameAsync(invalidId, this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
-        [Test]
+		[Test]
+		public async Task GetAccountsCountAsync_ShouldReturnAccountsCount()
+		{
+			//Arrange
+			int expectedCount = await this.accountsRepo.All().CountAsync(a => !a.IsDeleted);
+
+			//Act
+			int actualCount = await this.accountService.GetAccountsCountAsync();
+
+			//Assert
+			Assert.That(actualCount, Is.EqualTo(expectedCount));
+		}
+
+		[Test]
         public async Task GetAccountFormData_ShouldReturnCorrectData()
         {
             //Arrange
 
             //Act
-            AccountFormServiceModel formData = await this.accountService.GetAccountFormData(this.Account1User1.Id, this.User1.Id, isUserAdmin: false);
+            AccountFormServiceModel formData = await this.accountService.GetAccountFormDataAsync(this.Account1User1.Id, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(() =>
@@ -1354,7 +1368,7 @@
             //Arrange
 
             //Act
-            AccountFormServiceModel formData = await this.accountService.GetAccountFormData(this.Account1User1.Id, this.User2.Id, isUserAdmin: true);
+            AccountFormServiceModel formData = await this.accountService.GetAccountFormDataAsync(this.Account1User1.Id, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(() =>
@@ -1374,7 +1388,7 @@
             var invalidId = Guid.NewGuid();
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.GetAccountFormData(invalidId, this.User1.Id, isUserAdmin: false),
+            Assert.That(async () => await this.accountService.GetAccountFormDataAsync(invalidId, this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -1384,88 +1398,7 @@
             //Arrange
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.GetAccountFormData(this.Account1User1.Id, this.User2.Id, isUserAdmin: false),
-            Throws.TypeOf<InvalidOperationException>());
-        }
-
-        [Test]
-        public async Task GetAccountTransactions_ShouldReturnCorrectData()
-        {
-            //Arrange
-            DateTime startDate = DateTime.Now.AddMonths(-1);
-            DateTime endDate = DateTime.Now;
-            DateTime startDateUtc = startDate.ToUniversalTime();
-            DateTime endDateUtc = endDate.ToUniversalTime();
-            int page = 1;
-
-            var expect = new TransactionsServiceModel
-            {
-                StartDate = startDate,
-                EndDate = endDate,
-                Transactions = await this.transactionsRepo.All()
-                    .Where(t => t.AccountId == this.Account1User1.Id && t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
-                    .OrderByDescending(t => t.CreatedOn)
-                    .Take(TransactionsPerPage)
-                    .Select(t => new TransactionTableServiceModel
-                    {
-                        Id = t.Id,
-                        Amount = t.Amount,
-                        CreatedOn = t.CreatedOn.ToLocalTime(),
-                        AccountCurrencyName = t.Account.Currency.Name,
-                        CategoryName = t.Category.Name + (t.Category.IsDeleted ?
-                            " (Deleted)"
-                            : string.Empty),
-                        Reference = t.Reference,
-                        TransactionType = t.TransactionType.ToString()
-                    })
-                    .ToListAsync(),
-
-                TotalTransactionsCount = await this.transactionsRepo.All().CountAsync(t =>
-                    t.AccountId == this.Account1User1.Id && t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
-            };
-
-            //Act
-            TransactionsServiceModel actual = await this.accountService.GetAccountTransactions(this.Account1User1.Id, startDate, endDate, page);
-
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(actual, Is.Not.Null);
-                Assert.That(actual.TotalTransactionsCount, Is.EqualTo(expect.TotalTransactionsCount));
-                Assert.That(actual.Transactions, Is.Not.Null);
-                Assert.That(actual.Transactions.Count(), Is.EqualTo(expect.Transactions.Count()));
-
-                for (int i = 0; i < expect.Transactions.Count(); i++)
-                {
-                    Assert.That(actual.Transactions.ElementAt(i).Id,
-                        Is.EqualTo(expect.Transactions.ElementAt(i).Id));
-                    Assert.That(actual.Transactions.ElementAt(i).Amount,
-                        Is.EqualTo(expect.Transactions.ElementAt(i).Amount));
-                    Assert.That(actual.Transactions.ElementAt(i).AccountCurrencyName,
-                        Is.EqualTo(expect.Transactions.ElementAt(i).AccountCurrencyName));
-                    Assert.That(actual.Transactions.ElementAt(i).TransactionType,
-                        Is.EqualTo(expect.Transactions.ElementAt(i).TransactionType));
-                    Assert.That(actual.Transactions.ElementAt(i).Reference,
-                        Is.EqualTo(expect.Transactions.ElementAt(i).Reference));
-                    Assert.That(actual.Transactions.ElementAt(i).CategoryName,
-                        Is.EqualTo(expect.Transactions.ElementAt(i).CategoryName));
-                    Assert.That(actual.Transactions.ElementAt(i).CreatedOn,
-                        Is.EqualTo(expect.Transactions.ElementAt(i).CreatedOn));
-                }
-            });
-        }
-
-        [Test]
-        public void GetAccountTransactions_ShouldThrowException_WhenAccountDoesNotExist()
-        {
-            //Arrange
-            var invalidId = Guid.NewGuid();
-            DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-            DateTime endDate = DateTime.UtcNow;
-            int page = 1;
-
-            //Act & Assert
-            Assert.That(async () => await this.accountService.GetAccountTransactions(invalidId, startDate, endDate, page),
+            Assert.That(async () => await this.accountService.GetAccountFormDataAsync(this.Account1User1.Id, this.User2.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -1485,7 +1418,7 @@
 
             //Act
             TransactionFormServiceModel transactionFormModel =
-                await this.accountService.GetTransactionFormData(this.Transaction2User1.Id);
+                await this.accountService.GetTransactionFormDataAsync(this.Transaction2User1.Id);
 
             //Assert
             Assert.Multiple(() =>
@@ -1526,7 +1459,7 @@
 
             //Act
             TransactionFormServiceModel transactionFormModel =
-                await this.accountService.GetTransactionFormData(this.Transaction1User1.Id);
+                await this.accountService.GetTransactionFormDataAsync(this.Transaction1User1.Id);
 
             //Assert
             Assert.Multiple(() =>
@@ -1550,7 +1483,7 @@
         public void GetFulfilledTransactionFormModel_ShouldThrowException_WhenTransactionDoesNotExist()
         {
             //Act & Assert
-            Assert.That(async () => await this.accountService.GetTransactionFormData(Guid.NewGuid()),
+            Assert.That(async () => await this.accountService.GetTransactionFormDataAsync(Guid.NewGuid()),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -1559,7 +1492,7 @@
         {
             //Act
             TransactionDetailsServiceModel transactionFormModel =
-                await this.accountService.GetTransactionDetails(this.Transaction1User1.Id, this.User1.Id, isUserAdmin: false);
+                await this.accountService.GetTransactionDetailsAsync(this.Transaction1User1.Id, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(() =>
@@ -1581,7 +1514,7 @@
         public async Task GetOwnerId_ShouldReturnOwnerId_WithValidAccountId()
         {
             //Act
-            Guid ownerId = await this.accountService.GetOwnerId(this.Account1User1.Id);
+            Guid ownerId = await this.accountService.GetOwnerIdAsync(this.Account1User1.Id);
 
             //Assert
             Assert.That(ownerId, Is.EqualTo(this.User1.Id));
@@ -1591,7 +1524,7 @@
         public void GetOwnerId_ShouldThrowException_WhenAccountIdIsInvalid()
         {
             //Assert
-            Assert.That(async () => await this.accountService.GetOwnerId(Guid.NewGuid()),
+            Assert.That(async () => await this.accountService.GetOwnerIdAsync(Guid.NewGuid()),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -1600,7 +1533,7 @@
         {
             //Act
             TransactionDetailsServiceModel transactionFormModel =
-                await this.accountService.GetTransactionDetails(this.Transaction1User1.Id, this.User2.Id, isUserAdmin: true);
+                await this.accountService.GetTransactionDetailsAsync(this.Transaction1User1.Id, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(() =>
@@ -1625,7 +1558,7 @@
             var invalidId = Guid.NewGuid();
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.GetTransactionDetails(invalidId, this.User1.Id, isUserAdmin: false),
+            Assert.That(async () => await this.accountService.GetTransactionDetailsAsync(invalidId, this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -1635,73 +1568,15 @@
             //Arrange
 
             //Act & Assert
-            Assert.That(async () => await this.accountService.GetTransactionDetails(this.Transaction1User1.Id, this.User2.Id, isUserAdmin: false),
+            Assert.That(async () => await this.accountService.GetTransactionDetailsAsync(this.Transaction1User1.Id, this.User2.Id, isUserAdmin: false),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("User is not transaction's owner."));
-        }
-
-        [Test]
-        public async Task IsAccountDeleted_ShouldReturnTrue_WhenAccountIsDeleted()
-        {
-            //Arrange & Act
-            bool response = await this.accountService.IsAccountDeleted(this.Account3User1Deleted.Id);
-
-            //Assert
-            Assert.That(response, Is.True);
-        }
-
-        [Test]
-        public async Task IsAccountDeleted_ShouldReturnFalse_WhenAccountIsNotDeleted()
-        {
-            //Arrange & Act
-            bool response = await this.accountService.IsAccountDeleted(this.Account1User1.Id);
-
-            //Assert
-            Assert.That(response, Is.False);
-        }
-
-        [Test]
-        public void IsAccountDeleted_ShouldThrowException_WhenAccountDoesNotExist()
-        {
-            //Arrange & Act
-
-            //Assert
-            Assert.That(async () => await this.accountService.IsAccountDeleted(Guid.NewGuid()),
-            Throws.TypeOf<InvalidOperationException>());
-        }
-
-        [Test]
-        public async Task IsAccountOwner_ShouldReturnTrue_WhenUserIsOwner()
-        {
-            //Arrange & Act
-            bool response = await this.accountService.IsAccountOwner(this.User1.Id, this.Account1User1.Id);
-
-            //Assert
-            Assert.That(response, Is.True);
-        }
-
-        [Test]
-        public async Task IsAccountOwner_ShouldReturnFalse_WhenUserIsNotOwner()
-        {
-            //Arrange & Act
-            bool response = await this.accountService.IsAccountOwner(this.User2.Id, this.Account1User1.Id);
-
-            //Assert
-            Assert.That(response, Is.False);
-        }
-
-        [Test]
-        public void IsAccountOwner_ShouldThrowException_WhenAccountDoesNotExist()
-        {
-            //Assert
-            Assert.That(async () => await this.accountService.IsAccountOwner(this.User1.Id, Guid.NewGuid()),
-            Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]
         public async Task GetAccountShortDetails_ShouldReturnCorrectData_WithValidInput()
         {
             //Act
-            AccountDetailsShortServiceModel actualData = await this.accountService.GetAccountShortDetails(this.Account1User1.Id);
+            AccountDetailsShortServiceModel actualData = await this.accountService.GetAccountShortDetailsAsync(this.Account1User1.Id);
 
             //Assert
             Assert.Multiple(() =>
@@ -1717,8 +1592,39 @@
         public void GetAccountShortDetails_ShouldThrowException_WithInvalidInput()
         {
             //Act & Assert
-            Assert.That(async () => await this.accountService.GetAccountShortDetails(Guid.NewGuid()),
+            Assert.That(async () => await this.accountService.GetAccountShortDetailsAsync(Guid.NewGuid()),
             Throws.TypeOf<InvalidOperationException>());
-        }
-    }
+		}
+
+		[Test]
+		public async Task GetUserAccounts_ShouldReturnUsersAccounts_WithValidId()
+		{
+			//Arrange
+			List<AccountCardServiceModel> expectedAccounts = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.ProjectTo<AccountCardServiceModel>(this.mapper.ConfigurationProvider)
+				.ToListAsync();
+
+			//Act
+			IEnumerable<AccountCardServiceModel> actualAccounts = await this.accountService.GetUserAccountsAsync(this.User1.Id);
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(actualAccounts, Is.Not.Null);
+				Assert.That(actualAccounts.Count(), Is.EqualTo(expectedAccounts.Count));
+
+				for (int i = 0; i < expectedAccounts.Count; i++)
+				{
+					Assert.That(actualAccounts.ElementAt(i).Id,
+						Is.EqualTo(expectedAccounts.ElementAt(i).Id));
+					Assert.That(actualAccounts.ElementAt(i).Name,
+						Is.EqualTo(expectedAccounts.ElementAt(i).Name));
+					Assert.That(actualAccounts.ElementAt(i).Balance,
+						Is.EqualTo(expectedAccounts.ElementAt(i).Balance));
+				}
+			});
+		}
+	}
 }

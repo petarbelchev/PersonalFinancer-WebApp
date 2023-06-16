@@ -29,7 +29,7 @@
 
             //Act
             ApiOutputServiceModel actual =
-                await this.currencyService.CreateEntity(currencyName, ownerId);
+                await this.currencyService.CreateEntityAsync(currencyName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -68,7 +68,7 @@
 
             //Act
             ApiOutputServiceModel result =
-                await this.currencyService.CreateEntity(currencyName, ownerId);
+                await this.currencyService.CreateEntityAsync(currencyName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -105,7 +105,7 @@
 
             //Act
             ApiOutputServiceModel result =
-                await this.currencyService.CreateEntity(currencyName, ownerId);
+                await this.currencyService.CreateEntityAsync(currencyName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -127,7 +127,7 @@
             Guid ownerId = this.User1.Id;
 
             //Act & Assert
-            Assert.That(async () => await this.currencyService.CreateEntity(currencyName, ownerId),
+            Assert.That(async () => await this.currencyService.CreateEntityAsync(currencyName, ownerId),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Entity with the same name exist."));
         }
 
@@ -152,7 +152,7 @@
             });
 
             //Act
-            await this.currencyService.DeleteEntity(newCategory.Id, this.User1.Id, isUserAdmin: false);
+            await this.currencyService.DeleteEntityAsync(newCategory.Id, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(async () =>
@@ -183,7 +183,7 @@
             });
 
             //Act
-            await this.currencyService.DeleteEntity(newCurrency.Id, this.User2.Id, isUserAdmin: true);
+            await this.currencyService.DeleteEntityAsync(newCurrency.Id, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(async () =>
@@ -198,7 +198,7 @@
         {
             //Act & Assert
             Assert.That(async () => await this.currencyService
-                  .DeleteEntity(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
+                  .DeleteEntityAsync(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -217,7 +217,7 @@
 
             //Act & Assert
             Assert.That(async () => await this.currencyService
-                  .DeleteEntity(user2Currency.Id, this.User1.Id, isUserAdmin: false),
+                  .DeleteEntityAsync(user2Currency.Id, this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Unauthorized."));
         }
     }

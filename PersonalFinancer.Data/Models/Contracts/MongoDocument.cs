@@ -3,7 +3,7 @@
     using MongoDB.Bson;
     using MongoDB.Bson.Serialization.Attributes;
 
-    public class MongoDocument
+    public abstract class MongoDocument
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
