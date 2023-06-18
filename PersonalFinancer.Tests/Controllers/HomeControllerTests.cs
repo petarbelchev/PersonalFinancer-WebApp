@@ -11,7 +11,7 @@
     using PersonalFinancer.Web.Models.Home;
     using PersonalFinancer.Web.Models.Shared;
     using static PersonalFinancer.Data.Constants;
-    using static PersonalFinancer.Web.Infrastructure.Constants;
+    using static PersonalFinancer.Web.Constants;
 
     [TestFixture]
     internal class HomeControllerTests : ControllersUnitTestsBase
@@ -73,11 +73,11 @@
                 .GetUserDashboardDataAsync(this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(this.expUserDashboard);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetUserAccountsAsync(this.userId))
                 .ReturnsAsync(this.expAccountCard);
 
-            this.controller = new HomeController(this.usersServiceMock.Object, this.accountsServiceMock.Object)
+            this.controller = new HomeController(this.usersServiceMock.Object, this.accountsInfoServiceMock.Object)
             {
                 ControllerContext = new ControllerContext
                 {

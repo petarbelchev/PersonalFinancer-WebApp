@@ -2,9 +2,9 @@
 {
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Services.Transactions;
-    using PersonalFinancer.Services.Transactions.Models;
-    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Shared;
     using PersonalFinancer.Web.Models.Transaction;
     using System.Globalization;
@@ -15,10 +15,10 @@
 	[ApiController]
 	public class TransactionsApiController : ControllerBase
 	{
-		private readonly ITransactionsInfoService transactionsInfoService;
+		private readonly IAccountsInfoService accountsInfoService;
 
-		public TransactionsApiController(ITransactionsInfoService transactionsInfoService) 
-			=> this.transactionsInfoService = transactionsInfoService;
+		public TransactionsApiController(IAccountsInfoService accountsInfoService) 
+			=> this.accountsInfoService = accountsInfoService;
 
 		[Authorize(Roles = UserRoleName)]
 		[HttpPost]
@@ -42,7 +42,7 @@
 
 			try
 			{
-				userTransactions = await this.transactionsInfoService
+				userTransactions = await this.accountsInfoService
 					.GetUserTransactionsAsync(userId, startDate, endDate, inputModel.Page);
 			}
 			catch (InvalidOperationException)

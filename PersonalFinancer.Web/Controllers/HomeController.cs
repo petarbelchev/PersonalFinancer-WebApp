@@ -2,25 +2,25 @@
 {
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.User;
     using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Home;
     using PersonalFinancer.Web.Models.Shared;
-    using static PersonalFinancer.Web.Infrastructure.Constants.HostConstants;
+    using static PersonalFinancer.Web.Constants.HostConstants;
 
     public class HomeController : Controller
     {
         private readonly IUsersService userService;
-        private readonly IAccountsService accountsService;
+        private readonly IAccountsInfoService accountsInfoService;
 
 		public HomeController(
             IUsersService userService,
-            IAccountsService accountsService)
+            IAccountsInfoService accountsInfoService)
 		{
 			this.userService = userService;
-            this.accountsService = accountsService;
+            this.accountsInfoService = accountsInfoService;
 		}
 
 		public async Task<IActionResult> Index()
@@ -63,7 +63,7 @@
 
             if (!this.ModelState.IsValid)
             {
-                viewModel.Accounts = await this.accountsService.GetUserAccountsAsync(this.User.IdToGuid());
+                viewModel.Accounts = await this.accountsInfoService.GetUserAccountsAsync(this.User.IdToGuid());
                 return this.View(viewModel);
             }
 

@@ -1,6 +1,6 @@
-﻿namespace PersonalFinancer.Web.Infrastructure.EmailSender
+﻿namespace PersonalFinancer.Web.EmailSender
 {
-    public class AuthMessageSenderOptions
+    public class AuthEmailSenderOptions
     {
         public string EmailSender { get; set; } = null!;
 

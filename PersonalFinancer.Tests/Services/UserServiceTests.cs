@@ -6,11 +6,11 @@
     using PersonalFinancer.Data.Models;
     using PersonalFinancer.Data.Models.Enums;
     using PersonalFinancer.Data.Repositories;
-	using PersonalFinancer.Services.MemoryCacheService;
-	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.MemoryCacheService;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Services.User;
     using PersonalFinancer.Services.User.Models;
-    using static PersonalFinancer.Services.Infrastructure.Constants.PaginationConstants;
+    using static PersonalFinancer.Services.Constants.PaginationConstants;
 
     [TestFixture]
     internal class UserServiceTests : ServicesUnitTestsBase

@@ -1,7 +1,7 @@
 ﻿namespace PersonalFinancer.Web.Models.Shared
 {
     using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Web.Infrastructure.ModelBinders;
+    using PersonalFinancer.Web.ModelBinders;
     using System.ComponentModel.DataAnnotations;
 
     public class DateFilterModel : IValidatableObject

@@ -1,7 +1,7 @@
 ﻿namespace PersonalFinancer.Tests.Mocks
 {
     using AutoMapper;
-    using PersonalFinancer.Web.Infrastructure;
+    using PersonalFinancer.Web;
 
     static class ControllersMapperMock
 	{

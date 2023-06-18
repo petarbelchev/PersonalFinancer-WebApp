@@ -1,8 +1,8 @@
-﻿namespace PersonalFinancer.Services.Transactions.Models
+﻿namespace PersonalFinancer.Services.Accounts.Models
 {
-	using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Services.Shared.Models;
 
-	public class TransactionsServiceModel
+    public class TransactionsServiceModel
     {
         public DateTime StartDate { get; set; }
 

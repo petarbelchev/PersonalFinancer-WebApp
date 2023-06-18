@@ -1,17 +1,17 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.ModelBinding;
-	using PersonalFinancer.Data.Models.Contracts;
-	using PersonalFinancer.Services.ApiService;
-	using PersonalFinancer.Services.ApiService.Models;
-	using PersonalFinancer.Web.Infrastructure.Extensions;
-	using PersonalFinancer.Web.Models.Api;
-	using System.ComponentModel.DataAnnotations;
-	using System.Text;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.ModelBinding;
+    using PersonalFinancer.Data.Models.Contracts;
+    using PersonalFinancer.Services.ApiService;
+    using PersonalFinancer.Services.ApiService.Models;
+    using PersonalFinancer.Web.Extensions;
+    using PersonalFinancer.Web.Models.Api;
+    using System.ComponentModel.DataAnnotations;
+    using System.Text;
 
-	[Authorize]
+    [Authorize]
 	public abstract class BaseApiController<T> : ControllerBase where T : ApiEntity, new()
 	{
 		private readonly IApiService<T> apiService;

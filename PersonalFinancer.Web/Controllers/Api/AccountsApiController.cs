@@ -4,9 +4,7 @@
     using Microsoft.AspNetCore.Mvc;
     using PersonalFinancer.Services.Accounts;
     using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.Transactions;
-    using PersonalFinancer.Services.Transactions.Models;
-    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Account;
     using PersonalFinancer.Web.Models.Shared;
     using System.Globalization;
@@ -17,23 +15,17 @@
 	[ApiController]
 	public class AccountsApiController : ControllerBase
 	{
-		private readonly IAccountsService accountsService;
-		private readonly ITransactionsInfoService transactionsInfoService;
+		private readonly IAccountsInfoService accountsInfoService;
 
-		public AccountsApiController(
-			IAccountsService accountService,
-			ITransactionsInfoService transactionsInfoService)
-		{
-			this.accountsService = accountService;
-			this.transactionsInfoService = transactionsInfoService;
-		}
+		public AccountsApiController(IAccountsInfoService accountsInfoService)
+			=> this.accountsInfoService = accountsInfoService;
 
 		[Authorize(Roles = RoleConstants.AdminRoleName)]
 		[HttpGet("{page}")]
 		public async Task<IActionResult> GetAccounts(int page)
 		{
 			UsersAccountsCardsServiceModel usersCardsData =
-				await this.accountsService.GetAccountsCardsDataAsync(page);
+				await this.accountsInfoService.GetAccountsCardsDataAsync(page);
 
 			var usersCardsModel = new UsersAccountCardsViewModel
 			{
@@ -48,7 +40,7 @@
 		[Authorize(Roles = RoleConstants.AdminRoleName)]
 		[HttpGet("cashflow")]
 		public async Task<IActionResult> GetAccountsCashFlow()
-			=> this.Ok(await this.accountsService.GetCashFlowByCurrenciesAsync());
+			=> this.Ok(await this.accountsInfoService.GetCashFlowByCurrenciesAsync());
 
 		[HttpPost("transactions")]
 		public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
@@ -67,9 +59,9 @@
 			if (!this.User.IsAdmin() && inputModel.OwnerId != this.User.IdToGuid())
 				return this.Unauthorized();
 
-			TransactionsServiceModel accountTransactions = 
-				await this.transactionsInfoService.GetAccountTransactionsAsync(
-					inputModel.Id ?? throw new InvalidOperationException(), 
+			TransactionsServiceModel accountTransactions =
+				await this.accountsInfoService.GetAccountTransactionsAsync(
+					inputModel.Id ?? throw new InvalidOperationException(),
 					startDate, endDate, inputModel.Page);
 
 			var viewModel = new TransactionsViewModel

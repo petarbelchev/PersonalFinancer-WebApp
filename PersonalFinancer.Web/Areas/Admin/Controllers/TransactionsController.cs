@@ -4,8 +4,7 @@
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Transactions;
-	using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.User;
     using static PersonalFinancer.Data.Constants.RoleConstants;
 
     [Area("Admin")]
@@ -13,11 +12,11 @@
 	public class TransactionsController : Web.Controllers.TransactionsController
 	{
 		public TransactionsController(
-			IAccountsService accountsService,
+			IAccountsUpdateService accountsService,
+			IAccountsInfoService accountsInfoService,
 			IUsersService usersService,
-			IMapper mapper,
-			ITransactionsInfoService transactionsInfoService)
-			: base(accountsService, usersService, transactionsInfoService, mapper)
+			IMapper mapper)
+			: base(accountsService, accountsInfoService, usersService, mapper)
 		{ }
 	}
 }

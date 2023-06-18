@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Web.Infrastructure.Extensions
+﻿namespace PersonalFinancer.Web.Extensions
 {
     using System.Security.Claims;
     using static PersonalFinancer.Data.Constants.RoleConstants;

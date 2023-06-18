@@ -1,32 +1,35 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-	using AutoMapper;
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Services.User.Models;
-	using PersonalFinancer.Web.Infrastructure.Extensions;
-	using PersonalFinancer.Web.Models.Account;
-	using System.ComponentModel.DataAnnotations;
-	using static PersonalFinancer.Data.Constants.RoleConstants;
+    using AutoMapper;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Extensions;
+    using PersonalFinancer.Web.Models.Account;
+    using System.ComponentModel.DataAnnotations;
+    using static PersonalFinancer.Data.Constants.RoleConstants;
 
-	[Authorize]
+    [Authorize]
 	public class AccountsController : Controller
 	{
-		protected readonly IAccountsService accountService;
+		protected readonly IAccountsUpdateService accountsUpdateService;
+		protected readonly IAccountsInfoService accountsInfoService;
 		protected readonly IUsersService usersService;
 		protected readonly IMapper mapper;
 
 		public AccountsController(
-			IAccountsService accountService,
-			IMapper mapper,
-			IUsersService usersService)
+			IAccountsUpdateService accountsUpdateService,
+			IAccountsInfoService accountsInfoService,
+			IUsersService usersService,
+			IMapper mapper)
 		{
-			this.accountService = accountService;
-			this.mapper = mapper;
+			this.accountsUpdateService = accountsUpdateService;
+			this.accountsInfoService = accountsInfoService;
 			this.usersService = usersService;
+			this.mapper = mapper;
 		}
 
 		[Authorize(Roles = UserRoleName)]
@@ -57,7 +60,7 @@
 				AccountFormShortServiceModel accountServiceModel =
 					this.mapper.Map<AccountFormShortServiceModel>(inputModel);
 
-				Guid newAccountId = await this.accountService.CreateAccountAsync(accountServiceModel);
+				Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(accountServiceModel);
 				this.TempData["successMsg"] = "You create a new account successfully!";
 
 				return this.RedirectToAction(nameof(AccountDetails), new { id = newAccountId });
@@ -104,7 +107,7 @@
 				if (!this.ModelState.IsValid)
 				{
 					AccountDetailsShortServiceModel accountDetails =
-						await this.accountService.GetAccountShortDetailsAsync(accountId);
+						await this.accountsInfoService.GetAccountShortDetailsAsync(accountId);
 
 					viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
 				}
@@ -133,7 +136,7 @@
 			{
 				Guid accountId = id ?? throw new InvalidOperationException();
 
-				viewModel.Name = await this.accountService
+				viewModel.Name = await this.accountsInfoService
 					.GetAccountNameAsync(accountId, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (InvalidOperationException)
@@ -157,14 +160,14 @@
 			{
 				Guid accountId = inputModel.Id ?? throw new InvalidOperationException();
 
-				await this.accountService.DeleteAccountAsync(
+				await this.accountsUpdateService.DeleteAccountAsync(
 					accountId, this.User.IdToGuid(), this.User.IsAdmin(),
 					inputModel.ShouldDeleteTransactions ?? false);
 
 				if (this.User.IsAdmin())
 				{
 					this.TempData["successMsg"] = "You successfully delete user's account!";
-					Guid ownerId = await this.accountService.GetOwnerIdAsync(accountId);
+					Guid ownerId = await this.accountsInfoService.GetOwnerIdAsync(accountId);
 
 					return this.LocalRedirect("/Admin/Users/Details/" + ownerId);
 				}
@@ -196,7 +199,7 @@
 			{
 				Guid accountId = id ?? throw new InvalidOperationException();
 
-				accountData = await this.accountService
+				accountData = await this.accountsInfoService
 					.GetAccountFormDataAsync(accountId, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (InvalidOperationException)
@@ -225,7 +228,7 @@
 				Guid accountId = id ?? throw new InvalidOperationException();
 
 				Guid ownerId = this.User.IsAdmin()
-					? await this.accountService.GetOwnerIdAsync(accountId)
+					? await this.accountsInfoService.GetOwnerIdAsync(accountId)
 					: this.User.IdToGuid();
 
 				if (inputModel.OwnerId != ownerId)
@@ -234,7 +237,7 @@
 				AccountFormShortServiceModel serviceModel =
 					this.mapper.Map<AccountFormShortServiceModel>(inputModel);
 
-				await this.accountService.EditAccountAsync(accountId, serviceModel);
+				await this.accountsUpdateService.EditAccountAsync(accountId, serviceModel);
 			}
 			catch (ArgumentException)
 			{
@@ -279,7 +282,7 @@
 		private async Task<AccountDetailsViewModel> GetAccountDetailsViewModel(
 			Guid accountId, DateTime startDate, DateTime endDate, Guid userId, bool isUserAdmin)
 		{
-			AccountDetailsServiceModel accountDetails = await this.accountService
+			AccountDetailsServiceModel accountDetails = await this.accountsInfoService
 				.GetAccountDetailsAsync(accountId, startDate, endDate, userId, isUserAdmin);
 
 			AccountDetailsViewModel viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);

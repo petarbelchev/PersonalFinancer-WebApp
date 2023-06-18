@@ -3,7 +3,7 @@
     using Microsoft.AspNetCore.Mvc;
     using PersonalFinancer.Data.Models.Enums;
     using PersonalFinancer.Services.Shared.Models;
-    using PersonalFinancer.Web.Infrastructure.ModelBinders;
+    using PersonalFinancer.Web.ModelBinders;
     using System.ComponentModel.DataAnnotations;
     using static PersonalFinancer.Data.Constants.TransactionConstants;
 

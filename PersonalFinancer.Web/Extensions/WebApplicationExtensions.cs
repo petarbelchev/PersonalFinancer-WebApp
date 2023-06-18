@@ -1,9 +1,9 @@
-﻿namespace PersonalFinancer.Web.Infrastructure.Extensions
+﻿namespace PersonalFinancer.Web.Extensions
 {
-	using PersonalFinancer.Data.Seeding;
 	using PersonalFinancer.Data;
+	using PersonalFinancer.Data.Seeding;
 
-	public static class ApplicationExtensions
+	public static class WebApplicationExtensions
 	{
 		public static WebApplication SeedDatabase(this WebApplication app)
 		{

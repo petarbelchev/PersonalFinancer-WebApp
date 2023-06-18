@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Web.Infrastructure.EmailSender
+﻿namespace PersonalFinancer.Web.EmailSender
 {
     using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.Extensions.Options;
@@ -10,14 +10,14 @@
         private readonly ILogger<EmailSender> logger;
 
         public EmailSender(
-            IOptions<AuthMessageSenderOptions> optionsAccessor,
+            IOptions<AuthEmailSenderOptions> optionsAccessor,
             ILogger<EmailSender> logger)
         {
-            this.Options = optionsAccessor.Value;
+			this.Options = optionsAccessor.Value;
             this.logger = logger;
         }
 
-        public AuthMessageSenderOptions Options { get; set; }
+        public AuthEmailSenderOptions Options { get; set; }
 
         public async Task SendEmailAsync(string email, string subject, string message)
         {
@@ -28,7 +28,7 @@
             }
 
             var client = new SendGridClient(this.Options.SendGridKey);
-            
+
             var msg = new SendGridMessage()
             {
                 From = new EmailAddress(this.Options.EmailSender),
@@ -42,7 +42,7 @@
 
             Response response = await client.SendEmailAsync(msg);
 
-            this.logger.LogInformation(response.IsSuccessStatusCode
+			this.logger.LogInformation(response.IsSuccessStatusCode
                 ? $"Email to {email} queued successfully!"
                 : $"Failure Email to {email}");
         }

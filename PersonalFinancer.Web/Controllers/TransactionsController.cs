@@ -5,11 +5,9 @@
     using Microsoft.AspNetCore.Mvc;
     using PersonalFinancer.Services.Accounts;
     using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.Transactions;
-    using PersonalFinancer.Services.Transactions.Models;
     using PersonalFinancer.Services.User;
     using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Shared;
     using PersonalFinancer.Web.Models.Transaction;
     using static PersonalFinancer.Data.Constants.RoleConstants;
@@ -17,20 +15,20 @@
     [Authorize]
 	public class TransactionsController : Controller
 	{
-		protected readonly IAccountsService accountsService;
+		protected readonly IAccountsUpdateService accountsUpdateService;
+		protected readonly IAccountsInfoService accountsInfoService;
 		protected readonly IUsersService usersService;
-		protected readonly ITransactionsInfoService transactionsInfoService;
 		protected readonly IMapper mapper;
 
 		public TransactionsController(
-			IAccountsService accountsService,
+			IAccountsUpdateService accountsUpdateService,
+			IAccountsInfoService accountsInfoService,
 			IUsersService usersService,
-			ITransactionsInfoService transactionsInfoService,
 			IMapper mapper)
 		{
-			this.accountsService = accountsService;
+			this.accountsUpdateService = accountsUpdateService;
+			this.accountsInfoService = accountsInfoService;
 			this.usersService = usersService;
-			this.transactionsInfoService = transactionsInfoService;
 			this.mapper = mapper;
 		}
 
@@ -90,7 +88,7 @@
 				TransactionFormShortServiceModel serviceModel =
 					this.mapper.Map<TransactionFormShortServiceModel>(inputModel);
 
-				Guid newTransactionId = await this.accountsService.CreateTransactionAsync(serviceModel);
+				Guid newTransactionId = await this.accountsUpdateService.CreateTransactionAsync(serviceModel);
 				this.TempData["successMsg"] = "You create a new transaction successfully!";
 
 				return this.RedirectToAction(nameof(TransactionDetails), new { id = newTransactionId });
@@ -106,7 +104,7 @@
 		{
 			try
 			{
-				await this.accountsService.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
+				await this.accountsUpdateService.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 
 				this.TempData["successMsg"] = this.User.IsAdmin() ?
 					"You successfully delete a user's transaction!"
@@ -130,7 +128,7 @@
 		{
 			try
 			{
-				return this.View(await this.accountsService
+				return this.View(await this.accountsInfoService
 					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin()));
 			}
 			catch (ArgumentException)
@@ -149,7 +147,7 @@
 
 			try
 			{
-				transactionData = await this.accountsService.GetTransactionFormDataAsync(id);
+				transactionData = await this.accountsInfoService.GetTransactionFormDataAsync(id);
 			}
 			catch (InvalidOperationException)
 			{
@@ -177,7 +175,7 @@
 			try
 			{
 				Guid ownerId = this.User.IsAdmin()
-					? await this.accountsService.GetOwnerIdAsync(inputModel.AccountId ?? throw new InvalidOperationException())
+					? await this.accountsInfoService.GetOwnerIdAsync(inputModel.AccountId ?? throw new InvalidOperationException())
 					: this.User.IdToGuid();
 
 				if (inputModel.OwnerId != ownerId)
@@ -185,7 +183,7 @@
 
 				TransactionFormShortServiceModel serviceModel = this.mapper.Map<TransactionFormShortServiceModel>(inputModel);
 
-				await this.accountsService.EditTransactionAsync(id, serviceModel);
+				await this.accountsUpdateService.EditTransactionAsync(id, serviceModel);
 			}
 			catch (InvalidOperationException)
 			{
@@ -216,7 +214,7 @@
 			Guid userId, DateTime startDate, DateTime endDate)
 		{
 			TransactionsServiceModel userTransactions =
-				await this.transactionsInfoService.GetUserTransactionsAsync(userId, startDate, endDate);
+				await this.accountsInfoService.GetUserTransactionsAsync(userId, startDate, endDate);
 
 			UserTransactionsViewModel viewModel = this.mapper.Map<UserTransactionsViewModel>(userTransactions);
 			viewModel.Id = userId;

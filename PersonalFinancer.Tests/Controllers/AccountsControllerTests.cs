@@ -12,8 +12,8 @@
     using PersonalFinancer.Web.Controllers;
     using PersonalFinancer.Web.Models.Account;
     using static PersonalFinancer.Data.Constants;
-    using static PersonalFinancer.Services.Infrastructure.Constants;
-    using static PersonalFinancer.Web.Infrastructure.Constants;
+    using static PersonalFinancer.Services.Constants;
+    using static PersonalFinancer.Web.Constants;
 
     [TestFixture]
     internal class AccountsControllerTests : ControllersUnitTestsBase
@@ -79,9 +79,10 @@
                 .ReturnsAsync(this.expAccTypesAndCurrencies);
 
             this.controller = new AccountsController(
-                this.accountsServiceMock.Object,
-                this.mapper,
-                this.usersServiceMock.Object)
+                this.accountsUpdateServiceMock.Object,
+                this.accountsInfoServiceMock.Object,
+                this.usersServiceMock.Object,
+                this.mapper)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -177,7 +178,7 @@
 
             var newAccId = Guid.NewGuid();
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsUpdateServiceMock.Setup(x => x
                 .CreateAccountAsync(
                     It.Is<AccountFormShortServiceModel>(a =>
                         a.Balance == inputModel.Balance
@@ -218,7 +219,7 @@
                 OwnerId = this.userId
             };
 
-            this.accountsServiceMock
+            this.accountsUpdateServiceMock
                 .Setup(x => x.CreateAccountAsync(It.IsAny<AccountFormShortServiceModel>()))
                 .Throws<ArgumentException>();
 
@@ -245,7 +246,7 @@
 
             this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetAccountDetailsAsync(
                     this.expAccDetailsDto.Id,
                     It.IsAny<DateTime>(),
@@ -276,7 +277,7 @@
 
             this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetAccountDetailsAsync(this.expAccDetailsDto.Id, It.IsAny<DateTime>(), It.IsAny<DateTime>(), this.userId, true))
                 .ReturnsAsync(this.expAccDetailsDto);
 
@@ -302,7 +303,7 @@
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetAccountDetailsAsync(
                     It.IsAny<Guid>(),
                     It.IsAny<DateTime>(),
@@ -338,7 +339,7 @@
 
             this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetAccountDetailsAsync(this.expAccDetailsDto.Id, inputModel.StartDate, inputModel.EndDate, this.userId, true))
                 .ReturnsAsync(this.expAccDetailsDto);
 
@@ -373,7 +374,7 @@
 
             this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetAccountDetailsAsync(this.expAccDetailsDto.Id, inputModel.StartDate, inputModel.EndDate, this.userId, false))
                 .ReturnsAsync(this.expAccDetailsDto);
 
@@ -405,7 +406,7 @@
 
             this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetAccountDetailsAsync(this.expAccDetailsDto.Id, inputModel.StartDate, inputModel.EndDate, this.userId, false))
                 .Throws<InvalidOperationException>();
 
@@ -439,8 +440,8 @@
 
             this.controller.ModelState.AddModelError(nameof(inputModel.StartDate), "Start Date is invalid");
 
-            this.accountsServiceMock
-                .Setup(x => x.GetAccountShortDetailsAsync(this.expAccDetailsDto.Id))
+            this.accountsInfoServiceMock
+				.Setup(x => x.GetAccountShortDetailsAsync(this.expAccDetailsDto.Id))
                 .ReturnsAsync(serviceReturnModel);
 
             //Act
@@ -476,8 +477,8 @@
 
             this.controller.ModelState.AddModelError(string.Empty, "Model is invalid");
 
-            this.accountsServiceMock
-                .Setup(x => x.GetAccountShortDetailsAsync(accountId))
+            this.accountsInfoServiceMock
+				.Setup(x => x.GetAccountShortDetailsAsync(accountId))
                 .Throws<InvalidOperationException>();
 
             //Act
@@ -502,7 +503,7 @@
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetAccountNameAsync(accountId, this.userId, false))
                 .ReturnsAsync(accountName);
 
@@ -529,7 +530,7 @@
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetAccountNameAsync(It.IsAny<Guid>(), this.userId, false))
                 .Throws<InvalidOperationException>();
 
@@ -585,7 +586,7 @@
             var result =
                 (RedirectToActionResult)await this.controller.Delete(inputModel);
 
-            this.accountsServiceMock
+            this.accountsUpdateServiceMock
                 .Verify(x => x.DeleteAccountAsync(accountId, this.userId, false, false),
                     Times.Once);
 
@@ -619,7 +620,7 @@
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(true);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetOwnerIdAsync(accountId))
                 .ReturnsAsync(ownerId);
 
@@ -629,7 +630,7 @@
             //Act
             var result = (LocalRedirectResult)await this.controller.Delete(inputModel);
 
-            this.accountsServiceMock
+            this.accountsUpdateServiceMock
                 .Verify(x => x.DeleteAccountAsync(accountId, this.userId, true, false),
                     Times.Once);
 
@@ -660,7 +661,7 @@
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            this.accountsServiceMock.Setup(x =>
+            this.accountsUpdateServiceMock.Setup(x =>
                 x.DeleteAccountAsync(accountId, this.userId, false, false))
                 .Throws<ArgumentException>();
 
@@ -692,7 +693,7 @@
                 .IsInRole(RoleConstants.AdminRoleName))
                 .Returns(false);
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsUpdateServiceMock.Setup(x => x
                 .DeleteAccountAsync(accountId, this.userId, false, false))
                 .Throws<InvalidOperationException>();
 
@@ -795,7 +796,7 @@
                 }
             };
 
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetAccountFormDataAsync(accId, this.userId, false))
                 .ReturnsAsync(expServiceDto);
 
@@ -822,7 +823,7 @@
         public async Task EditAccountOnGet_ShouldReturnBadRequest_WhenServiceThrowException()
         {
             //Arrange
-            this.accountsServiceMock.Setup(x => x
+            this.accountsInfoServiceMock.Setup(x => x
                 .GetAccountFormDataAsync(It.IsAny<Guid>(), this.userId, false))
                 .Throws<InvalidOperationException>();
 
@@ -916,7 +917,7 @@
             //Act
             var result = (LocalRedirectResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
 
-            this.accountsServiceMock.Verify(x => x.EditAccountAsync(accId,
+            this.accountsUpdateServiceMock.Verify(x => x.EditAccountAsync(accId,
                 It.Is<AccountFormShortServiceModel>(m =>
                     m.CurrencyId == inputFormModel.CurrencyId
                     && m.Balance == inputFormModel.Balance
@@ -951,13 +952,13 @@
             };
 
             this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
-            this.accountsServiceMock.Setup(x => x.GetOwnerIdAsync(accId)).ReturnsAsync(ownerId);
+            this.accountsInfoServiceMock.Setup(x => x.GetOwnerIdAsync(accId)).ReturnsAsync(ownerId);
             this.controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
             //Act
             var result = (LocalRedirectResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
 
-            this.accountsServiceMock.Verify(x => x.EditAccountAsync(accId,
+            this.accountsUpdateServiceMock.Verify(x => x.EditAccountAsync(accId,
                 It.Is<AccountFormShortServiceModel>(m =>
                     m.CurrencyId == inputFormModel.CurrencyId
                     && m.Balance == inputFormModel.Balance
@@ -992,9 +993,9 @@
             };
 
             this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
-            this.accountsServiceMock.Setup(x => x.GetOwnerIdAsync(accId)).ReturnsAsync(ownerId);
+            this.accountsInfoServiceMock.Setup(x => x.GetOwnerIdAsync(accId)).ReturnsAsync(ownerId);
 
-            this.accountsServiceMock.Setup(x => x.EditAccountAsync(accId,
+            this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
                 It.Is<AccountFormShortServiceModel>(m =>
                     m.CurrencyId == inputFormModel.CurrencyId
                     && m.Balance == inputFormModel.Balance
@@ -1041,7 +1042,7 @@
 
             this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
-            this.accountsServiceMock.Setup(x => x.EditAccountAsync(accId,
+            this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
                 It.Is<AccountFormShortServiceModel>(m =>
                     m.CurrencyId == inputFormModel.CurrencyId
                     && m.Balance == inputFormModel.Balance
@@ -1088,7 +1089,7 @@
 
             this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
-            this.accountsServiceMock.Setup(x => x.EditAccountAsync(accId,
+            this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
                 It.Is<AccountFormShortServiceModel>(m =>
                     m.CurrencyId == inputFormModel.CurrencyId
                     && m.Balance == inputFormModel.Balance
