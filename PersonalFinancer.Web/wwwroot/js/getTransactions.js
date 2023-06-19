@@ -1,9 +1,9 @@
 ﻿let paginations = document.getElementsByClassName('pagination');
 
 for (let pagination of paginations) {
-    pagination.addEventListener('click', (e) => {
+    pagination.addEventListener('click', async (e) => {
         if (e.target.tagName == 'A') {
-            getTransactions(e.target.getAttribute('page'));
+            await getTransactions(e.target.getAttribute('page'));
         }
     })
 }
@@ -26,34 +26,36 @@ async function getTransactions(page) {
 
     if (response.status == 200) {
         let model = await response.json();
-        let innerHtml = '';
+        renderTransactions(model);
+        setUpPagination(page, model.pagination);
+    } else {
+        let error = await response.json();
+        alert(`${error.status} ${error.title}`)
+    }
+}
 
-        for (let transaction of model.transactions) {
-            let tr = `
+function renderTransactions(model) {
+    let innerHtml = '';
+
+    for (let transaction of model.transactions) {
+        let tr = `
                 <tr role="button" onclick=location.href='${model.transactionDetailsUrl + transaction.id}'>
 					<td><img src="${transaction.transactionType == 'Income' ? '/icons/greenArrow.png' : '/icons/redArrow.png'}" style="max-width: 25px;"></td>
 				    <td>${new Date(transaction.createdOn).toLocaleString('en-US', {
-                        year: "numeric",
-                        month: "numeric",
-                        day: "numeric",
-                        hour: "numeric",
-                        minute: "numeric"
-                    })}</td>
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            hour: "numeric",
+            minute: "numeric"
+        })}</td>
 				    <td>${transaction.categoryName}</td>
 				    <td>${transaction.amount.toFixed(2)} ${transaction.accountCurrencyName}</td>
 				    <td>${transaction.reference}</td>
 			    </tr>
             `;
 
-            innerHtml += tr;
-        }
-
-        document.querySelector('tbody').innerHTML = innerHtml;
-
-        setUpPagination(page, model.pagination);
-
-    } else {
-        let error = await response.json();
-        alert(`${error.status} ${error.title}`)
+        innerHtml += tr;
     }
+
+    document.querySelector('tbody').innerHTML = innerHtml;
 }
