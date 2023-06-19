@@ -8,7 +8,7 @@
         /// Throws ArgumentException if you try to create Entity with existing name.
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
-		Task<ApiOutputServiceModel> CreateEntity(string name, Guid ownerId);
+		Task<ApiOutputServiceModel> CreateEntityAsync(string name, Guid ownerId);
 
         /// <summary>
         /// Throws InvalidOperationException when Entity does not exist
@@ -16,6 +16,6 @@
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        Task DeleteEntity(Guid entityId, Guid userId, bool isUserAdmin);
+        Task DeleteEntityAsync(Guid entityId, Guid userId, bool isUserAdmin);
     }
 }

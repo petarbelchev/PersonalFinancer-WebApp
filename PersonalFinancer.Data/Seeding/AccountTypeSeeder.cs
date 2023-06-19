@@ -34,7 +34,7 @@
             };
 
             await dbContext.AccountTypes.AddRangeAsync(accountTypes);
-            _ = await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
     }
 }

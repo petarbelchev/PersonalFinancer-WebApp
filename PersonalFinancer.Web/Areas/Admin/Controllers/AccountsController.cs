@@ -14,16 +14,17 @@
     public class AccountsController : Web.Controllers.AccountsController
     {
         public AccountsController(
-            IAccountsService accountService,
+            IAccountsUpdateService accountsUpdateService,
+            IAccountsInfoService accountsInfoService,
             IUsersService usersService,
             IMapper mapper)
-            : base(accountService, mapper, usersService)
+            : base(accountsUpdateService, accountsInfoService, usersService, mapper)
         { }
 
         public async Task<IActionResult> Index(int page = 1)
         {
             UsersAccountsCardsServiceModel usersAccountCardsData =
-                await this.accountService.GetAccountsCardsData(page);
+                await this.accountsInfoService.GetAccountsCardsDataAsync(page);
 
             var viewModel = new UsersAccountCardsViewModel
             {

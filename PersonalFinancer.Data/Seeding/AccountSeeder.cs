@@ -52,7 +52,7 @@
             };
 
             await dbContext.Accounts.AddRangeAsync(accounts);
-            _ = await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
     }
 }

@@ -19,5 +19,7 @@
         public string TransactionType { get; init; } = null!;
 
         public string Reference { get; init; } = null!;
+
+        public bool IsInitialBalance { get; set; }
     }
 }

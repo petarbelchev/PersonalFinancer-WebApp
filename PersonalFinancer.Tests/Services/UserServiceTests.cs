@@ -6,10 +6,11 @@
     using PersonalFinancer.Data.Models;
     using PersonalFinancer.Data.Models.Enums;
     using PersonalFinancer.Data.Repositories;
+    using PersonalFinancer.Services.MemoryCacheService;
     using PersonalFinancer.Services.Shared.Models;
     using PersonalFinancer.Services.User;
     using PersonalFinancer.Services.User.Models;
-    using static PersonalFinancer.Services.Infrastructure.Constants.PaginationConstants;
+    using static PersonalFinancer.Services.Constants.PaginationConstants;
 
     [TestFixture]
     internal class UserServiceTests : ServicesUnitTestsBase
@@ -20,9 +21,13 @@
         private IEfRepository<AccountType> accountTypeRepo;
         private IEfRepository<Currency> currenciesRepo;
         private IEfRepository<Transaction> transactionsRepo;
+		private IMemoryCacheService<Category> categoriesCache;
+		private IMemoryCacheService<Currency> currenciesCache;
+		private IMemoryCacheService<AccountType> accountTypesCache;
+		private IMemoryCacheService<Account> accountsCache;
         private IUsersService userService;
 
-        [SetUp]
+		[SetUp]
         public void SetUp()
         {
             this.usersRepo = new EfRepository<ApplicationUser>(this.sqlDbContext);
@@ -31,7 +36,11 @@
             this.accountTypeRepo = new EfRepository<AccountType>(this.sqlDbContext);
             this.currenciesRepo = new EfRepository<Currency>(this.sqlDbContext);
             this.transactionsRepo = new EfRepository<Transaction>(this.sqlDbContext);
-            this.userService = new UsersService(this.usersRepo, this.categoriesRepo, this.accountsRepo, this.accountTypeRepo, this.currenciesRepo, this.mapper, this.memoryCache);
+            this.categoriesCache = new MemoryCacheService<Category>(this.memoryCache, this.categoriesRepo, this.mapper);
+            this.currenciesCache = new MemoryCacheService<Currency>(this.memoryCache, this.currenciesRepo, this.mapper);
+            this.accountTypesCache = new MemoryCacheService<AccountType>(this.memoryCache, this.accountTypeRepo, this.mapper);
+            this.accountsCache = new MemoryCacheService<Account>(this.memoryCache, this.accountsRepo, this.mapper);
+            this.userService = new UsersService(this.usersRepo, this.mapper, this.categoriesCache, this.currenciesCache, this.accountTypesCache, this.accountsCache);
         }
 
         [Test]
@@ -41,7 +50,7 @@
             string expectedFullName = $"{this.User1.FirstName} {this.User1.LastName}";
 
             //Act
-            string actualFullName = await this.userService.UserFullName(this.User1.Id);
+            string actualFullName = await this.userService.UserFullNameAsync(this.User1.Id);
 
             //Assert
             Assert.That(actualFullName, Is.EqualTo(expectedFullName));
@@ -51,7 +60,7 @@
         public void UserFullName_ShouldThrowException_WithInvalidId()
         {
             //Act & Assert
-            Assert.That(async () => await this.userService.UserFullName(Guid.NewGuid()),
+            Assert.That(async () => await this.userService.UserFullNameAsync(Guid.NewGuid()),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -69,7 +78,7 @@
             int expectedTotalCount = await this.usersRepo.All().CountAsync();
 
             //Act
-            UsersServiceModel actual = await this.userService.GetAllUsers(1);
+            UsersServiceModel actual = await this.userService.GetAllUsersAsync(1);
 
             //Assert
             Assert.Multiple(() =>
@@ -93,37 +102,6 @@
         }
 
         [Test]
-        public async Task GetUserAccounts_ShouldReturnUsersAccounts_WithValidId()
-        {
-            //Arrange
-            List<AccountCardServiceModel> expectedAccounts = await this.accountsRepo.All()
-                .Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
-                .OrderBy(a => a.Name)
-                .ProjectTo<AccountCardServiceModel>(this.mapper.ConfigurationProvider)
-                .ToListAsync();
-
-            //Act
-            IEnumerable<AccountCardServiceModel> actualAccounts = await this.userService.GetUserAccounts(this.User1.Id);
-
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(actualAccounts, Is.Not.Null);
-                Assert.That(actualAccounts.Count(), Is.EqualTo(expectedAccounts.Count));
-
-                for (int i = 0; i < expectedAccounts.Count; i++)
-                {
-                    Assert.That(actualAccounts.ElementAt(i).Id,
-                        Is.EqualTo(expectedAccounts.ElementAt(i).Id));
-                    Assert.That(actualAccounts.ElementAt(i).Name,
-                        Is.EqualTo(expectedAccounts.ElementAt(i).Name));
-                    Assert.That(actualAccounts.ElementAt(i).Balance,
-                        Is.EqualTo(expectedAccounts.ElementAt(i).Balance));
-                }
-            });
-        }
-
-        [Test]
         public async Task GetUserAccountsAndCategories_ShouldReturnCorrectData()
         {
             //Arrange
@@ -140,7 +118,7 @@
                 .ToArrayAsync();
 
             //Act
-            UserAccountsAndCategoriesServiceModel actual = await this.userService.GetUserAccountsAndCategories(this.User1.Id);
+            UserAccountsAndCategoriesServiceModel actual = await this.userService.GetUserAccountsAndCategoriesAsync(this.User1.Id);
 
             //Assert
             Assert.Multiple(() =>
@@ -185,7 +163,7 @@
                 .ToArrayAsync();
 
             //Act
-            UserAccountTypesAndCurrenciesServiceModel actual = await this.userService.GetUserAccountTypesAndCurrencies(this.User1.Id);
+            UserAccountTypesAndCurrenciesServiceModel actual = await this.userService.GetUserAccountTypesAndCurrenciesAsync(this.User1.Id);
 
             //Assert
             Assert.Multiple(() =>
@@ -208,64 +186,6 @@
                         Is.EqualTo(expectedCurrencies[i].Id));
                     Assert.That(actual.Currencies.ElementAt(i).Name,
                         Is.EqualTo(expectedCurrencies[i].Name));
-                }
-            });
-        }
-
-        [Test]
-        public async Task GetUsersAccountsCount_ShouldReturnAccountsCount()
-        {
-            //Arrange
-            int expectedCount = await this.accountsRepo.All().CountAsync(a => !a.IsDeleted);
-
-            //Act
-            int actualCount = await this.userService.GetUsersAccountsCount();
-
-            //Assert
-            Assert.That(actualCount, Is.EqualTo(expectedCount));
-        }
-
-        [Test]
-        public async Task GetUserTransactions_ShouldReturnCorrectViewModel_WithValidInput()
-        {
-            //Arrange
-            DateTime startDate = DateTime.Now.AddMonths(-1);
-            DateTime endDate = DateTime.Now;
-
-            TransactionTableServiceModel[] expectedTransactions = await this.transactionsRepo.All()
-                .Where(t => t.OwnerId == this.User1.Id
-                    && t.CreatedOn >= startDate && t.CreatedOn <= endDate)
-                .OrderByDescending(t => t.CreatedOn)
-                .Take(TransactionsPerPage)
-                .ProjectTo<TransactionTableServiceModel>(this.mapper.ConfigurationProvider)
-                .ToArrayAsync();
-
-            int expectedTotalTransactions = await this.transactionsRepo.All()
-                .CountAsync(t => t.OwnerId == this.User1.Id
-                    && t.CreatedOn >= startDate && t.CreatedOn <= endDate);
-
-            //Act
-            TransactionsServiceModel actual = await this.userService.GetUserTransactions(this.User1.Id, startDate, endDate);
-
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(actual, Is.Not.Null);
-                Assert.That(actual.Transactions.Count(), Is.EqualTo(expectedTransactions.Length));
-                Assert.That(actual.TotalTransactionsCount, Is.EqualTo(expectedTotalTransactions));
-
-                for (int i = 0; i < expectedTransactions.Length; i++)
-                {
-                    Assert.That(actual.Transactions.ElementAt(i).Id,
-                        Is.EqualTo(expectedTransactions.ElementAt(i).Id));
-                    Assert.That(actual.Transactions.ElementAt(i).Amount,
-                        Is.EqualTo(expectedTransactions.ElementAt(i).Amount));
-                    Assert.That(actual.Transactions.ElementAt(i).CategoryName,
-                        Is.EqualTo(expectedTransactions.ElementAt(i).CategoryName));
-                    Assert.That(actual.Transactions.ElementAt(i).Reference,
-                        Is.EqualTo(expectedTransactions.ElementAt(i).Reference));
-                    Assert.That(actual.Transactions.ElementAt(i).TransactionType,
-                        Is.EqualTo(expectedTransactions.ElementAt(i).TransactionType.ToString()));
                 }
             });
         }
@@ -314,7 +234,7 @@
                 .ToListAsync();
 
             //Act
-            UserDashboardServiceModel actual = await this.userService.GetUserDashboardData(this.User1.Id, startDate, endDate);
+            UserDashboardServiceModel actual = await this.userService.GetUserDashboardDataAsync(this.User1.Id, startDate, endDate);
 
             //Assert
             Assert.Multiple(() =>
@@ -384,7 +304,7 @@
                 .ToListAsync();
 
             //Act
-            UserDetailsServiceModel actual = await this.userService.UserDetails(this.User1.Id);
+            UserDetailsServiceModel actual = await this.userService.UserDetailsAsync(this.User1.Id);
 
             //Assert
             Assert.Multiple(() =>
@@ -418,7 +338,7 @@
             int expected = await this.usersRepo.All().CountAsync();
 
             //Act
-            int actual = await this.userService.UsersCount();
+            int actual = await this.userService.UsersCountAsync();
 
             //Assert
             Assert.That(actual, Is.EqualTo(expected));

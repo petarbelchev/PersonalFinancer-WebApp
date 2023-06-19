@@ -41,8 +41,8 @@
             if (user == null)
                 return this.NotFound($"Unable to load user with ID '{this.userManager.GetUserId(this.User)}'.");
 
-            _ = await this.userManager.SetTwoFactorEnabledAsync(user, false);
-            _ = await this.userManager.ResetAuthenticatorKeyAsync(user);
+            await this.userManager.SetTwoFactorEnabledAsync(user, false);
+            await this.userManager.ResetAuthenticatorKeyAsync(user);
 
             this.logger.LogInformation("User with ID '{UserId}' has reset their authentication app key.", user.Id);
 

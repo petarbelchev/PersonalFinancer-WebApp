@@ -1,24 +1,24 @@
-﻿namespace PersonalFinancer.Web.Infrastructure.ModelBinders
+﻿namespace PersonalFinancer.Web.ModelBinders
 {
     using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-    public class GuidIdModelBinder : IModelBinder
+    public class DecimalModelBinder : IModelBinder
     {
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
             string? fieldValue = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;
 
-            if (fieldValue != Guid.Empty.ToString())
-            {
-                bindingContext.Result = ModelBindingResult.Success(fieldValue);
-            }
-            else
+            if (decimal.TryParse(fieldValue, out decimal resultValue))
+			{
+				bindingContext.Result = ModelBindingResult.Success(resultValue);
+			}
+			else
             {
                 bindingContext.Result = ModelBindingResult.Failed();
 
                 bindingContext.ModelState.AddModelError(
                     bindingContext.FieldName,
-                    $"{bindingContext.FieldName} is required.");
+                    $"{bindingContext.FieldName} is required and must be a number.");
             }
 
             return Task.CompletedTask;

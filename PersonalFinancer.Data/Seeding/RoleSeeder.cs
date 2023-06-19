@@ -12,13 +12,13 @@
 			if (!await roleManager.RoleExistsAsync(RoleConstants.AdminRoleName))
 			{
 				var adminRole = new IdentityRole<Guid> { Name = RoleConstants.AdminRoleName };
-				_ = await roleManager.CreateAsync(adminRole);
+				await roleManager.CreateAsync(adminRole);
 			}
 
 			if (!await roleManager.RoleExistsAsync(RoleConstants.UserRoleName))
 			{
 				var userRole = new IdentityRole<Guid> { Name = RoleConstants.UserRoleName };
-				_ = await roleManager.CreateAsync(userRole);
+				await roleManager.CreateAsync(userRole);
 			}
 		}
 	}

@@ -8,7 +8,7 @@
     {
         public void Configure(EntityTypeBuilder<Category> builder)
         {
-            _ = builder
+            builder
                 .HasMany(c => c.Transactions)
                 .WithOne(t => t.Category)
                 .OnDelete(DeleteBehavior.Restrict);

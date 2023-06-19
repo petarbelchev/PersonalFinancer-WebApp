@@ -1,9 +1,9 @@
 let paginations = document.getElementsByClassName('pagination');
 
 for (let pagination of paginations) {
-    pagination.addEventListener('click', (e) => {
+    pagination.addEventListener('click', async (e) => {
         if (e.target.tagName == 'A') {
-            getAccounts(e.target.getAttribute('page'));
+            await getAccounts(e.target.getAttribute('page'));
         }
     })
 }
@@ -13,10 +13,19 @@ async function getAccounts(page) {
 
     if (response.status == 200) {
         let model = await response.json();
-        let innerHtml = '';
+        renderAccounts(model);
+        setUpPagination(page, model.pagination);
+    } else {
+        let error = await response.json();
+        alert(`${error.status} ${error.title}`)
+    }
+}
 
-        for (let account of model.accounts) {
-            let div = `
+function renderAccounts(model) {
+    let innerHtml = '';
+
+    for (let account of model.accounts) {
+        let div = `
                 <div class="col-xl-3 col-lg-4 col-sm-6">
 				    <div class="card formField align-items-center">
 					    <div class="d-flex flex-row align-items-center mb-2">
@@ -34,15 +43,8 @@ async function getAccounts(page) {
 			    </div>
             `;
 
-            innerHtml += div;
-        }
-
-        document.querySelector('section').innerHTML = innerHtml;
-
-        setUpPagination(page, model.pagination);
-
-    } else {
-        let error = await response.json();
-        alert(`${error.status} ${error.title}`)
+        innerHtml += div;
     }
+
+    document.querySelector('section').innerHTML = innerHtml;
 }

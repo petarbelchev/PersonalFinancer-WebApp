@@ -29,7 +29,7 @@
 
             //Act
             ApiOutputServiceModel actual =
-                await this.categoryService.CreateEntity(categoryName, ownerId);
+                await this.categoryService.CreateEntityAsync(categoryName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -55,7 +55,7 @@
                 IsDeleted = true
             };
             await this.repo.AddAsync(deletedCategory);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
             int countBefore = await this.repo.All().CountAsync();
 
             string categoryName = deletedCategory.Name;
@@ -68,7 +68,7 @@
 
             //Act
             ApiOutputServiceModel result =
-                await this.categoryService.CreateEntity(categoryName, ownerId);
+                await this.categoryService.CreateEntityAsync(categoryName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -94,7 +94,7 @@
             };
 
             await this.repo.AddAsync(user2Category);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
             int countBefore = await this.repo.All().CountAsync();
 
             string categoryName = user2Category.Name;
@@ -105,7 +105,7 @@
 
             //Act
             ApiOutputServiceModel result =
-                await this.categoryService.CreateEntity(categoryName, ownerId);
+                await this.categoryService.CreateEntityAsync(categoryName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -127,7 +127,7 @@
             Guid ownerId = this.User1.Id;
 
             //Act & Assert
-            Assert.That(async () => await this.categoryService.CreateEntity(categoryName, ownerId),
+            Assert.That(async () => await this.categoryService.CreateEntityAsync(categoryName, ownerId),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Entity with the same name exist."));
         }
 
@@ -142,7 +142,7 @@
                 OwnerId = this.User1.Id
             };
             await this.repo.AddAsync(newCategory);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Assert
             Assert.Multiple(async () =>
@@ -152,7 +152,7 @@
             });
 
             //Act
-            await this.categoryService.DeleteEntity(newCategory.Id, this.User1.Id, isUserAdmin: false);
+            await this.categoryService.DeleteEntityAsync(newCategory.Id, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(async () =>
@@ -173,7 +173,7 @@
                 OwnerId = this.User1.Id
             };
             await this.repo.AddAsync(newCategory);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Assert
             Assert.Multiple(async () =>
@@ -183,7 +183,7 @@
             });
 
             //Act
-            await this.categoryService.DeleteEntity(newCategory.Id, this.User2.Id, isUserAdmin: true);
+            await this.categoryService.DeleteEntityAsync(newCategory.Id, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(async () =>
@@ -198,7 +198,7 @@
         {
             //Act & Assert
             Assert.That(async () => await this.categoryService
-                  .DeleteEntity(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
+                  .DeleteEntityAsync(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -213,11 +213,11 @@
                 OwnerId = this.User2.Id
             };
             await this.repo.AddAsync(user2Category);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Act & Assert
             Assert.That(async () => await this.categoryService
-                  .DeleteEntity(user2Category.Id, this.User1.Id, isUserAdmin: false),
+                  .DeleteEntityAsync(user2Category.Id, this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Unauthorized."));
         }
     }

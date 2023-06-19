@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Web.Infrastructure.ModelBinders
+﻿namespace PersonalFinancer.Web.ModelBinders
 {
     using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -9,10 +9,10 @@
             string? fieldValue = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;
 
             if (DateTime.TryParse(fieldValue, out DateTime resultValue))
-            {
-                bindingContext.Result = ModelBindingResult.Success(resultValue);
-            }
-            else
+			{
+				bindingContext.Result = ModelBindingResult.Success(resultValue);
+			}
+			else
             {
                 bindingContext.Result = ModelBindingResult.Failed();
 

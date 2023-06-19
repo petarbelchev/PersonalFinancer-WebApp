@@ -30,7 +30,7 @@
 
             //Act
             ApiOutputServiceModel actual =
-                await this.accountTypeService.CreateEntity(accountTypeName, ownerId);
+                await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -57,7 +57,7 @@
             };
 
             await this.repo.AddAsync(deletedAccType);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
             int countBefore = await this.repo.All().CountAsync();
             string accountTypeName = deletedAccType.Name;
             Guid ownerId = this.User1.Id;
@@ -69,7 +69,7 @@
 
             //Act
             ApiOutputServiceModel result =
-                await this.accountTypeService.CreateEntity(accountTypeName, ownerId);
+                await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
             int countAfter = await this.repo.All().CountAsync();
 
             //Assert
@@ -94,7 +94,7 @@
             };
 
             await this.repo.AddAsync(user2AccType);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
             int countBefore = await this.repo.All().CountAsync();
 
             string accountTypeName = user2AccType.Name;
@@ -105,7 +105,7 @@
 
             //Act
             ApiOutputServiceModel result =
-                await this.accountTypeService.CreateEntity(accountTypeName, ownerId);
+                await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -127,7 +127,7 @@
             Guid ownerId = this.User1.Id;
 
             //Act & Assert
-            Assert.That(async () => await this.accountTypeService.CreateEntity(accountTypeName, ownerId),
+            Assert.That(async () => await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Entity with the same name exist."));
         }
 
@@ -142,7 +142,7 @@
                 OwnerId = this.User1.Id
             };
             await this.repo.AddAsync(newAccType);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Assert
             Assert.Multiple(async () =>
@@ -152,7 +152,7 @@
             });
 
             //Act
-            await this.accountTypeService.DeleteEntity(newAccType.Id, this.User1.Id, isUserAdmin: false);
+            await this.accountTypeService.DeleteEntityAsync(newAccType.Id, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(async () =>
@@ -173,7 +173,7 @@
                 OwnerId = this.User1.Id
             };
             await this.repo.AddAsync(newAccType);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Assert
             Assert.Multiple(async () =>
@@ -183,7 +183,7 @@
             });
 
             //Act
-            await this.accountTypeService.DeleteEntity(newAccType.Id, this.User2.Id, isUserAdmin: true);
+            await this.accountTypeService.DeleteEntityAsync(newAccType.Id, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(async () =>
@@ -198,7 +198,7 @@
         {
             //Act & Assert
             Assert.That(async () => await this.accountTypeService
-                  .DeleteEntity(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
+                  .DeleteEntityAsync(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -213,11 +213,11 @@
                 OwnerId = this.User2.Id
             };
             await this.repo.AddAsync(user2AccType);
-            _ = await this.repo.SaveChangesAsync();
+            await this.repo.SaveChangesAsync();
 
             //Act & Assert
             Assert.That(async () => await this.accountTypeService
-                  .DeleteEntity(user2AccType.Id, this.User1.Id, isUserAdmin: false),
+                  .DeleteEntityAsync(user2AccType.Id, this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Unauthorized."));
         }
     }

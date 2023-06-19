@@ -9,21 +9,21 @@
     {
         public void Configure(EntityTypeBuilder<ApplicationUser> builder)
         {
-            _ = builder
+            builder
                .Property(p => p.UserName)
                .HasMaxLength(UserNameMaxLength)
                .IsRequired();
 
-            _ = builder
+            builder
                .Property(p => p.NormalizedUserName)
                .HasMaxLength(UserNameMaxLength)
                .IsRequired();
 
-            _ = builder
+            builder
                .Property(p => p.PhoneNumber)
                .HasMaxLength(PhoneNumberLength);
 
-            _ = builder
+            builder
                .HasMany(a => a.Transactions)
                .WithOne(a => a.Owner)
                .OnDelete(DeleteBehavior.Restrict);

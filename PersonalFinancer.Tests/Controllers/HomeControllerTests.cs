@@ -11,7 +11,7 @@
     using PersonalFinancer.Web.Models.Home;
     using PersonalFinancer.Web.Models.Shared;
     using static PersonalFinancer.Data.Constants;
-    using static PersonalFinancer.Web.Infrastructure.Constants;
+    using static PersonalFinancer.Web.Constants;
 
     [TestFixture]
     internal class HomeControllerTests : ControllersUnitTestsBase
@@ -69,14 +69,15 @@
         [SetUp]
         public void SetUp()
         {
-            _ = this.usersServiceMock.Setup(x => x.GetUserDashboardData(
-                    this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+            this.usersServiceMock.Setup(x => x
+                .GetUserDashboardDataAsync(this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
                 .ReturnsAsync(this.expUserDashboard);
 
-            _ = this.usersServiceMock.Setup(x => x.GetUserAccounts(this.userId))
+            this.accountsInfoServiceMock.Setup(x => x
+                .GetUserAccountsAsync(this.userId))
                 .ReturnsAsync(this.expAccountCard);
 
-            this.controller = new HomeController(this.usersServiceMock.Object)
+            this.controller = new HomeController(this.usersServiceMock.Object, this.accountsInfoServiceMock.Object)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -92,8 +93,8 @@
         public async Task Index_ShouldReturnCorrectModel_WhenUserIsAuthenticatedUser()
         {
             //Arrange			
-            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
-            _ = this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(true);
+            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(true);
 
             //Act
             var viewResult = (ViewResult)await this.controller.Index();
@@ -161,8 +162,8 @@
         public async Task Index_ShouldReturnEmptyResult_WhenUserIsNotAuthenticated()
         {
             //Arrange
-            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
-            _ = this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(false);
+            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(false);
 
             //Act
             var viewResult = (ViewResult)await this.controller.Index();
@@ -179,7 +180,7 @@
         public async Task Index_ShouldRedirectToAdminArea_WhenUserIsAdmin()
         {
             //Arrange
-            _ = this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
+            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
 
             //Act
             var redirectResult = (LocalRedirectResult)await this.controller.Index();
@@ -281,7 +282,7 @@
             this.controller.ModelState.AddModelError("error", errorMessage);
             var viewResult = (ViewResult)await this.controller.Index(inputModel);
             var actual = viewResult.Model as UserDashboardViewModel;
-            Microsoft.AspNetCore.Mvc.ModelBinding.ModelErrorCollection modelStateErrors = viewResult.ViewData.ModelState.Values.First().Errors;
+            var modelStateErrors = viewResult.ViewData.ModelState.Values.First().Errors;
 
             //Assert
             Assert.Multiple(() =>

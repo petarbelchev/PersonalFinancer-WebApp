@@ -12,10 +12,11 @@
 	public class TransactionsController : Web.Controllers.TransactionsController
 	{
 		public TransactionsController(
-			IAccountsService accountsService,
+			IAccountsUpdateService accountsService,
+			IAccountsInfoService accountsInfoService,
 			IUsersService usersService,
 			IMapper mapper)
-			: base(accountsService, usersService, mapper)
+			: base(accountsService, accountsInfoService, usersService, mapper)
 		{ }
 	}
 }

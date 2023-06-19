@@ -1,64 +1,34 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Services.ApiService;
-    using PersonalFinancer.Services.ApiService.Models;
-    using PersonalFinancer.Web.Infrastructure.Extensions;
-    using PersonalFinancer.Web.Models.Api;
-    using System.ComponentModel.DataAnnotations;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Services.ApiService;
+	using PersonalFinancer.Web.Models.Api;
+	using System.ComponentModel.DataAnnotations;
 
-    [Route("api/currencies")]
+	[Route("api/currencies")]
     [ApiController]
-    public class CurrenciesApiController : BaseApiController
+    public class CurrenciesApiController : BaseApiController<Currency>
     {
-        private readonly IApiService<Currency> apiService;
-
         public CurrenciesApiController(IApiService<Currency> apiService)
-            => this.apiService = apiService;
+            : base(apiService)
+        { }
 
         [HttpPost]
-        public async Task<ActionResult> Create(CurrencyInputModel inputModel)
+        public async Task<IActionResult> CreateCurrency(CurrencyInputModel inputModel)
         {
-            if (!this.ModelState.IsValid)
-                return this.BadRequest(this.GetErrors(this.ModelState.Values));
-
             try
             {
-                ApiOutputServiceModel model = await this.apiService.CreateEntity(
-                    inputModel.Name,
-                    inputModel.OwnerId ?? throw new InvalidOperationException());
-
-                return this.Created(string.Empty, model);
+                return await this.CreateEntityAsync(inputModel);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException)
             {
-                return this.BadRequest(ex.Message);
+                return this.BadRequest($"Currency with the name \"{inputModel.Name}\" exist.");
             }
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete([Required] Guid? id)
-        {
-            if (!this.ModelState.IsValid)
-                return this.BadRequest(this.GetErrors(this.ModelState.Values));
-
-            try
-            {
-                await this.apiService.DeleteEntity(
-                    id ?? throw new InvalidOperationException(),
-                    this.User.IdToGuid(), this.User.IsAdmin());
-
-                return this.NoContent();
-            }
-            catch (ArgumentException)
-            {
-                return this.Unauthorized();
-            }
-            catch (InvalidOperationException)
-            {
-                return this.BadRequest();
-            }
-        }
+        public async Task<IActionResult> DeleteCurrency([Required] Guid? id)
+            => await this.DeleteEntityAsync(id);
     }
 }

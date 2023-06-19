@@ -6,7 +6,7 @@
     using PersonalFinancer.Services.Messages;
     using PersonalFinancer.Services.Messages.Models;
     using PersonalFinancer.Services.User;
-    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Message;
     using static PersonalFinancer.Data.Constants.RoleConstants;
 
@@ -50,7 +50,7 @@
                 .CreateAsync(new MessageInputServiceModel
                 {
                     AuthorId = this.User.Id(),
-                    AuthorName = await this.usersService.UserFullName(this.User.IdToGuid()),
+                    AuthorName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
                     Subject = model.Subject,
                     Content = model.Content
                 });
@@ -110,11 +110,11 @@
                     return this.View(viewModel);
                 }
 
-                _ = await this.messagesService.AddReplyAsync(new ReplyInputServiceModel
+                await this.messagesService.AddReplyAsync(new ReplyInputServiceModel
                 {
                     MessageId = inputModel.Id,
                     AuthorId = this.User.Id(),
-                    AuthorName = await this.usersService.UserFullName(this.User.IdToGuid()),
+                    AuthorName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
                     IsAuthorAdmin = this.User.IsAdmin(),
                     Content = inputModel.ReplyContent
                 });

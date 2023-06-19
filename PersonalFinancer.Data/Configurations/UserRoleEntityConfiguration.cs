@@ -9,12 +9,12 @@
     {
         public void Configure(EntityTypeBuilder<IdentityRole<Guid>> builder)
         {
-            _ = builder
+            builder
                 .Property(p => p.Name)
                 .HasMaxLength(NameMaxLength)
                 .IsRequired();
 
-            _ = builder
+            builder
                 .Property(p => p.NormalizedName)
                 .HasMaxLength(NameMaxLength)
                 .IsRequired();

@@ -2,8 +2,8 @@
 {
     using PersonalFinancer.Services.Shared.Models;
     using PersonalFinancer.Web.Models.Shared;
-    using static PersonalFinancer.Services.Infrastructure.Constants;
-    using static PersonalFinancer.Web.Infrastructure.Constants;
+    using static PersonalFinancer.Services.Constants;
+    using static PersonalFinancer.Web.Constants;
 
     public class UsersAccountCardsViewModel
 	{

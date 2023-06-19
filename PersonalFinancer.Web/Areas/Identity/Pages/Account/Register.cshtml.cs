@@ -99,7 +99,7 @@
 
                 if (creationResult.Succeeded)
                 {
-                    _ = await this.userManager.AddToRoleAsync(user, RoleConstants.UserRoleName);
+                    await this.userManager.AddToRoleAsync(user, RoleConstants.UserRoleName);
                     this.logger.LogInformation("User created a new account with password.");
 
                     if (this.userManager.Options.SignIn.RequireConfirmedAccount)

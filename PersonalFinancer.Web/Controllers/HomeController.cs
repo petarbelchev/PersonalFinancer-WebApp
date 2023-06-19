@@ -2,21 +2,28 @@
 {
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Services.Accounts;
     using PersonalFinancer.Services.User;
     using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Infrastructure.Extensions;
+    using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Home;
     using PersonalFinancer.Web.Models.Shared;
-    using static PersonalFinancer.Web.Infrastructure.Constants.HostConstants;
+    using static PersonalFinancer.Web.Constants.HostConstants;
 
     public class HomeController : Controller
     {
         private readonly IUsersService userService;
+        private readonly IAccountsInfoService accountsInfoService;
 
-        public HomeController(IUsersService userService)
-            => this.userService = userService;
+		public HomeController(
+            IUsersService userService,
+            IAccountsInfoService accountsInfoService)
+		{
+			this.userService = userService;
+            this.accountsInfoService = accountsInfoService;
+		}
 
-        public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index()
         {
             if (this.User.IsAdmin())
                 return this.LocalRedirect("/Admin");
@@ -27,7 +34,7 @@
                 DateTime endDate = DateTime.Now;
 
                 UserDashboardServiceModel userDashboardData = await this.userService
-                    .GetUserDashboardData(this.User.IdToGuid(), startDate, endDate);
+                    .GetUserDashboardDataAsync(this.User.IdToGuid(), startDate, endDate);
 
                 var viewModel = new UserDashboardViewModel
                 {
@@ -56,12 +63,12 @@
 
             if (!this.ModelState.IsValid)
             {
-                viewModel.Accounts = await this.userService.GetUserAccounts(this.User.IdToGuid());
+                viewModel.Accounts = await this.accountsInfoService.GetUserAccountsAsync(this.User.IdToGuid());
                 return this.View(viewModel);
             }
 
             UserDashboardServiceModel userDashboardData =
-                await this.userService.GetUserDashboardData(this.User.IdToGuid(), viewModel.StartDate, viewModel.EndDate);
+                await this.userService.GetUserDashboardDataAsync(this.User.IdToGuid(), viewModel.StartDate, viewModel.EndDate);
             
             viewModel.Accounts = userDashboardData.Accounts;
             viewModel.Transactions = userDashboardData.LastTransactions;

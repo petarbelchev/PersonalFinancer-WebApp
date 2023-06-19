@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using PersonalFinancer.Data.Models;
 @using PersonalFinancer.Services.User;
-@using PersonalFinancer.Web.Infrastructure.Extensions;
+@using PersonalFinancer.Web.Extensions;
 
 <ul class="navbar-nav">
 	@if (User?.Identity?.IsAuthenticated ?? false)
@@ -29,10 +29,14 @@
 				@User.GetUserName()
 			</a>
 			<ul class="dropdown-menu dropdown-menu-end">
-				<li><a class="nav-link btn btn-link dropdown-item text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" 
-					style="text-decoration: none;">Profile</a></li>
 				<li>
-					<a class="nav-link btn btn-link dropdown-item text-dark" asp-area="Identity" asp-page="/Account/Logout">Logout</a>
+					<a class="nav-link btn btn-link dropdown-item text-dark" asp-area="Identity" asp-page="/Account/Manage/Index"
+					   style="text-decoration: none;">Profile</a>
+				</li>
+				<li>
+					<form method="post">
+						<input type="submit" class="nav-link btn btn-link dropdown-item text-dark" asp-area="Identity" asp-page="/Account/Logout" value="Logout" />
+					</form>
 				</li>
 			</ul>
 		</li>
