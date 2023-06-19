@@ -49,7 +49,7 @@
 		protected Currency Curr2User1 { get; private set; } = null!;
 		protected Currency Curr3User1 { get; private set; } = null!;
 
-		protected Transaction Transaction1User1 { get; private set; } = null!;
+		protected Transaction InitialTransaction1User1 { get; private set; } = null!;
 		protected Transaction Transaction2User1 { get; private set; } = null!;
 		protected Transaction Transaction3User1 { get; private set; } = null!;
 		protected Transaction Transaction4User1 { get; private set; } = null!;
@@ -202,7 +202,7 @@
 
 			// Transactions
 			// Account 1
-			this.Transaction1User1 = new Transaction()
+			this.InitialTransaction1User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
 				OwnerId = user1Id,
@@ -273,7 +273,7 @@
 			};
 
 			await this.sqlDbContext.Transactions.AddRangeAsync(
-				this.Transaction1User1, this.Transaction2User1, this.Transaction3User1,
+				this.InitialTransaction1User1, this.Transaction2User1, this.Transaction3User1,
 				this.Transaction4User1, this.Transaction5User1, this.Transaction6User1);
 
 			await this.sqlDbContext.SaveChangesAsync();

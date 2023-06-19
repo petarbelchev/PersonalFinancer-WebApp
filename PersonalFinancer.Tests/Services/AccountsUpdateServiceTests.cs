@@ -1261,5 +1261,42 @@
 			Assert.That(async () => await this.accountsUpdateService.EditTransactionAsync(transaction.Id, model),
 			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Category is not valid."));
 		}
+
+		[Test]
+		public async Task EditTransaction_ShouldThrowException_WhenTransactionIsInitial()
+		{
+			//Arrange
+			var transaction = new Transaction
+			{
+				Id = Guid.NewGuid(),
+				OwnerId = this.User1.Id,
+				AccountId = this.Account1User1.Id,
+				Amount = 123,
+				CategoryId = this.CatInitialBalance.Id,
+				CreatedOn = DateTime.UtcNow,
+				Reference = this.CatInitialBalance.Name,
+				TransactionType = TransactionType.Income,
+                IsInitialBalance = true
+			};
+
+			await this.transactionsRepo.AddAsync(transaction);
+			this.Account1User1.Balance += transaction.Amount;
+			await this.transactionsRepo.SaveChangesAsync();
+
+			var model = new TransactionFormShortServiceModel
+			{
+				OwnerId = this.User1.Id,
+				AccountId = this.Account1User1.Id,
+				Amount = 321,
+				CategoryId = this.CatInitialBalance.Id,
+				CreatedOn = DateTime.UtcNow,
+				Reference = "Edited transaction with invalid category id",
+				TransactionType = TransactionType.Income
+			};
+
+			// Act & Assert
+			Assert.That(async () => await this.accountsUpdateService.EditTransactionAsync(transaction.Id, model),
+			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Cannot edit initial balance transaction."));
+		}
 	}
 }

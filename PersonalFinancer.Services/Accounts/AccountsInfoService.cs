@@ -159,13 +159,13 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction does not exist.
+		/// Throws InvalidOperationException when Transaction does not exist or is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<TransactionFormServiceModel> GetTransactionFormDataAsync(Guid transactionId)
 		{
 			return await this.transactionsRepo.All()
-				.Where(t => t.Id == transactionId)
+				.Where(t => t.Id == transactionId && !t.IsInitialBalance)
 				.Select(t => new TransactionFormServiceModel
 				{
 					OwnerId = t.OwnerId,
@@ -176,22 +176,14 @@
 					TransactionType = t.TransactionType,
 					Reference = t.Reference,
 					IsInitialBalance = t.IsInitialBalance,
-					UserAccounts = t.Account.IsDeleted || t.IsInitialBalance ?
-						new List<AccountServiceModel>()
-						{
-							new AccountServiceModel { Id = t.AccountId, Name = t.Account.Name }
-						}
-						: t.Owner.Accounts.Where(a => !a.IsDeleted)
-							.OrderBy(a => a.Name)
-							.Select(a => this.mapper.Map<AccountServiceModel>(a)),
-					UserCategories = t.IsInitialBalance ?
-						new List<CategoryServiceModel>()
-						{
-							new CategoryServiceModel { Id = t.CategoryId, Name = t.Category.Name }
-						}
-						: t.Owner.Categories.Where(c => !c.IsDeleted)
-							.OrderBy(c => c.Name)
-							.Select(c => this.mapper.Map<CategoryServiceModel>(c))
+					UserAccounts = t.Owner.Accounts
+						.Where(a => !a.IsDeleted)
+						.OrderBy(a => a.Name)
+						.Select(a => this.mapper.Map<AccountServiceModel>(a)),
+					UserCategories = t.Owner.Categories
+						.Where(c => !c.IsDeleted)
+						.OrderBy(c => c.Name)
+						.Select(c => this.mapper.Map<CategoryServiceModel>(c))
 				})
 				.FirstAsync();
 		}

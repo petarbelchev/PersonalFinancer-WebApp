@@ -191,7 +191,8 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction or Account does not exist.
+		/// Throws InvalidOperationException when Transaction or Account does not exist
+		/// or Transaction is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task EditTransactionAsync(Guid id, TransactionFormShortServiceModel model)
@@ -199,6 +200,9 @@
 			Transaction transactionInDb = await this.transactionsRepo.All()
 				.Include(t => t.Account)
 				.FirstAsync(t => t.Id == id);
+
+			if (transactionInDb.IsInitialBalance)
+				throw new InvalidOperationException("Cannot edit initial balance transaction.");
 
 			await this.ValidateCategory(model.CategoryId, model.OwnerId);
 

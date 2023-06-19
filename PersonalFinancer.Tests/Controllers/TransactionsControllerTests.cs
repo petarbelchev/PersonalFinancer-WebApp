@@ -695,7 +695,7 @@
         }
 
         [Test]
-        public async Task EditTransaction_OnGet_ShouldReturnTransactionFormModelAndTransactionIsInitial()
+        public async Task EditTransaction_OnGet_ShouldThrowException_WhenTransactionIsInitial()
         {
             //Arrange
             var transactionId = Guid.NewGuid();
@@ -719,23 +719,16 @@
 
             this.accountsInfoServiceMock.Setup(x => x
                 .GetTransactionFormDataAsync(transactionId))
-                .ReturnsAsync(serviceReturnDto);
+                .Throws<InvalidOperationException>();
 
             //Act
-            var result = (ViewResult)await this.controller.EditTransaction(transactionId);
-            var model = result.Model as TransactionFormModel;
+            var result = (BadRequestResult)await this.controller.EditTransaction(transactionId);
 
             //Assert
             Assert.Multiple(() =>
             {
-                Assert.That(model, Is.Not.Null);
-
-                CheckTransactionFormModel(model!, serviceReturnDto);
-
-                CheckUserAccountsAndCategories(model!, this.userAccAndCatDtoInitialTransaction);
-
-                Assert.That(model!.TransactionTypes, Has.Length.EqualTo(1));
-                Assert.That(model.TransactionTypes[0], Is.EqualTo(serviceReturnDto.TransactionType));
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result.StatusCode, Is.EqualTo(400));
             });
         }
 

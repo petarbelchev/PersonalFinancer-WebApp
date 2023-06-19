@@ -30,7 +30,7 @@
 		Task<string> GetAccountNameAsync(Guid accountId, Guid userId, bool isUserAdmin);
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction does not exist.
+		/// Throws InvalidOperationException when Transaction does not exist or is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task<TransactionFormServiceModel> GetTransactionFormDataAsync(Guid transactionId);

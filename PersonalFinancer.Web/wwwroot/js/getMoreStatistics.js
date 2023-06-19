@@ -1,4 +1,4 @@
-async function moreStatistics(url) {
+async function getMoreStatistics(url) {
 
     let response = await fetch(url);
 

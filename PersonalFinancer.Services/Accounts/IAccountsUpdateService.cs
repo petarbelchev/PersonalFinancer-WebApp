@@ -42,10 +42,11 @@
         /// <exception cref="InvalidOperationException"></exception>
         Task EditAccountAsync(Guid accountId, AccountFormShortServiceModel model);
 
-        /// <summary>
-        /// Throws InvalidOperationException when Transaction or Account does not exist.
-        /// </summary>
-        /// <exception cref="InvalidOperationException"></exception>
-        Task EditTransactionAsync(Guid id, TransactionFormShortServiceModel model);
+		/// <summary>
+		/// Throws InvalidOperationException when Transaction or Account does not exist
+		/// or Transaction is initial.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		Task EditTransactionAsync(Guid id, TransactionFormShortServiceModel model);
 	}
 }
