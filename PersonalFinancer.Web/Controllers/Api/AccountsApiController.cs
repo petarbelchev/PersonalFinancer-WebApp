@@ -1,16 +1,15 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Web.Extensions;
-    using PersonalFinancer.Web.Models.Account;
-    using PersonalFinancer.Web.Models.Shared;
-    using System.Globalization;
-    using static PersonalFinancer.Data.Constants;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Services.Accounts;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.Models.Account;
+	using PersonalFinancer.Web.Models.Shared;
+	using static PersonalFinancer.Data.Constants;
 
-    [Authorize]
+	[Authorize]
 	[Route("api/accounts")]
 	[ApiController]
 	public class AccountsApiController : ControllerBase
@@ -45,15 +44,7 @@
 		[HttpPost("transactions")]
 		public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
 		{
-			// TODO: Try to use input model with DateTime props
-
-			bool isStartDateValid = DateTime.TryParse(
-				inputModel.StartDate, null, DateTimeStyles.None, out DateTime startDate);
-
-			bool isEndDateValid = DateTime.TryParse(
-				inputModel.EndDate, null, DateTimeStyles.None, out DateTime endDate);
-
-			if (!this.ModelState.IsValid || !isStartDateValid || !isEndDateValid || startDate > endDate)
+			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 
 			if (!this.User.IsAdmin() && inputModel.OwnerId != this.User.IdToGuid())
@@ -62,7 +53,7 @@
 			TransactionsServiceModel accountTransactions =
 				await this.accountsInfoService.GetAccountTransactionsAsync(
 					inputModel.Id ?? throw new InvalidOperationException(),
-					startDate, endDate, inputModel.Page);
+					inputModel.StartDate, inputModel.EndDate, inputModel.Page);
 
 			var viewModel = new TransactionsViewModel
 			{

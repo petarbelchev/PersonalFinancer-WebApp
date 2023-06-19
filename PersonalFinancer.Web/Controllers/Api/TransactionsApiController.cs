@@ -1,16 +1,15 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Web.Extensions;
-    using PersonalFinancer.Web.Models.Shared;
-    using PersonalFinancer.Web.Models.Transaction;
-    using System.Globalization;
-    using static PersonalFinancer.Data.Constants.RoleConstants;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Services.Accounts;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.Models.Shared;
+	using PersonalFinancer.Web.Models.Transaction;
+	using static PersonalFinancer.Data.Constants.RoleConstants;
 
-    [Authorize]
+	[Authorize]
 	[Route("api/transactions")]
 	[ApiController]
 	public class TransactionsApiController : ControllerBase
@@ -24,13 +23,7 @@
 		[HttpPost]
 		public async Task<IActionResult> GetUserTransactions(UserTransactionsApiInputModel inputModel)
 		{
-			bool isStartDateValid = DateTime.TryParse(
-				inputModel.StartDate, null, DateTimeStyles.None, out DateTime startDate);
-
-			bool isEndDateValid = DateTime.TryParse(
-				inputModel.EndDate, null, DateTimeStyles.None, out DateTime endDate);
-
-			if (!this.ModelState.IsValid || !isStartDateValid || !isEndDateValid || startDate > endDate)
+			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 
 			Guid userId = this.User.IdToGuid();
@@ -43,7 +36,7 @@
 			try
 			{
 				userTransactions = await this.accountsInfoService
-					.GetUserTransactionsAsync(userId, startDate, endDate, inputModel.Page);
+					.GetUserTransactionsAsync(userId, inputModel.StartDate, inputModel.EndDate, inputModel.Page);
 			}
 			catch (InvalidOperationException)
 			{

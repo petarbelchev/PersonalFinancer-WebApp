@@ -1,17 +1,12 @@
 ﻿namespace PersonalFinancer.Web.Models.Transaction
 {
-    using System.ComponentModel.DataAnnotations;
+	using PersonalFinancer.Web.Models.Shared;
+	using System.ComponentModel.DataAnnotations;
 
-    public class UserTransactionsApiInputModel
+    public class UserTransactionsApiInputModel : DateFilterModel
     {
         [Required]
         public Guid? Id { get; set; }
-
-        [Required]
-        public string StartDate { get; set; } = null!;
-
-        [Required]
-        public string EndDate { get; set; } = null!;
 
         [Required]
         public int Page { get; set; }
