@@ -13,17 +13,26 @@
 	{
 		private readonly IEfRepository<Account> accountsRepo;
 		private readonly IEfRepository<Transaction> transactionsRepo;
+		private readonly IEfRepository<AccountType> accountTypesRepo;
+		private readonly IEfRepository<Currency> currenciesRepo;
+		private readonly IEfRepository<Category> categoriesRepo;
 		private readonly IMapper mapper;
 		private readonly IMemoryCache memoryCache;
 
 		public AccountsUpdateService(
 			IEfRepository<Account> accountRepository,
 			IEfRepository<Transaction> transactionRepository,
+			IEfRepository<AccountType> accountTypesRepo,
+			IEfRepository<Currency> currenciesRepo,
+			IEfRepository<Category> categoriesRepo,
 			IMapper mapper,
 			IMemoryCache memoryCache)
 		{
 			this.accountsRepo = accountRepository;
 			this.transactionsRepo = transactionRepository;
+			this.accountTypesRepo = accountTypesRepo;
+			this.currenciesRepo = currenciesRepo;
+			this.categoriesRepo = categoriesRepo;
 			this.mapper = mapper;
 			this.memoryCache = memoryCache;
 		}
@@ -35,10 +44,10 @@
 		/// <exception cref="ArgumentException"></exception>
 		public async Task<Guid> CreateAccountAsync(AccountFormShortServiceModel model)
 		{
-			// TODO: Validate Type and Currency!
-
 			if (await this.IsNameExistAsync(model.Name, model.OwnerId))
 				throw new ArgumentException($"The User already have Account with \"{model.Name}\" name.");
+
+			await this.ValidateAccountTypeAndCurrency(model);
 
 			Account newAccount = this.mapper.Map<Account>(model);
 			newAccount.Id = Guid.NewGuid();
@@ -66,10 +75,10 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<Guid> CreateTransactionAsync(TransactionFormShortServiceModel model)
 		{
-			// TODO: Validate Category!
-
 			Account account = await this.accountsRepo.All()
 				.FirstAsync(a => a.Id == model.AccountId);
+
+			await this.ValidateCategory(model.CategoryId, model.OwnerId);
 
 			model.CreatedOn = model.CreatedOn.ToUniversalTime();
 
@@ -142,13 +151,13 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task EditAccountAsync(Guid accountId, AccountFormShortServiceModel model)
 		{
-			// TODO: Validate Type and Currency!
-
 			Account account = await this.accountsRepo.All()
 				.FirstAsync(a => a.Id == accountId);
 
 			if (account.Name != model.Name && await this.IsNameExistAsync(model.Name, model.OwnerId))
 				throw new ArgumentException($"The User already have Account with \"{model.Name}\" name.");
+
+			await this.ValidateAccountTypeAndCurrency(model);
 
 			account.Name = model.Name.Trim();
 			account.CurrencyId = model.CurrencyId;
@@ -187,11 +196,11 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task EditTransactionAsync(Guid id, TransactionFormShortServiceModel model)
 		{
-			// TODO: Validate Category!
-
 			Transaction transactionInDb = await this.transactionsRepo.All()
 				.Include(t => t.Account)
 				.FirstAsync(t => t.Id == id);
+
+			await this.ValidateCategory(model.CategoryId, model.OwnerId);
 
 			if (model.AccountId != transactionInDb.AccountId
 				|| model.TransactionType != transactionInDb.TransactionType
@@ -260,6 +269,36 @@
 				transaction.TransactionType == TransactionType.Income
 					? TransactionType.Expense
 					: TransactionType.Income);
+		}
+
+		private async Task ValidateAccountTypeAndCurrency(AccountFormShortServiceModel model)
+		{
+			bool isAccountTypeValid = await this.accountTypesRepo.All().AnyAsync(at =>
+					at.Id == model.AccountTypeId
+					&& at.OwnerId == model.OwnerId
+					&& at.IsDeleted == false);
+
+			if (!isAccountTypeValid)
+				throw new InvalidOperationException("Account Type is not valid.");
+
+			bool isCurrencyValid = await this.currenciesRepo.All().AnyAsync(c =>
+					c.Id == model.CurrencyId
+					&& c.OwnerId == model.OwnerId
+					&& c.IsDeleted == false);
+
+			if (!isCurrencyValid)
+				throw new InvalidOperationException("Currency is not valid.");
+		}
+
+		private async Task ValidateCategory(Guid categoryId, Guid ownerId)
+		{
+			bool isCategoryValid = await this.categoriesRepo.All().AnyAsync(c =>
+				c.Id == categoryId
+				&& c.OwnerId == ownerId
+				&& c.IsDeleted == false);
+
+			if (!isCategoryValid)
+				throw new InvalidOperationException("Category is not valid.");
 		}
 	}
 }
