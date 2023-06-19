@@ -18,14 +18,12 @@
             this.logger = logger;
         }
 
-        public async Task<IActionResult> OnPost(string? returnUrl = null)
+        public async Task<IActionResult> OnPost()
         {
             await this.signInManager.SignOutAsync();
             this.logger.LogInformation("User logged out.");
 
-            return returnUrl != null 
-                ? this.LocalRedirect(returnUrl) 
-                : this.RedirectToPage();
+            return this.LocalRedirect("/");
         }
     }
 }
