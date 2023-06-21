@@ -1,16 +1,16 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.User;
-    using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Extensions;
-    using PersonalFinancer.Web.Models.Home;
-    using PersonalFinancer.Web.Models.Shared;
-    using static PersonalFinancer.Web.Constants.HostConstants;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Services.Accounts;
+	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.Models.Home;
+	using static PersonalFinancer.Web.Constants.HostConstants;
 
-    public class HomeController : Controller
+	public class HomeController : Controller
     {
         private readonly IUsersService userService;
         private readonly IAccountsInfoService accountsInfoService;
@@ -57,18 +57,21 @@
         {
             var viewModel = new UserDashboardViewModel
             {
-                StartDate = inputModel.StartDate.ToUniversalTime(),
-                EndDate = inputModel.EndDate.ToUniversalTime()
+                StartDate = inputModel.StartDate?.ToUniversalTime(),
+                EndDate = inputModel.EndDate?.ToUniversalTime()
             };
 
             if (!this.ModelState.IsValid)
             {
                 viewModel.Accounts = await this.accountsInfoService.GetUserAccountsAsync(this.User.IdToGuid());
+
                 return this.View(viewModel);
             }
 
             UserDashboardServiceModel userDashboardData =
-                await this.userService.GetUserDashboardDataAsync(this.User.IdToGuid(), viewModel.StartDate, viewModel.EndDate);
+                await this.userService.GetUserDashboardDataAsync(this.User.IdToGuid(), 
+                    viewModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be a null."), 
+                    viewModel.EndDate ?? throw new InvalidOperationException("End Date cannot be a null."));
             
             viewModel.Accounts = userDashboardData.Accounts;
             viewModel.Transactions = userDashboardData.LastTransactions;

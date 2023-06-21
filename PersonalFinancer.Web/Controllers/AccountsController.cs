@@ -1,18 +1,17 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-    using AutoMapper;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.User;
-    using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Extensions;
-    using PersonalFinancer.Web.Models.Account;
-    using System.ComponentModel.DataAnnotations;
-    using static PersonalFinancer.Data.Constants.RoleConstants;
+	using AutoMapper;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Services.Accounts;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.Models.Account;
+	using System.ComponentModel.DataAnnotations;
+	using static PersonalFinancer.Data.Constants.RoleConstants;
 
-    [Authorize]
+	[Authorize]
 	public class AccountsController : Controller
 	{
 		protected readonly IAccountsUpdateService accountsUpdateService;
@@ -114,7 +113,11 @@
 				else
 				{
 					viewModel = await this.GetAccountDetailsViewModel(
-						accountId, inputModel.StartDate, inputModel.EndDate, this.User.IdToGuid(), this.User.IsAdmin());
+						accountId, 
+						inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be a null."), 
+						inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be a null."), 
+						this.User.IdToGuid(), 
+						this.User.IsAdmin());
 				}
 			}
 			catch (InvalidOperationException)
@@ -167,7 +170,7 @@
 				if (this.User.IsAdmin())
 				{
 					this.TempData["successMsg"] = "You successfully delete user's account!";
-					Guid ownerId = await this.accountsInfoService.GetOwnerIdAsync(accountId);
+					Guid ownerId = await this.accountsInfoService.GetAccountOwnerIdAsync(accountId);
 
 					return this.LocalRedirect("/Admin/Users/Details/" + ownerId);
 				}
@@ -228,7 +231,7 @@
 				Guid accountId = id ?? throw new InvalidOperationException();
 
 				Guid ownerId = this.User.IsAdmin()
-					? await this.accountsInfoService.GetOwnerIdAsync(accountId)
+					? await this.accountsInfoService.GetAccountOwnerIdAsync(accountId)
 					: this.User.IdToGuid();
 
 				if (inputModel.OwnerId != ownerId)
@@ -265,12 +268,10 @@
 		{
 			if (viewModel.OwnerId != null)
 			{
-				UserAccountTypesAndCurrenciesServiceModel userData =
-					await this.usersService.GetUserAccountTypesAndCurrenciesAsync(
-						viewModel.OwnerId ?? throw new InvalidOperationException());
+				Guid userId = viewModel.OwnerId ?? throw new InvalidOperationException();
 
-				viewModel.AccountTypes = userData.AccountTypes;
-				viewModel.Currencies = userData.Currencies;
+				viewModel.AccountTypes = await this.usersService.GetUserAccountTypesDropdownData(userId);
+				viewModel.Currencies = await this.usersService.GetUserCurrenciesDropdownData(userId);
 			}
 		}
 

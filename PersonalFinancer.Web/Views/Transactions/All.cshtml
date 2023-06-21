@@ -1,54 +1,96 @@
-﻿@using PersonalFinancer.Web.Models.Shared;
+﻿@using PersonalFinancer.Services.Shared.Models;
 @using PersonalFinancer.Web.Models.Transaction;
 @model UserTransactionsViewModel
 @{
-	ViewData["Title"] = "All Transactions";
+	ViewData["Title"] = "Transactions";
 }
 
 <h1 class="display-6 text-center">@ViewData["Title"]</h1>
 
-@*DatePicker*@
-<partial name="_DatePickerFormPartial" model='new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }' />
-
-@if (Model.Transactions.Any())
-{
-	<div class="row justify-content-center">
-		<div class="col-xl-10">
-
-			@*Pagination*@
-			<partial name="_PaginationPartial" />
-
+<div class="row justify-content-center">
+	<div class="col-12 col-sm-4 col-md-3">
+		@*Transactions Filter*@
+		<form method="post">
+			<div class="form-floating card shadow">
+				<input type="datetime-local" name="@nameof(Model.StartDate)" value="@Model.StartDate?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+				<label asp-for="@Model.StartDate" class="form-label"></label>
+				<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
+			</div>
+			<div class="form-floating formField card shadow">
+				<input type="datetime-local" name="@nameof(Model.EndDate)" value="@Model.EndDate?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+				<label asp-for="@Model.EndDate" class="form-label"></label>
+				<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
+			</div>
+			<select class="form-select formField card shadow" asp-for="@Model.AccountId">
+				<option value="">Accounts</option>
+				@foreach (var account in Model.Accounts)
+				{
+					<option value="@account.Id">@account.Name</option>
+				}
+			</select>
+			<select class="form-select formField card shadow" asp-for="@Model.AccountTypeId">
+				<option value="">Account Types</option>
+				@foreach (var accountType in Model.AccountTypes)
+				{
+					<option value="@accountType.Id">@accountType.Name</option>
+				}
+			</select>
+			<select class="form-select formField card shadow" asp-for="@Model.CurrencyId">
+				<option value="">Currensies</option>
+				@foreach (var currency in Model.Currencies)
+				{
+					<option value="@currency.Id">@currency.Name</option>
+				}
+			</select>
+			<select class="form-select formField card shadow" asp-for="@Model.CategoryId">
+				<option value="">Categories</option>
+				@foreach (var category in Model.Categories)
+				{
+					<option value="@category.Id">@category.Name</option>
+				}
+			</select>
+			<div class="formField card shadow mb-4">
+				<button type="submit" class="btn btn-secondary form-control">Filter</button>
+			</div>
+		</form>
+	</div>
+	<div class="col-12 col-sm-8 col-md-9">
+		@if (Model.Transactions.Any())
+		{
 			@*Transactions Table*@
 			<div class="card shadow mb-4">
 				<div class="card-header">
-					<h6>All Transactions</h6>
+					<h6 class="text-center">Transactions matching the specified criteria</h6>
 				</div>
 				<partial name="_TransactionsTablePartial" />
 			</div>
 
 			@*Pagination*@
 			<partial name="_PaginationPartial" />
-
-		</div>
+		}
+		else
+		{
+			@*No Transactions Page*@
+			<div class="text-center" style="margin-top: 50px;">
+				<p class="display-6 fs-4">
+					You have no transactions matching the specified criteria.
+				</p>
+			</div>
+		}
 	</div>
-}
-else
-{
-	@*No Transactions Page*@
-	<div class="text-center" style="margin-top: 50px;">
-		<p class="display-6 fs-4">
-			You do not have any transactions for that period.
-		</p>
-	</div>
-}
+</div>
 
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
 	<script>
 		let params = {
 			id: '@Model.Id',
-			startDate: '@Model.StartDate.ToString("yyyy-MM-ddTHH:mm")',
-			endDate: '@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")',
+			startDate: '@Model.StartDate?.ToString("yyyy-MM-ddTHH:mm")',
+			endDate: '@Model.EndDate?.ToString("yyyy-MM-ddTHH:mm")',
+			accountId: '@Model.AccountId',
+			accountTypeId: '@Model.AccountTypeId',
+			currencyId: '@Model.CurrencyId',
+			categoryId: '@Model.CategoryId',
 			url: '@Model.ApiTransactionsEndpoint',
 		}
 	</script>

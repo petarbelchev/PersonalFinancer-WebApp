@@ -102,7 +102,7 @@
         }
 
         [Test]
-        public async Task GetUserAccountsAndCategories_ShouldReturnCorrectData()
+        public async Task GetUserAccountsDropdownData_ShouldReturnCorrectData()
         {
             //Arrange
             AccountServiceModel[] expectedAccounts = await this.accountsRepo.All()
@@ -111,43 +111,56 @@
                 .Select(a => this.mapper.Map<AccountServiceModel>(a))
                 .ToArrayAsync();
 
-            CategoryServiceModel[] expectedCategories = await this.categoriesRepo.All()
-                .Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
-                .OrderBy(c => c.Name)
-                .Select(c => this.mapper.Map<CategoryServiceModel>(c))
-                .ToArrayAsync();
-
             //Act
-            UserAccountsAndCategoriesServiceModel actual = await this.userService.GetUserAccountsAndCategoriesAsync(this.User1.Id);
+            IEnumerable<AccountServiceModel> actual = 
+                await this.userService.GetUserAccountsDropdownData(this.User1.Id);
 
             //Assert
             Assert.Multiple(() =>
             {
                 Assert.That(actual, Is.Not.Null);
-                Assert.That(actual.OwnerId, Is.EqualTo(this.User1.Id));
-                Assert.That(actual.UserAccounts.Count(), Is.EqualTo(expectedAccounts.Length));
-                Assert.That(actual.UserCategories.Count(), Is.EqualTo(expectedCategories.Length));
 
                 for (int i = 0; i < expectedAccounts.Length; i++)
                 {
-                    Assert.That(actual.UserAccounts.ElementAt(i).Id,
+                    Assert.That(actual.ElementAt(i).Id,
                         Is.EqualTo(expectedAccounts[i].Id));
-                    Assert.That(actual.UserAccounts.ElementAt(i).Name,
+                    Assert.That(actual.ElementAt(i).Name,
                         Is.EqualTo(expectedAccounts[i].Name));
-                }
-
-                for (int i = 0; i < expectedCategories.Length; i++)
-                {
-                    Assert.That(actual.UserCategories.ElementAt(i).Id,
-                        Is.EqualTo(expectedCategories[i].Id));
-                    Assert.That(actual.UserCategories.ElementAt(i).Name,
-                        Is.EqualTo(expectedCategories[i].Name));
                 }
             });
         }
 
-        [Test]
-        public async Task GetUserAccountTypesAndCurrencies_ShouldReturnCorrectData()
+		[Test]
+		public async Task GetUserAccountsAndCategories_ShouldReturnCorrectData()
+		{
+			//Arrange
+			CategoryServiceModel[] expectedCategories = await this.categoriesRepo.All()
+				.Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
+				.OrderBy(c => c.Name)
+				.Select(c => this.mapper.Map<CategoryServiceModel>(c))
+				.ToArrayAsync();
+
+			//Act
+			IEnumerable<CategoryServiceModel> actual = 
+                await this.userService.GetUserCategoriesDropdownData(this.User1.Id);
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(actual, Is.Not.Null);
+
+				for (int i = 0; i < expectedCategories.Length; i++)
+				{
+					Assert.That(actual.ElementAt(i).Id,
+						Is.EqualTo(expectedCategories[i].Id));
+					Assert.That(actual.ElementAt(i).Name,
+						Is.EqualTo(expectedCategories[i].Name));
+				}
+			});
+		}
+
+		[Test]
+        public async Task GetUserAccountTypesDropdownData_ShouldReturnCorrectData()
         {
             //Arrange
             AccountTypeServiceModel[] expectedAccTypes = await this.accountTypeRepo.All()
@@ -156,41 +169,55 @@
                 .Select(at => this.mapper.Map<AccountTypeServiceModel>(at))
                 .ToArrayAsync();
 
-            CurrencyServiceModel[] expectedCurrencies = await this.currenciesRepo.All()
-                .Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
-                .OrderBy(c => c.Name)
-                .Select(c => this.mapper.Map<CurrencyServiceModel>(c))
-                .ToArrayAsync();
-
             //Act
-            UserAccountTypesAndCurrenciesServiceModel actual = await this.userService.GetUserAccountTypesAndCurrenciesAsync(this.User1.Id);
+            IEnumerable<AccountTypeServiceModel> actual = 
+                await this.userService.GetUserAccountTypesDropdownData(this.User1.Id);
 
             //Assert
             Assert.Multiple(() =>
             {
                 Assert.That(actual, Is.Not.Null);
-                Assert.That(actual.Currencies.Count(), Is.EqualTo(expectedCurrencies.Length));
-                Assert.That(actual.AccountTypes.Count(), Is.EqualTo(expectedAccTypes.Length));
 
                 for (int i = 0; i < expectedAccTypes.Length; i++)
                 {
-                    Assert.That(actual.AccountTypes.ElementAt(i).Id,
+                    Assert.That(actual.ElementAt(i).Id,
                         Is.EqualTo(expectedAccTypes[i].Id));
-                    Assert.That(actual.AccountTypes.ElementAt(i).Name,
+                    Assert.That(actual.ElementAt(i).Name,
                         Is.EqualTo(expectedAccTypes[i].Name));
-                }
-
-                for (int i = 0; i < expectedCurrencies.Length; i++)
-                {
-                    Assert.That(actual.Currencies.ElementAt(i).Id,
-                        Is.EqualTo(expectedCurrencies[i].Id));
-                    Assert.That(actual.Currencies.ElementAt(i).Name,
-                        Is.EqualTo(expectedCurrencies[i].Name));
                 }
             });
         }
 
-        [Test]
+		[Test]
+		public async Task GetUserAccountTypesAndCurrencies_ShouldReturnCorrectData()
+		{
+			//Arrange
+			CurrencyServiceModel[] expectedCurrencies = await this.currenciesRepo.All()
+				.Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
+				.OrderBy(c => c.Name)
+				.Select(c => this.mapper.Map<CurrencyServiceModel>(c))
+				.ToArrayAsync();
+
+			//Act
+			IEnumerable<CurrencyServiceModel> actual = 
+                await this.userService.GetUserCurrenciesDropdownData(this.User1.Id);
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(actual, Is.Not.Null);
+
+				for (int i = 0; i < expectedCurrencies.Length; i++)
+				{
+					Assert.That(actual.ElementAt(i).Id,
+						Is.EqualTo(expectedCurrencies[i].Id));
+					Assert.That(actual.ElementAt(i).Name,
+						Is.EqualTo(expectedCurrencies[i].Name));
+				}
+			});
+		}
+
+		[Test]
         public async Task GetUserDashboardData_ShouldReturnCorrectData_WithValidParams()
         {
             //Arrange

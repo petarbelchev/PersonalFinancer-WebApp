@@ -1,19 +1,18 @@
 ﻿namespace PersonalFinancer.Tests.Controllers
 {
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Moq;
-    using NUnit.Framework;
-    using PersonalFinancer.Data.Models.Enums;
-    using PersonalFinancer.Services.Shared.Models;
-    using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Controllers;
-    using PersonalFinancer.Web.Models.Home;
-    using PersonalFinancer.Web.Models.Shared;
-    using static PersonalFinancer.Data.Constants;
-    using static PersonalFinancer.Web.Constants;
+	using Microsoft.AspNetCore.Http;
+	using Microsoft.AspNetCore.Mvc;
+	using Moq;
+	using NUnit.Framework;
+	using PersonalFinancer.Data.Models.Enums;
+	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Web.Controllers;
+	using PersonalFinancer.Web.Models.Home;
+	using static PersonalFinancer.Data.Constants;
+	using static PersonalFinancer.Web.Constants;
 
-    [TestFixture]
+	[TestFixture]
     internal class HomeControllerTests : ControllersUnitTestsBase
     {
         private readonly UserDashboardServiceModel expUserDashboard = new()

@@ -73,12 +73,14 @@
 		/// </summary>
 		/// <returns>New transaction Id.</returns>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<Guid> CreateTransactionAsync(TransactionFormShortServiceModel model)
+		public async Task<Guid> CreateTransactionAsync(TransactionFormModel model)
 		{
 			Account account = await this.accountsRepo.All()
 				.FirstAsync(a => a.Id == model.AccountId);
 
-			await this.ValidateCategory(model.CategoryId, model.OwnerId);
+			await this.ValidateCategory(
+				model.CategoryId ?? throw new InvalidOperationException("Category ID cannot be a null."), 
+				model.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be a null."));
 
 			model.CreatedOn = model.CreatedOn.ToUniversalTime();
 
@@ -191,20 +193,24 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction or Account does not exist
+		/// Throws InvalidOperationException when Transaction, Category or Account does not exist
 		/// or Transaction is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task EditTransactionAsync(Guid id, TransactionFormShortServiceModel model)
+		public async Task EditTransactionAsync(Guid transactionId, TransactionFormModel model)
 		{
 			Transaction transactionInDb = await this.transactionsRepo.All()
 				.Include(t => t.Account)
-				.FirstAsync(t => t.Id == id);
+				.FirstAsync(t => t.Id == transactionId);
 
 			if (transactionInDb.IsInitialBalance)
 				throw new InvalidOperationException("Cannot edit initial balance transaction.");
 
-			await this.ValidateCategory(model.CategoryId, model.OwnerId);
+			Guid categoryId = model.CategoryId ?? throw new InvalidOperationException("Category Id cannot be a null.");
+
+			await this.ValidateCategory(
+				categoryId,	
+				model.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be a null."));
 
 			if (model.AccountId != transactionInDb.AccountId
 				|| model.TransactionType != transactionInDb.TransactionType
@@ -224,8 +230,8 @@
 			}
 
 			transactionInDb.Reference = model.Reference.Trim();
-			transactionInDb.AccountId = model.AccountId;
-			transactionInDb.CategoryId = model.CategoryId;
+			transactionInDb.AccountId = model.AccountId ?? throw new InvalidOperationException("Account ID cannot be a null!");
+			transactionInDb.CategoryId = categoryId;
 			transactionInDb.Amount = model.Amount;
 			transactionInDb.CreatedOn = model.CreatedOn.ToUniversalTime();
 			transactionInDb.TransactionType = model.TransactionType;

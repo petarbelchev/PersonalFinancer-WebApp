@@ -167,7 +167,7 @@
         public async Task CreateTransaction_ShouldAddNewTransaction_AndDecreaseAccountBalance()
         {
             //Arrange
-            var transactionModel = new TransactionFormShortServiceModel()
+            var transactionModel = new TransactionFormModel()
             {
                 Amount = 100,
                 AccountId = this.Account1User1.Id,
@@ -203,7 +203,7 @@
         public async Task CreateTransaction_ShouldAddNewTransaction_AndIncreaseAccountBalance()
         {
             //Arrange
-            var transactionModel = new TransactionFormShortServiceModel()
+            var transactionModel = new TransactionFormModel()
             {
                 Amount = 100,
                 AccountId = this.Account1User1.Id,
@@ -239,7 +239,7 @@
         public void CreateTransaction_ShouldThrowException_WhenAccountDoesNotExist()
         {
             //Arrange
-            var inputFormModel = new TransactionFormShortServiceModel
+            var inputFormModel = new TransactionFormModel
             {
                 Amount = 100,
                 AccountId = Guid.NewGuid(),
@@ -259,7 +259,7 @@
 		public void CreateTransaction_ShouldThrowException_WhenCategoryIsNotValid()
 		{
 			//Arrange
-			var inputFormModel = new TransactionFormShortServiceModel
+			var inputFormModel = new TransactionFormModel
 			{
 				Amount = 100,
 				AccountId = this.Account1User1.Id,
@@ -1118,9 +1118,9 @@
             await this.transactionsRepo.SaveChangesAsync();
             decimal balanceBefore = this.Account1User1.Balance;
 
-            TransactionFormShortServiceModel transactionEditModel = await this.transactionsRepo.All()
+            TransactionFormModel transactionEditModel = await this.transactionsRepo.All()
                 .Where(t => t.Id == transaction.Id)
-                .Select(t => this.mapper.Map<TransactionFormShortServiceModel>(t))
+                .Select(t => this.mapper.Map<TransactionFormModel>(t))
                 .FirstAsync();
 
             //Act
@@ -1161,9 +1161,9 @@
             decimal secondAccBalanceBefore = this.Account1User1.Balance;
 
             //Act
-            TransactionFormShortServiceModel editTransactionModel = await this.transactionsRepo.All()
+            TransactionFormModel editTransactionModel = await this.transactionsRepo.All()
                 .Where(t => t.Id == transaction.Id)
-                .Select(t => this.mapper.Map<TransactionFormShortServiceModel>(t))
+                .Select(t => this.mapper.Map<TransactionFormModel>(t))
                 .FirstAsync();
 
             editTransactionModel.AccountId = this.Account1User1.Id;
@@ -1205,9 +1205,9 @@
             decimal balanceBefore = this.Account1User1.Balance;
 
             //Act
-            TransactionFormShortServiceModel editTransactionModel = await this.transactionsRepo.All()
+            TransactionFormModel editTransactionModel = await this.transactionsRepo.All()
                 .Where(t => t.Id == transaction.Id)
-                .Select(t => this.mapper.Map<TransactionFormShortServiceModel>(t))
+                .Select(t => this.mapper.Map<TransactionFormModel>(t))
                 .FirstAsync();
             editTransactionModel.Reference = "Second Reference";
             await this.accountsUpdateService.EditTransactionAsync(transaction.Id, editTransactionModel);
@@ -1246,7 +1246,7 @@
 			this.Account1User1.Balance += transaction.Amount;
 			await this.transactionsRepo.SaveChangesAsync();
 
-			var model = new TransactionFormShortServiceModel
+			var model = new TransactionFormModel
 			{
 				OwnerId = this.User1.Id,
 				AccountId = this.Account1User1.Id,
@@ -1283,7 +1283,7 @@
 			this.Account1User1.Balance += transaction.Amount;
 			await this.transactionsRepo.SaveChangesAsync();
 
-			var model = new TransactionFormShortServiceModel
+			var model = new TransactionFormModel
 			{
 				OwnerId = this.User1.Id,
 				AccountId = this.Account1User1.Id,

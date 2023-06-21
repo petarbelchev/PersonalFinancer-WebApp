@@ -1,9 +1,9 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
-	using PersonalFinancer.Web.Models.Shared;
+	using PersonalFinancer.Services.Shared.Models;
 	using System.ComponentModel.DataAnnotations;
 
-    public class AccountTransactionsInputModel : DateFilterModel
+	public class AccountTransactionsInputModel : DateFilterModel
 	{
 		[Required]
 		public Guid? Id { get; set; }

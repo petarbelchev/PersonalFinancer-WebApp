@@ -1,5 +1,4 @@
-﻿@using PersonalFinancer.Web.Models.Account;
-@using PersonalFinancer.Web.Models.Transaction;
+﻿@using PersonalFinancer.Services.Accounts.Models;
 @using PersonalFinancer.Data.Models.Enums;
 @model TransactionFormModel
 @{
@@ -53,10 +52,10 @@
 					<label asp-for="@Model.Reference" class="form-label"></label>
 					<span asp-validation-for="@Model.Reference" class="text-danger"></span>
 				</div>
+				<input type="hidden" asp-for="@Model.OwnerId" />
 				<div>
 					<button type="submit" class="w-100 btn btn-lg btn-warning">Edit</button>
 				</div>
-				<input asp-for="@Model.OwnerId" type="hidden" />
 			</form>
 		</section>
 	</div>

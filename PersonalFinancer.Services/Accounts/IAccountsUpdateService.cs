@@ -16,7 +16,7 @@
         /// </summary>
         /// <returns>New transaction Id.</returns>
         /// <exception cref="InvalidOperationException"></exception>
-        Task<Guid> CreateTransactionAsync(TransactionFormShortServiceModel model);
+        Task<Guid> CreateTransactionAsync(TransactionFormModel model);
 
         /// <summary>
         /// Throws InvalidOperationException when Account does not exist
@@ -43,10 +43,10 @@
         Task EditAccountAsync(Guid accountId, AccountFormShortServiceModel model);
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction or Account does not exist
+		/// Throws InvalidOperationException when Transaction, Category or Account does not exist
 		/// or Transaction is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task EditTransactionAsync(Guid id, TransactionFormShortServiceModel model);
+		Task EditTransactionAsync(Guid transactionId, TransactionFormModel model);
 	}
 }

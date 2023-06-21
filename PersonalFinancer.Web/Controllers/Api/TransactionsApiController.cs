@@ -36,7 +36,7 @@
 			try
 			{
 				userTransactions = await this.accountsInfoService
-					.GetUserTransactionsAsync(userId, inputModel.StartDate, inputModel.EndDate, inputModel.Page);
+					.GetUserTransactionsAsync(userId, inputModel, inputModel.Page);
 			}
 			catch (InvalidOperationException)
 			{

@@ -1,18 +1,17 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-    using AutoMapper.QueryableExtensions;
-    using Microsoft.EntityFrameworkCore;
-    using NUnit.Framework;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Models.Enums;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.Shared.Models;
-    using static PersonalFinancer.Data.Constants.CategoryConstants;
-    using static PersonalFinancer.Services.Constants.PaginationConstants;
+	using AutoMapper.QueryableExtensions;
+	using Microsoft.EntityFrameworkCore;
+	using NUnit.Framework;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Models.Enums;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Accounts;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.Shared.Models;
+	using static PersonalFinancer.Services.Constants.PaginationConstants;
 
-    [TestFixture]
+	[TestFixture]
 	internal class AccountsInfoServiceTests : ServicesUnitTestsBase
 	{
 		private IEfRepository<Transaction> transactionsRepo;
@@ -33,12 +32,15 @@
 		public async Task GetUserTransactions_ShouldReturnCorrectViewModel_WithValidInput()
 		{
 			//Arrange
-			DateTime startDate = DateTime.Now.AddMonths(-1);
-			DateTime endDate = DateTime.Now;
+			var inputModel = new UserTransactionsInputModel
+			{
+				StartDate = DateTime.Now.AddMonths(-1),
+				EndDate = DateTime.Now
+			};
 
 			TransactionTableServiceModel[] expectedTransactions = await this.transactionsRepo.All()
 				.Where(t => t.OwnerId == this.User1.Id
-					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+					&& t.CreatedOn >= inputModel.StartDate && t.CreatedOn <= inputModel.EndDate)
 				.OrderByDescending(t => t.CreatedOn)
 				.Take(TransactionsPerPage)
 				.ProjectTo<TransactionTableServiceModel>(this.mapper.ConfigurationProvider)
@@ -46,11 +48,11 @@
 
 			int expectedTotalTransactions = await this.transactionsRepo.All()
 				.CountAsync(t => t.OwnerId == this.User1.Id
-					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate);
+					&& t.CreatedOn >= inputModel.StartDate && t.CreatedOn <= inputModel.EndDate);
 
 			//Act
 			TransactionsServiceModel actual = await this.accountsInfoService
-				.GetUserTransactionsAsync(this.User1.Id, startDate, endDate);
+				.GetUserTransactionsAsync(this.User1.Id, inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -80,13 +82,16 @@
 		{
 			//Arrange
 			var invalidId = Guid.NewGuid();
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
+			var inputModel = new UserTransactionsInputModel
+			{
+				StartDate = DateTime.Now.AddMonths(-1),
+				EndDate = DateTime.Now
+			};
 			int page = 1;
 
 			//Act
 			TransactionsServiceModel transactionsData = await this.accountsInfoService
-				.GetUserTransactionsAsync(invalidId, startDate, endDate, page);
+				.GetUserTransactionsAsync(invalidId, inputModel, page);
 
 			//Act & Assert
 			Assert.Multiple(() =>
@@ -94,8 +99,6 @@
 				Assert.That(transactionsData, Is.Not.Null);
 				Assert.That(transactionsData.TotalTransactionsCount, Is.EqualTo(0));
 				Assert.That(transactionsData.Transactions.Count(), Is.EqualTo(0));
-				Assert.That(transactionsData.StartDate, Is.EqualTo(startDate));
-				Assert.That(transactionsData.EndDate, Is.EqualTo(endDate));
 			});
 		}
 
@@ -111,8 +114,6 @@
 
 			var expect = new TransactionsServiceModel
 			{
-				StartDate = startDate,
-				EndDate = endDate,
 				Transactions = await this.transactionsRepo.All()
 					.Where(t => t.AccountId == this.Account1User1.Id && t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 					.OrderByDescending(t => t.CreatedOn)
@@ -186,8 +187,6 @@
 				Assert.That(transactionsData, Is.Not.Null);
 				Assert.That(transactionsData.TotalTransactionsCount, Is.EqualTo(0));
 				Assert.That(transactionsData.Transactions.Count(), Is.EqualTo(0));
-				Assert.That(transactionsData.StartDate, Is.EqualTo(startDate));
-				Assert.That(transactionsData.EndDate, Is.EqualTo(endDate));
 			});
 		}
 
@@ -483,8 +482,8 @@
 				.ToListAsync();
 
 			//Act
-			TransactionFormServiceModel transactionFormModel =
-				await this.accountsInfoService.GetTransactionFormDataAsync(this.Transaction2User1.Id);
+			TransactionFormModel transactionFormModel =
+				await this.accountsInfoService.GetTransactionFormDataAsync(this.Transaction2User1.Id, this.User1.Id);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -524,7 +523,8 @@
 			//Arrange
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService.GetTransactionFormDataAsync(this.InitialTransaction1User1.Id), 
+			Assert.That(async () => await this.accountsInfoService
+				  .GetTransactionFormDataAsync(this.InitialTransaction1User1.Id, this.User1.Id), 
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -532,7 +532,7 @@
 		public void GetFulfilledTransactionFormModel_ShouldThrowException_WhenTransactionDoesNotExist()
 		{
 			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService.GetTransactionFormDataAsync(Guid.NewGuid()),
+			Assert.That(async () => await this.accountsInfoService.GetTransactionFormDataAsync(Guid.NewGuid(), this.User1.Id),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -563,7 +563,7 @@
 		public async Task GetOwnerId_ShouldReturnOwnerId_WithValidAccountId()
 		{
 			//Act
-			Guid ownerId = await this.accountsInfoService.GetOwnerIdAsync(this.Account1User1.Id);
+			Guid ownerId = await this.accountsInfoService.GetAccountOwnerIdAsync(this.Account1User1.Id);
 
 			//Assert
 			Assert.That(ownerId, Is.EqualTo(this.User1.Id));
@@ -573,7 +573,7 @@
 		public void GetOwnerId_ShouldThrowException_WhenAccountIdIsInvalid()
 		{
 			//Assert
-			Assert.That(async () => await this.accountsInfoService.GetOwnerIdAsync(Guid.NewGuid()),
+			Assert.That(async () => await this.accountsInfoService.GetAccountOwnerIdAsync(Guid.NewGuid()),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 

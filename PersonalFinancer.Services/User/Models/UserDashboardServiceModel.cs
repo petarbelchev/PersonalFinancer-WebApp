@@ -4,10 +4,13 @@
 
     public class UserDashboardServiceModel
     {
-        public IEnumerable<TransactionTableServiceModel> LastTransactions { get; set; } = null!;
+        public IEnumerable<TransactionTableServiceModel> LastTransactions { get; set; }
+            = new List<TransactionTableServiceModel>();
 
-        public IEnumerable<AccountCardServiceModel> Accounts { get; set; } = null!;
+        public IEnumerable<AccountCardServiceModel> Accounts { get; set; }
+            = new List<AccountCardServiceModel>();
 
-        public IEnumerable<CurrencyCashFlowServiceModel> CurrenciesCashFlow { get; set; } = null!;
+        public IEnumerable<CurrencyCashFlowServiceModel> CurrenciesCashFlow { get; set; }
+            = new List<CurrencyCashFlowServiceModel>();
     }
 }
