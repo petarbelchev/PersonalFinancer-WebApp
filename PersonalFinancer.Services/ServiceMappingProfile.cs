@@ -49,7 +49,7 @@
                 .ForMember(m => m.Accounts, mf => mf
                     .MapFrom(s => s.Accounts.Where(a => !a.IsDeleted).OrderBy(a => a.Name)));
 
-			this.CreateMap<ApiEntity, ApiOutputServiceModel>();
+			this.CreateMap<CacheableApiEntity, ApiOutputServiceModel>();
 
 			this.CreateMap<Reply, ReplyOutputServiceModel>();
 			this.CreateMap<MessageInputServiceModel, Message>();

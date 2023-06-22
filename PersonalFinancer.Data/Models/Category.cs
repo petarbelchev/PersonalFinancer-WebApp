@@ -5,7 +5,7 @@
     using System.ComponentModel.DataAnnotations.Schema;
     using static PersonalFinancer.Data.Constants.CategoryConstants;
 
-    public class Category : ApiEntity
+    public class Category : CacheableApiEntity
     {
         [Key]
         public override Guid Id { get; set; }

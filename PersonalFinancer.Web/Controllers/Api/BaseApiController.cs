@@ -12,7 +12,7 @@
     using System.Text;
 
     [Authorize]
-	public abstract class BaseApiController<T> : ControllerBase where T : ApiEntity, new()
+	public abstract class BaseApiController<T> : ControllerBase where T : CacheableApiEntity, new()
 	{
 		private readonly IApiService<T> apiService;
 

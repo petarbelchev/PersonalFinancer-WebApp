@@ -9,7 +9,7 @@
     using PersonalFinancer.Services.ApiService.Models;
     using static PersonalFinancer.Data.Constants;
 
-    public class ApiService<T> : IApiService<T> where T : ApiEntity, new()
+    public class ApiService<T> : IApiService<T> where T : CacheableApiEntity, new()
     {
         private readonly IEfRepository<T> repo;
         private readonly IMapper mapper;
