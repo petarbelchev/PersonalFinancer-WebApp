@@ -8,7 +8,6 @@
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User.Models;
 	using PersonalFinancer.Web.Controllers;
 	using PersonalFinancer.Web.Models.Account;
 	using static PersonalFinancer.Data.Constants;
@@ -74,11 +73,12 @@
 		public void SetUp()
 		{
 			this.usersServiceMock
-				.Setup(x => x.GetUserAccountTypesDropdownData(this.userId))
+				.Setup(x => x
+				.GetUserAccountTypesDropdownData(this.userId, false))
 				.ReturnsAsync(this.expectedAccountTypes);
 
 			this.usersServiceMock
-				.Setup(x => x.GetUserCurrenciesDropdownData(this.userId))
+				.Setup(x => x.GetUserCurrenciesDropdownData(this.userId, false))
 				.ReturnsAsync(this.expectedCurrencies);
 
 			this.controller = new AccountsController(
@@ -767,39 +767,13 @@
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
-			var expServiceDto = new AccountFormServiceModel
+			var expServiceDto = new AccountFormShortServiceModel
 			{
 				Name = "name",
 				AccountTypeId = Guid.NewGuid(),
 				CurrencyId = Guid.NewGuid(),
 				Balance = 100,
-				OwnerId = this.userId,
-				AccountTypes = new AccountTypeServiceModel[]
-				{
-					new AccountTypeServiceModel
-					{
-						Id = Guid.NewGuid(),
-						Name = "AccType 1"
-					},
-					new AccountTypeServiceModel
-					{
-						Id = Guid.NewGuid(),
-						Name = "AccType 2"
-					}
-				},
-				Currencies = new CurrencyServiceModel[]
-				{
-					new CurrencyServiceModel
-					{
-						Id = Guid.NewGuid(),
-						Name = "Currency 1"
-					},
-					new CurrencyServiceModel
-					{
-						Id = Guid.NewGuid(),
-						Name = "Currency 2"
-					}
-				}
+				OwnerId = this.userId
 			};
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -821,7 +795,7 @@
 				Assert.That(model.AccountTypeId, Is.EqualTo(expServiceDto.AccountTypeId));
 				this.CheckAccountTypesAndCurrencies(
 					model.AccountTypes, model.Currencies,
-					expServiceDto.AccountTypes, expServiceDto.Currencies);
+					this.expectedAccountTypes, this.expectedCurrencies);
 			});
 		}
 
@@ -1012,14 +986,6 @@
 
 			Guid userId = inputFormModel.OwnerId ?? throw new InvalidOperationException();
 
-			this.usersServiceMock
-				.Setup(x => x.GetUserAccountTypesDropdownData(this.userId))
-				.ReturnsAsync(this.expectedAccountTypes);
-
-			this.usersServiceMock
-				.Setup(x => x.GetUserCurrenciesDropdownData(this.userId))
-				.ReturnsAsync(this.expectedCurrencies);
-
 			//Act
 			var result = (ViewResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
 
@@ -1062,14 +1028,6 @@
 				.Throws<ArgumentException>();
 
 			Guid userId = inputFormModel.OwnerId ?? throw new InvalidOperationException();
-
-			this.usersServiceMock
-				.Setup(x => x.GetUserAccountTypesDropdownData(this.userId))
-				.ReturnsAsync(this.expectedAccountTypes);
-
-			this.usersServiceMock
-				.Setup(x => x.GetUserCurrenciesDropdownData(this.userId))
-				.ReturnsAsync(this.expectedCurrencies);
 
 			//Act
 			var result = (ViewResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);

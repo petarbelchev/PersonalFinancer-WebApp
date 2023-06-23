@@ -25,10 +25,11 @@
             public const int AccountNameMinLength = 2;
 
             public const double AccountInitialBalanceMaxValue = 10_000_000;
-            public const double AccountInitialBalanceMinValue = 0.00;
+            public const double AccountInitialBalanceMinValue = -10_000_000;
 
             public const string AccountCacheKeyValue = "accounts/";
-        }
+            public const string DeletedAccountCacheKeyValue = "deletedAccounts/";
+		}
 
         public static class AccountTypeConstants
         {
@@ -36,7 +37,8 @@
             public const int AccountTypeNameMinLength = 2;
 
             public const string AccTypeCacheKeyValue = "accountTypes/";
-        }
+            public const string DeletedAccTypeCacheKeyValue = "deletedAccountTypes/";
+		}
 
         public static class CurrencyConstants
         {
@@ -44,7 +46,8 @@
             public const int CurrencyNameMinLength = 2;
 
             public const string CurrencyCacheKeyValue = "currencies/";
-        }
+            public const string DeletedCurrencyCacheKeyValue = "deletedCurrencies/";
+		}
 
         public static class TransactionConstants
         {
@@ -64,7 +67,8 @@
             public const string InitialBalanceCategoryId = "e241b89f-b094-4f79-bb09-efc6f47c2cb3";
 
             public const string CategoryCacheKeyValue = "categories/";
-        }
+            public const string DeletedCategoryCacheKeyValue = "deletedCategories/";
+		}
 
         public static class SeedConstants
         {

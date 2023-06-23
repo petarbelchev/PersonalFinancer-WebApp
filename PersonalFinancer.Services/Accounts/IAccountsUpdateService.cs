@@ -3,12 +3,12 @@
 	using PersonalFinancer.Services.Accounts.Models;
 
 	public interface IAccountsUpdateService
-    {
-        /// <summary>
+	{
+		/// <summary>
         /// Throws ArgumentException when User already have Account with the given name.
-        /// </summary>
-        /// <returns>New Account Id.</returns>
-        /// <exception cref="ArgumentException"></exception>
+		/// </summary>
+		/// <returns>New Account Id.</returns>
+		/// <exception cref="ArgumentException"></exception>
         Task<Guid> CreateAccountAsync(AccountFormShortServiceModel model);
 
         /// <summary>
@@ -34,12 +34,12 @@
         /// <exception cref="InvalidOperationException"></exception>
         Task<decimal> DeleteTransactionAsync(Guid transactionId, Guid userId, bool isUserAdmin);
 
-        /// <summary>
+		/// <summary>
         /// Throws InvalidOperationException when Account does now exist,
-        /// and ArgumentException when User already have Account with given name.
-        /// </summary>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
+		/// and ArgumentException when User already have Account with given name.
+		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
         Task EditAccountAsync(Guid accountId, AccountFormShortServiceModel model);
 
 		/// <summary>

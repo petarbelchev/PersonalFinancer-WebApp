@@ -78,12 +78,12 @@
 		/// or User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<AccountFormServiceModel> GetAccountFormDataAsync(
+		public async Task<AccountFormShortServiceModel> GetAccountFormDataAsync(
 			Guid accountId, Guid userId, bool isUserAdmin)
 		{
 			return await this.accountsRepo.All()
 				.Where(a => a.Id == accountId && (isUserAdmin || a.OwnerId == userId))
-				.ProjectTo<AccountFormServiceModel>(this.mapper.ConfigurationProvider)
+				.ProjectTo<AccountFormShortServiceModel>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
@@ -266,8 +266,8 @@
 
 			return await this.GetTransactions(
 				query,
-				inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be a null."),
-				inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be a null"), 
+				inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."),
+				inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null"), 
 				page);
 		}
 

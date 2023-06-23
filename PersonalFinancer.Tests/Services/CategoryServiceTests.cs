@@ -1,22 +1,25 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-    using Microsoft.EntityFrameworkCore;
-    using NUnit.Framework;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.ApiService;
-    using PersonalFinancer.Services.ApiService.Models;
+	using Microsoft.EntityFrameworkCore;
+	using NUnit.Framework;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Api;
+	using PersonalFinancer.Services.Api.Models;
+	using PersonalFinancer.Services.Cache;
 
-    internal class CategoryServiceTests : ServicesUnitTestsBase
+	internal class CategoryServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<Category> repo;
-        private ApiService<Category> categoryService;
+		private ICacheService<Category> cache;
+		private ApiService<Category> categoryService;
 
         [SetUp]
         public void SetUp()
         {
             this.repo = new EfRepository<Category>(this.sqlDbContext);
-            this.categoryService = new ApiService<Category>(this.repo, this.mapper, this.memoryCache);
+			this.cache = new MemoryCacheService<Category>(this.memoryCache, this.repo, this.mapper);
+			this.categoryService = new ApiService<Category>(this.repo, this.mapper, this.cache);
         }
 
         [Test]
@@ -123,7 +126,7 @@
         public void CreateEntity_ShouldThrowException_WhenCategoryExist()
         {
             //Arrange
-            string categoryName = this.Cat2User1.Name;
+            string categoryName = this.Category1_User1_WithTransactions.Name;
             Guid ownerId = this.User1.Id;
 
             //Act & Assert

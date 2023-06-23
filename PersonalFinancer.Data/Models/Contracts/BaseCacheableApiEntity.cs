@@ -1,6 +1,6 @@
 ﻿namespace PersonalFinancer.Data.Models.Contracts
 {
-    public abstract class CacheableApiEntity
+    public abstract class BaseCacheableApiEntity
     {
         public abstract Guid Id { get; set; }
 

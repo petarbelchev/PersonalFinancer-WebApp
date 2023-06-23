@@ -1,29 +1,27 @@
-﻿namespace PersonalFinancer.Services.ApiService
+﻿namespace PersonalFinancer.Services.Api
 {
-    using AutoMapper;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Caching.Memory;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Models.Contracts;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.ApiService.Models;
-    using static PersonalFinancer.Data.Constants;
+	using AutoMapper;
+	using Microsoft.EntityFrameworkCore;
+	using PersonalFinancer.Data.Models.Contracts;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Api.Models;
+	using PersonalFinancer.Services.Cache;
 
-    public class ApiService<T> : IApiService<T> where T : CacheableApiEntity, new()
+	public class ApiService<T> : IApiService<T> where T : BaseCacheableApiEntity, new()
     {
         private readonly IEfRepository<T> repo;
         private readonly IMapper mapper;
-        private readonly IMemoryCache memoryCache;
+        private readonly ICacheService<T> cache;
 
         public ApiService(
             IEfRepository<T> repo,
             IMapper mapper,
-            IMemoryCache memoryCache)
+			ICacheService<T> cache)
         {
             this.repo = repo;
             this.mapper = mapper;
-            this.memoryCache = memoryCache;
-        }
+            this.cache = cache;
+		}
 
         /// <summary>
         /// Throws ArgumentException if you try to create Entity with existing name.
@@ -55,7 +53,7 @@
 
             await this.repo.SaveChangesAsync();
 
-            this.ClearCache(entity.GetType().Name, ownerId);
+            this.cache.RemoveValues(ownerId, notDeleted: true, deleted: true);
 
             ApiOutputServiceModel outputModel = this.mapper.Map<ApiOutputServiceModel>(entity);
 
@@ -83,17 +81,7 @@
 
             await this.repo.SaveChangesAsync();
 
-            this.ClearCache(entity.GetType().Name, userId);
-        }
-
-        private void ClearCache(string typeName, Guid ownerId)
-        {
-            if (typeName == nameof(AccountType))
-                this.memoryCache.Remove(AccountTypeConstants.AccTypeCacheKeyValue + ownerId);
-            else if (typeName == nameof(Category))
-                this.memoryCache.Remove(CategoryConstants.CategoryCacheKeyValue + ownerId);
-            else if (typeName == nameof(Currency))
-                this.memoryCache.Remove(CurrencyConstants.CurrencyCacheKeyValue + ownerId);
+            this.cache.RemoveValues(userId, notDeleted: true, deleted: true);
         }
     }
 }

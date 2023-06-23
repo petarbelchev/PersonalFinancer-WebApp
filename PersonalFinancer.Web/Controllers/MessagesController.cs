@@ -8,7 +8,8 @@
     using PersonalFinancer.Services.User;
     using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Message;
-    using static PersonalFinancer.Data.Constants.RoleConstants;
+	using System.ComponentModel.DataAnnotations;
+	using static PersonalFinancer.Data.Constants.RoleConstants;
 
     [Authorize]
     public class MessagesController : Controller
@@ -59,7 +60,7 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete([Required] string id)
         {
             try
             {
@@ -77,7 +78,7 @@
             return this.RedirectToAction(nameof(AllMessages));
         }
 
-        public async Task<IActionResult> MessageDetails(string id)
+        public async Task<IActionResult> MessageDetails([Required] string id)
         {
             try
             {

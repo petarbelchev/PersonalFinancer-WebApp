@@ -1,33 +1,32 @@
 ﻿namespace PersonalFinancer.Services.User
 {
-    using AutoMapper;
-    using AutoMapper.QueryableExtensions;
-    using Microsoft.EntityFrameworkCore;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Models.Enums;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.MemoryCacheService;
-    using PersonalFinancer.Services.Shared.Models;
-    using PersonalFinancer.Services.User.Models;
-    using static PersonalFinancer.Data.Constants;
-    using static PersonalFinancer.Services.Constants;
+	using AutoMapper;
+	using AutoMapper.QueryableExtensions;
+	using Microsoft.EntityFrameworkCore;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Models.Enums;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Cache;
+	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Services.User.Models;
+	using static PersonalFinancer.Services.Constants;
 
-    public class UsersService : IUsersService
+	public class UsersService : IUsersService
     {
         private readonly IEfRepository<ApplicationUser> usersRepo;
         private readonly IMapper mapper;
-        private readonly IMemoryCacheService<Category> categoriesCacheService;
-        private readonly IMemoryCacheService<Currency> currenciesCacheService;
-        private readonly IMemoryCacheService<AccountType> accountTypesCacheService;
-        private readonly IMemoryCacheService<Account> accountsCacheService;
+        private readonly ICacheService<Category> categoriesCacheService;
+        private readonly ICacheService<Currency> currenciesCacheService;
+        private readonly ICacheService<AccountType> accountTypesCacheService;
+        private readonly ICacheService<Account> accountsCacheService;
 
 		public UsersService(
             IEfRepository<ApplicationUser> usersRepo,
             IMapper mapper,
-            IMemoryCacheService<Category> categoriesCache,
-			IMemoryCacheService<Currency> currenciesCache,
-			IMemoryCacheService<AccountType> accountTypesCache,
-			IMemoryCacheService<Account> accountsCache)
+            ICacheService<Category> categoriesCache,
+			ICacheService<Currency> currenciesCache,
+			ICacheService<AccountType> accountTypesCache,
+			ICacheService<Account> accountsCache)
         {
             this.usersRepo = usersRepo;
             this.mapper = mapper;
@@ -52,29 +51,17 @@
 			};
 		}
 
-		public async Task<IEnumerable<AccountServiceModel>> GetUserAccountsDropdownData(Guid userId)
-		{
-			return await this.accountsCacheService
-				.GetValues<AccountServiceModel>(AccountConstants.AccountCacheKeyValue, userId);
-		}
+		public async Task<IEnumerable<AccountServiceModel>> GetUserAccountsDropdownData(Guid userId, bool withDeleted)
+			=> await this.accountsCacheService.GetValues<AccountServiceModel>(userId, withDeleted);
 
-		public async Task<IEnumerable<AccountTypeServiceModel>> GetUserAccountTypesDropdownData(Guid userId)
-		{
-			return await this.accountTypesCacheService
-				.GetValues<AccountTypeServiceModel>(AccountTypeConstants.AccTypeCacheKeyValue, userId);
-		}
+		public async Task<IEnumerable<AccountTypeServiceModel>> GetUserAccountTypesDropdownData(Guid userId, bool withDeleted)
+			=> await this.accountTypesCacheService.GetValues<AccountTypeServiceModel>(userId, withDeleted);
 
-		public async Task<IEnumerable<CategoryServiceModel>> GetUserCategoriesDropdownData(Guid userId)
-		{
-			return await this.categoriesCacheService
-				.GetValues<CategoryServiceModel>(CategoryConstants.CategoryCacheKeyValue, userId);
-		}
+		public async Task<IEnumerable<CategoryServiceModel>> GetUserCategoriesDropdownData(Guid userId, bool withDeleted)
+			=> await this.categoriesCacheService.GetValues<CategoryServiceModel>(userId, withDeleted);
 
-		public async Task<IEnumerable<CurrencyServiceModel>> GetUserCurrenciesDropdownData(Guid userId)
-		{
-			return await this.currenciesCacheService
-				.GetValues<CurrencyServiceModel>(CurrencyConstants.CurrencyCacheKeyValue, userId);
-		}
+		public async Task<IEnumerable<CurrencyServiceModel>> GetUserCurrenciesDropdownData(Guid userId, bool withDeleted)
+			=> await this.currenciesCacheService.GetValues<CurrencyServiceModel>(userId, withDeleted);
 
 		public async Task<UserDashboardServiceModel> GetUserDashboardDataAsync(
 			Guid userId, DateTime startDate, DateTime endDate)

@@ -4,19 +4,22 @@
     using NUnit.Framework;
     using PersonalFinancer.Data.Models;
     using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.ApiService;
-    using PersonalFinancer.Services.ApiService.Models;
+    using PersonalFinancer.Services.Api;
+    using PersonalFinancer.Services.Api.Models;
+	using PersonalFinancer.Services.Cache;
 
-    internal class CurrencyServiceTests : ServicesUnitTestsBase
+	internal class CurrencyServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<Currency> repo;
-        private ApiService<Currency> currencyService;
+        private ICacheService<Currency> cache;
+        private ApiService<Currency> currencyApiService;
 
         [SetUp]
         public void SetUp()
         {
             this.repo = new EfRepository<Currency>(this.sqlDbContext);
-            this.currencyService = new ApiService<Currency>(this.repo, this.mapper, this.memoryCache);
+            this.cache = new MemoryCacheService<Currency>(this.memoryCache, this.repo, this.mapper);
+            this.currencyApiService = new ApiService<Currency>(this.repo, this.mapper, this.cache);
         }
 
         [Test]
@@ -29,7 +32,7 @@
 
             //Act
             ApiOutputServiceModel actual =
-                await this.currencyService.CreateEntityAsync(currencyName, ownerId);
+                await this.currencyApiService.CreateEntityAsync(currencyName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -68,7 +71,7 @@
 
             //Act
             ApiOutputServiceModel result =
-                await this.currencyService.CreateEntityAsync(currencyName, ownerId);
+                await this.currencyApiService.CreateEntityAsync(currencyName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -105,7 +108,7 @@
 
             //Act
             ApiOutputServiceModel result =
-                await this.currencyService.CreateEntityAsync(currencyName, ownerId);
+                await this.currencyApiService.CreateEntityAsync(currencyName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
 
@@ -123,11 +126,11 @@
         public void CreateEntity_ShouldThrowException_WhenCurrencyExist()
         {
             //Arrange
-            string currencyName = this.Curr1User1.Name;
+            string currencyName = this.Currency1_User1_WithAcc.Name;
             Guid ownerId = this.User1.Id;
 
             //Act & Assert
-            Assert.That(async () => await this.currencyService.CreateEntityAsync(currencyName, ownerId),
+            Assert.That(async () => await this.currencyApiService.CreateEntityAsync(currencyName, ownerId),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Entity with the same name exist."));
         }
 
@@ -152,7 +155,7 @@
             });
 
             //Act
-            await this.currencyService.DeleteEntityAsync(newCategory.Id, this.User1.Id, isUserAdmin: false);
+            await this.currencyApiService.DeleteEntityAsync(newCategory.Id, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(async () =>
@@ -183,7 +186,7 @@
             });
 
             //Act
-            await this.currencyService.DeleteEntityAsync(newCurrency.Id, this.User2.Id, isUserAdmin: true);
+            await this.currencyApiService.DeleteEntityAsync(newCurrency.Id, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(async () =>
@@ -197,7 +200,7 @@
         public void DeleteEntity_ShouldThrowException_WhenCurrencyNotExist()
         {
             //Act & Assert
-            Assert.That(async () => await this.currencyService
+            Assert.That(async () => await this.currencyApiService
                   .DeleteEntityAsync(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
@@ -216,7 +219,7 @@
             await this.repo.SaveChangesAsync();
 
             //Act & Assert
-            Assert.That(async () => await this.currencyService
+            Assert.That(async () => await this.currencyApiService
                   .DeleteEntityAsync(user2Currency.Id, this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Unauthorized."));
         }

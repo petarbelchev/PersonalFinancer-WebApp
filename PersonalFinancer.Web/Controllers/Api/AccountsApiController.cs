@@ -52,9 +52,9 @@
 
 			TransactionsServiceModel accountTransactions =
 				await this.accountsInfoService.GetAccountTransactionsAsync(
-					inputModel.Id ?? throw new InvalidOperationException("Account ID cannot be a null."),
-					inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be a null."), 
-					inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be a null."), 
+					inputModel.Id ?? throw new InvalidOperationException("Account ID cannot be null."),
+					inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."), 
+					inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null."), 
 					inputModel.Page);
 
 			var viewModel = new TransactionsViewModel

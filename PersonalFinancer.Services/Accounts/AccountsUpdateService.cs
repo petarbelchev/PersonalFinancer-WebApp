@@ -2,11 +2,11 @@
 {
 	using AutoMapper;
 	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.Caching.Memory;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.Cache;
 	using static PersonalFinancer.Data.Constants;
 
 	public class AccountsUpdateService : IAccountsUpdateService
@@ -17,7 +17,10 @@
 		private readonly IEfRepository<Currency> currenciesRepo;
 		private readonly IEfRepository<Category> categoriesRepo;
 		private readonly IMapper mapper;
-		private readonly IMemoryCache memoryCache;
+		private readonly ICacheService<Account> accountsCache;
+		private readonly ICacheService<AccountType> accountTypesCache;
+		private readonly ICacheService<Currency> currenciesCache;
+		private readonly ICacheService<Category> categoriesCache;
 
 		public AccountsUpdateService(
 			IEfRepository<Account> accountRepository,
@@ -26,7 +29,10 @@
 			IEfRepository<Currency> currenciesRepo,
 			IEfRepository<Category> categoriesRepo,
 			IMapper mapper,
-			IMemoryCache memoryCache)
+			ICacheService<Account> accountsCache,
+			ICacheService<AccountType> accountTypesCache,
+			ICacheService<Currency> currenciesCache,
+			ICacheService<Category> categoriesCache)
 		{
 			this.accountsRepo = accountRepository;
 			this.transactionsRepo = transactionRepository;
@@ -34,7 +40,10 @@
 			this.currenciesRepo = currenciesRepo;
 			this.categoriesRepo = categoriesRepo;
 			this.mapper = mapper;
-			this.memoryCache = memoryCache;
+			this.accountsCache = accountsCache;
+			this.accountTypesCache = accountTypesCache;
+			this.currenciesCache = currenciesCache;
+			this.categoriesCache = categoriesCache;
 		}
 
 		/// <summary>
@@ -63,7 +72,7 @@
 			await this.accountsRepo.AddAsync(newAccount);
 			await this.accountsRepo.SaveChangesAsync();
 
-			this.memoryCache.Remove(AccountConstants.AccountCacheKeyValue + model.OwnerId);
+			this.accountsCache.RemoveValues(model.OwnerId, notDeleted: true, deleted: false);
 
 			return newAccount.Id;
 		}
@@ -79,8 +88,8 @@
 				.FirstAsync(a => a.Id == model.AccountId);
 
 			await this.ValidateCategory(
-				model.CategoryId ?? throw new InvalidOperationException("Category ID cannot be a null."), 
-				model.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be a null."));
+				model.CategoryId ?? throw new InvalidOperationException("Category ID cannot be null."), 
+				model.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be null."));
 
 			model.CreatedOn = model.CreatedOn.ToUniversalTime();
 
@@ -118,7 +127,10 @@
 
 			await this.accountsRepo.SaveChangesAsync();
 
-			this.memoryCache.Remove(AccountConstants.AccountCacheKeyValue + userId);
+			this.accountsCache.RemoveValues(userId, notDeleted: true, deleted: true);
+			this.accountTypesCache.RemoveValues(userId, notDeleted: false, deleted: true);
+			this.currenciesCache.RemoveValues(userId, notDeleted: false, deleted: true);
+			this.categoriesCache.RemoveValues(userId, notDeleted: false, deleted: true);
 		}
 
 		/// <summary>
@@ -141,6 +153,11 @@
 			RefundBalance(transaction);
 
 			await this.transactionsRepo.SaveChangesAsync();
+
+			this.accountsCache.RemoveValues(userId, notDeleted: false, deleted: true);
+			this.accountTypesCache.RemoveValues(userId, notDeleted: false, deleted: true);
+			this.currenciesCache.RemoveValues(userId, notDeleted: false, deleted: true);
+			this.categoriesCache.RemoveValues(userId, notDeleted: false, deleted: true);
 
 			return transaction.Account.Balance;
 		}
@@ -190,6 +207,9 @@
 			}
 
 			await this.accountsRepo.SaveChangesAsync();
+
+			this.accountsCache.RemoveValues(account.OwnerId, notDeleted: false, deleted: true);
+			this.accountTypesCache.RemoveValues(account.OwnerId, notDeleted: false, deleted: true);
 		}
 
 		/// <summary>
@@ -206,11 +226,11 @@
 			if (transactionInDb.IsInitialBalance)
 				throw new InvalidOperationException("Cannot edit initial balance transaction.");
 
-			Guid categoryId = model.CategoryId ?? throw new InvalidOperationException("Category Id cannot be a null.");
+			Guid categoryId = model.CategoryId ?? throw new InvalidOperationException("Category Id cannot be null.");
 
 			await this.ValidateCategory(
 				categoryId,	
-				model.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be a null."));
+				model.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be null."));
 
 			if (model.AccountId != transactionInDb.AccountId
 				|| model.TransactionType != transactionInDb.TransactionType
@@ -230,13 +250,18 @@
 			}
 
 			transactionInDb.Reference = model.Reference.Trim();
-			transactionInDb.AccountId = model.AccountId ?? throw new InvalidOperationException("Account ID cannot be a null!");
+			transactionInDb.AccountId = model.AccountId ?? throw new InvalidOperationException("Account ID cannot be null!");
 			transactionInDb.CategoryId = categoryId;
 			transactionInDb.Amount = model.Amount;
 			transactionInDb.CreatedOn = model.CreatedOn.ToUniversalTime();
 			transactionInDb.TransactionType = model.TransactionType;
 
 			await this.transactionsRepo.SaveChangesAsync();
+
+			this.categoriesCache.RemoveValues(transactionInDb.OwnerId, notDeleted: false, deleted: true);
+			this.accountsCache.RemoveValues(transactionInDb.OwnerId, notDeleted: false, deleted: true);
+			this.currenciesCache.RemoveValues(transactionInDb.OwnerId, notDeleted: false, deleted: true);
+			this.accountTypesCache.RemoveValues(transactionInDb.OwnerId, notDeleted: false, deleted: true);
 		}
 
 		private static Transaction CreateInitialTransaction(Guid accountId, Guid ownerId, decimal amount)
@@ -284,17 +309,17 @@
 		private async Task ValidateAccountTypeAndCurrency(AccountFormShortServiceModel model)
 		{
 			bool isAccountTypeValid = await this.accountTypesRepo.All().AnyAsync(at =>
-					at.Id == model.AccountTypeId
-					&& at.OwnerId == model.OwnerId
-					&& at.IsDeleted == false);
+				at.Id == model.AccountTypeId
+				&& at.OwnerId == model.OwnerId
+				&& at.IsDeleted == false);
 
 			if (!isAccountTypeValid)
 				throw new InvalidOperationException("Account Type is not valid.");
 
 			bool isCurrencyValid = await this.currenciesRepo.All().AnyAsync(c =>
-					c.Id == model.CurrencyId
-					&& c.OwnerId == model.OwnerId
-					&& c.IsDeleted == false);
+				c.Id == model.CurrencyId
+				&& c.OwnerId == model.OwnerId
+				&& c.IsDeleted == false);
 
 			if (!isCurrencyValid)
 				throw new InvalidOperationException("Currency is not valid.");

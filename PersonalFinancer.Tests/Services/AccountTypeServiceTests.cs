@@ -1,22 +1,25 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-    using Microsoft.EntityFrameworkCore;
-    using NUnit.Framework;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.ApiService;
-    using PersonalFinancer.Services.ApiService.Models;
+	using Microsoft.EntityFrameworkCore;
+	using NUnit.Framework;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Api;
+	using PersonalFinancer.Services.Api.Models;
+	using PersonalFinancer.Services.Cache;
 
-    internal class AccountTypeServiceTests : ServicesUnitTestsBase
+	internal class AccountTypeServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<AccountType> repo;
-        private ApiService<AccountType> accountTypeService;
+		private ICacheService<AccountType> cache;
+		private ApiService<AccountType> accountTypeService;
 
         [SetUp]
         public void SetUp()
         {
             this.repo = new EfRepository<AccountType>(this.sqlDbContext);
-            this.accountTypeService = new ApiService<AccountType>(this.repo, this.mapper, this.memoryCache);
+			this.cache = new MemoryCacheService<AccountType>(this.memoryCache, this.repo, this.mapper);
+			this.accountTypeService = new ApiService<AccountType>(this.repo, this.mapper, this.cache);
         }
 
         [Test]
@@ -123,7 +126,7 @@
         public void CreateEntity_ShouldThrowException_WhenAccTypeExist()
         {
             //Arrange
-            string accountTypeName = this.AccType1User1.Name;
+            string accountTypeName = this.AccType1_User1_WithAcc.Name;
             Guid ownerId = this.User1.Id;
 
             //Act & Assert

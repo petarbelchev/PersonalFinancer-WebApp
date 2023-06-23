@@ -5,7 +5,7 @@
     using System.ComponentModel.DataAnnotations.Schema;
     using static PersonalFinancer.Data.Constants.CurrencyConstants;
 
-    public class Currency : CacheableApiEntity
+    public class Currency : BaseCacheableApiEntity
     {
         [Key]
         public override Guid Id { get; set; }

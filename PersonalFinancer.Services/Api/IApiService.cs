@@ -1,6 +1,6 @@
-﻿namespace PersonalFinancer.Services.ApiService
+﻿namespace PersonalFinancer.Services.Api
 {
-    using PersonalFinancer.Services.ApiService.Models;
+    using PersonalFinancer.Services.Api.Models;
 
     public interface IApiService<T>
     {

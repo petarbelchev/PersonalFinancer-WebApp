@@ -9,6 +9,7 @@
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Web.Models.Account;
 	using static PersonalFinancer.Services.Constants.PaginationConstants;
 
 	[TestFixture]
@@ -115,7 +116,7 @@
 			var expect = new TransactionsServiceModel
 			{
 				Transactions = await this.transactionsRepo.All()
-					.Where(t => t.AccountId == this.Account1User1.Id && t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
+					.Where(t => t.AccountId == this.Account1_User1_WithTransactions.Id && t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 					.OrderByDescending(t => t.CreatedOn)
 					.Take(TransactionsPerPage)
 					.Select(t => new TransactionTableServiceModel
@@ -133,12 +134,12 @@
 					.ToListAsync(),
 
 				TotalTransactionsCount = await this.transactionsRepo.All().CountAsync(t =>
-					t.AccountId == this.Account1User1.Id && t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
+					t.AccountId == this.Account1_User1_WithTransactions.Id && t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 			};
 
 			//Act
 			TransactionsServiceModel actual = await this.accountsInfoService
-				.GetAccountTransactionsAsync(this.Account1User1.Id, startDate, endDate, page);
+				.GetAccountTransactionsAsync(this.Account1_User1_WithTransactions.Id, startDate, endDate, page);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -200,7 +201,7 @@
 			DateTime endDateUtc = endDate.ToUniversalTime();
 
 			AccountDetailsServiceModel? expected = await this.accountsRepo.All()
-				.Where(a => a.Id == this.Account1User1.Id && !a.IsDeleted)
+				.Where(a => a.Id == this.Account1_User1_WithTransactions.Id && !a.IsDeleted)
 				.Select(a => new AccountDetailsServiceModel
 				{
 					Id = a.Id,
@@ -223,7 +224,7 @@
 							Amount = t.Amount,
 							AccountCurrencyName = a.Currency.Name,
 							CreatedOn = t.CreatedOn.ToLocalTime(),
-							CategoryName = t.Category.Name,
+							CategoryName = t.Category.Name + (t.Category.IsDeleted ? " (Deleted)" : ""),
 							TransactionType = t.TransactionType.ToString(),
 							Reference = t.Reference
 						})
@@ -235,7 +236,7 @@
 
 			//Act
 			AccountDetailsServiceModel actual = await this.accountsInfoService.GetAccountDetailsAsync(
-				this.Account1User1.Id, startDate, endDate, this.User1.Id, isUserAdmin: false);
+				this.Account1_User1_WithTransactions.Id, startDate, endDate, this.User1.Id, isUserAdmin: false);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -378,10 +379,10 @@
 		{
 			//Act
 			string actualName = await this.accountsInfoService
-				.GetAccountNameAsync(this.Account1User1.Id, this.User1.Id, isUserAdmin: false);
+				.GetAccountNameAsync(this.Account1_User1_WithTransactions.Id, this.User1.Id, isUserAdmin: false);
 
 			//Assert
-			Assert.That(actualName, Is.EqualTo(this.Account1User1.Name));
+			Assert.That(actualName, Is.EqualTo(this.Account1_User1_WithTransactions.Name));
 		}
 
 		[Test]
@@ -414,16 +415,17 @@
 			//Arrange
 
 			//Act
-			AccountFormServiceModel formData = await this.accountsInfoService.GetAccountFormDataAsync(this.Account1User1.Id, this.User1.Id, isUserAdmin: false);
+			AccountFormShortServiceModel formData = await this.accountsInfoService
+				.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User1.Id, isUserAdmin: false);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(formData.Name, Is.EqualTo(this.Account1User1.Name));
-				Assert.That(formData.Balance, Is.EqualTo(this.Account1User1.Balance));
-				Assert.That(formData.AccountTypeId, Is.EqualTo(this.Account1User1.AccountTypeId));
-				Assert.That(formData.CurrencyId, Is.EqualTo(this.Account1User1.CurrencyId));
-				Assert.That(formData.OwnerId, Is.EqualTo(this.Account1User1.OwnerId));
+				Assert.That(formData.Name, Is.EqualTo(this.Account1_User1_WithTransactions.Name));
+				Assert.That(formData.Balance, Is.EqualTo(this.Account1_User1_WithTransactions.Balance));
+				Assert.That(formData.AccountTypeId, Is.EqualTo(this.Account1_User1_WithTransactions.AccountTypeId));
+				Assert.That(formData.CurrencyId, Is.EqualTo(this.Account1_User1_WithTransactions.CurrencyId));
+				Assert.That(formData.OwnerId, Is.EqualTo(this.Account1_User1_WithTransactions.OwnerId));
 			});
 		}
 
@@ -433,16 +435,17 @@
 			//Arrange
 
 			//Act
-			AccountFormServiceModel formData = await this.accountsInfoService.GetAccountFormDataAsync(this.Account1User1.Id, this.User2.Id, isUserAdmin: true);
+			AccountFormShortServiceModel formData = await this.accountsInfoService
+				.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User2.Id, isUserAdmin: true);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(formData.Name, Is.EqualTo(this.Account1User1.Name));
-				Assert.That(formData.Balance, Is.EqualTo(this.Account1User1.Balance));
-				Assert.That(formData.AccountTypeId, Is.EqualTo(this.Account1User1.AccountTypeId));
-				Assert.That(formData.CurrencyId, Is.EqualTo(this.Account1User1.CurrencyId));
-				Assert.That(formData.OwnerId, Is.EqualTo(this.Account1User1.OwnerId));
+				Assert.That(formData.Name, Is.EqualTo(this.Account1_User1_WithTransactions.Name));
+				Assert.That(formData.Balance, Is.EqualTo(this.Account1_User1_WithTransactions.Balance));
+				Assert.That(formData.AccountTypeId, Is.EqualTo(this.Account1_User1_WithTransactions.AccountTypeId));
+				Assert.That(formData.CurrencyId, Is.EqualTo(this.Account1_User1_WithTransactions.CurrencyId));
+				Assert.That(formData.OwnerId, Is.EqualTo(this.Account1_User1_WithTransactions.OwnerId));
 			});
 		}
 
@@ -463,7 +466,7 @@
 			//Arrange
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService.GetAccountFormDataAsync(this.Account1User1.Id, this.User2.Id, isUserAdmin: false),
+			Assert.That(async () => await this.accountsInfoService.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User2.Id, isUserAdmin: false),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -483,19 +486,19 @@
 
 			//Act
 			TransactionFormModel transactionFormModel =
-				await this.accountsInfoService.GetTransactionFormDataAsync(this.Transaction2User1.Id, this.User1.Id);
+				await this.accountsInfoService.GetTransactionFormDataAsync(this.Transaction2_User1.Id, this.User1.Id);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(transactionFormModel, Is.Not.Null);
-				Assert.That(transactionFormModel.AccountId, Is.EqualTo(this.Transaction2User1.AccountId));
-				Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction2User1.Amount));
-				Assert.That(transactionFormModel.CategoryId, Is.EqualTo(this.Transaction2User1.CategoryId));
-				Assert.That(transactionFormModel.Reference, Is.EqualTo(this.Transaction2User1.Reference));
-				Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.Transaction2User1.TransactionType));
-				Assert.That(transactionFormModel.IsInitialBalance, Is.EqualTo(this.Transaction2User1.IsInitialBalance));
-				Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.Transaction2User1.CreatedOn.ToLocalTime()));
+				Assert.That(transactionFormModel.AccountId, Is.EqualTo(this.Transaction2_User1.AccountId));
+				Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction2_User1.Amount));
+				Assert.That(transactionFormModel.CategoryId, Is.EqualTo(this.Transaction2_User1.CategoryId));
+				Assert.That(transactionFormModel.Reference, Is.EqualTo(this.Transaction2_User1.Reference));
+				Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.Transaction2_User1.TransactionType));
+				Assert.That(transactionFormModel.IsInitialBalance, Is.EqualTo(this.Transaction2_User1.IsInitialBalance));
+				Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.Transaction2_User1.CreatedOn.ToLocalTime()));
 				Assert.That(transactionFormModel.UserAccounts.Count(), Is.EqualTo(orderedUserAccounts.Count));
 				Assert.That(transactionFormModel.UserCategories.Count(), Is.EqualTo(orderedUserCategories.Count));
 
@@ -524,7 +527,7 @@
 
 			//Act & Assert
 			Assert.That(async () => await this.accountsInfoService
-				  .GetTransactionFormDataAsync(this.InitialTransaction1User1.Id, this.User1.Id), 
+				  .GetTransactionFormDataAsync(this.Transaction1_User1.Id, this.User1.Id), 
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -541,21 +544,21 @@
 		{
 			//Act
 			TransactionDetailsServiceModel transactionFormModel =
-				await this.accountsInfoService.GetTransactionDetailsAsync(this.InitialTransaction1User1.Id, this.User1.Id, isUserAdmin: false);
+				await this.accountsInfoService.GetTransactionDetailsAsync(this.Transaction1_User1.Id, this.User1.Id, isUserAdmin: false);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(transactionFormModel, Is.Not.Null);
-				Assert.That(transactionFormModel.Id, Is.EqualTo(this.InitialTransaction1User1.Id));
-				Assert.That(transactionFormModel.AccountName, Is.EqualTo(this.InitialTransaction1User1.Account.Name));
-				Assert.That(transactionFormModel.Amount, Is.EqualTo(this.InitialTransaction1User1.Amount));
-				Assert.That(transactionFormModel.CategoryName, Is.EqualTo(this.InitialTransaction1User1.Category.Name));
-				Assert.That(transactionFormModel.Reference, Is.EqualTo(this.InitialTransaction1User1.Reference));
-				Assert.That(transactionFormModel.OwnerId, Is.EqualTo(this.InitialTransaction1User1.OwnerId));
-				Assert.That(transactionFormModel.AccountCurrencyName, Is.EqualTo(this.InitialTransaction1User1.Account.Currency.Name));
-				Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.InitialTransaction1User1.CreatedOn.ToLocalTime()));
-				Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.InitialTransaction1User1.TransactionType.ToString()));
+				Assert.That(transactionFormModel.Id, Is.EqualTo(this.Transaction1_User1.Id));
+				Assert.That(transactionFormModel.AccountName, Is.EqualTo(this.Transaction1_User1.Account.Name));
+				Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction1_User1.Amount));
+				Assert.That(transactionFormModel.CategoryName, Is.EqualTo(this.Transaction1_User1.Category.Name));
+				Assert.That(transactionFormModel.Reference, Is.EqualTo(this.Transaction1_User1.Reference));
+				Assert.That(transactionFormModel.OwnerId, Is.EqualTo(this.Transaction1_User1.OwnerId));
+				Assert.That(transactionFormModel.AccountCurrencyName, Is.EqualTo(this.Transaction1_User1.Account.Currency.Name));
+				Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.Transaction1_User1.CreatedOn.ToLocalTime()));
+				Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.Transaction1_User1.TransactionType.ToString()));
 			});
 		}
 
@@ -563,7 +566,7 @@
 		public async Task GetOwnerId_ShouldReturnOwnerId_WithValidAccountId()
 		{
 			//Act
-			Guid ownerId = await this.accountsInfoService.GetAccountOwnerIdAsync(this.Account1User1.Id);
+			Guid ownerId = await this.accountsInfoService.GetAccountOwnerIdAsync(this.Account1_User1_WithTransactions.Id);
 
 			//Assert
 			Assert.That(ownerId, Is.EqualTo(this.User1.Id));
@@ -582,22 +585,22 @@
 		{
 			//Act
 			TransactionDetailsServiceModel transactionFormModel =
-				await this.accountsInfoService.GetTransactionDetailsAsync(this.InitialTransaction1User1.Id, this.User2.Id, isUserAdmin: true);
+				await this.accountsInfoService.GetTransactionDetailsAsync(this.Transaction1_User1.Id, this.User2.Id, isUserAdmin: true);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(transactionFormModel, Is.Not.Null);
-				Assert.That(transactionFormModel.Id, Is.EqualTo(this.InitialTransaction1User1.Id));
-				Assert.That(transactionFormModel.AccountName, Is.EqualTo(this.InitialTransaction1User1.Account.Name));
-				Assert.That(transactionFormModel.Amount, Is.EqualTo(this.InitialTransaction1User1.Amount));
-				Assert.That(transactionFormModel.CategoryName, Is.EqualTo(this.InitialTransaction1User1.Category.Name));
-				Assert.That(transactionFormModel.Reference, Is.EqualTo(this.InitialTransaction1User1.Reference));
-				Assert.That(transactionFormModel.OwnerId, Is.EqualTo(this.InitialTransaction1User1.OwnerId));
-				Assert.That(transactionFormModel.AccountCurrencyName, Is.EqualTo(this.InitialTransaction1User1.Account.Currency.Name));
-				Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.InitialTransaction1User1.CreatedOn.ToLocalTime()));
-				Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.InitialTransaction1User1.TransactionType.ToString()));
-				Assert.That(transactionFormModel.IsInitialBalance, Is.EqualTo(this.InitialTransaction1User1.IsInitialBalance));
+				Assert.That(transactionFormModel.Id, Is.EqualTo(this.Transaction1_User1.Id));
+				Assert.That(transactionFormModel.AccountName, Is.EqualTo(this.Transaction1_User1.Account.Name));
+				Assert.That(transactionFormModel.Amount, Is.EqualTo(this.Transaction1_User1.Amount));
+				Assert.That(transactionFormModel.CategoryName, Is.EqualTo(this.Transaction1_User1.Category.Name));
+				Assert.That(transactionFormModel.Reference, Is.EqualTo(this.Transaction1_User1.Reference));
+				Assert.That(transactionFormModel.OwnerId, Is.EqualTo(this.Transaction1_User1.OwnerId));
+				Assert.That(transactionFormModel.AccountCurrencyName, Is.EqualTo(this.Transaction1_User1.Account.Currency.Name));
+				Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.Transaction1_User1.CreatedOn.ToLocalTime()));
+				Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.Transaction1_User1.TransactionType.ToString()));
+				Assert.That(transactionFormModel.IsInitialBalance, Is.EqualTo(this.Transaction1_User1.IsInitialBalance));
 			});
 		}
 
@@ -618,7 +621,7 @@
 			//Arrange
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService.GetTransactionDetailsAsync(this.InitialTransaction1User1.Id, this.User2.Id, isUserAdmin: false),
+			Assert.That(async () => await this.accountsInfoService.GetTransactionDetailsAsync(this.Transaction1_User1.Id, this.User2.Id, isUserAdmin: false),
 			Throws.TypeOf<ArgumentException>().With.Message.EqualTo("User is not transaction's owner."));
 		}
 
@@ -626,15 +629,15 @@
 		public async Task GetAccountShortDetails_ShouldReturnCorrectData_WithValidInput()
 		{
 			//Act
-			AccountDetailsShortServiceModel actualData = await this.accountsInfoService.GetAccountShortDetailsAsync(this.Account1User1.Id);
+			AccountDetailsShortServiceModel actualData = await this.accountsInfoService.GetAccountShortDetailsAsync(this.Account1_User1_WithTransactions.Id);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(actualData, Is.Not.Null);
-				Assert.That(actualData.Name, Is.EqualTo(this.Account1User1.Name));
-				Assert.That(actualData.Balance, Is.EqualTo(this.Account1User1.Balance));
-				Assert.That(actualData.CurrencyName, Is.EqualTo(this.Account1User1.Currency.Name));
+				Assert.That(actualData.Name, Is.EqualTo(this.Account1_User1_WithTransactions.Name));
+				Assert.That(actualData.Balance, Is.EqualTo(this.Account1_User1_WithTransactions.Balance));
+				Assert.That(actualData.CurrencyName, Is.EqualTo(this.Account1_User1_WithTransactions.Currency.Name));
 			});
 		}
 

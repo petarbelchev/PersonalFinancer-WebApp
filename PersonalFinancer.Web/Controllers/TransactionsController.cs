@@ -57,7 +57,7 @@
 			{
 				viewModel = this.mapper.Map<UserTransactionsViewModel>(inputModel);
 				viewModel.Id = userId;
-				await this.PrepareAccountsTypesCategoriesCurrenciesAsync(userId, viewModel);
+				await this.PrepareAccountsTypesCategoriesAndCurrenciesAsync(viewModel);
 
 				return this.View(viewModel);
 			}
@@ -71,7 +71,7 @@
 		public async Task<IActionResult> Create()
 		{
 			var viewModel = new TransactionFormModel() { OwnerId = this.User.IdToGuid() };
-			await this.PrepareTransactionFormModelAsync(viewModel);
+			await this.PrepareAccountsAndCategoriesAsync(viewModel);
 			viewModel.CreatedOn = DateTime.Now;
 
 			return this.View(viewModel);
@@ -86,7 +86,7 @@
 
 			if (!this.ModelState.IsValid)
 			{
-				await this.PrepareTransactionFormModelAsync(inputModel);
+				await this.PrepareAccountsAndCategoriesAsync(inputModel);
 
 				return this.View(inputModel);
 			}
@@ -105,8 +105,11 @@
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> Delete(Guid id, string? returnUrl = null)
+		public async Task<IActionResult> Delete([Required] Guid id, string? returnUrl = null)
 		{
+			if (!this.ModelState.IsValid)
+				return this.BadRequest();
+
 			try
 			{
 				await this.accountsUpdateService.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
@@ -129,12 +132,17 @@
 				: this.RedirectToAction("Index", "Home");
 		}
 
-		public async Task<IActionResult> TransactionDetails(Guid id)
+		public async Task<IActionResult> TransactionDetails([Required] Guid id)
 		{
+			if (!this.ModelState.IsValid)
+				return this.BadRequest();
+
+			TransactionDetailsServiceModel viewModel;
+
 			try
 			{
-				return this.View(await this.accountsInfoService
-					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin()));
+				viewModel = await this.accountsInfoService
+					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (ArgumentException)
 			{
@@ -144,21 +152,24 @@
 			{
 				return this.BadRequest();
 			}
+
+			return this.View(viewModel);
 		}
 
-		public async Task<IActionResult> EditTransaction([Required] Guid? id)
+		public async Task<IActionResult> EditTransaction([Required] Guid id)
 		{
+			if (!this.ModelState.IsValid)
+				return this.BadRequest();
+
 			TransactionFormModel viewModel;
 
 			try
 			{
-				Guid transactionId = id ?? throw new InvalidOperationException("Transaction ID cannot be a null.");
-
 				Guid ownerId = this.User.IsAdmin()
-					? await this.accountsInfoService.GetTransactionOwnerIdAsync(transactionId)
+					? await this.accountsInfoService.GetTransactionOwnerIdAsync(id)
 					: this.User.IdToGuid();
 
-				viewModel = await this.accountsInfoService.GetTransactionFormDataAsync(transactionId, ownerId);
+				viewModel = await this.accountsInfoService.GetTransactionFormDataAsync(id, ownerId);
 			}
 			catch (InvalidOperationException)
 			{
@@ -169,23 +180,21 @@
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> EditTransaction([Required] Guid? id, TransactionFormModel inputModel)
+		public async Task<IActionResult> EditTransaction([Required] Guid id, TransactionFormModel inputModel)
 		{
 			try
 			{
-				Guid transactionId = id ?? throw new InvalidOperationException("Transaction ID cannot be a null.");
-
 				if (!this.User.IsAdmin() && this.User.IdToGuid() != inputModel.OwnerId)
 					return this.BadRequest();
 
 				if (!this.ModelState.IsValid)
 				{
-					await this.PrepareTransactionFormModelAsync(inputModel);
+					await this.PrepareAccountsAndCategoriesAsync(inputModel);
 
 					return this.View(inputModel);
 				}
 
-				await this.accountsUpdateService.EditTransactionAsync(transactionId, inputModel);
+				await this.accountsUpdateService.EditTransactionAsync(id, inputModel);
 			}
 			catch (InvalidOperationException)
 			{
@@ -199,11 +208,15 @@
 			return this.RedirectToAction(nameof(TransactionDetails), new { id });
 		}
 
-		private async Task PrepareTransactionFormModelAsync(TransactionFormModel formModel)
+		/// <summary>
+		/// Throws InvalidOperationException when Owner ID is invalid.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		private async Task PrepareAccountsAndCategoriesAsync(TransactionFormModel formModel)
 		{
-			Guid ownerId = formModel.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be a null.");
-			formModel.UserAccounts = await this.usersService.GetUserAccountsDropdownData(ownerId);
-			formModel.UserCategories = await this.usersService.GetUserCategoriesDropdownData(ownerId);
+			Guid ownerId = formModel.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be null.");
+			formModel.UserAccounts = await this.usersService.GetUserAccountsDropdownData(ownerId, withDeleted: false);
+			formModel.UserCategories = await this.usersService.GetUserCategoriesDropdownData(ownerId, withDeleted: false);
 		}
 
 		private async Task<UserTransactionsViewModel> PrepareUserTransactionsViewModelAsync(
@@ -219,17 +232,17 @@
 			viewModel.Transactions = userTransactions.Transactions;
 			viewModel.Pagination.TotalElements = userTransactions.TotalTransactionsCount;
 
-			await this.PrepareAccountsTypesCategoriesCurrenciesAsync(userId, viewModel);
+			await this.PrepareAccountsTypesCategoriesAndCurrenciesAsync(viewModel);
 
 			return viewModel;
 		}
 
-		private async Task PrepareAccountsTypesCategoriesCurrenciesAsync(Guid userId, UserTransactionsViewModel viewModel)
+		private async Task PrepareAccountsTypesCategoriesAndCurrenciesAsync(UserTransactionsViewModel viewModel)
 		{
-			viewModel.Accounts = await this.usersService.GetUserAccountsDropdownData(userId);
-			viewModel.Categories = await this.usersService.GetUserCategoriesDropdownData(userId);
-			viewModel.AccountTypes = await this.usersService.GetUserAccountTypesDropdownData(userId);
-			viewModel.Currencies = await this.usersService.GetUserCurrenciesDropdownData(userId);
+			viewModel.Accounts = await this.usersService.GetUserAccountsDropdownData(viewModel.Id, true);
+			viewModel.Categories = await this.usersService.GetUserCategoriesDropdownData(viewModel.Id, true);
+			viewModel.AccountTypes = await this.usersService.GetUserAccountTypesDropdownData(viewModel.Id, true);
+			viewModel.Currencies = await this.usersService.GetUserCurrenciesDropdownData(viewModel.Id, true);
 		}
 	}
 }

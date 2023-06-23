@@ -35,7 +35,7 @@
 		public async Task<IActionResult> Create()
 		{
 			var viewModel = new AccountFormViewModel { OwnerId = this.User.IdToGuid() };
-			await this.PrepareAccountFormViewModel(viewModel);
+			await this.SetUserDropdownDataToViewModel(viewModel);
 
 			return this.View(viewModel);
 		}
@@ -44,15 +44,15 @@
 		[HttpPost]
 		public async Task<IActionResult> Create(AccountFormViewModel inputModel)
 		{
+			if (inputModel.OwnerId != this.User.IdToGuid())
+				return this.BadRequest();
+
 			if (!this.ModelState.IsValid)
 			{
-				await this.PrepareAccountFormViewModel(inputModel);
+				await this.SetUserDropdownDataToViewModel(inputModel);
 
 				return this.View(inputModel);
 			}
-
-			if (inputModel.OwnerId != this.User.IdToGuid())
-				return this.BadRequest();
 
 			try
 			{
@@ -68,14 +68,17 @@
 			{
 				this.ModelState.AddModelError(nameof(inputModel.Name),
 					"You already have Account with that name.");
-				await this.PrepareAccountFormViewModel(inputModel);
+				await this.SetUserDropdownDataToViewModel(inputModel);
 
 				return this.View(inputModel);
 			}
 		}
 
-		public async Task<IActionResult> AccountDetails(Guid id)
+		public async Task<IActionResult> AccountDetails([Required] Guid id)
 		{
+			if (!this.ModelState.IsValid)
+				return this.BadRequest();
+
 			DateTime startDate = DateTime.Now.AddMonths(-1);
 			DateTime endDate = DateTime.Now;
 
@@ -113,10 +116,10 @@
 				else
 				{
 					viewModel = await this.GetAccountDetailsViewModel(
-						accountId, 
-						inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be a null."), 
-						inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be a null."), 
-						this.User.IdToGuid(), 
+						accountId,
+						inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."),
+						inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null."),
+						this.User.IdToGuid(),
 						this.User.IsAdmin());
 				}
 			}
@@ -128,7 +131,7 @@
 			return this.View(viewModel);
 		}
 
-		public async Task<IActionResult> Delete([Required] Guid? id)
+		public async Task<IActionResult> Delete([Required] Guid id)
 		{
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
@@ -137,10 +140,8 @@
 
 			try
 			{
-				Guid accountId = id ?? throw new InvalidOperationException();
-
 				viewModel.Name = await this.accountsInfoService
-					.GetAccountNameAsync(accountId, this.User.IdToGuid(), this.User.IsAdmin());
+					.GetAccountNameAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (InvalidOperationException)
 			{
@@ -191,47 +192,45 @@
 			}
 		}
 
-		public async Task<IActionResult> EditAccount([Required] Guid? id)
+		public async Task<IActionResult> EditAccount([Required] Guid id)
 		{
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 
-			AccountFormServiceModel accountData;
+			AccountFormShortServiceModel accountData;
+			AccountFormViewModel viewModel;
 
 			try
 			{
-				Guid accountId = id ?? throw new InvalidOperationException();
-
 				accountData = await this.accountsInfoService
-					.GetAccountFormDataAsync(accountId, this.User.IdToGuid(), this.User.IsAdmin());
+					.GetAccountFormDataAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (InvalidOperationException)
 			{
 				return this.BadRequest();
 			}
 
-			AccountFormViewModel viewModel = this.mapper.Map<AccountFormViewModel>(accountData);
+			viewModel = this.mapper.Map<AccountFormViewModel>(accountData);
+			await this.SetUserDropdownDataToViewModel(viewModel);
 
 			return this.View(viewModel);
 		}
 
 		[HttpPost]
 		public async Task<IActionResult> EditAccount(
-			[Required] Guid? id, AccountFormViewModel inputModel, string returnUrl)
+			[Required] Guid id, AccountFormViewModel inputModel, string returnUrl)
 		{
-			if (!this.ModelState.IsValid)
-			{
-				await this.PrepareAccountFormViewModel(inputModel);
-
-				return this.View(inputModel);
-			}
-
 			try
 			{
-				Guid accountId = id ?? throw new InvalidOperationException();
+				if (!this.ModelState.IsValid)
+				{
+					await this.SetUserDropdownDataToViewModel(inputModel);
+
+					return this.View(inputModel);
+				}
 
 				Guid ownerId = this.User.IsAdmin()
-					? await this.accountsInfoService.GetAccountOwnerIdAsync(accountId)
+					? await this.accountsInfoService.GetAccountOwnerIdAsync(id)
 					: this.User.IdToGuid();
 
 				if (inputModel.OwnerId != ownerId)
@@ -240,7 +239,7 @@
 				AccountFormShortServiceModel serviceModel =
 					this.mapper.Map<AccountFormShortServiceModel>(inputModel);
 
-				await this.accountsUpdateService.EditAccountAsync(accountId, serviceModel);
+				await this.accountsUpdateService.EditAccountAsync(id, serviceModel);
 			}
 			catch (ArgumentException)
 			{
@@ -248,7 +247,7 @@
 					? $"The user already have Account with \"{inputModel.Name}\" name."
 					: $"You already have Account with \"{inputModel.Name}\" name.");
 
-				await this.PrepareAccountFormViewModel(inputModel);
+				await this.SetUserDropdownDataToViewModel(inputModel);
 
 				return this.View(inputModel);
 			}
@@ -264,15 +263,15 @@
 			return this.LocalRedirect(returnUrl);
 		}
 
-		private async Task PrepareAccountFormViewModel(AccountFormViewModel viewModel)
+		/// <summary>
+		/// Throws InvalidOperationException when Owner ID is invalid.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		private async Task SetUserDropdownDataToViewModel(AccountFormViewModel viewModel)
 		{
-			if (viewModel.OwnerId != null)
-			{
-				Guid userId = viewModel.OwnerId ?? throw new InvalidOperationException();
-
-				viewModel.AccountTypes = await this.usersService.GetUserAccountTypesDropdownData(userId);
-				viewModel.Currencies = await this.usersService.GetUserCurrenciesDropdownData(userId);
-			}
+			Guid userId = viewModel.OwnerId ?? throw new InvalidOperationException();
+			viewModel.AccountTypes = await this.usersService.GetUserAccountTypesDropdownData(userId, withDeleted: false);
+			viewModel.Currencies = await this.usersService.GetUserCurrenciesDropdownData(userId, withDeleted: false);
 		}
 
 		/// <summary>

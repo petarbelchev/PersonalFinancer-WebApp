@@ -70,8 +70,8 @@
 
             UserDashboardServiceModel userDashboardData =
                 await this.userService.GetUserDashboardDataAsync(this.User.IdToGuid(), 
-                    viewModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be a null."), 
-                    viewModel.EndDate ?? throw new InvalidOperationException("End Date cannot be a null."));
+                    viewModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."), 
+                    viewModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null."));
             
             viewModel.Accounts = userDashboardData.Accounts;
             viewModel.Transactions = userDashboardData.LastTransactions;

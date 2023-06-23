@@ -1,9 +1,11 @@
 ﻿namespace PersonalFinancer.Services.Shared.Models
 {
-    public class CurrencyServiceModel
-    {
-        public Guid Id { get; set; }
+	using PersonalFinancer.Services.Shared.Contracts;
 
-        public string Name { get; init; } = null!;
+	public class CurrencyServiceModel : BaseCacheableServiceModel
+    {
+        public override Guid Id { get; set; }
+
+        public override string Name { get; set; } = null!;
     }
 }

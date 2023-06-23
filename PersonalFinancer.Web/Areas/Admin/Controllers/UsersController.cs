@@ -27,16 +27,14 @@
             return this.View(viewModel);
         }
 
-        public async Task<IActionResult> Details([Required] Guid? id)
+        public async Task<IActionResult> Details([Required] Guid id)
         {
             if (!this.ModelState.IsValid)
                 return this.BadRequest();
 
             try
             {
-                Guid userId = id ?? throw new InvalidOperationException();
-
-                return this.View(await this.userService.UserDetailsAsync(userId));
+                return this.View(await this.userService.UserDetailsAsync(id));
             }
             catch (InvalidOperationException)
             {

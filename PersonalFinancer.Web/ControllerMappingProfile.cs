@@ -13,14 +13,10 @@
     {
         public ControllerMappingProfile()
         {
-			this.CreateMap<Account, DeleteAccountViewModel>();
-			this.CreateMap<Account, AccountFormViewModel>();
 			this.CreateMap<AccountDetailsServiceModel, AccountDetailsViewModel>();
-			this.CreateMap<AccountFormServiceModel, AccountFormViewModel>();
-			this.CreateMap<AccountFormViewModel, AccountFormShortServiceModel>();
 			this.CreateMap<AccountDetailsShortServiceModel, AccountDetailsViewModel>();
+			this.CreateMap<AccountFormViewModel, AccountFormShortServiceModel>().ReverseMap();
 
-			this.CreateMap<Transaction, TransactionFormModel>();
 			this.CreateMap<TransactionsServiceModel, UserTransactionsViewModel>();
 			this.CreateMap<UserTransactionsInputModel, UserTransactionsViewModel>();
 			this.CreateMap<UserAccountsAndCategoriesServiceModel, TransactionFormModel>();

@@ -7,13 +7,13 @@
     {
         Task<UsersServiceModel> GetAllUsersAsync(int page);
 
-        Task<IEnumerable<AccountServiceModel>> GetUserAccountsDropdownData(Guid userId);
+        Task<IEnumerable<AccountServiceModel>> GetUserAccountsDropdownData(Guid userId, bool withDeleted);
 
-        Task<IEnumerable<AccountTypeServiceModel>> GetUserAccountTypesDropdownData(Guid userId);
+        Task<IEnumerable<AccountTypeServiceModel>> GetUserAccountTypesDropdownData(Guid userId, bool withDeleted);
 		
-        Task<IEnumerable<CategoryServiceModel>> GetUserCategoriesDropdownData(Guid userId);
+        Task<IEnumerable<CategoryServiceModel>> GetUserCategoriesDropdownData(Guid userId, bool withDeleted);
 
-        Task<IEnumerable<CurrencyServiceModel>> GetUserCurrenciesDropdownData(Guid userId);
+        Task<IEnumerable<CurrencyServiceModel>> GetUserCurrenciesDropdownData(Guid userId, bool withDeleted);
 
 		Task<UserDashboardServiceModel> GetUserDashboardDataAsync(Guid userId, DateTime startDate, DateTime endDate);
         

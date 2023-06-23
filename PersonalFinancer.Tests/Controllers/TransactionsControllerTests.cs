@@ -123,19 +123,35 @@
 			};
 
 			this.usersServiceMock.Setup(x => x
-				.GetUserAccountsDropdownData(this.userId))
+				.GetUserAccountsDropdownData(this.userId, true))
 				.ReturnsAsync(this.expectedAccounts);
 
 			this.usersServiceMock.Setup(x => x
-				.GetUserCategoriesDropdownData(this.userId))
+				.GetUserAccountsDropdownData(this.userId, false))
+				.ReturnsAsync(this.expectedAccounts);
+
+			this.usersServiceMock.Setup(x => x
+				.GetUserCategoriesDropdownData(this.userId, true))
 				.ReturnsAsync(this.expectedCategories);
 
 			this.usersServiceMock.Setup(x => x
-				.GetUserAccountTypesDropdownData(this.userId))
+				.GetUserCategoriesDropdownData(this.userId, false))
+				.ReturnsAsync(this.expectedCategories);
+
+			this.usersServiceMock.Setup(x => x
+				.GetUserAccountTypesDropdownData(this.userId, true))
 				.ReturnsAsync(this.expectedAccountTypes);
 
 			this.usersServiceMock.Setup(x => x
-				.GetUserCurrenciesDropdownData(this.userId))
+				.GetUserAccountTypesDropdownData(this.userId, false))
+				.ReturnsAsync(this.expectedAccountTypes);
+
+			this.usersServiceMock.Setup(x => x
+				.GetUserCurrenciesDropdownData(this.userId, true))
+				.ReturnsAsync(this.expectedCurrencies);
+
+			this.usersServiceMock.Setup(x => x
+				.GetUserCurrenciesDropdownData(this.userId, false))
 				.ReturnsAsync(this.expectedCurrencies);
 		}
 
@@ -702,18 +718,6 @@
 
 			//Act
 			var result = (BadRequestResult)await this.controller.EditTransaction(transactionId);
-
-			//Assert
-			Assert.That(result.StatusCode, Is.EqualTo(400));
-		}
-
-		[Test]
-		public async Task EditTransaction_OnGet_ShouldReturnBadRequest_WhenTransactionIdIsNull()
-		{
-			//Arrange
-
-			//Act
-			var result = (BadRequestResult)await this.controller.EditTransaction(null);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
