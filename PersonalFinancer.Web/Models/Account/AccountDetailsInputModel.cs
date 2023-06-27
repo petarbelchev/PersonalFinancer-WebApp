@@ -1,6 +1,6 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
-	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Web.Models.Shared;
 	using System.ComponentModel.DataAnnotations;
 
 	public class AccountDetailsInputModel : DateFilterModel

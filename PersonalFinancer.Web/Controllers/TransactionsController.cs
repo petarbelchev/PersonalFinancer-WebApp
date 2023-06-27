@@ -6,7 +6,9 @@
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.User.Models;
 	using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.Models.Account;
 	using PersonalFinancer.Web.Models.Transaction;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Data.Constants.RoleConstants;
@@ -34,14 +36,15 @@
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> All()
 		{
-			var inputModel = new UserTransactionsInputModel
+			var filterDTO = new TransactionsFilterDTO
 			{
+				UserId = this.User.IdToGuid(),
 				StartDate = DateTime.Now.AddMonths(-1),
 				EndDate = DateTime.Now
 			};
 
-			UserTransactionsViewModel viewModel =
-				await this.PrepareUserTransactionsViewModelAsync(this.User.IdToGuid(), inputModel);
+			UserTransactionsViewModel viewModel = 
+				await this.PrepareUserTransactionsViewModelAsync(filterDTO);
 
 			return this.View(viewModel);
 		}
@@ -56,13 +59,16 @@
 			if (!this.ModelState.IsValid)
 			{
 				viewModel = this.mapper.Map<UserTransactionsViewModel>(inputModel);
-				viewModel.Id = userId;
-				await this.PrepareAccountsTypesCategoriesAndCurrenciesAsync(viewModel);
+				viewModel.UserId = userId;
+				var dropdownDTO = await this.usersService.GetUserDropdownDataAsync(userId);
+				this.mapper.Map(dropdownDTO, viewModel);
 
 				return this.View(viewModel);
 			}
 
-			viewModel = await this.PrepareUserTransactionsViewModelAsync(userId, inputModel);
+			var filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
+			filterDTO.UserId = userId;
+			viewModel = await this.PrepareUserTransactionsViewModelAsync(filterDTO);
 
 			return this.View(viewModel);
 		}
@@ -70,7 +76,7 @@
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Create()
 		{
-			var viewModel = new TransactionFormModel() { OwnerId = this.User.IdToGuid() };
+			var viewModel = new TransactionFormViewModel() { OwnerId = this.User.IdToGuid() };
 			await this.PrepareAccountsAndCategoriesAsync(viewModel);
 			viewModel.CreatedOn = DateTime.Now;
 
@@ -79,7 +85,7 @@
 
 		[Authorize(Roles = UserRoleName)]
 		[HttpPost]
-		public async Task<IActionResult> Create(TransactionFormModel inputModel)
+		public async Task<IActionResult> Create(TransactionFormViewModel inputModel)
 		{
 			if (inputModel.OwnerId != this.User.IdToGuid())
 				return this.BadRequest();
@@ -93,7 +99,8 @@
 
 			try
 			{
-				Guid newTransactionId = await this.accountsUpdateService.CreateTransactionAsync(inputModel);
+				var dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
+				Guid newTransactionId = await this.accountsUpdateService.CreateTransactionAsync(dto);
 				this.TempData["successMsg"] = "You create a new transaction successfully!";
 
 				return this.RedirectToAction(nameof(TransactionDetails), new { id = newTransactionId });
@@ -137,7 +144,7 @@
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 
-			TransactionDetailsServiceModel viewModel;
+			TransactionDetailsDTO viewModel;
 
 			try
 			{
@@ -161,26 +168,23 @@
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 
-			TransactionFormModel viewModel;
-
 			try
 			{
-				Guid ownerId = this.User.IsAdmin()
-					? await this.accountsInfoService.GetTransactionOwnerIdAsync(id)
-					: this.User.IdToGuid();
+				var transactionDTO = await this.accountsInfoService
+					.GetTransactionFormDataAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 
-				viewModel = await this.accountsInfoService.GetTransactionFormDataAsync(id, ownerId);
+				var viewModel = this.mapper.Map<TransactionFormViewModel>(transactionDTO);
+
+				return this.View(viewModel);
 			}
 			catch (InvalidOperationException)
 			{
 				return this.BadRequest();
 			}
-
-			return this.View(viewModel);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> EditTransaction([Required] Guid id, TransactionFormModel inputModel)
+		public async Task<IActionResult> EditTransaction([Required] Guid id, TransactionFormViewModel inputModel)
 		{
 			try
 			{
@@ -194,7 +198,9 @@
 					return this.View(inputModel);
 				}
 
-				await this.accountsUpdateService.EditTransactionAsync(id, inputModel);
+				var dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
+
+				await this.accountsUpdateService.EditTransactionAsync(id, dto);
 			}
 			catch (InvalidOperationException)
 			{
@@ -212,37 +218,24 @@
 		/// Throws InvalidOperationException when Owner ID is invalid.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		private async Task PrepareAccountsAndCategoriesAsync(TransactionFormModel formModel)
+		private async Task PrepareAccountsAndCategoriesAsync(TransactionFormViewModel formModel)
 		{
 			Guid ownerId = formModel.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be null.");
-			formModel.UserAccounts = await this.usersService.GetUserAccountsDropdownData(ownerId, withDeleted: false);
-			formModel.UserCategories = await this.usersService.GetUserCategoriesDropdownData(ownerId, withDeleted: false);
+			var accountsAndCategoriesDTO = await this.usersService.GetUserAccountsAndCategoriesDropdownDataAsync(ownerId);
+			this.mapper.Map(accountsAndCategoriesDTO, formModel);
 		}
 
 		private async Task<UserTransactionsViewModel> PrepareUserTransactionsViewModelAsync(
-			Guid userId, UserTransactionsInputModel inputModel)
+			TransactionsFilterDTO filterDTO)
 		{
-			UserTransactionsViewModel viewModel =
-				this.mapper.Map<UserTransactionsViewModel>(inputModel);
-
-			TransactionsServiceModel userTransactions =
-				await this.accountsInfoService.GetUserTransactionsAsync(userId, inputModel);
-
-			viewModel.Id = userId;
-			viewModel.Transactions = userTransactions.Transactions;
-			viewModel.Pagination.TotalElements = userTransactions.TotalTransactionsCount;
-
-			await this.PrepareAccountsTypesCategoriesAndCurrenciesAsync(viewModel);
+			TransactionsPageDTO transactionsDTO =
+				await this.usersService.GetUserTransactionsPageDataAsync(filterDTO);
+			var viewModel = new UserTransactionsViewModel(
+				transactionsDTO.TotalTransactionsCount, filterDTO.Page);
+			this.mapper.Map(filterDTO, viewModel);
+			this.mapper.Map(transactionsDTO, viewModel);
 
 			return viewModel;
-		}
-
-		private async Task PrepareAccountsTypesCategoriesAndCurrenciesAsync(UserTransactionsViewModel viewModel)
-		{
-			viewModel.Accounts = await this.usersService.GetUserAccountsDropdownData(viewModel.Id, true);
-			viewModel.Categories = await this.usersService.GetUserCategoriesDropdownData(viewModel.Id, true);
-			viewModel.AccountTypes = await this.usersService.GetUserAccountTypesDropdownData(viewModel.Id, true);
-			viewModel.Currencies = await this.usersService.GetUserCurrenciesDropdownData(viewModel.Id, true);
 		}
 	}
 }

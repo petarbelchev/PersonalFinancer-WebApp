@@ -1,23 +1,31 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
+	using AutoMapper;
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.Shared;
-	using PersonalFinancer.Web.Models.Transaction;
 	using static PersonalFinancer.Data.Constants.RoleConstants;
+	using static PersonalFinancer.Web.Constants;
 
 	[Authorize]
 	[Route("api/transactions")]
 	[ApiController]
 	public class TransactionsApiController : ControllerBase
 	{
-		private readonly IAccountsInfoService accountsInfoService;
+		private readonly IUsersService usersService;
+		private readonly IMapper mapper;
 
-		public TransactionsApiController(IAccountsInfoService accountsInfoService) 
-			=> this.accountsInfoService = accountsInfoService;
+		public TransactionsApiController(
+			IUsersService usersService,
+			IMapper mapper)
+		{
+			this.usersService = usersService;
+			this.mapper = mapper;
+		}
 
 		[Authorize(Roles = UserRoleName)]
 		[HttpPost]
@@ -31,27 +39,24 @@
 			if (inputModel.Id != userId)
 				return this.Unauthorized();
 
-			TransactionsServiceModel userTransactions;
+			var filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
+			TransactionsDTO transactionsDTO;
 
 			try
 			{
-				userTransactions = await this.accountsInfoService
-					.GetUserTransactionsAsync(userId, inputModel, inputModel.Page);
+				transactionsDTO = await this.usersService.GetUserTransactionsAsync(filterDTO);
 			}
 			catch (InvalidOperationException)
 			{
 				return this.BadRequest();
 			}
 
-			var userModel = new TransactionsViewModel
-			{
-				Transactions = userTransactions.Transactions
-			};
-			userModel.Pagination.Page = inputModel.Page;
-			userModel.Pagination.TotalElements = userTransactions.TotalTransactionsCount;
-			userModel.TransactionDetailsUrl = "/Transactions/TransactionDetails/";
+			var userTransactions = new TransactionsViewModel(
+				transactionsDTO,
+				inputModel.Page,
+				UrlPathConstants.TransactionDetailsPath);
 
-			return this.Ok(userModel);
+			return this.Ok(userTransactions);
 		}
 	}
 }

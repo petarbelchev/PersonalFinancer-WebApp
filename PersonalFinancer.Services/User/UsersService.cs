@@ -6,122 +6,187 @@
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Data.Repositories;
-	using PersonalFinancer.Services.Cache;
+	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Services.User.Models;
+	using static PersonalFinancer.Data.Constants.CategoryConstants;
 	using static PersonalFinancer.Services.Constants;
 
 	public class UsersService : IUsersService
-    {
-        private readonly IEfRepository<ApplicationUser> usersRepo;
-        private readonly IMapper mapper;
-        private readonly ICacheService<Category> categoriesCacheService;
-        private readonly ICacheService<Currency> currenciesCacheService;
-        private readonly ICacheService<AccountType> accountTypesCacheService;
-        private readonly ICacheService<Account> accountsCacheService;
+	{
+		private readonly IEfRepository<ApplicationUser> usersRepo;
+		private readonly IEfRepository<Account> accountsRepo;
+		private readonly IEfRepository<Transaction> transactionsRepo;
+		private readonly IMapper mapper;
 
 		public UsersService(
-            IEfRepository<ApplicationUser> usersRepo,
-            IMapper mapper,
-            ICacheService<Category> categoriesCache,
-			ICacheService<Currency> currenciesCache,
-			ICacheService<AccountType> accountTypesCache,
-			ICacheService<Account> accountsCache)
-        {
-            this.usersRepo = usersRepo;
-            this.mapper = mapper;
-            this.categoriesCacheService = categoriesCache;
-            this.currenciesCacheService = currenciesCache;
-            this.accountTypesCacheService = accountTypesCache;
-            this.accountsCacheService = accountsCache;
-        }
-
-		public async Task<UsersServiceModel> GetAllUsersAsync(int page)
+			IEfRepository<ApplicationUser> usersRepo,
+			IEfRepository<Account> accountsRepo,
+			IEfRepository<Transaction> transactionsRepo,
+			IMapper mapper)
 		{
-			return new UsersServiceModel
+			this.usersRepo = usersRepo;
+			this.accountsRepo = accountsRepo;
+			this.transactionsRepo = transactionsRepo;
+			this.mapper = mapper;
+		}
+
+		public async Task<UsersInfoDTO> GetUsersInfoAsync(int page)
+		{
+			return new UsersInfoDTO
 			{
 				Users = await this.usersRepo.All()
 					.OrderBy(u => u.FirstName)
 					.ThenBy(u => u.LastName)
 					.Skip(PaginationConstants.UsersPerPage * (page - 1))
 					.Take(PaginationConstants.UsersPerPage)
-					.ProjectTo<UserServiceModel>(this.mapper.ConfigurationProvider)
+					.ProjectTo<UserInfoDTO>(this.mapper.ConfigurationProvider)
 					.ToListAsync(),
 				TotalUsersCount = await this.usersRepo.All().CountAsync()
 			};
 		}
 
-		public async Task<IEnumerable<AccountServiceModel>> GetUserAccountsDropdownData(Guid userId, bool withDeleted)
-			=> await this.accountsCacheService.GetValues<AccountServiceModel>(userId, withDeleted);
-
-		public async Task<IEnumerable<AccountTypeServiceModel>> GetUserAccountTypesDropdownData(Guid userId, bool withDeleted)
-			=> await this.accountTypesCacheService.GetValues<AccountTypeServiceModel>(userId, withDeleted);
-
-		public async Task<IEnumerable<CategoryServiceModel>> GetUserCategoriesDropdownData(Guid userId, bool withDeleted)
-			=> await this.categoriesCacheService.GetValues<CategoryServiceModel>(userId, withDeleted);
-
-		public async Task<IEnumerable<CurrencyServiceModel>> GetUserCurrenciesDropdownData(Guid userId, bool withDeleted)
-			=> await this.currenciesCacheService.GetValues<CurrencyServiceModel>(userId, withDeleted);
-
-		public async Task<UserDashboardServiceModel> GetUserDashboardDataAsync(
-			Guid userId, DateTime startDate, DateTime endDate)
+		public async Task<TransactionsDTO> GetUserTransactionsAsync(TransactionsFilterDTO dto)
 		{
-			DateTime startDateUtc = startDate.ToUniversalTime();
-			DateTime endDateUtc = endDate.ToUniversalTime();
+			IQueryable<Transaction> query = this.transactionsRepo.All().Where(t =>
+				t.OwnerId == dto.UserId &&
+				t.CreatedOn >= dto.StartDate.ToUniversalTime() &&
+				t.CreatedOn <= dto.EndDate.ToUniversalTime() &&
+				(dto.AccountId == null || t.AccountId == dto.AccountId) &&
+				(dto.CurrencyId == null || t.Account.CurrencyId == dto.CurrencyId) &&
+				(dto.CategoryId == null || t.CategoryId == dto.CategoryId) &&
+				(dto.AccountTypeId == null || t.Account.AccountTypeId == dto.AccountTypeId));
 
+			var result = new TransactionsDTO
+			{
+				Transactions = await query
+					.OrderByDescending(t => t.CreatedOn)
+					.Skip(PaginationConstants.TransactionsPerPage * (dto.Page - 1))
+					.Take(PaginationConstants.TransactionsPerPage)
+					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
+					.ToArrayAsync(),
+				TotalTransactionsCount = await query.CountAsync()
+			};
+
+			return result;
+		}
+
+		public async Task<TransactionsPageDTO> GetUserTransactionsPageDataAsync(TransactionsFilterDTO dto)
+		{
+			TransactionsPageDTO resultDTO = await this.usersRepo.All()
+				.Where(u => u.Id == dto.UserId)
+				.Select(u => new TransactionsPageDTO
+				{
+					UserAccounts = u.Accounts
+						.Where(a => !a.IsDeleted || a.Transactions.Any())
+						.Select(a => this.mapper.Map<AccountDropdownDTO>(a)),
+					UserAccountTypes = u.AccountTypes
+						.Where(at => !at.IsDeleted || at.Accounts.Any(a => a.Transactions.Any()))
+						.Select(at => this.mapper.Map<AccountTypeDropdownDTO>(at)),
+					UserCurrencies = u.Currencies
+						.Where(c => !c.IsDeleted || c.Accounts.Any(a => a.Transactions.Any()))
+						.Select(c => this.mapper.Map<CurrencyDropdownDTO>(c)),
+					UserCategories = u.Categories
+						.Where(c => !c.IsDeleted || c.Transactions.Any() || c.Id == Guid.Parse(InitialBalanceCategoryId))
+						.Select(c => this.mapper.Map<CategoryDropdownDTO>(c))
+				})
+				.FirstAsync();
+
+			TransactionsDTO transactionsDTO = await this.GetUserTransactionsAsync(dto);
+			this.mapper.Map(transactionsDTO, resultDTO);
+
+			return resultDTO;
+		}
+
+		public async Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownDataAsync(Guid userId)
+		{
 			return await this.usersRepo.All()
 				.Where(u => u.Id == userId)
-				.Select(u => new UserDashboardServiceModel
+				.Select(u => new AccountsAndCategoriesDropdownDTO
 				{
-					Accounts = u.Accounts.Where(a => !a.IsDeleted)
+					UserAccounts = u.Accounts
+						.Where(a => !a.IsDeleted)
 						.OrderBy(a => a.Name)
-						.Select(a => new AccountCardServiceModel
-						{
-							Id = a.Id,
-							Name = a.Name,
-							Balance = a.Balance,
-							CurrencyName = a.Currency.Name
-						}),
-					LastTransactions = u.Transactions
-						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
-						.OrderByDescending(t => t.CreatedOn)
-						.Take(5)
-						.Select(t => new TransactionTableServiceModel
-						{
-							Id = t.Id,
-							Amount = t.Amount,
-							AccountCurrencyName = t.Account.Currency.Name,
-							CreatedOn = t.CreatedOn.ToLocalTime(),
-							TransactionType = t.TransactionType.ToString(),
-							Reference = t.Reference,
-							CategoryName = t.Category.Name
-						}),
-					CurrenciesCashFlow = u.Transactions
-						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
-						.GroupBy(t => t.Account.Currency.Name)
-						.Select(t => new CurrencyCashFlowServiceModel
-						{
-							Name = t.Key,
-							Incomes = t
-								.Where(t => t.TransactionType == TransactionType.Income)
-								.Sum(t => t.Amount),
-							Expenses = t
-								.Where(t => t.TransactionType == TransactionType.Expense)
-								.Sum(t => t.Amount),
-							ExpensesByCategories = t
-								.Where(t => t.TransactionType == TransactionType.Expense)
-								.GroupBy(t => t.Category.Name)
-								.Select(t => new CategoryExpensesServiceModel
-								{
-									CategoryName = t.Key,
-									ExpensesAmount = t
-										.Where(t => t.TransactionType == TransactionType.Expense)
-										.Sum(t => t.Amount)
-								})
-						})
+						.Select(a => this.mapper.Map<AccountDropdownDTO>(a)),
+					UserCategories = u.Categories
+						.Where(c => !c.IsDeleted)
 						.OrderBy(c => c.Name)
-						.ToList()
+						.Select(c => this.mapper.Map<CategoryDropdownDTO>(c))
 				})
+				.FirstAsync();
+		}
+
+		public async Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownDataAsync(Guid userId)
+		{
+			return await this.usersRepo.All()
+				.Where(u => u.Id == userId)
+				.Select(u => new AccountTypesAndCurrenciesDropdownDTO
+				{
+					OwnerAccountTypes = u.AccountTypes
+						.Where(at => !at.IsDeleted)
+						.OrderBy(at => at.Name)
+						.Select(at => this.mapper.Map<AccountTypeDropdownDTO>(at)),
+					OwnerCurrencies = u.Currencies
+						.Where(c => !c.IsDeleted)
+						.OrderBy(c => c.Name)
+						.Select(c => this.mapper.Map<CurrencyDropdownDTO>(c))
+				})
+				.FirstAsync();
+		}
+
+		public async Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime startDate, DateTime endDate)
+		{
+			var dto = new UserDashboardDTO
+			{
+				Accounts = await this.accountsRepo.All()
+					.Where(a => a.OwnerId == userId && !a.IsDeleted)
+					.OrderBy(a => a.Name)
+					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
+					.ToArrayAsync()
+			};
+
+			IQueryable<Transaction> query = this.transactionsRepo.All().Where(t =>
+				t.OwnerId == userId
+				&& t.CreatedOn >= startDate.ToUniversalTime()
+				&& t.CreatedOn <= endDate.ToUniversalTime());
+
+			dto.LastTransactions = await query
+				.OrderByDescending(t => t.CreatedOn)
+				.Take(5)
+				.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
+				.ToArrayAsync();
+
+			dto.CurrenciesCashFlow = await query
+				.GroupBy(t => t.Account.Currency.Name)
+				.Select(group => new CurrencyCashFlowWithExpensesByCategoriesDTO
+				{
+					Name = group.Key,
+					Incomes = group
+						.Where(t => t.TransactionType == TransactionType.Income)
+						.Sum(t => t.Amount),
+					Expenses = group
+						.Where(t => t.TransactionType == TransactionType.Expense)
+						.Sum(t => t.Amount),
+					ExpensesByCategories = group
+						.Where(t => t.TransactionType == TransactionType.Expense)
+						.GroupBy(t => t.Category.Name)
+						.Select(categoryGroup => new CategoryExpensesDTO
+						{
+							CategoryName = categoryGroup.Key,
+							ExpensesAmount = categoryGroup.Sum(t => t.Amount)
+						})
+				})
+				.OrderBy(c => c.Name)
+				.ToArrayAsync();
+
+			return dto;
+		}
+
+		public Task<UserDropdownDTO> GetUserDropdownDataAsync(Guid userId)
+		{
+			return this.usersRepo.All()
+				.Where(u => u.Id == userId)
+				.ProjectTo<UserDropdownDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
@@ -129,11 +194,11 @@
 		/// Throws InvalidOperationException if User does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<UserDetailsServiceModel> UserDetailsAsync(Guid userId)
+		public async Task<UserDetailsDTO> UserDetailsAsync(Guid userId)
 		{
 			return await this.usersRepo.All()
 				.Where(u => u.Id == userId)
-				.ProjectTo<UserDetailsServiceModel>(this.mapper.ConfigurationProvider)
+				.ProjectTo<UserDetailsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
@@ -142,14 +207,14 @@
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> UserFullNameAsync(Guid userId)
-        {
+		{
 			return await this.usersRepo.All()
-                .Where(u => u.Id == userId)
-                .Select(u => $"{u.FirstName} {u.LastName}")
-                .FirstAsync();
-        }
+				.Where(u => u.Id == userId)
+				.Select(u => $"{u.FirstName} {u.LastName}")
+				.FirstAsync();
+		}
 
-        public async Task<int> UsersCountAsync()
-            => await this.usersRepo.All().CountAsync();
+		public async Task<int> UsersCountAsync()
+			=> await this.usersRepo.All().CountAsync();
 	}
 }

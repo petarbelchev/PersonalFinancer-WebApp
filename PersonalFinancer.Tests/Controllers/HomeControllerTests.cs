@@ -9,17 +9,18 @@
 	using PersonalFinancer.Services.User.Models;
 	using PersonalFinancer.Web.Controllers;
 	using PersonalFinancer.Web.Models.Home;
+	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Data.Constants;
 	using static PersonalFinancer.Web.Constants;
 
 	[TestFixture]
     internal class HomeControllerTests : ControllersUnitTestsBase
     {
-        private readonly UserDashboardServiceModel expUserDashboard = new()
+        private readonly UserDashboardDTO expUserDashboard = new()
         {
-            Accounts = new AccountCardServiceModel[]
+            Accounts = new AccountCardDTO[]
             {
-                new AccountCardServiceModel
+                new AccountCardDTO
                 {
                     Id = Guid.NewGuid(),
                     Balance = 100,
@@ -28,18 +29,18 @@
                     OwnerId = Guid.NewGuid()
                 }
             },
-            CurrenciesCashFlow = new CurrencyCashFlowServiceModel[]
+            CurrenciesCashFlow = new CurrencyCashFlowWithExpensesByCategoriesDTO[]
             {
-                new CurrencyCashFlowServiceModel
+                new CurrencyCashFlowWithExpensesByCategoriesDTO
                 {
                     Name = "Test Currency",
                     Incomes = 200,
                     Expenses = 100
                 }
             },
-            LastTransactions = new TransactionTableServiceModel[]
+            LastTransactions = new TransactionTableDTO[]
             {
-                new TransactionTableServiceModel
+                new TransactionTableDTO
                 {
                     Id = Guid.NewGuid(),
                     AccountCurrencyName = "Test Currency",
@@ -51,9 +52,9 @@
                 }
             }
         };
-        private readonly AccountCardServiceModel[] expAccountCard = new AccountCardServiceModel[]
+        private readonly AccountCardDTO[] expAccountCard = new AccountCardDTO[]
         {
-            new AccountCardServiceModel
+            new AccountCardDTO
             {
                 Id = Guid.NewGuid(),
                 Balance = 150,
@@ -73,7 +74,7 @@
                 .ReturnsAsync(this.expUserDashboard);
 
             this.accountsInfoServiceMock.Setup(x => x
-                .GetUserAccountsAsync(this.userId))
+                .GetUserAccountsCardsAsync(this.userId))
                 .ReturnsAsync(this.expAccountCard);
 
             this.controller = new HomeController(this.usersServiceMock.Object, this.accountsInfoServiceMock.Object)
@@ -327,7 +328,7 @@
                 Assert.That(viewBagKeys, Has.Count.EqualTo(1));
                 Assert.That(viewBagValues, Has.Count.EqualTo(1));
                 Assert.That(viewBagValues.First(),
-                    Is.EqualTo(HostConstants.BadRequestImgUrl));
+                    Is.EqualTo(UrlPathConstants.BadRequestImgPath));
             });
         }
 
@@ -347,7 +348,7 @@
                 Assert.That(viewBagKeys, Has.Count.EqualTo(1));
                 Assert.That(viewBagValues, Has.Count.EqualTo(1));
                 Assert.That(viewBagValues.First(),
-                    Is.EqualTo(HostConstants.InternalServerErrorImgUrl));
+                    Is.EqualTo(UrlPathConstants.InternalServerErrorImgPath));
             });
         }
     }

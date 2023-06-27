@@ -12,7 +12,7 @@
 	using System.Text;
 
 	[Authorize]
-	public abstract class BaseApiController<T> : ControllerBase where T : BaseCacheableApiEntity, new()
+	public abstract class BaseApiController<T> : ControllerBase where T : BaseApiEntity, new()
 	{
 		private readonly IApiService<T> apiService;
 
@@ -23,12 +23,12 @@
 		/// Throws ArgumentException if you try to create Entity with existing name.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		protected async Task<IActionResult> CreateEntityAsync(IApiInputModel inputModel)
+		protected async Task<IActionResult> CreateEntityAsync(IApiEntityInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
 				return this.BadRequest(this.GetErrors(this.ModelState.Values));
 
-			ApiOutputServiceModel model = await this.apiService.CreateEntityAsync(
+			ApiEntityDTO model = await this.apiService.CreateEntityAsync(
 				inputModel.Name,
 				inputModel.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be null."));
 

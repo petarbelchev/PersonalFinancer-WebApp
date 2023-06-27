@@ -2,13 +2,25 @@
 {
     public class PaginationModel
     {
-        public string ElementsName { get; set; } = null!;
+        public PaginationModel(
+            string elementsName, 
+            int elementsPerPage, 
+            int totalElements, 
+            int page = 1)
+        {
+            this.ElementsName = elementsName;
+            this.ElementsPerPage = elementsPerPage;
+            this.Page = page;
+            this.TotalElements = totalElements;
+        }
 
-        public int ElementsPerPage { get; set; }
+        public string ElementsName { get; private set; }
 
-        public int Page { get; set; } = 1;
+        public int ElementsPerPage { get; private set; }
 
-        public int TotalElements { get; set; }
+        public int Page { get; private set; }
+
+        public int TotalElements { get; private set; }
 
         public int FirstElement => (this.ElementsPerPage * (this.Page - 1)) + 1;
 

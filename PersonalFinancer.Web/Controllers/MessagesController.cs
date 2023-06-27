@@ -30,7 +30,7 @@
 
         public async Task<IActionResult> AllMessages()
         {
-            IEnumerable<MessageOutputServiceModel> messages = this.User.IsAdmin()
+            IEnumerable<MessageOutputDTO> messages = this.User.IsAdmin()
                 ? await this.messagesService.GetAllAsync()
                 : await this.messagesService.GetUserMessagesAsync(this.User.Id());
 
@@ -48,7 +48,7 @@
                 return this.View(model);
 
             string newMessageId = await this.messagesService
-                .CreateAsync(new MessageInputServiceModel
+                .CreateAsync(new MessageInputDTO
                 {
                     AuthorId = this.User.Id(),
                     AuthorName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
@@ -82,7 +82,7 @@
         {
             try
             {
-                MessageDetailsServiceModel message =
+                MessageDetailsDTO message =
                     await this.messagesService.GetMessageAsync(id, this.User.Id(), this.User.IsAdmin());
 
                 MessageDetailsViewModel viewModel = this.mapper.Map<MessageDetailsViewModel>(message);
@@ -102,7 +102,7 @@
             {
                 if (!this.ModelState.IsValid)
                 {
-                    MessageDetailsServiceModel message =
+                    MessageDetailsDTO message =
                         await this.messagesService.GetMessageAsync(inputModel.Id, this.User.Id(), this.User.IsAdmin());
 
                     MessageDetailsViewModel viewModel = this.mapper.Map<MessageDetailsViewModel>(message);
@@ -111,7 +111,7 @@
                     return this.View(viewModel);
                 }
 
-                await this.messagesService.AddReplyAsync(new ReplyInputServiceModel
+                await this.messagesService.AddReplyAsync(new ReplyInputDTO
                 {
                     MessageId = inputModel.Id,
                     AuthorId = this.User.Id(),

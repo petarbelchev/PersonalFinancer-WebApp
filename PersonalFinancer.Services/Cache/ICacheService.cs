@@ -3,7 +3,7 @@
 	using PersonalFinancer.Data.Models.Contracts;
 	using PersonalFinancer.Services.Shared.Contracts;
 
-	public interface ICacheService<T> where T : BaseCacheableApiEntity, new()
+	public interface ICacheService<T> where T : BaseApiEntity, new()
 	{
 		Task<IEnumerable<TResult>> GetValues<TResult>(Guid userId, bool withDeleted)
 			where TResult : BaseCacheableServiceModel, new();

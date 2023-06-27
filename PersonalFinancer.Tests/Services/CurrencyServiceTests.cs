@@ -1,25 +1,22 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-    using Microsoft.EntityFrameworkCore;
-    using NUnit.Framework;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.Api;
-    using PersonalFinancer.Services.Api.Models;
-	using PersonalFinancer.Services.Cache;
+	using Microsoft.EntityFrameworkCore;
+	using NUnit.Framework;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Api;
+	using PersonalFinancer.Services.Api.Models;
 
 	internal class CurrencyServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<Currency> repo;
-        private ICacheService<Currency> cache;
         private ApiService<Currency> currencyApiService;
 
         [SetUp]
         public void SetUp()
         {
             this.repo = new EfRepository<Currency>(this.sqlDbContext);
-            this.cache = new MemoryCacheService<Currency>(this.memoryCache, this.repo, this.mapper);
-            this.currencyApiService = new ApiService<Currency>(this.repo, this.mapper, this.cache);
+            this.currencyApiService = new ApiService<Currency>(this.repo, this.mapper);
         }
 
         [Test]
@@ -31,7 +28,7 @@
             int countBefore = await this.repo.All().CountAsync();
 
             //Act
-            ApiOutputServiceModel actual =
+            ApiEntityDTO actual =
                 await this.currencyApiService.CreateEntityAsync(currencyName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
@@ -70,7 +67,7 @@
             Assert.That(deletedAcc.IsDeleted, Is.True);
 
             //Act
-            ApiOutputServiceModel result =
+            ApiEntityDTO result =
                 await this.currencyApiService.CreateEntityAsync(currencyName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
@@ -107,7 +104,7 @@
             Assert.That(await this.repo.FindAsync(user2Currency.Id), Is.Not.Null);
 
             //Act
-            ApiOutputServiceModel result =
+            ApiEntityDTO result =
                 await this.currencyApiService.CreateEntityAsync(currencyName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();

@@ -7,22 +7,32 @@
 
     public class UsersViewModel
 	{
-		public IEnumerable<UserServiceModel> Users { get; set; } = null!;
+        public UsersViewModel(UsersInfoDTO usersInfoDTO, int page)
+        {
+			this.Users = usersInfoDTO.Users;
 
-		public PaginationModel Pagination { get; set; } = new PaginationModel
-		{
-			ElementsName = PaginationConstants.UsersName,
-			ElementsPerPage = PaginationConstants.UsersPerPage 
-		};
+			this.Pagination = new PaginationModel(
+				PaginationConstants.UsersName,
+				PaginationConstants.UsersPerPage,
+				usersInfoDTO.TotalUsersCount,
+				page);
 
-		public string ApiUsersEndpoint { get; set; }
-			= HostConstants.ApiUsersUrl;
+			this.ApiUsersEndpoint = UrlPathConstants.ApiUsersPath;
 
-		public RoutingModel Routing { get; set; } = new RoutingModel
-		{
-			Area = "Admin",
-			Controller = "Users",
-			Action = "Index"
-		};
+			this.Routing = new RoutingModel
+			{
+				Area = "Admin",
+				Controller = "Users",
+				Action = "Index"
+			};
+		}
+
+        public IEnumerable<UserInfoDTO> Users { get; private set; }
+
+		public PaginationModel Pagination { get; private set; }
+
+		public string ApiUsersEndpoint { get; private set; }
+
+		public RoutingModel Routing { get; private set; }
 	}
 }

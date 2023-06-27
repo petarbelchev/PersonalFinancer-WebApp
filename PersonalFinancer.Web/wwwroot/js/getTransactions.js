@@ -20,10 +20,10 @@ async function getTransactions(page) {
             page: page,
             startDate: params.startDate,
             endDate: params.endDate,
-            accountId: params.accountId,
-            accountTypeId: params.accountTypeId,
-            currencyId: params.currencyId,
-            categoryId: params.categoryId,
+            accountId: params.accountId == '' ? null : params.accountId,
+            accountTypeId: params.accountTypeId == '' ? null : params.accountTypeId,
+            currencyId: params.currencyId == '' ? null : params.currencyId,
+            categoryId: params.categoryId == '' ? null : params.categoryId,
             ownerId: params.ownerId
         })
     });

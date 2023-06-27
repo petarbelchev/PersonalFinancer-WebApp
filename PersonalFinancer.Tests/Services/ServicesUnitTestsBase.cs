@@ -1,7 +1,6 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
 	using AutoMapper;
-	using Microsoft.Extensions.Caching.Memory;
 	using NUnit.Framework;
 	using PersonalFinancer.Data;
 	using PersonalFinancer.Data.Models;
@@ -14,14 +13,12 @@
 	{
 		protected PersonalFinancerDbContext sqlDbContext;
 		protected IMapper mapper;
-		protected IMemoryCache memoryCache;
 
 		[SetUp]
 		protected async Task SetUpBase()
 		{
 			this.sqlDbContext = DatabaseMock.Instance;
 			this.mapper = ServicesMapperMock.Instance;
-			this.memoryCache = MemoryCacheMock.Instance;
 
 			await this.SeedDatabase();
 		}
@@ -53,12 +50,12 @@
 		protected Currency Currency3_User1_Deleted_WithAcc { get; private set; } = null!;
 		protected Currency Currency4_User1_Deleted_WithoutAcc { get; private set; } = null!;
 
-		protected Transaction Transaction1_User1 { get; private set; } = null!;
-		protected Transaction Transaction2_User1 { get; private set; } = null!;
-		protected Transaction Transaction3_User1 { get; private set; } = null!;
-		protected Transaction Transaction4_User1 { get; private set; } = null!;
-		protected Transaction Transaction5_User1 { get; private set; } = null!;
-		protected Transaction Transaction6_User1 { get; private set; } = null!;
+		protected Transaction InitialTransaction_Income_Account1_User1 { get; private set; } = null!;
+		protected Transaction Transaction1_Expense_Account1_User1 { get; private set; } = null!;
+		protected Transaction Transaction2_Expense_Account1_User1 { get; private set; } = null!;
+		protected Transaction Transaction3_Income_Account3_User1 { get; private set; } = null!;
+		protected Transaction Transaction4_Income_Account3_User1 { get; private set; } = null!;
+		protected Transaction Transaction5_Expense_Account3_User1 { get; private set; } = null!;
 
 		protected async Task SeedDatabase()
 		{
@@ -245,7 +242,7 @@
 				this.Category4_User1_Deleted_WithoutTransactions);
 
 			// Transactions
-			this.Transaction1_User1 = new Transaction()
+			this.InitialTransaction_Income_Account1_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
 				OwnerId = this.User1.Id,
@@ -257,7 +254,7 @@
 				TransactionType = TransactionType.Income,
 				IsInitialBalance = true
 			};
-			this.Transaction2_User1 = new Transaction()
+			this.Transaction1_Expense_Account1_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
 				OwnerId = this.User1.Id,
@@ -268,7 +265,7 @@
 				Reference = "Lunch",
 				TransactionType = TransactionType.Expense
 			};
-			this.Transaction3_User1 = new Transaction()
+			this.Transaction2_Expense_Account1_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
 				OwnerId = this.User1.Id,
@@ -279,7 +276,7 @@
 				Reference = "Taxi",
 				TransactionType = TransactionType.Expense
 			};
-			this.Transaction4_User1 = new Transaction()
+			this.Transaction3_Income_Account3_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
 				OwnerId = this.User1.Id,
@@ -291,7 +288,7 @@
 				TransactionType = TransactionType.Income,
 				IsInitialBalance = true
 			};
-			this.Transaction5_User1 = new Transaction()
+			this.Transaction4_Income_Account3_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
 				OwnerId = this.User1.Id,
@@ -302,7 +299,7 @@
 				Reference = "Salary",
 				TransactionType = TransactionType.Income
 			};
-			this.Transaction6_User1 = new Transaction()
+			this.Transaction5_Expense_Account3_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
 				OwnerId = this.User1.Id,
@@ -314,12 +311,12 @@
 				TransactionType = TransactionType.Expense
 			};
 			await this.sqlDbContext.Transactions.AddRangeAsync(
-				this.Transaction1_User1, 
-				this.Transaction2_User1, 
-				this.Transaction3_User1,
-				this.Transaction4_User1, 
-				this.Transaction5_User1, 
-				this.Transaction6_User1);
+				this.InitialTransaction_Income_Account1_User1, 
+				this.Transaction1_Expense_Account1_User1, 
+				this.Transaction2_Expense_Account1_User1,
+				this.Transaction3_Income_Account3_User1, 
+				this.Transaction4_Income_Account3_User1, 
+				this.Transaction5_Expense_Account3_User1);
 
 			await this.sqlDbContext.SaveChangesAsync();
 		}

@@ -6,20 +6,17 @@
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Api;
 	using PersonalFinancer.Services.Api.Models;
-	using PersonalFinancer.Services.Cache;
 
 	internal class AccountTypeServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<AccountType> repo;
-		private ICacheService<AccountType> cache;
 		private ApiService<AccountType> accountTypeService;
 
         [SetUp]
         public void SetUp()
         {
             this.repo = new EfRepository<AccountType>(this.sqlDbContext);
-			this.cache = new MemoryCacheService<AccountType>(this.memoryCache, this.repo, this.mapper);
-			this.accountTypeService = new ApiService<AccountType>(this.repo, this.mapper, this.cache);
+			this.accountTypeService = new ApiService<AccountType>(this.repo, this.mapper);
         }
 
         [Test]
@@ -32,7 +29,7 @@
             int countBefore = await this.repo.All().CountAsync();
 
             //Act
-            ApiOutputServiceModel actual =
+            ApiEntityDTO actual =
                 await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
@@ -71,7 +68,7 @@
             Assert.That(deletedAcc.IsDeleted, Is.True);
 
             //Act
-            ApiOutputServiceModel result =
+            ApiEntityDTO result =
                 await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
             int countAfter = await this.repo.All().CountAsync();
 
@@ -107,7 +104,7 @@
             Assert.That(await this.repo.FindAsync(user2AccType.Id), Is.Not.Null);
 
             //Act
-            ApiOutputServiceModel result =
+            ApiEntityDTO result =
                 await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();

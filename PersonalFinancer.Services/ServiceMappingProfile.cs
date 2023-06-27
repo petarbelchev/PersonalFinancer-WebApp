@@ -3,6 +3,7 @@
 	using AutoMapper;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Contracts;
+	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Api.Models;
 	using PersonalFinancer.Services.Messages.Models;
@@ -13,51 +14,68 @@
     {
         public ServiceMappingProfile()
         {
-			this.CreateMap<Category, CategoryServiceModel>()
-				.ForMember(m => m.Name, mf => mf
-					.MapFrom(s => s.Name + (s.IsDeleted ? " (Deleted)" : string.Empty)));
+			this.CreateMap<Category, CategoryDropdownDTO>()
+				.ForMember(x => x.Name, y => y
+					.MapFrom(z => z.Name + (z.IsDeleted ? " (Deleted)" : string.Empty)));
 
-			this.CreateMap<Currency, CurrencyServiceModel>()
-				.ForMember(m => m.Name, mf => mf
-					.MapFrom(s => s.Name + (s.IsDeleted ? " (Deleted)" : string.Empty)));
+			this.CreateMap<Currency, CurrencyDropdownDTO>()
+				.ForMember(x => x.Name, y => y
+					.MapFrom(z => z.Name + (z.IsDeleted ? " (Deleted)" : string.Empty)));
 
-			this.CreateMap<Account, AccountServiceModel>()
-				.ForMember(m => m.Name, mf => mf
-					.MapFrom(s => s.Name + (s.IsDeleted ? " (Deleted)" : string.Empty)));
-			this.CreateMap<Account, AccountCardServiceModel>();
-			this.CreateMap<Account, AccountCardServiceModel>();
-			this.CreateMap<Account, AccountDetailsShortServiceModel>();
-			this.CreateMap<AccountFormShortServiceModel, Account>().ReverseMap()
-                .ForMember(m => m.Name, mf => mf.MapFrom(s => s.Name.Trim()));
+			this.CreateMap<Account, AccountDropdownDTO>()
+				.ForMember(x => x.Name, y => y
+					.MapFrom(z => z.Name + (z.IsDeleted ? " (Deleted)" : string.Empty)));
 
-			this.CreateMap<AccountType, AccountTypeServiceModel>()
-				.ForMember(m => m.Name, mf => mf
-					.MapFrom(s => s.Name + (s.IsDeleted ? " (Deleted)" : string.Empty)));
+			this.CreateMap<Account, AccountCardDTO>();
+			this.CreateMap<Account, AccountDetailsShortDTO>();
 
-			this.CreateMap<Transaction, TransactionDetailsServiceModel>()
-                .ForMember(m => m.CategoryName, mf => mf
-                    .MapFrom(s => s.Category.Name + (s.Category.IsDeleted ? " (Deleted)" : string.Empty)))
-                .ForMember(m => m.AccountName, mf => mf
-                    .MapFrom(s => s.Account.Name + (s.Account.IsDeleted ? " (Deleted)" : string.Empty)));
+			this.CreateMap<CreateEditAccountDTO, Account>().ReverseMap()
+                .ForMember(x => x.Name, y => y
+					.MapFrom(z => z.Name.Trim()))
+				.ForMember(x => x.OwnerCurrencies, y => y
+					.MapFrom(z => z.Owner.Currencies
+						.Where(c => !c.IsDeleted)
+						.OrderBy(c => c.Name)))
+				.ForMember(x => x.OwnerAccountTypes, y => y
+					.MapFrom(z => z.Owner.AccountTypes
+						.Where(at => !at.IsDeleted)
+						.OrderBy(at => at.Name)));
 
-			this.CreateMap<TransactionFormModel, Transaction>().ReverseMap()
-                .ForMember(m => m.Reference, mf => mf.MapFrom(s => s.Reference.Trim()));
+			this.CreateMap<AccountType, AccountTypeDropdownDTO>()
+				.ForMember(x => x.Name, y => y
+					.MapFrom(z => z.Name + (z.IsDeleted ? " (Deleted)" : string.Empty)));
 
-			this.CreateMap<Transaction, TransactionTableServiceModel>()
-				.ForMember(m => m.CategoryName, mf => mf
-					.MapFrom(s => s.Category.Name + (s.Category.IsDeleted ? " (Deleted)" : string.Empty)));
+			this.CreateMap<Transaction, CreateEditTransactionDTO>().ReverseMap();
 
-			this.CreateMap<ApplicationUser, UserServiceModel>();
+			this.CreateMap<Transaction, TransactionDetailsDTO>()
+                .ForMember(x => x.CategoryName, y => y
+					.MapFrom(z => z.Category.Name + (z.Category.IsDeleted ? " (Deleted)" : string.Empty)))
+                .ForMember(x => x.AccountName, y => y
+					.MapFrom(z => z.Account.Name + (z.Account.IsDeleted ? " (Deleted)" : string.Empty)));
 
-			this.CreateMap<ApplicationUser, UserDetailsServiceModel>()
-                .ForMember(m => m.Accounts, mf => mf
-                    .MapFrom(s => s.Accounts.Where(a => !a.IsDeleted).OrderBy(a => a.Name)));
+			this.CreateMap<Transaction, TransactionTableDTO>()
+				.ForMember(x => x.AccountCurrencyName, y => y
+					.MapFrom(z => z.Account.Currency.Name + (z.Account.Currency.IsDeleted ? " (Deleted)" : string.Empty)))
+				.ForMember(x => x.CategoryName, y => y
+					.MapFrom(z => z.Category.Name + (z.Category.IsDeleted ? " (Deleted)" : string.Empty)))
+				.ForMember(x => x.CreatedOn, y => y
+					.MapFrom(z => z.CreatedOn.ToLocalTime()))
+				.ForMember(x => x.TransactionType, y => y
+					.MapFrom(z => z.TransactionType.ToString()));
 
-			this.CreateMap<BaseCacheableApiEntity, ApiOutputServiceModel>();
+			this.CreateMap<TransactionsDTO, TransactionsPageDTO>();
 
-			this.CreateMap<Reply, ReplyOutputServiceModel>();
-			this.CreateMap<MessageInputServiceModel, Message>();
-			this.CreateMap<ReplyInputServiceModel, Reply>();
+			this.CreateMap<ApplicationUser, UserInfoDTO>();
+
+			this.CreateMap<ApplicationUser, UserDetailsDTO>()
+                .ForMember(x => x.Accounts, y => y
+                    .MapFrom(z => z.Accounts.Where(a => !a.IsDeleted).OrderBy(a => a.Name)));
+
+			this.CreateMap<BaseApiEntity, ApiEntityDTO>();
+
+			this.CreateMap<Reply, ReplyOutputDTO>();
+			this.CreateMap<MessageInputDTO, Message>();
+			this.CreateMap<ReplyInputDTO, Reply>();
         }
     }
 }

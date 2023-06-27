@@ -5,7 +5,7 @@
     using System.ComponentModel.DataAnnotations.Schema;
     using static PersonalFinancer.Data.Constants.AccountTypeConstants;
 
-    public class AccountType : BaseCacheableApiEntity
+    public class AccountType : BaseApiEntity
     {
         [Key]
         public override Guid Id { get; set; }

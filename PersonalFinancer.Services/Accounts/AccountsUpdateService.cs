@@ -6,7 +6,6 @@
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.Cache;
 	using static PersonalFinancer.Data.Constants;
 
 	public class AccountsUpdateService : IAccountsUpdateService
@@ -17,10 +16,6 @@
 		private readonly IEfRepository<Currency> currenciesRepo;
 		private readonly IEfRepository<Category> categoriesRepo;
 		private readonly IMapper mapper;
-		private readonly ICacheService<Account> accountsCache;
-		private readonly ICacheService<AccountType> accountTypesCache;
-		private readonly ICacheService<Currency> currenciesCache;
-		private readonly ICacheService<Category> categoriesCache;
 
 		public AccountsUpdateService(
 			IEfRepository<Account> accountRepository,
@@ -28,11 +23,7 @@
 			IEfRepository<AccountType> accountTypesRepo,
 			IEfRepository<Currency> currenciesRepo,
 			IEfRepository<Category> categoriesRepo,
-			IMapper mapper,
-			ICacheService<Account> accountsCache,
-			ICacheService<AccountType> accountTypesCache,
-			ICacheService<Currency> currenciesCache,
-			ICacheService<Category> categoriesCache)
+			IMapper mapper)
 		{
 			this.accountsRepo = accountRepository;
 			this.transactionsRepo = transactionRepository;
@@ -40,10 +31,6 @@
 			this.currenciesRepo = currenciesRepo;
 			this.categoriesRepo = categoriesRepo;
 			this.mapper = mapper;
-			this.accountsCache = accountsCache;
-			this.accountTypesCache = accountTypesCache;
-			this.currenciesCache = currenciesCache;
-			this.categoriesCache = categoriesCache;
 		}
 
 		/// <summary>
@@ -51,12 +38,12 @@
 		/// </summary>
 		/// <returns>New Account Id.</returns>
 		/// <exception cref="ArgumentException"></exception>
-		public async Task<Guid> CreateAccountAsync(AccountFormShortServiceModel model)
+		public async Task<Guid> CreateAccountAsync(CreateEditAccountDTO model)
 		{
 			if (await this.IsNameExistAsync(model.Name, model.OwnerId))
 				throw new ArgumentException($"The User already have Account with \"{model.Name}\" name.");
 
-			await this.ValidateAccountTypeAndCurrency(model);
+			await this.ValidateAccountTypeAndCurrencyAsync(model);
 
 			Account newAccount = this.mapper.Map<Account>(model);
 			newAccount.Id = Guid.NewGuid();
@@ -72,8 +59,6 @@
 			await this.accountsRepo.AddAsync(newAccount);
 			await this.accountsRepo.SaveChangesAsync();
 
-			this.accountsCache.RemoveValues(model.OwnerId, notDeleted: true, deleted: false);
-
 			return newAccount.Id;
 		}
 
@@ -82,14 +67,11 @@
 		/// </summary>
 		/// <returns>New transaction Id.</returns>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<Guid> CreateTransactionAsync(TransactionFormModel model)
+		public async Task<Guid> CreateTransactionAsync(CreateEditTransactionDTO model)
 		{
-			Account account = await this.accountsRepo.All()
-				.FirstAsync(a => a.Id == model.AccountId);
+			Account account = await this.FindAccountAsync(model.AccountId);
 
-			await this.ValidateCategory(
-				model.CategoryId ?? throw new InvalidOperationException("Category ID cannot be null."), 
-				model.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be null."));
+			await this.ValidateCategoryAsync(model.CategoryId, model.OwnerId);
 
 			model.CreatedOn = model.CreatedOn.ToUniversalTime();
 
@@ -98,7 +80,7 @@
 
 			await this.transactionsRepo.AddAsync(newTransaction);
 
-			ChangeBalance(account, newTransaction.Amount, model.TransactionType);
+			ChangeAccountBalance(account, newTransaction.Amount, model.TransactionType);
 
 			await this.accountsRepo.SaveChangesAsync();
 
@@ -114,8 +96,7 @@
 		public async Task DeleteAccountAsync(
 			Guid accountId, Guid userId, bool isUserAdmin, bool shouldDeleteTransactions = false)
 		{
-			Account account = await this.accountsRepo.All()
-				.FirstAsync(a => a.Id == accountId && !a.IsDeleted);
+			Account account = await this.FindAccountAsync(accountId);
 
 			if (!isUserAdmin && account.OwnerId != userId)
 				throw new ArgumentException("Can't delete someone else account.");
@@ -126,11 +107,6 @@
 				account.IsDeleted = true;
 
 			await this.accountsRepo.SaveChangesAsync();
-
-			this.accountsCache.RemoveValues(userId, notDeleted: true, deleted: true);
-			this.accountTypesCache.RemoveValues(userId, notDeleted: false, deleted: true);
-			this.currenciesCache.RemoveValues(userId, notDeleted: false, deleted: true);
-			this.categoriesCache.RemoveValues(userId, notDeleted: false, deleted: true);
 		}
 
 		/// <summary>
@@ -146,18 +122,13 @@
 			   .FirstAsync(t => t.Id == transactionId);
 
 			if (!isUserAdmin && transaction.OwnerId != userId)
-				throw new ArgumentException("User is not transaction's owner");
+				throw new ArgumentException("The user is not transaction's owner");
 
 			this.transactionsRepo.Remove(transaction);
 
-			RefundBalance(transaction);
+			RestoreAccountBalance(transaction);
 
 			await this.transactionsRepo.SaveChangesAsync();
-
-			this.accountsCache.RemoveValues(userId, notDeleted: false, deleted: true);
-			this.accountTypesCache.RemoveValues(userId, notDeleted: false, deleted: true);
-			this.currenciesCache.RemoveValues(userId, notDeleted: false, deleted: true);
-			this.categoriesCache.RemoveValues(userId, notDeleted: false, deleted: true);
 
 			return transaction.Account.Balance;
 		}
@@ -168,15 +139,14 @@
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task EditAccountAsync(Guid accountId, AccountFormShortServiceModel model)
+		public async Task EditAccountAsync(Guid accountId, CreateEditAccountDTO model)
 		{
-			Account account = await this.accountsRepo.All()
-				.FirstAsync(a => a.Id == accountId);
+			Account account = await this.FindAccountAsync(accountId);
 
 			if (account.Name != model.Name && await this.IsNameExistAsync(model.Name, model.OwnerId))
 				throw new ArgumentException($"The User already have Account with \"{model.Name}\" name.");
 
-			await this.ValidateAccountTypeAndCurrency(model);
+			await this.ValidateAccountTypeAndCurrencyAsync(model);
 
 			account.Name = model.Name.Trim();
 			account.CurrencyId = model.CurrencyId;
@@ -184,7 +154,7 @@
 
 			if (account.Balance != model.Balance)
 			{
-				decimal amountOfChange = model.Balance - account.Balance;
+				decimal balanceChange = model.Balance - account.Balance;
 				account.Balance = model.Balance;
 
 				Transaction? transaction = await this.transactionsRepo.All()
@@ -193,13 +163,13 @@
 				if (transaction == null)
 				{
 					Transaction initialTransaction =
-						CreateInitialTransaction(account.Id, account.OwnerId, amountOfChange);
+						CreateInitialTransaction(account.Id, account.OwnerId, balanceChange);
 
 					await this.transactionsRepo.AddAsync(initialTransaction);
 				}
 				else
 				{
-					transaction.Amount += amountOfChange;
+					transaction.Amount += balanceChange;
 
 					if (transaction.Amount < 0)
 						transaction.TransactionType = TransactionType.Expense;
@@ -207,9 +177,6 @@
 			}
 
 			await this.accountsRepo.SaveChangesAsync();
-
-			this.accountsCache.RemoveValues(account.OwnerId, notDeleted: false, deleted: true);
-			this.accountTypesCache.RemoveValues(account.OwnerId, notDeleted: false, deleted: true);
 		}
 
 		/// <summary>
@@ -217,7 +184,7 @@
 		/// or Transaction is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task EditTransactionAsync(Guid transactionId, TransactionFormModel model)
+		public async Task EditTransactionAsync(Guid transactionId, CreateEditTransactionDTO model)
 		{
 			Transaction transactionInDb = await this.transactionsRepo.All()
 				.Include(t => t.Account)
@@ -226,42 +193,34 @@
 			if (transactionInDb.IsInitialBalance)
 				throw new InvalidOperationException("Cannot edit initial balance transaction.");
 
-			Guid categoryId = model.CategoryId ?? throw new InvalidOperationException("Category Id cannot be null.");
+			await this.ValidateCategoryAsync(model.CategoryId, model.OwnerId);
 
-			await this.ValidateCategory(
-				categoryId,	
-				model.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be null."));
+			bool isNeedBalanceChange = 
+				model.AccountId != transactionInDb.AccountId ||
+				model.TransactionType != transactionInDb.TransactionType ||
+				model.Amount != transactionInDb.Amount;
 
-			if (model.AccountId != transactionInDb.AccountId
-				|| model.TransactionType != transactionInDb.TransactionType
-				|| model.Amount != transactionInDb.Amount)
+			if (isNeedBalanceChange)
 			{
-				RefundBalance(transactionInDb);
+				RestoreAccountBalance(transactionInDb);
 
 				if (model.AccountId != transactionInDb.AccountId)
 				{
-					Account newAccount = await this.accountsRepo.All()
-						.FirstAsync(a => a.Id == model.AccountId);
-
+					Account newAccount = await this.FindAccountAsync(model.AccountId);
 					transactionInDb.Account = newAccount;
 				}
 
-				ChangeBalance(transactionInDb.Account, model.Amount, model.TransactionType);
+				transactionInDb.Amount = model.Amount;
+				transactionInDb.TransactionType = model.TransactionType;
+
+				ChangeAccountBalance(transactionInDb.Account, transactionInDb.Amount, transactionInDb.TransactionType);
 			}
 
 			transactionInDb.Reference = model.Reference.Trim();
-			transactionInDb.AccountId = model.AccountId ?? throw new InvalidOperationException("Account ID cannot be null!");
-			transactionInDb.CategoryId = categoryId;
-			transactionInDb.Amount = model.Amount;
+			transactionInDb.CategoryId = model.CategoryId;
 			transactionInDb.CreatedOn = model.CreatedOn.ToUniversalTime();
-			transactionInDb.TransactionType = model.TransactionType;
 
 			await this.transactionsRepo.SaveChangesAsync();
-
-			this.categoriesCache.RemoveValues(transactionInDb.OwnerId, notDeleted: false, deleted: true);
-			this.accountsCache.RemoveValues(transactionInDb.OwnerId, notDeleted: false, deleted: true);
-			this.currenciesCache.RemoveValues(transactionInDb.OwnerId, notDeleted: false, deleted: true);
-			this.accountTypesCache.RemoveValues(transactionInDb.OwnerId, notDeleted: false, deleted: true);
 		}
 
 		private static Transaction CreateInitialTransaction(Guid accountId, Guid ownerId, decimal amount)
@@ -282,7 +241,7 @@
 			};
 		}
 
-		private static void ChangeBalance(Account account, decimal amount, TransactionType transactionType)
+		private static void ChangeAccountBalance(Account account, decimal amount, TransactionType transactionType)
 		{
 			if (transactionType == TransactionType.Income)
 				account.Balance += amount;
@@ -290,15 +249,22 @@
 				account.Balance -= amount;
 		}
 
+		/// <summary>
+		/// Throws InvalidOperationException if Account does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		private async Task<Account> FindAccountAsync(Guid accountId)
+			=> await this.accountsRepo.All().FirstAsync(a => a.Id == accountId && !a.IsDeleted);
+
 		private async Task<bool> IsNameExistAsync(string name, Guid userId)
 		{
 			return await this.accountsRepo.All()
 				.AnyAsync(a => a.OwnerId == userId && a.Name == name);
 		}
 
-		private static void RefundBalance(Transaction transaction)
+		private static void RestoreAccountBalance(Transaction transaction)
 		{
-			ChangeBalance(
+			ChangeAccountBalance(
 				transaction.Account,
 				transaction.Amount,
 				transaction.TransactionType == TransactionType.Income
@@ -306,7 +272,11 @@
 					: TransactionType.Income);
 		}
 
-		private async Task ValidateAccountTypeAndCurrency(AccountFormShortServiceModel model)
+		/// <summary>
+		/// Throws InvalidOperationException if account type or currency is invalid.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		private async Task ValidateAccountTypeAndCurrencyAsync(CreateEditAccountDTO model)
 		{
 			bool isAccountTypeValid = await this.accountTypesRepo.All().AnyAsync(at =>
 				at.Id == model.AccountTypeId
@@ -325,7 +295,11 @@
 				throw new InvalidOperationException("Currency is not valid.");
 		}
 
-		private async Task ValidateCategory(Guid categoryId, Guid ownerId)
+		/// <summary>
+		/// Throws InvalidOperationException if category is invalid.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		private async Task ValidateCategoryAsync(Guid categoryId, Guid ownerId)
 		{
 			bool isCategoryValid = await this.categoriesRepo.All().AnyAsync(c =>
 				c.Id == categoryId

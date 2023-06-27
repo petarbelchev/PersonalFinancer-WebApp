@@ -3,7 +3,7 @@
     using System.ComponentModel.DataAnnotations;
     using static PersonalFinancer.Data.Constants.CategoryConstants;
 
-    public class CategoryInputModel : IApiInputModel
+    public class CategoryInputModel : IApiEntityInputModel
     {
         [Required(ErrorMessage = "Please enter a Category name.")]
         [StringLength(CategoryNameMaxLength, MinimumLength = CategoryNameMinLength,

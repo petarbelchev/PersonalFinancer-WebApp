@@ -20,14 +20,12 @@
         [HttpGet("{page}")]
         public async Task<ActionResult<UsersViewModel>> AllUsers(int page)
         {
-            UsersServiceModel usersData =
-                await this.usersService.GetAllUsersAsync(page);
+            UsersInfoDTO usersData =
+                await this.usersService.GetUsersInfoAsync(page);
 
-            var usersModel = new UsersViewModel { Users = usersData.Users };
-            usersModel.Pagination.Page = page;
-            usersModel.Pagination.TotalElements = usersData.TotalUsersCount;
+            var users = new UsersViewModel(usersData, page);
 
-            return this.Ok(usersModel);
+            return this.Ok(users);
         }
     }
 }

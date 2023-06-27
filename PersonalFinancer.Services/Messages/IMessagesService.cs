@@ -5,18 +5,18 @@
 
     public interface IMessagesService
     {
-        Task<IEnumerable<MessageOutputServiceModel>> GetAllAsync();
+        Task<IEnumerable<MessageOutputDTO>> GetAllAsync();
 
-        Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(string userId);
+        Task<IEnumerable<MessageOutputDTO>> GetUserMessagesAsync(string userId);
 
         /// <summary>
         /// Throws InvalidOperationException when Message does not exist
         /// or User is not owner or Administrator
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        Task<MessageDetailsServiceModel> GetMessageAsync(string id, string userId, bool isUserAdmin);
+        Task<MessageDetailsDTO> GetMessageAsync(string id, string userId, bool isUserAdmin);
 
-        Task<string> CreateAsync(MessageInputServiceModel model);
+        Task<string> CreateAsync(MessageInputDTO model);
 
         /// <summary>
         /// Throws ArgumentException when the User is not Authorized 
@@ -24,7 +24,7 @@
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        Task<UpdateResult> AddReplyAsync(ReplyInputServiceModel model);
+        Task<UpdateResult> AddReplyAsync(ReplyInputDTO model);
 
         /// <summary>
         /// Throws ArgumentException when the User is not Authorized 

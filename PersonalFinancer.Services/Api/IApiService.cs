@@ -8,7 +8,7 @@
         /// Throws ArgumentException if you try to create Entity with existing name.
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
-		Task<ApiOutputServiceModel> CreateEntityAsync(string name, Guid ownerId);
+		Task<ApiEntityDTO> CreateEntityAsync(string name, Guid ownerId);
 
         /// <summary>
         /// Throws InvalidOperationException when Entity does not exist

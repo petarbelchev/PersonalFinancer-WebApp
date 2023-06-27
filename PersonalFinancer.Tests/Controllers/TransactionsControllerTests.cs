@@ -9,7 +9,9 @@
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Services.User.Models;
 	using PersonalFinancer.Web.Controllers;
+	using PersonalFinancer.Web.Models.Account;
 	using PersonalFinancer.Web.Models.Transaction;
 	using static PersonalFinancer.Data.Constants;
 
@@ -18,11 +20,11 @@
 	{
 		private TransactionsController controller;
 
-		private readonly TransactionsServiceModel userTransactionsDto = new()
+		private static readonly TransactionsDTO expTransactionsDto = new()
 		{
-			Transactions = new TransactionTableServiceModel[]
+			Transactions = new TransactionTableDTO[]
 			{
-				new TransactionTableServiceModel
+				new TransactionTableDTO
 				{
 					Id = Guid.NewGuid(),
 					Amount = 10,
@@ -32,7 +34,7 @@
 					Reference = "Reference",
 					TransactionType = TransactionType.Expense.ToString()
 				},
-				new TransactionTableServiceModel
+				new TransactionTableDTO
 				{
 					Id = Guid.NewGuid(),
 					Amount = 15,
@@ -46,60 +48,74 @@
 			TotalTransactionsCount = 10
 		};
 
-		private readonly AccountServiceModel[] expectedAccounts = new AccountServiceModel[]
+		private static readonly AccountsAndCategoriesDropdownDTO expAccountsAndCategories = new()
 		{
-			new AccountServiceModel
+			UserAccounts = new AccountDropdownDTO[]
 			{
-				Id = Guid.NewGuid(),
-				Name = "Account name 1"
+				new AccountDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "Account name 1"
+				},
+				new AccountDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "Account name 2"
+				}
 			},
-			new AccountServiceModel
+			UserCategories = new CategoryDropdownDTO[]
 			{
-				Id = Guid.NewGuid(),
-				Name = "Account name 2"
+				new CategoryDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "Category name 1"
+				},
+				new CategoryDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "Category name 2"
+				}
 			}
 		};
 
-		private readonly CategoryServiceModel[] expectedCategories = new CategoryServiceModel[]
+		private static readonly AccountTypesAndCurrenciesDropdownDTO expAccountTypesAndCurrencies = new()
 		{
-			new CategoryServiceModel
+			OwnerAccountTypes = new AccountTypeDropdownDTO[]
 			{
-				Id = Guid.NewGuid(),
-				Name = "Category name 1"
+				new AccountTypeDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "AccType 1"
+				},
+				new AccountTypeDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "AccType 2"
+				}
 			},
-			new CategoryServiceModel
+			OwnerCurrencies = new CurrencyDropdownDTO[]
 			{
-				Id = Guid.NewGuid(),
-				Name = "Category name 2"
+				new CurrencyDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "Currency 1"
+				},
+				new CurrencyDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "Currency 2"
+				}
 			}
 		};
 
-		private readonly AccountTypeServiceModel[] expectedAccountTypes = new AccountTypeServiceModel[]
+		private static readonly TransactionsPageDTO expTransactionsPageDTO = new()
 		{
-			new AccountTypeServiceModel
-			{
-				Id = Guid.NewGuid(),
-				Name = "AccType 1"
-			},
-			new AccountTypeServiceModel
-			{
-				Id = Guid.NewGuid(),
-				Name = "AccType 2"
-			}
-		};
-
-		private readonly CurrencyServiceModel[] expectedCurrencies = new CurrencyServiceModel[]
-		{
-			new CurrencyServiceModel
-			{
-				Id = Guid.NewGuid(),
-				Name = "Currency 1"
-			},
-			new CurrencyServiceModel
-			{
-				Id = Guid.NewGuid(),
-				Name = "Currency 2"
-			}
+			Transactions = expTransactionsDto.Transactions,
+			TotalTransactionsCount = expTransactionsDto.TotalTransactionsCount,
+			UserAccounts = expAccountsAndCategories.UserAccounts,
+			UserAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
+			UserCategories = expAccountsAndCategories.UserCategories,
+			UserCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies
 		};
 
 		[SetUp]
@@ -123,45 +139,23 @@
 			};
 
 			this.usersServiceMock.Setup(x => x
-				.GetUserAccountsDropdownData(this.userId, true))
-				.ReturnsAsync(this.expectedAccounts);
+				.GetUserAccountsAndCategoriesDropdownDataAsync(this.userId))
+				.ReturnsAsync(expAccountsAndCategories);
 
 			this.usersServiceMock.Setup(x => x
-				.GetUserAccountsDropdownData(this.userId, false))
-				.ReturnsAsync(this.expectedAccounts);
-
-			this.usersServiceMock.Setup(x => x
-				.GetUserCategoriesDropdownData(this.userId, true))
-				.ReturnsAsync(this.expectedCategories);
-
-			this.usersServiceMock.Setup(x => x
-				.GetUserCategoriesDropdownData(this.userId, false))
-				.ReturnsAsync(this.expectedCategories);
-
-			this.usersServiceMock.Setup(x => x
-				.GetUserAccountTypesDropdownData(this.userId, true))
-				.ReturnsAsync(this.expectedAccountTypes);
-
-			this.usersServiceMock.Setup(x => x
-				.GetUserAccountTypesDropdownData(this.userId, false))
-				.ReturnsAsync(this.expectedAccountTypes);
-
-			this.usersServiceMock.Setup(x => x
-				.GetUserCurrenciesDropdownData(this.userId, true))
-				.ReturnsAsync(this.expectedCurrencies);
-
-			this.usersServiceMock.Setup(x => x
-				.GetUserCurrenciesDropdownData(this.userId, false))
-				.ReturnsAsync(this.expectedCurrencies);
+				.GetUserAccountTypesAndCurrenciesDropdownDataAsync(this.userId))
+				.ReturnsAsync(expAccountTypesAndCurrencies);
 		}
 
 		[Test]
 		public async Task All_OnGet_ShouldReturnViewModel()
 		{
 			//Arrange
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetUserTransactionsAsync(this.userId, It.IsAny<UserTransactionsInputModel>(), 1))
-				.ReturnsAsync(this.userTransactionsDto);
+			this.usersServiceMock.Setup(x => x
+				.GetUserTransactionsPageDataAsync(It.Is<TransactionsFilterDTO>(
+					x => x.UserId == this.userId
+					&& x.Page == 1)))
+				.ReturnsAsync(expTransactionsPageDTO);
 
 			//Act
 			var viewResult = (ViewResult)await this.controller.All();
@@ -181,15 +175,21 @@
 		public async Task All_OnPost_ShouldReturnViewModel()
 		{
 			//Arrange
+			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
+			DateTime endDate = DateTime.UtcNow;
 			var inputModel = new UserTransactionsInputModel
 			{
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
+				StartDate = startDate,
+				EndDate = endDate
 			};
 
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetUserTransactionsAsync(this.userId, inputModel, 1))
-				.ReturnsAsync(this.userTransactionsDto);
+			this.usersServiceMock.Setup(x => x
+				.GetUserTransactionsPageDataAsync(It.Is<TransactionsFilterDTO>(
+					x => x.UserId == this.userId
+					&& x.StartDate == inputModel.StartDate
+					&& x.EndDate == inputModel.EndDate
+					&& x.Page == 1)))
+				.ReturnsAsync(expTransactionsPageDTO);
 
 			//Act
 			var viewResult = (ViewResult)await this.controller.All(inputModel);
@@ -249,7 +249,7 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				var model = viewResult.Model as TransactionFormModel;
+				var model = viewResult.Model as TransactionFormViewModel;
 				Assert.That(model, Is.Not.Null);
 				Assert.That(model!.IsInitialBalance, Is.False);
 				Assert.That(model.Reference, Is.Null);
@@ -270,7 +270,7 @@
 		public async Task Create_OnPost_ShouldReturnViewModelWithErrors_WhenModelIsInvalid()
 		{
 			//Arrange
-			var inputModel = new TransactionFormModel
+			var inputModel = new TransactionFormViewModel
 			{
 				Amount = -10,
 				CreatedOn = DateTime.UtcNow,
@@ -281,6 +281,7 @@
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
 			};
+			var dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
 
 			this.controller.ModelState.AddModelError(nameof(inputModel.Amount), "Amount is invalid.");
 
@@ -292,10 +293,10 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				var model = viewResult.Model as TransactionFormModel;
+				var model = viewResult.Model as TransactionFormViewModel;
 				Assert.That(model, Is.Not.Null);
 
-				CheckTransactionFormModel(model!, inputModel);
+				CheckTransactionFormModel(model!, dto);
 
 				this.CheckUserAccountsAndCategories(model!);
 
@@ -312,7 +313,7 @@
 		public async Task Create_OnPost_ShouldReturnBadRequest_WhenUserIsNotOwnerInInputModel()
 		{
 			//Arrange
-			var inputModel = new TransactionFormModel
+			var inputModel = new TransactionFormViewModel
 			{
 				Amount = -10,
 				CreatedOn = DateTime.UtcNow,
@@ -339,7 +340,7 @@
 		public async Task Create_OnPost_ShouldRedirectToAction_WhenTransactionWasCreated()
 		{
 			//Arrange
-			var inputModel = new TransactionFormModel
+			var inputModel = new TransactionFormViewModel
 			{
 				Amount = 10,
 				CreatedOn = DateTime.UtcNow,
@@ -350,10 +351,17 @@
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
 			};
-			var newTransactionId = Guid.NewGuid();
+			var newTransactionId = Guid.Parse("e8befb1f-72a9-4bb7-831c-cbe678a11af8");
 
 			this.accountsUpdateServiceMock.Setup(x => x
-				.CreateTransactionAsync(inputModel))
+				.CreateTransactionAsync(It.Is<CreateEditTransactionDTO>(x =>
+					x.OwnerId == inputModel.OwnerId
+					&& x.TransactionType == inputModel.TransactionType
+					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.Reference == inputModel.Reference
+					&& x.AccountId == inputModel.AccountId
+					&& x.Amount == inputModel.Amount
+					&& x.CategoryId == inputModel.CategoryId)))
 				.ReturnsAsync(newTransactionId);
 
 			this.controller.TempData = new TempDataDictionary(
@@ -378,7 +386,7 @@
 		public async Task Create_OnPost_ShouldReturnBadRequest_WhenAccountDoesNotExist()
 		{
 			//Arrange
-			var inputModel = new TransactionFormModel
+			var inputModel = new TransactionFormViewModel
 			{
 				Amount = 10,
 				CreatedOn = DateTime.UtcNow,
@@ -391,7 +399,14 @@
 			};
 
 			this.accountsUpdateServiceMock.Setup(x => x
-				.CreateTransactionAsync(inputModel))
+				.CreateTransactionAsync(It.Is<CreateEditTransactionDTO>(x =>
+					x.OwnerId == inputModel.OwnerId
+					&& x.TransactionType == inputModel.TransactionType
+					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.Reference == inputModel.Reference
+					&& x.AccountId == inputModel.AccountId
+					&& x.Amount == inputModel.Amount
+					&& x.CategoryId == inputModel.CategoryId)))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -574,7 +589,7 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var serviceReturnDto = new TransactionDetailsServiceModel
+			var serviceReturnDto = new TransactionDetailsDTO
 			{
 				Id = transactionId,
 				AccountCurrencyName = "Currency",
@@ -597,7 +612,7 @@
 
 			//Act
 			var result = (ViewResult)await this.controller.TransactionDetails(transactionId);
-			var model = result.Model as TransactionDetailsServiceModel;
+			var model = result.Model as TransactionDetailsDTO;
 
 			//Assert
 			Assert.Multiple(() =>
@@ -662,7 +677,7 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var serviceReturnDto = new TransactionFormModel
+			var serviceReturnDto = new CreateEditTransactionDTO
 			{
 				Amount = 10,
 				CreatedOn = DateTime.UtcNow.AddDays(-1),
@@ -670,9 +685,8 @@
 				Reference = "Reference",
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = false,
-				UserAccounts = this.expectedAccounts,
-				UserCategories = this.expectedCategories,
+				UserAccounts = expAccountsAndCategories.UserAccounts,
+				UserCategories = expAccountsAndCategories.UserCategories,
 				TransactionType = TransactionType.Income
 			};
 
@@ -681,12 +695,12 @@
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetTransactionFormDataAsync(transactionId, this.userId))
+				.GetTransactionFormDataAsync(transactionId, this.userId, false))
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
 			var result = (ViewResult)await this.controller.EditTransaction(transactionId);
-			var model = result.Model as TransactionFormModel;
+			var model = result.Model as TransactionFormViewModel;
 
 			//Assert
 			Assert.Multiple(() =>
@@ -713,7 +727,7 @@
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetTransactionFormDataAsync(transactionId, this.userId))
+				.GetTransactionFormDataAsync(transactionId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -728,7 +742,7 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var inputModel = new TransactionFormModel
+			var inputModel = new TransactionFormViewModel
 			{
 				Amount = -10,
 				CreatedOn = DateTime.UtcNow,
@@ -739,6 +753,7 @@
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
 			};
+			var dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
 
 			this.controller.ModelState.AddModelError(nameof(inputModel.Amount), "Amount is invalid.");
 
@@ -752,9 +767,9 @@
 
 				CheckModelStateErrors(result.ViewData.ModelState, nameof(inputModel.Amount), "Amount is invalid.");
 
-				var model = result.Model as TransactionFormModel;
+				var model = result.Model as TransactionFormViewModel;
 				Assert.That(model, Is.Not.Null);
-				CheckTransactionFormModel(model!, inputModel);
+				CheckTransactionFormModel(model!, dto);
 				this.CheckUserAccountsAndCategories(model!);
 			});
 		}
@@ -764,7 +779,7 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var inputModel = new TransactionFormModel
+			var inputModel = new TransactionFormViewModel
 			{
 				Amount = 10,
 				CreatedOn = DateTime.UtcNow,
@@ -775,9 +790,16 @@
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
 			};
-			
+
 			this.accountsUpdateServiceMock.Setup(x => x
-				.EditTransactionAsync(transactionId, inputModel))
+				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionDTO>(x =>
+					x.OwnerId == inputModel.OwnerId
+					&& x.TransactionType == inputModel.TransactionType
+					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.Reference == inputModel.Reference
+					&& x.AccountId == inputModel.AccountId
+					&& x.Amount == inputModel.Amount
+					&& x.CategoryId == inputModel.CategoryId)))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -796,7 +818,7 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var inputModel = new TransactionFormModel
+			var inputModel = new TransactionFormViewModel
 			{
 				Amount = 10,
 				CreatedOn = DateTime.UtcNow,
@@ -824,7 +846,7 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var inputModel = new TransactionFormModel
+			var inputModel = new TransactionFormViewModel
 			{
 				Amount = 10,
 				CreatedOn = DateTime.UtcNow,
@@ -839,7 +861,14 @@
 			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x
-				.EditTransactionAsync(transactionId, inputModel))
+				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionDTO>(x =>
+					x.OwnerId == inputModel.OwnerId
+					&& x.TransactionType == inputModel.TransactionType
+					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.Reference == inputModel.Reference
+					&& x.AccountId == inputModel.AccountId
+					&& x.Amount == inputModel.Amount
+					&& x.CategoryId == inputModel.CategoryId)))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -854,7 +883,7 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var inputModel = new TransactionFormModel
+			var inputModel = new TransactionFormViewModel
 			{
 				Amount = 10,
 				CreatedOn = DateTime.UtcNow,
@@ -875,7 +904,14 @@
 			var result = (RedirectToActionResult)await this.controller.EditTransaction(transactionId, inputModel);
 
 			this.accountsUpdateServiceMock.Verify(x => x
-				.EditTransactionAsync(transactionId, inputModel),
+				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionDTO>(x =>
+					x.OwnerId == inputModel.OwnerId
+					&& x.TransactionType == inputModel.TransactionType
+					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.Reference == inputModel.Reference
+					&& x.AccountId == inputModel.AccountId
+					&& x.Amount == inputModel.Amount
+					&& x.CategoryId == inputModel.CategoryId)),
 				Times.Once);
 
 			//Assert
@@ -898,7 +934,7 @@
 			var transactionId = Guid.NewGuid();
 			var ownerId = Guid.NewGuid();
 			var accountId = Guid.NewGuid();
-			var inputModel = new TransactionFormModel
+			var inputModel = new TransactionFormViewModel
 			{
 				Amount = 10,
 				CreatedOn = DateTime.UtcNow,
@@ -925,7 +961,14 @@
 			var result = (RedirectToActionResult)await this.controller.EditTransaction(transactionId, inputModel);
 
 			this.accountsUpdateServiceMock.Verify(x => x
-				.EditTransactionAsync(transactionId, inputModel),
+				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionDTO>(x =>
+					x.OwnerId == inputModel.OwnerId
+					&& x.TransactionType == inputModel.TransactionType
+					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.Reference == inputModel.Reference
+					&& x.AccountId == inputModel.AccountId
+					&& x.Amount == inputModel.Amount
+					&& x.CategoryId == inputModel.CategoryId)),
 				Times.Once);
 
 			//Assert
@@ -943,59 +986,59 @@
 
 		private void CheckUserTransactionsViewModel(UserTransactionsViewModel model)
 		{
-			Assert.That(model.Id, Is.EqualTo(this.userId));
+			Assert.That(model.UserId, Is.EqualTo(this.userId));
 
 			Assert.That(model.Transactions.Count(),
-				Is.EqualTo(this.userTransactionsDto.Transactions.Count()));
+				Is.EqualTo(expTransactionsDto.Transactions.Count()));
 
 			Assert.That(model.Pagination.TotalElements,
-				Is.EqualTo(this.userTransactionsDto.TotalTransactionsCount));
+				Is.EqualTo(expTransactionsDto.TotalTransactionsCount));
 
-			for (int i = 0; i < this.userTransactionsDto.Transactions.Count(); i++)
+			for (int i = 0; i < expTransactionsDto.Transactions.Count(); i++)
 			{
 				Assert.That(model.Transactions.ElementAt(i).Amount,
-					Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).Amount));
+					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).Amount));
 				Assert.That(model.Transactions.ElementAt(i).Reference,
-					Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).Reference));
+					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).Reference));
 				Assert.That(model.Transactions.ElementAt(i).TransactionType,
-					Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).TransactionType));
+					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).TransactionType));
 				Assert.That(model.Transactions.ElementAt(i).AccountCurrencyName,
-					Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).AccountCurrencyName));
+					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).AccountCurrencyName));
 				Assert.That(model.Transactions.ElementAt(i).Id,
-					Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).Id));
+					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).Id));
 				Assert.That(model.Transactions.ElementAt(i).CategoryName,
-					Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).CategoryName));
+					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).CategoryName));
 				Assert.That(model.Transactions.ElementAt(i).CreatedOn,
-					Is.EqualTo(this.userTransactionsDto.Transactions.ElementAt(i).CreatedOn));
+					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).CreatedOn));
 			}
 		}
 
-		private void CheckUserAccountsAndCategories(TransactionFormModel model)
+		private void CheckUserAccountsAndCategories(TransactionFormViewModel model)
 		{
 			Assert.That(model.UserCategories.Count(),
-				Is.EqualTo(this.expectedCategories.Length));
+				Is.EqualTo(expAccountsAndCategories.UserCategories.Count()));
 
-			for (int i = 0; i < this.expectedCategories.Length; i++)
+			for (int i = 0; i < expAccountsAndCategories.UserCategories.Count(); i++)
 			{
 				Assert.That(model.UserCategories.ElementAt(i).Id,
-					Is.EqualTo(this.expectedCategories[i].Id));
+					Is.EqualTo(expAccountsAndCategories.UserCategories.ElementAt(i).Id));
 				Assert.That(model.UserCategories.ElementAt(i).Name,
-					Is.EqualTo(this.expectedCategories[i].Name));
+					Is.EqualTo(expAccountsAndCategories.UserCategories.ElementAt(i).Name));
 			}
 
 			Assert.That(model.UserAccounts.Count(),
-				Is.EqualTo(this.expectedAccounts.Length));
+				Is.EqualTo(expAccountsAndCategories.UserAccounts.Count()));
 
-			for (int i = 0; i < this.expectedAccounts.Length; i++)
+			for (int i = 0; i < expAccountsAndCategories.UserAccounts.Count(); i++)
 			{
 				Assert.That(model.UserAccounts.ElementAt(i).Id,
-					Is.EqualTo(this.expectedAccounts[i].Id));
+					Is.EqualTo(expAccountsAndCategories.UserAccounts.ElementAt(i).Id));
 				Assert.That(model.UserAccounts.ElementAt(i).Name,
-					Is.EqualTo(this.expectedAccounts[i].Name));
+					Is.EqualTo(expAccountsAndCategories.UserAccounts.ElementAt(i).Name));
 			}
 		}
 
-		private static void CheckTransactionFormModel(TransactionFormModel model, TransactionFormModel inputModel)
+		private static void CheckTransactionFormModel(TransactionFormViewModel model, CreateEditTransactionDTO inputModel)
 		{
 			Assert.That(model.Amount, Is.EqualTo(inputModel.Amount));
 			Assert.That(model.TransactionType, Is.EqualTo(inputModel.TransactionType));
@@ -1004,7 +1047,6 @@
 			Assert.That(model.CreatedOn, Is.EqualTo(inputModel.CreatedOn));
 			Assert.That(model.AccountId, Is.EqualTo(inputModel.AccountId));
 			Assert.That(model.CategoryId, Is.EqualTo(inputModel.CategoryId));
-			Assert.That(model.IsInitialBalance, Is.EqualTo(inputModel.IsInitialBalance));
 		}
 	}
 }

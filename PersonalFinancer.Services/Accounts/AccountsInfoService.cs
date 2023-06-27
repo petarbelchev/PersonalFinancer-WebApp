@@ -33,7 +33,7 @@
 		/// or User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<AccountDetailsServiceModel> GetAccountDetailsAsync(
+		public async Task<AccountDetailsLongDTO> GetAccountDetailsAsync(
 			Guid accountId, DateTime startDate, DateTime endDate, Guid userId, bool isUserAdmin)
 		{
 			DateTime startDateUtc = startDate.ToUniversalTime();
@@ -41,7 +41,7 @@
 
 			return await this.accountsRepo.All()
 				.Where(a => a.Id == accountId && !a.IsDeleted && (isUserAdmin || a.OwnerId == userId))
-				.Select(a => new AccountDetailsServiceModel
+				.Select(a => new AccountDetailsLongDTO
 				{
 					Id = a.Id,
 					Name = a.Name,
@@ -57,7 +57,7 @@
 						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
 						.OrderByDescending(t => t.CreatedOn)
 						.Take(PaginationConstants.TransactionsPerPage)
-						.Select(t => new TransactionTableServiceModel
+						.Select(t => new TransactionTableDTO
 						{
 							Id = t.Id,
 							Amount = t.Amount,
@@ -78,12 +78,12 @@
 		/// or User is not owner or Administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<AccountFormShortServiceModel> GetAccountFormDataAsync(
+		public async Task<CreateEditAccountDTO> GetAccountFormDataAsync(
 			Guid accountId, Guid userId, bool isUserAdmin)
 		{
 			return await this.accountsRepo.All()
 				.Where(a => a.Id == accountId && (isUserAdmin || a.OwnerId == userId))
-				.ProjectTo<AccountFormShortServiceModel>(this.mapper.ConfigurationProvider)
+				.ProjectTo<CreateEditAccountDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
@@ -112,18 +112,18 @@
 				.FirstAsync();
 		}
 
-		public async Task<UsersAccountsCardsServiceModel> GetAccountsCardsDataAsync(int page)
+		public async Task<AccountsCardsDTO> GetAccountsCardsDataAsync(int page)
 		{
-			return new UsersAccountsCardsServiceModel
+			return new AccountsCardsDTO
 			{
 				Accounts = await this.accountsRepo.All()
 					.Where(a => !a.IsDeleted)
 					.OrderBy(a => a.Name)
 					.Skip(PaginationConstants.AccountsPerPage * (page - 1))
 					.Take(PaginationConstants.AccountsPerPage)
-					.ProjectTo<AccountCardServiceModel>(this.mapper.ConfigurationProvider)
+					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
-				TotalUsersAccountsCount = await this.accountsRepo.All()
+				TotalAccountsCount = await this.accountsRepo.All()
 					.CountAsync(a => !a.IsDeleted)
 			};
 		}
@@ -135,28 +135,44 @@
 		/// Throws InvalidOperationException when Account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<AccountDetailsShortServiceModel> GetAccountShortDetailsAsync(Guid accountId)
+		public async Task<AccountDetailsShortDTO> GetAccountShortDetailsAsync(Guid accountId)
 		{
 			return await this.accountsRepo.All()
 				.Where(a => a.Id == accountId)
-				.ProjectTo<AccountDetailsShortServiceModel>(this.mapper.ConfigurationProvider)
+				.ProjectTo<AccountDetailsShortDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
-		public async Task<TransactionsServiceModel> GetAccountTransactionsAsync(
-			Guid accountId, DateTime startDate, DateTime endDate, int page = 1)
+		/// <summary>
+		/// Throws InvalidOperationException when Account does not exist.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<TransactionsDTO> GetAccountTransactionsAsync(AccountTransactionsFilterDTO dto)
 		{
-			IQueryable<Transaction> query = this.transactionsRepo.All()
-				.Where(t => t.AccountId == accountId && !t.Account.IsDeleted);
+			DateTime startDateUtc = dto.StartDate.ToUniversalTime();
+			DateTime endDateUtc = dto.EndDate.ToUniversalTime();
 
-			return await this.GetTransactions(query, startDate, endDate, page);
+			return await this.accountsRepo.All()
+				.Where(a => a.Id == dto.AccountId && !a.IsDeleted)
+				.Select(a => new TransactionsDTO()
+				{
+					Transactions = a.Transactions
+						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
+						.OrderByDescending(t => t.CreatedOn)
+						.Skip(PaginationConstants.TransactionsPerPage * (dto.Page - 1))
+						.Take(PaginationConstants.TransactionsPerPage)
+						.Select(t => this.mapper.Map<TransactionTableDTO>(t)),
+					TotalTransactionsCount = a.Transactions
+						.Count(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
+				})
+				.FirstAsync();
 		}
 
-		public async Task<IEnumerable<CurrencyCashFlowServiceModel>> GetCashFlowByCurrenciesAsync()
+		public async Task<IEnumerable<CurrencyCashFlowDTO>> GetCashFlowByCurrenciesAsync()
 		{
 			return await this.transactionsRepo.All()
 				.GroupBy(t => t.Account.Currency.Name)
-				.Select(t => new CurrencyCashFlowServiceModel
+				.Select(t => new CurrencyCashFlowDTO
 				{
 					Name = t.Key,
 					Incomes = t
@@ -176,17 +192,16 @@
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<TransactionDetailsServiceModel> GetTransactionDetailsAsync(
+		public async Task<TransactionDetailsDTO> GetTransactionDetailsAsync(
 			Guid transactionId, Guid ownerId, bool isUserAdmin)
 		{
-			TransactionDetailsServiceModel? transaction = await this.transactionsRepo.All()
+			TransactionDetailsDTO transaction = await this.transactionsRepo.All()
 				.Where(t => t.Id == transactionId)
-				.ProjectTo<TransactionDetailsServiceModel>(this.mapper.ConfigurationProvider)
-				.FirstOrDefaultAsync() ??
-					throw new InvalidOperationException("Transaction does not exist.");
+				.ProjectTo<TransactionDetailsDTO>(this.mapper.ConfigurationProvider)
+				.FirstAsync();
 
 			if (!isUserAdmin && transaction.OwnerId != ownerId)
-				throw new ArgumentException("User is not transaction's owner.");
+				throw new ArgumentException("The user is not transaction's owner.");
 
 			transaction.CreatedOn = transaction.CreatedOn.ToLocalTime();
 
@@ -197,11 +212,13 @@
 		/// Throws InvalidOperationException when the user is not owner, transaction does not exist or is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		public async Task<TransactionFormModel> GetTransactionFormDataAsync(Guid transactionId, Guid ownerId)
+		public async Task<CreateEditTransactionDTO> GetTransactionFormDataAsync(Guid transactionId, Guid userId, bool isUserAdmin)
 		{
 			return await this.transactionsRepo.All()
-				.Where(t => t.Id == transactionId && t.OwnerId == ownerId && !t.IsInitialBalance)
-				.Select(t => new TransactionFormModel
+				.Where(t => t.Id == transactionId && 
+							(isUserAdmin || t.OwnerId == userId) && 
+							!t.IsInitialBalance)
+				.Select(t => new CreateEditTransactionDTO
 				{
 					OwnerId = t.OwnerId,
 					AccountId = t.AccountId,
@@ -210,15 +227,14 @@
 					CreatedOn = t.CreatedOn.ToLocalTime(),
 					TransactionType = t.TransactionType,
 					Reference = t.Reference,
-					IsInitialBalance = t.IsInitialBalance,
 					UserAccounts = t.Owner.Accounts
 						.Where(a => !a.IsDeleted)
 						.OrderBy(a => a.Name)
-						.Select(a => this.mapper.Map<AccountServiceModel>(a)),
+						.Select(a => this.mapper.Map<AccountDropdownDTO>(a)),
 					UserCategories = t.Owner.Categories
 						.Where(c => !c.IsDeleted)
 						.OrderBy(c => c.Name)
-						.Select(c => this.mapper.Map<CategoryServiceModel>(c))
+						.Select(c => this.mapper.Map<CategoryDropdownDTO>(c))
 				})
 				.FirstAsync();
 		}
@@ -237,69 +253,13 @@
 				.FirstAsync();
 		}
 
-		public async Task<IEnumerable<AccountCardServiceModel>> GetUserAccountsAsync(Guid userId)
+		public async Task<IEnumerable<AccountCardDTO>> GetUserAccountsCardsAsync(Guid userId)
 		{
 			return await this.accountsRepo.All()
 				.Where(a => a.OwnerId == userId && !a.IsDeleted)
 				.OrderBy(a => a.Name)
-				.Select(a => this.mapper.Map<AccountCardServiceModel>(a))
+				.Select(a => this.mapper.Map<AccountCardDTO>(a))
 				.ToArrayAsync();
-		}
-
-		public async Task<TransactionsServiceModel> GetUserTransactionsAsync(
-			Guid userId, UserTransactionsInputModel inputModel, int page = 1)
-		{
-			IQueryable<Transaction> query = this.transactionsRepo.All()
-				.Where(t => t.OwnerId == userId);
-
-			if (!string.IsNullOrWhiteSpace(inputModel.AccountId))
-				query = query.Where(t => t.AccountId == Guid.Parse(inputModel.AccountId!));
-
-			if (!string.IsNullOrWhiteSpace(inputModel.CurrencyId))
-				query = query.Where(t => t.Account.CurrencyId == Guid.Parse(inputModel.CurrencyId!));
-
-			if (!string.IsNullOrWhiteSpace(inputModel.CategoryId))
-				query = query.Where(t => t.CategoryId == Guid.Parse(inputModel.CategoryId!));
-
-			if (!string.IsNullOrWhiteSpace(inputModel.AccountTypeId))
-				query = query.Where(t => t.Account.AccountTypeId == Guid.Parse(inputModel.AccountTypeId!));
-
-			return await this.GetTransactions(
-				query,
-				inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."),
-				inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null"), 
-				page);
-		}
-
-		private async Task<TransactionsServiceModel> GetTransactions(
-			 IQueryable<Transaction> query, DateTime startDate, DateTime endDate, int page = 1)
-		{
-			DateTime startDateUtc = startDate.ToUniversalTime();
-			DateTime endDateUtc = endDate.ToUniversalTime();
-
-			query = query.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc);
-
-			return new TransactionsServiceModel()
-			{
-				Transactions = await query
-					.OrderByDescending(t => t.CreatedOn)
-					.Skip(PaginationConstants.TransactionsPerPage * (page - 1))
-					.Take(PaginationConstants.TransactionsPerPage)
-					.Select(t => new TransactionTableServiceModel
-					{
-						Id = t.Id,
-						Amount = t.Amount,
-						AccountCurrencyName = t.Account.Currency.Name,
-						CreatedOn = t.CreatedOn.ToLocalTime(),
-						CategoryName = t.Category.Name + (t.Category.IsDeleted ?
-							" (Deleted)"
-							: string.Empty),
-						TransactionType = t.TransactionType.ToString(),
-						Reference = t.Reference
-					})
-					.ToArrayAsync(),
-				TotalTransactionsCount = await query.CountAsync()
-			};
 		}
 	}
 }

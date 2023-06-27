@@ -8,6 +8,7 @@
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Services.User.Models;
 	using PersonalFinancer.Web.Controllers;
 	using PersonalFinancer.Web.Models.Account;
 	using static PersonalFinancer.Data.Constants;
@@ -19,43 +20,45 @@
 	{
 		private AccountsController controller;
 
-		private readonly AccountTypeServiceModel[] expectedAccountTypes = new AccountTypeServiceModel[]
+		private readonly AccountTypesAndCurrenciesDropdownDTO expAccountTypesAndCurrencies = new()
 		{
-			new AccountTypeServiceModel
+			OwnerAccountTypes = new AccountTypeDropdownDTO[]
 			{
-				Id = Guid.NewGuid(),
-				Name = "AccType 1"
+				new AccountTypeDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "AccType 1"
+				},
+				new AccountTypeDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "AccType 2"
+				}
 			},
-			new AccountTypeServiceModel
+			OwnerCurrencies = new CurrencyDropdownDTO[]
 			{
-				Id = Guid.NewGuid(),
-				Name = "AccType 2"
+				new CurrencyDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "Currency 1"
+				},
+				new CurrencyDropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "Currency 2"
+				}
 			}
 		};
 
-		private readonly CurrencyServiceModel[] expectedCurrencies = new CurrencyServiceModel[]
-		{
-			new CurrencyServiceModel
-			{
-				Id = Guid.NewGuid(),
-				Name = "Currency 1"
-			},
-			new CurrencyServiceModel
-			{
-				Id = Guid.NewGuid(),
-				Name = "Currency 2"
-			}
-		};
-
-		private readonly AccountDetailsServiceModel expectedAccountDetailsDto = new AccountDetailsServiceModel
+		private readonly AccountDetailsLongDTO expectedAccountDetailsDto = new()
 		{
 			Id = Guid.NewGuid(),
 			Balance = 100,
 			CurrencyName = "Currency",
 			Name = "Account Name",
-			Transactions = new TransactionTableServiceModel[]
+			Transactions = new TransactionTableDTO[]
 				{
-					new TransactionTableServiceModel
+					new TransactionTableDTO
 					{
 						Id = Guid.NewGuid(),
 						AccountCurrencyName = "Currency",
@@ -74,12 +77,8 @@
 		{
 			this.usersServiceMock
 				.Setup(x => x
-				.GetUserAccountTypesDropdownData(this.userId, false))
-				.ReturnsAsync(this.expectedAccountTypes);
-
-			this.usersServiceMock
-				.Setup(x => x.GetUserCurrenciesDropdownData(this.userId, false))
-				.ReturnsAsync(this.expectedCurrencies);
+				.GetUserAccountTypesAndCurrenciesDropdownDataAsync(this.userId))
+				.ReturnsAsync(this.expAccountTypesAndCurrencies);
 
 			this.controller = new AccountsController(
 				this.accountsUpdateServiceMock.Object,
@@ -183,7 +182,7 @@
 
 			this.accountsUpdateServiceMock.Setup(x => x
 				.CreateAccountAsync(
-					It.Is<AccountFormShortServiceModel>(a =>
+					It.Is<CreateEditAccountDTO>(a =>
 						a.Balance == inputModel.Balance
 						&& a.CurrencyId == inputModel.CurrencyId
 						&& a.Name == inputModel.Name
@@ -223,7 +222,7 @@
 			};
 
 			this.accountsUpdateServiceMock
-				.Setup(x => x.CreateAccountAsync(It.IsAny<AccountFormShortServiceModel>()))
+				.Setup(x => x.CreateAccountAsync(It.IsAny<CreateEditAccountDTO>()))
 				.Throws<ArgumentException>();
 
 			//Act
@@ -437,7 +436,7 @@
 				EndDate = DateTime.UtcNow
 			};
 
-			var serviceReturnModel = new AccountDetailsShortServiceModel
+			var serviceReturnModel = new AccountDetailsShortDTO
 			{
 				Name = this.expectedAccountDetailsDto.Name,
 				Balance = this.expectedAccountDetailsDto.Balance,
@@ -767,13 +766,15 @@
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
-			var expServiceDto = new AccountFormShortServiceModel
+			var expServiceDto = new CreateEditAccountDTO
 			{
 				Name = "name",
 				AccountTypeId = Guid.NewGuid(),
 				CurrencyId = Guid.NewGuid(),
 				Balance = 100,
-				OwnerId = this.userId
+				OwnerId = this.userId,
+				OwnerAccountTypes = this.expAccountTypesAndCurrencies.OwnerAccountTypes,
+				OwnerCurrencies = this.expAccountTypesAndCurrencies.OwnerCurrencies
 			};
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -794,8 +795,8 @@
 				Assert.That(model.OwnerId, Is.EqualTo(expServiceDto.OwnerId));
 				Assert.That(model.AccountTypeId, Is.EqualTo(expServiceDto.AccountTypeId));
 				this.CheckAccountTypesAndCurrencies(
-					model.AccountTypes, model.Currencies,
-					this.expectedAccountTypes, this.expectedCurrencies);
+					model.OwnerAccountTypes, model.OwnerCurrencies,
+					this.expAccountTypesAndCurrencies);
 			});
 		}
 
@@ -898,7 +899,7 @@
 			var result = (LocalRedirectResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
 
 			this.accountsUpdateServiceMock.Verify(x => x.EditAccountAsync(accId,
-				It.Is<AccountFormShortServiceModel>(m =>
+				It.Is<CreateEditAccountDTO>(m =>
 					m.CurrencyId == inputFormModel.CurrencyId
 					&& m.Balance == inputFormModel.Balance
 					&& m.OwnerId == inputFormModel.OwnerId
@@ -939,7 +940,7 @@
 			var result = (LocalRedirectResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
 
 			this.accountsUpdateServiceMock.Verify(x => x.EditAccountAsync(accId,
-				It.Is<AccountFormShortServiceModel>(m =>
+				It.Is<CreateEditAccountDTO>(m =>
 					m.CurrencyId == inputFormModel.CurrencyId
 					&& m.Balance == inputFormModel.Balance
 					&& m.OwnerId == inputFormModel.OwnerId
@@ -976,7 +977,7 @@
 			this.accountsInfoServiceMock.Setup(x => x.GetAccountOwnerIdAsync(accId)).ReturnsAsync(ownerId);
 
 			this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
-				It.Is<AccountFormShortServiceModel>(m =>
+				It.Is<CreateEditAccountDTO>(m =>
 					m.CurrencyId == inputFormModel.CurrencyId
 					&& m.Balance == inputFormModel.Balance
 					&& m.OwnerId == inputFormModel.OwnerId
@@ -1019,7 +1020,7 @@
 			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
-				It.Is<AccountFormShortServiceModel>(m =>
+				It.Is<CreateEditAccountDTO>(m =>
 					m.CurrencyId == inputFormModel.CurrencyId
 					&& m.Balance == inputFormModel.Balance
 					&& m.OwnerId == inputFormModel.OwnerId
@@ -1062,7 +1063,7 @@
 			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
-				It.Is<AccountFormShortServiceModel>(m =>
+				It.Is<CreateEditAccountDTO>(m =>
 					m.CurrencyId == inputFormModel.CurrencyId
 					&& m.Balance == inputFormModel.Balance
 					&& m.OwnerId == inputFormModel.OwnerId
@@ -1106,44 +1107,53 @@
 
 			if (inputModel != null)
 			{
+				AccountTypesAndCurrenciesDropdownDTO expModel = new()
+				{
+					OwnerAccountTypes = inputModel.OwnerAccountTypes,
+					OwnerCurrencies = inputModel.OwnerCurrencies
+				};
+
 				this.CheckAccountTypesAndCurrencies(
-					viewModel.AccountTypes, viewModel.Currencies,
-					inputModel.AccountTypes, inputModel.Currencies);
+					viewModel.OwnerAccountTypes, viewModel.OwnerCurrencies, expModel);
+			}
+			else
+			{
+				this.CheckAccountTypesAndCurrencies(
+					viewModel.OwnerAccountTypes, viewModel.OwnerCurrencies, this.expAccountTypesAndCurrencies);
 			}
 		}
 
 		private void CheckAccountTypesAndCurrencies(
-			IEnumerable<AccountTypeServiceModel> actualAccountTypes,
-			IEnumerable<CurrencyServiceModel> actualCurrencies,
-			IEnumerable<AccountTypeServiceModel> expAccountTypes,
-			IEnumerable<CurrencyServiceModel> expCurrencies)
+			IEnumerable<AccountTypeDropdownDTO> actualAccountTypes,
+			IEnumerable<CurrencyDropdownDTO> actualCurrencies,
+			AccountTypesAndCurrenciesDropdownDTO expected)
 		{
 			Assert.That(actualAccountTypes.Count(),
-				Is.EqualTo(expAccountTypes.Count()));
+				Is.EqualTo(expected.OwnerAccountTypes.Count()));
 
-			for (int i = 0; i < expAccountTypes.Count(); i++)
+			for (int i = 0; i < expected.OwnerAccountTypes.Count(); i++)
 			{
 				Assert.That(actualAccountTypes.ElementAt(i).Id,
-					Is.EqualTo(expAccountTypes.ElementAt(i).Id));
+					Is.EqualTo(expected.OwnerAccountTypes.ElementAt(i).Id));
 				Assert.That(actualAccountTypes.ElementAt(i).Name,
-					Is.EqualTo(expAccountTypes.ElementAt(i).Name));
+					Is.EqualTo(expected.OwnerAccountTypes.ElementAt(i).Name));
 			}
 
 			Assert.That(actualCurrencies.Count(),
-				Is.EqualTo(expCurrencies.Count()));
+				Is.EqualTo(expected.OwnerCurrencies.Count()));
 
-			for (int i = 0; i < expCurrencies.Count(); i++)
+			for (int i = 0; i < expected.OwnerCurrencies.Count(); i++)
 			{
 				Assert.That(actualCurrencies.ElementAt(i).Id,
-					Is.EqualTo(expCurrencies.ElementAt(i).Id));
+					Is.EqualTo(expected.OwnerCurrencies.ElementAt(i).Id));
 				Assert.That(actualCurrencies.ElementAt(i).Name,
-					Is.EqualTo(expCurrencies.ElementAt(i).Name));
+					Is.EqualTo(expected.OwnerCurrencies.ElementAt(i).Name));
 			}
 		}
 
 		private static void CheckAccountDetailsViewModel(
 			AccountDetailsViewModel? viewModel,
-			AccountDetailsServiceModel serviceModel,
+			AccountDetailsLongDTO serviceModel,
 			bool isUserAdmin, bool isPostRequest = false)
 		{
 			Assert.That(viewModel, Is.Not.Null);
@@ -1181,7 +1191,7 @@
 			Assert.That(viewModel.Pagination.ElementsPerPage, Is.EqualTo(PaginationConstants.TransactionsPerPage));
 			Assert.That(viewModel.Pagination.Page, Is.EqualTo(1));
 
-			Assert.That(viewModel.ApiTransactionsEndpoint, Is.EqualTo(HostConstants.ApiAccountTransactionsUrl));
+			Assert.That(viewModel.ApiTransactionsEndpoint, Is.EqualTo(UrlPathConstants.ApiAccountTransactionsPath));
 
 			Assert.That(viewModel.Routing.Area, isUserAdmin ? Is.EqualTo("Admin") : Is.EqualTo(string.Empty));
 			Assert.That(viewModel.Routing.Controller, Is.EqualTo("Accounts"));

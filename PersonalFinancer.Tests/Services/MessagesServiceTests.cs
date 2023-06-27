@@ -29,15 +29,15 @@
         public async Task GelAllAsync_ShouldReturnCorrectData()
         {
             //Arrange
-            var expect = new List<MessageOutputServiceModel>
+            var expect = new List<MessageOutputDTO>
             {
-                new MessageOutputServiceModel
+                new MessageOutputDTO
                 {
                     Id = "1",
                     CreatedOn = DateTime.UtcNow,
                     Subject = "Test Subject 1"
                 },
-                new MessageOutputServiceModel
+                new MessageOutputDTO
                 {
                     Id = "2",
                     CreatedOn = DateTime.UtcNow,
@@ -46,7 +46,7 @@
             };
 
             this.repoMock.Setup(x => x.FindAsync(
-                m => new MessageOutputServiceModel
+                m => new MessageOutputDTO
                 {
                     Id = m.Id,
                     CreatedOn = m.CreatedOn,
@@ -54,7 +54,7 @@
                 })).ReturnsAsync(expect);
 
             //Act
-            IEnumerable<MessageOutputServiceModel> actual = await this.service.GetAllAsync();
+            IEnumerable<MessageOutputDTO> actual = await this.service.GetAllAsync();
 
             //Assert
             Assert.Multiple(() =>
@@ -77,9 +77,9 @@
         public async Task GetUserMessagesAsync_ShouldReturnCorrectData()
         {
             //Arrange
-            var expect = new List<MessageOutputServiceModel>
+            var expect = new List<MessageOutputDTO>
             {
-                new MessageOutputServiceModel
+                new MessageOutputDTO
                 {
                     Id = "1",
                     CreatedOn = DateTime.UtcNow,
@@ -91,7 +91,7 @@
 
             this.repoMock.Setup(x => x.FindAsync(
                 m => m.AuthorId == userId,
-                m => new MessageOutputServiceModel
+                m => new MessageOutputDTO
                 {
                     Id = m.Id,
                     CreatedOn = m.CreatedOn,
@@ -99,7 +99,7 @@
                 })).ReturnsAsync(expect);
 
             //Act
-            IEnumerable<MessageOutputServiceModel> actual = await this.service.GetUserMessagesAsync(userId);
+            IEnumerable<MessageOutputDTO> actual = await this.service.GetUserMessagesAsync(userId);
 
             //Assert
             Assert.Multiple(() =>
@@ -122,16 +122,16 @@
         public async Task GetMessageAsync_ShouldReturnCorrectData_WhenUserIsAuthor()
         {
             //Arrange
-            var expect = new MessageDetailsServiceModel
+            var expect = new MessageDetailsDTO
             {
                 Id = "1",
                 AuthorName = "Test Author Name",
                 Content = "Test Content",
                 Subject = "Test Subject",
                 CreatedOn = DateTime.UtcNow,
-                Replies = new List<ReplyOutputServiceModel>
+                Replies = new List<ReplyOutputDTO>
                 {
-                    new ReplyOutputServiceModel
+                    new ReplyOutputDTO
                     {
                         AuthorName = "Test Reply Author",
                         CreatedOn = DateTime.UtcNow,
@@ -146,14 +146,14 @@
 
             this.repoMock.Setup(x => x.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
-                m => new MessageDetailsServiceModel
+                m => new MessageDetailsDTO
                 {
                     Id = m.Id,
                     AuthorName = m.AuthorName,
                     Content = m.Content,
                     Subject = m.Subject,
                     CreatedOn = m.CreatedOn,
-                    Replies = m.Replies.Select(r => new ReplyOutputServiceModel
+                    Replies = m.Replies.Select(r => new ReplyOutputDTO
                     {
                         AuthorName = r.AuthorName,
                         CreatedOn = r.CreatedOn,
@@ -162,7 +162,7 @@
                 })).ReturnsAsync(expect);
 
             //Act
-            MessageDetailsServiceModel actual = await this.service.GetMessageAsync(messageId, userId, isUserAdmin);
+            MessageDetailsDTO actual = await this.service.GetMessageAsync(messageId, userId, isUserAdmin);
 
             //Assert
             Assert.Multiple(() =>
@@ -190,16 +190,16 @@
         public async Task GetMessageAsync_ShouldReturnCorrectData_WhenUserIsAdmin()
         {
             //Arrange
-            var expect = new MessageDetailsServiceModel
+            var expect = new MessageDetailsDTO
             {
                 Id = "1",
                 AuthorName = "Test Author Name",
                 Content = "Test Content",
                 Subject = "Test Subject",
                 CreatedOn = DateTime.UtcNow,
-                Replies = new List<ReplyOutputServiceModel>
+                Replies = new List<ReplyOutputDTO>
                 {
-                    new ReplyOutputServiceModel
+                    new ReplyOutputDTO
                     {
                         AuthorName = "Test Reply Author",
                         CreatedOn = DateTime.UtcNow,
@@ -214,14 +214,14 @@
 
             this.repoMock.Setup(x => x.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
-                m => new MessageDetailsServiceModel
+                m => new MessageDetailsDTO
                 {
                     Id = m.Id,
                     AuthorName = m.AuthorName,
                     Content = m.Content,
                     Subject = m.Subject,
                     CreatedOn = m.CreatedOn,
-                    Replies = m.Replies.Select(r => new ReplyOutputServiceModel
+                    Replies = m.Replies.Select(r => new ReplyOutputDTO
                     {
                         AuthorName = r.AuthorName,
                         CreatedOn = r.CreatedOn,
@@ -230,7 +230,7 @@
                 })).ReturnsAsync(expect);
 
             //Act
-            MessageDetailsServiceModel actual = await this.service.GetMessageAsync(messageId, userId, isUserAdmin);
+            MessageDetailsDTO actual = await this.service.GetMessageAsync(messageId, userId, isUserAdmin);
 
             //Assert
             Assert.Multiple(() =>
@@ -264,14 +264,14 @@
 
             this.repoMock.Setup(x => x.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == notAuthorId),
-                m => new MessageDetailsServiceModel
+                m => new MessageDetailsDTO
                 {
                     Id = m.Id,
                     AuthorName = m.AuthorName,
                     Content = m.Content,
                     Subject = m.Subject,
                     CreatedOn = m.CreatedOn,
-                    Replies = m.Replies.Select(r => new ReplyOutputServiceModel
+                    Replies = m.Replies.Select(r => new ReplyOutputDTO
                     {
                         AuthorName = r.AuthorName,
                         CreatedOn = r.CreatedOn,
@@ -291,7 +291,7 @@
             //Arrange
             var fakeCollection = new List<Message>();
 
-            var inputModel = new MessageInputServiceModel
+            var inputModel = new MessageInputDTO
             {
                 AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",
@@ -329,7 +329,7 @@
         public async Task AddReplyAsync_ShouldAddNewReplyToMessage_WhenUserIsMessageAuthor()
         {
             //Arrange
-            var inputModel = new ReplyInputServiceModel
+            var inputModel = new ReplyInputDTO
             {
                 AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",
@@ -366,7 +366,7 @@
         public async Task AddReplyAsync_ShouldAddNewReplyToMessage_WhenUserIsAdmin()
         {
             //Arrange
-            var inputModel = new ReplyInputServiceModel
+            var inputModel = new ReplyInputDTO
             {
                 AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",
@@ -403,7 +403,7 @@
         public void AddReplyAsync_ShouldThrowException_WhenUserIsNotAuthorized()
         {
             //Arrange
-            var inputModel = new ReplyInputServiceModel
+            var inputModel = new ReplyInputDTO
             {
                 AuthorId = Guid.NewGuid().ToString(),
                 AuthorName = "Test Author Name",

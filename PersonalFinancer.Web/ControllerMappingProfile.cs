@@ -6,6 +6,7 @@
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Services.User.Models;
 	using PersonalFinancer.Web.Models.Account;
+	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.Message;
 	using PersonalFinancer.Web.Models.Transaction;
 
@@ -13,17 +14,26 @@
     {
         public ControllerMappingProfile()
         {
-			this.CreateMap<AccountDetailsServiceModel, AccountDetailsViewModel>();
-			this.CreateMap<AccountDetailsShortServiceModel, AccountDetailsViewModel>();
-			this.CreateMap<AccountFormViewModel, AccountFormShortServiceModel>().ReverseMap();
+			this.CreateMap<AccountDetailsLongDTO, AccountDetailsViewModel>();
+			this.CreateMap<AccountDetailsShortDTO, AccountDetailsViewModel>();
+			this.CreateMap<AccountFormViewModel, CreateEditAccountDTO>().ReverseMap();
+			this.CreateMap<AccountTypesAndCurrenciesDropdownDTO, AccountFormViewModel>();
 
-			this.CreateMap<TransactionsServiceModel, UserTransactionsViewModel>();
+			this.CreateMap<TransactionsDTO, UserTransactionsViewModel>();
+			this.CreateMap<TransactionsFilterDTO, UserTransactionsViewModel>();
 			this.CreateMap<UserTransactionsInputModel, UserTransactionsViewModel>();
-			this.CreateMap<UserAccountsAndCategoriesServiceModel, TransactionFormModel>();
+			this.CreateMap<TransactionsPageDTO, UserTransactionsViewModel>();
+			this.CreateMap<UserTransactionsInputModel, TransactionsFilterDTO>();
+
+			this.CreateMap<UserTransactionsApiInputModel, TransactionsFilterDTO>()
+				.ForMember(m => m.UserId, mf => mf.MapFrom(s => s.Id));
+
+			this.CreateMap<TransactionFormViewModel, CreateEditTransactionDTO>().ReverseMap();
+			this.CreateMap<AccountsAndCategoriesDropdownDTO, TransactionFormViewModel>();
 
 			this.CreateMap<ApplicationUser, AccountFormViewModel>();
 
-			this.CreateMap<MessageDetailsServiceModel, MessageDetailsViewModel>();
+			this.CreateMap<MessageDetailsDTO, MessageDetailsViewModel>();
         }
     }
 }

@@ -1,43 +1,54 @@
 ﻿namespace PersonalFinancer.Web.Models.Transaction
 {
-	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Services.Constants;
 	using static PersonalFinancer.Web.Constants;
 
 	public class UserTransactionsViewModel : UserTransactionsInputModel
-    {
-        public Guid Id { get; set; }
+	{
+		public UserTransactionsViewModel(int totalTransactionsCount, int page = 1)
+		{
+			this.Pagination = new PaginationModel(
+				PaginationConstants.TransactionsName,
+				PaginationConstants.TransactionsPerPage,
+				totalTransactionsCount,
+				page);
 
-        public IEnumerable<TransactionTableServiceModel> Transactions { get; set; }
-            = new List<TransactionTableServiceModel>();
+			this.ApiTransactionsEndpoint = UrlPathConstants.ApiTransactionsPath;
 
-        public IEnumerable<AccountServiceModel> Accounts { get; set; }
-            = new List<AccountServiceModel>();
+			this.Routing = new RoutingModel
+			{
+				Controller = "Transactions",
+				Action = "All"
+			};
 
-        public IEnumerable<AccountTypeServiceModel> AccountTypes { get; set; } 
-            = new List<AccountTypeServiceModel>();
+			this.Transactions = new List<TransactionTableDTO>();
+			this.UserAccounts = new List<AccountDropdownDTO>();
+			this.UserAccountTypes = new List<AccountTypeDropdownDTO>();
+			this.UserCurrencies = new List<CurrencyDropdownDTO>();
+			this.UserCategories = new List<CategoryDropdownDTO>();
+		}
 
-        public IEnumerable<CurrencyServiceModel> Currencies { get; set; } 
-            = new List<CurrencyServiceModel>();
+		public UserTransactionsViewModel() : this(0)
+		{ }
 
-        public IEnumerable<CategoryServiceModel> Categories { get; set; } 
-            = new List<CategoryServiceModel>();
+		public Guid UserId { get; set; }
 
-        public string ApiTransactionsEndpoint { get; set; }
-            = HostConstants.ApiTransactionsUrl;
+		public IEnumerable<TransactionTableDTO> Transactions { get; set; }
 
-        public RoutingModel Routing { get; set; } = new RoutingModel
-        {
-            Controller = "Transactions",
-            Action = "All"
-        };
+		public IEnumerable<AccountDropdownDTO> UserAccounts { get; set; }
 
-        public PaginationModel Pagination { get; set; } = new PaginationModel
-        {
-            ElementsPerPage = PaginationConstants.TransactionsPerPage,
-            ElementsName = PaginationConstants.TransactionsName
-        };
-    }
+		public IEnumerable<AccountTypeDropdownDTO> UserAccountTypes { get; set; }
+
+		public IEnumerable<CurrencyDropdownDTO> UserCurrencies { get; set; }
+
+		public IEnumerable<CategoryDropdownDTO> UserCategories { get; set; }
+
+		public string ApiTransactionsEndpoint { get; private set; }
+
+		public RoutingModel Routing { get; private set; }
+
+		public PaginationModel Pagination { get; private set; }
+	}
 }

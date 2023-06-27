@@ -3,12 +3,12 @@
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Services.User.Models;
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Home;
-	using static PersonalFinancer.Web.Constants.HostConstants;
+	using PersonalFinancer.Web.Models.Shared;
+	using static PersonalFinancer.Web.Constants.UrlPathConstants;
 
 	public class HomeController : Controller
     {
@@ -33,7 +33,7 @@
                 DateTime startDate = DateTime.Now.AddMonths(-1);
                 DateTime endDate = DateTime.Now;
 
-                UserDashboardServiceModel userDashboardData = await this.userService
+                UserDashboardDTO userDashboardData = await this.userService
                     .GetUserDashboardDataAsync(this.User.IdToGuid(), startDate, endDate);
 
                 var viewModel = new UserDashboardViewModel
@@ -63,12 +63,12 @@
 
             if (!this.ModelState.IsValid)
             {
-                viewModel.Accounts = await this.accountsInfoService.GetUserAccountsAsync(this.User.IdToGuid());
+                viewModel.Accounts = await this.accountsInfoService.GetUserAccountsCardsAsync(this.User.IdToGuid());
 
                 return this.View(viewModel);
             }
 
-            UserDashboardServiceModel userDashboardData =
+            UserDashboardDTO userDashboardData =
                 await this.userService.GetUserDashboardDataAsync(this.User.IdToGuid(), 
                     viewModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."), 
                     viewModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null."));
@@ -83,11 +83,11 @@
         public IActionResult Error(int statusCode)
         {
             if (statusCode == 400)
-                this.ViewBag.ImgUrl = BadRequestImgUrl;
+                this.ViewBag.ImgUrl = BadRequestImgPath;
             else if (statusCode == 404)
-                this.ViewBag.ImgUrl = NotFoundImgUrl;
+                this.ViewBag.ImgUrl = NotFoundImgPath;
             else
-                this.ViewBag.ImgUrl = InternalServerErrorImgUrl;
+                this.ViewBag.ImgUrl = InternalServerErrorImgPath;
 
             return this.View();
         }

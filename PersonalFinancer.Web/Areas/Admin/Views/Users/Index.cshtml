@@ -21,7 +21,7 @@
 				</tr>
 			</thead>
 			<tbody style="vertical-align: text-top;">
-				@foreach (UserServiceModel user in Model.Users)
+				@foreach (UserInfoDTO user in Model.Users)
 				{
 					<tr role="button" onclick="location.href='@Url.Action("Details", "Users", new { id = user.Id })'">
 						<th scope="row">@(row++).</th>

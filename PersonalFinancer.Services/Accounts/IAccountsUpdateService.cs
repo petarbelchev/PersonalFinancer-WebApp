@@ -9,14 +9,14 @@
 		/// </summary>
 		/// <returns>New Account Id.</returns>
 		/// <exception cref="ArgumentException"></exception>
-        Task<Guid> CreateAccountAsync(AccountFormShortServiceModel model);
+        Task<Guid> CreateAccountAsync(CreateEditAccountDTO model);
 
         /// <summary>
         /// Throws InvalidOperationException if Account does not exist.
         /// </summary>
         /// <returns>New transaction Id.</returns>
         /// <exception cref="InvalidOperationException"></exception>
-        Task<Guid> CreateTransactionAsync(TransactionFormModel model);
+        Task<Guid> CreateTransactionAsync(CreateEditTransactionDTO model);
 
         /// <summary>
         /// Throws InvalidOperationException when Account does not exist
@@ -40,13 +40,13 @@
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-        Task EditAccountAsync(Guid accountId, AccountFormShortServiceModel model);
+        Task EditAccountAsync(Guid accountId, CreateEditAccountDTO model);
 
 		/// <summary>
 		/// Throws InvalidOperationException when Transaction, Category or Account does not exist
 		/// or Transaction is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task EditTransactionAsync(Guid transactionId, TransactionFormModel model);
+		Task EditTransactionAsync(Guid transactionId, CreateEditTransactionDTO model);
 	}
 }

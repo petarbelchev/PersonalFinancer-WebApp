@@ -25,14 +25,14 @@
 		[Display(Name = "Account Type")]
 		public Guid? AccountTypeId { get; set; }
 
-		public IEnumerable<AccountTypeServiceModel> AccountTypes { get; set; }
-			= new List<AccountTypeServiceModel>();
+		public IEnumerable<AccountTypeDropdownDTO> OwnerAccountTypes { get; set; }
+			= new List<AccountTypeDropdownDTO>();
 
 		[Required(ErrorMessage = "Currency name is required.")]
 		[Display(Name = "Currency")]
 		public Guid? CurrencyId { get; set; }
 
-		public IEnumerable<CurrencyServiceModel> Currencies { get; set; }
-			= new List<CurrencyServiceModel>();
+		public IEnumerable<CurrencyDropdownDTO> OwnerCurrencies { get; set; }
+			= new List<CurrencyDropdownDTO>();
 	}
 }

@@ -2,20 +2,28 @@
 {
     public static class Constants
     {
-        public static class HostConstants
+        public static class UrlPathConstants
         {
-            public const string ApiCategoriesUrl = "/api/categories/";
-            public const string ApiTransactionsUrl = "/api/transactions/";
-            public const string ApiAccountTypesUrl = "/api/accounttypes/";
-            public const string ApiCurrencyUrl = "/api/currencies/";
-            public const string ApiAccountsUrl = "/api/accounts/";
-            public const string ApiAccountsCashFlowUrl = "/api/accounts/cashflow";
-            public const string ApiAccountTransactionsUrl = "/api/accounts/transactions";
-            public const string ApiUsersUrl = "/api/users/";
+            public const string ApiCategoriesPath = "/api/categories/";
+            public const string ApiTransactionsPath = "/api/transactions/";
+            public const string ApiAccountTypesPath = "/api/accounttypes/";
+            public const string ApiCurrencyPath = "/api/currencies/";
+            public const string ApiAccountsPath = "/api/accounts/";
+            public const string ApiAccountsCashFlowPath = "/api/accounts/cashflow";
+            public const string ApiAccountTransactionsPath = "/api/accounts/transactions";
+            public const string ApiUsersPath = "/api/users/";
 
-            public const string BadRequestImgUrl = "/images/400BadRequest.webp";
-            public const string InternalServerErrorImgUrl = "/images/500InternalServerError.webp";
-            public const string NotFoundImgUrl = "/images/404NotFound.webp";
+            public const string TransactionDetailsPath = "/Transactions/TransactionDetails/";
+            public const string AdminTransactionDetailsPath = "/Admin/Transactions/TransactionDetails/";
+
+            public const string AdminUserDetailsPath = "/Admin/Users/Details/";
+
+            public const string AccountDetailsPath = "/Accounts/AccountDetails/";
+            public const string AdminAccountDetailsPath = "/Admin/Accounts/AccountDetails/";
+
+			public const string BadRequestImgPath = "/images/400BadRequest.webp";
+            public const string InternalServerErrorImgPath = "/images/500InternalServerError.webp";
+            public const string NotFoundImgPath = "/images/404NotFound.webp";
         }
     }
 }

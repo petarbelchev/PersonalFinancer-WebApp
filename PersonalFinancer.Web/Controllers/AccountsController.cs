@@ -10,6 +10,7 @@
 	using PersonalFinancer.Web.Models.Account;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Data.Constants.RoleConstants;
+	using static PersonalFinancer.Web.Constants;
 
 	[Authorize]
 	public class AccountsController : Controller
@@ -56,18 +57,20 @@
 
 			try
 			{
-				AccountFormShortServiceModel accountServiceModel =
-					this.mapper.Map<AccountFormShortServiceModel>(inputModel);
+				CreateEditAccountDTO accountDTO =
+					this.mapper.Map<CreateEditAccountDTO>(inputModel);
 
-				Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(accountServiceModel);
+				Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(accountDTO);
 				this.TempData["successMsg"] = "You create a new account successfully!";
 
 				return this.RedirectToAction(nameof(AccountDetails), new { id = newAccountId });
 			}
 			catch (ArgumentException)
 			{
-				this.ModelState.AddModelError(nameof(inputModel.Name),
+				this.ModelState.AddModelError(
+					nameof(inputModel.Name),
 					"You already have Account with that name.");
+
 				await this.SetUserDropdownDataToViewModel(inputModel);
 
 				return this.View(inputModel);
@@ -108,7 +111,7 @@
 
 				if (!this.ModelState.IsValid)
 				{
-					AccountDetailsShortServiceModel accountDetails =
+					AccountDetailsShortDTO accountDetails =
 						await this.accountsInfoService.GetAccountShortDetailsAsync(accountId);
 
 					viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
@@ -173,7 +176,7 @@
 					this.TempData["successMsg"] = "You successfully delete user's account!";
 					Guid ownerId = await this.accountsInfoService.GetAccountOwnerIdAsync(accountId);
 
-					return this.LocalRedirect("/Admin/Users/Details/" + ownerId);
+					return this.LocalRedirect(UrlPathConstants.AdminUserDetailsPath + ownerId);
 				}
 				else
 				{
@@ -197,12 +200,11 @@
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 
-			AccountFormShortServiceModel accountData;
-			AccountFormViewModel viewModel;
+			CreateEditAccountDTO accountDTO;
 
 			try
 			{
-				accountData = await this.accountsInfoService
+				accountDTO = await this.accountsInfoService
 					.GetAccountFormDataAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (InvalidOperationException)
@@ -210,8 +212,8 @@
 				return this.BadRequest();
 			}
 
-			viewModel = this.mapper.Map<AccountFormViewModel>(accountData);
-			await this.SetUserDropdownDataToViewModel(viewModel);
+			AccountFormViewModel viewModel =
+				this.mapper.Map<AccountFormViewModel>(accountDTO);
 
 			return this.View(viewModel);
 		}
@@ -220,6 +222,9 @@
 		public async Task<IActionResult> EditAccount(
 			[Required] Guid id, AccountFormViewModel inputModel, string returnUrl)
 		{
+			if (!this.User.IsAdmin() && this.User.IdToGuid() != inputModel.OwnerId)
+				return this.BadRequest();
+
 			try
 			{
 				if (!this.ModelState.IsValid)
@@ -229,17 +234,10 @@
 					return this.View(inputModel);
 				}
 
-				Guid ownerId = this.User.IsAdmin()
-					? await this.accountsInfoService.GetAccountOwnerIdAsync(id)
-					: this.User.IdToGuid();
+				CreateEditAccountDTO accountDTO =
+					this.mapper.Map<CreateEditAccountDTO>(inputModel);
 
-				if (inputModel.OwnerId != ownerId)
-					return this.BadRequest();
-
-				AccountFormShortServiceModel serviceModel =
-					this.mapper.Map<AccountFormShortServiceModel>(inputModel);
-
-				await this.accountsUpdateService.EditAccountAsync(id, serviceModel);
+				await this.accountsUpdateService.EditAccountAsync(id, accountDTO);
 			}
 			catch (ArgumentException)
 			{
@@ -270,8 +268,8 @@
 		private async Task SetUserDropdownDataToViewModel(AccountFormViewModel viewModel)
 		{
 			Guid userId = viewModel.OwnerId ?? throw new InvalidOperationException();
-			viewModel.AccountTypes = await this.usersService.GetUserAccountTypesDropdownData(userId, withDeleted: false);
-			viewModel.Currencies = await this.usersService.GetUserCurrenciesDropdownData(userId, withDeleted: false);
+			var typesAndCurrenciesDTO = await this.usersService.GetUserAccountTypesAndCurrenciesDropdownDataAsync(userId);
+			this.mapper.Map(typesAndCurrenciesDTO, viewModel);
 		}
 
 		/// <summary>
@@ -282,20 +280,20 @@
 		private async Task<AccountDetailsViewModel> GetAccountDetailsViewModel(
 			Guid accountId, DateTime startDate, DateTime endDate, Guid userId, bool isUserAdmin)
 		{
-			AccountDetailsServiceModel accountDetails = await this.accountsInfoService
+			AccountDetailsLongDTO accountDetails = await this.accountsInfoService
 				.GetAccountDetailsAsync(accountId, startDate, endDate, userId, isUserAdmin);
 
-			AccountDetailsViewModel viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
-			viewModel.Pagination.TotalElements = accountDetails.TotalAccountTransactions;
+			var viewModel = new AccountDetailsViewModel(accountDetails.TotalAccountTransactions);
+			this.mapper.Map(accountDetails, viewModel);
 
 			if (isUserAdmin)
 			{
 				viewModel.Routing.Area = "Admin";
-				viewModel.Routing.ReturnUrl = "/Admin/Accounts/AccountDetails/" + accountId;
+				viewModel.Routing.ReturnUrl = UrlPathConstants.AdminAccountDetailsPath + accountId;
 			}
 			else
 			{
-				viewModel.Routing.ReturnUrl = "/Accounts/AccountDetails/" + accountId;
+				viewModel.Routing.ReturnUrl = UrlPathConstants.AccountDetailsPath + accountId;
 			}
 
 			return viewModel;

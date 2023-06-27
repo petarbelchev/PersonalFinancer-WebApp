@@ -1,5 +1,5 @@
 ﻿@using PersonalFinancer.Web.Models.Account;
-@model UsersAccountCardsViewModel
+@model UsersAccountsCardsViewModel
 @{
 	ViewData["Title"] = "All Accounts";
 }
@@ -13,7 +13,7 @@
 
 	@*Account Cards*@
 	<div class="row">
-		@foreach (var account in Model.Accounts)
+		@foreach (var account in Model.AccountsCards)
 		{
 			<div class="col-sm-6 col-lg-4 col-xl-3">
 				<div class="card align-items-center shadow mb-4">

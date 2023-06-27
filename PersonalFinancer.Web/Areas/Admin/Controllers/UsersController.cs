@@ -19,10 +19,8 @@
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            UsersServiceModel usersData = await this.userService.GetAllUsersAsync(page);
-            var viewModel = new UsersViewModel { Users = usersData.Users };
-            viewModel.Pagination.TotalElements = usersData.TotalUsersCount;
-            viewModel.Pagination.Page = page;
+            UsersInfoDTO usersData = await this.userService.GetUsersInfoAsync(page);
+            var viewModel = new UsersViewModel(usersData, page);
 
             return this.View(viewModel);
         }

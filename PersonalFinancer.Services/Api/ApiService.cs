@@ -5,29 +5,25 @@
 	using PersonalFinancer.Data.Models.Contracts;
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Api.Models;
-	using PersonalFinancer.Services.Cache;
 
-	public class ApiService<T> : IApiService<T> where T : BaseCacheableApiEntity, new()
+	public class ApiService<T> : IApiService<T> where T : BaseApiEntity, new()
     {
         private readonly IEfRepository<T> repo;
         private readonly IMapper mapper;
-        private readonly ICacheService<T> cache;
 
         public ApiService(
             IEfRepository<T> repo,
-            IMapper mapper,
-			ICacheService<T> cache)
+            IMapper mapper)
         {
             this.repo = repo;
             this.mapper = mapper;
-            this.cache = cache;
 		}
 
         /// <summary>
         /// Throws ArgumentException if you try to create Entity with existing name.
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
-        public async Task<ApiOutputServiceModel> CreateEntityAsync(string name, Guid ownerId)
+        public async Task<ApiEntityDTO> CreateEntityAsync(string name, Guid ownerId)
         {
             T? entity = await this.repo.All().FirstOrDefaultAsync(
                 x => x.Name == name && x.OwnerId == ownerId);
@@ -53,9 +49,7 @@
 
             await this.repo.SaveChangesAsync();
 
-            this.cache.RemoveValues(ownerId, notDeleted: true, deleted: true);
-
-            ApiOutputServiceModel outputModel = this.mapper.Map<ApiOutputServiceModel>(entity);
+            ApiEntityDTO outputModel = this.mapper.Map<ApiEntityDTO>(entity);
 
             return outputModel;
         }
@@ -80,8 +74,6 @@
             entity.IsDeleted = true;
 
             await this.repo.SaveChangesAsync();
-
-            this.cache.RemoveValues(userId, notDeleted: true, deleted: true);
         }
     }
 }

@@ -5,13 +5,13 @@
 
     public class UserDashboardViewModel : DateFilterModel
     {
-        public IEnumerable<TransactionTableServiceModel> Transactions { get; set; }
-            = new List<TransactionTableServiceModel>();
+        public IEnumerable<TransactionTableDTO> Transactions { get; set; }
+            = new List<TransactionTableDTO>();
 
-        public IEnumerable<AccountCardServiceModel> Accounts { get; set; }
-            = new List<AccountCardServiceModel>();
+        public IEnumerable<AccountCardDTO> Accounts { get; set; }
+            = new List<AccountCardDTO>();
 
-        public IEnumerable<CurrencyCashFlowServiceModel> CurrenciesCashFlow { get; set; }
-            = new List<CurrencyCashFlowServiceModel>();
+        public IEnumerable<CurrencyCashFlowWithExpensesByCategoriesDTO> CurrenciesCashFlow { get; set; }
+            = new List<CurrencyCashFlowWithExpensesByCategoriesDTO>();
     }
 }

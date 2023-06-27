@@ -15,8 +15,8 @@
 
 		public string Content { get; set; } = null!;
 
-		public IEnumerable<ReplyOutputServiceModel> Replies { get; set; }
-			= new List<ReplyOutputServiceModel>();
+		public IEnumerable<ReplyOutputDTO> Replies { get; set; }
+			= new List<ReplyOutputDTO>();
 
 		[Required(ErrorMessage = "Please enter a message.")]
 		[StringLength(1000, MinimumLength = 10,

@@ -10,7 +10,7 @@
 	using PersonalFinancer.Services.Shared.Models;
 	using static PersonalFinancer.Data.Constants;
 
-	public class MemoryCacheService<T> : ICacheService<T> where T : BaseCacheableApiEntity, new()
+	public class MemoryCacheService<T> : ICacheService<T> where T : BaseApiEntity, new()
 	{
 		private readonly IMemoryCache memoryCache;
 		private readonly IEfRepository<T> repo;
@@ -62,25 +62,25 @@
 		{
 			Type type = typeof(T);
 
-			if (type == typeof(AccountServiceModel) || type == typeof(Account))
+			if (type == typeof(AccountDropdownDTO) || type == typeof(Account))
 			{
 				return deletedCacheKey
 					? AccountConstants.DeletedAccountCacheKeyValue
 					: AccountConstants.AccountCacheKeyValue;
 			}
-			else if (type == typeof(CurrencyServiceModel) || type == typeof(Currency))
+			else if (type == typeof(CurrencyDropdownDTO) || type == typeof(Currency))
 			{
 				return deletedCacheKey
 					? CurrencyConstants.DeletedCurrencyCacheKeyValue
 					: CurrencyConstants.CurrencyCacheKeyValue;
 			}
-			else if (type == typeof(CategoryServiceModel) || type == typeof(Category))
+			else if (type == typeof(CategoryDropdownDTO) || type == typeof(Category))
 			{
 				return deletedCacheKey
 					? CategoryConstants.DeletedCategoryCacheKeyValue
 					: CategoryConstants.CategoryCacheKeyValue;
 			}
-			else if (type == typeof(AccountTypeServiceModel) || type == typeof(AccountType))
+			else if (type == typeof(AccountTypeDropdownDTO) || type == typeof(AccountType))
 			{
 				return deletedCacheKey
 					? AccountTypeConstants.DeletedAccTypeCacheKeyValue
@@ -95,12 +95,12 @@
 		private async Task<IEnumerable<TModel>> GetValue<TModel>(Guid userId, string cacheKey)
 			where TModel : BaseCacheableServiceModel, new()
 		{
-			bool isDeletedValue = cacheKey.StartsWith("deleted") ? true : false;
+			bool isDeletedValue = cacheKey.StartsWith("deleted");
 			string userCacheKey = cacheKey + userId;
 
 			if (!this.memoryCache.TryGetValue(userCacheKey, out IEnumerable<TModel> value))
 			{
-				IQueryable<BaseCacheableApiEntity> query = this.QueryProvider(userId, isDeletedValue);
+				IQueryable<BaseApiEntity> query = this.QueryProvider(userId, isDeletedValue);
 
 				value = await query
 					.OrderBy(x => x.Name)
@@ -113,7 +113,7 @@
 			return value;
 		}
 
-		private IQueryable<BaseCacheableApiEntity> QueryProvider(Guid userId, bool isDeletedValue)
+		private IQueryable<BaseApiEntity> QueryProvider(Guid userId, bool isDeletedValue)
 		{
 			if (typeof(T) == typeof(Category))
 			{
