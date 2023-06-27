@@ -412,22 +412,22 @@
 				Assert.That(transactionFormModel.Reference, Is.EqualTo(this.Transaction1_Expense_Account1_User1.Reference));
 				Assert.That(transactionFormModel.TransactionType, Is.EqualTo(this.Transaction1_Expense_Account1_User1.TransactionType));
 				Assert.That(transactionFormModel.CreatedOn, Is.EqualTo(this.Transaction1_Expense_Account1_User1.CreatedOn.ToLocalTime()));
-				Assert.That(transactionFormModel.UserAccounts.Count(), Is.EqualTo(orderedUserAccounts.Count));
-				Assert.That(transactionFormModel.UserCategories.Count(), Is.EqualTo(orderedUserCategories.Count));
+				Assert.That(transactionFormModel.OwnerAccounts.Count(), Is.EqualTo(orderedUserAccounts.Count));
+				Assert.That(transactionFormModel.OwnerCategories.Count(), Is.EqualTo(orderedUserCategories.Count));
 
 				for (int i = 0; i < orderedUserAccounts.Count; i++)
 				{
-					Assert.That(transactionFormModel.UserAccounts.ElementAt(i).Id,
+					Assert.That(transactionFormModel.OwnerAccounts.ElementAt(i).Id,
 						Is.EqualTo(orderedUserAccounts.ElementAt(i).Id));
-					Assert.That(transactionFormModel.UserAccounts.ElementAt(i).Name,
+					Assert.That(transactionFormModel.OwnerAccounts.ElementAt(i).Name,
 						Is.EqualTo(orderedUserAccounts.ElementAt(i).Name));
 				}
 
 				for (int i = 0; i < orderedUserCategories.Count; i++)
 				{
-					Assert.That(transactionFormModel.UserCategories.ElementAt(i).Id,
+					Assert.That(transactionFormModel.OwnerCategories.ElementAt(i).Id,
 						Is.EqualTo(orderedUserCategories.ElementAt(i).Id));
-					Assert.That(transactionFormModel.UserCategories.ElementAt(i).Name,
+					Assert.That(transactionFormModel.OwnerCategories.ElementAt(i).Name,
 						Is.EqualTo(orderedUserCategories.ElementAt(i).Name));
 				}
 			});

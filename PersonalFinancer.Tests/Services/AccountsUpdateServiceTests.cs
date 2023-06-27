@@ -1133,7 +1133,7 @@
                 Assert.That(transaction.AccountId, Is.EqualTo(dto.AccountId));
                 Assert.That(transaction.Amount, Is.EqualTo(dto.Amount));
                 Assert.That(transaction.OwnerId, Is.EqualTo(dto.OwnerId));
-                Assert.That(transaction.CreatedOn, Is.EqualTo(dto.CreatedOn));
+                Assert.That(transaction.CreatedOn, Is.EqualTo(dto.CreatedOn.ToUniversalTime()));
             });
         }
 

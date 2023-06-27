@@ -23,28 +23,28 @@
 			</div>
 			<select class="form-select formField card shadow" asp-for="@Model.AccountId">
 				<option value="">All Accounts</option>
-				@foreach (var account in Model.UserAccounts)
+				@foreach (var account in Model.OwnerAccounts)
 				{
 					<option value="@account.Id">@account.Name</option>
 				}
 			</select>
 			<select class="form-select formField card shadow" asp-for="@Model.AccountTypeId">
 				<option value="">All Account Types</option>
-				@foreach (var accountType in Model.UserAccountTypes)
+				@foreach (var accountType in Model.OwnerAccountTypes)
 				{
 					<option value="@accountType.Id">@accountType.Name</option>
 				}
 			</select>
 			<select class="form-select formField card shadow" asp-for="@Model.CurrencyId">
 				<option value="">All Currensies</option>
-				@foreach (var currency in Model.UserCurrencies)
+				@foreach (var currency in Model.OwnerCurrencies)
 				{
 					<option value="@currency.Id">@currency.Name</option>
 				}
 			</select>
 			<select class="form-select formField card shadow" asp-for="@Model.CategoryId">
 				<option value="">All Categories</option>
-				@foreach (var category in Model.UserCategories)
+				@foreach (var category in Model.OwnerCategories)
 				{
 					<option value="@category.Id">@category.Name</option>
 				}

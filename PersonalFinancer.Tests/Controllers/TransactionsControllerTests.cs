@@ -50,7 +50,7 @@
 
 		private static readonly AccountsAndCategoriesDropdownDTO expAccountsAndCategories = new()
 		{
-			UserAccounts = new AccountDropdownDTO[]
+			OwnerAccounts = new AccountDropdownDTO[]
 			{
 				new AccountDropdownDTO
 				{
@@ -63,7 +63,7 @@
 					Name = "Account name 2"
 				}
 			},
-			UserCategories = new CategoryDropdownDTO[]
+			OwnerCategories = new CategoryDropdownDTO[]
 			{
 				new CategoryDropdownDTO
 				{
@@ -112,10 +112,10 @@
 		{
 			Transactions = expTransactionsDto.Transactions,
 			TotalTransactionsCount = expTransactionsDto.TotalTransactionsCount,
-			UserAccounts = expAccountsAndCategories.UserAccounts,
-			UserAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
-			UserCategories = expAccountsAndCategories.UserCategories,
-			UserCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies
+			OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
+			OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
+			OwnerCategories = expAccountsAndCategories.OwnerCategories.ToList(),
+			OwnerCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies
 		};
 
 		[SetUp]
@@ -685,8 +685,8 @@
 				Reference = "Reference",
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				UserAccounts = expAccountsAndCategories.UserAccounts,
-				UserCategories = expAccountsAndCategories.UserCategories,
+				OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
+				OwnerCategories = expAccountsAndCategories.OwnerCategories,
 				TransactionType = TransactionType.Income
 			};
 
@@ -1015,26 +1015,26 @@
 
 		private void CheckUserAccountsAndCategories(TransactionFormViewModel model)
 		{
-			Assert.That(model.UserCategories.Count(),
-				Is.EqualTo(expAccountsAndCategories.UserCategories.Count()));
+			Assert.That(model.OwnerCategories.Count(),
+				Is.EqualTo(expAccountsAndCategories.OwnerCategories.Count()));
 
-			for (int i = 0; i < expAccountsAndCategories.UserCategories.Count(); i++)
+			for (int i = 0; i < expAccountsAndCategories.OwnerCategories.Count(); i++)
 			{
-				Assert.That(model.UserCategories.ElementAt(i).Id,
-					Is.EqualTo(expAccountsAndCategories.UserCategories.ElementAt(i).Id));
-				Assert.That(model.UserCategories.ElementAt(i).Name,
-					Is.EqualTo(expAccountsAndCategories.UserCategories.ElementAt(i).Name));
+				Assert.That(model.OwnerCategories.ElementAt(i).Id,
+					Is.EqualTo(expAccountsAndCategories.OwnerCategories.ElementAt(i).Id));
+				Assert.That(model.OwnerCategories.ElementAt(i).Name,
+					Is.EqualTo(expAccountsAndCategories.OwnerCategories.ElementAt(i).Name));
 			}
 
-			Assert.That(model.UserAccounts.Count(),
-				Is.EqualTo(expAccountsAndCategories.UserAccounts.Count()));
+			Assert.That(model.OwnerAccounts.Count(),
+				Is.EqualTo(expAccountsAndCategories.OwnerAccounts.Count()));
 
-			for (int i = 0; i < expAccountsAndCategories.UserAccounts.Count(); i++)
+			for (int i = 0; i < expAccountsAndCategories.OwnerAccounts.Count(); i++)
 			{
-				Assert.That(model.UserAccounts.ElementAt(i).Id,
-					Is.EqualTo(expAccountsAndCategories.UserAccounts.ElementAt(i).Id));
-				Assert.That(model.UserAccounts.ElementAt(i).Name,
-					Is.EqualTo(expAccountsAndCategories.UserAccounts.ElementAt(i).Name));
+				Assert.That(model.OwnerAccounts.ElementAt(i).Id,
+					Is.EqualTo(expAccountsAndCategories.OwnerAccounts.ElementAt(i).Id));
+				Assert.That(model.OwnerAccounts.ElementAt(i).Name,
+					Is.EqualTo(expAccountsAndCategories.OwnerAccounts.ElementAt(i).Name));
 			}
 		}
 

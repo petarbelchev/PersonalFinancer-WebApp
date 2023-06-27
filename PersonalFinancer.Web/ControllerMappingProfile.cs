@@ -18,6 +18,8 @@
 			this.CreateMap<AccountDetailsShortDTO, AccountDetailsViewModel>();
 			this.CreateMap<AccountFormViewModel, CreateEditAccountDTO>().ReverseMap();
 			this.CreateMap<AccountTypesAndCurrenciesDropdownDTO, AccountFormViewModel>();
+			this.CreateMap<AccountTransactionsInputModel, AccountTransactionsFilterDTO>()
+				.ForMember(dest => dest.AccountId, opt => opt.MapFrom(src => src.Id));
 
 			this.CreateMap<TransactionsDTO, UserTransactionsViewModel>();
 			this.CreateMap<TransactionsFilterDTO, UserTransactionsViewModel>();
@@ -26,7 +28,7 @@
 			this.CreateMap<UserTransactionsInputModel, TransactionsFilterDTO>();
 
 			this.CreateMap<UserTransactionsApiInputModel, TransactionsFilterDTO>()
-				.ForMember(m => m.UserId, mf => mf.MapFrom(s => s.Id));
+				.ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id));
 
 			this.CreateMap<TransactionFormViewModel, CreateEditTransactionDTO>().ReverseMap();
 			this.CreateMap<AccountsAndCategoriesDropdownDTO, TransactionFormViewModel>();

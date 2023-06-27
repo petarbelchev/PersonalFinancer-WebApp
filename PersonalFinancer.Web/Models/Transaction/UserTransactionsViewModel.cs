@@ -24,10 +24,10 @@
 			};
 
 			this.Transactions = new List<TransactionTableDTO>();
-			this.UserAccounts = new List<AccountDropdownDTO>();
-			this.UserAccountTypes = new List<AccountTypeDropdownDTO>();
-			this.UserCurrencies = new List<CurrencyDropdownDTO>();
-			this.UserCategories = new List<CategoryDropdownDTO>();
+			this.OwnerAccounts = new List<AccountDropdownDTO>();
+			this.OwnerAccountTypes = new List<AccountTypeDropdownDTO>();
+			this.OwnerCurrencies = new List<CurrencyDropdownDTO>();
+			this.OwnerCategories = new List<CategoryDropdownDTO>();
 		}
 
 		public UserTransactionsViewModel() : this(0)
@@ -37,13 +37,13 @@
 
 		public IEnumerable<TransactionTableDTO> Transactions { get; set; }
 
-		public IEnumerable<AccountDropdownDTO> UserAccounts { get; set; }
+		public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
 
-		public IEnumerable<AccountTypeDropdownDTO> UserAccountTypes { get; set; }
+		public IEnumerable<AccountTypeDropdownDTO> OwnerAccountTypes { get; set; }
 
-		public IEnumerable<CurrencyDropdownDTO> UserCurrencies { get; set; }
+		public IEnumerable<CurrencyDropdownDTO> OwnerCurrencies { get; set; }
 
-		public IEnumerable<CategoryDropdownDTO> UserCategories { get; set; }
+		public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; set; }
 
 		public string ApiTransactionsEndpoint { get; private set; }
 

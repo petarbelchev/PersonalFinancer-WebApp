@@ -20,14 +20,14 @@
         [Display(Name = "Category")]
         public Guid? CategoryId { get; set; }
 
-        public IEnumerable<CategoryDropdownDTO> UserCategories { get; set; }
+        public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; set; }
             = new List<CategoryDropdownDTO>();
 
         [Required(ErrorMessage = "Account is required.")]
         [Display(Name = "Account")]
         public Guid? AccountId { get; set; }
 
-        public IEnumerable<AccountDropdownDTO> UserAccounts { get; set; }
+        public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
             = new List<AccountDropdownDTO>();
 
         [Required(ErrorMessage = "Date is required.")]

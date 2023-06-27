@@ -14,7 +14,7 @@
 	using static PersonalFinancer.Services.Constants.PaginationConstants;
 
 	[TestFixture]
-    internal class UserServiceTests : ServicesUnitTestsBase
+    internal class UsersServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<ApplicationUser> usersRepo;
         private IEfRepository<Category> categoriesRepo;
@@ -35,7 +35,8 @@
             this.currenciesRepo = new EfRepository<Currency>(this.sqlDbContext);
             this.transactionsRepo = new EfRepository<Transaction>(this.sqlDbContext);
 
-            this.usersService = new UsersService(this.usersRepo, this.accountsRepo, this.transactionsRepo, this.mapper);
+            this.usersService = new UsersService(this.usersRepo, this.accountsRepo, 
+				this.transactionsRepo, this.categoriesRepo, this.mapper);
         }
 
 		[Test]
@@ -102,14 +103,14 @@
 
 				for (int i = 0; i < expectedAccounts.Length; i++)
 				{
-					Assert.That(actual.UserAccounts.ElementAt(i).Id,
+					Assert.That(actual.OwnerAccounts.ElementAt(i).Id,
 						Is.EqualTo(expectedAccounts[i].Id));
-					Assert.That(actual.UserAccounts.ElementAt(i).Name,
+					Assert.That(actual.OwnerAccounts.ElementAt(i).Name,
 						Is.EqualTo(expectedAccounts[i].Name));
 
-					Assert.That(actual.UserCategories.ElementAt(i).Id,
+					Assert.That(actual.OwnerCategories.ElementAt(i).Id,
 						Is.EqualTo(expectedCategories[i].Id));
-					Assert.That(actual.UserCategories.ElementAt(i).Name,
+					Assert.That(actual.OwnerCategories.ElementAt(i).Name,
 						Is.EqualTo(expectedCategories[i].Name));
 				}
 			});

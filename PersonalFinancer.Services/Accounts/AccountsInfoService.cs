@@ -36,40 +36,9 @@
 		public async Task<AccountDetailsLongDTO> GetAccountDetailsAsync(
 			Guid accountId, DateTime startDate, DateTime endDate, Guid userId, bool isUserAdmin)
 		{
-			DateTime startDateUtc = startDate.ToUniversalTime();
-			DateTime endDateUtc = endDate.ToUniversalTime();
-
 			return await this.accountsRepo.All()
 				.Where(a => a.Id == accountId && !a.IsDeleted && (isUserAdmin || a.OwnerId == userId))
-				.Select(a => new AccountDetailsLongDTO
-				{
-					Id = a.Id,
-					Name = a.Name,
-					OwnerId = a.OwnerId,
-					Balance = a.Balance,
-					CurrencyName = a.Currency.Name,
-					AccountTypeName = a.AccountType.Name,
-					StartDate = startDate,
-					EndDate = endDate,
-					TotalAccountTransactions = a.Transactions
-						.Count(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc),
-					Transactions = a.Transactions
-						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
-						.OrderByDescending(t => t.CreatedOn)
-						.Take(PaginationConstants.TransactionsPerPage)
-						.Select(t => new TransactionTableDTO
-						{
-							Id = t.Id,
-							Amount = t.Amount,
-							AccountCurrencyName = a.Currency.Name,
-							CreatedOn = t.CreatedOn.ToLocalTime(),
-							CategoryName = t.Category.Name + (t.Category.IsDeleted ?
-								" (Deleted)"
-								: string.Empty),
-							TransactionType = t.TransactionType.ToString(),
-							Reference = t.Reference
-						})
-				})
+				.ProjectTo<AccountDetailsLongDTO>(this.mapper.ConfigurationProvider, new { startDate, endDate })
 				.FirstAsync();
 		}
 
@@ -149,22 +118,11 @@
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<TransactionsDTO> GetAccountTransactionsAsync(AccountTransactionsFilterDTO dto)
 		{
-			DateTime startDateUtc = dto.StartDate.ToUniversalTime();
-			DateTime endDateUtc = dto.EndDate.ToUniversalTime();
-
 			return await this.accountsRepo.All()
 				.Where(a => a.Id == dto.AccountId && !a.IsDeleted)
-				.Select(a => new TransactionsDTO()
-				{
-					Transactions = a.Transactions
-						.Where(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
-						.OrderByDescending(t => t.CreatedOn)
-						.Skip(PaginationConstants.TransactionsPerPage * (dto.Page - 1))
-						.Take(PaginationConstants.TransactionsPerPage)
-						.Select(t => this.mapper.Map<TransactionTableDTO>(t)),
-					TotalTransactionsCount = a.Transactions
-						.Count(t => t.CreatedOn >= startDateUtc && t.CreatedOn <= endDateUtc)
-				})
+				.ProjectTo<TransactionsDTO>(
+					this.mapper.ConfigurationProvider, 
+					new { startDate = dto.StartDate, endDate = dto.EndDate, page = dto.Page })
 				.FirstAsync();
 		}
 
@@ -203,8 +161,6 @@
 			if (!isUserAdmin && transaction.OwnerId != ownerId)
 				throw new ArgumentException("The user is not transaction's owner.");
 
-			transaction.CreatedOn = transaction.CreatedOn.ToLocalTime();
-
 			return transaction;
 		}
 
@@ -218,24 +174,7 @@
 				.Where(t => t.Id == transactionId && 
 							(isUserAdmin || t.OwnerId == userId) && 
 							!t.IsInitialBalance)
-				.Select(t => new CreateEditTransactionDTO
-				{
-					OwnerId = t.OwnerId,
-					AccountId = t.AccountId,
-					CategoryId = t.CategoryId,
-					Amount = t.Amount,
-					CreatedOn = t.CreatedOn.ToLocalTime(),
-					TransactionType = t.TransactionType,
-					Reference = t.Reference,
-					UserAccounts = t.Owner.Accounts
-						.Where(a => !a.IsDeleted)
-						.OrderBy(a => a.Name)
-						.Select(a => this.mapper.Map<AccountDropdownDTO>(a)),
-					UserCategories = t.Owner.Categories
-						.Where(c => !c.IsDeleted)
-						.OrderBy(c => c.Name)
-						.Select(c => this.mapper.Map<CategoryDropdownDTO>(c))
-				})
+				.ProjectTo<CreateEditTransactionDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 

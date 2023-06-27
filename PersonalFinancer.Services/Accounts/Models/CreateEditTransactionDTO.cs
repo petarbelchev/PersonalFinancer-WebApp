@@ -21,8 +21,8 @@ namespace PersonalFinancer.Services.Accounts.Models
 
 		public TransactionType TransactionType { get; set; }
 		
-		public IEnumerable<AccountDropdownDTO> UserAccounts { get; set; }
+		public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
 
-		public IEnumerable<CategoryDropdownDTO> UserCategories { get; set; }
+		public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; set; }
 	}
 }

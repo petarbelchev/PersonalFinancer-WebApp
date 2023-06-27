@@ -17,17 +17,20 @@
 		private readonly IEfRepository<ApplicationUser> usersRepo;
 		private readonly IEfRepository<Account> accountsRepo;
 		private readonly IEfRepository<Transaction> transactionsRepo;
+		private readonly IEfRepository<Category> categoriesRepo;
 		private readonly IMapper mapper;
 
 		public UsersService(
 			IEfRepository<ApplicationUser> usersRepo,
 			IEfRepository<Account> accountsRepo,
 			IEfRepository<Transaction> transactionsRepo,
+			IEfRepository<Category> categoriesRepo,
 			IMapper mapper)
 		{
 			this.usersRepo = usersRepo;
 			this.accountsRepo = accountsRepo;
 			this.transactionsRepo = transactionsRepo;
+			this.categoriesRepo = categoriesRepo;
 			this.mapper = mapper;
 		}
 
@@ -77,20 +80,26 @@
 				.Where(u => u.Id == dto.UserId)
 				.Select(u => new TransactionsPageDTO
 				{
-					UserAccounts = u.Accounts
+					OwnerAccounts = u.Accounts
 						.Where(a => !a.IsDeleted || a.Transactions.Any())
 						.Select(a => this.mapper.Map<AccountDropdownDTO>(a)),
-					UserAccountTypes = u.AccountTypes
+					OwnerAccountTypes = u.AccountTypes
 						.Where(at => !at.IsDeleted || at.Accounts.Any(a => a.Transactions.Any()))
 						.Select(at => this.mapper.Map<AccountTypeDropdownDTO>(at)),
-					UserCurrencies = u.Currencies
+					OwnerCurrencies = u.Currencies
 						.Where(c => !c.IsDeleted || c.Accounts.Any(a => a.Transactions.Any()))
 						.Select(c => this.mapper.Map<CurrencyDropdownDTO>(c)),
-					UserCategories = u.Categories
-						.Where(c => !c.IsDeleted || c.Transactions.Any() || c.Id == Guid.Parse(InitialBalanceCategoryId))
+					OwnerCategories = u.Categories
+						.Where(c => !c.IsDeleted || c.Transactions.Any())
 						.Select(c => this.mapper.Map<CategoryDropdownDTO>(c))
+						.ToList()
 				})
 				.FirstAsync();
+
+			resultDTO.OwnerCategories.Add(await this.categoriesRepo.All()
+				.Where(c => c.Id == Guid.Parse(InitialBalanceCategoryId))
+				.ProjectTo<CategoryDropdownDTO>(this.mapper.ConfigurationProvider)
+				.FirstAsync());
 
 			TransactionsDTO transactionsDTO = await this.GetUserTransactionsAsync(dto);
 			this.mapper.Map(transactionsDTO, resultDTO);
@@ -102,17 +111,7 @@
 		{
 			return await this.usersRepo.All()
 				.Where(u => u.Id == userId)
-				.Select(u => new AccountsAndCategoriesDropdownDTO
-				{
-					UserAccounts = u.Accounts
-						.Where(a => !a.IsDeleted)
-						.OrderBy(a => a.Name)
-						.Select(a => this.mapper.Map<AccountDropdownDTO>(a)),
-					UserCategories = u.Categories
-						.Where(c => !c.IsDeleted)
-						.OrderBy(c => c.Name)
-						.Select(c => this.mapper.Map<CategoryDropdownDTO>(c))
-				})
+				.ProjectTo<AccountsAndCategoriesDropdownDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
@@ -120,17 +119,7 @@
 		{
 			return await this.usersRepo.All()
 				.Where(u => u.Id == userId)
-				.Select(u => new AccountTypesAndCurrenciesDropdownDTO
-				{
-					OwnerAccountTypes = u.AccountTypes
-						.Where(at => !at.IsDeleted)
-						.OrderBy(at => at.Name)
-						.Select(at => this.mapper.Map<AccountTypeDropdownDTO>(at)),
-					OwnerCurrencies = u.Currencies
-						.Where(c => !c.IsDeleted)
-						.OrderBy(c => c.Name)
-						.Select(c => this.mapper.Map<CurrencyDropdownDTO>(c))
-				})
+				.ProjectTo<AccountTypesAndCurrenciesDropdownDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
