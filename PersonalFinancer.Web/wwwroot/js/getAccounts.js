@@ -24,27 +24,29 @@ async function getAccounts(page) {
 function renderAccounts(model) {
     let innerHtml = '';
 
-    for (let account of model.accounts) {
+    for (let account of model.accountsCards) {
         let div = `
-                <div class="col-xl-3 col-lg-4 col-sm-6">
-				    <div class="card formField align-items-center">
-					    <div class="d-flex flex-row align-items-center mb-2">
-						    <div class="p-2">
-							    <img src="/icons/icons8-wallet-64.png">
-						    </div>
-						    <div class="card-body p-2 flex-grow-1">
-							    <h5 class="card-title">${account.name}</h5>
-							    <p class="card-text">${account.balance} ${account.currencyName}</p>
-						    </div>
-					    </div>
-					    <a href="${'Accounts/AccountDetails/' + account.id}" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Details</a>
-					    <a href="${'Users/Details/' + account.ownerId}" class="btn btn-secondary col-md-8" style="margin-bottom: 10px;">Owner</a>
-				    </div>
-			    </div>
-            `;
+			<div class="col-sm-6 col-lg-4 col-xl-3">
+				<div class="card align-items-center shadow mb-4">
+					<div class="d-flex align-items-center">
+						<div class="p-2">
+							<img src="/icons/icons8-wallet-64.png">
+						</div>
+						<div class="card-body p-2 flex-grow-1">
+							<h5 class="card-title">${account.name}</h5>
+							<p class="card-text">${account.balance.toFixed(2)} ${account.currencyName}</p>
+						</div>
+					</div>
+					<div class="d-flex">
+						<a href = '/Admin/Accounts/AccountDetails/${account.id}' class="btn btn-secondary" style="margin-bottom: 10px; margin-right: 10px;">Details</a>
+						<a href = '/Admin/Users/Details/${account.ownerId}' class="btn btn-secondary" style="margin-bottom: 10px;">Owner</a>
+					</div>
+				</div>
+			</div>
+        `;
 
         innerHtml += div;
     }
 
-    document.querySelector('section').innerHTML = innerHtml;
+    document.getElementById('accounts').innerHTML = innerHtml;
 }

@@ -1,15 +1,17 @@
 ﻿let paginations = document.getElementsByClassName('pagination');
+let currentPage = 1;
 
 for (let pagination of paginations) {
     pagination.addEventListener('click', async (e) => {
         if (e.target.tagName == 'A') {
-            await getTransactions(e.target.getAttribute('page'));
+            currentPage = e.target.getAttribute('page');
+            await getTransactions(currentPage);
         }
     })
 }
 
 async function getTransactions(page) {
-    let response = await fetch(params.url, {
+    let response = await fetch(params.allTransactionsEndpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -33,8 +35,7 @@ async function getTransactions(page) {
         renderTransactions(model);
         setUpPagination(page, model.pagination);
     } else {
-        let error = await response.json();
-        alert(`${error.status} ${error.title}`)
+        alert('Oops! Something was wrong!')
     }
 }
 
@@ -43,15 +44,16 @@ function renderTransactions(model) {
 
     for (let transaction of model.transactions) {
         let tr = `
-                <tr role="button" onclick=location.href='${model.transactionDetailsUrl + transaction.id}'>
+                <tr role="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" transactionId="${transaction.id}">
 					<td><img src="${transaction.transactionType == 'Income' ? '/icons/greenArrow.png' : '/icons/redArrow.png'}" style="max-width: 25px;"></td>
 				    <td>${new Date(transaction.createdOn).toLocaleString('en-US', {
-            year: "numeric",
-            month: "numeric",
-            day: "numeric",
-            hour: "numeric",
-            minute: "numeric"
-        })}</td>
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric"
+                    })}
+                    </td>
 				    <td>${transaction.categoryName}</td>
 				    <td>${transaction.amount.toFixed(2)} ${transaction.accountCurrencyName}</td>
 				    <td>${transaction.reference}</td>

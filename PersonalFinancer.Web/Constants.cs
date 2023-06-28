@@ -4,22 +4,21 @@
     {
         public static class UrlPathConstants
         {
-            public const string ApiCategoriesPath = "/api/categories/";
-            public const string ApiTransactionsPath = "/api/transactions/";
-            public const string ApiAccountTypesPath = "/api/accounttypes/";
-            public const string ApiCurrencyPath = "/api/currencies/";
-            public const string ApiAccountsPath = "/api/accounts/";
-            public const string ApiAccountsCashFlowPath = "/api/accounts/cashflow";
-            public const string ApiAccountTransactionsPath = "/api/accounts/transactions";
-            public const string ApiUsersPath = "/api/users/";
+            public const string ApiCategoriesEndpoint = "/api/categories/";
+            public const string ApiTransactionsEndpoint = "/api/transactions/";
+            public const string ApiAccountTypesEndpoint = "/api/accounttypes/";
+            public const string ApiCurrencyEndpoint = "/api/currencies/";
+            public const string ApiAccountsEndpoint = "/api/accounts/";
+            public const string ApiAccountsCashFlowEndpoint = "/api/accounts/cashflow";
+            public const string ApiAccountTransactionsEndpoint = "/api/accounts/transactions/";
+            public const string ApiUsersEndpoint = "/api/users/";
 
             public const string TransactionDetailsPath = "/Transactions/TransactionDetails/";
-            public const string AdminTransactionDetailsPath = "/Admin/Transactions/TransactionDetails/";
+            public const string TransactionEditPath = "/Transactions/EditTransaction/";
 
             public const string AdminUserDetailsPath = "/Admin/Users/Details/";
 
             public const string AccountDetailsPath = "/Accounts/AccountDetails/";
-            public const string AdminAccountDetailsPath = "/Admin/Accounts/AccountDetails/";
 
 			public const string BadRequestImgPath = "/images/400BadRequest.webp";
             public const string InternalServerErrorImgPath = "/images/500InternalServerError.webp";

@@ -31,7 +31,7 @@
                 RegisteredUsers = await this.usersService.UsersCountAsync(),
                 CreatedAccounts = await this.accountsInfoService.GetAccountsCountAsync(),
                 AdminFullName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
-                AccountsCashFlowEndpoint = UrlPathConstants.ApiAccountsCashFlowPath
+                AccountsCashFlowEndpoint = UrlPathConstants.ApiAccountsCashFlowEndpoint
             });
         }
     }

@@ -17,7 +17,7 @@
 				usersInfoDTO.TotalUsersCount,
 				page);
 
-			this.ApiUsersEndpoint = UrlPathConstants.ApiUsersPath;
+			this.ApiUsersEndpoint = UrlPathConstants.ApiUsersEndpoint;
 
 			this.Routing = new RoutingModel
 			{

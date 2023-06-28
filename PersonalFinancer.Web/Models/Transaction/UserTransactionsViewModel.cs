@@ -3,7 +3,6 @@
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Services.Constants;
-	using static PersonalFinancer.Web.Constants;
 
 	public class UserTransactionsViewModel : UserTransactionsInputModel
 	{
@@ -14,8 +13,6 @@
 				PaginationConstants.TransactionsPerPage,
 				totalTransactionsCount,
 				page);
-
-			this.ApiTransactionsEndpoint = UrlPathConstants.ApiTransactionsPath;
 
 			this.Routing = new RoutingModel
 			{
@@ -44,8 +41,6 @@
 		public IEnumerable<CurrencyDropdownDTO> OwnerCurrencies { get; set; }
 
 		public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; set; }
-
-		public string ApiTransactionsEndpoint { get; private set; }
 
 		public RoutingModel Routing { get; private set; }
 

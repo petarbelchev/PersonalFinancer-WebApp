@@ -24,7 +24,7 @@
 						<label asp-for="@Model.CreatedOn" class="form-label"></label>
 						<span asp-validation-for="@Model.CreatedOn" class="text-danger"></span>
 					</div>
-					<div class="newElemDiv dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField" ownerId="@Model.OwnerId" apiUrl="@ApiCategoriesPath">
+					<div class="newElemDiv dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField" ownerId="@Model.OwnerId" apiUrl="@ApiCategoriesEndpoint">
 						<label asp-for="@Model.CategoryId" class="form-label"></label>
 						<select asp-for="@Model.CategoryId" class="form-select">
 							@foreach (var category in @Model.OwnerCategories)

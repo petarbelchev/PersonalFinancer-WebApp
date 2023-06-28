@@ -12,7 +12,7 @@
         {
 			this.AccountsCards = usersCardsData.Accounts;
 
-			this.ApiAccountsEndpoint = UrlPathConstants.ApiAccountsPath;
+			this.ApiAccountsEndpoint = UrlPathConstants.ApiAccountsEndpoint;
 
 			this.Pagination = new PaginationModel(
 				PaginationConstants.AccountsName, 

@@ -1191,18 +1191,11 @@
 			Assert.That(viewModel.Pagination.ElementsPerPage, Is.EqualTo(PaginationConstants.TransactionsPerPage));
 			Assert.That(viewModel.Pagination.Page, Is.EqualTo(1));
 
-			Assert.That(viewModel.ApiTransactionsEndpoint, Is.EqualTo(UrlPathConstants.ApiAccountTransactionsPath));
-
-			Assert.That(viewModel.Routing.Area, isUserAdmin ? Is.EqualTo("Admin") : Is.EqualTo(string.Empty));
+			Assert.That(viewModel.Routing.Area, Is.EqualTo(string.Empty));
 			Assert.That(viewModel.Routing.Controller, Is.EqualTo("Accounts"));
 			Assert.That(viewModel.Routing.Action, Is.EqualTo("AccountDetails"));
 
-			string expectedReturnUrl = (isUserAdmin
-				? "/Admin/Accounts/AccountDetails/"
-				: "/Accounts/AccountDetails/")
-				+ serviceModel.Id;
-
-			Assert.That(viewModel.Routing.ReturnUrl, Is.EqualTo(expectedReturnUrl));
+			Assert.That(viewModel.Routing.ReturnUrl, Is.EqualTo(UrlPathConstants.AccountDetailsPath + serviceModel.Id));
 		}
 	}
 }

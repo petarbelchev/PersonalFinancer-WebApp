@@ -286,15 +286,7 @@
 			var viewModel = new AccountDetailsViewModel(accountDetails.TotalAccountTransactions);
 			this.mapper.Map(accountDetails, viewModel);
 
-			if (isUserAdmin)
-			{
-				viewModel.Routing.Area = "Admin";
-				viewModel.Routing.ReturnUrl = UrlPathConstants.AdminAccountDetailsPath + accountId;
-			}
-			else
-			{
-				viewModel.Routing.ReturnUrl = UrlPathConstants.AccountDetailsPath + accountId;
-			}
+			viewModel.Routing.ReturnUrl = UrlPathConstants.AccountDetailsPath + accountId;
 
 			return viewModel;
 		}

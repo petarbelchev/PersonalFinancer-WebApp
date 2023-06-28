@@ -8,8 +8,7 @@
     {
         public TransactionsViewModel(
             TransactionsDTO transactionsDTO,
-            int page,
-            string transactionDetailsUrl)
+            int page)
         {
             this.Transactions = transactionsDTO.Transactions;
             
@@ -18,14 +17,10 @@
                 PaginationConstants.TransactionsPerPage,
                 transactionsDTO.TotalTransactionsCount, 
                 page);
-
-            this.TransactionDetailsUrl = transactionDetailsUrl;
         }
 
         public IEnumerable<TransactionTableDTO> Transactions { get; private set; }
 
         public PaginationModel Pagination { get; private set; }
-
-        public string TransactionDetailsUrl { get; private set; }
     }
 }

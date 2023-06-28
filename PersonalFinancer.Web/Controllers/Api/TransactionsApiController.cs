@@ -3,13 +3,13 @@
 	using AutoMapper;
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Data.Constants.RoleConstants;
-	using static PersonalFinancer.Web.Constants;
 
 	[Authorize]
 	[Route("api/transactions")]
@@ -17,14 +17,65 @@
 	public class TransactionsApiController : ControllerBase
 	{
 		private readonly IUsersService usersService;
+		private readonly IAccountsInfoService accountsInfoService;
+		private readonly IAccountsUpdateService accountsUpdateService;
 		private readonly IMapper mapper;
 
 		public TransactionsApiController(
 			IUsersService usersService,
+			IAccountsInfoService accountsInfoService,
+			IAccountsUpdateService accountsUpdateService,
 			IMapper mapper)
 		{
 			this.usersService = usersService;
+			this.accountsInfoService = accountsInfoService;
+			this.accountsUpdateService = accountsUpdateService;
 			this.mapper = mapper;
+		}
+
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteTransaction(Guid id)
+		{
+			try
+			{
+				await this.accountsUpdateService.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
+			}
+			catch (ArgumentException)
+			{
+				return this.Unauthorized();
+			}
+			catch (InvalidOperationException)
+			{
+				return this.BadRequest();
+			}
+
+			string message = this.User.IsAdmin()
+				? "You successfully delete a user's transaction!"
+				: "Your transaction was successfully deleted!";
+
+			return this.Content(message);
+		}
+
+		[HttpGet("{id}")]
+		public async Task<IActionResult> GetTransactionDetails(Guid id)
+		{
+			TransactionDetailsDTO viewModel;
+
+			try
+			{
+				viewModel = await this.accountsInfoService
+					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
+			}
+			catch (ArgumentException)
+			{
+				return this.Unauthorized();
+			}
+			catch (InvalidOperationException)
+			{
+				return this.BadRequest();
+			}
+
+			return this.Ok(viewModel);
 		}
 
 		[Authorize(Roles = UserRoleName)]
@@ -53,8 +104,7 @@
 
 			var userTransactions = new TransactionsViewModel(
 				transactionsDTO,
-				inputModel.Page,
-				UrlPathConstants.TransactionDetailsPath);
+				inputModel.Page);
 
 			return this.Ok(userTransactions);
 		}

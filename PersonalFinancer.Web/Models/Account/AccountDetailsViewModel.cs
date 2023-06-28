@@ -1,11 +1,10 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
-    using PersonalFinancer.Services.Shared.Models;
-    using PersonalFinancer.Web.Models.Shared;
-    using static PersonalFinancer.Services.Constants;
-    using static PersonalFinancer.Web.Constants;
+	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Web.Models.Shared;
+	using static PersonalFinancer.Services.Constants;
 
-    public class AccountDetailsViewModel
+	public class AccountDetailsViewModel
 	{
         public AccountDetailsViewModel(int totalTransactionsCount)
         {
@@ -19,8 +18,6 @@
 				Controller = "Accounts",
 				Action = "AccountDetails"
 			};
-
-			this.ApiTransactionsEndpoint = UrlPathConstants.ApiAccountTransactionsPath;
 
 			this.Transactions = new List<TransactionTableDTO>();
 		}
@@ -46,8 +43,6 @@
 		public Guid OwnerId { get; set; }
 
 		public IEnumerable<TransactionTableDTO> Transactions { get; set; }
-
-		public string ApiTransactionsEndpoint { get; set; }
 
 		public RoutingModel Routing { get; private set; }
 

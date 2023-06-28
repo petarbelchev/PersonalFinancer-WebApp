@@ -121,8 +121,8 @@
 			{
 				await this.accountsUpdateService.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 
-				this.TempData["successMsg"] = this.User.IsAdmin() ?
-					"You successfully delete a user's transaction!"
+				this.TempData["successMsg"] = this.User.IsAdmin() 
+					? "You successfully delete a user's transaction!"
 					: "Your transaction was successfully deleted!";
 			}
 			catch (ArgumentException)

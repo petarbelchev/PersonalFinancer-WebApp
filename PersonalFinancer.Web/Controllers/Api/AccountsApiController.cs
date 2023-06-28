@@ -59,12 +59,8 @@
 			TransactionsDTO transactionsDTO =
 				await this.accountsInfoService.GetAccountTransactionsAsync(filterDTO);
 
-			string transactionDetailsUrlPath = this.User.IsAdmin()
-				? UrlPathConstants.AdminTransactionDetailsPath
-				: UrlPathConstants.TransactionDetailsPath;
-
 			var accountTransactions = new TransactionsViewModel(
-				transactionsDTO, inputModel.Page, transactionDetailsUrlPath);
+				transactionsDTO, inputModel.Page);
 
 			return this.Ok(accountTransactions);
 		}

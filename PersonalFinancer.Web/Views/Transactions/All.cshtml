@@ -1,5 +1,6 @@
 ﻿@using PersonalFinancer.Services.Shared.Models;
 @using PersonalFinancer.Web.Models.Transaction;
+@using static PersonalFinancer.Web.Constants;
 @model UserTransactionsViewModel
 @{
 	ViewData["Title"] = "Transactions";
@@ -7,8 +8,12 @@
 
 <h1 class="display-6 text-center">@ViewData["Title"]</h1>
 
+@*Modal*@
+<partial name="_TransactionDetailsModalPartial" />
+
 <div class="row justify-content-center">
 	<div class="col-12 col-sm-4 col-md-3">
+
 		@*Transactions Filter*@
 		<form method="post">
 			<div class="form-floating card shadow">
@@ -53,6 +58,7 @@
 				<button type="submit" class="btn btn-secondary form-control">Filter</button>
 			</div>
 		</form>
+
 	</div>
 	<div class="col-12 col-sm-8 col-md-9">
 		@if (Model.Transactions.Any())
@@ -91,9 +97,12 @@
 			accountTypeId: '@Model.AccountTypeId',
 			currencyId: '@Model.CurrencyId',
 			categoryId: '@Model.CategoryId',
-			url: '@Model.ApiTransactionsEndpoint',
+			allTransactionsEndpoint: '@UrlPathConstants.ApiTransactionsEndpoint',
+			transactionEndpoint: '@UrlPathConstants.ApiTransactionsEndpoint',
+			editTransactionPath: '@UrlPathConstants.TransactionEditPath'
 		}
 	</script>
 	<script src="~/js/getTransactions.js"></script>
 	<script src="~/js/setUpPagination.js"></script>
+	<script src="~/js/transactionDetails.js"></script>
 }
