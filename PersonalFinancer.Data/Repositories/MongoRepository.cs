@@ -7,7 +7,7 @@
     using PersonalFinancer.Data.Models.Contracts;
     using System.Linq.Expressions;
 
-    public class MongoRepository<T> : IMongoRepository<T> where T : MongoDocument
+    public class MongoRepository<T> : IMongoRepository<T> where T : BaseMongoDocument
     {
         private readonly IMongoCollection<T> collection;
 

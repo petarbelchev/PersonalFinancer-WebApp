@@ -53,15 +53,15 @@
         public async Task AllMessages_ShouldReturnViewModelWithUserMessages_WhenUserIsNotAdmin()
         {
             //Arrange
-            var serviceReturnDto = new MessageOutputServiceModel[]
+            var serviceReturnDto = new MessageOutputDTO[]
             {
-                new MessageOutputServiceModel
+                new MessageOutputDTO
                 {
                     Id = "1",
                     Subject = "Subject",
                     CreatedOn = DateTime.UtcNow.AddDays(-1)
                 },
-                new MessageOutputServiceModel
+                new MessageOutputDTO
                 {
                     Id = "2",
                     Subject = "Subject 2",
@@ -84,7 +84,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(viewResult, Is.Not.Null);
-                var model = viewResult.Model as MessageOutputServiceModel[];
+                var model = viewResult.Model as MessageOutputDTO[];
                 Assert.That(model, Is.Not.Null);
                 Assert.That(model, Has.Length.EqualTo(serviceReturnDto.Length));
 
@@ -104,15 +104,15 @@
         public async Task AllMessages_ShouldReturnViewModelWithUserMessages_WhenUserIsAdmin()
         {
             //Arrange
-            var serviceReturnDto = new MessageOutputServiceModel[]
+            var serviceReturnDto = new MessageOutputDTO[]
             {
-                new MessageOutputServiceModel
+                new MessageOutputDTO
                 {
                     Id = "1",
                     Subject = "Subject",
                     CreatedOn = DateTime.UtcNow.AddDays(-1)
                 },
-                new MessageOutputServiceModel
+                new MessageOutputDTO
                 {
                     Id = "2",
                     Subject = "Subject 2",
@@ -135,7 +135,7 @@
             Assert.Multiple(() =>
             {
                 Assert.That(viewResult, Is.Not.Null);
-                var model = viewResult.Model as MessageOutputServiceModel[];
+                var model = viewResult.Model as MessageOutputDTO[];
                 Assert.That(model, Is.Not.Null);
                 Assert.That(model, Has.Length.EqualTo(serviceReturnDto.Length));
 
@@ -216,7 +216,7 @@
                 .ReturnsAsync(fullName);
 
             this.messagesServiceMock.Setup(x =>
-                x.CreateAsync(It.Is<MessageInputServiceModel>(m =>
+                x.CreateAsync(It.Is<MessageInputDTO>(m =>
                     m.Subject == inputModel.Subject
                     && m.Content == inputModel.Content
                     && m.AuthorId == this.userId
@@ -308,15 +308,15 @@
             //Arrange
             string messageId = "id";
 
-            var serviceReturnDto = new MessageDetailsServiceModel
+            var serviceReturnDto = new MessageDetailsDTO
             {
                 Id = messageId,
                 AuthorName = "Account name",
                 Content = "Content",
                 CreatedOn = DateTime.UtcNow.AddDays(-1),
-                Replies = new ReplyOutputServiceModel[]
+                Replies = new ReplyOutputDTO[]
                 {
-                    new ReplyOutputServiceModel
+                    new ReplyOutputDTO
                     {
                         AuthorName = "Author name",
                         Content = "Content",
@@ -387,15 +387,15 @@
                 ReplyContent = ""
             };
 
-            var serviceReturnDto = new MessageDetailsServiceModel
+            var serviceReturnDto = new MessageDetailsDTO
             {
                 Id = inputModel.Id,
                 AuthorName = "Account name",
                 Content = "Content",
                 CreatedOn = DateTime.UtcNow.AddDays(-1),
-                Replies = new ReplyOutputServiceModel[]
+                Replies = new ReplyOutputDTO[]
                 {
-                    new ReplyOutputServiceModel
+                    new ReplyOutputDTO
                     {
                         AuthorName = "Author name",
                         Content = "Content",
@@ -497,7 +497,7 @@
             var result = (RedirectToActionResult)await this.controller.MessageDetails(inputModel);
 
             this.messagesServiceMock.Verify(x => x
-                .AddReplyAsync(It.Is<ReplyInputServiceModel>(m =>
+                .AddReplyAsync(It.Is<ReplyInputDTO>(m =>
                     m.MessageId == inputModel.Id
                     && m.IsAuthorAdmin == false
                     && m.Content == inputModel.ReplyContent
@@ -535,7 +535,7 @@
                 .ReturnsAsync(userName);
 
             this.messagesServiceMock.Setup(x => x
-                .AddReplyAsync(It.Is<ReplyInputServiceModel>(m =>
+                .AddReplyAsync(It.Is<ReplyInputDTO>(m =>
                     m.MessageId == inputModel.Id
                     && m.IsAuthorAdmin == false
                     && m.Content == inputModel.ReplyContent
@@ -571,7 +571,7 @@
                 .ReturnsAsync(userName);
 
             this.messagesServiceMock.Setup(x => x
-                .AddReplyAsync(It.Is<ReplyInputServiceModel>(m =>
+                .AddReplyAsync(It.Is<ReplyInputDTO>(m =>
                     m.MessageId == inputModel.Id
                     && m.IsAuthorAdmin == false
                     && m.Content == inputModel.ReplyContent

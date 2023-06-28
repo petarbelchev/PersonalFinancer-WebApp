@@ -20,10 +20,10 @@
             this.mapper = mapper;
         }
 
-        public async Task<IEnumerable<MessageOutputServiceModel>> GetAllAsync()
+        public async Task<IEnumerable<MessageOutputDTO>> GetAllAsync()
         {
             return await this.messagesRepo
-                .FindAsync(m => new MessageOutputServiceModel
+                .FindAsync(m => new MessageOutputDTO
                 {
                     Id = m.Id,
                     CreatedOn = m.CreatedOn,
@@ -31,11 +31,11 @@
                 });
         }
 
-        public async Task<IEnumerable<MessageOutputServiceModel>> GetUserMessagesAsync(string userId)
+        public async Task<IEnumerable<MessageOutputDTO>> GetUserMessagesAsync(string userId)
         {
             return await this.messagesRepo.FindAsync(
                 x => x.AuthorId == userId,
-                m => new MessageOutputServiceModel
+                m => new MessageOutputDTO
                 {
                     Id = m.Id,
                     CreatedOn = m.CreatedOn,
@@ -48,19 +48,19 @@
         /// or User is not owner or Administrator
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<MessageDetailsServiceModel> GetMessageAsync(
+        public async Task<MessageDetailsDTO> GetMessageAsync(
             string messageId, string userId, bool isUserAdmin)
         {
             return await this.messagesRepo.FindOneAsync(
                 x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
-                m => new MessageDetailsServiceModel
+                m => new MessageDetailsDTO
                 {
                     Id = m.Id,
                     AuthorName = m.AuthorName,
                     Content = m.Content,
                     Subject = m.Subject,
                     CreatedOn = m.CreatedOn,
-                    Replies = m.Replies.Select(r => new ReplyOutputServiceModel
+                    Replies = m.Replies.Select(r => new ReplyOutputDTO
                     {
                         AuthorName = r.AuthorName,
                         CreatedOn = r.CreatedOn,
@@ -69,7 +69,7 @@
                 });
         }
 
-        public async Task<string> CreateAsync(MessageInputServiceModel model)
+        public async Task<string> CreateAsync(MessageInputDTO model)
         {
             Message newMessage = this.mapper.Map<Message>(model);
             newMessage.CreatedOn = DateTime.UtcNow;
@@ -85,7 +85,7 @@
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
-        public async Task<UpdateResult> AddReplyAsync(ReplyInputServiceModel model)
+        public async Task<UpdateResult> AddReplyAsync(ReplyInputDTO model)
         {
             if (!model.IsAuthorAdmin && !await this.messagesRepo.IsUserDocumentAuthor(model.MessageId, model.AuthorId))
                 throw new ArgumentException("The User is not Authorized to make replies.");

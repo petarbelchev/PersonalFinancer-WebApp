@@ -1,13 +1,32 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
-    using PersonalFinancer.Services.Shared.Models;
-    using PersonalFinancer.Web.Models.Shared;
-    using static PersonalFinancer.Services.Constants;
-    using static PersonalFinancer.Web.Constants;
+	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Web.Models.Shared;
+	using static PersonalFinancer.Services.Constants;
 
-    public class AccountDetailsViewModel
+	public class AccountDetailsViewModel
 	{
-		public Guid Id { get; set; }
+        public AccountDetailsViewModel(int totalTransactionsCount)
+        {
+			this.Pagination = new PaginationModel(
+				PaginationConstants.TransactionsName,
+				PaginationConstants.TransactionsPerPage,
+				totalTransactionsCount);
+
+			this.Routing = new RoutingModel
+			{
+				Controller = "Accounts",
+				Action = "AccountDetails"
+			};
+
+			this.Transactions = new List<TransactionTableDTO>();
+		}
+
+        public AccountDetailsViewModel() : this(0)
+        {
+		}
+
+        public Guid Id { get; set; }
 
 		public string Name { get; set; } = null!;
 
@@ -23,22 +42,10 @@
 
 		public Guid OwnerId { get; set; }
 
-		public IEnumerable<TransactionTableServiceModel> Transactions { get; set; }
-			= new List<TransactionTableServiceModel>();
+		public IEnumerable<TransactionTableDTO> Transactions { get; set; }
 
-		public string ApiTransactionsEndpoint { get; set; }
-			= HostConstants.ApiAccountTransactionsUrl;
+		public RoutingModel Routing { get; private set; }
 
-		public RoutingModel Routing { get; set; } = new RoutingModel
-		{
-			Controller = "Accounts",
-			Action = "AccountDetails"
-		};
-
-		public PaginationModel Pagination { get; set; } = new PaginationModel
-		{
-			ElementsPerPage = PaginationConstants.TransactionsPerPage,
-			ElementsName = PaginationConstants.TransactionsName
-		};
+		public PaginationModel Pagination { get; private set; }
 	}
 }

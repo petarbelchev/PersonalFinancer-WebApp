@@ -7,7 +7,7 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>@ViewData["Title"] - Personal Financer</title>
-	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 	<link rel="stylesheet" href="~/PersonalFinancer.Web.styles.css" asp-append-version="true" />
 </head>
@@ -31,7 +31,7 @@
 					<ul class="navbar-nav flex-grow-1">
 						@if ((User?.Identity?.IsAuthenticated ?? false) && !User.IsAdmin())
 						{
-							<a class="nav-link text-light" asp-area="" asp-controller="Transactions" asp-action="All">All Transactions</a>
+							<a class="nav-link text-light" asp-area="" asp-controller="Transactions" asp-action="All">Transactions</a>
 							<li class="nav-item dropdown">
 								<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 									Create
@@ -82,7 +82,7 @@
 	</footer>
 
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
-	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 	@await RenderSectionAsync("Scripts", required: false)
 

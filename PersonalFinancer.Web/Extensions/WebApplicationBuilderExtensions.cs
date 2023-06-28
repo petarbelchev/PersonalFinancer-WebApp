@@ -9,8 +9,8 @@
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.ApiService;
-	using PersonalFinancer.Services.MemoryCacheService;
+	using PersonalFinancer.Services.Api;
+	using PersonalFinancer.Services.Cache;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Web.EmailSender;
@@ -75,10 +75,10 @@
 				.AddSingleton<IMongoDbContext, MessagesDbContext>()
 
 				.AddSingleton<IMemoryCache, MemoryCache>()
-				.AddScoped<IMemoryCacheService<Category>, MemoryCacheService<Category>>()
-				.AddScoped<IMemoryCacheService<Currency>, MemoryCacheService<Currency>>()
-				.AddScoped<IMemoryCacheService<AccountType>, MemoryCacheService<AccountType>>()
-				.AddScoped<IMemoryCacheService<Account>, MemoryCacheService<Account>>()
+				.AddScoped<ICacheService<Category>, MemoryCacheService<Category>>()
+				.AddScoped<ICacheService<Currency>, MemoryCacheService<Currency>>()
+				.AddScoped<ICacheService<AccountType>, MemoryCacheService<AccountType>>()
+				.AddScoped<ICacheService<Account>, MemoryCacheService<Account>>()
 
 				.AddTransient<IEmailSender, EmailSender>();
 

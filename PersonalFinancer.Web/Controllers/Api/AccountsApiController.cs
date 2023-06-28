@@ -1,5 +1,6 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
+	using AutoMapper;
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Services.Accounts;
@@ -8,6 +9,7 @@
 	using PersonalFinancer.Web.Models.Account;
 	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Data.Constants;
+	using static PersonalFinancer.Web.Constants;
 
 	[Authorize]
 	[Route("api/accounts")]
@@ -15,23 +17,23 @@
 	public class AccountsApiController : ControllerBase
 	{
 		private readonly IAccountsInfoService accountsInfoService;
+		private readonly IMapper mapper;
 
-		public AccountsApiController(IAccountsInfoService accountsInfoService)
-			=> this.accountsInfoService = accountsInfoService;
+		public AccountsApiController(
+			IAccountsInfoService accountsInfoService,
+			IMapper mapper)
+		{
+			this.accountsInfoService = accountsInfoService;
+			this.mapper = mapper;
+		}
 
 		[Authorize(Roles = RoleConstants.AdminRoleName)]
 		[HttpGet("{page}")]
 		public async Task<IActionResult> GetAccounts(int page)
 		{
-			UsersAccountsCardsServiceModel usersCardsData =
+			AccountsCardsDTO usersCardsData =
 				await this.accountsInfoService.GetAccountsCardsDataAsync(page);
-
-			var usersCardsModel = new UsersAccountCardsViewModel
-			{
-				Accounts = usersCardsData.Accounts
-			};
-
-			usersCardsModel.Pagination.TotalElements = usersCardsData.TotalUsersAccountsCount;
+			var usersCardsModel = new UsersAccountsCardsViewModel(usersCardsData);
 
 			return this.Ok(usersCardsModel);
 		}
@@ -44,28 +46,23 @@
 		[HttpPost("transactions")]
 		public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
 		{
+			// TODO: Try to use default api validation.
+
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 
 			if (!this.User.IsAdmin() && inputModel.OwnerId != this.User.IdToGuid())
 				return this.Unauthorized();
 
-			TransactionsServiceModel accountTransactions =
-				await this.accountsInfoService.GetAccountTransactionsAsync(
-					inputModel.Id ?? throw new InvalidOperationException(),
-					inputModel.StartDate, inputModel.EndDate, inputModel.Page);
+			var filterDTO = this.mapper.Map<AccountTransactionsFilterDTO>(inputModel);
 
-			var viewModel = new TransactionsViewModel
-			{
-				Transactions = accountTransactions.Transactions
-			};
+			TransactionsDTO transactionsDTO =
+				await this.accountsInfoService.GetAccountTransactionsAsync(filterDTO);
 
-			viewModel.Pagination.TotalElements = accountTransactions.TotalTransactionsCount;
-			viewModel.Pagination.Page = inputModel.Page;
-			viewModel.TransactionDetailsUrl =
-				$"{(this.User.IsAdmin() ? "/Admin" : string.Empty)}/Transactions/TransactionDetails/";
+			var accountTransactions = new TransactionsViewModel(
+				transactionsDTO, inputModel.Page);
 
-			return this.Ok(viewModel);
+			return this.Ok(accountTransactions);
 		}
 	}
 }

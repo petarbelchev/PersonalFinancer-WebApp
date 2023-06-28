@@ -1,15 +1,30 @@
-﻿let paginations = document.getElementsByClassName('pagination');
+﻿const tbody = document.querySelector('tbody');
+let paginations = document.getElementsByClassName('pagination');
+let currentPage = 1;
 
 for (let pagination of paginations) {
     pagination.addEventListener('click', async (e) => {
         if (e.target.tagName == 'A') {
-            await getTransactions(e.target.getAttribute('page'));
+            currentPage = e.target.getAttribute('page');
+            await getTransactions(currentPage);
         }
     })
 }
 
 async function getTransactions(page) {
-    let response = await fetch(params.url, {
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="5">
+	            <div class="d-flex justify-content-center">
+		            <div class="spinner-border" role="status">
+			            <span class="visually-hidden">Loading...</span>
+		            </div>
+	            </div>
+            </td>
+        </tr>
+	`;
+
+    let response = await fetch(params.allTransactionsEndpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -20,6 +35,10 @@ async function getTransactions(page) {
             page: page,
             startDate: params.startDate,
             endDate: params.endDate,
+            accountId: params.accountId == '' ? null : params.accountId,
+            accountTypeId: params.accountTypeId == '' ? null : params.accountTypeId,
+            currencyId: params.currencyId == '' ? null : params.currencyId,
+            categoryId: params.categoryId == '' ? null : params.categoryId,
             ownerId: params.ownerId
         })
     });
@@ -29,8 +48,7 @@ async function getTransactions(page) {
         renderTransactions(model);
         setUpPagination(page, model.pagination);
     } else {
-        let error = await response.json();
-        alert(`${error.status} ${error.title}`)
+        alert('Oops! Something was wrong!')
     }
 }
 
@@ -39,15 +57,16 @@ function renderTransactions(model) {
 
     for (let transaction of model.transactions) {
         let tr = `
-                <tr role="button" onclick=location.href='${model.transactionDetailsUrl + transaction.id}'>
+                <tr role="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" transactionId="${transaction.id}">
 					<td><img src="${transaction.transactionType == 'Income' ? '/icons/greenArrow.png' : '/icons/redArrow.png'}" style="max-width: 25px;"></td>
 				    <td>${new Date(transaction.createdOn).toLocaleString('en-US', {
-            year: "numeric",
-            month: "numeric",
-            day: "numeric",
-            hour: "numeric",
-            minute: "numeric"
-        })}</td>
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric"
+                    })}
+                    </td>
 				    <td>${transaction.categoryName}</td>
 				    <td>${transaction.amount.toFixed(2)} ${transaction.accountCurrencyName}</td>
 				    <td>${transaction.reference}</td>
@@ -57,5 +76,5 @@ function renderTransactions(model) {
         innerHtml += tr;
     }
 
-    document.querySelector('tbody').innerHTML = innerHtml;
+    tbody.innerHTML = innerHtml;
 }

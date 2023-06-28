@@ -1,7 +1,6 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
 	using AutoMapper;
-	using Microsoft.Extensions.Caching.Memory;
 	using NUnit.Framework;
 	using PersonalFinancer.Data;
 	using PersonalFinancer.Data.Models;
@@ -14,56 +13,56 @@
 	{
 		protected PersonalFinancerDbContext sqlDbContext;
 		protected IMapper mapper;
-		protected IMemoryCache memoryCache;
 
-		[OneTimeSetUp]
+		[SetUp]
 		protected async Task SetUpBase()
 		{
 			this.sqlDbContext = DatabaseMock.Instance;
 			this.mapper = ServicesMapperMock.Instance;
-			this.memoryCache = MemoryCacheMock.Instance;
 
 			await this.SeedDatabase();
 		}
 
-		[OneTimeTearDown]
+		[TearDown]
 		protected async Task TearDownBase() => await this.sqlDbContext.DisposeAsync();
 
 		protected ApplicationUser User1 { get; private set; } = null!;
 		protected ApplicationUser User2 { get; private set; } = null!;
 
-		protected Account Account1User1 { get; private set; } = null!;
-		protected Account Account2User1 { get; private set; } = null!;
-		protected Account Account3User1Deleted { get; private set; } = null!;
+		protected Account Account1_User1_WithTransactions { get; private set; } = null!;
+		protected Account Account2_User1_WithoutTransactions { get; private set; } = null!;
+		protected Account Account3_User1_Deleted_WithTransactions { get; private set; } = null!;
+		protected Account Account4_User1_Deleted_WithoutTransactions { get; private set; } = null!;
 
-		protected AccountType AccType1User1 { get; private set; } = null!;
-		protected AccountType AccType2User1 { get; private set; } = null!;
-		protected AccountType AccType3User1 { get; private set; } = null!;
+		protected AccountType AccType1_User1_WithAcc { get; private set; } = null!;
+		protected AccountType AccType2_User1_WithoutAcc { get; private set; } = null!;
+		protected AccountType AccType3_User1_Deleted_WithAcc { get; private set; } = null!;
+		protected AccountType AccType4_User1_Deleted_WithoutAcc { get; private set; } = null!;
 
-		protected Category CatInitialBalance { get; private set; } = null!;
-		protected Category Cat2User1 { get; private set; } = null!;
-		protected Category Cat3User1 { get; private set; } = null!;
-		protected Category Cat4User1 { get; private set; } = null!;
+		protected Category Category_InitialBalance { get; private set; } = null!;
+		protected Category Category1_User1_WithTransactions { get; private set; } = null!;
+		protected Category Category2_User1_WithoutTransactions { get; private set; } = null!;
+		protected Category Category3_User1_Deleted_WithTransactions { get; private set; } = null!;
+		protected Category Category4_User1_Deleted_WithoutTransactions { get; private set; } = null!;
 
-		protected Currency Curr1User1 { get; private set; } = null!;
-		protected Currency Curr2User1 { get; private set; } = null!;
-		protected Currency Curr3User1 { get; private set; } = null!;
+		protected Currency Currency1_User1_WithAcc { get; private set; } = null!;
+		protected Currency Currency2_User1_WithoutAcc { get; private set; } = null!;
+		protected Currency Currency3_User1_Deleted_WithAcc { get; private set; } = null!;
+		protected Currency Currency4_User1_Deleted_WithoutAcc { get; private set; } = null!;
 
-		protected Transaction InitialTransaction1User1 { get; private set; } = null!;
-		protected Transaction Transaction2User1 { get; private set; } = null!;
-		protected Transaction Transaction3User1 { get; private set; } = null!;
-		protected Transaction Transaction4User1 { get; private set; } = null!;
-		protected Transaction Transaction5User1 { get; private set; } = null!;
-		protected Transaction Transaction6User1 { get; private set; } = null!;
+		protected Transaction InitialTransaction_Income_Account1_User1 { get; private set; } = null!;
+		protected Transaction Transaction1_Expense_Account1_User1 { get; private set; } = null!;
+		protected Transaction Transaction2_Expense_Account1_User1 { get; private set; } = null!;
+		protected Transaction Transaction3_Income_Account3_User1 { get; private set; } = null!;
+		protected Transaction Transaction4_Income_Account3_User1 { get; private set; } = null!;
+		protected Transaction Transaction5_Expense_Account3_User1 { get; private set; } = null!;
 
-		private async Task SeedDatabase()
+		protected async Task SeedDatabase()
 		{
 			//Users
-			var user1Id = Guid.NewGuid();
-			var user2Id = Guid.NewGuid();
 			this.User1 = new ApplicationUser
 			{
-				Id = user1Id,
+				Id = Guid.NewGuid(),
 				UserName = "petar",
 				NormalizedUserName = "PETAR",
 				FirstName = "Petar",
@@ -73,7 +72,7 @@
 			};
 			this.User2 = new ApplicationUser
 			{
-				Id = user2Id,
+				Id = Guid.NewGuid(),
 				UserName = "todor",
 				NormalizedUserName = "TODOR",
 				FirstName = "Todor",
@@ -81,132 +80,173 @@
 				Email = "todor@mail.com",
 				NormalizedEmail = "TODOR@MAIL.COM"
 			};
-
-			await this.sqlDbContext.Users.AddRangeAsync(this.User1, this.User2);
+			await this.sqlDbContext.Users.AddRangeAsync(
+				this.User1,
+				this.User2);
 
 			// Account Types
-			var accType1Id = Guid.NewGuid();
-			var accType2Id = Guid.NewGuid();
-			var accType3Id = Guid.NewGuid();
-			this.AccType1User1 = new AccountType
+			this.AccType1_User1_WithAcc = new AccountType
 			{
-				Id = accType1Id,
+				Id = Guid.NewGuid(),
 				Name = "Cash",
-				OwnerId = user1Id
+				OwnerId = this.User1.Id,
+				IsDeleted = false
 			};
-			this.AccType2User1 = new AccountType
+			this.AccType2_User1_WithoutAcc = new AccountType
 			{
-				Id = accType2Id,
+				Id = Guid.NewGuid(),
 				Name = "Bank",
-				OwnerId = user1Id
+				OwnerId = this.User1.Id,
+				IsDeleted = false
 			};
-			this.AccType3User1 = new AccountType
+			this.AccType3_User1_Deleted_WithAcc = new AccountType
 			{
-				Id = accType3Id,
-				Name = "Bank",
-				OwnerId = user1Id
-			};
-
-			await this.sqlDbContext.AccountTypes.AddRangeAsync(this.AccType1User1, this.AccType2User1, this.AccType3User1);
-
-			// Currencies
-			var curr1Id = Guid.NewGuid();
-			var EurCurrencyId = Guid.NewGuid();
-			var User2UsdCurrencyId = Guid.NewGuid();
-			this.Curr1User1 = new Currency
-			{
-				Id = curr1Id,
-				Name = "BGN",
-				OwnerId = user1Id
-			};
-			this.Curr2User1 = new Currency
-			{
-				Id = EurCurrencyId,
-				Name = "EUR",
-				OwnerId = user1Id
-			};
-			this.Curr3User1 = new Currency
-			{
-				Id = User2UsdCurrencyId,
-				Name = "USD",
-				OwnerId = user1Id
-			};
-
-			await this.sqlDbContext.Currencies.AddRangeAsync(this.Curr1User1, this.Curr2User1, this.Curr3User1);
-
-			// Accounts
-			var acc1Id = Guid.NewGuid();
-			var acc2Id = Guid.NewGuid();
-			var acc3Id = Guid.NewGuid();
-			this.Account1User1 = new Account
-			{
-				Id = acc1Id,
-				Name = "Cash BGN",
-				AccountTypeId = accType1Id,
-				Balance = 189.55m,
-				CurrencyId = curr1Id,
-				OwnerId = user1Id
-			};
-			this.Account2User1 = new Account
-			{
-				Id = acc2Id,
-				Name = "Bank EUR",
-				AccountTypeId = accType1Id,
-				Balance = 900.01m,
-				CurrencyId = curr1Id,
-				OwnerId = user1Id
-			};
-			this.Account3User1Deleted = new Account
-			{
-				Id = acc3Id,
-				Name = "Bank USD",
-				AccountTypeId = acc1Id,
-				Balance = 0,
-				CurrencyId = curr1Id,
-				OwnerId = user1Id,
+				Id = Guid.NewGuid(),
+				Name = "Credit",
+				OwnerId = this.User1.Id,
 				IsDeleted = true
 			};
+			this.AccType4_User1_Deleted_WithoutAcc = new AccountType
+			{
+				Id = Guid.NewGuid(),
+				Name = "Crypto",
+				OwnerId = this.User1.Id,
+				IsDeleted = true
+			};
+			await this.sqlDbContext.AccountTypes.AddRangeAsync(
+				this.AccType1_User1_WithAcc,
+				this.AccType2_User1_WithoutAcc,
+				this.AccType3_User1_Deleted_WithAcc,
+				this.AccType4_User1_Deleted_WithoutAcc);
 
-			await this.sqlDbContext.Accounts.AddRangeAsync(this.Account1User1, this.Account2User1, this.Account3User1Deleted);
+			// Currencies
+			this.Currency1_User1_WithAcc = new Currency
+			{
+				Id = Guid.NewGuid(),
+				Name = "BGN",
+				OwnerId = this.User1.Id,
+				IsDeleted = false
+			};
+			this.Currency2_User1_WithoutAcc = new Currency
+			{
+				Id = Guid.NewGuid(),
+				Name = "EUR",
+				OwnerId = this.User1.Id,
+				IsDeleted = false
+			};
+			this.Currency3_User1_Deleted_WithAcc = new Currency
+			{
+				Id = Guid.NewGuid(),
+				Name = "USD",
+				OwnerId = this.User1.Id,
+				IsDeleted = true
+			};
+			this.Currency4_User1_Deleted_WithoutAcc = new Currency
+			{
+				Id = Guid.NewGuid(),
+				Name = "SEK",
+				OwnerId = this.User1.Id,
+				IsDeleted = true
+			};
+			await this.sqlDbContext.Currencies.AddRangeAsync(
+				this.Currency1_User1_WithAcc,
+				this.Currency2_User1_WithoutAcc,
+				this.Currency3_User1_Deleted_WithAcc,
+				this.Currency4_User1_Deleted_WithoutAcc);
+
+			// Accounts
+			this.Account1_User1_WithTransactions = new Account
+			{
+				Id = Guid.NewGuid(),
+				Name = "Cash BGN",
+				AccountTypeId = this.AccType1_User1_WithAcc.Id,
+				Balance = 189.55m,
+				CurrencyId = this.Currency1_User1_WithAcc.Id,
+				OwnerId = this.User1.Id,
+				IsDeleted = false
+			};
+			this.Account2_User1_WithoutTransactions = new Account
+			{
+				Id = Guid.NewGuid(),
+				Name = "Bank EUR",
+				AccountTypeId = this.AccType3_User1_Deleted_WithAcc.Id,
+				Balance = 900.01m,
+				CurrencyId = this.Currency3_User1_Deleted_WithAcc.Id,
+				OwnerId = this.User1.Id,
+				IsDeleted = false
+			};
+			this.Account3_User1_Deleted_WithTransactions = new Account
+			{
+				Id = Guid.NewGuid(),
+				Name = "Bank USD",
+				AccountTypeId = this.Account1_User1_WithTransactions.Id,
+				Balance = 0,
+				CurrencyId = this.Currency1_User1_WithAcc.Id,
+				OwnerId = this.User1.Id,
+				IsDeleted = true
+			};
+			this.Account4_User1_Deleted_WithoutTransactions = new Account
+			{
+				Id = Guid.NewGuid(),
+				Name = "Bank SEK",
+				AccountTypeId = this.Account1_User1_WithTransactions.Id,
+				Balance = 0,
+				CurrencyId = this.Currency1_User1_WithAcc.Id,
+				OwnerId = this.User1.Id,
+				IsDeleted = true
+			};
+			await this.sqlDbContext.Accounts.AddRangeAsync(
+				this.Account1_User1_WithTransactions, 
+				this.Account2_User1_WithoutTransactions, 
+				this.Account3_User1_Deleted_WithTransactions,
+				this.Account4_User1_Deleted_WithoutTransactions);
 
 			// Categories
-			var foodCatId = Guid.NewGuid();
-			var transportCatId = Guid.NewGuid();
-			var salaryCatId = Guid.NewGuid();
-			this.CatInitialBalance = new Category
+			this.Category_InitialBalance = new Category
 			{
 				Id = Guid.Parse(InitialBalanceCategoryId),
 				Name = CategoryInitialBalanceName,
 				OwnerId = Guid.NewGuid()
 			};
-			this.Cat2User1 = new Category
-			{
-				Id = foodCatId,
-				Name = "Food and Drinks",
-				OwnerId = user1Id
-			};
-			this.Cat3User1 = new Category
-			{
-				Id = transportCatId,
-				Name = "Transport",
-				OwnerId = user1Id
-			};
-			this.Cat4User1 = new Category
-			{
-				Id = salaryCatId,
-				Name = "Salary",
-				OwnerId = user1Id
-			};
-
-			await this.sqlDbContext.Categories.AddRangeAsync(this.CatInitialBalance, this.Cat2User1, this.Cat3User1, this.Cat4User1);
-
-			// Transactions
-			// Account 1
-			this.InitialTransaction1User1 = new Transaction()
+			this.Category1_User1_WithTransactions = new Category
 			{
 				Id = Guid.NewGuid(),
-				OwnerId = user1Id,
-				AccountId = acc1Id,
+				Name = "Food and Drinks",
+				OwnerId = this.User1.Id
+			};
+			this.Category2_User1_WithoutTransactions = new Category
+			{
+				Id = Guid.NewGuid(),
+				Name = "Transport",
+				OwnerId = this.User1.Id
+			};
+			this.Category3_User1_Deleted_WithTransactions = new Category
+			{
+				Id = Guid.NewGuid(),
+				Name = "Salary",
+				OwnerId = this.User1.Id,
+				IsDeleted = true
+			};
+			this.Category4_User1_Deleted_WithoutTransactions = new Category
+			{
+				Id = Guid.NewGuid(),
+				Name = "Utilities",
+				OwnerId = this.User1.Id,
+				IsDeleted = true
+			};
+			await this.sqlDbContext.Categories.AddRangeAsync(
+				this.Category_InitialBalance, 
+				this.Category1_User1_WithTransactions, 
+				this.Category2_User1_WithoutTransactions, 
+				this.Category3_User1_Deleted_WithTransactions,
+				this.Category4_User1_Deleted_WithoutTransactions);
+
+			// Transactions
+			this.InitialTransaction_Income_Account1_User1 = new Transaction()
+			{
+				Id = Guid.NewGuid(),
+				OwnerId = this.User1.Id,
+				AccountId = this.Account1_User1_WithTransactions.Id,
 				Amount = 200,
 				CategoryId = Guid.Parse(InitialBalanceCategoryId),
 				CreatedOn = DateTime.UtcNow.AddMonths(-3),
@@ -214,34 +254,33 @@
 				TransactionType = TransactionType.Income,
 				IsInitialBalance = true
 			};
-			this.Transaction2User1 = new Transaction()
+			this.Transaction1_Expense_Account1_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
-				OwnerId = user1Id,
-				AccountId = acc1Id,
+				OwnerId = this.User1.Id,
+				AccountId = this.Account1_User1_WithTransactions.Id,
 				Amount = 5.65m,
-				CategoryId = this.Cat2User1.Id,
+				CategoryId = this.Category1_User1_WithTransactions.Id,
 				CreatedOn = DateTime.UtcNow.AddMonths(-2),
 				Reference = "Lunch",
 				TransactionType = TransactionType.Expense
 			};
-			this.Transaction3User1 = new Transaction()
+			this.Transaction2_Expense_Account1_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
-				OwnerId = user1Id,
-				AccountId = acc1Id,
+				OwnerId = this.User1.Id,
+				AccountId = this.Account1_User1_WithTransactions.Id,
 				Amount = 4.80m,
-				CategoryId = transportCatId,
+				CategoryId = this.Category3_User1_Deleted_WithTransactions.Id,
 				CreatedOn = DateTime.UtcNow.AddDays(-2),
 				Reference = "Taxi",
 				TransactionType = TransactionType.Expense
 			};
-			// Account 2
-			this.Transaction4User1 = new Transaction()
+			this.Transaction3_Income_Account3_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
-				OwnerId = user1Id,
-				AccountId = acc2Id,
+				OwnerId = this.User1.Id,
+				AccountId = this.Account3_User1_Deleted_WithTransactions.Id,
 				Amount = 200,
 				CategoryId = Guid.Parse(InitialBalanceCategoryId),
 				CreatedOn = DateTime.UtcNow.AddMonths(-3),
@@ -249,32 +288,35 @@
 				TransactionType = TransactionType.Income,
 				IsInitialBalance = true
 			};
-			this.Transaction5User1 = new Transaction()
+			this.Transaction4_Income_Account3_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
-				OwnerId = user1Id,
-				AccountId = acc2Id,
+				OwnerId = this.User1.Id,
+				AccountId = this.Account3_User1_Deleted_WithTransactions.Id,
 				Amount = 750m,
-				CategoryId = salaryCatId,
+				CategoryId = this.Category3_User1_Deleted_WithTransactions.Id,
 				CreatedOn = DateTime.UtcNow.AddMonths(-2),
 				Reference = "Salary",
 				TransactionType = TransactionType.Income
 			};
-			this.Transaction6User1 = new Transaction()
+			this.Transaction5_Expense_Account3_User1 = new Transaction()
 			{
 				Id = Guid.NewGuid(),
-				OwnerId = user1Id,
-				AccountId = acc2Id,
+				OwnerId = this.User1.Id,
+				AccountId = this.Account3_User1_Deleted_WithTransactions.Id,
 				Amount = 49.99m,
-				CategoryId = transportCatId,
+				CategoryId = this.Category3_User1_Deleted_WithTransactions.Id,
 				CreatedOn = DateTime.UtcNow.AddMonths(-2),
 				Reference = "Flight ticket",
 				TransactionType = TransactionType.Expense
 			};
-
 			await this.sqlDbContext.Transactions.AddRangeAsync(
-				this.InitialTransaction1User1, this.Transaction2User1, this.Transaction3User1,
-				this.Transaction4User1, this.Transaction5User1, this.Transaction6User1);
+				this.InitialTransaction_Income_Account1_User1, 
+				this.Transaction1_Expense_Account1_User1, 
+				this.Transaction2_Expense_Account1_User1,
+				this.Transaction3_Income_Account3_User1, 
+				this.Transaction4_Income_Account3_User1, 
+				this.Transaction5_Expense_Account3_User1);
 
 			await this.sqlDbContext.SaveChangesAsync();
 		}

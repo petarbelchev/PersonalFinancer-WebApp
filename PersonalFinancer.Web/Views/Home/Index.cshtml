@@ -1,7 +1,8 @@
 ﻿@using Newtonsoft.Json;
 @using PersonalFinancer.Data.Models.Enums;
-@using PersonalFinancer.Web.Models.Shared;
 @using PersonalFinancer.Web.Models.Home;
+@using PersonalFinancer.Web.Models.Shared;
+@using System.Globalization;
 @model UserDashboardViewModel
 
 @if (!User?.Identity?.IsAuthenticated ?? false)
@@ -63,7 +64,36 @@ else
 							<div class="card-header">
 								<h6>Last Five Transactions</h6>
 							</div>
-							<partial name="_TransactionsTablePartial" />
+							<table class="table table-hover">
+								<thead>
+									<tr>
+										<th scope="col"></th>
+										<th scope="col">Date</th>
+										<th scope="col">Category</th>
+										<th scope="col">Amount</th>
+										<th scope="col">Reference</th>
+									</tr>
+								</thead>
+								<tbody style="vertical-align: text-top;">
+									@foreach (var transaction in Model.Transactions)
+									{
+										<tr role="button" onclick="location.href='@Url.Action("TransactionDetails", "Transactions", new { id = transaction.Id })'">
+											@if (transaction.TransactionType == TransactionType.Income.ToString())
+											{
+												<td><img src="/icons/greenArrow.png" style="max-width: 25px;"></td>
+											}
+											else
+											{
+												<td><img src="/icons/redArrow.png" style="max-width: 25px;"></td>
+											}
+											<td>@transaction.CreatedOn.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
+											<td>@transaction.CategoryName</td>
+											<td>@transaction.Amount @transaction.AccountCurrencyName</td>
+											<td>@transaction.Reference</td>
+										</tr>
+									}
+								</tbody>
+							</table>
 						</div>
 					</div>
 
@@ -159,7 +189,7 @@ else
 
 	@section Scripts {
 	<partial name="_ValidationScriptsPartial" />
-	<script src="/js/chart.umd.js"></script>
+	<script src="~/lib/Chart.js/chart.umd.js"></script>
 	<script>
 		let currencies = @Html.Raw(JsonConvert.SerializeObject(Model.CurrenciesCashFlow));
 		let canvas = document.querySelector('#doughnutChart');

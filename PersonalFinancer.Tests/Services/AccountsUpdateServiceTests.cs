@@ -1,15 +1,15 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-    using Microsoft.EntityFrameworkCore;
-    using NUnit.Framework;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Models.Enums;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.Accounts.Models;
-    using static PersonalFinancer.Data.Constants.CategoryConstants;
+	using Microsoft.EntityFrameworkCore;
+	using NUnit.Framework;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Models.Enums;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Accounts;
+	using PersonalFinancer.Services.Accounts.Models;
+	using static PersonalFinancer.Data.Constants.CategoryConstants;
 
-    [TestFixture]
+	[TestFixture]
     internal class AccountsUpdateServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<Account> accountsRepo;
@@ -17,7 +17,8 @@
         private IEfRepository<AccountType> accountTypesRepo;
         private IEfRepository<Currency> currenciesRepo;
         private IEfRepository<Category> categoriesRepo;
-        private IAccountsUpdateService accountsUpdateService;
+
+		private IAccountsUpdateService accountsUpdateService;
 
         [SetUp]
         public void SetUp()
@@ -27,22 +28,22 @@
             this.accountTypesRepo = new EfRepository<AccountType>(this.sqlDbContext);
             this.currenciesRepo = new EfRepository<Currency>(this.sqlDbContext);
             this.categoriesRepo = new EfRepository<Category>(this.sqlDbContext);
-			
-            this.accountsUpdateService = new AccountsUpdateService(
-                this.accountsRepo, this.transactionsRepo, this.accountTypesRepo, this.currenciesRepo, 
-                this.categoriesRepo, this.mapper, this.memoryCache);
+
+			this.accountsUpdateService = new AccountsUpdateService(
+                this.accountsRepo, this.transactionsRepo, this.accountTypesRepo, 
+                this.currenciesRepo, this.categoriesRepo, this.mapper);
         }
 
         [Test]
         public async Task CreateAccount_ShouldAddNewAccountAndTransaction_WithValidInput()
         {
             //Arrange
-            var inputModel = new AccountFormShortServiceModel
+            var inputModel = new CreateEditAccountDTO
             {
                 Name = "AccountWithNonZeroBalance",
-                AccountTypeId = this.AccType1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
                 Balance = 100,
-                CurrencyId = this.Curr1User1.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id
             };
 
@@ -66,11 +67,11 @@
                 Assert.That(newAccount.AccountTypeId, Is.EqualTo(inputModel.AccountTypeId));
                 Assert.That(newAccount.Transactions, Has.Count.EqualTo(1));
 
-                Assert.That(initialBalanceTransaction.CategoryId, Is.EqualTo(this.CatInitialBalance.Id));
+                Assert.That(initialBalanceTransaction.CategoryId, Is.EqualTo(this.Category_InitialBalance.Id));
                 Assert.That(initialBalanceTransaction.IsInitialBalance, Is.True);
                 Assert.That(initialBalanceTransaction.TransactionType, Is.EqualTo(TransactionType.Income));
                 Assert.That(initialBalanceTransaction.Amount, Is.EqualTo(inputModel.Balance));
-                Assert.That(initialBalanceTransaction.Reference, Is.EqualTo(this.CatInitialBalance.Name));
+                Assert.That(initialBalanceTransaction.Reference, Is.EqualTo(this.Category_InitialBalance.Name));
             });
         }
 
@@ -78,12 +79,12 @@
         public async Task CreateAccount_ShouldAddNewAccountWithoutTransaction_WithValidInput()
         {
             //Arrange
-            var newAccountModel = new AccountFormShortServiceModel
+            var newAccountModel = new CreateEditAccountDTO
             {
                 Name = "AccountWithZeroBalance",
-                AccountTypeId = this.AccType1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
                 Balance = 0,
-                CurrencyId = this.Curr1User1.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id
             };
 
@@ -112,31 +113,31 @@
         public void CreateAccount_ShouldThrowException_WhenUserHaveAccountWithSameName()
         {
             //Arrange
-            var newAccountModel = new AccountFormShortServiceModel
+            var newAccountModel = new CreateEditAccountDTO
             {
-                Name = this.Account1User1.Name,
-                AccountTypeId = this.AccType1User1.Id,
+                Name = this.Account1_User1_WithTransactions.Name,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
                 Balance = 0,
-                CurrencyId = this.Curr1User1.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id
             };
 
             // Act & Assert
             Assert.That(async () => await this.accountsUpdateService.CreateAccountAsync(newAccountModel),
-            Throws.TypeOf<ArgumentException>().With.Message.EqualTo(
-                $"The User already have Account with \"{this.Account1User1.Name}\" name."));
+            Throws.TypeOf<ArgumentException>().With.Message
+                  .EqualTo($"The User already have Account with \"{this.Account1_User1_WithTransactions.Name}\" name."));
         }
 
 		[Test]
 		public void CreateAccount_ShouldThrowException_WhenAccountTypeIsNotValid()
 		{
 			//Arrange
-			var newAccountModel = new AccountFormShortServiceModel
+			var newAccountModel = new CreateEditAccountDTO
 			{
 				Name = "New Account With Invalid Account Type",
 				AccountTypeId = Guid.NewGuid(),
 				Balance = 0,
-				CurrencyId = this.Curr1User1.Id,
+				CurrencyId = this.Currency1_User1_WithAcc.Id,
 				OwnerId = this.User1.Id
 			};
 
@@ -149,10 +150,10 @@
 		public void CreateAccount_ShouldThrowException_WhenCurrencyIsNotValid()
 		{
 			//Arrange
-			var newAccountModel = new AccountFormShortServiceModel
+			var newAccountModel = new CreateEditAccountDTO
 			{
 				Name = "New Account With Invalid Currency",
-				AccountTypeId = this.AccType1User1.Id,
+				AccountTypeId = this.AccType1_User1_WithAcc.Id,
 				Balance = 0,
 				CurrencyId = Guid.NewGuid(),
 				OwnerId = this.User1.Id
@@ -164,74 +165,50 @@
 		}
 
 		[Test]
-        public async Task CreateTransaction_ShouldAddNewTransaction_AndDecreaseAccountBalance()
+        [TestCase(TransactionType.Income)]
+        [TestCase(TransactionType.Expense)]
+		public async Task CreateTransaction_ShouldAddNewTransactionAndChangeAccountBalance(TransactionType transactionType)
         {
             //Arrange
-            var transactionModel = new TransactionFormShortServiceModel()
+            var account = this.Account1_User1_WithTransactions;
+			var dto = new CreateEditTransactionDTO()
             {
                 Amount = 100,
-                AccountId = this.Account1User1.Id,
+                AccountId = account.Id,
                 OwnerId = this.User1.Id,
-                CategoryId = this.Cat2User1.Id,
+                CategoryId = this.Category1_User1_WithTransactions.Id,
                 CreatedOn = DateTime.UtcNow,
-                Reference = "Not Initial Balance",
-                TransactionType = TransactionType.Expense
+                Reference = "New transaction",
+                TransactionType = transactionType
             };
-            int transactionsCountBefore = this.Account1User1.Transactions.Count;
-            decimal balanceBefore = this.Account1User1.Balance;
+            int transactionsCountBefore = account.Transactions.Count;
+            decimal balanceBefore = account.Balance;
 
             //Act
-            Guid id = await this.accountsUpdateService.CreateTransactionAsync(transactionModel);
+            Guid id = await this.accountsUpdateService.CreateTransactionAsync(dto);
             Transaction? transaction = await this.transactionsRepo.FindAsync(id);
 
             //Assert
             Assert.That(transaction, Is.Not.Null);
             Assert.Multiple(() =>
             {
-                Assert.That(this.Account1User1.Transactions, Has.Count.EqualTo(transactionsCountBefore + 1));
-                Assert.That(transaction.Amount, Is.EqualTo(transactionModel.Amount));
-                Assert.That(transaction.CategoryId, Is.EqualTo(transactionModel.CategoryId));
-                Assert.That(transaction.AccountId, Is.EqualTo(transactionModel.AccountId));
-                Assert.That(transaction.Reference, Is.EqualTo(transactionModel.Reference));
-                Assert.That(transaction.CreatedOn, Is.EqualTo(transactionModel.CreatedOn));
-                Assert.That(transaction.TransactionType, Is.EqualTo(transactionModel.TransactionType));
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore - transaction.Amount));
-            });
-        }
+                if (transactionType == TransactionType.Income)
+				{
+					Assert.That(account.Transactions, Has.Count.EqualTo(transactionsCountBefore + 1));
+					Assert.That(account.Balance, Is.EqualTo(balanceBefore + transaction.Amount));
+				}
+                else
+				{
+					Assert.That(account.Transactions, Has.Count.EqualTo(transactionsCountBefore + 1));
+					Assert.That(account.Balance, Is.EqualTo(balanceBefore - transaction.Amount));
+				}
 
-        [Test]
-        public async Task CreateTransaction_ShouldAddNewTransaction_AndIncreaseAccountBalance()
-        {
-            //Arrange
-            var transactionModel = new TransactionFormShortServiceModel()
-            {
-                Amount = 100,
-                AccountId = this.Account1User1.Id,
-                OwnerId = this.User1.Id,
-                CategoryId = this.Cat2User1.Id,
-                CreatedOn = DateTime.UtcNow,
-                Reference = "Not Initial Balance",
-                TransactionType = TransactionType.Income
-            };
-            int transactionsCountBefore = this.Account1User1.Transactions.Count;
-            decimal balanceBefore = this.Account1User1.Balance;
-
-            //Act
-            Guid id = await this.accountsUpdateService.CreateTransactionAsync(transactionModel);
-            Transaction? transaction = await this.transactionsRepo.FindAsync(id);
-
-            //Assert
-            Assert.That(transaction, Is.Not.Null);
-            Assert.Multiple(() =>
-            {
-                Assert.That(this.Account1User1.Transactions, Has.Count.EqualTo(transactionsCountBefore + 1));
-                Assert.That(transaction.Amount, Is.EqualTo(transactionModel.Amount));
-                Assert.That(transaction.CategoryId, Is.EqualTo(transactionModel.CategoryId));
-                Assert.That(transaction.AccountId, Is.EqualTo(transactionModel.AccountId));
-                Assert.That(transaction.Reference, Is.EqualTo(transactionModel.Reference));
-                Assert.That(transaction.CreatedOn, Is.EqualTo(transactionModel.CreatedOn));
-                Assert.That(transaction.TransactionType, Is.EqualTo(transactionModel.TransactionType));
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore + transaction.Amount));
+                Assert.That(transaction.Amount, Is.EqualTo(dto.Amount));
+                Assert.That(transaction.CategoryId, Is.EqualTo(dto.CategoryId));
+                Assert.That(transaction.AccountId, Is.EqualTo(dto.AccountId));
+                Assert.That(transaction.Reference, Is.EqualTo(dto.Reference));
+                Assert.That(transaction.CreatedOn, Is.EqualTo(dto.CreatedOn));
+                Assert.That(transaction.TransactionType, Is.EqualTo(dto.TransactionType));
             });
         }
 
@@ -239,19 +216,11 @@
         public void CreateTransaction_ShouldThrowException_WhenAccountDoesNotExist()
         {
             //Arrange
-            var inputFormModel = new TransactionFormShortServiceModel
-            {
-                Amount = 100,
-                AccountId = Guid.NewGuid(),
-                OwnerId = this.User1.Id,
-                CategoryId = this.CatInitialBalance.Id,
-                CreatedOn = DateTime.UtcNow,
-                Reference = "Not Initial Balance",
-                TransactionType = TransactionType.Expense
-            };
+            var dto = this.mapper.Map<CreateEditTransactionDTO>(this.Transaction1_Expense_Account1_User1);
+            dto.AccountId = Guid.NewGuid();
 
             //Act & Assert
-            Assert.That(async () => await this.accountsUpdateService.CreateTransactionAsync(inputFormModel),
+            Assert.That(async () => await this.accountsUpdateService.CreateTransactionAsync(dto),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -259,19 +228,11 @@
 		public void CreateTransaction_ShouldThrowException_WhenCategoryIsNotValid()
 		{
 			//Arrange
-			var inputFormModel = new TransactionFormShortServiceModel
-			{
-				Amount = 100,
-				AccountId = this.Account1User1.Id,
-				OwnerId = this.User1.Id,
-				CategoryId = Guid.NewGuid(),
-				CreatedOn = DateTime.UtcNow,
-				Reference = "Transaction with invalid category",
-				TransactionType = TransactionType.Expense
-			};
+			var dto = this.mapper.Map<CreateEditTransactionDTO>(this.Transaction1_Expense_Account1_User1);
+			dto.CategoryId = Guid.NewGuid();
 
 			// Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.CreateTransactionAsync(inputFormModel),
+			Assert.That(async () => await this.accountsUpdateService.CreateTransactionAsync(dto),
 			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Category is not valid."));
 		}
 
@@ -284,9 +245,9 @@
             {
                 Id = accId,
                 Name = "AccountForDelete",
-                AccountTypeId = this.AccType1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
                 Balance = 0,
-                CurrencyId = this.Curr1User1.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id,
                 Transactions = new HashSet<Transaction>
                 {
@@ -295,7 +256,7 @@
                         Id = Guid.NewGuid(),
                         OwnerId = this.User1.Id,
                         Amount = 200,
-                        CategoryId = this.CatInitialBalance.Id,
+                        CategoryId = this.Category_InitialBalance.Id,
                         CreatedOn = DateTime.UtcNow,
                         Reference = "Salary",
                         TransactionType = TransactionType.Income
@@ -333,9 +294,9 @@
             {
                 Id = accountId,
                 Name = "AccountForDelete",
-                AccountTypeId = this.AccType1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
                 Balance = 0,
-                CurrencyId = this.Curr1User1.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id,
                 Transactions = new HashSet<Transaction>
                 {
@@ -344,7 +305,7 @@
                         Id = Guid.NewGuid(),
                         OwnerId = this.User1.Id,
                         Amount = 200,
-                        CategoryId = this.CatInitialBalance.Id,
+                        CategoryId = this.Category_InitialBalance.Id,
                         CreatedOn = DateTime.UtcNow,
                         Reference = "Salary",
                         TransactionType = TransactionType.Income
@@ -383,8 +344,8 @@
             //Arrange & Act
 
             //Assert
-            Assert.That(async () => await this.accountsUpdateService.DeleteAccountAsync(
-                Guid.NewGuid(), this.User1.Id, isUserAdmin: false, shouldDeleteTransactions: true),
+            Assert.That(async () => await this.accountsUpdateService
+                  .DeleteAccountAsync(Guid.NewGuid(), this.User1.Id, isUserAdmin: false, shouldDeleteTransactions: true),
             Throws.TypeOf<InvalidOperationException>());
         }
 
@@ -396,8 +357,8 @@
             await this.accountsRepo.AddAsync(new Account
             {
                 Id = accId,
-                AccountTypeId = this.AccType1User1.Id,
-                CurrencyId = this.Curr1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 Balance = 0,
                 Name = "For Delete",
                 OwnerId = this.User1.Id
@@ -405,8 +366,8 @@
             await this.accountsRepo.SaveChangesAsync();
 
             //Act & Assert
-            Assert.That(async () => await this.accountsUpdateService.DeleteAccountAsync(
-                accId, this.User2.Id, isUserAdmin: false, shouldDeleteTransactions: true),
+            Assert.That(async () => await this.accountsUpdateService
+                  .DeleteAccountAsync(accId, this.User2.Id, isUserAdmin: false, shouldDeleteTransactions: true),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Can't delete someone else account."));
         }
 
@@ -418,8 +379,8 @@
             await this.accountsRepo.AddAsync(new Account
             {
                 Id = accId,
-                AccountTypeId = this.AccType1User1.Id,
-                CurrencyId = this.Curr1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 Balance = 0,
                 Name = "For Delete 2",
                 OwnerId = this.User1.Id,
@@ -430,7 +391,7 @@
                         Id = Guid.NewGuid(),
                         OwnerId = this.User1.Id,
                         Amount = 200,
-                        CategoryId = this.CatInitialBalance.Id,
+                        CategoryId = this.Category_InitialBalance.Id,
                         CreatedOn = DateTime.UtcNow,
                         Reference = "Salary",
                         TransactionType = TransactionType.Income
@@ -471,8 +432,8 @@
             await this.accountsRepo.AddAsync(new Account
             {
                 Id = accId,
-                AccountTypeId = this.AccType1User1.Id,
-                CurrencyId = this.Curr1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 Balance = 0,
                 Name = "For Delete 3",
                 OwnerId = this.User1.Id,
@@ -483,7 +444,7 @@
                         Id = Guid.NewGuid(),
                         OwnerId = this.User1.Id,
                         Amount = 200,
-                        CategoryId = this.CatInitialBalance.Id,
+                        CategoryId = this.Category_InitialBalance.Id,
                         CreatedOn = DateTime.UtcNow,
                         Reference = "Salary",
                         TransactionType = TransactionType.Income
@@ -526,19 +487,19 @@
             {
                 Id = transactionId,
                 OwnerId = this.User1.Id,
-                AccountId = this.Account1User1.Id,
+                AccountId = this.Account1_User1_WithTransactions.Id,
                 Amount = 123,
-                CategoryId = this.CatInitialBalance.Id,
+                CategoryId = this.Category_InitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
                 Reference = "TestTransaction",
                 TransactionType = TransactionType.Income
             };
             await this.transactionsRepo.AddAsync(transaction);
-            this.Account1User1.Balance += transaction.Amount;
+            this.Account1_User1_WithTransactions.Balance += transaction.Amount;
             await this.transactionsRepo.SaveChangesAsync();
 
-            decimal balanceBefore = this.Account1User1.Balance;
-            int transactionsBefore = this.Account1User1.Transactions.Count;
+            decimal balanceBefore = this.Account1_User1_WithTransactions.Balance;
+            int transactionsBefore = this.Account1_User1_WithTransactions.Transactions.Count;
             Transaction? transactionInDb = await this.transactionsRepo.FindAsync(transactionId);
 
             //Assert
@@ -550,9 +511,9 @@
             //Assert
             Assert.Multiple(async () =>
             {
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(newBalance));
-                Assert.That(this.Account1User1.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
+                Assert.That(this.Account1_User1_WithTransactions.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
+                Assert.That(this.Account1_User1_WithTransactions.Balance, Is.EqualTo(newBalance));
+                Assert.That(this.Account1_User1_WithTransactions.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
                 Assert.That(await this.transactionsRepo.FindAsync(transactionId), Is.Null);
             });
         }
@@ -566,19 +527,19 @@
             {
                 Id = transactionId,
                 OwnerId = this.User1.Id,
-                AccountId = this.Account1User1.Id,
+                AccountId = this.Account1_User1_WithTransactions.Id,
                 Amount = 123,
-                CategoryId = this.CatInitialBalance.Id,
+                CategoryId = this.Category_InitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
                 Reference = "TestTransaction",
                 TransactionType = TransactionType.Income
             };
             await this.transactionsRepo.AddAsync(transaction);
-            this.Account1User1.Balance += transaction.Amount;
+            this.Account1_User1_WithTransactions.Balance += transaction.Amount;
             await this.transactionsRepo.SaveChangesAsync();
 
-            decimal balanceBefore = this.Account1User1.Balance;
-            int transactionsBefore = this.Account1User1.Transactions.Count;
+            decimal balanceBefore = this.Account1_User1_WithTransactions.Balance;
+            int transactionsBefore = this.Account1_User1_WithTransactions.Transactions.Count;
             Transaction? transactionInDb = await this.transactionsRepo.FindAsync(transactionId);
 
             //Assert
@@ -590,9 +551,9 @@
             //Assert
             Assert.Multiple(async () =>
             {
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(newBalance));
-                Assert.That(this.Account1User1.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
+                Assert.That(this.Account1_User1_WithTransactions.Balance, Is.EqualTo(balanceBefore - transactionInDb.Amount));
+                Assert.That(this.Account1_User1_WithTransactions.Balance, Is.EqualTo(newBalance));
+                Assert.That(this.Account1_User1_WithTransactions.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
                 Assert.That(await this.transactionsRepo.FindAsync(transactionId), Is.Null);
             });
         }
@@ -605,20 +566,20 @@
             var transaction = new Transaction
             {
                 Id = transactionId,
-                AccountId = this.Account1User1.Id,
+                AccountId = this.Account1_User1_WithTransactions.Id,
                 OwnerId = this.User1.Id,
                 Amount = 123,
-                CategoryId = this.CatInitialBalance.Id,
+                CategoryId = this.Category_InitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
                 Reference = "TestTransaction",
                 TransactionType = TransactionType.Expense
             };
             await this.transactionsRepo.AddAsync(transaction);
-            this.Account1User1.Balance -= transaction.Amount;
+            this.Account1_User1_WithTransactions.Balance -= transaction.Amount;
             await this.transactionsRepo.SaveChangesAsync();
 
-            decimal balanceBefore = this.Account1User1.Balance;
-            int transactionsBefore = this.Account1User1.Transactions.Count;
+            decimal balanceBefore = this.Account1_User1_WithTransactions.Balance;
+            int transactionsBefore = this.Account1_User1_WithTransactions.Transactions.Count;
             Transaction? transactionInDb = await this.transactionsRepo.FindAsync(transactionId);
 
             //Assert
@@ -630,9 +591,9 @@
             //Assert
             Assert.Multiple(async () =>
             {
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(newBalance));
-                Assert.That(this.Account1User1.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
+                Assert.That(this.Account1_User1_WithTransactions.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
+                Assert.That(this.Account1_User1_WithTransactions.Balance, Is.EqualTo(newBalance));
+                Assert.That(this.Account1_User1_WithTransactions.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
                 Assert.That(await this.transactionsRepo.FindAsync(transactionId), Is.Null);
             });
         }
@@ -645,20 +606,20 @@
             var transaction = new Transaction
             {
                 Id = transactionId,
-                AccountId = this.Account1User1.Id,
+                AccountId = this.Account1_User1_WithTransactions.Id,
                 OwnerId = this.User1.Id,
                 Amount = 123,
-                CategoryId = this.CatInitialBalance.Id,
+                CategoryId = this.Category_InitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
                 Reference = "TestTransaction",
                 TransactionType = TransactionType.Expense
             };
             await this.transactionsRepo.AddAsync(transaction);
-            this.Account1User1.Balance -= transaction.Amount;
+            this.Account1_User1_WithTransactions.Balance -= transaction.Amount;
             await this.transactionsRepo.SaveChangesAsync();
 
-            decimal balanceBefore = this.Account1User1.Balance;
-            int transactionsBefore = this.Account1User1.Transactions.Count;
+            decimal balanceBefore = this.Account1_User1_WithTransactions.Balance;
+            int transactionsBefore = this.Account1_User1_WithTransactions.Transactions.Count;
             Transaction? transactionInDb = await this.transactionsRepo.FindAsync(transactionId);
 
             //Assert
@@ -670,9 +631,9 @@
             //Assert
             Assert.Multiple(async () =>
             {
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(newBalance));
-                Assert.That(this.Account1User1.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
+                Assert.That(this.Account1_User1_WithTransactions.Balance, Is.EqualTo(balanceBefore + transactionInDb.Amount));
+                Assert.That(this.Account1_User1_WithTransactions.Balance, Is.EqualTo(newBalance));
+                Assert.That(this.Account1_User1_WithTransactions.Transactions, Has.Count.EqualTo(transactionsBefore - 1));
                 Assert.That(await this.transactionsRepo.FindAsync(transactionId), Is.Null);
             });
         }
@@ -695,8 +656,8 @@
             var transaction = new Transaction
             {
                 Id = id,
-                AccountId = this.Account1User1.Id,
-                CategoryId = this.Curr1User1.Id,
+                AccountId = this.Account1_User1_WithTransactions.Id,
+                CategoryId = this.Currency1_User1_WithAcc.Id,
                 Amount = 10,
                 CreatedOn = DateTime.UtcNow,
                 OwnerId = this.User1.Id,
@@ -708,7 +669,7 @@
 
             //Act & Assert
             Assert.That(async () => await this.accountsUpdateService.DeleteTransactionAsync(id, this.User2.Id, isUserAdmin: false),
-            Throws.TypeOf<ArgumentException>().With.Message.EqualTo("User is not transaction's owner"));
+            Throws.TypeOf<ArgumentException>().With.Message.EqualTo("The user is not transaction's owner"));
         }
 
         [Test]
@@ -721,14 +682,14 @@
                 Id = accId,
                 Name = "For Edit",
                 Balance = 10,
-                AccountTypeId = this.AccType1User1.Id,
-                CurrencyId = this.Curr1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id
             };
             await this.accountsRepo.AddAsync(account);
             await this.accountsRepo.SaveChangesAsync();
 
-            var inputModel = new AccountFormShortServiceModel
+            var inputModel = new CreateEditAccountDTO
             {
                 Name = "New Name", // Change
                 AccountTypeId = account.AccountTypeId,
@@ -761,19 +722,19 @@
                 Id = accId,
                 Name = "For Edit 2",
                 Balance = 10,
-                AccountTypeId = this.AccType1User1.Id,
-                CurrencyId = this.Curr1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id
             };
             await this.accountsRepo.AddAsync(account);
             await this.accountsRepo.SaveChangesAsync();
 
-            var inputModel = new AccountFormShortServiceModel
+            var inputModel = new CreateEditAccountDTO
             {
                 Name = account.Name,
                 AccountTypeId = account.AccountTypeId,
                 Balance = account.Balance,
-                CurrencyId = this.Curr2User1.Id, // Change
+                CurrencyId = this.Currency2_User1_WithoutAcc.Id, // Change
                 OwnerId = account.OwnerId
             };
 
@@ -800,17 +761,17 @@
                 Id = Guid.NewGuid(),
                 Name = "For Edit 3",
                 Balance = 10,
-                AccountTypeId = this.AccType1User1.Id,
-                CurrencyId = this.Curr1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id
             };
             await this.accountsRepo.AddAsync(account);
             await this.accountsRepo.SaveChangesAsync();
 
-            var inputModel = new AccountFormShortServiceModel
+            var inputModel = new CreateEditAccountDTO
             {
                 Name = account.Name,
-                AccountTypeId = this.AccType2User1.Id, // Change
+                AccountTypeId = this.AccType2_User1_WithoutAcc.Id, // Change
                 Balance = account.Balance,
                 CurrencyId = account.CurrencyId,
                 OwnerId = account.OwnerId
@@ -839,8 +800,8 @@
                 Id = Guid.NewGuid(),
                 Name = "For Edit 4",
                 Balance = 5,
-                AccountTypeId = this.AccType1User1.Id,
-                CurrencyId = this.Curr1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id
             };
             var initialBalTransaction = new Transaction
@@ -849,7 +810,7 @@
                 Amount = 10,
                 OwnerId = account.OwnerId,
                 AccountId = account.Id,
-                CategoryId = this.CatInitialBalance.Id,
+                CategoryId = this.Category_InitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
                 Reference = "Initial Balance",
                 IsInitialBalance = true,
@@ -861,7 +822,7 @@
                 Amount = 5,
                 OwnerId = account.OwnerId,
                 AccountId = account.Id,
-                CategoryId = this.CatInitialBalance.Id,
+                CategoryId = this.Category_InitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
                 Reference = "Lunch",
                 TransactionType = TransactionType.Expense
@@ -884,7 +845,7 @@
             //Assert that the account has correct balance before the test
             Assert.That(account.Balance, Is.EqualTo(accountIncomesSum - accountExpensesSum));
 
-            var inputModel = new AccountFormShortServiceModel
+            var inputModel = new CreateEditAccountDTO
             {
                 Name = account.Name,
                 AccountTypeId = account.AccountTypeId,
@@ -920,8 +881,8 @@
                 Id = Guid.NewGuid(),
                 Name = "For Edit 4",
                 Balance = 5,
-                AccountTypeId = this.AccType1User1.Id,
-                CurrencyId = this.Curr1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id
             };
             var initialBalTransaction = new Transaction
@@ -930,7 +891,7 @@
                 Amount = 10,
                 OwnerId = account.OwnerId,
                 AccountId = account.Id,
-                CategoryId = this.CatInitialBalance.Id,
+                CategoryId = this.Category_InitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
                 Reference = "Initial Balance",
                 IsInitialBalance = true,
@@ -942,7 +903,7 @@
                 Amount = 5,
                 OwnerId = account.OwnerId,
                 AccountId = account.Id,
-                CategoryId = this.CatInitialBalance.Id,
+                CategoryId = this.Category_InitialBalance.Id,
                 CreatedOn = DateTime.UtcNow,
                 Reference = "Lunch",
                 TransactionType = TransactionType.Expense
@@ -965,7 +926,7 @@
             //Assert that the account has correct balance before the test
             Assert.That(account.Balance, Is.EqualTo(accountIncomesSum - accountExpensesSum));
 
-            var inputModel = new AccountFormShortServiceModel
+            var inputModel = new CreateEditAccountDTO
             {
                 Name = account.Name,
                 AccountTypeId = account.AccountTypeId,
@@ -1000,14 +961,14 @@
                 Id = Guid.NewGuid(),
                 Name = "For Edit 3",
                 Balance = 0,
-                AccountTypeId = this.AccType1User1.Id,
-                CurrencyId = this.Curr1User1.Id,
+                AccountTypeId = this.AccType1_User1_WithAcc.Id,
+                CurrencyId = this.Currency1_User1_WithAcc.Id,
                 OwnerId = this.User1.Id
             };
             await this.accountsRepo.AddAsync(account);
             await this.accountsRepo.SaveChangesAsync();
 
-            var inputModel = new AccountFormShortServiceModel
+            var inputModel = new CreateEditAccountDTO
             {
                 Name = account.Name,
                 AccountTypeId = account.AccountTypeId,
@@ -1030,7 +991,7 @@
                 Assert.That(initialBalTransaction.Reference, Is.EqualTo(CategoryInitialBalanceName));
                 Assert.That(initialBalTransaction.OwnerId, Is.EqualTo(account.OwnerId));
                 Assert.That(initialBalTransaction.AccountId, Is.EqualTo(account.Id));
-                Assert.That(initialBalTransaction.CategoryId, Is.EqualTo(this.CatInitialBalance.Id));
+                Assert.That(initialBalTransaction.CategoryId, Is.EqualTo(this.Category_InitialBalance.Id));
                 Assert.That(initialBalTransaction.TransactionType, Is.EqualTo(TransactionType.Income));
 
                 Assert.That(account.Balance, Is.EqualTo(100));
@@ -1046,36 +1007,36 @@
         public void EditAccount_ShouldThrowExceptionWhenUserHaveAccountWithSameName()
         {
             //Arrange
-            var inputModel = new AccountFormShortServiceModel
+            var inputModel = new CreateEditAccountDTO
             {
-                Name = this.Account2User1.Name, // Change
-                AccountTypeId = this.Account1User1.AccountTypeId,
-                Balance = this.Account1User1.Balance,
-                CurrencyId = this.Account1User1.CurrencyId,
-                OwnerId = this.Account1User1.OwnerId
+                Name = this.Account2_User1_WithoutTransactions.Name, // Change
+                AccountTypeId = this.Account1_User1_WithTransactions.AccountTypeId,
+                Balance = this.Account1_User1_WithTransactions.Balance,
+                CurrencyId = this.Account1_User1_WithTransactions.CurrencyId,
+                OwnerId = this.Account1_User1_WithTransactions.OwnerId
             };
 
             //Act & Assert
-            Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(this.Account1User1.Id, inputModel),
+            Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(this.Account1_User1_WithTransactions.Id, inputModel),
             Throws.TypeOf<ArgumentException>().With.Message
-                  .EqualTo($"The User already have Account with \"{this.Account2User1.Name}\" name."));
+                  .EqualTo($"The User already have Account with \"{this.Account2_User1_WithoutTransactions.Name}\" name."));
         }
 
 		[Test]
 		public void EditAccount_ShouldThrowException_WhenAccountTypeIsNotValid()
 		{
 			//Arrange
-			var inputModel = new AccountFormShortServiceModel
+			var inputModel = new CreateEditAccountDTO
 			{
-				Name = this.Account1User1.Name,
+				Name = this.Account1_User1_WithTransactions.Name,
 				AccountTypeId = Guid.NewGuid(), // Invalid Id
-				Balance = this.Account1User1.Balance,
-				CurrencyId = this.Account1User1.CurrencyId,
-				OwnerId = this.Account1User1.OwnerId
+				Balance = this.Account1_User1_WithTransactions.Balance,
+				CurrencyId = this.Account1_User1_WithTransactions.CurrencyId,
+				OwnerId = this.Account1_User1_WithTransactions.OwnerId
 			};
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(this.Account1User1.Id, inputModel),
+			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(this.Account1_User1_WithTransactions.Id, inputModel),
 			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Account Type is not valid."));
 		}
 
@@ -1083,17 +1044,17 @@
 		public void EditAccount_ShouldThrowException_WhenCurrencyIsNotValid()
 		{
 			//Arrange
-			var inputModel = new AccountFormShortServiceModel
+			var inputModel = new CreateEditAccountDTO
 			{
-				Name = this.Account1User1.Name,
-				AccountTypeId = this.Account1User1.AccountTypeId,
-				Balance = this.Account1User1.Balance,
+				Name = this.Account1_User1_WithTransactions.Name,
+				AccountTypeId = this.Account1_User1_WithTransactions.AccountTypeId,
+				Balance = this.Account1_User1_WithTransactions.Balance,
 				CurrencyId = Guid.NewGuid(), // Invalid Id
-				OwnerId = this.Account1User1.OwnerId
+				OwnerId = this.Account1_User1_WithTransactions.OwnerId
 			};
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(this.Account1User1.Id, inputModel),
+			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(this.Account1_User1_WithTransactions.Id, inputModel),
 			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Currency is not valid."));
 		}
 
@@ -1101,40 +1062,23 @@
         public async Task EditTransaction_ShouldEditTransactionAndChangeBalance_WhenTransactionTypeIsChanged()
         {
             //Arrange
-            var transaction = new Transaction
-            {
-                Id = Guid.NewGuid(),
-                OwnerId = this.User1.Id,
-                AccountId = this.Account1User1.Id,
-                Amount = 123,
-                CategoryId = this.Cat2User1.Id,
-                CreatedOn = DateTime.UtcNow,
-                Reference = "TransactionTypeChanged",
-                TransactionType = TransactionType.Income
-            };
+            var account = this.Account1_User1_WithTransactions;
+			var transaction = this.Transaction1_Expense_Account1_User1;
+			decimal balanceBefore = account.Balance;
+            var dto = this.mapper.Map<CreateEditTransactionDTO>(transaction);
 
-            await this.transactionsRepo.AddAsync(transaction);
-            this.Account1User1.Balance += transaction.Amount;
-            await this.transactionsRepo.SaveChangesAsync();
-            decimal balanceBefore = this.Account1User1.Balance;
-
-            TransactionFormShortServiceModel transactionEditModel = await this.transactionsRepo.All()
-                .Where(t => t.Id == transaction.Id)
-                .Select(t => this.mapper.Map<TransactionFormShortServiceModel>(t))
-                .FirstAsync();
-
-            //Act
-            transactionEditModel.TransactionType = TransactionType.Expense;
-            await this.accountsUpdateService.EditTransactionAsync(transaction.Id, transactionEditModel);
+			//Act
+			dto.TransactionType = TransactionType.Income;
+            await this.accountsUpdateService.EditTransactionAsync(transaction.Id, dto);
 
             //Assert
             Assert.Multiple(() =>
             {
                 Assert.That(transaction.TransactionType,
-                    Is.EqualTo(transactionEditModel.TransactionType));
+                    Is.EqualTo(dto.TransactionType));
 
-                Assert.That(this.Account1User1.Balance,
-                    Is.EqualTo(balanceBefore - (transaction.Amount * 2)));
+                Assert.That(account.Balance, 
+                    Is.EqualTo(balanceBefore + (transaction.Amount * 2)));
             });
         }
 
@@ -1142,44 +1086,28 @@
         public async Task EditTransaction_ShouldEditTransactionAndChangeBalanceOnTwoAccounts_WhenAccountIsChanged()
         {
             //Arrange
-            var transaction = new Transaction
-            {
-                Id = Guid.NewGuid(),
-                OwnerId = this.User1.Id,
-                AccountId = this.Account2User1.Id,
-                Amount = 123,
-                CategoryId = this.Cat2User1.Id,
-                CreatedOn = DateTime.UtcNow,
-                Reference = "AccountChanged",
-                TransactionType = TransactionType.Income
-            };
+            var firstAccount = this.Account1_User1_WithTransactions;
+            var secondAccount = this.Account2_User1_WithoutTransactions;
+            decimal firstAccBalanceBefore = firstAccount.Balance;
+            decimal secondAccBalanceBefore = secondAccount.Balance;
+            var transaction = this.Transaction1_Expense_Account1_User1;
+			var dto = this.mapper.Map<CreateEditTransactionDTO>(transaction);
 
-            await this.transactionsRepo.AddAsync(transaction);
-            this.Account2User1.Balance += transaction.Amount;
-            await this.transactionsRepo.SaveChangesAsync();
-            decimal firstAccBalanceBefore = this.Account2User1.Balance;
-            decimal secondAccBalanceBefore = this.Account1User1.Balance;
-
-            //Act
-            TransactionFormShortServiceModel editTransactionModel = await this.transactionsRepo.All()
-                .Where(t => t.Id == transaction.Id)
-                .Select(t => this.mapper.Map<TransactionFormShortServiceModel>(t))
-                .FirstAsync();
-
-            editTransactionModel.AccountId = this.Account1User1.Id;
-            await this.accountsUpdateService.EditTransactionAsync(transaction.Id, editTransactionModel);
+			//Act
+			dto.AccountId = secondAccount.Id;
+            await this.accountsUpdateService.EditTransactionAsync(transaction.Id, dto);
 
             //Assert
             Assert.Multiple(() =>
             {
                 Assert.That(transaction.AccountId,
-                    Is.EqualTo(this.Account1User1.Id));
+                    Is.EqualTo(secondAccount.Id));
 
-                Assert.That(this.Account2User1.Balance,
-                    Is.EqualTo(firstAccBalanceBefore - transaction.Amount));
+                Assert.That(firstAccount.Balance,
+                    Is.EqualTo(firstAccBalanceBefore + transaction.Amount));
 
-                Assert.That(this.Account1User1.Balance,
-                    Is.EqualTo(secondAccBalanceBefore + transaction.Amount));
+                Assert.That(secondAccount.Balance,
+                    Is.EqualTo(secondAccBalanceBefore - transaction.Amount));
             });
         }
 
@@ -1187,115 +1115,57 @@
         public async Task EditTransaction_ShouldEditTransaction_WhenPaymentReferenceIsChanged()
         {
             //Arrange
-            var transaction = new Transaction
-            {
-                Id = Guid.NewGuid(),
-                OwnerId = this.User1.Id,
-                AccountId = this.Account1User1.Id,
-                Amount = 123,
-                CategoryId = this.Cat2User1.Id,
-                CreatedOn = DateTime.UtcNow,
-                Reference = "First Reference",
-                TransactionType = TransactionType.Income
-            };
-
-            await this.transactionsRepo.AddAsync(transaction);
-            this.Account1User1.Balance += transaction.Amount;
-            await this.transactionsRepo.SaveChangesAsync();
-            decimal balanceBefore = this.Account1User1.Balance;
+            var account = this.Account1_User1_WithTransactions;
+			decimal balanceBefore = account.Balance;
+            var transaction = this.Transaction1_Expense_Account1_User1;
+            var dto = this.mapper.Map<CreateEditTransactionDTO>(transaction);
 
             //Act
-            TransactionFormShortServiceModel editTransactionModel = await this.transactionsRepo.All()
-                .Where(t => t.Id == transaction.Id)
-                .Select(t => this.mapper.Map<TransactionFormShortServiceModel>(t))
-                .FirstAsync();
-            editTransactionModel.Reference = "Second Reference";
-            await this.accountsUpdateService.EditTransactionAsync(transaction.Id, editTransactionModel);
+            dto.Reference = "Second Reference";
+            await this.accountsUpdateService.EditTransactionAsync(transaction.Id, dto);
 
             //Assert that only transaction reference is changed
             Assert.Multiple(() =>
             {
-
-                Assert.That(this.Account1User1.Balance, Is.EqualTo(balanceBefore));
-                Assert.That(transaction.Reference, Is.EqualTo(editTransactionModel.Reference));
-                Assert.That(transaction.CategoryId, Is.EqualTo(editTransactionModel.CategoryId));
-                Assert.That(transaction.AccountId, Is.EqualTo(editTransactionModel.AccountId));
-                Assert.That(transaction.Amount, Is.EqualTo(editTransactionModel.Amount));
-                Assert.That(transaction.OwnerId, Is.EqualTo(editTransactionModel.OwnerId));
-                Assert.That(transaction.CreatedOn, Is.EqualTo(editTransactionModel.CreatedOn));
+                Assert.That(account.Balance, Is.EqualTo(balanceBefore));
+                Assert.That(transaction.Reference, Is.EqualTo(dto.Reference));
+                Assert.That(transaction.CategoryId, Is.EqualTo(dto.CategoryId));
+                Assert.That(transaction.AccountId, Is.EqualTo(dto.AccountId));
+                Assert.That(transaction.Amount, Is.EqualTo(dto.Amount));
+                Assert.That(transaction.OwnerId, Is.EqualTo(dto.OwnerId));
+                Assert.That(transaction.CreatedOn, Is.EqualTo(dto.CreatedOn.ToUniversalTime()));
             });
         }
 
 		[Test]
-		public async Task EditTransaction_ShouldThrowException_WhenCategoryIsNotValid()
+		public void EditTransaction_ShouldThrowException_WhenCategoryIsNotValid()
 		{
 			//Arrange
-			var transaction = new Transaction
-			{
-				Id = Guid.NewGuid(),
-				OwnerId = this.User1.Id,
-				AccountId = this.Account1User1.Id,
-				Amount = 123,
-				CategoryId = this.Cat2User1.Id,
-				CreatedOn = DateTime.UtcNow,
-				Reference = Guid.NewGuid().ToString(),
-				TransactionType = TransactionType.Income
-			};
+			var account = this.Account1_User1_WithTransactions;
+			var transaction = this.Transaction1_Expense_Account1_User1;
+			var dto = this.mapper.Map<CreateEditTransactionDTO>(transaction);
 
-			await this.transactionsRepo.AddAsync(transaction);
-			this.Account1User1.Balance += transaction.Amount;
-			await this.transactionsRepo.SaveChangesAsync();
+            //Act
+            dto.CategoryId = Guid.NewGuid();
 
-			var model = new TransactionFormShortServiceModel
-			{
-				OwnerId = this.User1.Id,
-				AccountId = this.Account1User1.Id,
-				Amount = 321,
-				CategoryId = Guid.NewGuid(),
-				CreatedOn = DateTime.UtcNow,
-				Reference = "Edited transaction with invalid category id",
-				TransactionType = TransactionType.Income
-			};
-
-			// Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.EditTransactionAsync(transaction.Id, model),
+			//Assert
+			Assert.That(async () => await this.accountsUpdateService.EditTransactionAsync(transaction.Id, dto),
 			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Category is not valid."));
 		}
 
 		[Test]
-		public async Task EditTransaction_ShouldThrowException_WhenTransactionIsInitial()
+		public void EditTransaction_ShouldThrowException_WhenTransactionIsInitial()
 		{
 			//Arrange
-			var transaction = new Transaction
-			{
-				Id = Guid.NewGuid(),
-				OwnerId = this.User1.Id,
-				AccountId = this.Account1User1.Id,
-				Amount = 123,
-				CategoryId = this.CatInitialBalance.Id,
-				CreatedOn = DateTime.UtcNow,
-				Reference = this.CatInitialBalance.Name,
-				TransactionType = TransactionType.Income,
-                IsInitialBalance = true
-			};
+			var account = this.Account1_User1_WithTransactions;
+			var transaction = this.InitialTransaction_Income_Account1_User1;
+			var dto = this.mapper.Map<CreateEditTransactionDTO>(transaction);
 
-			await this.transactionsRepo.AddAsync(transaction);
-			this.Account1User1.Balance += transaction.Amount;
-			await this.transactionsRepo.SaveChangesAsync();
-
-			var model = new TransactionFormShortServiceModel
-			{
-				OwnerId = this.User1.Id,
-				AccountId = this.Account1User1.Id,
-				Amount = 321,
-				CategoryId = this.CatInitialBalance.Id,
-				CreatedOn = DateTime.UtcNow,
-				Reference = "Edited transaction with invalid category id",
-				TransactionType = TransactionType.Income
-			};
+            //Act
+            dto.CategoryId = this.Category1_User1_WithTransactions.Id;
 
 			// Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.EditTransactionAsync(transaction.Id, model),
+			Assert.That(async () => await this.accountsUpdateService.EditTransactionAsync(transaction.Id, dto),
 			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Cannot edit initial balance transaction."));
 		}
 	}

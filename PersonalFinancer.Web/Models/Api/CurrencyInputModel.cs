@@ -3,7 +3,7 @@
     using System.ComponentModel.DataAnnotations;
     using static PersonalFinancer.Data.Constants.CurrencyConstants;
 
-    public class CurrencyInputModel : IApiInputModel
+    public class CurrencyInputModel : IApiEntityInputModel
     {
         [Required(ErrorMessage = "Please enter a Currency name.")]
         [StringLength(CurrencyNameMaxLength, MinimumLength = CurrencyNameMinLength,

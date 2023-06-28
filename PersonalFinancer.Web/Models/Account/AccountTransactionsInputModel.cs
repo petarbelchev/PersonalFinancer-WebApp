@@ -3,7 +3,7 @@
 	using PersonalFinancer.Web.Models.Shared;
 	using System.ComponentModel.DataAnnotations;
 
-    public class AccountTransactionsInputModel : DateFilterModel
+	public class AccountTransactionsInputModel : DateFilterModel
 	{
 		[Required]
 		public Guid? Id { get; set; }

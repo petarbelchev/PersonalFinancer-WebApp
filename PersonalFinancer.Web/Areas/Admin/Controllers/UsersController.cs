@@ -19,24 +19,20 @@
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            UsersServiceModel usersData = await this.userService.GetAllUsersAsync(page);
-            var viewModel = new UsersViewModel { Users = usersData.Users };
-            viewModel.Pagination.TotalElements = usersData.TotalUsersCount;
-            viewModel.Pagination.Page = page;
+            UsersInfoDTO usersData = await this.userService.GetUsersInfoAsync(page);
+            var viewModel = new UsersViewModel(usersData, page);
 
             return this.View(viewModel);
         }
 
-        public async Task<IActionResult> Details([Required] Guid? id)
+        public async Task<IActionResult> Details([Required] Guid id)
         {
             if (!this.ModelState.IsValid)
                 return this.BadRequest();
 
             try
             {
-                Guid userId = id ?? throw new InvalidOperationException();
-
-                return this.View(await this.userService.UserDetailsAsync(userId));
+                return this.View(await this.userService.UserDetailsAsync(id));
             }
             catch (InvalidOperationException)
             {

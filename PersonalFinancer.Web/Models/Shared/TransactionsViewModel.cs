@@ -1,18 +1,26 @@
 ﻿namespace PersonalFinancer.Web.Models.Shared
 {
-    using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.Shared.Models;
     using static PersonalFinancer.Services.Constants;
 
     public class TransactionsViewModel
     {
-        public IEnumerable<TransactionTableServiceModel> Transactions { get; set; } = null!;
-
-        public PaginationModel Pagination { get; set; } = new PaginationModel
+        public TransactionsViewModel(
+            TransactionsDTO transactionsDTO,
+            int page)
         {
-            ElementsName = PaginationConstants.TransactionsName,
-            ElementsPerPage = PaginationConstants.TransactionsPerPage
-        };
+            this.Transactions = transactionsDTO.Transactions;
+            
+            this.Pagination = new PaginationModel(
+                PaginationConstants.TransactionsName,
+                PaginationConstants.TransactionsPerPage,
+                transactionsDTO.TotalTransactionsCount, 
+                page);
+        }
 
-        public string TransactionDetailsUrl { get; set; } = null!;
+        public IEnumerable<TransactionTableDTO> Transactions { get; private set; }
+
+        public PaginationModel Pagination { get; private set; }
     }
 }

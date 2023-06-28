@@ -1,22 +1,22 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-    using Microsoft.EntityFrameworkCore;
-    using NUnit.Framework;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.ApiService;
-    using PersonalFinancer.Services.ApiService.Models;
+	using Microsoft.EntityFrameworkCore;
+	using NUnit.Framework;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Api;
+	using PersonalFinancer.Services.Api.Models;
 
-    internal class CategoryServiceTests : ServicesUnitTestsBase
+	internal class CategoryServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<Category> repo;
-        private ApiService<Category> categoryService;
+		private ApiService<Category> categoryService;
 
         [SetUp]
         public void SetUp()
         {
             this.repo = new EfRepository<Category>(this.sqlDbContext);
-            this.categoryService = new ApiService<Category>(this.repo, this.mapper, this.memoryCache);
+			this.categoryService = new ApiService<Category>(this.repo, this.mapper);
         }
 
         [Test]
@@ -28,7 +28,7 @@
             int countBefore = await this.repo.All().CountAsync();
 
             //Act
-            ApiOutputServiceModel actual =
+            ApiEntityDTO actual =
                 await this.categoryService.CreateEntityAsync(categoryName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
@@ -67,7 +67,7 @@
             Assert.That(deletedAcc!.IsDeleted, Is.True);
 
             //Act
-            ApiOutputServiceModel result =
+            ApiEntityDTO result =
                 await this.categoryService.CreateEntityAsync(categoryName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
@@ -104,7 +104,7 @@
             Assert.That(await this.repo.FindAsync(user2Category.Id), Is.Not.Null);
 
             //Act
-            ApiOutputServiceModel result =
+            ApiEntityDTO result =
                 await this.categoryService.CreateEntityAsync(categoryName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
@@ -123,7 +123,7 @@
         public void CreateEntity_ShouldThrowException_WhenCategoryExist()
         {
             //Arrange
-            string categoryName = this.Cat2User1.Name;
+            string categoryName = this.Category1_User1_WithTransactions.Name;
             Guid ownerId = this.User1.Id;
 
             //Act & Assert

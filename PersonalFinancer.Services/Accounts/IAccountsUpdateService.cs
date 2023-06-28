@@ -3,20 +3,20 @@
 	using PersonalFinancer.Services.Accounts.Models;
 
 	public interface IAccountsUpdateService
-    {
-        /// <summary>
+	{
+		/// <summary>
         /// Throws ArgumentException when User already have Account with the given name.
-        /// </summary>
-        /// <returns>New Account Id.</returns>
-        /// <exception cref="ArgumentException"></exception>
-        Task<Guid> CreateAccountAsync(AccountFormShortServiceModel model);
+		/// </summary>
+		/// <returns>New Account Id.</returns>
+		/// <exception cref="ArgumentException"></exception>
+        Task<Guid> CreateAccountAsync(CreateEditAccountDTO model);
 
         /// <summary>
         /// Throws InvalidOperationException if Account does not exist.
         /// </summary>
         /// <returns>New transaction Id.</returns>
         /// <exception cref="InvalidOperationException"></exception>
-        Task<Guid> CreateTransactionAsync(TransactionFormShortServiceModel model);
+        Task<Guid> CreateTransactionAsync(CreateEditTransactionDTO model);
 
         /// <summary>
         /// Throws InvalidOperationException when Account does not exist
@@ -34,19 +34,19 @@
         /// <exception cref="InvalidOperationException"></exception>
         Task<decimal> DeleteTransactionAsync(Guid transactionId, Guid userId, bool isUserAdmin);
 
-        /// <summary>
+		/// <summary>
         /// Throws InvalidOperationException when Account does now exist,
-        /// and ArgumentException when User already have Account with given name.
-        /// </summary>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
-        Task EditAccountAsync(Guid accountId, AccountFormShortServiceModel model);
+		/// and ArgumentException when User already have Account with given name.
+		/// </summary>
+		/// <exception cref="ArgumentException"></exception>
+		/// <exception cref="InvalidOperationException"></exception>
+        Task EditAccountAsync(Guid accountId, CreateEditAccountDTO model);
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction or Account does not exist
+		/// Throws InvalidOperationException when Transaction, Category or Account does not exist
 		/// or Transaction is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
-		Task EditTransactionAsync(Guid id, TransactionFormShortServiceModel model);
+		Task EditTransactionAsync(Guid transactionId, CreateEditTransactionDTO model);
 	}
 }

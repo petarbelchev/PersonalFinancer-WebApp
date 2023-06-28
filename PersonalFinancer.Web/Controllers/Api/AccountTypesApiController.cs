@@ -2,7 +2,7 @@
 {
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Data.Models;
-	using PersonalFinancer.Services.ApiService;
+	using PersonalFinancer.Services.Api;
 	using PersonalFinancer.Web.Models.Api;
 	using System.ComponentModel.DataAnnotations;
 
@@ -28,7 +28,7 @@
 		}
 
 		[HttpDelete("{id}")]
-		public async Task<IActionResult> DeleteAccountType([Required] Guid? id) 
+		public async Task<IActionResult> DeleteAccountType([Required] Guid id) 
 			=> await this.DeleteEntityAsync(id);
 	}
 }

@@ -8,7 +8,8 @@
     using PersonalFinancer.Services.User;
     using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Message;
-    using static PersonalFinancer.Data.Constants.RoleConstants;
+	using System.ComponentModel.DataAnnotations;
+	using static PersonalFinancer.Data.Constants.RoleConstants;
 
     [Authorize]
     public class MessagesController : Controller
@@ -29,7 +30,7 @@
 
         public async Task<IActionResult> AllMessages()
         {
-            IEnumerable<MessageOutputServiceModel> messages = this.User.IsAdmin()
+            IEnumerable<MessageOutputDTO> messages = this.User.IsAdmin()
                 ? await this.messagesService.GetAllAsync()
                 : await this.messagesService.GetUserMessagesAsync(this.User.Id());
 
@@ -47,7 +48,7 @@
                 return this.View(model);
 
             string newMessageId = await this.messagesService
-                .CreateAsync(new MessageInputServiceModel
+                .CreateAsync(new MessageInputDTO
                 {
                     AuthorId = this.User.Id(),
                     AuthorName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
@@ -59,7 +60,7 @@
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete([Required] string id)
         {
             try
             {
@@ -77,11 +78,11 @@
             return this.RedirectToAction(nameof(AllMessages));
         }
 
-        public async Task<IActionResult> MessageDetails(string id)
+        public async Task<IActionResult> MessageDetails([Required] string id)
         {
             try
             {
-                MessageDetailsServiceModel message =
+                MessageDetailsDTO message =
                     await this.messagesService.GetMessageAsync(id, this.User.Id(), this.User.IsAdmin());
 
                 MessageDetailsViewModel viewModel = this.mapper.Map<MessageDetailsViewModel>(message);
@@ -101,7 +102,7 @@
             {
                 if (!this.ModelState.IsValid)
                 {
-                    MessageDetailsServiceModel message =
+                    MessageDetailsDTO message =
                         await this.messagesService.GetMessageAsync(inputModel.Id, this.User.Id(), this.User.IsAdmin());
 
                     MessageDetailsViewModel viewModel = this.mapper.Map<MessageDetailsViewModel>(message);
@@ -110,7 +111,7 @@
                     return this.View(viewModel);
                 }
 
-                await this.messagesService.AddReplyAsync(new ReplyInputServiceModel
+                await this.messagesService.AddReplyAsync(new ReplyInputDTO
                 {
                     MessageId = inputModel.Id,
                     AuthorId = this.User.Id(),

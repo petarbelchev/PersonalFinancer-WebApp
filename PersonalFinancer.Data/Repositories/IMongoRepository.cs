@@ -4,7 +4,7 @@
     using PersonalFinancer.Data.Models.Contracts;
     using System.Linq.Expressions;
 
-    public interface IMongoRepository<T> where T : MongoDocument
+    public interface IMongoRepository<T> where T : BaseMongoDocument
     {
         Task InsertOneAsync(T entity);
 

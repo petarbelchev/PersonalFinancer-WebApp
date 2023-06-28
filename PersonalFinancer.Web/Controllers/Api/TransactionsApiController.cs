@@ -1,12 +1,14 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
+	using AutoMapper;
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.Shared;
-	using PersonalFinancer.Web.Models.Transaction;
 	using static PersonalFinancer.Data.Constants.RoleConstants;
 
 	[Authorize]
@@ -14,10 +16,67 @@
 	[ApiController]
 	public class TransactionsApiController : ControllerBase
 	{
+		private readonly IUsersService usersService;
 		private readonly IAccountsInfoService accountsInfoService;
+		private readonly IAccountsUpdateService accountsUpdateService;
+		private readonly IMapper mapper;
 
-		public TransactionsApiController(IAccountsInfoService accountsInfoService) 
-			=> this.accountsInfoService = accountsInfoService;
+		public TransactionsApiController(
+			IUsersService usersService,
+			IAccountsInfoService accountsInfoService,
+			IAccountsUpdateService accountsUpdateService,
+			IMapper mapper)
+		{
+			this.usersService = usersService;
+			this.accountsInfoService = accountsInfoService;
+			this.accountsUpdateService = accountsUpdateService;
+			this.mapper = mapper;
+		}
+
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteTransaction(Guid id)
+		{
+			try
+			{
+				await this.accountsUpdateService.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
+			}
+			catch (ArgumentException)
+			{
+				return this.Unauthorized();
+			}
+			catch (InvalidOperationException)
+			{
+				return this.BadRequest();
+			}
+
+			string message = this.User.IsAdmin()
+				? "You successfully delete a user's transaction!"
+				: "Your transaction was successfully deleted!";
+
+			return this.Content(message);
+		}
+
+		[HttpGet("{id}")]
+		public async Task<IActionResult> GetTransactionDetails(Guid id)
+		{
+			TransactionDetailsDTO viewModel;
+
+			try
+			{
+				viewModel = await this.accountsInfoService
+					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
+			}
+			catch (ArgumentException)
+			{
+				return this.Unauthorized();
+			}
+			catch (InvalidOperationException)
+			{
+				return this.BadRequest();
+			}
+
+			return this.Ok(viewModel);
+		}
 
 		[Authorize(Roles = UserRoleName)]
 		[HttpPost]
@@ -31,27 +90,23 @@
 			if (inputModel.Id != userId)
 				return this.Unauthorized();
 
-			TransactionsServiceModel userTransactions;
+			var filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
+			TransactionsDTO transactionsDTO;
 
 			try
 			{
-				userTransactions = await this.accountsInfoService
-					.GetUserTransactionsAsync(userId, inputModel.StartDate, inputModel.EndDate, inputModel.Page);
+				transactionsDTO = await this.usersService.GetUserTransactionsAsync(filterDTO);
 			}
 			catch (InvalidOperationException)
 			{
 				return this.BadRequest();
 			}
 
-			var userModel = new TransactionsViewModel
-			{
-				Transactions = userTransactions.Transactions
-			};
-			userModel.Pagination.Page = inputModel.Page;
-			userModel.Pagination.TotalElements = userTransactions.TotalTransactionsCount;
-			userModel.TransactionDetailsUrl = "/Transactions/TransactionDetails/";
+			var userTransactions = new TransactionsViewModel(
+				transactionsDTO,
+				inputModel.Page);
 
-			return this.Ok(userModel);
+			return this.Ok(userTransactions);
 		}
 	}
 }

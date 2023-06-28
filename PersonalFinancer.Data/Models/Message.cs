@@ -2,7 +2,7 @@
 {
     using PersonalFinancer.Data.Models.Contracts;
 
-    public class Message : MongoDocument
+    public class Message : BaseMongoDocument
     {
         public string AuthorName { get; set; } = null!;
 

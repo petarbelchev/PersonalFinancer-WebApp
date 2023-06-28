@@ -5,10 +5,10 @@
     using System.ComponentModel.DataAnnotations.Schema;
     using static PersonalFinancer.Data.Constants.AccountConstants;
 
-    public class Account : CacheableEntity
+    public class Account : BaseApiEntity
     {
         [Key]
-        public Guid Id { get; set; }
+        public override Guid Id { get; set; }
 
         [MaxLength(AccountNameMaxLength,
            ErrorMessage = "Account name max length must be {1} characters long.")]

@@ -3,9 +3,10 @@ let mainDiv;
 let selectField;
 let ownerId;
 let url;
+let newElemDiv;
 
 for (var div of divs) {
-    div.addEventListener('click', await eventHandler(e));
+    div.addEventListener('click', async (e) => await eventHandler(e));
 }
 
 async function eventHandler(e) {
@@ -17,14 +18,13 @@ async function eventHandler(e) {
     selectField = mainDiv.querySelector('select');
     ownerId = mainDiv.attributes[1].value;
     url = mainDiv.attributes[2].value;
+    newElemDiv = mainDiv.querySelector('div');
 
     if (e.target.classList.contains('createBtn')) {
-        let newElemDiv = mainDiv.querySelector('div');
-
         if (newElemDiv.style.display == 'none') {
             newElemDiv.style.display = 'block';
         } else {
-            await createEntity(newElemDiv);
+            await createEntity();
         }
 
     } else if (e.target.classList.contains('deleteBtn')) {
@@ -34,7 +34,7 @@ async function eventHandler(e) {
     }
 }
 
-async function createEntity(newElemDiv) {
+async function createEntity() {
     let inputField = newElemDiv.querySelector('input');
     let errorMsgField = newElemDiv.querySelector('p');
 

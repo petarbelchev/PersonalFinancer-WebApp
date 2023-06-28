@@ -1,22 +1,22 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-    using Microsoft.EntityFrameworkCore;
-    using NUnit.Framework;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.ApiService;
-    using PersonalFinancer.Services.ApiService.Models;
+	using Microsoft.EntityFrameworkCore;
+	using NUnit.Framework;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Api;
+	using PersonalFinancer.Services.Api.Models;
 
-    internal class AccountTypeServiceTests : ServicesUnitTestsBase
+	internal class AccountTypeServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<AccountType> repo;
-        private ApiService<AccountType> accountTypeService;
+		private ApiService<AccountType> accountTypeService;
 
         [SetUp]
         public void SetUp()
         {
             this.repo = new EfRepository<AccountType>(this.sqlDbContext);
-            this.accountTypeService = new ApiService<AccountType>(this.repo, this.mapper, this.memoryCache);
+			this.accountTypeService = new ApiService<AccountType>(this.repo, this.mapper);
         }
 
         [Test]
@@ -29,7 +29,7 @@
             int countBefore = await this.repo.All().CountAsync();
 
             //Act
-            ApiOutputServiceModel actual =
+            ApiEntityDTO actual =
                 await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
@@ -68,7 +68,7 @@
             Assert.That(deletedAcc.IsDeleted, Is.True);
 
             //Act
-            ApiOutputServiceModel result =
+            ApiEntityDTO result =
                 await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
             int countAfter = await this.repo.All().CountAsync();
 
@@ -104,7 +104,7 @@
             Assert.That(await this.repo.FindAsync(user2AccType.Id), Is.Not.Null);
 
             //Act
-            ApiOutputServiceModel result =
+            ApiEntityDTO result =
                 await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
 
             int countAfter = await this.repo.All().CountAsync();
@@ -123,7 +123,7 @@
         public void CreateEntity_ShouldThrowException_WhenAccTypeExist()
         {
             //Arrange
-            string accountTypeName = this.AccType1User1.Name;
+            string accountTypeName = this.AccType1_User1_WithAcc.Name;
             Guid ownerId = this.User1.Id;
 
             //Act & Assert

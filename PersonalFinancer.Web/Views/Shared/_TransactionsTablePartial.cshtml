@@ -14,7 +14,7 @@
 	<tbody style="vertical-align: text-top;">
 		@foreach (var transaction in Model.Transactions)
 		{
-			<tr role="button" onclick="location.href='@Url.Action("TransactionDetails", "Transactions", new { id = transaction.Id })'">
+			<tr role="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" transactionId="@transaction.Id">
 				@if (transaction.TransactionType == TransactionType.Income.ToString())
 				{
 					<td><img src="/icons/greenArrow.png" style="max-width: 25px;"></td>
