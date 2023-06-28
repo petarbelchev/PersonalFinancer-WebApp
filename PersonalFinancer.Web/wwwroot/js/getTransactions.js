@@ -1,4 +1,5 @@
-﻿let paginations = document.getElementsByClassName('pagination');
+﻿const tbody = document.querySelector('tbody');
+let paginations = document.getElementsByClassName('pagination');
 let currentPage = 1;
 
 for (let pagination of paginations) {
@@ -11,6 +12,18 @@ for (let pagination of paginations) {
 }
 
 async function getTransactions(page) {
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="5">
+	            <div class="d-flex justify-content-center">
+		            <div class="spinner-border" role="status">
+			            <span class="visually-hidden">Loading...</span>
+		            </div>
+	            </div>
+            </td>
+        </tr>
+	`;
+
     let response = await fetch(params.allTransactionsEndpoint, {
         method: 'POST',
         headers: {
@@ -63,5 +76,5 @@ function renderTransactions(model) {
         innerHtml += tr;
     }
 
-    document.querySelector('tbody').innerHTML = innerHtml;
+    tbody.innerHTML = innerHtml;
 }

@@ -14,11 +14,11 @@ myModal.addEventListener('show.bs.modal', async (e) => {
 
 myModal.addEventListener('hidden.bs.modal', () => {
     modalBody.innerHTML = `
-	<div class="d-flex justify-content-center">
-		<div class="spinner-border" role="status">
-			<span class="visually-hidden">Loading...</span>
-		</div>
-	</div>
+	    <div class="d-flex justify-content-center">
+		    <div class="spinner-border" role="status">
+			    <span class="visually-hidden">Loading...</span>
+		    </div>
+	    </div>
 	`;
 
     editBtn.style.display = 'none';
