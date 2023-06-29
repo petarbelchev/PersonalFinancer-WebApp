@@ -34,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PersonalFinancer.Common\PersonalFinancer.Common.csproj" />
     <ProjectReference Include="..\PersonalFinancer.Data\PersonalFinancer.Data.csproj" />
     <ProjectReference Include="..\PersonalFinancer.Services\PersonalFinancer.Services.csproj" />
   </ItemGroup>

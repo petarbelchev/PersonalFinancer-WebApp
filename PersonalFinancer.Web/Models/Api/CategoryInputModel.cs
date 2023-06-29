@@ -1,16 +1,18 @@
 ﻿namespace PersonalFinancer.Web.Models.Api
 {
+    using PersonalFinancer.Common.Messages;
     using System.ComponentModel.DataAnnotations;
     using static PersonalFinancer.Data.Constants.CategoryConstants;
 
     public class CategoryInputModel : IApiEntityInputModel
     {
-        [Required(ErrorMessage = "Please enter a Category name.")]
+        [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
         [StringLength(CategoryNameMaxLength, MinimumLength = CategoryNameMinLength,
-            ErrorMessage = "Category name must be between {2} and {1} characters long.")]
-        public string Name { get; set; } = null!;
+            ErrorMessage = ValidationMessages.InvalidLength)]
+		[Display(Name = "Category")]
+		public string Name { get; set; } = null!;
 
-        [Required(ErrorMessage = "Owner Id is required!")]
+        [Required]
         public Guid? OwnerId { get; set; }
     }
 }

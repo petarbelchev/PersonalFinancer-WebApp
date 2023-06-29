@@ -1,58 +1,57 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Data.Models.Enums;
     using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Web.ModelBinders;
     using System.ComponentModel.DataAnnotations;
     using static PersonalFinancer.Data.Constants.TransactionConstants;
 
     public class TransactionFormViewModel
-    {
-        // TODO: Check decimal model binding!
-        [Required(ErrorMessage = "Please enter an Amount.")]
-        [Range(TransactionMinValue, TransactionMaxValue,
-            ErrorMessage = "Amount must be a number between {1} and {2}.")]
-        public decimal Amount { get; set; }
+	{
+		[Required]
+		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
+		[Range(TransactionMinValue, TransactionMaxValue,
+			ErrorMessage = ValidationMessages.InvalidNumericLength)]
+		public decimal Amount { get; set; }
 
-        [Required(ErrorMessage = "Owner Id is required.")]
-        public Guid? OwnerId { get; set; }
+		[Required]
+		public Guid? OwnerId { get; set; }
 
-        [Required(ErrorMessage = "Category is required.")]
-        [Display(Name = "Category")]
-        public Guid? CategoryId { get; set; }
+		[Required]
+		[Display(Name = "Category")]
+		public Guid? CategoryId { get; set; }
 
-        public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; set; }
-            = new List<CategoryDropdownDTO>();
+		[Required]
+		[Display(Name = "Account")]
+		public Guid? AccountId { get; set; }
 
-        [Required(ErrorMessage = "Account is required.")]
-        [Display(Name = "Account")]
-        public Guid? AccountId { get; set; }
+		[Required]
+		[Display(Name = "Date")]
+		public DateTime CreatedOn { get; set; }
 
-        public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
-            = new List<AccountDropdownDTO>();
+		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+		[StringLength(TransactionReferenceMaxLength,
+			MinimumLength = TransactionReferenceMinLength,
+			ErrorMessage = ValidationMessages.InvalidLength)]
+		[Display(Name = "Payment Reference")]
+		public string Reference { get; set; } = null!;
 
-        [Required(ErrorMessage = "Date is required.")]
-        [Display(Name = "Date")]
-        [DataType(DataType.DateTime, ErrorMessage = "Please enter a valid Date.")]
-        public DateTime CreatedOn { get; set; }
+		[Required]
+		[Display(Name = "Transaction Type")]
+		public TransactionType TransactionType { get; set; }
 
-        [Required(ErrorMessage = "Payment Reference is required.")]
-        [StringLength(TransactionReferenceMaxLength,
-            MinimumLength = TransactionReferenceMinLength,
-            ErrorMessage = "Payment Reference must be between {2} and {1} characters long.")]
-        [Display(Name = "Payment Reference")]
-        public string Reference { get; set; } = null!;
+		public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; set; }
+			= new List<CategoryDropdownDTO>();
 
-        [Display(Name = "Transaction Type")]
-        public TransactionType TransactionType { get; set; }
+		public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
+			= new List<AccountDropdownDTO>();
 
-        public TransactionType[] TransactionTypes => this.IsInitialBalance ?
-            new TransactionType[] { TransactionType.Income }
-            : new TransactionType[]
-            {
-                TransactionType.Income,
-                TransactionType.Expense
-            };
-
-        public bool IsInitialBalance { get; set; }
-    }
+		public TransactionType[] TransactionTypes { get; set; } = new TransactionType[]
+		{
+			TransactionType.Income,
+			TransactionType.Expense
+		};
+	}
 }

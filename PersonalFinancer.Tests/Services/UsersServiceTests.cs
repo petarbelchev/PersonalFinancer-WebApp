@@ -171,7 +171,7 @@
 
 			List<CurrencyCashFlowWithExpensesByCategoriesDTO> expectedCurrenciesCashFlow = await this.transactionsRepo.All()
 				.Where(t => t.OwnerId == this.User1.Id
-					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+							&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 				.GroupBy(t => t.Account.Currency.Name)
 				.Select(t => new CurrencyCashFlowWithExpensesByCategoriesDTO
 				{
@@ -193,7 +193,7 @@
 
 			List<TransactionTableDTO> expectedLastFiveTransaction = await this.transactionsRepo.All()
 				.Where(t => t.Account.OwnerId == this.User1.Id
-					&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
+							&& t.CreatedOn >= startDate && t.CreatedOn <= endDate)
 				.OrderByDescending(t => t.CreatedOn)
 				.Take(5)
 				.Select(t => this.mapper.Map<TransactionTableDTO>(t))

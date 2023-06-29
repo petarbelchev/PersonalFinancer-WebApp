@@ -1,14 +1,15 @@
 ﻿namespace PersonalFinancer.Web.Models.Shared
 {
-	using System.ComponentModel.DataAnnotations;
+    using PersonalFinancer.Common.Messages;
+    using System.ComponentModel.DataAnnotations;
 
-	public class DateFilterModel : IValidatableObject
+    public class DateFilterModel : IValidatableObject
     {
-        [Required(ErrorMessage = "Please enter a valid date.")]
+        [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
         [Display(Name = "From")]
         public DateTime? StartDate { get; set; }
 
-        [Required(ErrorMessage = "Please enter a valid date.")]
+        [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
         [Display(Name = "To")]
         public DateTime? EndDate { get; set; }
 

@@ -15,11 +15,11 @@
            Expression<Func<T, bool>> filterExpression,
            Expression<Func<T, TProjected>> projectionExpression);
 
-        /// <summary>
-        /// Throws InvalidOperationException when Document not found with the given filter.
-        /// </summary>
-        /// <exception cref="InvalidOperationException"></exception>
-        Task<TProjected> FindOneAsync<TProjected>(
+		/// <summary>
+		/// Throws Invalid Operation Exception when the document is not found with the given filter.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		Task<TProjected> FindOneAsync<TProjected>(
            Expression<Func<T, bool>> filterExpression,
            Expression<Func<T, TProjected>> projectionExpression);
 

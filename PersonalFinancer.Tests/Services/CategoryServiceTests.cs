@@ -1,13 +1,14 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-	using Microsoft.EntityFrameworkCore;
-	using NUnit.Framework;
-	using PersonalFinancer.Data.Models;
-	using PersonalFinancer.Data.Repositories;
-	using PersonalFinancer.Services.Api;
-	using PersonalFinancer.Services.Api.Models;
+    using Microsoft.EntityFrameworkCore;
+    using NUnit.Framework;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models;
+    using PersonalFinancer.Data.Repositories;
+    using PersonalFinancer.Services.Api;
+    using PersonalFinancer.Services.Api.Models;
 
-	internal class CategoryServiceTests : ServicesUnitTestsBase
+    internal class CategoryServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<Category> repo;
 		private ApiService<Category> categoryService;
@@ -218,7 +219,7 @@
             //Act & Assert
             Assert.That(async () => await this.categoryService
                   .DeleteEntityAsync(user2Category.Id, this.User1.Id, isUserAdmin: false),
-            Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Unauthorized."));
+            Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
         }
     }
 }

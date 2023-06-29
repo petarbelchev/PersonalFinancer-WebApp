@@ -1,14 +1,15 @@
 ﻿namespace PersonalFinancer.Services.Accounts
 {
-	using AutoMapper;
-	using Microsoft.EntityFrameworkCore;
-	using PersonalFinancer.Data.Models;
-	using PersonalFinancer.Data.Models.Enums;
-	using PersonalFinancer.Data.Repositories;
-	using PersonalFinancer.Services.Accounts.Models;
-	using static PersonalFinancer.Data.Constants;
+    using AutoMapper;
+    using Microsoft.EntityFrameworkCore;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models;
+    using PersonalFinancer.Data.Models.Enums;
+    using PersonalFinancer.Data.Repositories;
+    using PersonalFinancer.Services.Accounts.Models;
+    using static PersonalFinancer.Data.Constants;
 
-	public class AccountsUpdateService : IAccountsUpdateService
+    public class AccountsUpdateService : IAccountsUpdateService
 	{
 		private readonly IEfRepository<Account> accountsRepo;
 		private readonly IEfRepository<Transaction> transactionsRepo;
@@ -34,19 +35,18 @@
 		}
 
 		/// <summary>
-		/// Throws ArgumentException when User already have Account with the given name.
+		/// Throws Argument Exception when the user already have account with the given name.
 		/// </summary>
 		/// <returns>New Account Id.</returns>
 		/// <exception cref="ArgumentException"></exception>
 		public async Task<Guid> CreateAccountAsync(CreateEditAccountDTO model)
 		{
 			if (await this.IsNameExistAsync(model.Name, model.OwnerId))
-				throw new ArgumentException($"The User already have Account with \"{model.Name}\" name.");
+				throw new ArgumentException(string.Format(ExceptionMessages.ExistingUserEntityName, "account", model.Name));
 
 			await this.ValidateAccountTypeAndCurrencyAsync(model);
 
 			Account newAccount = this.mapper.Map<Account>(model);
-			newAccount.Id = Guid.NewGuid();
 
 			if (newAccount.Balance != 0)
 			{
@@ -63,7 +63,7 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException if Account does not exist.
+		/// Throws Invalid Operation Exception if the account does not exist.
 		/// </summary>
 		/// <returns>New transaction Id.</returns>
 		/// <exception cref="InvalidOperationException"></exception>
@@ -73,10 +73,7 @@
 
 			await this.ValidateCategoryAsync(model.CategoryId, model.OwnerId);
 
-			model.CreatedOn = model.CreatedOn.ToUniversalTime();
-
 			Transaction newTransaction = this.mapper.Map<Transaction>(model);
-			newTransaction.Id = Guid.NewGuid();
 
 			await this.transactionsRepo.AddAsync(newTransaction);
 
@@ -88,8 +85,8 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Account does not exist
-		/// and ArgumentException when User is not owner or Administrator.
+		/// Throws Invalid Operation Exception when the account does not exist
+		/// and Argument Exception when the user is not owner or administrator.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
@@ -99,7 +96,7 @@
 			Account account = await this.FindAccountAsync(accountId);
 
 			if (!isUserAdmin && account.OwnerId != userId)
-				throw new ArgumentException("Can't delete someone else account.");
+				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
 
 			if (shouldDeleteTransactions)
 				this.accountsRepo.Remove(account);
@@ -110,8 +107,8 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction does not exist
-		/// and ArgumentException when User is not owner or Administrator.
+		/// Throws Invalid Operation Exception when the transaction does not exist
+		/// and Argument Exception when the user is not owner or administrator.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
@@ -122,7 +119,7 @@
 			   .FirstAsync(t => t.Id == transactionId);
 
 			if (!isUserAdmin && transaction.OwnerId != userId)
-				throw new ArgumentException("The user is not transaction's owner");
+				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
 
 			this.transactionsRepo.Remove(transaction);
 
@@ -134,8 +131,8 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Account does now exist,
-		/// and ArgumentException when User already have Account with given name.
+		/// Throws Invalid Operation Exception when the account does now exist,
+		/// and Argument Exception when the user already have account with the given name.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
@@ -144,7 +141,7 @@
 			Account account = await this.FindAccountAsync(accountId);
 
 			if (account.Name != model.Name && await this.IsNameExistAsync(model.Name, model.OwnerId))
-				throw new ArgumentException($"The User already have Account with \"{model.Name}\" name.");
+				throw new ArgumentException(string.Format(ExceptionMessages.ExistingUserEntityName, "account", model.Name));
 
 			await this.ValidateAccountTypeAndCurrencyAsync(model);
 
@@ -180,8 +177,8 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction, Category or Account does not exist
-		/// or Transaction is initial.
+		/// Throws Invalid Operation Exception when the transaction, category or account does not exist
+		/// or the transaction is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task EditTransactionAsync(Guid transactionId, CreateEditTransactionDTO model)
@@ -191,7 +188,7 @@
 				.FirstAsync(t => t.Id == transactionId);
 
 			if (transactionInDb.IsInitialBalance)
-				throw new InvalidOperationException("Cannot edit initial balance transaction.");
+				throw new InvalidOperationException(ExceptionMessages.EditInitialTransaction);
 
 			await this.ValidateCategoryAsync(model.CategoryId, model.OwnerId);
 
@@ -227,7 +224,6 @@
 		{
 			return new Transaction()
 			{
-				Id = Guid.NewGuid(),
 				AccountId = accountId,
 				OwnerId = ownerId,
 				CategoryId = Guid.Parse(CategoryConstants.InitialBalanceCategoryId),
@@ -250,7 +246,7 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException if Account does not exist.
+		/// Throws Invalid Operation Exception if the account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		private async Task<Account> FindAccountAsync(Guid accountId)
@@ -273,7 +269,7 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException if account type or currency is invalid.
+		/// Throws Invalid Operation Exception if the account type or currency is invalid.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		private async Task ValidateAccountTypeAndCurrencyAsync(CreateEditAccountDTO model)
@@ -284,7 +280,7 @@
 				&& at.IsDeleted == false);
 
 			if (!isAccountTypeValid)
-				throw new InvalidOperationException("Account Type is not valid.");
+				throw new InvalidOperationException(ExceptionMessages.InvalidAccountType);
 
 			bool isCurrencyValid = await this.currenciesRepo.All().AnyAsync(c =>
 				c.Id == model.CurrencyId
@@ -292,11 +288,11 @@
 				&& c.IsDeleted == false);
 
 			if (!isCurrencyValid)
-				throw new InvalidOperationException("Currency is not valid.");
+				throw new InvalidOperationException(ExceptionMessages.InvalidCurrency);
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException if category is invalid.
+		/// Throws Invalid Operation Exception if the category is invalid.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		private async Task ValidateCategoryAsync(Guid categoryId, Guid ownerId)
@@ -307,7 +303,7 @@
 				&& c.IsDeleted == false);
 
 			if (!isCategoryValid)
-				throw new InvalidOperationException("Category is not valid.");
+				throw new InvalidOperationException(ExceptionMessages.InvalidCategory);
 		}
 	}
 }

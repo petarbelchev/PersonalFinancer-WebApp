@@ -3,6 +3,7 @@
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Data.Models;
     using System.ComponentModel.DataAnnotations;
     using static PersonalFinancer.Data.Constants;
@@ -28,26 +29,29 @@
 
         public class InputModel
         {
-            [Required(ErrorMessage = "Username is required.")]
-            [StringLength(UserConstants.UserNameMaxLength, MinimumLength = UserConstants.UserNameMinLength,
-                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+            [StringLength(UserConstants.UserNameMaxLength, 
+                MinimumLength = UserConstants.UserNameMinLength,
+                ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "Username")]
             public string UserName { get; set; } = null!;
 
-            [Required(ErrorMessage = "First Name is required.")]
-            [StringLength(UserConstants.UserFirstNameMaxLength, MinimumLength = UserConstants.UserFirstNameMinLength,
-                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+            [StringLength(UserConstants.UserFirstNameMaxLength, 
+                MinimumLength = UserConstants.UserFirstNameMinLength,
+                ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "First Name")]
             public string FirstName { get; set; } = null!;
 
-            [Required(ErrorMessage = "Last Name is required.")]
-            [StringLength(UserConstants.UserLastNameMaxLength, MinimumLength = UserConstants.UserLastNameMinLength,
-                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+            [StringLength(UserConstants.UserLastNameMaxLength, 
+                MinimumLength = UserConstants.UserLastNameMinLength,
+                ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "Last Name")]
             public string LastName { get; set; } = null!;
 
             [DataType(DataType.PhoneNumber)]
-            [RegularExpression(@"^\d{10}$", ErrorMessage = "Phone number must be 10 digits.")]
+            [RegularExpression(@"^\d{10}$", ErrorMessage = ValidationMessages.InvalidPhoneNumberLength)]
             [Display(Name = "Phone number")]
             public string? PhoneNumber { get; set; }
         }

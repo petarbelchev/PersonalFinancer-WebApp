@@ -4,6 +4,7 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
+    using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Data.Models;
     using System.ComponentModel.DataAnnotations;
     using System.Text;
@@ -21,20 +22,21 @@
 
         public class InputModel
         {
-            [Required(ErrorMessage = "Email address is required.")]
-            [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+            [EmailAddress(ErrorMessage = ValidationMessages.InvalidEmailAddress)]
             [Display(Name = "Email")]
             public string Email { get; set; } = null!;
 
-            [Required(ErrorMessage = "Password is required.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
             [DataType(DataType.Password)]
-            [StringLength(UserConstants.UserPasswordMaxLength, MinimumLength = UserConstants.UserPasswordMinLength,
-                ErrorMessage = "Password must be between {2} and {1} characters long.")]
+            [StringLength(UserConstants.UserPasswordMaxLength, 
+                MinimumLength = UserConstants.UserPasswordMinLength,
+                ErrorMessage = ValidationMessages.InvalidLength)]
             public string Password { get; set; } = null!;
 
-            [Required(ErrorMessage = "Confirm Password is required.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
             [DataType(DataType.Password)]
-            [Compare(nameof(Password), ErrorMessage = "Password do not match.")]
+            [Compare(nameof(Password), ErrorMessage = ValidationMessages.CompareDoNotMatch)]
             [Display(Name = "Confirm Password")]
             public string ConfirmPassword { get; set; } = null!;
 

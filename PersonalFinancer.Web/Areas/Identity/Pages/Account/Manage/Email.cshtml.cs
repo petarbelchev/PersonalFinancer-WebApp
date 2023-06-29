@@ -5,6 +5,7 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
+    using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Data.Models;
     using System.ComponentModel.DataAnnotations;
     using System.Text;
@@ -35,8 +36,8 @@
 
         public class InputModel
         {
-            [Required(ErrorMessage = "Email address is required.")]
-            [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+            [EmailAddress(ErrorMessage = ValidationMessages.InvalidEmailAddress)]
             [Display(Name = "New Email")]
             public string NewEmail { get; set; } = null!;
         }

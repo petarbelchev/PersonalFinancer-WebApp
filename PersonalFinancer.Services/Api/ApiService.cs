@@ -1,12 +1,13 @@
 ﻿namespace PersonalFinancer.Services.Api
 {
-	using AutoMapper;
-	using Microsoft.EntityFrameworkCore;
-	using PersonalFinancer.Data.Models.Contracts;
-	using PersonalFinancer.Data.Repositories;
-	using PersonalFinancer.Services.Api.Models;
+    using AutoMapper;
+    using Microsoft.EntityFrameworkCore;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models.Contracts;
+    using PersonalFinancer.Data.Repositories;
+    using PersonalFinancer.Services.Api.Models;
 
-	public class ApiService<T> : IApiService<T> where T : BaseApiEntity, new()
+    public class ApiService<T> : IApiService<T> where T : BaseApiEntity, new()
     {
         private readonly IEfRepository<T> repo;
         private readonly IMapper mapper;
@@ -20,7 +21,7 @@
 		}
 
         /// <summary>
-        /// Throws ArgumentException if you try to create Entity with existing name.
+        /// Throws Argument Exception if you try to create entity with existing name.
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public async Task<ApiEntityDTO> CreateEntityAsync(string name, Guid ownerId)
@@ -31,7 +32,7 @@
             if (entity != null)
             {
                 if (entity.IsDeleted == false)
-                    throw new ArgumentException("Entity with the same name exist.");
+                    throw new ArgumentException(ExceptionMessages.ExistingEntityName);
 
                 entity.IsDeleted = false;
                 entity.Name = name.Trim();
@@ -55,21 +56,21 @@
         }
 
         /// <summary>
-        /// Throws InvalidOperationException when Entity does not exist
-        /// and ArgumentException when User is not owner or Administrator.
+        /// Throws Invalid Operation Exception when the entity does not exist
+        /// and Argument Exception when the user is not owner or administrator.
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
         public async Task DeleteEntityAsync(Guid entityId, Guid userId, bool isUserAdmin)
         {
             T? entity = await this.repo.FindAsync(entityId) 
-                ?? throw new InvalidOperationException("Entity does not exist.");
+                ?? throw new InvalidOperationException(ExceptionMessages.EntityDoesNotExist);
             
             if (isUserAdmin)
                 userId = entity.OwnerId;
 
             if (entity.OwnerId != userId)
-                throw new ArgumentException("Unauthorized.");
+                throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
 
             entity.IsDeleted = true;
 

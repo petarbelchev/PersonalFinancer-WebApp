@@ -33,7 +33,7 @@
               .ToListAsync();
 
         /// <summary>
-        /// Throws InvalidOperationException when Document not found with the given filter.
+        /// Throws Invalid Operation Exception when the document is not found with the given filter.
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<TProjected> FindOneAsync<TProjected>(

@@ -1,17 +1,18 @@
 ﻿namespace PersonalFinancer.Web.Models.Message
 {
+    using PersonalFinancer.Common.Messages;
     using System.ComponentModel.DataAnnotations;
 
     public class MessageInputModel
 	{
-		[Required(ErrorMessage = "Please enter a subject.")]
+		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
 		[StringLength(50, MinimumLength = 10, 
-			ErrorMessage = "Subject must be between {2} and {1} characters long.")]
+			ErrorMessage = ValidationMessages.InvalidLength)]
 		public string Subject { get; set; } = null!;
 		
-		[Required(ErrorMessage = "Please enter a message.")]
+		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
 		[StringLength(1000, MinimumLength = 20, 
-			ErrorMessage = "Message must be between {2} and {1} characters long.")]
+			ErrorMessage = ValidationMessages.InvalidLength)]
 		public string Content { get; set; } = null!;
     }
 }

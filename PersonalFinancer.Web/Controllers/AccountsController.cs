@@ -1,18 +1,19 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-	using AutoMapper;
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Web.Extensions;
-	using PersonalFinancer.Web.Models.Account;
-	using System.ComponentModel.DataAnnotations;
-	using static PersonalFinancer.Data.Constants.RoleConstants;
-	using static PersonalFinancer.Web.Constants;
+    using AutoMapper;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Web.Extensions;
+    using PersonalFinancer.Web.Models.Account;
+    using System.ComponentModel.DataAnnotations;
+    using static PersonalFinancer.Data.Constants.RoleConstants;
+    using static PersonalFinancer.Web.Constants;
 
-	[Authorize]
+    [Authorize]
 	public class AccountsController : Controller
 	{
 		protected readonly IAccountsUpdateService accountsUpdateService;
@@ -61,16 +62,13 @@
 					this.mapper.Map<CreateEditAccountDTO>(inputModel);
 
 				Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(accountDTO);
-				this.TempData["successMsg"] = "You create a new account successfully!";
+				this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.CreatedAccount;
 
 				return this.RedirectToAction(nameof(AccountDetails), new { id = newAccountId });
 			}
-			catch (ArgumentException)
+			catch (ArgumentException ex)
 			{
-				this.ModelState.AddModelError(
-					nameof(inputModel.Name),
-					"You already have Account with that name.");
-
+				this.ModelState.AddModelError(nameof(inputModel.Name), ex.Message);
 				await this.SetUserDropdownDataToViewModel(inputModel);
 
 				return this.View(inputModel);
@@ -120,8 +118,10 @@
 				{
 					viewModel = await this.GetAccountDetailsViewModel(
 						accountId,
-						inputModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."),
-						inputModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null."),
+						inputModel.StartDate ?? throw new InvalidOperationException(
+							string.Format(ExceptionMessages.NotNullableProperty, inputModel.StartDate)),
+						inputModel.EndDate ?? throw new InvalidOperationException(
+							string.Format(ExceptionMessages.NotNullableProperty, inputModel.EndDate)),
 						this.User.IdToGuid(),
 						this.User.IsAdmin());
 				}
@@ -173,14 +173,14 @@
 
 				if (this.User.IsAdmin())
 				{
-					this.TempData["successMsg"] = "You successfully delete user's account!";
+					this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.AdminDeletedUserAccount;
 					Guid ownerId = await this.accountsInfoService.GetAccountOwnerIdAsync(accountId);
 
 					return this.LocalRedirect(UrlPathConstants.AdminUserDetailsPath + ownerId);
 				}
 				else
 				{
-					this.TempData["successMsg"] = "Your account was successfully deleted!";
+					this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.DeletedAccount;
 
 					return this.RedirectToAction("Index", "Home");
 				}
@@ -239,11 +239,11 @@
 
 				await this.accountsUpdateService.EditAccountAsync(id, accountDTO);
 			}
-			catch (ArgumentException)
+			catch (ArgumentException ex)
 			{
 				this.ModelState.AddModelError(nameof(inputModel.Name), this.User.IsAdmin()
-					? $"The user already have Account with \"{inputModel.Name}\" name."
-					: $"You already have Account with \"{inputModel.Name}\" name.");
+					? string.Format(ExceptionMessages.AdminExistingUserEntityName, "account", inputModel.Name)
+					: ex.Message);
 
 				await this.SetUserDropdownDataToViewModel(inputModel);
 
@@ -254,9 +254,9 @@
 				return this.BadRequest();
 			}
 
-			this.TempData["successMsg"] = this.User.IsAdmin()
-				? "You successfully edited user's account!"
-				: "Your account was successfully edited!";
+			this.TempData[ResponseMessages.TempDataKey] = this.User.IsAdmin()
+				? ResponseMessages.AdminEditedUserAccount
+				: ResponseMessages.EditedAccount;
 
 			return this.LocalRedirect(returnUrl);
 		}

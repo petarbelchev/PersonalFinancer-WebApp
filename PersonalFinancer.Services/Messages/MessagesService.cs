@@ -3,6 +3,7 @@
     using AutoMapper;
     using MongoDB.Driver;
     using MongoDB.Driver.Linq;
+    using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Data.Models;
     using PersonalFinancer.Data.Repositories;
     using PersonalFinancer.Services.Messages.Models;
@@ -44,8 +45,8 @@
         }
 
         /// <summary>
-        /// Throws InvalidOperationException when Message does not exist
-        /// or User is not owner or Administrator
+        /// Throws Invalid Operation Exception when the message does not exist
+        /// or the user is not owner or administrator
         /// </summary>
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<MessageDetailsDTO> GetMessageAsync(
@@ -80,15 +81,15 @@
         }
 
         /// <summary>
-        /// Throws ArgumentException when the User is not Authorized 
-        /// and InvalidOperationException when adding a reply was unsuccessful.
+        /// Throws Argument Exception when the user is unauthorized 
+        /// and Invalid Operation Exception when adding a reply was unsuccessful.
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
         public async Task<UpdateResult> AddReplyAsync(ReplyInputDTO model)
         {
             if (!model.IsAuthorAdmin && !await this.messagesRepo.IsUserDocumentAuthor(model.MessageId, model.AuthorId))
-                throw new ArgumentException("The User is not Authorized to make replies.");
+                throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
 
             Reply reply = this.mapper.Map<Reply>(model);
             reply.CreatedOn = DateTime.UtcNow;
@@ -101,20 +102,20 @@
         }
 
         /// <summary>
-        /// Throws ArgumentException when the User is not Authorized 
-        /// and InvalidOperationException when deleting a message was unsuccessful.
+        /// Throws Argument Exception when the user is unauthorized 
+        /// and Invalid Operation Exception when deleting a message was unsuccessful.
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="InvalidOperationException"></exception>
         public async Task RemoveAsync(string messageId, string userId, bool isUserAdmin)
         {
             if (!isUserAdmin && !await this.messagesRepo.IsUserDocumentAuthor(messageId, userId))
-                throw new ArgumentException("The User is not Authorized to delete the message.");
+                throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
 
             DeleteResult result = await this.messagesRepo.DeleteOneAsync(messageId);
 
             if (!result.IsAcknowledged)
-                throw new InvalidOperationException("Delete a message was unsuccessful.");
+                throw new InvalidOperationException(ExceptionMessages.UnsuccessfulDelete);
         }
     }
 }

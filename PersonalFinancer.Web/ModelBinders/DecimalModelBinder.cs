@@ -18,7 +18,7 @@
 
                 bindingContext.ModelState.AddModelError(
                     bindingContext.FieldName,
-                    $"{bindingContext.FieldName} is required and must be a number.");
+                    $"The {bindingContext.FieldName} is required and must be a number.");
             }
 
             return Task.CompletedTask;

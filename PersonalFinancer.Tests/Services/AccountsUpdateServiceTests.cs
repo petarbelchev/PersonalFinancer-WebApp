@@ -1,15 +1,16 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-	using Microsoft.EntityFrameworkCore;
-	using NUnit.Framework;
-	using PersonalFinancer.Data.Models;
-	using PersonalFinancer.Data.Models.Enums;
-	using PersonalFinancer.Data.Repositories;
-	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Accounts.Models;
-	using static PersonalFinancer.Data.Constants.CategoryConstants;
+    using Microsoft.EntityFrameworkCore;
+    using NUnit.Framework;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models;
+    using PersonalFinancer.Data.Models.Enums;
+    using PersonalFinancer.Data.Repositories;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using static PersonalFinancer.Data.Constants.CategoryConstants;
 
-	[TestFixture]
+    [TestFixture]
     internal class AccountsUpdateServiceTests : ServicesUnitTestsBase
     {
         private IEfRepository<Account> accountsRepo;
@@ -125,7 +126,7 @@
             // Act & Assert
             Assert.That(async () => await this.accountsUpdateService.CreateAccountAsync(newAccountModel),
             Throws.TypeOf<ArgumentException>().With.Message
-                  .EqualTo($"The User already have Account with \"{this.Account1_User1_WithTransactions.Name}\" name."));
+                  .EqualTo(string.Format(ExceptionMessages.ExistingUserEntityName, "account", this.Account1_User1_WithTransactions.Name)));
         }
 
 		[Test]
@@ -143,7 +144,7 @@
 
 			// Act & Assert
 			Assert.That(async () => await this.accountsUpdateService.CreateAccountAsync(newAccountModel),
-			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Account Type is not valid."));
+			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(ExceptionMessages.InvalidAccountType));
 		}
 
 		[Test]
@@ -161,7 +162,7 @@
 
 			// Act & Assert
 			Assert.That(async () => await this.accountsUpdateService.CreateAccountAsync(newAccountModel),
-			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Currency is not valid."));
+			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(ExceptionMessages.InvalidCurrency));
 		}
 
 		[Test]
@@ -233,7 +234,7 @@
 
 			// Act & Assert
 			Assert.That(async () => await this.accountsUpdateService.CreateTransactionAsync(dto),
-			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Category is not valid."));
+			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(ExceptionMessages.InvalidCategory));
 		}
 
 		[Test]
@@ -368,7 +369,7 @@
             //Act & Assert
             Assert.That(async () => await this.accountsUpdateService
                   .DeleteAccountAsync(accId, this.User2.Id, isUserAdmin: false, shouldDeleteTransactions: true),
-            Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Can't delete someone else account."));
+            Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
         }
 
         [Test]
@@ -669,7 +670,7 @@
 
             //Act & Assert
             Assert.That(async () => await this.accountsUpdateService.DeleteTransactionAsync(id, this.User2.Id, isUserAdmin: false),
-            Throws.TypeOf<ArgumentException>().With.Message.EqualTo("The user is not transaction's owner"));
+            Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
         }
 
         [Test]
@@ -1019,7 +1020,7 @@
             //Act & Assert
             Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(this.Account1_User1_WithTransactions.Id, inputModel),
             Throws.TypeOf<ArgumentException>().With.Message
-                  .EqualTo($"The User already have Account with \"{this.Account2_User1_WithoutTransactions.Name}\" name."));
+                  .EqualTo(string.Format(ExceptionMessages.ExistingUserEntityName, "account", this.Account2_User1_WithoutTransactions.Name)));
         }
 
 		[Test]
@@ -1037,7 +1038,7 @@
 
 			//Act & Assert
 			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(this.Account1_User1_WithTransactions.Id, inputModel),
-			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Account Type is not valid."));
+			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(ExceptionMessages.InvalidAccountType));
 		}
 
 		[Test]
@@ -1055,7 +1056,7 @@
 
 			//Act & Assert
 			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(this.Account1_User1_WithTransactions.Id, inputModel),
-			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Currency is not valid."));
+			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(ExceptionMessages.InvalidCurrency));
 		}
 
 		[Test]
@@ -1150,7 +1151,7 @@
 
 			//Assert
 			Assert.That(async () => await this.accountsUpdateService.EditTransactionAsync(transaction.Id, dto),
-			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Category is not valid."));
+			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(ExceptionMessages.InvalidCategory));
 		}
 
 		[Test]
@@ -1166,7 +1167,7 @@
 
 			// Act & Assert
 			Assert.That(async () => await this.accountsUpdateService.EditTransactionAsync(transaction.Id, dto),
-			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo("Cannot edit initial balance transaction."));
+			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(ExceptionMessages.EditInitialTransaction));
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
     using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Services.Shared.Models;
     using PersonalFinancer.Web.ModelBinders;
     using System.ComponentModel.DataAnnotations;
@@ -8,29 +9,32 @@
 
     public class AccountFormViewModel
 	{
-		[Required(ErrorMessage = "Account name is required.")]
-		[StringLength(AccountNameMaxLength, MinimumLength = AccountNameMinLength,
-			ErrorMessage = "Account name must be between {2} and {1} characters long.")]
+		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+		[StringLength(AccountNameMaxLength, 
+			MinimumLength = AccountNameMinLength,
+			ErrorMessage = ValidationMessages.InvalidLength)]
 		public string Name { get; set; } = null!;
 
+		[Required]
 		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
-		[Range(AccountInitialBalanceMinValue, AccountInitialBalanceMaxValue,
-			ErrorMessage = "Balance must be a number between {1} and {2}")]
+		[Range(AccountInitialBalanceMinValue, 
+			AccountInitialBalanceMaxValue,
+			ErrorMessage = ValidationMessages.InvalidNumericLength)]
 		public decimal Balance { get; set; }
 		
-		[Required(ErrorMessage = "Owner Id name is required.")]
+		[Required]
 		public Guid? OwnerId { get; set; }
 
-		[Required(ErrorMessage = "Account Type name is required.")]
+		[Required]
 		[Display(Name = "Account Type")]
 		public Guid? AccountTypeId { get; set; }
 
-		public IEnumerable<AccountTypeDropdownDTO> OwnerAccountTypes { get; set; }
-			= new List<AccountTypeDropdownDTO>();
-
-		[Required(ErrorMessage = "Currency name is required.")]
+		[Required]
 		[Display(Name = "Currency")]
 		public Guid? CurrencyId { get; set; }
+
+		public IEnumerable<AccountTypeDropdownDTO> OwnerAccountTypes { get; set; }
+			= new List<AccountTypeDropdownDTO>();
 
 		public IEnumerable<CurrencyDropdownDTO> OwnerCurrencies { get; set; }
 			= new List<CurrencyDropdownDTO>();

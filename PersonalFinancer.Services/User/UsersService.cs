@@ -125,48 +125,57 @@
 
 		public async Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime startDate, DateTime endDate)
 		{
+			DateTime startDateUtc = startDate.ToUniversalTime();
+			DateTime endDateUtc = endDate.ToUniversalTime();
+		
 			var dto = new UserDashboardDTO
 			{
 				Accounts = await this.accountsRepo.All()
 					.Where(a => a.OwnerId == userId && !a.IsDeleted)
 					.OrderBy(a => a.Name)
 					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
+					.ToArrayAsync(),
+				LastTransactions = await this.transactionsRepo.All()
+					.Where(t => t.OwnerId == userId
+								&& t.CreatedOn >= startDateUtc
+								&& t.CreatedOn <= endDateUtc)
+					.OrderByDescending(t => t.CreatedOn)
+					.Take(5)
+					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
+					.ToArrayAsync(),
+				CurrenciesCashFlow = await this.accountsRepo.All()
+					.Where(a => a.OwnerId == userId && a.Transactions.Any())
+					.GroupBy(a => a.Currency.Name)
+					.Select(group => new CurrencyCashFlowWithExpensesByCategoriesDTO
+					{
+						Name = group.Key,
+						Incomes = group
+							.SelectMany(a => a.Transactions)
+							.Where(t => t.TransactionType == TransactionType.Income
+										&& t.CreatedOn >= startDateUtc
+										&& t.CreatedOn <= endDateUtc)
+							.Sum(t => t.Amount),
+						Expenses = group
+							.SelectMany(a => a.Transactions)
+							.Where(t => t.TransactionType == TransactionType.Expense
+										&& t.CreatedOn >= startDateUtc
+										&& t.CreatedOn <= endDateUtc)
+							.Sum(t => t.Amount),
+						ExpensesByCategories = group
+							.SelectMany(a => a.Transactions
+								.Where(t => t.TransactionType == TransactionType.Expense
+											&& t.CreatedOn >= startDateUtc
+											&& t.CreatedOn <= endDateUtc))
+							.GroupBy(t => t.Category.Name)
+							.Select(cGroup => new CategoryExpensesDTO
+							{
+								CategoryName = cGroup.Key,
+								ExpensesAmount = cGroup.Sum(t => t.Amount)
+							})
+					})
+					.OrderBy(c => c.Name)
 					.ToArrayAsync()
 			};
-
-			IQueryable<Transaction> query = this.transactionsRepo.All().Where(t =>
-				t.OwnerId == userId
-				&& t.CreatedOn >= startDate.ToUniversalTime()
-				&& t.CreatedOn <= endDate.ToUniversalTime());
-
-			dto.LastTransactions = await query
-				.OrderByDescending(t => t.CreatedOn)
-				.Take(5)
-				.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
-				.ToArrayAsync();
-
-			dto.CurrenciesCashFlow = await query
-				.GroupBy(t => t.Account.Currency.Name)
-				.Select(group => new CurrencyCashFlowWithExpensesByCategoriesDTO
-				{
-					Name = group.Key,
-					Incomes = group
-						.Where(t => t.TransactionType == TransactionType.Income)
-						.Sum(t => t.Amount),
-					Expenses = group
-						.Where(t => t.TransactionType == TransactionType.Expense)
-						.Sum(t => t.Amount),
-					ExpensesByCategories = group
-						.Where(t => t.TransactionType == TransactionType.Expense)
-						.GroupBy(t => t.Category.Name)
-						.Select(categoryGroup => new CategoryExpensesDTO
-						{
-							CategoryName = categoryGroup.Key,
-							ExpensesAmount = categoryGroup.Sum(t => t.Amount)
-						})
-				})
-				.OrderBy(c => c.Name)
-				.ToArrayAsync();
 
 			return dto;
 		}
@@ -180,7 +189,7 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException if User does not exist.
+		/// Throws Invalid Operation Exception if the user does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<UserDetailsDTO> UserDetailsAsync(Guid userId)
@@ -192,7 +201,7 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException if User does not exist.
+		/// Throws Invalid Operation Exception if the user does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> UserFullNameAsync(Guid userId)

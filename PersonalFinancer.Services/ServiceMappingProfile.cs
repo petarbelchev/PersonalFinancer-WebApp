@@ -95,6 +95,8 @@
 				.ReverseMap()
 				.ForMember(dest => dest.Reference, opt => opt
 					.MapFrom(src => src.Reference.Trim()))
+				.ForMember(dest => dest.CreatedOn, opt => opt
+					.MapFrom(src => src.CreatedOn.ToUniversalTime()))
 				.ForMember(dest => dest.Owner, opt => opt.Ignore());
 
 			this.CreateMap<Transaction, TransactionDetailsDTO>()

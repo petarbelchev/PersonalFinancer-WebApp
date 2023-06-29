@@ -1,5 +1,6 @@
 ﻿namespace PersonalFinancer.Web.Models.Message
 {
+    using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Services.Messages.Models;
     using System.ComponentModel.DataAnnotations;
 
@@ -18,9 +19,9 @@
 		public IEnumerable<ReplyOutputDTO> Replies { get; set; }
 			= new List<ReplyOutputDTO>();
 
-		[Required(ErrorMessage = "Please enter a message.")]
+		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
 		[StringLength(1000, MinimumLength = 10,
-			ErrorMessage = "Reply must be between {2} and {1} characters long.")]
+			ErrorMessage = ValidationMessages.InvalidLength)]
 		public string ReplyContent { get; set; } = null!;
 	}
 }

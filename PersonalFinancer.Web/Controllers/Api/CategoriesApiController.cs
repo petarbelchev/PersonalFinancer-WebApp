@@ -1,12 +1,13 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Data.Models;
-	using PersonalFinancer.Services.Api;
-	using PersonalFinancer.Web.Models.Api;
-	using System.ComponentModel.DataAnnotations;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models;
+    using PersonalFinancer.Services.Api;
+    using PersonalFinancer.Web.Models.Api;
+    using System.ComponentModel.DataAnnotations;
 
-	[Route("api/categories")]
+    [Route("api/categories")]
 	[ApiController]
 	public class CategoriesApiController : BaseApiController<Category>
 	{
@@ -23,7 +24,7 @@
 			}
 			catch (ArgumentException)
 			{
-				return this.BadRequest($"Category with the name \"{inputModel.Name}\" exist.");
+				return this.BadRequest(string.Format(ExceptionMessages.ExistingUserEntityName, "category", inputModel.Name));
 			}
 		}
 

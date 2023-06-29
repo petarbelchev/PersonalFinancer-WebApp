@@ -1,21 +1,22 @@
 ﻿namespace PersonalFinancer.Tests.Controllers
 {
-	using Microsoft.AspNetCore.Http;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.ViewFeatures;
-	using Moq;
-	using NUnit.Framework;
-	using PersonalFinancer.Data.Models.Enums;
-	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User.Models;
-	using PersonalFinancer.Web.Controllers;
-	using PersonalFinancer.Web.Models.Account;
-	using static PersonalFinancer.Data.Constants;
-	using static PersonalFinancer.Services.Constants;
-	using static PersonalFinancer.Web.Constants;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.ViewFeatures;
+    using Moq;
+    using NUnit.Framework;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models.Enums;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Controllers;
+    using PersonalFinancer.Web.Models.Account;
+    using static PersonalFinancer.Data.Constants;
+    using static PersonalFinancer.Services.Constants;
+    using static PersonalFinancer.Web.Constants;
 
-	[TestFixture]
+    [TestFixture]
 	internal class AccountsControllerTests : ControllersUnitTestsBase
 	{
 		private AccountsController controller;
@@ -221,9 +222,16 @@
 				OwnerId = this.userId
 			};
 
-			this.accountsUpdateServiceMock
-				.Setup(x => x.CreateAccountAsync(It.IsAny<CreateEditAccountDTO>()))
-				.Throws<ArgumentException>();
+			string errorMessage = string.Format(ExceptionMessages.ExistingUserEntityName, "account", inputModel.Name);
+
+			this.accountsUpdateServiceMock.Setup(x => x
+				.CreateAccountAsync(It.Is<CreateEditAccountDTO>(
+					x => x.CurrencyId == inputModel.CurrencyId
+					&& x.Balance == inputModel.Balance
+					&& x.AccountTypeId == inputModel.AccountTypeId
+					&& x.OwnerId == inputModel.OwnerId
+					&& x.Name == inputModel.Name)))
+				.Throws(new ArgumentException(errorMessage));
 
 			//Act
 			var viewResult = (ViewResult)await this.controller.Create(inputModel);
@@ -232,10 +240,12 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
+
 				CheckModelStateErrors(
 					viewResult.ViewData.ModelState,
 					nameof(inputModel.Name),
-					"You already have Account with that name.");
+					errorMessage);
+
 				this.CheckAccountFormViewModel(viewResult.Model as AccountFormViewModel, inputModel);
 			});
 		}
@@ -266,8 +276,7 @@
 				Assert.That(viewResult, Is.Not.Null);
 				CheckAccountDetailsViewModel(
 					viewResult.Model as AccountDetailsViewModel,
-					this.expectedAccountDetailsDto,
-					isUserAdmin: false);
+					this.expectedAccountDetailsDto);
 			});
 		}
 
@@ -292,8 +301,7 @@
 				Assert.That(viewResult, Is.Not.Null);
 				CheckAccountDetailsViewModel(
 					viewResult.Model as AccountDetailsViewModel,
-					this.expectedAccountDetailsDto,
-					isUserAdmin: true);
+					this.expectedAccountDetailsDto);
 			});
 		}
 
@@ -355,7 +363,6 @@
 				CheckAccountDetailsViewModel(
 					viewResult.Model as AccountDetailsViewModel,
 					this.expectedAccountDetailsDto,
-					isUserAdmin: true,
 					isPostRequest: true);
 			});
 		}
@@ -390,7 +397,6 @@
 				CheckAccountDetailsViewModel(
 					viewResult.Model as AccountDetailsViewModel,
 					this.expectedAccountDetailsDto,
-					isUserAdmin: false,
 					isPostRequest: true);
 			});
 		}
@@ -973,11 +979,16 @@
 				AccountTypeId = Guid.NewGuid(),
 			};
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
-			this.accountsInfoServiceMock.Setup(x => x.GetAccountOwnerIdAsync(accId)).ReturnsAsync(ownerId);
+			this.userMock.Setup(x => x
+				.IsInRole(RoleConstants.AdminRoleName))
+				.Returns(true);
 
-			this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
-				It.Is<CreateEditAccountDTO>(m =>
+			this.accountsInfoServiceMock.Setup(x => x
+				.GetAccountOwnerIdAsync(accId))
+				.ReturnsAsync(ownerId);
+
+			this.accountsUpdateServiceMock.Setup(x => x
+				.EditAccountAsync(accId, It.Is<CreateEditAccountDTO>(m =>
 					m.CurrencyId == inputFormModel.CurrencyId
 					&& m.Balance == inputFormModel.Balance
 					&& m.OwnerId == inputFormModel.OwnerId
@@ -996,7 +1007,7 @@
 				Assert.That(result, Is.Not.Null);
 
 				CheckModelStateErrors(result.ViewData.ModelState, nameof(inputFormModel.Name),
-					$"The user already have Account with \"{inputFormModel.Name}\" name.");
+					string.Format(ExceptionMessages.AdminExistingUserEntityName, "account", inputFormModel.Name));
 
 				this.CheckAccountFormViewModel(result.Model as AccountFormViewModel, inputFormModel);
 			});
@@ -1019,6 +1030,8 @@
 
 			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
 
+			string errorMessage = string.Format(ExceptionMessages.ExistingUserEntityName, "account", inputFormModel.Name);
+
 			this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
 				It.Is<CreateEditAccountDTO>(m =>
 					m.CurrencyId == inputFormModel.CurrencyId
@@ -1026,7 +1039,7 @@
 					&& m.OwnerId == inputFormModel.OwnerId
 					&& m.AccountTypeId == inputFormModel.AccountTypeId
 					&& m.Name == inputFormModel.Name)))
-				.Throws<ArgumentException>();
+				.Throws(new ArgumentException(errorMessage));
 
 			Guid userId = inputFormModel.OwnerId ?? throw new InvalidOperationException();
 
@@ -1038,8 +1051,7 @@
 			{
 				Assert.That(result, Is.Not.Null);
 
-				CheckModelStateErrors(result.ViewData.ModelState, nameof(inputFormModel.Name),
-					$"You already have Account with \"{inputFormModel.Name}\" name.");
+				CheckModelStateErrors(result.ViewData.ModelState, nameof(inputFormModel.Name), errorMessage);
 
 				this.CheckAccountFormViewModel(result.Model as AccountFormViewModel, inputFormModel);
 			});
@@ -1154,7 +1166,7 @@
 		private static void CheckAccountDetailsViewModel(
 			AccountDetailsViewModel? viewModel,
 			AccountDetailsLongDTO serviceModel,
-			bool isUserAdmin, bool isPostRequest = false)
+			bool isPostRequest = false)
 		{
 			Assert.That(viewModel, Is.Not.Null);
 			Assert.That(viewModel.Id, Is.EqualTo(serviceModel.Id));

@@ -1,19 +1,20 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-	using AutoMapper;
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Services.User.Models;
-	using PersonalFinancer.Web.Extensions;
-	using PersonalFinancer.Web.Models.Account;
-	using PersonalFinancer.Web.Models.Transaction;
-	using System.ComponentModel.DataAnnotations;
-	using static PersonalFinancer.Data.Constants.RoleConstants;
+    using AutoMapper;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Extensions;
+    using PersonalFinancer.Web.Models.Account;
+    using PersonalFinancer.Web.Models.Transaction;
+    using System.ComponentModel.DataAnnotations;
+    using static PersonalFinancer.Data.Constants.RoleConstants;
 
-	[Authorize]
+    [Authorize]
 	public class TransactionsController : Controller
 	{
 		protected readonly IAccountsUpdateService accountsUpdateService;
@@ -101,7 +102,7 @@
 			{
 				var dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
 				Guid newTransactionId = await this.accountsUpdateService.CreateTransactionAsync(dto);
-				this.TempData["successMsg"] = "You create a new transaction successfully!";
+				this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.CreatedTransaction;
 
 				return this.RedirectToAction(nameof(TransactionDetails), new { id = newTransactionId });
 			}
@@ -121,9 +122,9 @@
 			{
 				await this.accountsUpdateService.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 
-				this.TempData["successMsg"] = this.User.IsAdmin() 
-					? "You successfully delete a user's transaction!"
-					: "Your transaction was successfully deleted!";
+				this.TempData[ResponseMessages.TempDataKey] = this.User.IsAdmin() 
+					? ResponseMessages.AdminDeletedUserTransaction
+					: ResponseMessages.DeletedTransaction;
 			}
 			catch (ArgumentException)
 			{
@@ -207,20 +208,22 @@
 				return this.BadRequest();
 			}
 
-			this.TempData["successMsg"] = this.User.IsAdmin()
-				? "You successfully edit User's transaction!"
-				: "Your transaction was successfully edited!";
+			this.TempData[ResponseMessages.TempDataKey] = this.User.IsAdmin()
+				? ResponseMessages.AdminEditedUserTransaction
+				: ResponseMessages.EditedTransaction;
 
 			return this.RedirectToAction(nameof(TransactionDetails), new { id });
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Owner ID is invalid.
+		/// Throws Invalid Operation Exception when the owner ID is invalid.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		private async Task PrepareAccountsAndCategoriesAsync(TransactionFormViewModel formModel)
 		{
-			Guid ownerId = formModel.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be null.");
+			Guid ownerId = formModel.OwnerId ?? throw new InvalidOperationException(
+				string.Format(ExceptionMessages.NotNullableProperty, formModel.OwnerId));
+
 			var accountsAndCategoriesDTO = await this.usersService.GetUserAccountsAndCategoriesDropdownDataAsync(ownerId);
 			this.mapper.Map(accountsAndCategoriesDTO, formModel);
 		}

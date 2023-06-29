@@ -3,6 +3,7 @@
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Data.Models;
     using System.ComponentModel.DataAnnotations;
     using static PersonalFinancer.Data.Constants;
@@ -31,23 +32,25 @@
 
         public class InputModel
         {
-            [Required(ErrorMessage = "Password is required.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
             [DataType(DataType.Password)]
-            [StringLength(UserConstants.UserPasswordMaxLength, MinimumLength = UserConstants.UserPasswordMinLength,
-                ErrorMessage = "Password must be between {2} and {1} characters long.")]
+            [StringLength(UserConstants.UserPasswordMaxLength, 
+                MinimumLength = UserConstants.UserPasswordMinLength,
+                ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "Old Password")]
             public string OldPassword { get; set; } = null!;
 
-            [Required(ErrorMessage = "Password is required.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
             [DataType(DataType.Password)]
-            [StringLength(UserConstants.UserPasswordMaxLength, MinimumLength = UserConstants.UserPasswordMinLength,
-                ErrorMessage = "Password must be between {2} and {1} characters long.")]
+            [StringLength(UserConstants.UserPasswordMaxLength, 
+                MinimumLength = UserConstants.UserPasswordMinLength,
+                ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "New Password")]
             public string NewPassword { get; set; } = null!;
 
-            [Required(ErrorMessage = "Confirm Password is required.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
             [DataType(DataType.Password)]
-            [Compare(nameof(NewPassword), ErrorMessage = "Password do not match.")]
+            [Compare(nameof(NewPassword), ErrorMessage = ValidationMessages.CompareDoNotMatch)]
             [Display(Name = "Confirm Password")]
             public string ConfirmPassword { get; set; } = null!;
         }

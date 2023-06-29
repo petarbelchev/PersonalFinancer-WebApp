@@ -1,16 +1,18 @@
 ﻿namespace PersonalFinancer.Web.Models.Api
 {
+    using PersonalFinancer.Common.Messages;
     using System.ComponentModel.DataAnnotations;
     using static PersonalFinancer.Data.Constants.CurrencyConstants;
 
     public class CurrencyInputModel : IApiEntityInputModel
     {
-        [Required(ErrorMessage = "Please enter a Currency name.")]
+        [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
         [StringLength(CurrencyNameMaxLength, MinimumLength = CurrencyNameMinLength,
-            ErrorMessage = "Currency name must be between {2} and {1} characters long.")]
-        public string Name { get; set; } = null!;
+            ErrorMessage = ValidationMessages.InvalidLength)]
+		[Display(Name = "Currency")]
+		public string Name { get; set; } = null!;
 
-        [Required(ErrorMessage = "Owner Id is required!")]
+        [Required]
         public Guid? OwnerId { get; set; }
     }
 }

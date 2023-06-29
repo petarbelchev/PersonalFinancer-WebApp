@@ -14,6 +14,7 @@
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Web.EmailSender;
+	using static PersonalFinancer.Data.Constants;
 
 	public static class WebApplicationBuilderExtensions
 	{
@@ -35,6 +36,7 @@
 					options.User.RequireUniqueEmail = true;
 					options.Password.RequireUppercase = false;
 					options.Password.RequireNonAlphanumeric = false;
+					options.Password.RequiredLength = UserConstants.UserPasswordMinLength;
 				})
 				.AddRoles<IdentityRole<Guid>>()
 				.AddEntityFrameworkStores<PersonalFinancerDbContext>();

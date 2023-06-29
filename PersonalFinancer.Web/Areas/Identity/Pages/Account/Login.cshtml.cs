@@ -1,14 +1,15 @@
 ﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account
 {
-	using Microsoft.AspNetCore.Authentication;
-	using Microsoft.AspNetCore.Identity;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.RazorPages;
-	using PersonalFinancer.Data.Models;
-	using System.ComponentModel.DataAnnotations;
-	using static PersonalFinancer.Data.Constants;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models;
+    using System.ComponentModel.DataAnnotations;
+    using static PersonalFinancer.Data.Constants;
 
-	public class LoginModel : PageModel
+    public class LoginModel : PageModel
 	{
 		private readonly SignInManager<ApplicationUser> signInManager;
 		private readonly ILogger<LoginModel> logger;
@@ -31,15 +32,15 @@
 
 		public class InputModel
 		{
-			[Required(ErrorMessage = "Email address is required.")]
-			[EmailAddress(ErrorMessage = "Please enter a valid email address.")]
-			[Display(Name = "Email")]
+			[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+			[EmailAddress(ErrorMessage = ValidationMessages.InvalidEmailAddress)]
 			public string Email { get; set; } = null!;
 
-			[Required(ErrorMessage = "Password is required.")]
+			[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
 			[DataType(DataType.Password)]
-			[StringLength(UserConstants.UserPasswordMaxLength, MinimumLength = UserConstants.UserPasswordMinLength,
-				ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
+			[StringLength(UserConstants.UserPasswordMaxLength, 
+				MinimumLength = UserConstants.UserPasswordMinLength,
+				ErrorMessage = ValidationMessages.InvalidLength)]
 			public string Password { get; set; } = null!;
 
 			[Display(Name = "Remember me?")]

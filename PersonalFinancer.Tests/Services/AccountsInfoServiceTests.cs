@@ -1,18 +1,19 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-	using AutoMapper.QueryableExtensions;
-	using Microsoft.EntityFrameworkCore;
-	using NUnit.Framework;
-	using PersonalFinancer.Data.Models;
-	using PersonalFinancer.Data.Models.Enums;
-	using PersonalFinancer.Data.Repositories;
-	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.Shared.Models;
-	using System.Linq.Expressions;
-	using static PersonalFinancer.Services.Constants.PaginationConstants;
+    using AutoMapper.QueryableExtensions;
+    using Microsoft.EntityFrameworkCore;
+    using NUnit.Framework;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models;
+    using PersonalFinancer.Data.Models.Enums;
+    using PersonalFinancer.Data.Repositories;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.Shared.Models;
+    using System.Linq.Expressions;
+    using static PersonalFinancer.Services.Constants.PaginationConstants;
 
-	[TestFixture]
+    [TestFixture]
 	internal class AccountsInfoServiceTests : ServicesUnitTestsBase
 	{
 		private IEfRepository<Transaction> transactionsRepo;
@@ -536,7 +537,7 @@
 
 			//Act & Assert
 			Assert.That(async () => await this.accountsInfoService.GetTransactionDetailsAsync(this.InitialTransaction_Income_Account1_User1.Id, this.User2.Id, isUserAdmin: false),
-			Throws.TypeOf<ArgumentException>().With.Message.EqualTo("The user is not transaction's owner."));
+			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 
 		[Test]

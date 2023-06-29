@@ -5,6 +5,7 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.WebUtilities;
+    using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Data.Models;
     using System.ComponentModel.DataAnnotations;
     using System.Text;
@@ -37,43 +38,47 @@
 
         public class InputModel
         {
-            [Required(ErrorMessage = "Username is required.")]
-            [StringLength(UserConstants.UserNameMaxLength, MinimumLength = UserConstants.UserNameMinLength,
-                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+            [StringLength(UserConstants.UserNameMaxLength, 
+                MinimumLength = UserConstants.UserNameMinLength,
+                ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "Username")]
             public string UserName { get; set; } = null!;
 
-            [Required(ErrorMessage = "First Name is required.")]
-            [StringLength(UserConstants.UserFirstNameMaxLength, MinimumLength = UserConstants.UserFirstNameMinLength,
-                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+            [StringLength(UserConstants.UserFirstNameMaxLength, 
+                MinimumLength = UserConstants.UserFirstNameMinLength,
+                ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "First Name")]
             public string FirstName { get; set; } = null!;
 
-            [Required(ErrorMessage = "Last Name is required.")]
-            [StringLength(UserConstants.UserLastNameMaxLength, MinimumLength = UserConstants.UserLastNameMinLength,
-                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+            [StringLength(UserConstants.UserLastNameMaxLength, 
+                MinimumLength = UserConstants.UserLastNameMinLength,
+                ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "Last Name")]
             public string LastName { get; set; } = null!;
 
-            [Required(ErrorMessage = "Email address is required.")]
-            [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+            [EmailAddress(ErrorMessage = ValidationMessages.InvalidEmailAddress)]
             [Display(Name = "Email")]
             public string Email { get; set; } = null!;
 
-            [Required(ErrorMessage = "Password is required.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
             [DataType(DataType.Password)]
-            [StringLength(UserConstants.UserPasswordMaxLength, MinimumLength = UserConstants.UserPasswordMinLength,
-                ErrorMessage = "The {0} must be between {2} and {1} characters long.")]
+            [StringLength(UserConstants.UserPasswordMaxLength, 
+                MinimumLength = UserConstants.UserPasswordMinLength,
+                ErrorMessage = ValidationMessages.InvalidLength)]
             public string Password { get; set; } = null!;
 
-            [Required(ErrorMessage = "Confirm Password is required.")]
+            [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
             [DataType(DataType.Password)]
-            [Compare(nameof(Password), ErrorMessage = "The {0} do not match.")]
+            [Compare(nameof(Password), ErrorMessage = ValidationMessages.CompareDoNotMatch)]
             [Display(Name = "Confirm Password")]
             public string ConfirmPassword { get; set; } = null!;
 
             [DataType(DataType.PhoneNumber)]
-            [RegularExpression(@"^\d{10}$", ErrorMessage = "The {0} must be 10 digits.")]
+            [RegularExpression(@"^\d{10}$", ErrorMessage = ValidationMessages.InvalidPhoneNumberLength)]
             [Display(Name = "Phone number")]
             public string? PhoneNumber { get; set; }
         }

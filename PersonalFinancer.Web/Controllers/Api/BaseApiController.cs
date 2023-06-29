@@ -1,17 +1,18 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.ModelBinding;
-	using PersonalFinancer.Data.Models.Contracts;
-	using PersonalFinancer.Services.Api;
-	using PersonalFinancer.Services.Api.Models;
-	using PersonalFinancer.Web.Extensions;
-	using PersonalFinancer.Web.Models.Api;
-	using System.ComponentModel.DataAnnotations;
-	using System.Text;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.ModelBinding;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models.Contracts;
+    using PersonalFinancer.Services.Api;
+    using PersonalFinancer.Services.Api.Models;
+    using PersonalFinancer.Web.Extensions;
+    using PersonalFinancer.Web.Models.Api;
+    using System.ComponentModel.DataAnnotations;
+    using System.Text;
 
-	[Authorize]
+    [Authorize]
 	public abstract class BaseApiController<T> : ControllerBase where T : BaseApiEntity, new()
 	{
 		private readonly IApiService<T> apiService;
@@ -20,7 +21,7 @@
 			=> this.apiService = apiService;
 
 		/// <summary>
-		/// Throws ArgumentException if you try to create Entity with existing name.
+		/// Throws Argument Exception if you try to create entity with existing name.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		protected async Task<IActionResult> CreateEntityAsync(IApiEntityInputModel inputModel)
@@ -30,7 +31,8 @@
 
 			ApiEntityDTO model = await this.apiService.CreateEntityAsync(
 				inputModel.Name,
-				inputModel.OwnerId ?? throw new InvalidOperationException("Owner ID cannot be null."));
+				inputModel.OwnerId ?? throw new InvalidOperationException(
+					string.Format(ExceptionMessages.NotNullableProperty, inputModel.OwnerId)));
 
 			return this.Created(string.Empty, model);
 		}

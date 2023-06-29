@@ -1,6 +1,7 @@
 ﻿namespace PersonalFinancer.Web.ModelBinders
 {
     using Microsoft.AspNetCore.Mvc.ModelBinding;
+    using PersonalFinancer.Common.Messages;
 
     public class DateTimeModelBinder : IModelBinder
     {
@@ -17,7 +18,7 @@
                 bindingContext.Result = ModelBindingResult.Failed();
 
                 bindingContext.ModelState.AddModelError(
-                    bindingContext.FieldName, $"Please enter a valid date.");
+                    bindingContext.FieldName, ValidationMessages.InvalidDate);
             }
 
             return Task.CompletedTask;

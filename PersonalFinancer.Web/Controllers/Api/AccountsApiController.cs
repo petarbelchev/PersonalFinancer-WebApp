@@ -9,7 +9,6 @@
 	using PersonalFinancer.Web.Models.Account;
 	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Data.Constants;
-	using static PersonalFinancer.Web.Constants;
 
 	[Authorize]
 	[Route("api/accounts")]
@@ -46,8 +45,6 @@
 		[HttpPost("transactions")]
 		public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
 		{
-			// TODO: Try to use default api validation.
-
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 

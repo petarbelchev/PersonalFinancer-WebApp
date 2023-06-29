@@ -1,17 +1,18 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-	using AutoMapper;
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Web.Extensions;
-	using PersonalFinancer.Web.Models.Api;
-	using PersonalFinancer.Web.Models.Shared;
-	using static PersonalFinancer.Data.Constants.RoleConstants;
+    using AutoMapper;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Web.Extensions;
+    using PersonalFinancer.Web.Models.Api;
+    using PersonalFinancer.Web.Models.Shared;
+    using static PersonalFinancer.Data.Constants.RoleConstants;
 
-	[Authorize]
+    [Authorize]
 	[Route("api/transactions")]
 	[ApiController]
 	public class TransactionsApiController : ControllerBase
@@ -50,8 +51,8 @@
 			}
 
 			string message = this.User.IsAdmin()
-				? "You successfully delete a user's transaction!"
-				: "Your transaction was successfully deleted!";
+				? ResponseMessages.AdminDeletedUserTransaction
+				: ResponseMessages.DeletedTransaction;
 
 			return this.Content(message);
 		}

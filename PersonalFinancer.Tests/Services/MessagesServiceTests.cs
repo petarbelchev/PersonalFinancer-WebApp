@@ -5,6 +5,7 @@
     using MongoDB.Driver.Linq;
     using Moq;
     using NUnit.Framework;
+    using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Data.Models;
     using PersonalFinancer.Data.Repositories;
     using PersonalFinancer.Services.Messages;
@@ -419,7 +420,7 @@
             //Act & Assert
             Assert.That(async () => await this.service.AddReplyAsync(inputModel),
             Throws.TypeOf<ArgumentException>().With.Message
-                  .EqualTo("The User is not Authorized to make replies."));
+                  .EqualTo(ExceptionMessages.UnauthorizedUser));
         }
 
         [Test]
@@ -513,7 +514,7 @@
             Assert.That(async () => await this.service
                   .RemoveAsync(message.Id, message.AuthorId, isUserAdmin: false),
             Throws.TypeOf<ArgumentException>().With.Message
-                  .EqualTo("The User is not Authorized to delete the message."));
+                  .EqualTo(ExceptionMessages.UnauthorizedUser));
         }
     }
 }

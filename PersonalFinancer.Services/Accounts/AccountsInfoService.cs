@@ -1,18 +1,19 @@
 ﻿namespace PersonalFinancer.Services.Accounts
 {
-	using AutoMapper;
-	using AutoMapper.QueryableExtensions;
-	using Microsoft.EntityFrameworkCore;
-	using PersonalFinancer.Data.Models;
-	using PersonalFinancer.Data.Models.Enums;
-	using PersonalFinancer.Data.Repositories;
-	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.Shared.Models;
-	using System;
-	using System.Threading.Tasks;
-	using static PersonalFinancer.Services.Constants;
+    using AutoMapper;
+    using AutoMapper.QueryableExtensions;
+    using Microsoft.EntityFrameworkCore;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models;
+    using PersonalFinancer.Data.Models.Enums;
+    using PersonalFinancer.Data.Repositories;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.Shared.Models;
+    using System;
+    using System.Threading.Tasks;
+    using static PersonalFinancer.Services.Constants;
 
-	public class AccountsInfoService : IAccountsInfoService
+    public class AccountsInfoService : IAccountsInfoService
 	{
 		private readonly IEfRepository<Transaction> transactionsRepo;
 		private readonly IEfRepository<Account> accountsRepo;
@@ -29,8 +30,8 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Account does not exist
-		/// or User is not owner or Administrator.
+		/// Throws Invalid Operation Exception when the account does not exist
+		/// or the user is not owner or administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<AccountDetailsLongDTO> GetAccountDetailsAsync(
@@ -43,40 +44,40 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Account does not exist 
-		/// or User is not owner or Administrator.
+		/// Throws Invalid Operation Exception when the account does not exist 
+		/// or the user is not owner or administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<CreateEditAccountDTO> GetAccountFormDataAsync(
 			Guid accountId, Guid userId, bool isUserAdmin)
 		{
 			return await this.accountsRepo.All()
-				.Where(a => a.Id == accountId && (isUserAdmin || a.OwnerId == userId))
+				.Where(a => a.Id == accountId && !a.IsDeleted && (isUserAdmin || a.OwnerId == userId))
 				.ProjectTo<CreateEditAccountDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Account does not exist
-		/// or User is not owner or Administrator.
+		/// Throws Invalid Operation Exception when the account does not exist
+		/// or the user is not owner or administrator.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> GetAccountNameAsync(Guid accountId, Guid userId, bool isUserAdmin)
 		{
 			return await this.accountsRepo.All()
-				.Where(a => a.Id == accountId && (isUserAdmin || a.OwnerId == userId))
+				.Where(a => a.Id == accountId && !a.IsDeleted && (isUserAdmin || a.OwnerId == userId))
 				.Select(a => a.Name)
 				.FirstAsync();
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException if Account does not exist.
+		/// Throws Invalid Operation Exception if the account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<Guid> GetAccountOwnerIdAsync(Guid accountId)
 		{
 			return await this.accountsRepo.All()
-				.Where(a => a.Id == accountId)
+				.Where(a => a.Id == accountId && !a.IsDeleted)
 				.Select(a => a.OwnerId)
 				.FirstAsync();
 		}
@@ -101,7 +102,7 @@
 			=> await this.accountsRepo.All().CountAsync(a => !a.IsDeleted);
 
 		/// <summary>
-		/// Throws InvalidOperationException when Account does not exist.
+		/// Throws Invalid Operation Exception when the account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<AccountDetailsShortDTO> GetAccountShortDetailsAsync(Guid accountId)
@@ -113,7 +114,7 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Account does not exist.
+		/// Throws Invalid Operation Exception when the account does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<TransactionsDTO> GetAccountTransactionsAsync(AccountTransactionsFilterDTO dto)
@@ -145,8 +146,8 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when Transaction does not exist
-		/// and ArgumentException when the User is not owner or Administrator.
+		/// Throws Invalid Operation Exception when the transaction does not exist
+		/// and Argument Exception when the user is not owner or administrator.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
@@ -159,13 +160,14 @@
 				.FirstAsync();
 
 			if (!isUserAdmin && transaction.OwnerId != ownerId)
-				throw new ArgumentException("The user is not transaction's owner.");
+				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
 
 			return transaction;
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException when the user is not owner, transaction does not exist or is initial.
+		/// Throws Invalid Operation Exception when the user is not owner, 
+		/// transaction does not exist or is initial.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<CreateEditTransactionDTO> GetTransactionFormDataAsync(Guid transactionId, Guid userId, bool isUserAdmin)
@@ -179,7 +181,7 @@
 		}
 
 		/// <summary>
-		/// Throws InvalidOperationException if Transaction does not exist.
+		/// Throws Invalid Operation Exception if the transaction does not exist.
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<Guid> GetTransactionOwnerIdAsync(Guid transactionId)

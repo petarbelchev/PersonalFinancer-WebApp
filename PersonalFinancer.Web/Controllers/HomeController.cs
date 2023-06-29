@@ -1,16 +1,17 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-	using Microsoft.AspNetCore.Authorization;
-	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Services.User.Models;
-	using PersonalFinancer.Web.Extensions;
-	using PersonalFinancer.Web.Models.Home;
-	using PersonalFinancer.Web.Models.Shared;
-	using static PersonalFinancer.Web.Constants.UrlPathConstants;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.User;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Extensions;
+    using PersonalFinancer.Web.Models.Home;
+    using PersonalFinancer.Web.Models.Shared;
+    using static PersonalFinancer.Web.Constants.UrlPathConstants;
 
-	public class HomeController : Controller
+    public class HomeController : Controller
     {
         private readonly IUsersService userService;
         private readonly IAccountsInfoService accountsInfoService;
@@ -69,9 +70,12 @@
             }
 
             UserDashboardDTO userDashboardData =
-                await this.userService.GetUserDashboardDataAsync(this.User.IdToGuid(), 
-                    viewModel.StartDate ?? throw new InvalidOperationException("Start Date cannot be null."), 
-                    viewModel.EndDate ?? throw new InvalidOperationException("End Date cannot be null."));
+                await this.userService.GetUserDashboardDataAsync(
+                    this.User.IdToGuid(), 
+                    viewModel.StartDate ?? throw new InvalidOperationException(
+                        string.Format(ExceptionMessages.NotNullableProperty, inputModel.StartDate)), 
+                    viewModel.EndDate ?? throw new InvalidOperationException(
+                        string.Format(ExceptionMessages.NotNullableProperty, inputModel.EndDate)));
             
             viewModel.Accounts = userDashboardData.Accounts;
             viewModel.Transactions = userDashboardData.LastTransactions;

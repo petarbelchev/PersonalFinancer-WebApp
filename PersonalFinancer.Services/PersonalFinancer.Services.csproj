@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PersonalFinancer.Common\PersonalFinancer.Common.csproj" />
     <ProjectReference Include="..\PersonalFinancer.Data\PersonalFinancer.Data.csproj" />
   </ItemGroup>
 

@@ -1,21 +1,22 @@
 ﻿namespace PersonalFinancer.Tests.Controllers
 {
-	using Microsoft.AspNetCore.Http;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.ViewFeatures;
-	using Moq;
-	using NUnit.Framework;
-	using PersonalFinancer.Data.Models.Enums;
-	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User.Models;
-	using PersonalFinancer.Web.Controllers;
-	using PersonalFinancer.Web.Models.Account;
-	using PersonalFinancer.Web.Models.Transaction;
-	using static PersonalFinancer.Data.Constants;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.ViewFeatures;
+    using Moq;
+    using NUnit.Framework;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models.Enums;
+    using PersonalFinancer.Services.Accounts;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Controllers;
+    using PersonalFinancer.Web.Models.Account;
+    using PersonalFinancer.Web.Models.Transaction;
+    using static PersonalFinancer.Data.Constants;
 
-	[TestFixture]
+    [TestFixture]
 	internal class TransactionsControllerTests : ControllersUnitTestsBase
 	{
 		private TransactionsController controller;
@@ -251,8 +252,7 @@
 
 				var model = viewResult.Model as TransactionFormViewModel;
 				Assert.That(model, Is.Not.Null);
-				Assert.That(model!.IsInitialBalance, Is.False);
-				Assert.That(model.Reference, Is.Null);
+				Assert.That(model!.Reference, Is.Null);
 				Assert.That(model.OwnerId, Is.EqualTo(this.userId));
 				Assert.That(model.AccountId, Is.Null);
 				Assert.That(model.Amount, Is.EqualTo(0));
@@ -276,7 +276,6 @@
 				CreatedOn = DateTime.UtcNow,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = false,
 				OwnerId = this.userId,
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
@@ -319,7 +318,6 @@
 				CreatedOn = DateTime.UtcNow,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = false,
 				OwnerId = Guid.NewGuid(),
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
@@ -346,7 +344,6 @@
 				CreatedOn = DateTime.UtcNow,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = false,
 				OwnerId = this.userId,
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
@@ -392,7 +389,6 @@
 				CreatedOn = DateTime.UtcNow,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = false,
 				OwnerId = this.userId,
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
@@ -748,7 +744,6 @@
 				CreatedOn = DateTime.UtcNow,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = false,
 				OwnerId = this.userId,
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
@@ -785,7 +780,6 @@
 				CreatedOn = DateTime.UtcNow,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = true,
 				OwnerId = this.userId,
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
@@ -824,7 +818,6 @@
 				CreatedOn = DateTime.UtcNow,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = false,
 				OwnerId = Guid.NewGuid(),
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
@@ -852,7 +845,6 @@
 				CreatedOn = DateTime.UtcNow,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = false,
 				OwnerId = this.userId,
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
@@ -889,7 +881,6 @@
 				CreatedOn = DateTime.UtcNow,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = false,
 				OwnerId = this.userId,
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
@@ -940,7 +931,6 @@
 				CreatedOn = DateTime.UtcNow,
 				AccountId = accountId,
 				CategoryId = Guid.NewGuid(),
-				IsInitialBalance = false,
 				OwnerId = ownerId,
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
@@ -981,7 +971,7 @@
 				CheckRouteValues(result.RouteValues!, "id", transactionId);
 			});
 
-			CheckTempDataMessage(this.controller.TempData, "You successfully edit User's transaction!");
+			CheckTempDataMessage(this.controller.TempData, ResponseMessages.AdminEditedUserTransaction);
 		}
 
 		private void CheckUserTransactionsViewModel(UserTransactionsViewModel model)

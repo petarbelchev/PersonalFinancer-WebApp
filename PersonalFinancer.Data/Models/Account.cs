@@ -7,7 +7,9 @@
 
     public class Account : BaseApiEntity
     {
-        [Key]
+		public Account() => this.Id = Guid.NewGuid();
+
+		[Key]
         public override Guid Id { get; set; }
 
         [MaxLength(AccountNameMaxLength,

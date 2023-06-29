@@ -7,7 +7,9 @@
 
     public class Transaction
     {
-        [Key]
+		public Transaction() => this.Id = Guid.NewGuid();
+
+		[Key]
         public Guid Id { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]

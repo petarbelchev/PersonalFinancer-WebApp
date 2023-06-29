@@ -1,16 +1,18 @@
 ﻿namespace PersonalFinancer.Web.Models.Api
 {
+    using PersonalFinancer.Common.Messages;
     using System.ComponentModel.DataAnnotations;
     using static PersonalFinancer.Data.Constants.AccountTypeConstants;
 
     public class AccountTypeInputModel : IApiEntityInputModel
     {
-        [Required(ErrorMessage = "Please enter an Account Type name.")]
+        [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
         [StringLength(AccountTypeNameMaxLength, MinimumLength = AccountTypeNameMinLength,
-            ErrorMessage = "Account Type name must be between {2} and {1} characters long.")]
+            ErrorMessage = ValidationMessages.InvalidLength)]
+        [Display(Name = "Account Type")]
         public string Name { get; set; } = null!;
 
-        [Required(ErrorMessage = "Owner Id is required!")]
+        [Required]
         public Guid? OwnerId { get; set; }
     }
 }
