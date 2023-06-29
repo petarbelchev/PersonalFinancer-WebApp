@@ -1,19 +1,19 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-    using AutoMapper;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.User;
-    using PersonalFinancer.Web.Extensions;
-    using PersonalFinancer.Web.Models.Account;
-    using System.ComponentModel.DataAnnotations;
-    using static PersonalFinancer.Data.Constants.RoleConstants;
-    using static PersonalFinancer.Web.Constants;
+	using AutoMapper;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Services.Accounts;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.Models.Account;
+	using System.ComponentModel.DataAnnotations;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
+	using static PersonalFinancer.Common.Constants.UrlPathConstants;
 
-    [Authorize]
+	[Authorize]
 	public class AccountsController : Controller
 	{
 		protected readonly IAccountsUpdateService accountsUpdateService;
@@ -176,7 +176,7 @@
 					this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.AdminDeletedUserAccount;
 					Guid ownerId = await this.accountsInfoService.GetAccountOwnerIdAsync(accountId);
 
-					return this.LocalRedirect(UrlPathConstants.AdminUserDetailsPath + ownerId);
+					return this.LocalRedirect(AdminUserDetailsPath + ownerId);
 				}
 				else
 				{
@@ -286,7 +286,7 @@
 			var viewModel = new AccountDetailsViewModel(accountDetails.TotalAccountTransactions);
 			this.mapper.Map(accountDetails, viewModel);
 
-			viewModel.Routing.ReturnUrl = UrlPathConstants.AccountDetailsPath + accountId;
+			viewModel.Routing.ReturnUrl = AccountDetailsPath + accountId;
 
 			return viewModel;
 		}

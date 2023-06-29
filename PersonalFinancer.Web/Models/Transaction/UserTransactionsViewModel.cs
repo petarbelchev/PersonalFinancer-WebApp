@@ -2,17 +2,14 @@
 {
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Web.Models.Shared;
-	using static PersonalFinancer.Services.Constants;
+	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	public class UserTransactionsViewModel : UserTransactionsInputModel
 	{
 		public UserTransactionsViewModel(int totalTransactionsCount, int page = 1)
 		{
 			this.Pagination = new PaginationModel(
-				PaginationConstants.TransactionsName,
-				PaginationConstants.TransactionsPerPage,
-				totalTransactionsCount,
-				page);
+				TransactionsName, TransactionsPerPage, totalTransactionsCount, page);
 
 			this.Routing = new RoutingModel
 			{

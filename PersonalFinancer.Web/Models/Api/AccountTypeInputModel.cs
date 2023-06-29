@@ -2,7 +2,7 @@
 {
     using PersonalFinancer.Common.Messages;
     using System.ComponentModel.DataAnnotations;
-    using static PersonalFinancer.Data.Constants.AccountTypeConstants;
+    using static PersonalFinancer.Common.Constants.AccountTypeConstants;
 
     public class AccountTypeInputModel : IApiEntityInputModel
     {

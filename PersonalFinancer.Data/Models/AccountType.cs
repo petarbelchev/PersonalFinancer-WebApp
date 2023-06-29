@@ -3,24 +3,28 @@
     using PersonalFinancer.Data.Models.Contracts;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using static PersonalFinancer.Data.Constants.AccountTypeConstants;
+    using static PersonalFinancer.Common.Constants.AccountTypeConstants;
 
     public class AccountType : BaseApiEntity
     {
+        [Required]
         [Key]
         public override Guid Id { get; set; }
 
-        [MaxLength(AccountTypeNameMaxLength,
-           ErrorMessage = "Account type name max length must be {1} characters long.")]
+        [Required]
+        [MaxLength(AccountTypeNameMaxLength)]
         public override string Name { get; set; } = null!;
 
+        [Required]
         [ForeignKey(nameof(Owner))]
         public override Guid OwnerId { get; set; }
 
         public ApplicationUser Owner { get; set; } = null!;
 
+        [Required]
         public override bool IsDeleted { get; set; }
 
-        public ICollection<Account> Accounts { get; set; } = new HashSet<Account>();
+        public ICollection<Account> Accounts { get; set; } 
+            = new HashSet<Account>();
     }
 }

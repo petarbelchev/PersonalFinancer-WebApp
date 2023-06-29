@@ -1,22 +1,22 @@
 ﻿namespace PersonalFinancer.Tests.Controllers
 {
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.ViewFeatures;
-    using Moq;
-    using NUnit.Framework;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models.Enums;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.Shared.Models;
-    using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Controllers;
-    using PersonalFinancer.Web.Models.Account;
-    using static PersonalFinancer.Data.Constants;
-    using static PersonalFinancer.Services.Constants;
-    using static PersonalFinancer.Web.Constants;
+	using Microsoft.AspNetCore.Http;
+	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.AspNetCore.Mvc.ViewFeatures;
+	using Moq;
+	using NUnit.Framework;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Data.Models.Enums;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Web.Controllers;
+	using PersonalFinancer.Web.Models.Account;
+	using static PersonalFinancer.Common.Constants.PaginationConstants;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
+	using static PersonalFinancer.Common.Constants.UrlPathConstants;
 
-    [TestFixture]
+	[TestFixture]
 	internal class AccountsControllerTests : ControllersUnitTestsBase
 	{
 		private AccountsController controller;
@@ -256,7 +256,7 @@
 			//Arrange
 			this.expectedAccountDetailsDto.OwnerId = this.userId;
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
 				.GetAccountDetailsAsync(
@@ -286,7 +286,7 @@
 			//Arrange
 			this.expectedAccountDetailsDto.OwnerId = Guid.NewGuid();
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
 
 			this.accountsInfoServiceMock.Setup(x => x
 				.GetAccountDetailsAsync(this.expectedAccountDetailsDto.Id, It.IsAny<DateTime>(), It.IsAny<DateTime>(), this.userId, true))
@@ -310,7 +310,7 @@
 		{
 			//Arrange
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -347,7 +347,7 @@
 			this.expectedAccountDetailsDto.StartDate = inputModel.StartDate ?? throw new InvalidOperationException();
 			this.expectedAccountDetailsDto.EndDate = inputModel.EndDate ?? throw new InvalidOperationException();
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
 
 			this.accountsInfoServiceMock.Setup(x => x
 				.GetAccountDetailsAsync(this.expectedAccountDetailsDto.Id, this.expectedAccountDetailsDto.StartDate, this.expectedAccountDetailsDto.EndDate, this.userId, true))
@@ -381,7 +381,7 @@
 			this.expectedAccountDetailsDto.StartDate = inputModel.StartDate ?? throw new InvalidOperationException();
 			this.expectedAccountDetailsDto.EndDate = inputModel.EndDate ?? throw new InvalidOperationException();
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
 				.GetAccountDetailsAsync(this.expectedAccountDetailsDto.Id, this.expectedAccountDetailsDto.StartDate, this.expectedAccountDetailsDto.EndDate, this.userId, false))
@@ -415,7 +415,7 @@
 				EndDate = endDate
 			};
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
 				.GetAccountDetailsAsync(this.expectedAccountDetailsDto.Id, startDate, endDate, this.userId, false))
@@ -511,7 +511,7 @@
 			string accountName = "name";
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -538,7 +538,7 @@
 		{
 			//Arrange
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -587,7 +587,7 @@
 			};
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.controller.TempData = new TempDataDictionary(
@@ -628,7 +628,7 @@
 			var ownerId = Guid.NewGuid();
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(true);
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -669,7 +669,7 @@
 			};
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x =>
@@ -701,7 +701,7 @@
 			};
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x
@@ -869,7 +869,7 @@
 				AccountTypeId = Guid.NewGuid()
 			};
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			//Act
 			var viewResult = (BadRequestResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
@@ -897,7 +897,7 @@
 				AccountTypeId = Guid.NewGuid(),
 			};
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
@@ -938,7 +938,7 @@
 				AccountTypeId = Guid.NewGuid(),
 			};
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
 			this.accountsInfoServiceMock.Setup(x => x.GetAccountOwnerIdAsync(accId)).ReturnsAsync(ownerId);
 			this.controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
@@ -980,7 +980,7 @@
 			};
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(true);
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -1028,7 +1028,7 @@
 				AccountTypeId = Guid.NewGuid(),
 			};
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			string errorMessage = string.Format(ExceptionMessages.ExistingUserEntityName, "account", inputFormModel.Name);
 
@@ -1072,7 +1072,7 @@
 				AccountTypeId = Guid.NewGuid(),
 			};
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
 				It.Is<CreateEditAccountDTO>(m =>
@@ -1199,15 +1199,15 @@
 			}
 
 			Assert.That(viewModel.Pagination.TotalElements, Is.EqualTo(serviceModel.TotalAccountTransactions));
-			Assert.That(viewModel.Pagination.ElementsName, Is.EqualTo(PaginationConstants.TransactionsName));
-			Assert.That(viewModel.Pagination.ElementsPerPage, Is.EqualTo(PaginationConstants.TransactionsPerPage));
+			Assert.That(viewModel.Pagination.ElementsName, Is.EqualTo(TransactionsName));
+			Assert.That(viewModel.Pagination.ElementsPerPage, Is.EqualTo(TransactionsPerPage));
 			Assert.That(viewModel.Pagination.Page, Is.EqualTo(1));
 
 			Assert.That(viewModel.Routing.Area, Is.EqualTo(string.Empty));
 			Assert.That(viewModel.Routing.Controller, Is.EqualTo("Accounts"));
 			Assert.That(viewModel.Routing.Action, Is.EqualTo("AccountDetails"));
 
-			Assert.That(viewModel.Routing.ReturnUrl, Is.EqualTo(UrlPathConstants.AccountDetailsPath + serviceModel.Id));
+			Assert.That(viewModel.Routing.ReturnUrl, Is.EqualTo(AccountDetailsPath + serviceModel.Id));
 		}
 	}
 }

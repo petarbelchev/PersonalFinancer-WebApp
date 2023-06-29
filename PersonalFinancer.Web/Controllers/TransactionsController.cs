@@ -12,7 +12,7 @@
     using PersonalFinancer.Web.Models.Account;
     using PersonalFinancer.Web.Models.Transaction;
     using System.ComponentModel.DataAnnotations;
-    using static PersonalFinancer.Data.Constants.RoleConstants;
+    using static PersonalFinancer.Common.Constants.RoleConstants;
 
     [Authorize]
 	public class TransactionsController : Controller

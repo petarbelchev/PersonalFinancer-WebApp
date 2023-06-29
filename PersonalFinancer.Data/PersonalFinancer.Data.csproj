@@ -25,4 +25,8 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PersonalFinancer.Common\PersonalFinancer.Common.csproj" />
+  </ItemGroup>
+
 </Project>

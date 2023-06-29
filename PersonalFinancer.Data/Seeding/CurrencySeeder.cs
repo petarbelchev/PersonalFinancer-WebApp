@@ -2,7 +2,7 @@
 {
 	using Microsoft.EntityFrameworkCore;
 	using PersonalFinancer.Data.Models;
-	using static PersonalFinancer.Data.Constants.SeedConstants;
+	using static PersonalFinancer.Common.Constants.SeedConstants;
 
 	public class CurrencySeeder : IUserDataSeeder
     {

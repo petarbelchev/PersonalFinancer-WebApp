@@ -3,7 +3,7 @@
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
-    using static PersonalFinancer.Data.Constants.RoleConstants;
+    using static PersonalFinancer.Common.Constants.RoleConstants;
 
     internal class UserRoleEntityConfiguration : IEntityTypeConfiguration<IdentityRole<Guid>>
     {

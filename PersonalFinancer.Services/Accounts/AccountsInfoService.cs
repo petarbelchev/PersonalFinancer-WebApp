@@ -1,19 +1,19 @@
 ﻿namespace PersonalFinancer.Services.Accounts
 {
-    using AutoMapper;
-    using AutoMapper.QueryableExtensions;
-    using Microsoft.EntityFrameworkCore;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Models.Enums;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.Shared.Models;
-    using System;
-    using System.Threading.Tasks;
-    using static PersonalFinancer.Services.Constants;
+	using AutoMapper;
+	using AutoMapper.QueryableExtensions;
+	using Microsoft.EntityFrameworkCore;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Models.Enums;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.Shared.Models;
+	using System;
+	using System.Threading.Tasks;
+	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
-    public class AccountsInfoService : IAccountsInfoService
+	public class AccountsInfoService : IAccountsInfoService
 	{
 		private readonly IEfRepository<Transaction> transactionsRepo;
 		private readonly IEfRepository<Account> accountsRepo;
@@ -89,8 +89,8 @@
 				Accounts = await this.accountsRepo.All()
 					.Where(a => !a.IsDeleted)
 					.OrderBy(a => a.Name)
-					.Skip(PaginationConstants.AccountsPerPage * (page - 1))
-					.Take(PaginationConstants.AccountsPerPage)
+					.Skip(AccountsPerPage * (page - 1))
+					.Take(AccountsPerPage)
 					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
 				TotalAccountsCount = await this.accountsRepo.All()

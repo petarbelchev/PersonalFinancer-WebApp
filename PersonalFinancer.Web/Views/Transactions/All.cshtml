@@ -1,6 +1,6 @@
 ﻿@using PersonalFinancer.Services.Shared.Models;
 @using PersonalFinancer.Web.Models.Transaction;
-@using static PersonalFinancer.Web.Constants;
+@using static PersonalFinancer.Common.Constants.UrlPathConstants;
 @model UserTransactionsViewModel
 @{
 	ViewData["Title"] = "Transactions";
@@ -97,9 +97,9 @@
 			accountTypeId: '@Model.AccountTypeId',
 			currencyId: '@Model.CurrencyId',
 			categoryId: '@Model.CategoryId',
-			allTransactionsEndpoint: '@UrlPathConstants.ApiTransactionsEndpoint',
-			transactionEndpoint: '@UrlPathConstants.ApiTransactionsEndpoint',
-			editTransactionPath: '@UrlPathConstants.TransactionEditPath'
+			allTransactionsEndpoint: '@ApiTransactionsEndpoint',
+			transactionEndpoint: '@ApiTransactionsEndpoint',
+			editTransactionPath: '@TransactionEditPath'
 		}
 	</script>
 	<script src="~/js/getTransactions.js"></script>

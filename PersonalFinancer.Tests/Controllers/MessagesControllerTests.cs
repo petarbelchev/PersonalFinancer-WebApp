@@ -14,7 +14,7 @@
     using PersonalFinancer.Web.Controllers;
     using PersonalFinancer.Web.Models.Message;
     using System.Security.Claims;
-    using static PersonalFinancer.Data.Constants;
+    using static PersonalFinancer.Common.Constants.RoleConstants;
 
     [TestFixture]
     internal class MessagesControllerTests
@@ -70,7 +70,7 @@
             };
 
             this.userMock.Setup(x => x
-                .IsInRole(RoleConstants.AdminRoleName))
+                .IsInRole(AdminRoleName))
                 .Returns(false);
 
             this.messagesServiceMock.Setup(x => x
@@ -121,7 +121,7 @@
             };
 
             this.userMock.Setup(x => x
-                .IsInRole(RoleConstants.AdminRoleName))
+                .IsInRole(AdminRoleName))
                 .Returns(true);
 
             this.messagesServiceMock.Setup(x => x
@@ -242,7 +242,7 @@
             string messageId = "id";
 
             this.userMock.Setup(x => x
-                .IsInRole(RoleConstants.AdminRoleName))
+                .IsInRole(AdminRoleName))
                 .Returns(false);
 
             //Act
@@ -267,7 +267,7 @@
             string messageId = "id";
 
             this.userMock.Setup(x => x
-                .IsInRole(RoleConstants.AdminRoleName))
+                .IsInRole(AdminRoleName))
                 .Returns(false);
 
             this.messagesServiceMock.Setup(x => x
@@ -288,7 +288,7 @@
             string messageId = "id";
 
             this.userMock.Setup(x => x
-                .IsInRole(RoleConstants.AdminRoleName))
+                .IsInRole(AdminRoleName))
                 .Returns(false);
 
             this.messagesServiceMock.Setup(x => x
@@ -406,7 +406,7 @@
             };
 
             this.userMock.Setup(x => x
-                .IsInRole(RoleConstants.AdminRoleName))
+                .IsInRole(AdminRoleName))
                 .Returns(false);
 
             this.messagesServiceMock.Setup(x => x
@@ -457,7 +457,7 @@
             };
 
             this.userMock.Setup(x => x
-                .IsInRole(RoleConstants.AdminRoleName))
+                .IsInRole(AdminRoleName))
                 .Returns(false);
 
             this.messagesServiceMock.Setup(x => x
@@ -486,7 +486,7 @@
             string userName = "user name";
 
             this.userMock.Setup(x => x
-                .IsInRole(RoleConstants.AdminRoleName))
+                .IsInRole(AdminRoleName))
                 .Returns(false);
 
             this.usersServiceMock.Setup(x => x
@@ -527,7 +527,7 @@
             string userName = "user name";
 
             this.userMock.Setup(x => x
-                .IsInRole(RoleConstants.AdminRoleName))
+                .IsInRole(AdminRoleName))
                 .Returns(false);
 
             this.usersServiceMock.Setup(x => x
@@ -563,7 +563,7 @@
             string userName = "user name";
 
             this.userMock.Setup(x => x
-                .IsInRole(RoleConstants.AdminRoleName))
+                .IsInRole(AdminRoleName))
                 .Returns(false);
 
             this.usersServiceMock.Setup(x => x

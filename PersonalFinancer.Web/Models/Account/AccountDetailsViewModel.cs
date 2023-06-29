@@ -2,16 +2,14 @@
 {
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Web.Models.Shared;
-	using static PersonalFinancer.Services.Constants;
+	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	public class AccountDetailsViewModel
 	{
-        public AccountDetailsViewModel(int totalTransactionsCount)
-        {
+		public AccountDetailsViewModel(int totalTransactionsCount)
+		{
 			this.Pagination = new PaginationModel(
-				PaginationConstants.TransactionsName,
-				PaginationConstants.TransactionsPerPage,
-				totalTransactionsCount);
+				TransactionsName, TransactionsPerPage, totalTransactionsCount);
 
 			this.Routing = new RoutingModel
 			{
@@ -22,11 +20,11 @@
 			this.Transactions = new List<TransactionTableDTO>();
 		}
 
-        public AccountDetailsViewModel() : this(0)
-        {
+		public AccountDetailsViewModel() : this(0)
+		{
 		}
 
-        public Guid Id { get; set; }
+		public Guid Id { get; set; }
 
 		public string Name { get; set; } = null!;
 
@@ -34,9 +32,9 @@
 
 		public string CurrencyName { get; set; } = null!;
 
-        public string AccountTypeName { get; set; } = null!;
+		public string AccountTypeName { get; set; } = null!;
 
-        public DateTime StartDate { get; set; }
+		public DateTime StartDate { get; set; }
 
 		public DateTime EndDate { get; set; }
 

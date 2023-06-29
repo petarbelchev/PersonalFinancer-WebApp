@@ -1,6 +1,6 @@
 ﻿@using PersonalFinancer.Web.Models.Account;
 @using PersonalFinancer.Web.Models.Shared;
-@using static PersonalFinancer.Web.Constants;
+@using static PersonalFinancer.Common.Constants.UrlPathConstants;
 @model AccountDetailsViewModel
 @{
 	ViewData["Title"] = "Account Details";
@@ -69,9 +69,9 @@ else
 			startDate: '@Model.StartDate.ToString("yyyy-MM-ddTHH:mm")',
 			endDate: '@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")',
 			ownerId: '@Model.OwnerId',
-			allTransactionsEndpoint: '@UrlPathConstants.ApiAccountTransactionsEndpoint',
-			transactionEndpoint: '@UrlPathConstants.ApiTransactionsEndpoint',
-			editTransactionPath: '@UrlPathConstants.TransactionEditPath'
+			allTransactionsEndpoint: '@ApiAccountTransactionsEndpoint',
+			transactionEndpoint: '@ApiTransactionsEndpoint',
+			editTransactionPath: '@TransactionEditPath'
 		}
 	</script>
 	<script src="~/js/getTransactions.js"></script>

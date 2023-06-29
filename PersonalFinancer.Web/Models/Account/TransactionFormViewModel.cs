@@ -6,7 +6,7 @@
     using PersonalFinancer.Services.Shared.Models;
     using PersonalFinancer.Web.ModelBinders;
     using System.ComponentModel.DataAnnotations;
-    using static PersonalFinancer.Data.Constants.TransactionConstants;
+    using static PersonalFinancer.Common.Constants.TransactionConstants;
 
     public class TransactionFormViewModel
 	{

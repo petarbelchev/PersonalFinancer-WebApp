@@ -10,7 +10,7 @@
     using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Api;
     using PersonalFinancer.Web.Models.Shared;
-    using static PersonalFinancer.Data.Constants.RoleConstants;
+    using static PersonalFinancer.Common.Constants.RoleConstants;
 
     [Authorize]
 	[Route("api/transactions")]

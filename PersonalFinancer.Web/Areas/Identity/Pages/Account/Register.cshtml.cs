@@ -10,9 +10,10 @@
     using System.ComponentModel.DataAnnotations;
     using System.Text;
     using System.Text.Encodings.Web;
-    using static PersonalFinancer.Data.Constants;
+    using static PersonalFinancer.Common.Constants.UserConstants;
+    using static PersonalFinancer.Common.Constants.RoleConstants;
 
-    public class RegisterModel : PageModel
+	public class RegisterModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<ApplicationUser> userManager;
@@ -39,22 +40,22 @@
         public class InputModel
         {
             [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
-            [StringLength(UserConstants.UserNameMaxLength, 
-                MinimumLength = UserConstants.UserNameMinLength,
+            [StringLength(UserNameMaxLength, 
+                MinimumLength = UserNameMinLength,
                 ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "Username")]
             public string UserName { get; set; } = null!;
 
             [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
-            [StringLength(UserConstants.UserFirstNameMaxLength, 
-                MinimumLength = UserConstants.UserFirstNameMinLength,
+            [StringLength(UserFirstNameMaxLength, 
+                MinimumLength = UserFirstNameMinLength,
                 ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "First Name")]
             public string FirstName { get; set; } = null!;
 
             [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
-            [StringLength(UserConstants.UserLastNameMaxLength, 
-                MinimumLength = UserConstants.UserLastNameMinLength,
+            [StringLength(UserLastNameMaxLength, 
+                MinimumLength = UserLastNameMinLength,
                 ErrorMessage = ValidationMessages.InvalidLength)]
             [Display(Name = "Last Name")]
             public string LastName { get; set; } = null!;
@@ -66,8 +67,8 @@
 
             [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
             [DataType(DataType.Password)]
-            [StringLength(UserConstants.UserPasswordMaxLength, 
-                MinimumLength = UserConstants.UserPasswordMinLength,
+            [StringLength(UserPasswordMaxLength, 
+                MinimumLength = UserPasswordMinLength,
                 ErrorMessage = ValidationMessages.InvalidLength)]
             public string Password { get; set; } = null!;
 
@@ -104,7 +105,7 @@
 
                 if (creationResult.Succeeded)
                 {
-                    await this.userManager.AddToRoleAsync(user, RoleConstants.UserRoleName);
+                    await this.userManager.AddToRoleAsync(user, UserRoleName);
                     this.logger.LogInformation("User created a new account with password.");
 
                     if (this.userManager.Options.SignIn.RequireConfirmedAccount)

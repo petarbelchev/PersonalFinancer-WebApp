@@ -11,7 +11,7 @@
     using PersonalFinancer.Services.Accounts.Models;
     using PersonalFinancer.Services.Shared.Models;
     using System.Linq.Expressions;
-    using static PersonalFinancer.Services.Constants.PaginationConstants;
+    using static PersonalFinancer.Common.Constants.PaginationConstants;
 
     [TestFixture]
 	internal class AccountsInfoServiceTests : ServicesUnitTestsBase

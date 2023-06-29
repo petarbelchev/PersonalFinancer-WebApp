@@ -6,7 +6,7 @@
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Tests.Mocks;
-	using static PersonalFinancer.Data.Constants.CategoryConstants;
+	using static PersonalFinancer.Common.Constants.CategoryConstants;
 
 	[TestFixture]
 	internal abstract class ServicesUnitTestsBase

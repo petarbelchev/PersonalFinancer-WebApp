@@ -7,7 +7,7 @@
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Web.Models.Account;
-	using static PersonalFinancer.Data.Constants.RoleConstants;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[Area("Admin")]
     [Authorize(Roles = AdminRoleName)]

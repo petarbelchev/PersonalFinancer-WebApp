@@ -6,11 +6,11 @@
     using PersonalFinancer.Services.User;
     using PersonalFinancer.Web.Areas.Admin.Models.Home;
     using PersonalFinancer.Web.Extensions;
-    using static PersonalFinancer.Data.Constants;
-    using static PersonalFinancer.Web.Constants;
+    using static PersonalFinancer.Common.Constants.RoleConstants;
+    using static PersonalFinancer.Common.Constants.UrlPathConstants;
 
     [Area("Admin")]
-    [Authorize(Roles = RoleConstants.AdminRoleName)]
+    [Authorize(Roles = AdminRoleName)]
     public class HomeController : Controller
     {
         private readonly IUsersService usersService;
@@ -31,7 +31,7 @@
                 RegisteredUsers = await this.usersService.UsersCountAsync(),
                 CreatedAccounts = await this.accountsInfoService.GetAccountsCountAsync(),
                 AdminFullName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
-                AccountsCashFlowEndpoint = UrlPathConstants.ApiAccountsCashFlowEndpoint
+                AccountsCashFlowEndpoint = ApiAccountsCashFlowEndpoint
             });
         }
     }

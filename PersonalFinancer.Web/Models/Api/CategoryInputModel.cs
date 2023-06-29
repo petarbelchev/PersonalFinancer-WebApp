@@ -2,7 +2,7 @@
 {
     using PersonalFinancer.Common.Messages;
     using System.ComponentModel.DataAnnotations;
-    using static PersonalFinancer.Data.Constants.CategoryConstants;
+    using static PersonalFinancer.Common.Constants.CategoryConstants;
 
     public class CategoryInputModel : IApiEntityInputModel
     {

@@ -3,7 +3,7 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
     using PersonalFinancer.Data.Models;
-    using static PersonalFinancer.Data.Constants.UserConstants;
+    using static PersonalFinancer.Common.Constants.UserConstants;
 
     internal class UserEntityConfiguration : IEntityTypeConfiguration<ApplicationUser>
     {

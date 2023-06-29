@@ -8,7 +8,10 @@
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Shared.Contracts;
 	using PersonalFinancer.Services.Shared.Models;
-	using static PersonalFinancer.Data.Constants;
+	using static PersonalFinancer.Common.Constants.AccountConstants;
+	using static PersonalFinancer.Common.Constants.AccountTypeConstants;
+	using static PersonalFinancer.Common.Constants.CategoryConstants;
+	using static PersonalFinancer.Common.Constants.CurrencyConstants;
 
 	public class MemoryCacheService<T> : ICacheService<T> where T : BaseApiEntity, new()
 	{
@@ -65,26 +68,26 @@
 			if (type == typeof(AccountDropdownDTO) || type == typeof(Account))
 			{
 				return deletedCacheKey
-					? AccountConstants.DeletedAccountCacheKeyValue
-					: AccountConstants.AccountCacheKeyValue;
+					? DeletedAccountCacheKeyValue
+					: AccountCacheKeyValue;
 			}
 			else if (type == typeof(CurrencyDropdownDTO) || type == typeof(Currency))
 			{
 				return deletedCacheKey
-					? CurrencyConstants.DeletedCurrencyCacheKeyValue
-					: CurrencyConstants.CurrencyCacheKeyValue;
+					? DeletedCurrencyCacheKeyValue
+					: CurrencyCacheKeyValue;
 			}
 			else if (type == typeof(CategoryDropdownDTO) || type == typeof(Category))
 			{
 				return deletedCacheKey
-					? CategoryConstants.DeletedCategoryCacheKeyValue
-					: CategoryConstants.CategoryCacheKeyValue;
+					? DeletedCategoryCacheKeyValue
+					: CategoryCacheKeyValue;
 			}
 			else if (type == typeof(AccountTypeDropdownDTO) || type == typeof(AccountType))
 			{
 				return deletedCacheKey
-					? AccountTypeConstants.DeletedAccTypeCacheKeyValue
-					: AccountTypeConstants.AccTypeCacheKeyValue;
+					? DeletedAccTypeCacheKeyValue
+					: AccTypeCacheKeyValue;
 			}
 			else
 			{
@@ -122,7 +125,7 @@
 									&& (isDeletedValue 
 										? x.IsDeleted && x.Transactions.Any() 
 										: !x.IsDeleted))
-								|| (!isDeletedValue && x.Id == Guid.Parse(CategoryConstants.InitialBalanceCategoryId)));
+								|| (!isDeletedValue && x.Id == Guid.Parse(InitialBalanceCategoryId)));
 			}
 			else if (typeof(T) == typeof(AccountType))
 			{

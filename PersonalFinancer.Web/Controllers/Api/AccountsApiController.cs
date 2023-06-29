@@ -8,7 +8,7 @@
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Account;
 	using PersonalFinancer.Web.Models.Shared;
-	using static PersonalFinancer.Data.Constants;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[Authorize]
 	[Route("api/accounts")]
@@ -26,7 +26,7 @@
 			this.mapper = mapper;
 		}
 
-		[Authorize(Roles = RoleConstants.AdminRoleName)]
+		[Authorize(Roles = AdminRoleName)]
 		[HttpGet("{page}")]
 		public async Task<IActionResult> GetAccounts(int page)
 		{
@@ -37,7 +37,7 @@
 			return this.Ok(usersCardsModel);
 		}
 
-		[Authorize(Roles = RoleConstants.AdminRoleName)]
+		[Authorize(Roles = AdminRoleName)]
 		[HttpGet("cashflow")]
 		public async Task<IActionResult> GetAccountsCashFlow()
 			=> this.Ok(await this.accountsInfoService.GetCashFlowByCurrenciesAsync());

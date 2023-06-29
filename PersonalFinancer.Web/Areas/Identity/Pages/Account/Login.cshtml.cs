@@ -7,7 +7,7 @@
     using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Data.Models;
     using System.ComponentModel.DataAnnotations;
-    using static PersonalFinancer.Data.Constants;
+    using static PersonalFinancer.Common.Constants.UserConstants;
 
     public class LoginModel : PageModel
 	{
@@ -38,8 +38,8 @@
 
 			[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
 			[DataType(DataType.Password)]
-			[StringLength(UserConstants.UserPasswordMaxLength, 
-				MinimumLength = UserConstants.UserPasswordMinLength,
+			[StringLength(UserPasswordMaxLength, 
+				MinimumLength = UserPasswordMinLength,
 				ErrorMessage = ValidationMessages.InvalidLength)]
 			public string Password { get; set; } = null!;
 

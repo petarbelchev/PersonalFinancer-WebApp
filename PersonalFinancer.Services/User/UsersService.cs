@@ -9,8 +9,8 @@
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Services.User.Models;
-	using static PersonalFinancer.Data.Constants.CategoryConstants;
-	using static PersonalFinancer.Services.Constants;
+	using static PersonalFinancer.Common.Constants.CategoryConstants;
+	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	public class UsersService : IUsersService
 	{
@@ -41,8 +41,8 @@
 				Users = await this.usersRepo.All()
 					.OrderBy(u => u.FirstName)
 					.ThenBy(u => u.LastName)
-					.Skip(PaginationConstants.UsersPerPage * (page - 1))
-					.Take(PaginationConstants.UsersPerPage)
+					.Skip(UsersPerPage * (page - 1))
+					.Take(UsersPerPage)
 					.ProjectTo<UserInfoDTO>(this.mapper.ConfigurationProvider)
 					.ToListAsync(),
 				TotalUsersCount = await this.usersRepo.All().CountAsync()
@@ -64,8 +64,8 @@
 			{
 				Transactions = await query
 					.OrderByDescending(t => t.CreatedOn)
-					.Skip(PaginationConstants.TransactionsPerPage * (dto.Page - 1))
-					.Take(PaginationConstants.TransactionsPerPage)
+					.Skip(TransactionsPerPage * (dto.Page - 1))
+					.Take(TransactionsPerPage)
 					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
 				TotalTransactionsCount = await query.CountAsync()

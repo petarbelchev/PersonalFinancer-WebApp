@@ -3,21 +3,24 @@
     using PersonalFinancer.Data.Models.Contracts;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using static PersonalFinancer.Data.Constants.CategoryConstants;
+    using static PersonalFinancer.Common.Constants.CategoryConstants;
 
     public class Category : BaseApiEntity
     {
+        [Required]
         [Key]
         public override Guid Id { get; set; }
 
-        [MaxLength(CategoryNameMaxLength,
-           ErrorMessage = "Category's name max length must be {1} characters long.")]
+        [Required]
+        [MaxLength(CategoryNameMaxLength)]
         public override string Name { get; set; } = null!;
 
+        [Required]
         [ForeignKey(nameof(Owner))]
         public override Guid OwnerId { get; set; }
         public ApplicationUser Owner { get; set; } = null!;
 
+        [Required]
         public override bool IsDeleted { get; set; }
 
         public ICollection<Transaction> Transactions { get; set; }

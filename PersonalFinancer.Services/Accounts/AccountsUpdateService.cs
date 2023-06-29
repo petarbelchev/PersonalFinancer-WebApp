@@ -7,7 +7,7 @@
     using PersonalFinancer.Data.Models.Enums;
     using PersonalFinancer.Data.Repositories;
     using PersonalFinancer.Services.Accounts.Models;
-    using static PersonalFinancer.Data.Constants;
+    using static PersonalFinancer.Common.Constants.CategoryConstants;
 
     public class AccountsUpdateService : IAccountsUpdateService
 	{
@@ -226,13 +226,13 @@
 			{
 				AccountId = accountId,
 				OwnerId = ownerId,
-				CategoryId = Guid.Parse(CategoryConstants.InitialBalanceCategoryId),
+				CategoryId = Guid.Parse(InitialBalanceCategoryId),
 				Amount = amount,
 				CreatedOn = DateTime.UtcNow,
 				TransactionType = amount < 0
 					? TransactionType.Expense
 					: TransactionType.Income,
-				Reference = CategoryConstants.CategoryInitialBalanceName,
+				Reference = CategoryInitialBalanceName,
 				IsInitialBalance = true
 			};
 		}

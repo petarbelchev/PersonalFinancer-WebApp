@@ -4,7 +4,8 @@
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
 	using System.Security.Cryptography;
-	using static PersonalFinancer.Data.Constants;
+	using static PersonalFinancer.Common.Constants.CategoryConstants;
+	using static PersonalFinancer.Common.Constants.SeedConstants;
 
 	public class TransactionSeeder : IUserDataSeeder
     {
@@ -13,19 +14,19 @@
 			if (await dbContext.Accounts.AnyAsync(a => a.OwnerId == user.Id && a.Balance != 0))
 				return;
 
-			var cashBgnAccId = Guid.Parse(SeedConstants.CashBgnAccountId);
-            var bankBgnAccId = Guid.Parse(SeedConstants.BankBgnAccountId);
-            var euroSavingsAccId = Guid.Parse(SeedConstants.BankEurAccountId);
-            var usdSavingsAccId = Guid.Parse(SeedConstants.BankUsdAccountId);
+			var cashBgnAccId = Guid.Parse(CashBgnAccountId);
+            var bankBgnAccId = Guid.Parse(BankBgnAccountId);
+            var euroSavingsAccId = Guid.Parse(BankEurAccountId);
+            var usdSavingsAccId = Guid.Parse(BankUsdAccountId);
 
-            var initialBalanceCategoryId = Guid.Parse(CategoryConstants.InitialBalanceCategoryId);
-            var salaryCategoryId = Guid.Parse(SeedConstants.SalaryCategoryId);
-            var transportCategoryId = Guid.Parse(SeedConstants.TransportCategoryId);
-            var medicalHealthcareCategoryId = Guid.Parse(SeedConstants.MedicalHealthcareCategoryId);
-            var dividendsCategoryId = Guid.Parse(SeedConstants.DividendsCategoryId);
-            var utilitiesCategoryId = Guid.Parse(SeedConstants.UtilitiesCategoryId);
-            var moneyTransferCategoryId = Guid.Parse(SeedConstants.MoneyTransferCategoryId);
-            var foodDrinkCategoryId = Guid.Parse(SeedConstants.FoodDrinkCategoryId);
+            var initialBalanceCategoryId = Guid.Parse(InitialBalanceCategoryId);
+            var salaryCategoryId = Guid.Parse(SalaryCategoryId);
+            var transportCategoryId = Guid.Parse(TransportCategoryId);
+            var medicalHealthcareCategoryId = Guid.Parse(MedicalHealthcareCategoryId);
+            var dividendsCategoryId = Guid.Parse(DividendsCategoryId);
+            var utilitiesCategoryId = Guid.Parse(UtilitiesCategoryId);
+            var moneyTransferCategoryId = Guid.Parse(MoneyTransferCategoryId);
+            var foodDrinkCategoryId = Guid.Parse(FoodDrinkCategoryId);
 
             var transactions = new List<Transaction>
             {
@@ -36,7 +37,7 @@
                     Amount = 2000,
                     CategoryId = initialBalanceCategoryId,
                     CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                    Reference = CategoryConstants.CategoryInitialBalanceName,
+                    Reference = CategoryInitialBalanceName,
                     TransactionType = TransactionType.Income,
                     IsInitialBalance = true,
                     OwnerId = user.Id,
@@ -49,7 +50,7 @@
                     Amount = 4000,
                     CategoryId = initialBalanceCategoryId,
                     CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                    Reference = CategoryConstants.CategoryInitialBalanceName,
+                    Reference = CategoryInitialBalanceName,
                     TransactionType = TransactionType.Income,
                     IsInitialBalance = true,
                     OwnerId = user.Id,
@@ -62,7 +63,7 @@
                     Amount = 2800,
                     CategoryId = initialBalanceCategoryId,
                     CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                    Reference = CategoryConstants.CategoryInitialBalanceName,
+                    Reference = CategoryInitialBalanceName,
                     TransactionType = TransactionType.Income,
                     IsInitialBalance = true,
                     OwnerId = user.Id,
@@ -75,7 +76,7 @@
                     Amount = 3800,
                     CategoryId = initialBalanceCategoryId,
                     CreatedOn = DateTime.UtcNow.AddMonths(-2),
-                    Reference = CategoryConstants.CategoryInitialBalanceName,
+                    Reference = CategoryInitialBalanceName,
                     TransactionType = TransactionType.Income,
                     IsInitialBalance = true,
                     OwnerId = user.Id,

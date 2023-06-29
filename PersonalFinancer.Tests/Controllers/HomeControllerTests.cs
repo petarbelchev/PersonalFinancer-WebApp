@@ -10,8 +10,8 @@
 	using PersonalFinancer.Web.Controllers;
 	using PersonalFinancer.Web.Models.Home;
 	using PersonalFinancer.Web.Models.Shared;
-	using static PersonalFinancer.Data.Constants;
-	using static PersonalFinancer.Web.Constants;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
+	using static PersonalFinancer.Common.Constants.UrlPathConstants;
 
 	[TestFixture]
     internal class HomeControllerTests : ControllersUnitTestsBase
@@ -93,7 +93,7 @@
         public async Task Index_ShouldReturnCorrectModel_WhenUserIsAuthenticatedUser()
         {
             //Arrange			
-            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
             this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(true);
 
             //Act
@@ -162,7 +162,7 @@
         public async Task Index_ShouldReturnEmptyResult_WhenUserIsNotAuthenticated()
         {
             //Arrange
-            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+            this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
             this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(false);
 
             //Act
@@ -180,7 +180,7 @@
         public async Task Index_ShouldRedirectToAdminArea_WhenUserIsAdmin()
         {
             //Arrange
-            this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
+            this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
 
             //Act
             var redirectResult = (LocalRedirectResult)await this.controller.Index();
@@ -328,7 +328,7 @@
                 Assert.That(viewBagKeys, Has.Count.EqualTo(1));
                 Assert.That(viewBagValues, Has.Count.EqualTo(1));
                 Assert.That(viewBagValues.First(),
-                    Is.EqualTo(UrlPathConstants.BadRequestImgPath));
+                    Is.EqualTo(BadRequestImgPath));
             });
         }
 
@@ -348,7 +348,7 @@
                 Assert.That(viewBagKeys, Has.Count.EqualTo(1));
                 Assert.That(viewBagValues, Has.Count.EqualTo(1));
                 Assert.That(viewBagValues.First(),
-                    Is.EqualTo(UrlPathConstants.InternalServerErrorImgPath));
+                    Is.EqualTo(InternalServerErrorImgPath));
             });
         }
     }

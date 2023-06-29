@@ -3,13 +3,14 @@
 	using Microsoft.AspNetCore.Identity;
 	using PersonalFinancer.Data.Models;
 	using System.Threading.Tasks;
-	using static PersonalFinancer.Data.Constants;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
+	using static PersonalFinancer.Common.Constants.SeedConstants;
 
 	public static class UserSeeder
 	{
 		public static async Task SeedAsync(UserManager<ApplicationUser> userManager)
 		{
-			ApplicationUser? admin = await userManager.FindByEmailAsync(SeedConstants.AdminEmail);
+			ApplicationUser? admin = await userManager.FindByEmailAsync(AdminEmail);
 
 			if (admin == null)
 			{
@@ -26,13 +27,13 @@
 				};
 
 				IdentityResult creationResult =
-				   await userManager.CreateAsync(admin, SeedConstants.AdminPassword);
+				   await userManager.CreateAsync(admin, AdminPassword);
 
 				if (creationResult.Succeeded)
-					await userManager.AddToRoleAsync(admin, RoleConstants.AdminRoleName);
+					await userManager.AddToRoleAsync(admin, AdminRoleName);
 			}
 
-			ApplicationUser? testUser = await userManager.FindByEmailAsync(SeedConstants.FirstUserEmail);
+			ApplicationUser? testUser = await userManager.FindByEmailAsync(FirstUserEmail);
 
 			if (testUser == null)
 			{
@@ -49,10 +50,10 @@
 				};
 
 				IdentityResult creationResult = 
-					await userManager.CreateAsync(testUser, SeedConstants.FirstUserPassword);
+					await userManager.CreateAsync(testUser, FirstUserPassword);
 
 				if (creationResult.Succeeded)
-					await userManager.AddToRoleAsync(testUser, RoleConstants.UserRoleName);
+					await userManager.AddToRoleAsync(testUser, UserRoleName);
 			}			
 		}
 	}

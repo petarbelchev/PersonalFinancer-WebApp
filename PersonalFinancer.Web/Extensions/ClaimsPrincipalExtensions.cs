@@ -1,7 +1,7 @@
 ﻿namespace PersonalFinancer.Web.Extensions
 {
     using System.Security.Claims;
-    using static PersonalFinancer.Data.Constants.RoleConstants;
+    using static PersonalFinancer.Common.Constants.RoleConstants;
 
     public static class ClaimsPrincipalExtensions
     {

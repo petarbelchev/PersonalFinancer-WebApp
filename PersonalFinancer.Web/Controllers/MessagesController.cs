@@ -9,7 +9,7 @@
     using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Message;
 	using System.ComponentModel.DataAnnotations;
-	using static PersonalFinancer.Data.Constants.RoleConstants;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
 
     [Authorize]
     public class MessagesController : Controller

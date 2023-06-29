@@ -6,7 +6,8 @@
 	using PersonalFinancer.Data.Models;
 	using System;
 	using System.Threading.Tasks;
-	using static PersonalFinancer.Data.Constants;
+	using static PersonalFinancer.Common.Constants.CategoryConstants;
+	using static PersonalFinancer.Common.Constants.SeedConstants;
 
 	public class PersonalFinancerDbContextSeeder
 	{
@@ -24,7 +25,7 @@
 
 			// This seed is for the test user and is not mandatory.
 			// If you don't have a test user, don't execute this seed.
-			ApplicationUser testUser = await userManager.FindByEmailAsync(SeedConstants.FirstUserEmail);
+			ApplicationUser testUser = await userManager.FindByEmailAsync(FirstUserEmail);
 			var userDataSeeders = new IUserDataSeeder[]
 			{
 				new AccountTypeSeeder(),
@@ -40,16 +41,16 @@
 
 		private async Task SeedInitialBalanceCategory(PersonalFinancerDbContext dbContext, UserManager<ApplicationUser> userManager)
 		{
-			var initialBalanceCategoryId = Guid.Parse(CategoryConstants.InitialBalanceCategoryId);
+			var initialBalanceCategoryId = Guid.Parse(InitialBalanceCategoryId);
 
 			if (!await dbContext.Categories.AnyAsync(c => c.Id == initialBalanceCategoryId))
 			{
-				ApplicationUser admin = await userManager.FindByEmailAsync(SeedConstants.AdminEmail);
+				ApplicationUser admin = await userManager.FindByEmailAsync(AdminEmail);
 
 				await dbContext.Categories.AddAsync(new Category
 				{
 					Id = initialBalanceCategoryId,
-					Name = CategoryConstants.CategoryInitialBalanceName,
+					Name = CategoryInitialBalanceName,
 					OwnerId = admin.Id
 				});
 			}

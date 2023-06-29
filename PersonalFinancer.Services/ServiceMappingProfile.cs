@@ -8,7 +8,7 @@
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Services.User.Models;
-	using static PersonalFinancer.Services.Constants;
+	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	public class ServiceMappingProfile : Profile
     {
@@ -40,7 +40,7 @@
 						.Where(t =>	t.CreatedOn >= startDate.ToUniversalTime()
 									&& t.CreatedOn <= endDate.ToUniversalTime())
 						.OrderByDescending(t => t.CreatedOn)
-						.Take(PaginationConstants.TransactionsPerPage)))
+						.Take(TransactionsPerPage)))
 				.ForMember(dest => dest.TotalAccountTransactions, opt => opt
 					.MapFrom(src => src.Transactions
 						.Count(t => t.CreatedOn >= startDate.ToUniversalTime()
@@ -54,8 +54,8 @@
 						.Where(t => t.CreatedOn >= startDate.ToUniversalTime() 
 									&& t.CreatedOn <= endDate.ToUniversalTime())
 						.OrderByDescending(t => t.CreatedOn)
-						.Skip(PaginationConstants.TransactionsPerPage * (page - 1))
-						.Take(PaginationConstants.TransactionsPerPage)))
+						.Skip(TransactionsPerPage * (page - 1))
+						.Take(TransactionsPerPage)))
 				.ForMember(dest => dest.TotalTransactionsCount, opt => opt
 					.MapFrom(src => src.Transactions
 						.Count(t => t.CreatedOn >= startDate.ToUniversalTime()

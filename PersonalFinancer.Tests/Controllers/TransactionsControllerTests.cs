@@ -14,7 +14,7 @@
     using PersonalFinancer.Web.Controllers;
     using PersonalFinancer.Web.Models.Account;
     using PersonalFinancer.Web.Models.Transaction;
-    using static PersonalFinancer.Data.Constants;
+    using static PersonalFinancer.Common.Constants.RoleConstants;
 
     [TestFixture]
 	internal class TransactionsControllerTests : ControllersUnitTestsBase
@@ -425,7 +425,7 @@
 			string? returnUrl = null;
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x
@@ -455,7 +455,7 @@
 			decimal newBalance = 100;
 			string? returnUrl = null;
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(true);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
 
 			this.accountsUpdateServiceMock.Setup(x => x
 				.DeleteTransactionAsync(transactionId, this.userId, true))
@@ -485,7 +485,7 @@
 			string? returnUrl = "return url";
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x
@@ -515,7 +515,7 @@
 			string? returnUrl = "return url";
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(true);
 
 			this.accountsUpdateServiceMock.Setup(x => x
@@ -544,7 +544,7 @@
 			string? returnUrl = "return url";
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x
@@ -566,7 +566,7 @@
 			string? returnUrl = "return url";
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x
@@ -599,7 +599,7 @@
 			};
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -633,7 +633,7 @@
 			var transactionId = Guid.NewGuid();
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -654,7 +654,7 @@
 			var transactionId = Guid.NewGuid();
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -687,7 +687,7 @@
 			};
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -719,7 +719,7 @@
 			var transactionId = Guid.NewGuid();
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -824,7 +824,7 @@
 			};
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			//Act
@@ -850,7 +850,7 @@
 				TransactionType = TransactionType.Expense
 			};
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x
 				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionDTO>(x =>
@@ -886,7 +886,7 @@
 				TransactionType = TransactionType.Expense
 			};
 
-			this.userMock.Setup(x => x.IsInRole(RoleConstants.AdminRoleName)).Returns(false);
+			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.controller.TempData = new TempDataDictionary(
 				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
@@ -937,7 +937,7 @@
 			};
 
 			this.userMock.Setup(x => x
-				.IsInRole(RoleConstants.AdminRoleName))
+				.IsInRole(AdminRoleName))
 				.Returns(true);
 
 			this.controller.TempData = new TempDataDictionary(

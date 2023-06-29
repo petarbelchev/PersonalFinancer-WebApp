@@ -5,7 +5,7 @@
     using PersonalFinancer.Services.Shared.Models;
     using PersonalFinancer.Web.ModelBinders;
     using System.ComponentModel.DataAnnotations;
-    using static PersonalFinancer.Data.Constants.AccountConstants;
+    using static PersonalFinancer.Common.Constants.AccountConstants;
 
     public class AccountFormViewModel
 	{

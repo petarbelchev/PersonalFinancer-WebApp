@@ -5,7 +5,7 @@
     using PersonalFinancer.Services.User;
     using PersonalFinancer.Services.User.Models;
     using PersonalFinancer.Web.Models.User;
-    using static PersonalFinancer.Data.Constants.RoleConstants;
+    using static PersonalFinancer.Common.Constants.RoleConstants;
 
     [Authorize(Roles = AdminRoleName)]
     [Route("api/users")]

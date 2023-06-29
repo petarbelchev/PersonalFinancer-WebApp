@@ -9,7 +9,7 @@
     using PersonalFinancer.Web.Extensions;
     using PersonalFinancer.Web.Models.Home;
     using PersonalFinancer.Web.Models.Shared;
-    using static PersonalFinancer.Web.Constants.UrlPathConstants;
+    using static PersonalFinancer.Common.Constants.UrlPathConstants;
 
     public class HomeController : Controller
     {

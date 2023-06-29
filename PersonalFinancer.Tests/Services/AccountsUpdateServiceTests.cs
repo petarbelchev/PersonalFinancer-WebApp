@@ -8,7 +8,7 @@
     using PersonalFinancer.Data.Repositories;
     using PersonalFinancer.Services.Accounts;
     using PersonalFinancer.Services.Accounts.Models;
-    using static PersonalFinancer.Data.Constants.CategoryConstants;
+    using static PersonalFinancer.Common.Constants.CategoryConstants;
 
     [TestFixture]
     internal class AccountsUpdateServiceTests : ServicesUnitTestsBase
