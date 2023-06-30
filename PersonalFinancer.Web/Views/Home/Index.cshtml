@@ -109,11 +109,12 @@ else
 									<div class="d-flex">
 										<div class="p-2">
 											<div class="row">
-												@foreach (var currency in Model.CurrenciesCashFlow.Where(c => c.ExpensesByCategories.Any()))
-												{
+												@{
 													int index = 0;
-
-													<button class="col-12 btn btn-secondary formField" onclick="loadChart(@(index++))">@currency.Name</button>
+													foreach (var currency in Model.CurrenciesCashFlow.Where(c => c.ExpensesByCategories.Any()))
+													{
+														<button class="col-12 btn btn-secondary formField" onclick="loadChart(@(index++))">@currency.Name</button>
+													}
 												}
 											</div>
 										</div>
