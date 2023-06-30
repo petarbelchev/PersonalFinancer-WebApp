@@ -109,12 +109,11 @@ else
 									<div class="d-flex">
 										<div class="p-2">
 											<div class="row">
-												@for (int i = 0; i < Model.CurrenciesCashFlow.Count(); i++)
+												@foreach (var currency in Model.CurrenciesCashFlow.Where(c => c.ExpensesByCategories.Any()))
 												{
-													if (Model.CurrenciesCashFlow.ElementAt(i).ExpensesByCategories.Any())
-													{
-														<button class="col-12 btn btn-secondary formField" onclick="loadChart(@i)">@Model.CurrenciesCashFlow.ElementAt(i).Name</button>
-													}
+													int index = 0;
+
+													<button class="col-12 btn btn-secondary formField" onclick="loadChart(@(index++))">@currency.Name</button>
 												}
 											</div>
 										</div>
@@ -191,7 +190,7 @@ else
 	<partial name="_ValidationScriptsPartial" />
 	<script src="~/lib/Chart.js/chart.umd.js"></script>
 	<script>
-		let currencies = @Html.Raw(JsonConvert.SerializeObject(Model.CurrenciesCashFlow));
+		let currencies = @Html.Raw(JsonConvert.SerializeObject(Model.CurrenciesCashFlow.Where(c => c.ExpensesByCategories.Any())));
 		let canvas = document.querySelector('#doughnutChart');
 		let chart;
 		let isChartDrawed = false;

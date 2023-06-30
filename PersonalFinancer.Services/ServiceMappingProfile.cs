@@ -104,6 +104,8 @@
 					.MapFrom(src => src.Category.Name + (src.Category.IsDeleted ? " (Deleted)" : string.Empty)))
                 .ForMember(dest => dest.AccountName, opt => opt
 					.MapFrom(src => src.Account.Name + (src.Account.IsDeleted ? " (Deleted)" : string.Empty)))
+				.ForMember(dest => dest.AccountCurrencyName, opt => opt
+					.MapFrom(src => src.Account.Currency.Name + (src.Account.Currency.IsDeleted ? " (Deleted)" : string.Empty)))
 				.ForMember(dest => dest.CreatedOn, opt => opt
 					.MapFrom(src => src.CreatedOn.ToLocalTime()));
 
