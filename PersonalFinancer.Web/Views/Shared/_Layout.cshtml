@@ -1,4 +1,5 @@
-﻿@using PersonalFinancer.Web.Extensions;
+﻿@using PersonalFinancer.Common.Messages;
+@using PersonalFinancer.Web.Extensions;
 
 <!DOCTYPE html>
 <html lang="en">
@@ -62,11 +63,11 @@
 	<div class="container">
 		<main role="main" class="pb-3">
 
-			@if (TempData.ContainsKey("successMsg"))
+			@if (TempData.ContainsKey(ResponseMessages.TempDataKey))
 			{
 				<div class="alert alert-success alert-dismissible fade show" role="alert">
 					<i class="bi bi-check-circle me-1"></i>
-					@TempData["successMsg"]
+					@TempData[ResponseMessages.TempDataKey]
 					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 				</div>
 			}

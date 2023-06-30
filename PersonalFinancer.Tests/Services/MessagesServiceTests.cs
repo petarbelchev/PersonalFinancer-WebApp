@@ -1,520 +1,546 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
-    using AutoMapper;
-    using MongoDB.Driver;
-    using MongoDB.Driver.Linq;
-    using Moq;
-    using NUnit.Framework;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.Messages;
-    using PersonalFinancer.Services.Messages.Models;
-    using PersonalFinancer.Tests.Mocks;
+	using AutoMapper;
+	using MongoDB.Driver;
+	using MongoDB.Driver.Linq;
+	using Moq;
+	using Newtonsoft.Json;
+	using NUnit.Framework;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Messages;
+	using PersonalFinancer.Services.Messages.Models;
+	using PersonalFinancer.Tests.Mocks;
+	using System.Reflection;
 
-    [TestFixture]
-    internal class MessagesServiceTests
-    {
-        private Mock<IMongoRepository<Message>> repoMock;
-        private MessagesService service;
-        private readonly IMapper mapper = ServicesMapperMock.Instance;
+	[TestFixture]
+	internal class MessagesServiceTests
+	{
+		private string AdminId = Guid.NewGuid().ToString();
+		private string AdminName = "Admin Name";
+		private string FirstUserId = Guid.NewGuid().ToString();
+		private string FirstUserName = "First User Name";
+		private string SecondUserId = Guid.NewGuid().ToString();
+		private string SecondUserName = "Second User Name";
+		private ICollection<Message> fakeCollection;
 
-        [SetUp]
-        public void SetUp()
-        {
-            this.repoMock = new Mock<IMongoRepository<Message>>();
-            this.service = new MessagesService(this.repoMock.Object, this.mapper);
-        }
+		private Mock<UpdateResult> updateResultMock;
+		private Mock<IMongoRepository<Message>> repoMock;
+		private readonly IMapper mapper = ServicesMapperMock.Instance;
 
-        [Test]
-        public async Task GelAllAsync_ShouldReturnCorrectData()
-        {
-            //Arrange
-            var expect = new List<MessageOutputDTO>
-            {
-                new MessageOutputDTO
-                {
-                    Id = "1",
-                    CreatedOn = DateTime.UtcNow,
-                    Subject = "Test Subject 1"
-                },
-                new MessageOutputDTO
-                {
-                    Id = "2",
-                    CreatedOn = DateTime.UtcNow,
-                    Subject = "Test Subject 2"
-                }
-            };
+		private MessagesService messagesService;
 
-            this.repoMock.Setup(x => x.FindAsync(
-                m => new MessageOutputDTO
-                {
-                    Id = m.Id,
-                    CreatedOn = m.CreatedOn,
-                    Subject = m.Subject
-                })).ReturnsAsync(expect);
+		[SetUp]
+		public void SetUp()
+		{
+			this.fakeCollection = this.SeedFakeCollection();
+			this.updateResultMock = new Mock<UpdateResult>();
+			this.repoMock = new Mock<IMongoRepository<Message>>();
+			this.messagesService = new MessagesService(this.repoMock.Object, this.mapper);
+		}
 
-            //Act
-            IEnumerable<MessageOutputDTO> actual = await this.service.GetAllAsync();
+		[Test]
+		public async Task GelAllAsync_ShouldReturnCorrectData()
+		{
+			//Arrange
+			var expected = this.fakeCollection
+				.Select(m => new MessageOutputDTO
+				{
+					Id = m.Id,
+					CreatedOn = m.CreatedOn,
+					Subject = m.Subject
+				})
+				.ToArray();
 
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(actual.Count(), Is.EqualTo(expect.Count));
+			this.repoMock.Setup(x => x
+				.FindAsync(m => new MessageOutputDTO
+				{
+					Id = m.Id,
+					CreatedOn = m.CreatedOn,
+					Subject = m.Subject
+				}))
+				.ReturnsAsync(expected);
 
-                for (int i = 0; i < expect.Count; i++)
-                {
-                    Assert.That(actual.ElementAt(i).Id,
-                        Is.EqualTo(expect[i].Id));
-                    Assert.That(actual.ElementAt(i).CreatedOn,
-                        Is.EqualTo(expect[i].CreatedOn));
-                    Assert.That(actual.ElementAt(i).Subject,
-                        Is.EqualTo(expect[i].Subject));
-                }
-            });
-        }
+			//Act
+			IEnumerable<MessageOutputDTO> actual = await this.messagesService.GetAllAsync();
 
-        [Test]
-        public async Task GetUserMessagesAsync_ShouldReturnCorrectData()
-        {
-            //Arrange
-            var expect = new List<MessageOutputDTO>
-            {
-                new MessageOutputDTO
-                {
-                    Id = "1",
-                    CreatedOn = DateTime.UtcNow,
-                    Subject = "Test Subject 1"
-                }
-            };
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(actual.Count(), Is.EqualTo(expected.Length));
+				this.AssertAreEqualAsJson(actual, expected);
+			});
+		}
 
-            string userId = Guid.NewGuid().ToString();
+		[Test]
+		public async Task GetUserMessagesAsync_ShouldReturnCorrectData()
+		{
+			//Arrange
+			var expected = this.fakeCollection
+				.Where(m => m.AuthorId == this.FirstUserId)
+				.Select(m => new MessageOutputDTO
+				{
+					Id = m.Id,
+					CreatedOn = m.CreatedOn,
+					Subject = m.Subject
+				})
+				.ToArray();
 
-            this.repoMock.Setup(x => x.FindAsync(
-                m => m.AuthorId == userId,
-                m => new MessageOutputDTO
-                {
-                    Id = m.Id,
-                    CreatedOn = m.CreatedOn,
-                    Subject = m.Subject
-                })).ReturnsAsync(expect);
+			string userId = this.FirstUserId;
 
-            //Act
-            IEnumerable<MessageOutputDTO> actual = await this.service.GetUserMessagesAsync(userId);
+			this.repoMock.Setup(x => x.FindAsync(
+					m => m.AuthorId == userId,
+					m => new MessageOutputDTO
+					{
+						Id = m.Id,
+						CreatedOn = m.CreatedOn,
+						Subject = m.Subject
+					}))
+				.ReturnsAsync(expected);
 
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(actual.Count(), Is.EqualTo(expect.Count));
+			//Act
+			IEnumerable<MessageOutputDTO> actual = await this.messagesService.GetUserMessagesAsync(userId);
 
-                for (int i = 0; i < expect.Count; i++)
-                {
-                    Assert.That(actual.ElementAt(i).Id,
-                        Is.EqualTo(expect[i].Id));
-                    Assert.That(actual.ElementAt(i).CreatedOn,
-                        Is.EqualTo(expect[i].CreatedOn));
-                    Assert.That(actual.ElementAt(i).Subject,
-                        Is.EqualTo(expect[i].Subject));
-                }
-            });
-        }
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(actual.Count(), Is.EqualTo(expected.Length));
+				this.AssertAreEqualAsJson(actual, expected);
+			});
+		}
 
-        [Test]
-        public async Task GetMessageAsync_ShouldReturnCorrectData_WhenUserIsAuthor()
-        {
-            //Arrange
-            var expect = new MessageDetailsDTO
-            {
-                Id = "1",
-                AuthorName = "Test Author Name",
-                Content = "Test Content",
-                Subject = "Test Subject",
-                CreatedOn = DateTime.UtcNow,
-                Replies = new List<ReplyOutputDTO>
-                {
-                    new ReplyOutputDTO
-                    {
-                        AuthorName = "Test Reply Author",
-                        CreatedOn = DateTime.UtcNow,
-                        Content = "Test Reply Content"
-                    }
-                }
-            };
+		[Test]
+		public async Task GetMessageAsync_ShouldReturnCorrectData_WhenUserIsAuthor()
+		{
+			//Arrange
+			string messageId = "1";
+			bool isUserAdmin = false;
+			string userId = this.FirstUserId;
 
-            string messageId = Guid.NewGuid().ToString();
-            bool isUserAdmin = false;
-            string userId = Guid.NewGuid().ToString();
+			var expect = this.fakeCollection
+				.Where(m => m.Id == messageId && (isUserAdmin || m.AuthorId == userId))
+				.Select(m => new MessageDetailsDTO
+				{
+					Id = m.Id,
+					AuthorName = m.AuthorName,
+					Content = m.Content,
+					Subject = m.Subject,
+					CreatedOn = m.CreatedOn,
+					Replies = m.Replies.Select(r => new ReplyOutputDTO
+					{
+						AuthorName = r.AuthorName,
+						CreatedOn = r.CreatedOn,
+						Content = r.Content
+					})
+				})
+				.First();
 
-            this.repoMock.Setup(x => x.FindOneAsync(
-                x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
-                m => new MessageDetailsDTO
-                {
-                    Id = m.Id,
-                    AuthorName = m.AuthorName,
-                    Content = m.Content,
-                    Subject = m.Subject,
-                    CreatedOn = m.CreatedOn,
-                    Replies = m.Replies.Select(r => new ReplyOutputDTO
-                    {
-                        AuthorName = r.AuthorName,
-                        CreatedOn = r.CreatedOn,
-                        Content = r.Content
-                    })
-                })).ReturnsAsync(expect);
+			this.repoMock.Setup(x => x
+				.FindOneAsync(
+					x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
+					m => new MessageDetailsDTO
+					{
+						Id = m.Id,
+						AuthorName = m.AuthorName,
+						Content = m.Content,
+						Subject = m.Subject,
+						CreatedOn = m.CreatedOn,
+						Replies = m.Replies.Select(r => new ReplyOutputDTO
+						{
+							AuthorName = r.AuthorName,
+							CreatedOn = r.CreatedOn,
+							Content = r.Content
+						})
+					}))
+				.ReturnsAsync(expect);
 
-            //Act
-            MessageDetailsDTO actual = await this.service.GetMessageAsync(messageId, userId, isUserAdmin);
+			//Act
+			MessageDetailsDTO actual = await this.messagesService.GetMessageAsync(messageId, userId, isUserAdmin);
 
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(actual.Id, Is.EqualTo(expect.Id));
-                Assert.That(actual.Subject, Is.EqualTo(expect.Subject));
-                Assert.That(actual.Content, Is.EqualTo(expect.Content));
-                Assert.That(actual.AuthorName, Is.EqualTo(expect.AuthorName));
-                Assert.That(actual.CreatedOn, Is.EqualTo(expect.CreatedOn));
-                Assert.That(actual.Replies.Count(), Is.EqualTo(expect.Replies.Count()));
+			//Assert
+			this.AssertAreEqualAsJson(actual, expect);
+		}
 
-                for (int i = 0; i < expect.Replies.Count(); i++)
-                {
-                    Assert.That(actual.Replies.ElementAt(i).Content,
-                        Is.EqualTo(expect.Replies.ElementAt(i).Content));
-                    Assert.That(actual.Replies.ElementAt(i).AuthorName,
-                        Is.EqualTo(expect.Replies.ElementAt(i).AuthorName));
-                    Assert.That(actual.Replies.ElementAt(i).CreatedOn,
-                        Is.EqualTo(expect.Replies.ElementAt(i).CreatedOn));
-                }
-            });
-        }
+		[Test]
+		public async Task GetMessageAsync_ShouldReturnCorrectData_WhenUserIsAdmin()
+		{
+			//Arrange
+			string messageId = "1";
+			bool isUserAdmin = true;
+			string userId = this.AdminId;
 
-        [Test]
-        public async Task GetMessageAsync_ShouldReturnCorrectData_WhenUserIsAdmin()
-        {
-            //Arrange
-            var expect = new MessageDetailsDTO
-            {
-                Id = "1",
-                AuthorName = "Test Author Name",
-                Content = "Test Content",
-                Subject = "Test Subject",
-                CreatedOn = DateTime.UtcNow,
-                Replies = new List<ReplyOutputDTO>
-                {
-                    new ReplyOutputDTO
-                    {
-                        AuthorName = "Test Reply Author",
-                        CreatedOn = DateTime.UtcNow,
-                        Content = "Test Reply Content"
-                    }
-                }
-            };
+			var expect = this.fakeCollection
+				.Where(m => m.Id == messageId && (isUserAdmin || m.AuthorId == userId))
+				.Select(m => new MessageDetailsDTO
+				{
+					Id = m.Id,
+					AuthorName = m.AuthorName,
+					Content = m.Content,
+					Subject = m.Subject,
+					CreatedOn = m.CreatedOn,
+					Replies = m.Replies.Select(r => new ReplyOutputDTO
+					{
+						AuthorName = r.AuthorName,
+						CreatedOn = r.CreatedOn,
+						Content = r.Content
+					})
+				})
+				.First();
 
-            string messageId = Guid.NewGuid().ToString();
-            bool isUserAdmin = true;
-            string userId = Guid.NewGuid().ToString();
+			this.repoMock.Setup(x => x
+				.FindOneAsync(
+					x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
+					m => new MessageDetailsDTO
+					{
+						Id = m.Id,
+						AuthorName = m.AuthorName,
+						Content = m.Content,
+						Subject = m.Subject,
+						CreatedOn = m.CreatedOn,
+						Replies = m.Replies.Select(r => new ReplyOutputDTO
+						{
+							AuthorName = r.AuthorName,
+							CreatedOn = r.CreatedOn,
+							Content = r.Content
+						})
+					}))
+				.ReturnsAsync(expect);
 
-            this.repoMock.Setup(x => x.FindOneAsync(
-                x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
-                m => new MessageDetailsDTO
-                {
-                    Id = m.Id,
-                    AuthorName = m.AuthorName,
-                    Content = m.Content,
-                    Subject = m.Subject,
-                    CreatedOn = m.CreatedOn,
-                    Replies = m.Replies.Select(r => new ReplyOutputDTO
-                    {
-                        AuthorName = r.AuthorName,
-                        CreatedOn = r.CreatedOn,
-                        Content = r.Content
-                    })
-                })).ReturnsAsync(expect);
+			//Act
+			MessageDetailsDTO actual = await this.messagesService.GetMessageAsync(messageId, userId, isUserAdmin);
 
-            //Act
-            MessageDetailsDTO actual = await this.service.GetMessageAsync(messageId, userId, isUserAdmin);
+			//Assert
+			this.AssertAreEqualAsJson(actual, expect);
+		}
 
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(actual.Id, Is.EqualTo(expect.Id));
-                Assert.That(actual.Subject, Is.EqualTo(expect.Subject));
-                Assert.That(actual.Content, Is.EqualTo(expect.Content));
-                Assert.That(actual.AuthorName, Is.EqualTo(expect.AuthorName));
-                Assert.That(actual.CreatedOn, Is.EqualTo(expect.CreatedOn));
-                Assert.That(actual.Replies.Count(), Is.EqualTo(expect.Replies.Count()));
+		[Test]
+		public void GetMessageAsync_ShouldThrowException_WhenUserIsNotAuthorOrAdmin()
+		{
+			//Arrange
+			string messageId = "1";
+			bool isUserAdmin = false;
+			string notAuthorId = Guid.NewGuid().ToString();
 
-                for (int i = 0; i < expect.Replies.Count(); i++)
-                {
-                    Assert.That(actual.Replies.ElementAt(i).Content,
-                        Is.EqualTo(expect.Replies.ElementAt(i).Content));
-                    Assert.That(actual.Replies.ElementAt(i).AuthorName,
-                        Is.EqualTo(expect.Replies.ElementAt(i).AuthorName));
-                    Assert.That(actual.Replies.ElementAt(i).CreatedOn,
-                        Is.EqualTo(expect.Replies.ElementAt(i).CreatedOn));
-                }
-            });
-        }
+			this.repoMock.Setup(x => x
+				.FindOneAsync(
+					x => x.Id == messageId && (isUserAdmin || x.AuthorId == notAuthorId),
+					m => new MessageDetailsDTO
+					{
+						Id = m.Id,
+						AuthorName = m.AuthorName,
+						Content = m.Content,
+						Subject = m.Subject,
+						CreatedOn = m.CreatedOn,
+						Replies = m.Replies.Select(r => new ReplyOutputDTO
+						{
+							AuthorName = r.AuthorName,
+							CreatedOn = r.CreatedOn,
+							Content = r.Content
+						})
+					}))
+				.Throws<InvalidOperationException>();
 
-        [Test]
-        public void GetMessageAsync_ShouldThrowException_WhenUserIsNotAuthorOrAdmin()
-        {
-            //Arrange
-            string messageId = Guid.NewGuid().ToString();
-            bool isUserAdmin = false;
-            string notAuthorId = Guid.NewGuid().ToString();
+			//Act & Assert
+			Assert.That(async () => await this.messagesService
+				  .GetMessageAsync(messageId, notAuthorId, isUserAdmin),
+			Throws.TypeOf<InvalidOperationException>());
+		}
 
-            this.repoMock.Setup(x => x.FindOneAsync(
-                x => x.Id == messageId && (isUserAdmin || x.AuthorId == notAuthorId),
-                m => new MessageDetailsDTO
-                {
-                    Id = m.Id,
-                    AuthorName = m.AuthorName,
-                    Content = m.Content,
-                    Subject = m.Subject,
-                    CreatedOn = m.CreatedOn,
-                    Replies = m.Replies.Select(r => new ReplyOutputDTO
-                    {
-                        AuthorName = r.AuthorName,
-                        CreatedOn = r.CreatedOn,
-                        Content = r.Content
-                    })
-                })).Throws<InvalidOperationException>();
+		[Test]
+		public async Task CreateAsync_ShouldCreateNewMessage_WithValidInput()
+		{
+			//Arrange
+			var inputModel = new MessageInputDTO
+			{
+				AuthorId = this.FirstUserId,
+				AuthorName = this.FirstUserName,
+				Subject = "New Message Subject",
+				Content = "New Message Content"
+			};
 
-            //Act & Assert
-            Assert.That(async () => await this.service
-                  .GetMessageAsync(messageId, notAuthorId, isUserAdmin),
-            Throws.TypeOf<InvalidOperationException>());
-        }
+			string expectedNewMessageId = "New Message Id";
 
-        [Test]
-        public async Task CreateAsync_ShouldCreateNewMessage_WithValidInput()
-        {
-            //Arrange
-            var fakeCollection = new List<Message>();
+			this.repoMock.Setup(x => x
+				.InsertOneAsync(It.Is<Message>(m => 
+					m.AuthorId == inputModel.AuthorId
+					&& m.AuthorName == inputModel.AuthorName
+					&& m.Subject == inputModel.Subject
+					&& m.Content == inputModel.Content)))
+				.Callback((Message message) =>
+				{
+					message.Id = expectedNewMessageId;
+					this.fakeCollection.Add(message);
+				});
 
-            var inputModel = new MessageInputDTO
-            {
-                AuthorId = Guid.NewGuid().ToString(),
-                AuthorName = "Test Author Name",
-                Subject = "Test Subject",
-                Content = "Test Content"
-            };
+			int messagesCountBefore = this.fakeCollection.Count;
 
-            string newMessageId = "New Message Id";
+			//Act
+			string actualNewMessageId = await this.messagesService.CreateAsync(inputModel);
 
-            this.repoMock.Setup(x => x.InsertOneAsync(It.IsAny<Message>()))
-                .Callback((Message message) =>
-                {
-                    message.Id = newMessageId;
-                    fakeCollection.Add(message);
-                });
+			//Arrange
+			Message actualNewMessage = this.fakeCollection.First(m => m.Id == actualNewMessageId);
 
-            //Act
-            string returnedId = await this.service.CreateAsync(inputModel);
-            Message msgInCollection = fakeCollection.First();
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(actualNewMessageId, Is.EqualTo(expectedNewMessageId));
+				Assert.That(this.fakeCollection, Has.Count.EqualTo(messagesCountBefore + 1));
+				this.AssertSamePropertiesValuesAreEqual(actualNewMessage, inputModel);
+			});
+		}
 
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(returnedId, Is.Not.Null);
-                Assert.That(returnedId, Is.EqualTo(newMessageId));
-                Assert.That(fakeCollection, Has.Count.EqualTo(1));
-                Assert.That(msgInCollection.AuthorId, Is.EqualTo(inputModel.AuthorId));
-                Assert.That(msgInCollection.AuthorName, Is.EqualTo(inputModel.AuthorName));
-                Assert.That(msgInCollection.Subject, Is.EqualTo(inputModel.Subject));
-                Assert.That(msgInCollection.Content, Is.EqualTo(inputModel.Content));
-            });
-        }
+		[Test]
+		public async Task AddReplyAsync_ShouldAddNewReplyToMessage_WhenUserIsMessageAuthor()
+		{
+			//Arrange
+			var inputModel = new ReplyInputDTO
+			{
+				MessageId = "1",
+				AuthorId = this.FirstUserId,
+				AuthorName = this.FirstUserName,
+				Content = "First User Test Reply Content",
+				IsAuthorAdmin = false
+			};
 
-        [Test]
-        public async Task AddReplyAsync_ShouldAddNewReplyToMessage_WhenUserIsMessageAuthor()
-        {
-            //Arrange
-            var inputModel = new ReplyInputDTO
-            {
-                AuthorId = Guid.NewGuid().ToString(),
-                AuthorName = "Test Author Name",
-                MessageId = "Test Message Id",
-                Content = "Test Content",
-                IsAuthorAdmin = false
-            };
+			this.updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
 
-            var updateResultMock = new Mock<UpdateResult>();
-            updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
+			this.repoMock.Setup(x => x
+				.IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
+				.ReturnsAsync(true);
 
-            this.repoMock.Setup(x => x
-                .IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
-                .ReturnsAsync(true);
+			this.repoMock.Setup(x => x
+				.UpdateOneAsync(x => 
+					x.Id == inputModel.MessageId,
+					It.IsAny<UpdateDefinition<Message>>()))
+				.ReturnsAsync(this.updateResultMock.Object);
 
-            this.repoMock.Setup(x => x
-                .UpdateOneAsync(
-                    x => x.Id == inputModel.MessageId,
-                    It.IsAny<UpdateDefinition<Message>>()))
-                .ReturnsAsync(updateResultMock.Object);
+			//Act
+			UpdateResult result = await this.messagesService.AddReplyAsync(inputModel);
 
-            //Act
-            UpdateResult result = await this.service.AddReplyAsync(inputModel);
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(result, Is.Not.Null);
+				Assert.That(result.IsAcknowledged, Is.True);
+			});
+		}
 
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(result, Is.Not.Null);
-                Assert.That(result.IsAcknowledged, Is.True);
-            });
-        }
+		[Test]
+		public async Task AddReplyAsync_ShouldAddNewReplyToMessage_WhenUserIsAdmin()
+		{
+			//Arrange
+			var inputModel = new ReplyInputDTO
+			{
+				MessageId = "1",
+				AuthorId = this.AdminId,
+				AuthorName = this.AdminName,
+				Content = "Admin Test Reply Content",
+				IsAuthorAdmin = true
+			};
 
-        [Test]
-        public async Task AddReplyAsync_ShouldAddNewReplyToMessage_WhenUserIsAdmin()
-        {
-            //Arrange
-            var inputModel = new ReplyInputDTO
-            {
-                AuthorId = Guid.NewGuid().ToString(),
-                AuthorName = "Test Author Name",
-                MessageId = "Test Message Id",
-                Content = "Test Content",
-                IsAuthorAdmin = true
-            };
+			this.updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
 
-            var updateResultMock = new Mock<UpdateResult>();
-            updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
+			this.repoMock.Setup(x => x
+				.IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
+				.ReturnsAsync(false);
 
-            this.repoMock.Setup(x => x
-                .IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
-                .ReturnsAsync(false);
+			this.repoMock.Setup(x => x
+				.UpdateOneAsync(x =>
+					x.Id == inputModel.MessageId,
+					It.IsAny<UpdateDefinition<Message>>()))
+				.ReturnsAsync(this.updateResultMock.Object);
 
-            this.repoMock.Setup(x => x
-                .UpdateOneAsync(
-                    x => x.Id == inputModel.MessageId,
-                    It.IsAny<UpdateDefinition<Message>>()))
-                .ReturnsAsync(updateResultMock.Object);
+			//Act
+			UpdateResult result = await this.messagesService.AddReplyAsync(inputModel);
 
-            //Act
-            UpdateResult result = await this.service.AddReplyAsync(inputModel);
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(result, Is.Not.Null);
+				Assert.That(result.IsAcknowledged, Is.True);
+			});
+		}
 
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(result, Is.Not.Null);
-                Assert.That(result.IsAcknowledged, Is.True);
-            });
-        }
+		[Test]
+		public void AddReplyAsync_ShouldThrowException_WhenUserIsNotAuthorized()
+		{
+			//Arrange
+			var inputModel = new ReplyInputDTO
+			{
+				MessageId = "1",
+				AuthorId = this.SecondUserId,
+				AuthorName = this.SecondUserName,
+				Content = "Second User Unauthorized Test Reply Content",
+				IsAuthorAdmin = false
+			};
 
-        [Test]
-        public void AddReplyAsync_ShouldThrowException_WhenUserIsNotAuthorized()
-        {
-            //Arrange
-            var inputModel = new ReplyInputDTO
-            {
-                AuthorId = Guid.NewGuid().ToString(),
-                AuthorName = "Test Author Name",
-                MessageId = "Test Message Id",
-                Content = "Test Content",
-                IsAuthorAdmin = false
-            };
+			this.repoMock.Setup(x => x
+				.IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
+				.ReturnsAsync(false);
 
-            this.repoMock.Setup(x => x
-                .IsUserDocumentAuthor(inputModel.MessageId, inputModel.AuthorId))
-                .ReturnsAsync(false);
+			//Act & Assert
+			Assert.That(async () => await this.messagesService.AddReplyAsync(inputModel),
+			Throws.TypeOf<ArgumentException>().With.Message
+				  .EqualTo(ExceptionMessages.UnauthorizedUser));
+		}
 
-            //Act & Assert
-            Assert.That(async () => await this.service.AddReplyAsync(inputModel),
-            Throws.TypeOf<ArgumentException>().With.Message
-                  .EqualTo(ExceptionMessages.UnauthorizedUser));
-        }
+		[Test]
+		public async Task RemoveAsync_ShouldRemoveMessage_WhenUserIsAuthor()
+		{
+			//Arrange
+			Message message = this.fakeCollection.First(m => m.Id == "1");
 
-        [Test]
-        public async Task RemoveAsync_ShouldRemoveMessage_WhenUserIsAuthor()
-        {
-            //Arrange
-            var message = new Message
-            {
-                Id = "Test Message Id",
-                AuthorId = Guid.NewGuid().ToString(),
-                AuthorName = "Test Author Name",
-                CreatedOn = DateTime.UtcNow,
-                Subject = "Test Message Subject",
-                Content = "This Message Content"
-            };
-            var fakeCollection = new List<Message> { message };
+			this.repoMock.Setup(x => x
+				.IsUserDocumentAuthor(message.Id, message.AuthorId))
+				.ReturnsAsync(true);
 
-            this.repoMock.Setup(x => x
-                .IsUserDocumentAuthor(message.Id, message.AuthorId))
-                .ReturnsAsync(true);
+			this.repoMock.Setup(x => x
+				.DeleteOneAsync(message.Id))
+				.ReturnsAsync(() =>
+				{
+					this.fakeCollection.Remove(message);
+					return new DeleteResult.Acknowledged(1);
+				});
 
-            this.repoMock.Setup(x => x
-                .DeleteOneAsync(message.Id))
-                .ReturnsAsync(() =>
-                {
-                    fakeCollection.Remove(message);
-                    return new DeleteResult.Acknowledged(1);
-                });
+			int messagesBefore = this.fakeCollection.Count;
 
-            //Act
-            await this.service.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: false);
+			//Act
+			await this.messagesService.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: false);
 
-            //Assert
-            Assert.That(fakeCollection.Any(), Is.False);
-        }
+			//Assert
+			Assert.That(this.fakeCollection.Count, Is.EqualTo(messagesBefore - 1));
+			Assert.That(this.fakeCollection.FirstOrDefault(m => m.Id == "1"), Is.Null);
+		}
 
-        [Test]
-        public async Task RemoveAsync_ShouldRemoveMessage_WhenUserIsAdmin()
-        {
-            //Arrange
-            var message = new Message
-            {
-                Id = "Test Message Id",
-                AuthorId = Guid.NewGuid().ToString(),
-                AuthorName = "Test Author Name",
-                CreatedOn = DateTime.UtcNow,
-                Subject = "Test Message Subject",
-                Content = "This Message Content"
-            };
-            var fakeCollection = new List<Message> { message };
+		[Test]
+		public async Task RemoveAsync_ShouldRemoveMessage_WhenUserIsAdmin()
+		{
+			//Arrange
+			Message message = this.fakeCollection.First(m => m.Id == "1");
 
-            this.repoMock.Setup(x => x
-                .IsUserDocumentAuthor(message.Id, message.AuthorId))
-                .ReturnsAsync(false);
+			string adminId = this.AdminId;
 
-            this.repoMock.Setup(x => x
-                .DeleteOneAsync(message.Id))
-                .ReturnsAsync(() =>
-                {
-                    fakeCollection.Remove(message);
-                    return new DeleteResult.Acknowledged(1);
-                });
+			this.repoMock.Setup(x => x
+				.IsUserDocumentAuthor(message.Id, adminId))
+				.ReturnsAsync(false);
 
-            //Act
-            await this.service.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: true);
+			this.repoMock.Setup(x => x
+				.DeleteOneAsync(message.Id))
+				.ReturnsAsync(() =>
+				{
+					this.fakeCollection.Remove(message);
+					return new DeleteResult.Acknowledged(1);
+				});
 
-            //Assert
-            Assert.That(fakeCollection.Any(), Is.False);
-        }
+			int messagesBefore = this.fakeCollection.Count;
 
-        [Test]
-        public void RemoveAsync_ShouldThrowException_WhenUserIsNotAuthorized()
-        {
-            //Arrange
-            var message = new Message
-            {
-                Id = "Test Message Id",
-                AuthorId = Guid.NewGuid().ToString(),
-                AuthorName = "Test Author Name",
-                CreatedOn = DateTime.UtcNow,
-                Subject = "Test Message Subject",
-                Content = "This Message Content"
-            };
-            var fakeCollection = new List<Message> { message };
+			//Act
+			await this.messagesService.RemoveAsync(message.Id, adminId, isUserAdmin: true);
 
-            this.repoMock.Setup(x => x
-                .IsUserDocumentAuthor(message.Id, message.AuthorId))
-                .ReturnsAsync(false);
+			//Assert
+			Assert.That(this.fakeCollection.Count, Is.EqualTo(messagesBefore - 1));
+			Assert.That(this.fakeCollection.FirstOrDefault(m => m.Id == "1"), Is.Null);
+		}
 
-            //Act & Assert
-            Assert.That(async () => await this.service
-                  .RemoveAsync(message.Id, message.AuthorId, isUserAdmin: false),
-            Throws.TypeOf<ArgumentException>().With.Message
-                  .EqualTo(ExceptionMessages.UnauthorizedUser));
-        }
-    }
+		[Test]
+		public void RemoveAsync_ShouldThrowException_WhenUserIsNotAuthorized()
+		{
+			//Arrange
+			Message message = this.fakeCollection.First(m => m.Id == "1");
+
+			string notAuthorId = this.SecondUserId;
+
+			this.repoMock.Setup(x => x
+				.IsUserDocumentAuthor(message.Id, notAuthorId))
+				.ReturnsAsync(false);
+
+			//Act & Assert
+			Assert.That(async () => await this.messagesService
+				  .RemoveAsync(message.Id, notAuthorId, isUserAdmin: false),
+			Throws.TypeOf<ArgumentException>().With.Message
+				  .EqualTo(ExceptionMessages.UnauthorizedUser));
+		}
+
+		private void AssertAreEqualAsJson(object actual, object expected)
+		{
+			string actualAsJson = JsonConvert.SerializeObject(actual, Formatting.Indented);
+			string expectedAsJson = JsonConvert.SerializeObject(expected, Formatting.Indented);
+
+			Assert.That(actualAsJson, Is.EqualTo(expectedAsJson));
+		}
+
+		private void AssertSamePropertiesValuesAreEqual(object actual, object expected)
+		{
+			PropertyInfo[] propsToCompare = expected.GetType().GetProperties();
+
+			Assert.Multiple(() =>
+			{
+				foreach (PropertyInfo propToCompare in propsToCompare)
+				{
+					PropertyInfo? actualProp = actual
+						.GetType()
+						.GetProperty(propToCompare.Name, propToCompare.PropertyType);
+
+					if (actualProp == null)
+						continue;
+
+					object? expectedValue = propToCompare.GetValue(expected);
+					object? actualValue = actualProp.GetValue(actual);
+
+					if (actualProp.PropertyType == typeof(DateTime))
+					{
+						if (expectedValue == null)
+							throw new InvalidOperationException($"{propToCompare.PropertyType} cannot be null.");
+
+						if (actualValue == null)
+							throw new InvalidOperationException($"{actualProp.PropertyType} cannot be null.");
+
+						var expectedDateTime = (DateTime)expectedValue;
+						expectedValue = expectedDateTime.ToUniversalTime();
+
+						var actualDateTime = (DateTime)actualValue;
+						actualValue = actualDateTime.ToUniversalTime();
+					}
+
+					Assert.That(actualValue, Is.EqualTo(expectedValue));
+				}
+			});
+		}
+
+		private ICollection<Message> SeedFakeCollection()
+		{
+			return new List<Message>
+			{
+				new Message
+				{
+					Id = "1",
+					CreatedOn = DateTime.UtcNow,
+					Subject = "First User First Message",
+					AuthorId = this.FirstUserId,
+					AuthorName = this.FirstUserName,
+					Content = "First User First Message Content",
+					Replies = new List<Reply>
+					{
+						new Reply
+						{
+							AuthorId = this.AdminId,
+							AuthorName = this.AdminName,
+							Content = "Admin First Message Reply Content",
+							CreatedOn = DateTime.UtcNow
+						}
+					}
+				},
+				new Message
+				{
+					Id = "2",
+					CreatedOn = DateTime.UtcNow,
+					Subject = "First User Second Message",
+					AuthorId = this.FirstUserId,
+					AuthorName = this.FirstUserName,
+					Content = "First User Second Message Content",
+				}
+			};
+		}
+	}
 }

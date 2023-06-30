@@ -3,7 +3,7 @@
     using Microsoft.EntityFrameworkCore;
     using PersonalFinancer.Data;
 
-    static class DatabaseMock
+    static class PersonalFinancerDbContextMock
 	{
 		public static PersonalFinancerDbContext Instance
 		{

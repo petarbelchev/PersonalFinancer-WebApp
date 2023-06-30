@@ -194,6 +194,7 @@
 				.FirstAsync();
 		}
 
+		// NOTE: Move it to Users Service?
 		public async Task<IEnumerable<AccountCardDTO>> GetUserAccountsCardsAsync(Guid userId)
 		{
 			return await this.accountsRepo.All()

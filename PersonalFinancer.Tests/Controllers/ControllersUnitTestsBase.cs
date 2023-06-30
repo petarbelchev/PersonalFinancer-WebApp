@@ -6,6 +6,7 @@
 	using Microsoft.AspNetCore.Routing;
 	using Moq;
 	using NUnit.Framework;
+	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Tests.Mocks;
@@ -55,7 +56,7 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(tempData.Keys, Has.Count.EqualTo(1));
-				Assert.That(tempData.Keys.First(), Is.EqualTo("successMsg"));
+				Assert.That(tempData.Keys.First(), Is.EqualTo(ResponseMessages.TempDataKey));
 				Assert.That(tempData.Values, Has.Count.EqualTo(1));
 				Assert.That(tempData.Values.First(), Is.EqualTo(expectedMessage));
 			});

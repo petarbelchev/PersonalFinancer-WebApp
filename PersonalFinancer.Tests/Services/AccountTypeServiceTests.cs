@@ -16,15 +16,14 @@
         [SetUp]
         public void SetUp()
         {
-            this.repo = new EfRepository<AccountType>(this.sqlDbContext);
-			this.accountTypeService = new ApiService<AccountType>(this.repo, this.mapper);
+            this.repo = new EfRepository<AccountType>(this.dbContextMock);
+			this.accountTypeService = new ApiService<AccountType>(this.repo, this.mapperMock);
         }
 
         [Test]
         public async Task CreateEntity_ShouldAddNewAccountType_WithValidParams()
         {
             //Arrange
-
             string accountTypeName = "NewAccountType";
             Guid ownerId = this.User1.Id;
             int countBefore = await this.repo.All().CountAsync();
@@ -33,53 +32,39 @@
             ApiEntityDTO actual =
                 await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
 
+            //Arrange
             int countAfter = await this.repo.All().CountAsync();
 
             //Assert
             Assert.Multiple(() =>
             {
                 Assert.That(countAfter, Is.EqualTo(countBefore + 1));
-                Assert.That(actual, Is.Not.Null);
                 Assert.That(actual.Id, Is.Not.EqualTo(Guid.Empty));
                 Assert.That(actual.Name, Is.EqualTo(accountTypeName));
             });
         }
 
         [Test]
-        public async Task CreateEntity_ShouldRecreateDeletedBeforeAccountType_WithValidParams()
+        public async Task CreateEntity_ShouldRecreateDeletedAccountType_WithValidParams()
         {
             //Arrange
-            var deletedAccType = new AccountType
-            {
-                Id = Guid.NewGuid(),
-                Name = "DeletedAccType",
-                OwnerId = this.User1.Id,
-                IsDeleted = true
-            };
-
-            await this.repo.AddAsync(deletedAccType);
-            await this.repo.SaveChangesAsync();
+            AccountType deletedAccType = this.AccType4_User1_Deleted_WithoutAcc;
             int countBefore = await this.repo.All().CountAsync();
             string accountTypeName = deletedAccType.Name;
-            Guid ownerId = this.User1.Id;
-
-            //Assert
-            AccountType? deletedAcc = await this.repo.FindAsync(deletedAccType.Id);
-            Assert.That(deletedAcc, Is.Not.Null);
-            Assert.That(deletedAcc.IsDeleted, Is.True);
 
             //Act
-            ApiEntityDTO result =
-                await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
+            ApiEntityDTO result = await this.accountTypeService
+                .CreateEntityAsync(accountTypeName, this.User1.Id);
+
+            //Arrange
             int countAfter = await this.repo.All().CountAsync();
 
             //Assert
             Assert.Multiple(() =>
             {
                 Assert.That(countAfter, Is.EqualTo(countBefore));
-                Assert.That(result, Is.Not.Null);
-                Assert.That(result.Id, Is.EqualTo(deletedAccType.Id));
-                Assert.That(result.Name, Is.EqualTo(deletedAccType.Name));
+
+                this.AssertSamePropertiesValuesAreEqual(result, deletedAccType);
             });
         }
 
@@ -87,27 +72,15 @@
         public async Task CreateEntity_ShouldAddNewAccTypeWhenAnotherUserHaveTheSameAccType()
         {
             //Arrange
-            var user2AccType = new AccountType
-            {
-                Id = Guid.NewGuid(),
-                Name = "User2AccType",
-                OwnerId = this.User2.Id
-            };
-
-            await this.repo.AddAsync(user2AccType);
-            await this.repo.SaveChangesAsync();
+            AccountType user2AccountType = this.AccType5_User2_WithoutAcc;
             int countBefore = await this.repo.All().CountAsync();
-
-            string accountTypeName = user2AccType.Name;
-            Guid ownerId = this.User1.Id;
-
-            //Assert
-            Assert.That(await this.repo.FindAsync(user2AccType.Id), Is.Not.Null);
+            string accountTypeName = user2AccountType.Name;
 
             //Act
-            ApiEntityDTO result =
-                await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId);
+            ApiEntityDTO result = await this.accountTypeService
+                .CreateEntityAsync(accountTypeName, this.User1.Id);
 
+            //Arrange
             int countAfter = await this.repo.All().CountAsync();
 
             //Assert
@@ -115,8 +88,8 @@
             {
                 Assert.That(countAfter, Is.EqualTo(countBefore + 1));
                 Assert.That(result.Id, Is.Not.EqualTo(Guid.Empty));
-                Assert.That(result.Id, Is.Not.EqualTo(user2AccType.Id));
-                Assert.That(result.Name, Is.EqualTo(user2AccType.Name));
+                Assert.That(result.Id, Is.Not.EqualTo(user2AccountType.Id));
+                Assert.That(result.Name, Is.EqualTo(user2AccountType.Name));
             });
         }
 
@@ -129,96 +102,64 @@
 
             //Act & Assert
             Assert.That(async () => await this.accountTypeService.CreateEntityAsync(accountTypeName, ownerId),
-            Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Entity with the same name exist."));
+            Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.ExistingEntityName));
         }
 
         [Test]
         public async Task DeleteEntity_ShouldMarkAccTypeAsDeleted_WithValidParams()
         {
             //Arrange
-            var newAccType = new AccountType()
-            {
-                Id = Guid.NewGuid(),
-                Name = "NewAccType",
-                OwnerId = this.User1.Id
-            };
-            await this.repo.AddAsync(newAccType);
-            await this.repo.SaveChangesAsync();
-
-            //Assert
-            Assert.Multiple(async () =>
-            {
-                Assert.That(await this.repo.FindAsync(newAccType.Id), Is.Not.Null);
-                Assert.That(newAccType.IsDeleted, Is.False);
-            });
+            AccountType accountType = this.AccType1_User1_WithAcc;
 
             //Act
-            await this.accountTypeService.DeleteEntityAsync(newAccType.Id, this.User1.Id, isUserAdmin: false);
+            await this.accountTypeService.DeleteEntityAsync(accountType.Id, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(async () =>
             {
-                Assert.That(newAccType.IsDeleted, Is.True);
-                Assert.That(await this.repo.FindAsync(newAccType.Id), Is.Not.Null);
+                Assert.That(accountType.IsDeleted, Is.True);
+                Assert.That(await this.repo.FindAsync(accountType.Id), Is.Not.Null);
             });
         }
 
         [Test]
         public async Task DeleteEntity_ShouldMarkAccTypeAsDeleted_WhenUserIsAdmin()
         {
-            //Arrange
-            var newAccType = new AccountType()
-            {
-                Id = Guid.NewGuid(),
-                Name = "NewAccType",
-                OwnerId = this.User1.Id
-            };
-            await this.repo.AddAsync(newAccType);
-            await this.repo.SaveChangesAsync();
+			//Arrange
+			AccountType accountType = this.AccType1_User1_WithAcc;
+
+			//Act
+			await this.accountTypeService.DeleteEntityAsync(accountType.Id, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(async () =>
             {
-                Assert.That(await this.repo.FindAsync(newAccType.Id), Is.Not.Null);
-                Assert.That(newAccType.IsDeleted, Is.False);
-            });
-
-            //Act
-            await this.accountTypeService.DeleteEntityAsync(newAccType.Id, this.User2.Id, isUserAdmin: true);
-
-            //Assert
-            Assert.Multiple(async () =>
-            {
-                Assert.That(newAccType.IsDeleted, Is.True);
-                Assert.That(await this.repo.FindAsync(newAccType.Id), Is.Not.Null);
+                Assert.That(accountType.IsDeleted, Is.True);
+                Assert.That(await this.repo.FindAsync(accountType.Id), Is.Not.Null);
             });
         }
 
         [Test]
         public void DeleteEntity_ShouldThrowException_WhenAccTypeNotExist()
         {
+            //Arrange
+            var invalidId = Guid.NewGuid();
+
             //Act & Assert
             Assert.That(async () => await this.accountTypeService
-                  .DeleteEntityAsync(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
+                  .DeleteEntityAsync(invalidId, this.User1.Id, isUserAdmin: false),
             Throws.TypeOf<InvalidOperationException>());
         }
 
         [Test]
-        public async Task DeleteEntity_ShouldThrowException_WhenUserIsNotOwner()
+        public void DeleteEntity_ShouldThrowException_WhenUserIsNotOwner()
         {
-            //Arrange
-            var user2AccType = new AccountType()
-            {
-                Id = Guid.NewGuid(),
-                Name = "ForDelete",
-                OwnerId = this.User2.Id
-            };
-            await this.repo.AddAsync(user2AccType);
-            await this.repo.SaveChangesAsync();
+			//Arrange
+			AccountType accountType = this.AccType1_User1_WithAcc;
 
-            //Act & Assert
-            Assert.That(async () => await this.accountTypeService
-                  .DeleteEntityAsync(user2AccType.Id, this.User1.Id, isUserAdmin: false),
+			//Act & Assert
+			Assert.That(async () => await this.accountTypeService
+                  .DeleteEntityAsync(accountType.Id, this.User2.Id, isUserAdmin: false),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
         }
     }

@@ -276,16 +276,14 @@
 		{
 			bool isAccountTypeValid = await this.accountTypesRepo.All().AnyAsync(at =>
 				at.Id == model.AccountTypeId
-				&& at.OwnerId == model.OwnerId
-				&& at.IsDeleted == false);
+				&& at.OwnerId == model.OwnerId);
 
 			if (!isAccountTypeValid)
 				throw new InvalidOperationException(ExceptionMessages.InvalidAccountType);
 
 			bool isCurrencyValid = await this.currenciesRepo.All().AnyAsync(c =>
 				c.Id == model.CurrencyId
-				&& c.OwnerId == model.OwnerId
-				&& c.IsDeleted == false);
+				&& c.OwnerId == model.OwnerId);
 
 			if (!isCurrencyValid)
 				throw new InvalidOperationException(ExceptionMessages.InvalidCurrency);
@@ -299,8 +297,7 @@
 		{
 			bool isCategoryValid = await this.categoriesRepo.All().AnyAsync(c =>
 				c.Id == categoryId
-				&& c.OwnerId == ownerId
-				&& c.IsDeleted == false);
+				&& c.OwnerId == ownerId);
 
 			if (!isCategoryValid)
 				throw new InvalidOperationException(ExceptionMessages.InvalidCategory);

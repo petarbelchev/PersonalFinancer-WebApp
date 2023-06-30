@@ -66,11 +66,11 @@
 					.MapFrom(src => src.Name))
 				.ForMember(dest => dest.OwnerCurrencies, opt => opt
 					.MapFrom(src => src.Owner.Currencies
-						.Where(c => !c.IsDeleted)
+						.Where(c => !c.IsDeleted || c.Id == src.CurrencyId)
 						.OrderBy(c => c.Name)))
 				.ForMember(dest => dest.OwnerAccountTypes, opt => opt
 					.MapFrom(src => src.Owner.AccountTypes
-						.Where(at => !at.IsDeleted)
+						.Where(at => !at.IsDeleted || at.Id == src.AccountTypeId)
 						.OrderBy(at => at.Name)))
 				.ReverseMap()
 				.ForMember(dest => dest.Name, opt => opt
@@ -86,7 +86,7 @@
 					.MapFrom(src => src.CreatedOn.ToLocalTime()))
 				.ForMember(dest => dest.OwnerCategories, opt => opt
 					.MapFrom(src => src.Owner.Categories
-						.Where(c => !c.IsDeleted)
+						.Where(c => !c.IsDeleted || c.Id == src.CategoryId)
 						.OrderBy(c => c.Name)))
 				.ForMember(dest => dest.OwnerAccounts, opt => opt
 					.MapFrom(src => src.Owner.Accounts

@@ -16,8 +16,8 @@
         [SetUp]
         public void SetUp()
         {
-            this.repo = new EfRepository<Currency>(this.sqlDbContext);
-            this.currencyApiService = new ApiService<Currency>(this.repo, this.mapper);
+            this.repo = new EfRepository<Currency>(this.dbContextMock);
+            this.currencyApiService = new ApiService<Currency>(this.repo, this.mapperMock);
         }
 
         [Test]
@@ -25,52 +25,36 @@
         {
             //Arrange
             string currencyName = "NewCurrency";
-            Guid ownerId = this.User1.Id;
             int countBefore = await this.repo.All().CountAsync();
 
             //Act
-            ApiEntityDTO actual =
-                await this.currencyApiService.CreateEntityAsync(currencyName, ownerId);
+            ApiEntityDTO actual = await this.currencyApiService
+                .CreateEntityAsync(currencyName, this.User1.Id);
 
+            //Arrange
             int countAfter = await this.repo.All().CountAsync();
 
             //Assert
             Assert.Multiple(() =>
             {
                 Assert.That(countAfter, Is.EqualTo(countBefore + 1));
-                Assert.That(actual, Is.Not.Null);
                 Assert.That(actual.Id, Is.Not.EqualTo(Guid.Empty));
                 Assert.That(actual.Name, Is.EqualTo(currencyName));
             });
         }
 
         [Test]
-        public async Task CreateEntity_ShouldRecreateDeletedBeforeCurrency_WithValidParams()
+        public async Task CreateEntity_ShouldRecreateDeletedCurrency_WithValidParams()
         {
             //Arrange
-            var deletedCurrency = new Currency
-            {
-                Id = Guid.NewGuid(),
-                Name = "DeletedCurrency",
-                OwnerId = this.User1.Id,
-                IsDeleted = true
-            };
-            await this.repo.AddAsync(deletedCurrency);
-            await this.repo.SaveChangesAsync();
+            Currency deletedCurrency = this.Currency4_User1_Deleted_WithoutAcc;
             int countBefore = await this.repo.All().CountAsync();
 
-            string currencyName = deletedCurrency.Name;
-            Guid ownerId = this.User1.Id;
-
-            //Assert
-            Currency? deletedAcc = await this.repo.FindAsync(deletedCurrency.Id);
-            Assert.That(deletedAcc, Is.Not.Null);
-            Assert.That(deletedAcc.IsDeleted, Is.True);
-
             //Act
-            ApiEntityDTO result =
-                await this.currencyApiService.CreateEntityAsync(currencyName, ownerId);
+            ApiEntityDTO result = await this.currencyApiService
+                .CreateEntityAsync(deletedCurrency.Name, this.User1.Id);
 
+            //Arrange
             int countAfter = await this.repo.All().CountAsync();
 
             //Assert
@@ -78,8 +62,8 @@
             {
                 Assert.That(countAfter, Is.EqualTo(countBefore));
                 Assert.That(result, Is.Not.Null);
-                Assert.That(result.Id, Is.EqualTo(deletedCurrency.Id));
-                Assert.That(result.Name, Is.EqualTo(deletedCurrency.Name));
+
+                this.AssertSamePropertiesValuesAreEqual(result, deletedCurrency);
             });
         }
 
@@ -87,27 +71,14 @@
         public async Task CreateEntity_ShouldAddNewCurrencyWhenAnotherUserHaveTheSameCurrency()
         {
             //Arrange
-            var user2Currency = new Currency
-            {
-                Id = Guid.NewGuid(),
-                Name = "User2Currency",
-                OwnerId = this.User2.Id
-            };
+            Currency user2Currency = this.Currency5_User2_WithoutAcc;
+			int countBefore = await this.repo.All().CountAsync();
 
-            await this.repo.AddAsync(user2Currency);
-            await this.repo.SaveChangesAsync();
-            int countBefore = await this.repo.All().CountAsync();
+			//Act
+			ApiEntityDTO result =
+                await this.currencyApiService.CreateEntityAsync(user2Currency.Name, this.User1.Id);
 
-            string currencyName = user2Currency.Name;
-            Guid ownerId = this.User1.Id;
-
-            //Assert
-            Assert.That(await this.repo.FindAsync(user2Currency.Id), Is.Not.Null);
-
-            //Act
-            ApiEntityDTO result =
-                await this.currencyApiService.CreateEntityAsync(currencyName, ownerId);
-
+            //Arrange
             int countAfter = await this.repo.All().CountAsync();
 
             //Assert
@@ -125,72 +96,43 @@
         {
             //Arrange
             string currencyName = this.Currency1_User1_WithAcc.Name;
-            Guid ownerId = this.User1.Id;
 
             //Act & Assert
-            Assert.That(async () => await this.currencyApiService.CreateEntityAsync(currencyName, ownerId),
-            Throws.TypeOf<ArgumentException>().With.Message.EqualTo("Entity with the same name exist."));
+            Assert.That(async () => await this.currencyApiService.CreateEntityAsync(currencyName, this.User1.Id),
+            Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.ExistingEntityName));
         }
 
         [Test]
         public async Task DeleteEntity_ShouldMarkCurrencyAsDeleted_WithValidParams()
         {
             //Arrange
-            var newCategory = new Currency()
-            {
-                Id = Guid.NewGuid(),
-                Name = "NewCurrency",
-                OwnerId = this.User1.Id
-            };
-            await this.repo.AddAsync(newCategory);
-            await this.repo.SaveChangesAsync();
-
-            //Assert
-            Assert.Multiple(async () =>
-            {
-                Assert.That(await this.repo.FindAsync(newCategory.Id), Is.Not.Null);
-                Assert.That(newCategory.IsDeleted, Is.False);
-            });
+            Currency currency = this.Currency2_User1_WithoutAcc;
 
             //Act
-            await this.currencyApiService.DeleteEntityAsync(newCategory.Id, this.User1.Id, isUserAdmin: false);
+            await this.currencyApiService.DeleteEntityAsync(currency.Id, this.User1.Id, isUserAdmin: false);
 
             //Assert
             Assert.Multiple(async () =>
             {
-                Assert.That(newCategory.IsDeleted, Is.True);
-                Assert.That(await this.repo.FindAsync(newCategory.Id), Is.Not.Null);
+                Assert.That(currency.IsDeleted, Is.True);
+                Assert.That(await this.repo.FindAsync(currency.Id), Is.Not.Null);
             });
         }
 
         [Test]
         public async Task DeleteEntity_ShouldMarkCurrencyAsDeleted_WhenUserIsAdmin()
         {
-            //Arrange
-            var newCurrency = new Currency()
-            {
-                Id = Guid.NewGuid(),
-                Name = "NewCurrency",
-                OwnerId = this.User1.Id
-            };
-            await this.repo.AddAsync(newCurrency);
-            await this.repo.SaveChangesAsync();
+			//Arrange
+			Currency currency = this.Currency2_User1_WithoutAcc;
+
+			//Act
+			await this.currencyApiService.DeleteEntityAsync(currency.Id, this.User2.Id, isUserAdmin: true);
 
             //Assert
             Assert.Multiple(async () =>
             {
-                Assert.That(await this.repo.FindAsync(newCurrency.Id), Is.Not.Null);
-                Assert.That(newCurrency.IsDeleted, Is.False);
-            });
-
-            //Act
-            await this.currencyApiService.DeleteEntityAsync(newCurrency.Id, this.User2.Id, isUserAdmin: true);
-
-            //Assert
-            Assert.Multiple(async () =>
-            {
-                Assert.That(newCurrency.IsDeleted, Is.True);
-                Assert.That(await this.repo.FindAsync(newCurrency.Id), Is.Not.Null);
+                Assert.That(currency.IsDeleted, Is.True);
+                Assert.That(await this.repo.FindAsync(currency.Id), Is.Not.Null);
             });
         }
 
@@ -204,21 +146,14 @@
         }
 
         [Test]
-        public async Task DeleteEntity_ShouldThrowException_WhenUserIsNotOwner()
+        public void DeleteEntity_ShouldThrowException_WhenUserIsNotOwner()
         {
             //Arrange
-            var user2Currency = new Currency()
-            {
-                Id = Guid.NewGuid(),
-                Name = "ForDelete",
-                OwnerId = this.User2.Id
-            };
-            await this.repo.AddAsync(user2Currency);
-            await this.repo.SaveChangesAsync();
+            Currency currency = this.Currency1_User1_WithAcc;
 
             //Act & Assert
             Assert.That(async () => await this.currencyApiService
-                  .DeleteEntityAsync(user2Currency.Id, this.User1.Id, isUserAdmin: false),
+                  .DeleteEntityAsync(currency.Id, this.User2.Id, isUserAdmin: false),
             Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
         }
     }

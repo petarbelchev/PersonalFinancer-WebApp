@@ -1,30 +1,78 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
 	using AutoMapper;
+	using Newtonsoft.Json;
 	using NUnit.Framework;
 	using PersonalFinancer.Data;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Tests.Mocks;
+	using System.Reflection;
 	using static PersonalFinancer.Common.Constants.CategoryConstants;
 
 	[TestFixture]
 	internal abstract class ServicesUnitTestsBase
 	{
-		protected PersonalFinancerDbContext sqlDbContext;
-		protected IMapper mapper;
+		protected PersonalFinancerDbContext dbContextMock;
+		protected IMapper mapperMock;
 
 		[SetUp]
 		protected async Task SetUpBase()
 		{
-			this.sqlDbContext = DatabaseMock.Instance;
-			this.mapper = ServicesMapperMock.Instance;
+			this.dbContextMock = PersonalFinancerDbContextMock.Instance;
+			this.mapperMock = ServicesMapperMock.Instance;
 
 			await this.SeedDatabase();
 		}
 
 		[TearDown]
-		protected async Task TearDownBase() => await this.sqlDbContext.DisposeAsync();
+		protected async Task TearDownBase() => await this.dbContextMock.DisposeAsync();
+
+		protected void AssertAreEqualAsJson(object actual, object expected)
+		{
+			string actualAsJson = JsonConvert.SerializeObject(actual, Formatting.Indented);
+			string expectedAsJson = JsonConvert.SerializeObject(expected, Formatting.Indented);
+
+			Assert.That(actualAsJson, Is.EqualTo(expectedAsJson));
+		}
+
+		protected void AssertSamePropertiesValuesAreEqual(object actual, object expected)
+		{
+			PropertyInfo[] propsToCompare = expected.GetType().GetProperties();
+
+			Assert.Multiple(() =>
+			{
+				foreach (PropertyInfo propToCompare in propsToCompare)
+				{
+					PropertyInfo? actualProp = actual
+						.GetType()
+						.GetProperty(propToCompare.Name, propToCompare.PropertyType);
+
+					if (actualProp == null)
+						continue;
+
+					object? expectedValue = propToCompare.GetValue(expected);
+					object? actualValue = actualProp.GetValue(actual);
+
+					if (actualProp.PropertyType == typeof(DateTime))
+					{
+						if (expectedValue == null)
+							throw new InvalidOperationException($"{propToCompare.PropertyType} cannot be null.");
+
+						if (actualValue == null)
+							throw new InvalidOperationException($"{actualProp.PropertyType} cannot be null.");
+
+						var expectedDateTime = (DateTime)expectedValue;
+						expectedValue = expectedDateTime.ToUniversalTime();
+
+						var actualDateTime = (DateTime)actualValue;
+						actualValue = actualDateTime.ToUniversalTime();
+					}
+
+					Assert.That(actualValue, Is.EqualTo(expectedValue));
+				}
+			});
+		}
 
 		protected ApplicationUser User1 { get; private set; } = null!;
 		protected ApplicationUser User2 { get; private set; } = null!;
@@ -38,17 +86,20 @@
 		protected AccountType AccType2_User1_WithoutAcc { get; private set; } = null!;
 		protected AccountType AccType3_User1_Deleted_WithAcc { get; private set; } = null!;
 		protected AccountType AccType4_User1_Deleted_WithoutAcc { get; private set; } = null!;
+		protected AccountType AccType5_User2_WithoutAcc { get; private set; } = null!;
 
 		protected Category Category_InitialBalance { get; private set; } = null!;
 		protected Category Category1_User1_WithTransactions { get; private set; } = null!;
 		protected Category Category2_User1_WithoutTransactions { get; private set; } = null!;
 		protected Category Category3_User1_Deleted_WithTransactions { get; private set; } = null!;
 		protected Category Category4_User1_Deleted_WithoutTransactions { get; private set; } = null!;
+		protected Category Category5_User2_WithoutTransactions { get; private set; } = null!;
 
 		protected Currency Currency1_User1_WithAcc { get; private set; } = null!;
 		protected Currency Currency2_User1_WithoutAcc { get; private set; } = null!;
 		protected Currency Currency3_User1_Deleted_WithAcc { get; private set; } = null!;
 		protected Currency Currency4_User1_Deleted_WithoutAcc { get; private set; } = null!;
+		protected Currency Currency5_User2_WithoutAcc { get; private set; } = null!;
 
 		protected Transaction InitialTransaction_Income_Account1_User1 { get; private set; } = null!;
 		protected Transaction Transaction1_Expense_Account1_User1 { get; private set; } = null!;
@@ -80,7 +131,7 @@
 				Email = "todor@mail.com",
 				NormalizedEmail = "TODOR@MAIL.COM"
 			};
-			await this.sqlDbContext.Users.AddRangeAsync(
+			await this.dbContextMock.Users.AddRangeAsync(
 				this.User1,
 				this.User2);
 
@@ -113,11 +164,19 @@
 				OwnerId = this.User1.Id,
 				IsDeleted = true
 			};
-			await this.sqlDbContext.AccountTypes.AddRangeAsync(
+			this.AccType5_User2_WithoutAcc = new AccountType
+			{
+				Id = Guid.NewGuid(),
+				Name = "MyAcc",
+				OwnerId = this.User2.Id,
+				IsDeleted = false
+			};
+			await this.dbContextMock.AccountTypes.AddRangeAsync(
 				this.AccType1_User1_WithAcc,
 				this.AccType2_User1_WithoutAcc,
 				this.AccType3_User1_Deleted_WithAcc,
-				this.AccType4_User1_Deleted_WithoutAcc);
+				this.AccType4_User1_Deleted_WithoutAcc,
+				this.AccType5_User2_WithoutAcc);
 
 			// Currencies
 			this.Currency1_User1_WithAcc = new Currency
@@ -148,11 +207,19 @@
 				OwnerId = this.User1.Id,
 				IsDeleted = true
 			};
-			await this.sqlDbContext.Currencies.AddRangeAsync(
+			this.Currency5_User2_WithoutAcc = new Currency
+			{
+				Id = Guid.NewGuid(),
+				Name = "SEK2",
+				OwnerId = this.User2.Id,
+				IsDeleted = false
+			};
+			await this.dbContextMock.Currencies.AddRangeAsync(
 				this.Currency1_User1_WithAcc,
 				this.Currency2_User1_WithoutAcc,
 				this.Currency3_User1_Deleted_WithAcc,
-				this.Currency4_User1_Deleted_WithoutAcc);
+				this.Currency4_User1_Deleted_WithoutAcc,
+				this.Currency5_User2_WithoutAcc);
 
 			// Accounts
 			this.Account1_User1_WithTransactions = new Account
@@ -170,7 +237,7 @@
 				Id = Guid.NewGuid(),
 				Name = "Bank EUR",
 				AccountTypeId = this.AccType3_User1_Deleted_WithAcc.Id,
-				Balance = 900.01m,
+				Balance = 0,
 				CurrencyId = this.Currency3_User1_Deleted_WithAcc.Id,
 				OwnerId = this.User1.Id,
 				IsDeleted = false
@@ -195,7 +262,7 @@
 				OwnerId = this.User1.Id,
 				IsDeleted = true
 			};
-			await this.sqlDbContext.Accounts.AddRangeAsync(
+			await this.dbContextMock.Accounts.AddRangeAsync(
 				this.Account1_User1_WithTransactions, 
 				this.Account2_User1_WithoutTransactions, 
 				this.Account3_User1_Deleted_WithTransactions,
@@ -234,12 +301,20 @@
 				OwnerId = this.User1.Id,
 				IsDeleted = true
 			};
-			await this.sqlDbContext.Categories.AddRangeAsync(
+			this.Category5_User2_WithoutTransactions = new Category
+			{
+				Id = Guid.NewGuid(),
+				Name = "MyCurrency",
+				OwnerId = this.User2.Id,
+				IsDeleted = false
+			};
+			await this.dbContextMock.Categories.AddRangeAsync(
 				this.Category_InitialBalance, 
 				this.Category1_User1_WithTransactions, 
 				this.Category2_User1_WithoutTransactions, 
 				this.Category3_User1_Deleted_WithTransactions,
-				this.Category4_User1_Deleted_WithoutTransactions);
+				this.Category4_User1_Deleted_WithoutTransactions,
+				this.Category5_User2_WithoutTransactions);
 
 			// Transactions
 			this.InitialTransaction_Income_Account1_User1 = new Transaction()
@@ -310,7 +385,7 @@
 				Reference = "Flight ticket",
 				TransactionType = TransactionType.Expense
 			};
-			await this.sqlDbContext.Transactions.AddRangeAsync(
+			await this.dbContextMock.Transactions.AddRangeAsync(
 				this.InitialTransaction_Income_Account1_User1, 
 				this.Transaction1_Expense_Account1_User1, 
 				this.Transaction2_Expense_Account1_User1,
@@ -318,7 +393,7 @@
 				this.Transaction4_Income_Account3_User1, 
 				this.Transaction5_Expense_Account3_User1);
 
-			await this.sqlDbContext.SaveChangesAsync();
+			await this.dbContextMock.SaveChangesAsync();
 		}
 	}
 }
