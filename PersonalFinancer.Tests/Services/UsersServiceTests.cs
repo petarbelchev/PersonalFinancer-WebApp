@@ -58,7 +58,7 @@
 			UsersInfoDTO actual = await this.usersService.GetUsersInfoAsync(1);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -84,7 +84,7 @@
 				.GetUserAccountsAndCategoriesDropdownDataAsync(this.User1.Id);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -110,7 +110,7 @@
 				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownDataAsync(this.User1.Id);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -158,7 +158,7 @@
 			UserDashboardDTO actual = await this.usersService.GetUserDashboardDataAsync(this.User1.Id, startDate, endDate);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -192,7 +192,7 @@
 			TransactionsDTO actual = await this.usersService.GetUserTransactionsAsync(dto);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -231,7 +231,7 @@
 			UserDetailsDTO actual = await this.usersService.UserDetailsAsync(this.User1.Id);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]

@@ -21,6 +21,7 @@
 			this.CreateMap<AccountTransactionsInputModel, AccountTransactionsFilterDTO>()
 				.ForMember(dest => dest.AccountId, opt => opt.MapFrom(src => src.Id));
 
+			this.CreateMap<UserDropdownDTO, UserTransactionsViewModel>();
 			this.CreateMap<TransactionsDTO, UserTransactionsViewModel>();
 			this.CreateMap<TransactionsFilterDTO, UserTransactionsViewModel>();
 			this.CreateMap<UserTransactionsInputModel, UserTransactionsViewModel>();
@@ -35,7 +36,10 @@
 
 			this.CreateMap<ApplicationUser, AccountFormViewModel>();
 
+			this.CreateMap<Reply, ReplyOutputDTO>();
+
 			this.CreateMap<MessageDetailsDTO, MessageDetailsViewModel>();
+			this.CreateMap<Message, MessageDetailsDTO>();
         }
     }
 }

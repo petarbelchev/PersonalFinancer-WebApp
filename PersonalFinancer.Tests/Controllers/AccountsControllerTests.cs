@@ -12,16 +12,14 @@
 	using PersonalFinancer.Services.User.Models;
 	using PersonalFinancer.Web.Controllers;
 	using PersonalFinancer.Web.Models.Account;
-	using static PersonalFinancer.Common.Constants.PaginationConstants;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
-	using static PersonalFinancer.Common.Constants.UrlPathConstants;
 
 	[TestFixture]
 	internal class AccountsControllerTests : ControllersUnitTestsBase
 	{
 		private AccountsController controller;
 
-		private readonly AccountTypesAndCurrenciesDropdownDTO expAccountTypesAndCurrencies = new()
+		private static readonly AccountTypesAndCurrenciesDropdownDTO expAccountTypesAndCurrencies = new()
 		{
 			OwnerAccountTypes = new AccountTypeDropdownDTO[]
 			{
@@ -51,7 +49,7 @@
 			}
 		};
 
-		private readonly AccountDetailsLongDTO expectedAccountDetailsDto = new()
+		private static readonly AccountDetailsLongDTO expectedAccountDetailsDto = new()
 		{
 			Id = Guid.NewGuid(),
 			Balance = 100,
@@ -79,7 +77,7 @@
 			this.usersServiceMock
 				.Setup(x => x
 				.GetUserAccountTypesAndCurrenciesDropdownDataAsync(this.userId))
-				.ReturnsAsync(this.expAccountTypesAndCurrencies);
+				.ReturnsAsync(expAccountTypesAndCurrencies);
 
 			this.controller = new AccountsController(
 				this.accountsUpdateServiceMock.Object,
@@ -106,8 +104,21 @@
 			var viewResult = (ViewResult)await this.controller.Create();
 
 			//Assert
-			Assert.That(viewResult, Is.Not.Null);
-			this.CheckAccountFormViewModel(viewResult.Model as AccountFormViewModel);
+			Assert.Multiple(() =>
+			{
+				Assert.That(viewResult, Is.Not.Null);
+
+				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				Assert.That(viewModel.OwnerId, Is.EqualTo(this.userId));
+				Assert.That(viewModel.Name, Is.Null);
+				Assert.That(viewModel.Balance, Is.EqualTo(0));
+				Assert.That(viewModel.CurrencyId, Is.Null);
+				Assert.That(viewModel.AccountTypeId, Is.Null);
+
+				AssertSamePropertiesValuesAreEqual(viewModel!, expAccountTypesAndCurrencies);
+			});
 		}
 
 		[Test]
@@ -133,12 +144,13 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				CheckModelStateErrors(
-					viewResult.ViewData.ModelState,
-					nameof(inputModel.Balance),
-					"Balance is invalid.");
+				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Balance), "Balance is invalid.");
 
-				this.CheckAccountFormViewModel(viewResult.Model as AccountFormViewModel, inputModel);
+				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
+				AssertSamePropertiesValuesAreEqual(viewModel, expAccountTypesAndCurrencies);
 			});
 		}
 
@@ -202,11 +214,11 @@
 			{
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.ActionName, Is.EqualTo("AccountDetails"));
-				CheckTempDataMessage(this.controller.TempData, "You create a new account successfully!");
-			});
+				AssertTempDataMessageIsEqual(this.controller.TempData, "You create a new account successfully!");
 
-			Assert.That(result.RouteValues, Is.Not.Null);
-			CheckRouteValues(result.RouteValues, "id", newAccId);
+				Assert.That(result.RouteValues, Is.Not.Null);
+				AssertRouteValueIsEqual(result.RouteValues!, "id", newAccId);
+			});
 		}
 
 		[Test]
@@ -241,12 +253,13 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				CheckModelStateErrors(
-					viewResult.ViewData.ModelState,
-					nameof(inputModel.Name),
-					errorMessage);
+				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Name), errorMessage);
 
-				this.CheckAccountFormViewModel(viewResult.Model as AccountFormViewModel, inputModel);
+				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
+				AssertSamePropertiesValuesAreEqual(viewModel, expAccountTypesAndCurrencies);
 			});
 		}
 
@@ -254,29 +267,31 @@
 		public async Task AccountDetailsOnGet_ShouldReturnViewModel_WhenUserIsOwner()
 		{
 			//Arrange
-			this.expectedAccountDetailsDto.OwnerId = this.userId;
+			expectedAccountDetailsDto.OwnerId = this.userId;
 
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
 				.GetAccountDetailsAsync(
-					this.expectedAccountDetailsDto.Id,
+					expectedAccountDetailsDto.Id,
 					It.IsAny<DateTime>(),
 					It.IsAny<DateTime>(),
 					this.userId,
 					false))
-				.ReturnsAsync(this.expectedAccountDetailsDto);
+				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.AccountDetails(this.expectedAccountDetailsDto.Id);
+			var viewResult = (ViewResult)await this.controller.AccountDetails(expectedAccountDetailsDto.Id);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
-				CheckAccountDetailsViewModel(
-					viewResult.Model as AccountDetailsViewModel,
-					this.expectedAccountDetailsDto);
+
+				AccountDetailsViewModel viewModel = viewResult.Model as AccountDetailsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, expectedAccountDetailsDto);
 			});
 		}
 
@@ -284,24 +299,26 @@
 		public async Task AccountDetailsOnGet_ShouldReturnViewModel_WhenUserIsNotOwnerButIsAdmin()
 		{
 			//Arrange
-			this.expectedAccountDetailsDto.OwnerId = Guid.NewGuid();
+			expectedAccountDetailsDto.OwnerId = Guid.NewGuid();
 
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(this.expectedAccountDetailsDto.Id, It.IsAny<DateTime>(), It.IsAny<DateTime>(), this.userId, true))
-				.ReturnsAsync(this.expectedAccountDetailsDto);
+				.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, It.IsAny<DateTime>(), It.IsAny<DateTime>(), this.userId, true))
+				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.AccountDetails(this.expectedAccountDetailsDto.Id);
+			var viewResult = (ViewResult)await this.controller.AccountDetails(expectedAccountDetailsDto.Id);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
-				CheckAccountDetailsViewModel(
-					viewResult.Model as AccountDetailsViewModel,
-					this.expectedAccountDetailsDto);
+
+				AccountDetailsViewModel viewModel = viewResult.Model as AccountDetailsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, expectedAccountDetailsDto);
 			});
 		}
 
@@ -339,19 +356,27 @@
 			//Arrange
 			var inputModel = new AccountDetailsInputModel
 			{
-				Id = this.expectedAccountDetailsDto.Id,
+				Id = expectedAccountDetailsDto.Id,
 				StartDate = DateTime.UtcNow.AddMonths(-1),
 				EndDate = DateTime.UtcNow
 			};
-			this.expectedAccountDetailsDto.OwnerId = Guid.NewGuid();
-			this.expectedAccountDetailsDto.StartDate = inputModel.StartDate ?? throw new InvalidOperationException();
-			this.expectedAccountDetailsDto.EndDate = inputModel.EndDate ?? throw new InvalidOperationException();
 
-			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
+			expectedAccountDetailsDto.OwnerId = Guid.NewGuid();
+			expectedAccountDetailsDto.StartDate = inputModel.StartDate ?? throw new InvalidOperationException();
+			expectedAccountDetailsDto.EndDate = inputModel.EndDate ?? throw new InvalidOperationException();
+
+			this.userMock.Setup(x => x
+				.IsInRole(AdminRoleName))
+				.Returns(true);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(this.expectedAccountDetailsDto.Id, this.expectedAccountDetailsDto.StartDate, this.expectedAccountDetailsDto.EndDate, this.userId, true))
-				.ReturnsAsync(this.expectedAccountDetailsDto);
+				.GetAccountDetailsAsync(
+					expectedAccountDetailsDto.Id,
+					expectedAccountDetailsDto.StartDate,
+					expectedAccountDetailsDto.EndDate,
+					this.userId,
+					true))
+				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
 			var viewResult = (ViewResult)await this.controller.AccountDetails(inputModel);
@@ -360,10 +385,11 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
-				CheckAccountDetailsViewModel(
-					viewResult.Model as AccountDetailsViewModel,
-					this.expectedAccountDetailsDto,
-					isPostRequest: true);
+
+				AccountDetailsViewModel viewModel = viewResult.Model as AccountDetailsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, expectedAccountDetailsDto);
 			});
 		}
 
@@ -373,19 +399,25 @@
 			//Arrange
 			var inputModel = new AccountDetailsInputModel
 			{
-				Id = this.expectedAccountDetailsDto.Id,
+				Id = expectedAccountDetailsDto.Id,
 				StartDate = DateTime.UtcNow.AddMonths(-1),
 				EndDate = DateTime.UtcNow
 			};
-			this.expectedAccountDetailsDto.OwnerId = this.userId;
-			this.expectedAccountDetailsDto.StartDate = inputModel.StartDate ?? throw new InvalidOperationException();
-			this.expectedAccountDetailsDto.EndDate = inputModel.EndDate ?? throw new InvalidOperationException();
+
+			expectedAccountDetailsDto.OwnerId = this.userId;
+			expectedAccountDetailsDto.StartDate = inputModel.StartDate ?? throw new InvalidOperationException();
+			expectedAccountDetailsDto.EndDate = inputModel.EndDate ?? throw new InvalidOperationException();
 
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(this.expectedAccountDetailsDto.Id, this.expectedAccountDetailsDto.StartDate, this.expectedAccountDetailsDto.EndDate, this.userId, false))
-				.ReturnsAsync(this.expectedAccountDetailsDto);
+				.GetAccountDetailsAsync(
+					expectedAccountDetailsDto.Id,
+					expectedAccountDetailsDto.StartDate,
+					expectedAccountDetailsDto.EndDate,
+					this.userId,
+					false))
+				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
 			var viewResult = (ViewResult)await this.controller.AccountDetails(inputModel);
@@ -394,10 +426,11 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
-				CheckAccountDetailsViewModel(
-					viewResult.Model as AccountDetailsViewModel,
-					this.expectedAccountDetailsDto,
-					isPostRequest: true);
+
+				AccountDetailsViewModel viewModel = viewResult.Model as AccountDetailsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, expectedAccountDetailsDto);
 			});
 		}
 
@@ -410,7 +443,7 @@
 
 			var inputModel = new AccountDetailsInputModel
 			{
-				Id = this.expectedAccountDetailsDto.Id,
+				Id = expectedAccountDetailsDto.Id,
 				StartDate = startDate,
 				EndDate = endDate
 			};
@@ -418,7 +451,7 @@
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(this.expectedAccountDetailsDto.Id, startDate, endDate, this.userId, false))
+				.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, startDate, endDate, this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -438,22 +471,23 @@
 			//Arrange
 			var inputModel = new AccountDetailsInputModel
 			{
-				Id = this.expectedAccountDetailsDto.Id,
+				Id = expectedAccountDetailsDto.Id,
 				EndDate = DateTime.UtcNow
 			};
 
-			var serviceReturnModel = new AccountDetailsShortDTO
+			var serviceModel = new AccountDetailsShortDTO
 			{
-				Name = this.expectedAccountDetailsDto.Name,
-				Balance = this.expectedAccountDetailsDto.Balance,
-				CurrencyName = this.expectedAccountDetailsDto.CurrencyName
+				Name = expectedAccountDetailsDto.Name,
+				Balance = expectedAccountDetailsDto.Balance,
+				AccountTypeName = expectedAccountDetailsDto.AccountTypeName,
+				CurrencyName = expectedAccountDetailsDto.CurrencyName
 			};
 
 			this.controller.ModelState.AddModelError(nameof(inputModel.StartDate), "Start Date is invalid");
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountShortDetailsAsync(this.expectedAccountDetailsDto.Id))
-				.ReturnsAsync(serviceReturnModel);
+				.Setup(x => x.GetAccountShortDetailsAsync(expectedAccountDetailsDto.Id))
+				.ReturnsAsync(serviceModel);
 
 			//Act
 			var viewResult = (ViewResult)await this.controller.AccountDetails(inputModel);
@@ -462,16 +496,15 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
-				CheckModelStateErrors(
+				AssertModelStateErrorIsEqual(
 					viewResult.ViewData.ModelState,
 					nameof(inputModel.StartDate),
 					"Start Date is invalid");
 
-				var model = viewResult.Model as AccountDetailsViewModel;
-				Assert.That(model, Is.Not.Null);
-				Assert.That(model!.Name, Is.EqualTo(serviceReturnModel.Name));
-				Assert.That(model.Balance, Is.EqualTo(serviceReturnModel.Balance));
-				Assert.That(model.CurrencyName, Is.EqualTo(serviceReturnModel.CurrencyName));
+				AccountDetailsViewModel viewModel = viewResult.Model as AccountDetailsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, serviceModel);
 			});
 		}
 
@@ -594,12 +627,11 @@
 				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
 			//Act
-			var result =
-				(RedirectToActionResult)await this.controller.Delete(inputModel);
+			var result = (RedirectToActionResult)await this.controller.Delete(inputModel);
 
-			this.accountsUpdateServiceMock
-				.Verify(x => x.DeleteAccountAsync(accountId, this.userId, false, false),
-					Times.Once);
+			this.accountsUpdateServiceMock.Verify(x => x
+				.DeleteAccountAsync(accountId, this.userId, false, false),
+				Times.Once);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -608,7 +640,7 @@
 				Assert.That(result.ControllerName, Is.EqualTo("Home"));
 				Assert.That(result.ActionName, Is.EqualTo("Index"));
 
-				CheckTempDataMessage(this.controller.TempData, "Your account was successfully deleted!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, "Your account was successfully deleted!");
 			});
 		}
 
@@ -641,9 +673,9 @@
 			//Act
 			var result = (LocalRedirectResult)await this.controller.Delete(inputModel);
 
-			this.accountsUpdateServiceMock
-				.Verify(x => x.DeleteAccountAsync(accountId, this.userId, true, false),
-					Times.Once);
+			this.accountsUpdateServiceMock.Verify(x => x
+				.DeleteAccountAsync(accountId, this.userId, true, false),
+				Times.Once);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -651,7 +683,7 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.Url, Is.EqualTo("/Admin/Users/Details/" + ownerId));
 
-				CheckTempDataMessage(this.controller.TempData, "You successfully delete user's account!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, "You successfully delete user's account!");
 			});
 		}
 
@@ -779,8 +811,8 @@
 				CurrencyId = Guid.NewGuid(),
 				Balance = 100,
 				OwnerId = this.userId,
-				OwnerAccountTypes = this.expAccountTypesAndCurrencies.OwnerAccountTypes,
-				OwnerCurrencies = this.expAccountTypesAndCurrencies.OwnerCurrencies
+				OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
+				OwnerCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies
 			};
 
 			this.accountsInfoServiceMock.Setup(x => x
@@ -793,16 +825,10 @@
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(viewResult, Is.Not.Null);
-				var model = viewResult.Model as AccountFormViewModel;
-				Assert.That(model, Is.Not.Null);
-				Assert.That(model!.Balance, Is.EqualTo(expServiceDto.Balance));
-				Assert.That(model.CurrencyId, Is.EqualTo(expServiceDto.CurrencyId));
-				Assert.That(model.OwnerId, Is.EqualTo(expServiceDto.OwnerId));
-				Assert.That(model.AccountTypeId, Is.EqualTo(expServiceDto.AccountTypeId));
-				this.CheckAccountTypesAndCurrencies(
-					model.OwnerAccountTypes, model.OwnerCurrencies,
-					this.expAccountTypesAndCurrencies);
+				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, expServiceDto);
 			});
 		}
 
@@ -831,26 +857,32 @@
 			//Arrange
 			var accId = Guid.NewGuid();
 			string returnUrl = "returnUrl";
-			var inputFormModel = new AccountFormViewModel
+			var inputModel = new AccountFormViewModel
 			{
-				//Name = null,
+				Name = "a",
 				Balance = 100,
 				OwnerId = this.userId,
 				CurrencyId = Guid.NewGuid(),
 				AccountTypeId = Guid.NewGuid(),
 			};
 
-			this.controller.ModelState.AddModelError(nameof(inputFormModel.Name), "Name is invalid.");
+			this.controller.ModelState.AddModelError(nameof(inputModel.Name), "Name is invalid.");
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
+			var viewResult = (ViewResult)await this.controller.EditAccount(accId, inputModel, returnUrl);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
-				CheckModelStateErrors(viewResult.ViewData.ModelState, nameof(inputFormModel.Name), "Name is invalid.");
-				this.CheckAccountFormViewModel(viewResult.Model as AccountFormViewModel, inputFormModel);
+
+				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Name), "Name is invalid.");
+
+				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
+				AssertSamePropertiesValuesAreEqual(viewModel, expAccountTypesAndCurrencies);
 			});
 		}
 
@@ -918,7 +950,7 @@
 			{
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.Url, Is.EqualTo(returnUrl));
-				CheckTempDataMessage(this.controller.TempData, "Your account was successfully edited!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, "Your account was successfully edited!");
 			});
 		}
 
@@ -959,7 +991,7 @@
 			{
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.Url, Is.EqualTo(returnUrl));
-				CheckTempDataMessage(this.controller.TempData, "You successfully edited user's account!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, "You successfully edited user's account!");
 			});
 		}
 
@@ -970,7 +1002,7 @@
 			var accId = Guid.NewGuid();
 			string returnUrl = "returnUrl";
 			var ownerId = Guid.NewGuid();
-			var inputFormModel = new AccountFormViewModel
+			var inputModel = new AccountFormViewModel
 			{
 				Name = "Account name",
 				Balance = 100,
@@ -989,27 +1021,33 @@
 
 			this.accountsUpdateServiceMock.Setup(x => x
 				.EditAccountAsync(accId, It.Is<CreateEditAccountDTO>(m =>
-					m.CurrencyId == inputFormModel.CurrencyId
-					&& m.Balance == inputFormModel.Balance
-					&& m.OwnerId == inputFormModel.OwnerId
-					&& m.AccountTypeId == inputFormModel.AccountTypeId
-					&& m.Name == inputFormModel.Name)))
+					m.CurrencyId == inputModel.CurrencyId
+					&& m.Balance == inputModel.Balance
+					&& m.OwnerId == inputModel.OwnerId
+					&& m.AccountTypeId == inputModel.AccountTypeId
+					&& m.Name == inputModel.Name)))
 				.Throws<ArgumentException>();
 
-			Guid userId = inputFormModel.OwnerId ?? throw new InvalidOperationException();
+			this.usersServiceMock.Setup(x => x
+				.GetUserAccountTypesAndCurrenciesDropdownDataAsync(ownerId))
+				.ReturnsAsync(expAccountTypesAndCurrencies);
 
 			//Act
-			var result = (ViewResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
+			var viewResult = (ViewResult)await this.controller.EditAccount(accId, inputModel, returnUrl);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(result, Is.Not.Null);
+				Assert.That(viewResult, Is.Not.Null);
 
-				CheckModelStateErrors(result.ViewData.ModelState, nameof(inputFormModel.Name),
-					string.Format(ExceptionMessages.AdminExistingUserEntityName, "account", inputFormModel.Name));
+				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Name),
+					string.Format(ExceptionMessages.AdminExistingUserEntityName, "account", inputModel.Name));
 
-				this.CheckAccountFormViewModel(result.Model as AccountFormViewModel, inputFormModel);
+				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
+				AssertSamePropertiesValuesAreEqual(viewModel, expAccountTypesAndCurrencies);
 			});
 		}
 
@@ -1019,7 +1057,7 @@
 			//Arrange
 			var accId = Guid.NewGuid();
 			string returnUrl = "returnUrl";
-			var inputFormModel = new AccountFormViewModel
+			var inputModel = new AccountFormViewModel
 			{
 				Name = "Account name",
 				Balance = 100,
@@ -1030,30 +1068,34 @@
 
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
-			string errorMessage = string.Format(ExceptionMessages.ExistingUserEntityName, "account", inputFormModel.Name);
+			string errorMessage = string.Format(ExceptionMessages.ExistingUserEntityName, "account", inputModel.Name);
 
 			this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
 				It.Is<CreateEditAccountDTO>(m =>
-					m.CurrencyId == inputFormModel.CurrencyId
-					&& m.Balance == inputFormModel.Balance
-					&& m.OwnerId == inputFormModel.OwnerId
-					&& m.AccountTypeId == inputFormModel.AccountTypeId
-					&& m.Name == inputFormModel.Name)))
+					m.CurrencyId == inputModel.CurrencyId
+					&& m.Balance == inputModel.Balance
+					&& m.OwnerId == inputModel.OwnerId
+					&& m.AccountTypeId == inputModel.AccountTypeId
+					&& m.Name == inputModel.Name)))
 				.Throws(new ArgumentException(errorMessage));
 
-			Guid userId = inputFormModel.OwnerId ?? throw new InvalidOperationException();
+			Guid userId = inputModel.OwnerId ?? throw new InvalidOperationException();
 
 			//Act
-			var result = (ViewResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
+			var viewResult = (ViewResult)await this.controller.EditAccount(accId, inputModel, returnUrl);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(result, Is.Not.Null);
+				Assert.That(viewResult, Is.Not.Null);
 
-				CheckModelStateErrors(result.ViewData.ModelState, nameof(inputFormModel.Name), errorMessage);
+				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Name), errorMessage);
 
-				this.CheckAccountFormViewModel(result.Model as AccountFormViewModel, inputFormModel);
+				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
+				AssertSamePropertiesValuesAreEqual(viewModel, expAccountTypesAndCurrencies);
 			});
 		}
 
@@ -1092,122 +1134,6 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
-		}
-
-		private void CheckAccountFormViewModel(
-			AccountFormViewModel? viewModel,
-			AccountFormViewModel? inputModel = null)
-		{
-			Assert.That(viewModel, Is.Not.Null);
-
-			if (inputModel == null)
-			{
-				Assert.That(viewModel.OwnerId, Is.EqualTo(this.userId));
-				Assert.That(viewModel.Name, Is.Null);
-				Assert.That(viewModel.Balance, Is.EqualTo(0));
-				Assert.That(viewModel.CurrencyId, Is.Null);
-				Assert.That(viewModel.AccountTypeId, Is.Null);
-			}
-			else
-			{
-				Assert.That(viewModel.OwnerId, Is.EqualTo(inputModel.OwnerId));
-				Assert.That(viewModel.Name, Is.EqualTo(inputModel.Name));
-				Assert.That(viewModel.Balance, Is.EqualTo(inputModel.Balance));
-				Assert.That(viewModel.CurrencyId, Is.EqualTo(inputModel.CurrencyId));
-				Assert.That(viewModel.AccountTypeId, Is.EqualTo(inputModel.AccountTypeId));
-			}
-
-			if (inputModel != null)
-			{
-				AccountTypesAndCurrenciesDropdownDTO expModel = new()
-				{
-					OwnerAccountTypes = inputModel.OwnerAccountTypes,
-					OwnerCurrencies = inputModel.OwnerCurrencies
-				};
-
-				this.CheckAccountTypesAndCurrencies(
-					viewModel.OwnerAccountTypes, viewModel.OwnerCurrencies, expModel);
-			}
-			else
-			{
-				this.CheckAccountTypesAndCurrencies(
-					viewModel.OwnerAccountTypes, viewModel.OwnerCurrencies, this.expAccountTypesAndCurrencies);
-			}
-		}
-
-		private void CheckAccountTypesAndCurrencies(
-			IEnumerable<AccountTypeDropdownDTO> actualAccountTypes,
-			IEnumerable<CurrencyDropdownDTO> actualCurrencies,
-			AccountTypesAndCurrenciesDropdownDTO expected)
-		{
-			Assert.That(actualAccountTypes.Count(),
-				Is.EqualTo(expected.OwnerAccountTypes.Count()));
-
-			for (int i = 0; i < expected.OwnerAccountTypes.Count(); i++)
-			{
-				Assert.That(actualAccountTypes.ElementAt(i).Id,
-					Is.EqualTo(expected.OwnerAccountTypes.ElementAt(i).Id));
-				Assert.That(actualAccountTypes.ElementAt(i).Name,
-					Is.EqualTo(expected.OwnerAccountTypes.ElementAt(i).Name));
-			}
-
-			Assert.That(actualCurrencies.Count(),
-				Is.EqualTo(expected.OwnerCurrencies.Count()));
-
-			for (int i = 0; i < expected.OwnerCurrencies.Count(); i++)
-			{
-				Assert.That(actualCurrencies.ElementAt(i).Id,
-					Is.EqualTo(expected.OwnerCurrencies.ElementAt(i).Id));
-				Assert.That(actualCurrencies.ElementAt(i).Name,
-					Is.EqualTo(expected.OwnerCurrencies.ElementAt(i).Name));
-			}
-		}
-
-		private static void CheckAccountDetailsViewModel(
-			AccountDetailsViewModel? viewModel,
-			AccountDetailsLongDTO serviceModel,
-			bool isPostRequest = false)
-		{
-			Assert.That(viewModel, Is.Not.Null);
-			Assert.That(viewModel.Id, Is.EqualTo(serviceModel.Id));
-			Assert.That(viewModel.Name, Is.EqualTo(serviceModel.Name));
-			Assert.That(viewModel.Balance, Is.EqualTo(serviceModel.Balance));
-			Assert.That(viewModel.CurrencyName, Is.EqualTo(serviceModel.CurrencyName));
-			Assert.That(viewModel.OwnerId, Is.EqualTo(serviceModel.OwnerId));
-
-			if (isPostRequest)
-			{
-				Assert.That(viewModel.StartDate, Is.EqualTo(serviceModel.StartDate));
-				Assert.That(viewModel.EndDate, Is.EqualTo(serviceModel.EndDate));
-			}
-
-			Assert.That(viewModel.Transactions.Count(), Is.EqualTo(serviceModel.Transactions.Count()));
-			for (int i = 0; i < serviceModel.Transactions.Count(); i++)
-			{
-				Assert.That(viewModel.Transactions.ElementAt(i).Id,
-					Is.EqualTo(serviceModel.Transactions.ElementAt(i).Id));
-				Assert.That(viewModel.Transactions.ElementAt(i).Amount,
-					Is.EqualTo(serviceModel.Transactions.ElementAt(i).Amount));
-				Assert.That(viewModel.Transactions.ElementAt(i).Reference,
-					Is.EqualTo(serviceModel.Transactions.ElementAt(i).Reference));
-				Assert.That(viewModel.Transactions.ElementAt(i).TransactionType,
-					Is.EqualTo(serviceModel.Transactions.ElementAt(i).TransactionType));
-				Assert.That(viewModel.Transactions.ElementAt(i).AccountCurrencyName,
-					Is.EqualTo(serviceModel.Transactions.ElementAt(i).AccountCurrencyName));
-				Assert.That(viewModel.Transactions.ElementAt(i).CreatedOn,
-					Is.EqualTo(serviceModel.Transactions.ElementAt(i).CreatedOn));
-			}
-
-			Assert.That(viewModel.Pagination.TotalElements, Is.EqualTo(serviceModel.TotalAccountTransactions));
-			Assert.That(viewModel.Pagination.ElementsName, Is.EqualTo(TransactionsName));
-			Assert.That(viewModel.Pagination.ElementsPerPage, Is.EqualTo(TransactionsPerPage));
-			Assert.That(viewModel.Pagination.Page, Is.EqualTo(1));
-
-			Assert.That(viewModel.Routing.Area, Is.EqualTo(string.Empty));
-			Assert.That(viewModel.Routing.Controller, Is.EqualTo("Accounts"));
-			Assert.That(viewModel.Routing.Action, Is.EqualTo("AccountDetails"));
-
-			Assert.That(viewModel.Routing.ReturnUrl, Is.EqualTo(AccountDetailsPath + serviceModel.Id));
 		}
 	}
 }

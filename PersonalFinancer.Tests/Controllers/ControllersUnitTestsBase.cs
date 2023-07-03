@@ -13,7 +13,7 @@
 	using System.Security.Claims;
 
 	[TestFixture]
-	abstract class ControllersUnitTestsBase
+	abstract class ControllersUnitTestsBase : UnitTestsBase
 	{
 		protected IMapper mapper = ControllersMapperMock.Instance;
 		protected Mock<IAccountsUpdateService> accountsUpdateServiceMock;
@@ -36,8 +36,7 @@
 				.Returns(new Claim(ClaimTypes.NameIdentifier, this.userId.ToString()));
 		}
 
-		protected static void CheckModelStateErrors(
-			ModelStateDictionary modelState, string key, string errorMessage)
+		protected static void AssertModelStateErrorIsEqual(ModelStateDictionary modelState, string key, string errorMessage)
 		{
 			Assert.Multiple(() =>
 			{
@@ -45,13 +44,11 @@
 				Assert.That(modelState.Keys.First(), Is.EqualTo(key));
 				Assert.That(modelState.Values.Count(), Is.EqualTo(1));
 				Assert.That(modelState.Values.First().Errors, Has.Count.EqualTo(1));
-				Assert.That(modelState.Values.First().Errors.First().ErrorMessage,
-					Is.EqualTo(errorMessage));
+				Assert.That(modelState.Values.First().Errors.First().ErrorMessage, Is.EqualTo(errorMessage));
 			});
 		}
 
-		protected static void CheckTempDataMessage(
-			ITempDataDictionary tempData, string expectedMessage)
+		protected static void AssertTempDataMessageIsEqual(ITempDataDictionary tempData, string expectedMessage)
 		{
 			Assert.Multiple(() =>
 			{
@@ -62,8 +59,7 @@
 			});
 		}
 
-		protected static void CheckRouteValues(
-			RouteValueDictionary routeValues, string key, Guid value)
+		protected static void AssertRouteValueIsEqual(RouteValueDictionary routeValues, string key, object value)
 		{
 			Assert.Multiple(() =>
 			{

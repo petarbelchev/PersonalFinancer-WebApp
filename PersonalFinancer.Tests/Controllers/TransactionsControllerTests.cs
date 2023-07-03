@@ -1,26 +1,23 @@
 ﻿namespace PersonalFinancer.Tests.Controllers
 {
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.ViewFeatures;
-    using Moq;
-    using NUnit.Framework;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models.Enums;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.Shared.Models;
-    using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Controllers;
-    using PersonalFinancer.Web.Models.Account;
-    using PersonalFinancer.Web.Models.Transaction;
-    using static PersonalFinancer.Common.Constants.RoleConstants;
+	using Microsoft.AspNetCore.Http;
+	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.AspNetCore.Mvc.ViewFeatures;
+	using Moq;
+	using NUnit.Framework;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Data.Models.Enums;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Web.Controllers;
+	using PersonalFinancer.Web.Models.Account;
+	using PersonalFinancer.Web.Models.Transaction;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
 
-    [TestFixture]
+	[TestFixture]
 	internal class TransactionsControllerTests : ControllersUnitTestsBase
 	{
-		private TransactionsController controller;
-
 		private static readonly TransactionsDTO expTransactionsDto = new()
 		{
 			Transactions = new TransactionTableDTO[]
@@ -119,11 +116,11 @@
 			OwnerCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies
 		};
 
+		private TransactionsController controller;
+
 		[SetUp]
 		public void SetUp()
 		{
-			this.accountsInfoServiceMock = new Mock<IAccountsInfoService>();
-
 			this.controller = new TransactionsController(
 				this.accountsUpdateServiceMock.Object,
 				this.accountsInfoServiceMock.Object,
@@ -166,9 +163,10 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				var model = viewResult.Model as UserTransactionsViewModel;
-				Assert.That(model, Is.Not.Null);
-				this.CheckUserTransactionsViewModel(model!);
+				UserTransactionsViewModel viewModel = viewResult.Model as UserTransactionsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, expTransactionsPageDTO);
 			});
 		}
 
@@ -176,12 +174,22 @@
 		public async Task All_OnPost_ShouldReturnViewModel()
 		{
 			//Arrange
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
 			var inputModel = new UserTransactionsInputModel
 			{
-				StartDate = startDate,
-				EndDate = endDate
+				StartDate = DateTime.UtcNow.AddMonths(-1),
+				EndDate = DateTime.UtcNow
+			};
+
+			var expected = new UserTransactionsViewModel(expTransactionsDto.TotalTransactionsCount)
+			{
+				UserId = this.userId,
+				StartDate = inputModel.StartDate,
+				EndDate = inputModel.EndDate,
+				OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
+				OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
+				OwnerCategories = expAccountsAndCategories.OwnerCategories,
+				OwnerCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies,
+				Transactions = expTransactionsDto.Transactions,
 			};
 
 			this.usersServiceMock.Setup(x => x
@@ -200,11 +208,10 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				var model = viewResult.Model as UserTransactionsViewModel;
-				Assert.That(model, Is.Not.Null);
-				Assert.That(model!.StartDate, Is.EqualTo(inputModel.StartDate));
-				Assert.That(model.EndDate, Is.EqualTo(inputModel.EndDate));
-				this.CheckUserTransactionsViewModel(model);
+				UserTransactionsViewModel viewModel = viewResult.Model as UserTransactionsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertAreEqualAsJson(viewModel, expected);
 			});
 		}
 
@@ -218,6 +225,27 @@
 				EndDate = DateTime.UtcNow
 			};
 
+			var expected = new UserTransactionsViewModel
+			{
+				UserId = this.userId,
+				StartDate = inputModel.StartDate,
+				EndDate = inputModel.EndDate,
+				OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
+				OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
+				OwnerCategories = expAccountsAndCategories.OwnerCategories,
+				OwnerCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies
+			};
+
+			this.usersServiceMock.Setup(x => x
+				.GetUserDropdownDataAsync(this.userId))
+				.ReturnsAsync(new UserDropdownDTO
+				{
+					OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
+					OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
+					OwnerCategories = expAccountsAndCategories.OwnerCategories,
+					OwnerCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies
+				});
+
 			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid.");
 
 			//Act
@@ -227,13 +255,13 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
-				CheckModelStateErrors(viewResult.ViewData.ModelState, string.Empty, "Model is invalid.");
 
-				var model = viewResult.Model as UserTransactionsViewModel;
-				Assert.That(model, Is.Not.Null);
-				Assert.That(model!.StartDate, Is.EqualTo(inputModel.StartDate));
-				Assert.That(model.EndDate, Is.EqualTo(inputModel.EndDate));
-				Assert.That(model.Transactions.Any(), Is.False);
+				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, string.Empty, "Model is invalid.");
+
+				UserTransactionsViewModel viewModel = viewResult.Model as UserTransactionsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertAreEqualAsJson(viewModel, expected);
 			});
 		}
 
@@ -241,6 +269,7 @@
 		public async Task Create_OnGet_ShouldReturnViewModel()
 		{
 			//Arrange
+			TransactionType[] transactionTypes = Enum.GetValues<TransactionType>();
 
 			//Act
 			var viewResult = (ViewResult)await this.controller.Create();
@@ -258,11 +287,18 @@
 				Assert.That(model.Amount, Is.EqualTo(0));
 				Assert.That(model.CategoryId, Is.Null);
 
-				this.CheckUserAccountsAndCategories(model);
+				AssertSamePropertiesValuesAreEqual(model, expAccountsAndCategories);
 
-				Assert.That(model.TransactionTypes, Has.Length.EqualTo(2));
-				Assert.That(model.TransactionTypes[0], Is.EqualTo(TransactionType.Income));
-				Assert.That(model.TransactionTypes[1], Is.EqualTo(TransactionType.Expense));
+				Assert.That(model.TransactionTypes, Has.Count.EqualTo(transactionTypes.Length));
+
+				for (int i = 0; i < transactionTypes.Length; i++)
+				{
+					Assert.That(model.TransactionTypes[i].Value,
+						Is.EqualTo(transactionTypes[i].ToString()));
+
+					Assert.That(model.TransactionTypes[i].Text,
+						Is.EqualTo(transactionTypes[i].ToString()));
+				}
 			});
 		}
 
@@ -280,7 +316,6 @@
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
 			};
-			var dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
 
 			this.controller.ModelState.AddModelError(nameof(inputModel.Amount), "Amount is invalid.");
 
@@ -292,19 +327,16 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				var model = viewResult.Model as TransactionFormViewModel;
-				Assert.That(model, Is.Not.Null);
+				TransactionFormViewModel model = viewResult.Model as TransactionFormViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				CheckTransactionFormModel(model!, dto);
+				AssertSamePropertiesValuesAreEqual(model, inputModel);
+				AssertSamePropertiesValuesAreEqual(model, expAccountsAndCategories);
 
-				this.CheckUserAccountsAndCategories(model!);
-
-				Assert.That(model!.TransactionTypes, Has.Length.EqualTo(2));
-				Assert.That(model.TransactionTypes[0], Is.EqualTo(TransactionType.Income));
-				Assert.That(model.TransactionTypes[1], Is.EqualTo(TransactionType.Expense));
-
-				CheckModelStateErrors(viewResult.ViewData.ModelState,
-					nameof(inputModel.Amount), "Amount is invalid.");
+				AssertModelStateErrorIsEqual(
+					viewResult.ViewData.ModelState,
+					nameof(inputModel.Amount),
+					"Amount is invalid.");
 			});
 		}
 
@@ -374,8 +406,9 @@
 				Assert.That(result.ControllerName, Is.Null);
 				Assert.That(result.ActionName, Is.EqualTo("TransactionDetails"));
 				Assert.That(result.RouteValues, Is.Not.Null);
-				CheckRouteValues(result.RouteValues!, "id", newTransactionId);
-				CheckTempDataMessage(this.controller.TempData, "You create a new transaction successfully!");
+
+				AssertRouteValueIsEqual(result.RouteValues!, "id", newTransactionId);
+				AssertTempDataMessageIsEqual(this.controller.TempData, "You create a new transaction successfully!");
 			});
 		}
 
@@ -443,7 +476,7 @@
 			{
 				Assert.That(result.ControllerName, Is.EqualTo("Home"));
 				Assert.That(result.ActionName, Is.EqualTo("Index"));
-				CheckTempDataMessage(this.controller.TempData, "Your transaction was successfully deleted!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, "Your transaction was successfully deleted!");
 			});
 		}
 
@@ -472,7 +505,7 @@
 			{
 				Assert.That(result.ControllerName, Is.EqualTo("Home"));
 				Assert.That(result.ActionName, Is.EqualTo("Index"));
-				CheckTempDataMessage(this.controller.TempData, "You successfully delete a user's transaction!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, "You successfully delete a user's transaction!");
 			});
 		}
 
@@ -502,7 +535,7 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(result.Url, Is.EqualTo(returnUrl));
-				CheckTempDataMessage(this.controller.TempData, "Your transaction was successfully deleted!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, "Your transaction was successfully deleted!");
 			});
 		}
 
@@ -532,7 +565,7 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(result.Url, Is.EqualTo(returnUrl));
-				CheckTempDataMessage(this.controller.TempData, "You successfully delete a user's transaction!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, "You successfully delete a user's transaction!");
 			});
 		}
 
@@ -607,22 +640,15 @@
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
-			var result = (ViewResult)await this.controller.TransactionDetails(transactionId);
-			var model = result.Model as TransactionDetailsDTO;
+			var viewResult = (ViewResult)await this.controller.TransactionDetails(transactionId);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(model, Is.Not.Null);
-				Assert.That(model!.Id, Is.EqualTo(serviceReturnDto.Id));
-				Assert.That(model.Reference, Is.EqualTo(serviceReturnDto.Reference));
-				Assert.That(model.TransactionType, Is.EqualTo(serviceReturnDto.TransactionType));
-				Assert.That(model.AccountCurrencyName, Is.EqualTo(serviceReturnDto.AccountCurrencyName));
-				Assert.That(model.OwnerId, Is.EqualTo(serviceReturnDto.OwnerId));
-				Assert.That(model.AccountName, Is.EqualTo(serviceReturnDto.AccountName));
-				Assert.That(model.Amount, Is.EqualTo(serviceReturnDto.Amount));
-				Assert.That(model.CategoryName, Is.EqualTo(serviceReturnDto.CategoryName));
-				Assert.That(model.CreatedOn, Is.EqualTo(serviceReturnDto.CreatedOn));
+				TransactionDetailsDTO actual = viewResult.Model as TransactionDetailsDTO ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertAreEqualAsJson(actual, serviceReturnDto);
 			});
 		}
 
@@ -695,20 +721,15 @@
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
-			var result = (ViewResult)await this.controller.EditTransaction(transactionId);
-			var model = result.Model as TransactionFormViewModel;
+			var viewResult = (ViewResult)await this.controller.EditTransaction(transactionId);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(model, Is.Not.Null);
-				CheckTransactionFormModel(model!, serviceReturnDto);
+				TransactionFormViewModel viewModel = viewResult.Model as TransactionFormViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				this.CheckUserAccountsAndCategories(model!);
-
-				Assert.That(model!.TransactionTypes, Has.Length.EqualTo(2));
-				Assert.That(model.TransactionTypes[0], Is.EqualTo(TransactionType.Income));
-				Assert.That(model.TransactionTypes[1], Is.EqualTo(TransactionType.Expense));
+				AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
 			});
 		}
 
@@ -748,24 +769,24 @@
 				Reference = "Test Transaction",
 				TransactionType = TransactionType.Expense
 			};
-			var dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
 
 			this.controller.ModelState.AddModelError(nameof(inputModel.Amount), "Amount is invalid.");
 
 			//Act
-			var result = (ViewResult)await this.controller.EditTransaction(transactionId, inputModel);
+			var viewResult = (ViewResult)await this.controller.EditTransaction(transactionId, inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(result, Is.Not.Null);
+				Assert.That(viewResult, Is.Not.Null);
 
-				CheckModelStateErrors(result.ViewData.ModelState, nameof(inputModel.Amount), "Amount is invalid.");
+				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Amount), "Amount is invalid.");
 
-				var model = result.Model as TransactionFormViewModel;
-				Assert.That(model, Is.Not.Null);
-				CheckTransactionFormModel(model!, dto);
-				this.CheckUserAccountsAndCategories(model!);
+				TransactionFormViewModel viewModel = viewResult.Model as TransactionFormViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
+				AssertSamePropertiesValuesAreEqual(viewModel, expAccountsAndCategories);
 			});
 		}
 
@@ -912,9 +933,9 @@
 				Assert.That(result.ActionName, Is.EqualTo("TransactionDetails"));
 
 				Assert.That(result.RouteValues, Is.Not.Null);
-				CheckRouteValues(result.RouteValues!, "id", transactionId);
+				AssertRouteValueIsEqual(result.RouteValues!, "id", transactionId);
 
-				CheckTempDataMessage(this.controller.TempData, "Your transaction was successfully edited!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, "Your transaction was successfully edited!");
 			});
 		}
 
@@ -968,75 +989,10 @@
 				Assert.That(result.ActionName, Is.EqualTo("TransactionDetails"));
 
 				Assert.That(result.RouteValues, Is.Not.Null);
-				CheckRouteValues(result.RouteValues!, "id", transactionId);
+				AssertRouteValueIsEqual(result.RouteValues!, "id", transactionId);
+				
+				AssertTempDataMessageIsEqual(this.controller.TempData, ResponseMessages.AdminEditedUserTransaction);
 			});
-
-			CheckTempDataMessage(this.controller.TempData, ResponseMessages.AdminEditedUserTransaction);
-		}
-
-		private void CheckUserTransactionsViewModel(UserTransactionsViewModel model)
-		{
-			Assert.That(model.UserId, Is.EqualTo(this.userId));
-
-			Assert.That(model.Transactions.Count(),
-				Is.EqualTo(expTransactionsDto.Transactions.Count()));
-
-			Assert.That(model.Pagination.TotalElements,
-				Is.EqualTo(expTransactionsDto.TotalTransactionsCount));
-
-			for (int i = 0; i < expTransactionsDto.Transactions.Count(); i++)
-			{
-				Assert.That(model.Transactions.ElementAt(i).Amount,
-					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).Amount));
-				Assert.That(model.Transactions.ElementAt(i).Reference,
-					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).Reference));
-				Assert.That(model.Transactions.ElementAt(i).TransactionType,
-					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).TransactionType));
-				Assert.That(model.Transactions.ElementAt(i).AccountCurrencyName,
-					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).AccountCurrencyName));
-				Assert.That(model.Transactions.ElementAt(i).Id,
-					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).Id));
-				Assert.That(model.Transactions.ElementAt(i).CategoryName,
-					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).CategoryName));
-				Assert.That(model.Transactions.ElementAt(i).CreatedOn,
-					Is.EqualTo(expTransactionsDto.Transactions.ElementAt(i).CreatedOn));
-			}
-		}
-
-		private void CheckUserAccountsAndCategories(TransactionFormViewModel model)
-		{
-			Assert.That(model.OwnerCategories.Count(),
-				Is.EqualTo(expAccountsAndCategories.OwnerCategories.Count()));
-
-			for (int i = 0; i < expAccountsAndCategories.OwnerCategories.Count(); i++)
-			{
-				Assert.That(model.OwnerCategories.ElementAt(i).Id,
-					Is.EqualTo(expAccountsAndCategories.OwnerCategories.ElementAt(i).Id));
-				Assert.That(model.OwnerCategories.ElementAt(i).Name,
-					Is.EqualTo(expAccountsAndCategories.OwnerCategories.ElementAt(i).Name));
-			}
-
-			Assert.That(model.OwnerAccounts.Count(),
-				Is.EqualTo(expAccountsAndCategories.OwnerAccounts.Count()));
-
-			for (int i = 0; i < expAccountsAndCategories.OwnerAccounts.Count(); i++)
-			{
-				Assert.That(model.OwnerAccounts.ElementAt(i).Id,
-					Is.EqualTo(expAccountsAndCategories.OwnerAccounts.ElementAt(i).Id));
-				Assert.That(model.OwnerAccounts.ElementAt(i).Name,
-					Is.EqualTo(expAccountsAndCategories.OwnerAccounts.ElementAt(i).Name));
-			}
-		}
-
-		private static void CheckTransactionFormModel(TransactionFormViewModel model, CreateEditTransactionDTO inputModel)
-		{
-			Assert.That(model.Amount, Is.EqualTo(inputModel.Amount));
-			Assert.That(model.TransactionType, Is.EqualTo(inputModel.TransactionType));
-			Assert.That(model.Reference, Is.EqualTo(inputModel.Reference));
-			Assert.That(model.OwnerId, Is.EqualTo(inputModel.OwnerId));
-			Assert.That(model.CreatedOn, Is.EqualTo(inputModel.CreatedOn));
-			Assert.That(model.AccountId, Is.EqualTo(inputModel.AccountId));
-			Assert.That(model.CategoryId, Is.EqualTo(inputModel.CategoryId));
 		}
 	}
 }

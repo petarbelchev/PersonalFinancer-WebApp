@@ -8,7 +8,6 @@
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
-	using System.Reflection;
 	using static PersonalFinancer.Common.Constants.CategoryConstants;
 
 	[TestFixture]
@@ -62,7 +61,7 @@
 			//Assert
 			Assert.Multiple(async () =>
 			{
-				this.AssertSamePropertiesValuesAreEqual(newAccount, inputModel);
+				AssertSamePropertiesValuesAreEqual(newAccount, inputModel);
 
 				Assert.That(await this.accountsRepo.All().CountAsync(), Is.EqualTo(accountsCountBefore + 1));
 				Assert.That(newAccount.Transactions, Has.Count.EqualTo(1));
@@ -99,7 +98,7 @@
 			//Assert
 			Assert.Multiple(async () =>
 			{
-				this.AssertSamePropertiesValuesAreEqual(newAccount, newAccountModel);
+				AssertSamePropertiesValuesAreEqual(newAccount, newAccountModel);
 
 				Assert.That(await this.accountsRepo.All().CountAsync(), Is.EqualTo(accountsCountBefore + 1));
 				Assert.That(newAccount.Transactions.Any(), Is.False);
@@ -200,7 +199,7 @@
 					Assert.That(account.Balance, Is.EqualTo(balanceBefore - transaction.Amount));
 				}
 
-				this.AssertSamePropertiesValuesAreEqual(transaction, dto);
+				AssertSamePropertiesValuesAreEqual(transaction, dto);
 			});
 		}
 
@@ -478,7 +477,7 @@
 			await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel);
 
 			//Assert
-			this.AssertSamePropertiesValuesAreEqual(account, inputModel);
+			AssertSamePropertiesValuesAreEqual(account, inputModel);
 		}
 
 		[Test]
@@ -499,7 +498,7 @@
 			await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel);
 
 			//Assert
-			this.AssertSamePropertiesValuesAreEqual(account, inputModel);
+			AssertSamePropertiesValuesAreEqual(account, inputModel);
 		}
 
 		[Test]
@@ -520,7 +519,7 @@
 			await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel);
 
 			//Assert
-			this.AssertSamePropertiesValuesAreEqual(account, inputModel);
+			AssertSamePropertiesValuesAreEqual(account, inputModel);
 		}
 
 		[Test]
@@ -549,7 +548,7 @@
 				Assert.That(initialTransaction.Amount, Is.EqualTo(initialTransactionAmountBefore + 100));
 				Assert.That(initialTransaction.TransactionType, Is.EqualTo(TransactionType.Income));
 
-				this.AssertSamePropertiesValuesAreEqual(account, inputModel);
+				AssertSamePropertiesValuesAreEqual(account, inputModel);
 			});
 		}
 
@@ -579,7 +578,7 @@
 				Assert.That(initialTransaction.Amount, Is.EqualTo(initialTransactionAmountBefore - 1000));
 				Assert.That(initialTransaction.TransactionType, Is.EqualTo(TransactionType.Expense));
 
-				this.AssertSamePropertiesValuesAreEqual(account, inputModel);
+				AssertSamePropertiesValuesAreEqual(account, inputModel);
 			});
 		}
 
@@ -614,7 +613,7 @@
 				Assert.That(initialBalTransaction.TransactionType, Is.EqualTo(TransactionType.Income));
 
 				Assert.That(account.Balance, Is.EqualTo(100));
-				this.AssertSamePropertiesValuesAreEqual(account, inputModel);
+				AssertSamePropertiesValuesAreEqual(account, inputModel);
 			});
 		}
 
@@ -696,7 +695,7 @@
 			//Assert
 			Assert.Multiple(() =>
 			{
-				this.AssertSamePropertiesValuesAreEqual(transaction, dto);
+				AssertSamePropertiesValuesAreEqual(transaction, dto);
 
 				Assert.That(account.Balance,
 					Is.EqualTo(balanceBefore + (transaction.Amount * 2)));
@@ -750,7 +749,7 @@
 			{
 				Assert.That(account.Balance, Is.EqualTo(balanceBefore));
 
-				this.AssertSamePropertiesValuesAreEqual(account, dto);
+				AssertSamePropertiesValuesAreEqual(account, dto);
 			});
 		}
 

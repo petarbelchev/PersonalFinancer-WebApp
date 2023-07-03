@@ -4,7 +4,6 @@
 	using MongoDB.Driver;
 	using MongoDB.Driver.Linq;
 	using Moq;
-	using Newtonsoft.Json;
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models;
@@ -12,17 +11,16 @@
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Tests.Mocks;
-	using System.Reflection;
 
 	[TestFixture]
-	internal class MessagesServiceTests
+	internal class MessagesServiceTests : UnitTestsBase
 	{
-		private string AdminId = Guid.NewGuid().ToString();
-		private string AdminName = "Admin Name";
-		private string FirstUserId = Guid.NewGuid().ToString();
-		private string FirstUserName = "First User Name";
-		private string SecondUserId = Guid.NewGuid().ToString();
-		private string SecondUserName = "Second User Name";
+		private readonly string AdminId = Guid.NewGuid().ToString();
+		private readonly string AdminName = "Admin Name";
+		private readonly string FirstUserId = Guid.NewGuid().ToString();
+		private readonly string FirstUserName = "First User Name";
+		private readonly string SecondUserId = Guid.NewGuid().ToString();
+		private readonly string SecondUserName = "Second User Name";
 		private ICollection<Message> fakeCollection;
 
 		private Mock<UpdateResult> updateResultMock;
@@ -44,7 +42,7 @@
 		public async Task GelAllAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
-			var expected = this.fakeCollection
+			MessageOutputDTO[] expected = this.fakeCollection
 				.Select(m => new MessageOutputDTO
 				{
 					Id = m.Id,
@@ -69,7 +67,7 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(actual.Count(), Is.EqualTo(expected.Length));
-				this.AssertAreEqualAsJson(actual, expected);
+				AssertAreEqualAsJson(actual, expected);
 			});
 		}
 
@@ -77,7 +75,7 @@
 		public async Task GetUserMessagesAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
-			var expected = this.fakeCollection
+			MessageOutputDTO[] expected = this.fakeCollection
 				.Where(m => m.AuthorId == this.FirstUserId)
 				.Select(m => new MessageOutputDTO
 				{
@@ -106,7 +104,7 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(actual.Count(), Is.EqualTo(expected.Length));
-				this.AssertAreEqualAsJson(actual, expected);
+				AssertAreEqualAsJson(actual, expected);
 			});
 		}
 
@@ -118,7 +116,7 @@
 			bool isUserAdmin = false;
 			string userId = this.FirstUserId;
 
-			var expect = this.fakeCollection
+			MessageDetailsDTO expect = this.fakeCollection
 				.Where(m => m.Id == messageId && (isUserAdmin || m.AuthorId == userId))
 				.Select(m => new MessageDetailsDTO
 				{
@@ -159,7 +157,7 @@
 			MessageDetailsDTO actual = await this.messagesService.GetMessageAsync(messageId, userId, isUserAdmin);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expect);
+			AssertAreEqualAsJson(actual, expect);
 		}
 
 		[Test]
@@ -170,7 +168,7 @@
 			bool isUserAdmin = true;
 			string userId = this.AdminId;
 
-			var expect = this.fakeCollection
+			MessageDetailsDTO expect = this.fakeCollection
 				.Where(m => m.Id == messageId && (isUserAdmin || m.AuthorId == userId))
 				.Select(m => new MessageDetailsDTO
 				{
@@ -211,7 +209,7 @@
 			MessageDetailsDTO actual = await this.messagesService.GetMessageAsync(messageId, userId, isUserAdmin);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expect);
+			AssertAreEqualAsJson(actual, expect);
 		}
 
 		[Test]
@@ -286,7 +284,7 @@
 			{
 				Assert.That(actualNewMessageId, Is.EqualTo(expectedNewMessageId));
 				Assert.That(this.fakeCollection, Has.Count.EqualTo(messagesCountBefore + 1));
-				this.AssertSamePropertiesValuesAreEqual(actualNewMessage, inputModel);
+				AssertSamePropertiesValuesAreEqual(actualNewMessage, inputModel);
 			});
 		}
 
@@ -409,7 +407,7 @@
 			await this.messagesService.RemoveAsync(message.Id, message.AuthorId, isUserAdmin: false);
 
 			//Assert
-			Assert.That(this.fakeCollection.Count, Is.EqualTo(messagesBefore - 1));
+			Assert.That(this.fakeCollection, Has.Count.EqualTo(messagesBefore - 1));
 			Assert.That(this.fakeCollection.FirstOrDefault(m => m.Id == "1"), Is.Null);
 		}
 
@@ -439,7 +437,7 @@
 			await this.messagesService.RemoveAsync(message.Id, adminId, isUserAdmin: true);
 
 			//Assert
-			Assert.That(this.fakeCollection.Count, Is.EqualTo(messagesBefore - 1));
+			Assert.That(this.fakeCollection, Has.Count.EqualTo(messagesBefore - 1));
 			Assert.That(this.fakeCollection.FirstOrDefault(m => m.Id == "1"), Is.Null);
 		}
 
@@ -460,52 +458,6 @@
 				  .RemoveAsync(message.Id, notAuthorId, isUserAdmin: false),
 			Throws.TypeOf<ArgumentException>().With.Message
 				  .EqualTo(ExceptionMessages.UnauthorizedUser));
-		}
-
-		private void AssertAreEqualAsJson(object actual, object expected)
-		{
-			string actualAsJson = JsonConvert.SerializeObject(actual, Formatting.Indented);
-			string expectedAsJson = JsonConvert.SerializeObject(expected, Formatting.Indented);
-
-			Assert.That(actualAsJson, Is.EqualTo(expectedAsJson));
-		}
-
-		private void AssertSamePropertiesValuesAreEqual(object actual, object expected)
-		{
-			PropertyInfo[] propsToCompare = expected.GetType().GetProperties();
-
-			Assert.Multiple(() =>
-			{
-				foreach (PropertyInfo propToCompare in propsToCompare)
-				{
-					PropertyInfo? actualProp = actual
-						.GetType()
-						.GetProperty(propToCompare.Name, propToCompare.PropertyType);
-
-					if (actualProp == null)
-						continue;
-
-					object? expectedValue = propToCompare.GetValue(expected);
-					object? actualValue = actualProp.GetValue(actual);
-
-					if (actualProp.PropertyType == typeof(DateTime))
-					{
-						if (expectedValue == null)
-							throw new InvalidOperationException($"{propToCompare.PropertyType} cannot be null.");
-
-						if (actualValue == null)
-							throw new InvalidOperationException($"{actualProp.PropertyType} cannot be null.");
-
-						var expectedDateTime = (DateTime)expectedValue;
-						expectedValue = expectedDateTime.ToUniversalTime();
-
-						var actualDateTime = (DateTime)actualValue;
-						actualValue = actualDateTime.ToUniversalTime();
-					}
-
-					Assert.That(actualValue, Is.EqualTo(expectedValue));
-				}
-			});
 		}
 
 		private ICollection<Message> SeedFakeCollection()

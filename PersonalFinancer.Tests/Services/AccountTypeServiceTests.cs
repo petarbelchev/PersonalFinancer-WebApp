@@ -64,7 +64,7 @@
             {
                 Assert.That(countAfter, Is.EqualTo(countBefore));
 
-                this.AssertSamePropertiesValuesAreEqual(result, deletedAccType);
+                AssertSamePropertiesValuesAreEqual(result, deletedAccType);
             });
         }
 

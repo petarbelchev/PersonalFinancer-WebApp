@@ -40,12 +40,7 @@
 				</div>
 				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
 					<label asp-for="@Model.TransactionType" class="form-label"></label>
-					<select asp-for="@Model.TransactionType" class="form-select">
-						@foreach (TransactionType type in Model.TransactionTypes)
-						{
-							<option value="@type">@type</option>
-						}
-					</select>
+					<select asp-for="@Model.TransactionType" class="form-select" asp-items="@Html.GetEnumSelectList<TransactionType>()"></select>
 				</div>
 				<div class="form-floating formField">
 					<input type="text" asp-for="@Model.Reference" class="form-control form-control-lg" placeholder=".form-control-lg" />

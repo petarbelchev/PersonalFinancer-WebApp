@@ -63,7 +63,7 @@
 			TransactionsDTO actual = await this.accountsInfoService.GetAccountTransactionsAsync(dto);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -100,7 +100,7 @@
 				this.Account1_User1_WithTransactions.Id, startDate, endDate, this.User1.Id, isUserAdmin: false);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -137,7 +137,7 @@
 			AccountsCardsDTO actual = await this.accountsInfoService.GetAccountsCardsDataAsync(1);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -166,7 +166,7 @@
 				await this.accountsInfoService.GetCashFlowByCurrenciesAsync();
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -216,7 +216,7 @@
 				.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User1.Id, isUserAdmin: false);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -230,7 +230,7 @@
 				.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User2.Id, isUserAdmin: true);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -270,7 +270,7 @@
 				.GetTransactionFormDataAsync(this.Transaction1_Expense_Account1_User1.Id, this.User1.Id, isUserAdmin: false);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -331,7 +331,7 @@
 				.GetTransactionDetailsAsync(this.InitialTransaction_Income_Account1_User1.Id, this.User1.Id, isUserAdmin: false);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -348,7 +348,7 @@
 				.GetTransactionDetailsAsync(this.InitialTransaction_Income_Account1_User1.Id, this.User2.Id, isUserAdmin: true);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -388,7 +388,7 @@
 				.GetAccountShortDetailsAsync(this.Account1_User1_WithTransactions.Id);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
@@ -416,7 +416,7 @@
 			IEnumerable<AccountCardDTO> actual = await this.accountsInfoService.GetUserAccountsCardsAsync(this.User1.Id);
 
 			//Assert
-			this.AssertAreEqualAsJson(actual, expected);
+			AssertAreEqualAsJson(actual, expected);
 		}
 	}
 }

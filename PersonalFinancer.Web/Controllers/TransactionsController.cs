@@ -79,7 +79,6 @@
 		{
 			var viewModel = new TransactionFormViewModel() { OwnerId = this.User.IdToGuid() };
 			await this.PrepareAccountsAndCategoriesAsync(viewModel);
-			viewModel.CreatedOn = DateTime.Now;
 
 			return this.View(viewModel);
 		}

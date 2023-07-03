@@ -62,7 +62,7 @@
             {
                 Assert.That(countAfter, Is.EqualTo(countBefore));
 
-                this.AssertSamePropertiesValuesAreEqual(result, category);
+                AssertSamePropertiesValuesAreEqual(result, category);
             });
         }
 

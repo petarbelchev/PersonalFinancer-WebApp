@@ -1,15 +1,18 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models.Enums;
-    using PersonalFinancer.Services.Shared.Models;
-    using PersonalFinancer.Web.ModelBinders;
-    using System.ComponentModel.DataAnnotations;
-    using static PersonalFinancer.Common.Constants.TransactionConstants;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Data.Models.Enums;
+	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Web.ModelBinders;
+	using System.ComponentModel.DataAnnotations;
+	using static PersonalFinancer.Common.Constants.TransactionConstants;
 
-    public class TransactionFormViewModel
+	public class TransactionFormViewModel
 	{
+		public TransactionFormViewModel() 
+			=> this.CreatedOn = DateTime.Now;
+
 		[Required]
 		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		[Range(TransactionMinValue, TransactionMaxValue,
@@ -47,11 +50,5 @@
 
 		public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
 			= new List<AccountDropdownDTO>();
-
-		public TransactionType[] TransactionTypes { get; set; } = new TransactionType[]
-		{
-			TransactionType.Income,
-			TransactionType.Expense
-		};
 	}
 }

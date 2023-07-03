@@ -1,17 +1,15 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
 	using AutoMapper;
-	using Newtonsoft.Json;
 	using NUnit.Framework;
 	using PersonalFinancer.Data;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Tests.Mocks;
-	using System.Reflection;
 	using static PersonalFinancer.Common.Constants.CategoryConstants;
 
 	[TestFixture]
-	internal abstract class ServicesUnitTestsBase
+	internal abstract class ServicesUnitTestsBase : UnitTestsBase
 	{
 		protected PersonalFinancerDbContext dbContextMock;
 		protected IMapper mapperMock;
@@ -27,52 +25,6 @@
 
 		[TearDown]
 		protected async Task TearDownBase() => await this.dbContextMock.DisposeAsync();
-
-		protected void AssertAreEqualAsJson(object actual, object expected)
-		{
-			string actualAsJson = JsonConvert.SerializeObject(actual, Formatting.Indented);
-			string expectedAsJson = JsonConvert.SerializeObject(expected, Formatting.Indented);
-
-			Assert.That(actualAsJson, Is.EqualTo(expectedAsJson));
-		}
-
-		protected void AssertSamePropertiesValuesAreEqual(object actual, object expected)
-		{
-			PropertyInfo[] propsToCompare = expected.GetType().GetProperties();
-
-			Assert.Multiple(() =>
-			{
-				foreach (PropertyInfo propToCompare in propsToCompare)
-				{
-					PropertyInfo? actualProp = actual
-						.GetType()
-						.GetProperty(propToCompare.Name, propToCompare.PropertyType);
-
-					if (actualProp == null)
-						continue;
-
-					object? expectedValue = propToCompare.GetValue(expected);
-					object? actualValue = actualProp.GetValue(actual);
-
-					if (actualProp.PropertyType == typeof(DateTime))
-					{
-						if (expectedValue == null)
-							throw new InvalidOperationException($"{propToCompare.PropertyType} cannot be null.");
-
-						if (actualValue == null)
-							throw new InvalidOperationException($"{actualProp.PropertyType} cannot be null.");
-
-						var expectedDateTime = (DateTime)expectedValue;
-						expectedValue = expectedDateTime.ToUniversalTime();
-
-						var actualDateTime = (DateTime)actualValue;
-						actualValue = actualDateTime.ToUniversalTime();
-					}
-
-					Assert.That(actualValue, Is.EqualTo(expectedValue));
-				}
-			});
-		}
 
 		protected ApplicationUser User1 { get; private set; } = null!;
 		protected ApplicationUser User2 { get; private set; } = null!;

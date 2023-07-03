@@ -63,7 +63,7 @@
                 Assert.That(countAfter, Is.EqualTo(countBefore));
                 Assert.That(result, Is.Not.Null);
 
-                this.AssertSamePropertiesValuesAreEqual(result, deletedCurrency);
+                AssertSamePropertiesValuesAreEqual(result, deletedCurrency);
             });
         }
 
