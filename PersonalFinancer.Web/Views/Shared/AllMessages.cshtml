@@ -22,7 +22,15 @@
 					@foreach (var message in Model)
 					{
 						<tr role="button" onclick="location.href='@Url.Action("MessageDetails", "Messages", new { id = message.Id })'">
-							<td><img src="/icons/icons8-message-64.png" style="max-width: 45px;" /><span>	@message.Subject</span></td>
+							<td messageId="@message.Id">
+								<img src="/icons/icons8-message-64.png" style="max-width: 45px;" />
+								<span>	@message.Subject</span>
+
+								@if (!message.IsSeen)
+								{
+									<span class="badge text-bg-danger">New messages</span>
+								}
+							</td>
 							<td><p>@message.CreatedOn.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</p></td>
 						</tr>
 					}
@@ -34,4 +42,8 @@
 else
 {
 	<p class="display-6 fs-4 text-center">You don't have any messages.</p>
+}
+
+@section Scripts {
+	<script src="~/js/hubs/allMessagesHub.js"></script>
 }

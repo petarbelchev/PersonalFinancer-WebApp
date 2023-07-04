@@ -31,5 +31,8 @@
         /// <returns></returns>
         public static string GetUserName(this ClaimsPrincipal user)
             => user.FindFirstValue(ClaimTypes.Name);
+
+        public static bool IsAuthenticated(this ClaimsPrincipal user)
+            => user.Identity?.IsAuthenticated ?? false;
     }
 }

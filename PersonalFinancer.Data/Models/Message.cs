@@ -4,13 +4,23 @@
 
     public class Message : BaseMongoDocument
     {
-        public string AuthorName { get; set; } = null!;
+		public Message()
+		{
+            this.CreatedOn = DateTime.UtcNow;
+			this.IsSeenByAuthor = true;
+		}
+
+		public string AuthorName { get; set; } = null!;
 
         public DateTime CreatedOn { get; set; }
 
         public string Subject { get; set; } = null!;
 
         public string Content { get; set; } = null!;
+
+        public bool IsSeenByAuthor { get; set; }
+
+        public bool IsSeenByAdmin { get; set; }
 
         public ICollection<Reply> Replies { get; set; }
            = new List<Reply>();

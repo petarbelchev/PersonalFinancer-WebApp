@@ -2,17 +2,21 @@
 {
     using AutoMapper;
     using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Services.Messages;
+	using Microsoft.AspNetCore.SignalR;
+	using PersonalFinancer.Services.Messages;
     using PersonalFinancer.Services.User;
+	using PersonalFinancer.Web.Hubs;
 
-    [Area("Admin")]
+	[Area("Admin")]
     public class MessagesController : Web.Controllers.MessagesController
     {
         public MessagesController(
             IMessagesService messagesService,
             IUsersService usersService,
-            IMapper mapper)
-            : base(messagesService, usersService, mapper)
+            IMapper mapper,
+            IHubContext<AllMessagesHub> allMessagesHub,
+            IHubContext<NotificationsHub> notificationsHub)
+            : base(messagesService, usersService, mapper, allMessagesHub, notificationsHub)
         { }
     }
 }

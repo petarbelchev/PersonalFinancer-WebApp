@@ -151,6 +151,7 @@
 
 			this.CreateMap<Reply, ReplyOutputDTO>();
 			this.CreateMap<MessageInputDTO, Message>();
+			this.CreateMap<Message, MessageOutputDTO>();
 			this.CreateMap<ReplyInputDTO, Reply>();
         }
     }

@@ -9,6 +9,7 @@
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Services.User.Models;
+	using System.Collections.Generic;
 	using static PersonalFinancer.Common.Constants.CategoryConstants;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
@@ -187,6 +188,12 @@
 				.ProjectTo<UserDropdownDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
+
+		public async Task<IEnumerable<string>> GetAdminsIds() 
+			=> await this.usersRepo.All()
+				.Where(u => u.IsAdmin)
+				.Select(u => u.Id.ToString().ToLower()) // .ToString().ToLower() because of SignalR Hubs
+				.ToListAsync();
 
 		/// <summary>
 		/// Throws Invalid Operation Exception if the user does not exist.

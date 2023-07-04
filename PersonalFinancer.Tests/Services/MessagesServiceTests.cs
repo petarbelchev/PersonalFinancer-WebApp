@@ -314,13 +314,14 @@
 				.ReturnsAsync(this.updateResultMock.Object);
 
 			//Act
-			UpdateResult result = await this.messagesService.AddReplyAsync(inputModel);
+			ReplyOutputDTO? actual = await this.messagesService.AddReplyAsync(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(result, Is.Not.Null);
-				Assert.That(result.IsAcknowledged, Is.True);
+				Assert.That(actual, Is.Not.Null);
+				Assert.That(actual!.AuthorName, Is.EqualTo(inputModel.AuthorName));
+				Assert.That(actual.Content, Is.EqualTo(inputModel.Content));
 			});
 		}
 
@@ -350,13 +351,14 @@
 				.ReturnsAsync(this.updateResultMock.Object);
 
 			//Act
-			UpdateResult result = await this.messagesService.AddReplyAsync(inputModel);
+			ReplyOutputDTO? actual = await this.messagesService.AddReplyAsync(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(result, Is.Not.Null);
-				Assert.That(result.IsAcknowledged, Is.True);
+				Assert.That(actual, Is.Not.Null);
+				Assert.That(actual!.AuthorName, Is.EqualTo(inputModel.AuthorName));
+				Assert.That(actual.Content, Is.EqualTo(inputModel.Content));
 			});
 		}
 

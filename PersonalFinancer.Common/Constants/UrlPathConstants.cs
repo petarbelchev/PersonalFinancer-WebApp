@@ -10,6 +10,7 @@
 		public const string ApiAccountsCashFlowEndpoint = "/api/accounts/cashflow";
 		public const string ApiAccountTransactionsEndpoint = "/api/accounts/transactions/";
 		public const string ApiUsersEndpoint = "/api/users/";
+		public const string ApiMessagesEndpoint = "/api/messages/";
 
 		public const string TransactionDetailsPath = "/Transactions/TransactionDetails/";
 		public const string TransactionEditPath = "/Transactions/EditTransaction/";
