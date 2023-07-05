@@ -21,15 +21,16 @@
 
 		/// <summary>
 		/// Throws Argument Exception when the user is unauthorized 
-		/// and Invalid Operation Exception when adding a reply was unsuccessful.
+		/// and returns null when adding a reply was unsuccessful.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
 		Task<ReplyOutputDTO?> AddReplyAsync(ReplyInputDTO model);
 
 		Task<bool> HasUnseenMessagesByAdminAsync();
 
 		Task<bool> HasUnseenMessagesByUserAsync(string userId);
+
+		Task<bool> IsMessageSeenAsync(string messageId, bool isUserAdmin);
 
 		/// <summary>
 		/// Throws Invalid Operation Exception when the update was unsuccessful.
@@ -44,5 +45,5 @@
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
 		Task RemoveAsync(string messageId, string userId, bool isUserAdmin);
-    }
+	}
 }

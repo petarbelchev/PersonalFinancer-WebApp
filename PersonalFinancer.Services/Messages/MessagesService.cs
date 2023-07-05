@@ -92,10 +92,9 @@
 
 		/// <summary>
 		/// Throws Argument Exception when the user is unauthorized 
-		/// and Invalid Operation Exception when adding a reply was unsuccessful.
+		/// and returns null when adding a reply was unsuccessful.
 		/// </summary>
 		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<ReplyOutputDTO?> AddReplyAsync(ReplyInputDTO model)
 		{
 			if (!model.IsAuthorAdmin && !await this.messagesRepo.IsUserDocumentAuthor(model.MessageId, model.AuthorId))
@@ -119,6 +118,15 @@
 
 		public async Task<bool> HasUnseenMessagesByUserAsync(string userId)
 			=> await this.messagesRepo.AnyAsync(m => m.AuthorId == userId && !m.IsSeenByAuthor);
+
+		public async Task<bool> IsMessageSeenAsync(string messageId, bool isUserAdmin)
+		{
+			bool result = await this.messagesRepo.FindOneAsync(
+				m => m.Id == messageId, 
+				m => isUserAdmin ? m.IsSeenByAuthor : m.IsSeenByAdmin);
+
+			return result;
+		}
 
 		/// <summary>
 		/// Throws Invalid Operation Exception when the update was unsuccessful.

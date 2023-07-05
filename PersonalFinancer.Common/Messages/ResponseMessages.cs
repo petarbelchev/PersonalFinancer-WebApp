@@ -23,5 +23,9 @@
         public const string EditedAccount = "Your account was successfully edited!";
 
         public const string AdminEditedUserAccount = "You successfully edited user's account!";
-    }
+
+        public const string MessageSuccessfullySent = "The message was successfully sent.";
+
+        public const string NotificationSuccessfullySent = "The notification was successfully sent.";
+	}
 }

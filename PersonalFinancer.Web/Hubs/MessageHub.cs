@@ -7,12 +7,12 @@
 	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Web.Extensions;
 
-	public class MessagesHub : Hub
+	public class MessageHub : Hub
 	{
 		private readonly IUsersService usersService;
 		private readonly IMessagesService messagesService;
 
-		public MessagesHub(
+		public MessageHub(
 			IUsersService usersService,
 			IMessagesService messagesService)
 		{
@@ -26,14 +26,10 @@
 			await this.Groups.AddToGroupAsync(this.Context.ConnectionId, groupName);
 		}
 
-		public async Task SendMessage(string messageId, string replyContent)
+		public async Task<string> SendMessage(string messageId, string replyContent)
 		{
-			string userId = this.Context.UserIdentifier ??
-					throw new InvalidOperationException(string.Format(
-						ExceptionMessages.NotNullableProperty, nameof(this.Context.User)));
-
-			string userFullName = await this.usersService
-				.UserFullNameAsync(Guid.Parse(userId));
+			string userId = this.Context.UserIdentifier ?? throw new InvalidOperationException();
+			string userFullName = await this.usersService.UserFullNameAsync(Guid.Parse(userId));
 
 			var dto = new ReplyInputDTO
 			{
@@ -41,16 +37,27 @@
 				AuthorId = userId,
 				AuthorName = userFullName,
 				Content = replyContent,
-				IsAuthorAdmin = this.Context.User?.IsAdmin() ?? false
+				IsAuthorAdmin = this.Context.User?.IsAdmin() ?? throw new InvalidOperationException()
 			};
 
-			ReplyOutputDTO? reply = await this.messagesService.AddReplyAsync(dto);
+			ReplyOutputDTO? reply;
 
-			if (reply != null)
+			try
 			{
-				await this.Clients.Group(messageId).SendAsync("ReceiveMessage", reply);
-				await this.Clients.Group(messageId).SendAsync("MarkAsSeen");
+				reply = await this.messagesService.AddReplyAsync(dto);
 			}
+			catch (ArgumentException ex)
+			{
+				return ex.Message;
+			}
+
+			if (reply == null)
+				throw new InvalidOperationException();
+
+			await this.Clients.Group(messageId).SendAsync("ReceiveMessage", reply);
+			await this.Clients.Group(messageId).SendAsync("MarkAsSeen");
+
+			return ResponseMessages.MessageSuccessfullySent;
 		}
 	}
 }

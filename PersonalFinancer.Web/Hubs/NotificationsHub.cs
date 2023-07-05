@@ -8,21 +8,28 @@
 	public class NotificationsHub : Hub
 	{
 		private readonly IUsersService usersService;
+		private readonly IHubContext<AllMessagesHub> allMessagesHub;
 
-		public NotificationsHub(IUsersService usersService) 
-			=> this.usersService = usersService;
-
-		public async Task SendNotification(string authorId)
+		public NotificationsHub(
+			IUsersService usersService,
+			IHubContext<AllMessagesHub> allMessagesHub)
 		{
-			bool isUserAdmin = this.Context.User?.IsAdmin() ?? 
-				throw new InvalidOperationException(string.Format(
-					ExceptionMessages.NotNullableProperty, nameof(this.Context.User)));
+			this.usersService = usersService;
+			this.allMessagesHub = allMessagesHub;
+		}
+
+		public async Task<string> SendNotification(string authorId, string messageId)
+		{
+			bool isUserAdmin = this.Context.User?.IsAdmin() ?? throw new InvalidOperationException();
 
 			IEnumerable<string> ids = isUserAdmin
 				? new List<string>() { authorId }
 				: await this.usersService.GetAdminsIds();
 
 			await this.Clients.Users(ids).SendAsync("ReceiveNotification");
+			await this.allMessagesHub.Clients.Users(ids).SendAsync("ReceiveNotification", messageId);
+
+			return ResponseMessages.NotificationSuccessfullySent;
 		}
 	}
 }

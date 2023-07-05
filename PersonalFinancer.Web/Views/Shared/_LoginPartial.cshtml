@@ -10,7 +10,7 @@
 	{
 		if (this.User.IsAdmin())
 		{
-			<a class="nav-link text-light notification" asp-area="" asp-controller="Messages" asp-action="AllMessages">
+			<a class="nav-link text-light navpanMessagesBtn" asp-area="" asp-controller="Messages" asp-action="AllMessages">
 				Users Messages
 
 				@if (await this.messagesService.HasUnseenMessagesByAdminAsync())
@@ -22,7 +22,7 @@
 		else
 		{
 			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle text-light notification" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+				<a class="nav-link dropdown-toggle text-light navpanMessagesBtn" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 					Contact Us
 					
 					@if (await this.messagesService.HasUnseenMessagesByUserAsync(this.User.Id()))

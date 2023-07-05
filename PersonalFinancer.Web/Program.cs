@@ -59,7 +59,7 @@ app.UseEndpoints(endpoints =>
     endpoints.MapDefaultControllerRoute();
 });
 
-app.MapHub<MessagesHub>("/message");
+app.MapHub<MessageHub>("/message");
 app.MapHub<NotificationsHub>("/notifications");
 app.MapHub<AllMessagesHub>("/allMessages");
 

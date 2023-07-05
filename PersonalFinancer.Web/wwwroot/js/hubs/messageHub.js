@@ -1,11 +1,9 @@
 let messageHub = new signalR.HubConnectionBuilder().withUrl('/message').build();
 
-const sendReply = document.getElementById('sendReply');
-sendReply.disabled = true;
+let repliesDiv = document.getElementById('replies');
 
 messageHub.on('ReceiveMessage', (reply) => {
     let replyDiv = document.createElement('div');
-
     replyDiv.className = 'card formField shadow mb-4';
 
     replyDiv.innerHTML = `
@@ -27,7 +25,7 @@ messageHub.on('ReceiveMessage', (reply) => {
 		</div>
     `;
 
-    document.getElementById('replies').appendChild(replyDiv);
+    repliesDiv.appendChild(replyDiv);
 });
 
 messageHub.on('MarkAsSeen', async () => {
@@ -43,26 +41,34 @@ messageHub.on('MarkAsSeen', async () => {
     }
 });
 
-messageHub
-    .start()
-    .then(() => {
-        sendReply.disabled = false;
-        messageHub.invoke('JoinGroup', params.messageId);
-    })
-    .catch((err) => console.error(err.toString()));
+let sendReplyBtn = document.getElementById('sendReply');
+sendReplyBtn.disabled = true;
 
-sendReply.addEventListener('click', (e) => {
-    let textArea = e.target.parentElement.querySelector('textarea');
-    let replyContent = textArea.value;
+let textArea = sendReplyBtn.parentElement.querySelector('textarea');
 
+sendReplyBtn.addEventListener('click', () => {
     messageHub
-        .invoke('SendMessage', params.messageId, replyContent)
-        .then(() => {
+        .invoke('SendMessage', params.messageId, textArea.value)
+        .then((response) => {
             textArea.value = '';
-            notificationsHub.invoke('SendNotification', params.authorId);
+            console.log(response);
+
+            notificationsHub
+                .invoke('SendNotification', params.authorId, params.messageId)
+                .then((response) => {
+                    console.log(response);
+                });
         })
         .catch(() => {
-            alert("Oops... Something goes wrong!");
+            alert('Oops... Something goes wrong!');
             location.reload();
         });
 });
+
+messageHub
+    .start()
+    .then(() => {
+        sendReplyBtn.disabled = false;
+        messageHub.invoke('JoinGroup', params.messageId);
+    })
+    .catch((err) => console.error(err.toString()));

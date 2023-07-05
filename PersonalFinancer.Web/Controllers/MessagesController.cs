@@ -79,9 +79,13 @@
 
         [HttpPost]
         public async Task<IActionResult> Delete([Required] string id)
-        {
-            try
-            {
+		{
+			IEnumerable<string> ids = this.User.IsAdmin()
+				? new List<string> { await this.messagesService.GetMessageAuthorIdAsync(id) }
+				: await this.usersService.GetAdminsIds();
+
+			try
+			{
                 await this.messagesService.RemoveAsync(id, this.User.Id(), this.User.IsAdmin());
             }
             catch (ArgumentException)
@@ -93,13 +97,8 @@
                 return this.BadRequest();
             }
 
-            // TODO: When admin delete user message...
-            IEnumerable<string> adminsIds = /*this.User.IsAdmin()
-                ? new List<string> { await this.messagesService.GetMessageAuthorIdAsync(id) }
-                : */await this.usersService.GetAdminsIds();
-
 			await this.allMessagesHub.Clients
-				.Users(adminsIds)
+				.Users(ids)
 				.SendAsync("DeleteMessage", id);
 
 			return this.RedirectToAction(nameof(AllMessages));
@@ -115,43 +114,6 @@
                 MessageDetailsViewModel viewModel = this.mapper.Map<MessageDetailsViewModel>(message);
 
                 return this.View(viewModel);
-            }
-            catch (InvalidOperationException)
-            {
-                return this.BadRequest();
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> MessageDetails(ReplyInputModel inputModel)
-        {
-            try
-            {
-                if (!this.ModelState.IsValid)
-                {
-                    MessageDetailsDTO message =
-                        await this.messagesService.GetMessageAsync(inputModel.Id, this.User.Id(), this.User.IsAdmin());
-
-                    MessageDetailsViewModel viewModel = this.mapper.Map<MessageDetailsViewModel>(message);
-                    viewModel.ReplyContent = inputModel.ReplyContent;
-
-                    return this.View(viewModel);
-                }
-
-                await this.messagesService.AddReplyAsync(new ReplyInputDTO
-                {
-                    MessageId = inputModel.Id,
-                    AuthorId = this.User.Id(),
-                    AuthorName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
-                    IsAuthorAdmin = this.User.IsAdmin(),
-                    Content = inputModel.ReplyContent
-                });
-
-                return this.RedirectToAction(nameof(MessageDetails), new { inputModel.Id });
-            }
-            catch (ArgumentException)
-            {
-                return this.Unauthorized();
             }
             catch (InvalidOperationException)
             {

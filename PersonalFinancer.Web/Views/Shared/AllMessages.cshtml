@@ -7,18 +7,19 @@
 
 <p class="display-6 text-center">@ViewData["Title"]</p>
 
-@if (Model.Any())
-{
-	<div class="row d-flex justify-content-center">
-		<div class="col-md-10 col-lg-8">
-			<table class="table table-hover">
-				<thead>
-					<tr>
-						<th scope="col">Subject</th>
-						<th scope="col">Date</th>
-					</tr>
-				</thead>
-				<tbody style="vertical-align: text-top;">
+<div class="row d-flex justify-content-center">
+	<div id="tableContainer" class="col-md-10 col-lg-8">
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th scope="col">Subject</th>
+					<th scope="col">Date</th>
+				</tr>
+			</thead>
+			<tbody style="vertical-align: text-top;">
+		
+				@if (Model.Any())
+				{
 					@foreach (var message in Model)
 					{
 						<tr role="button" onclick="location.href='@Url.Action("MessageDetails", "Messages", new { id = message.Id })'">
@@ -34,15 +35,17 @@
 							<td><p>@message.CreatedOn.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</p></td>
 						</tr>
 					}
-				</tbody>
-			</table>
-		</div>
+				}
+
+			</tbody>
+		</table>
+
+		@if (!Model.Any())
+		{
+			<p id="noMessagesNote" class="display-6 fs-4 text-center">You don't have any messages.</p>
+		}
 	</div>
-}
-else
-{
-	<p class="display-6 fs-4 text-center">You don't have any messages.</p>
-}
+</div>
 
 @section Scripts {
 	<script src="~/js/hubs/allMessagesHub.js"></script>
