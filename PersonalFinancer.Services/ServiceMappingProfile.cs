@@ -151,7 +151,11 @@
 
 			this.CreateMap<Reply, ReplyOutputDTO>();
 			this.CreateMap<MessageInputDTO, Message>();
-			this.CreateMap<Message, MessageOutputDTO>();
+
+			this.CreateMap<Message, MessageOutputDTO>()
+				.ForMember(dest => dest.IsSeen, opt => opt
+					.MapFrom(src => src.IsSeenByAuthor));
+			
 			this.CreateMap<ReplyInputDTO, Reply>();
         }
     }

@@ -47,7 +47,8 @@
 				{
 					Id = m.Id,
 					CreatedOn = m.CreatedOn,
-					Subject = m.Subject
+					Subject = m.Subject,
+					IsSeen = m.IsSeenByAdmin
 				})
 				.ToArray();
 
@@ -56,7 +57,8 @@
 				{
 					Id = m.Id,
 					CreatedOn = m.CreatedOn,
-					Subject = m.Subject
+					Subject = m.Subject,
+					IsSeen = m.IsSeenByAdmin
 				}))
 				.ReturnsAsync(expected);
 
@@ -81,7 +83,8 @@
 				{
 					Id = m.Id,
 					CreatedOn = m.CreatedOn,
-					Subject = m.Subject
+					Subject = m.Subject,
+					IsSeen = m.IsSeenByAuthor
 				})
 				.ToArray();
 
@@ -93,7 +96,8 @@
 					{
 						Id = m.Id,
 						CreatedOn = m.CreatedOn,
-						Subject = m.Subject
+						Subject = m.Subject,
+						IsSeen = m.IsSeenByAuthor
 					}))
 				.ReturnsAsync(expected);
 
@@ -121,6 +125,7 @@
 				.Select(m => new MessageDetailsDTO
 				{
 					Id = m.Id,
+					AuthorId = m.AuthorId,
 					AuthorName = m.AuthorName,
 					Content = m.Content,
 					Subject = m.Subject,
@@ -140,6 +145,7 @@
 					m => new MessageDetailsDTO
 					{
 						Id = m.Id,
+						AuthorId = m.AuthorId,
 						AuthorName = m.AuthorName,
 						Content = m.Content,
 						Subject = m.Subject,
@@ -152,6 +158,14 @@
 						})
 					}))
 				.ReturnsAsync(expect);
+
+			this.updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
+
+			this.repoMock.Setup(x => x
+				.UpdateOneAsync(x =>
+					x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
+					It.IsAny<UpdateDefinition<Message>>()))
+				.ReturnsAsync(this.updateResultMock.Object);
 
 			//Act
 			MessageDetailsDTO actual = await this.messagesService.GetMessageAsync(messageId, userId, isUserAdmin);
@@ -173,6 +187,7 @@
 				.Select(m => new MessageDetailsDTO
 				{
 					Id = m.Id,
+					AuthorId = m.AuthorId,
 					AuthorName = m.AuthorName,
 					Content = m.Content,
 					Subject = m.Subject,
@@ -192,6 +207,7 @@
 					m => new MessageDetailsDTO
 					{
 						Id = m.Id,
+						AuthorId = m.AuthorId,
 						AuthorName = m.AuthorName,
 						Content = m.Content,
 						Subject = m.Subject,
@@ -204,6 +220,14 @@
 						})
 					}))
 				.ReturnsAsync(expect);
+
+			this.updateResultMock.Setup(x => x.IsAcknowledged).Returns(true);
+
+			this.repoMock.Setup(x => x
+				.UpdateOneAsync(x =>
+					x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
+					It.IsAny<UpdateDefinition<Message>>()))
+				.ReturnsAsync(this.updateResultMock.Object);
 
 			//Act
 			MessageDetailsDTO actual = await this.messagesService.GetMessageAsync(messageId, userId, isUserAdmin);
@@ -226,6 +250,7 @@
 					m => new MessageDetailsDTO
 					{
 						Id = m.Id,
+						AuthorId = m.AuthorId,
 						AuthorName = m.AuthorName,
 						Content = m.Content,
 						Subject = m.Subject,
@@ -274,17 +299,19 @@
 			int messagesCountBefore = this.fakeCollection.Count;
 
 			//Act
-			string actualNewMessageId = await this.messagesService.CreateAsync(inputModel);
+			MessageOutputDTO actualDTO = await this.messagesService.CreateAsync(inputModel);
 
 			//Arrange
-			Message actualNewMessage = this.fakeCollection.First(m => m.Id == actualNewMessageId);
+			Message actualNewMessage = this.fakeCollection.First(m => m.Id == actualDTO.Id);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(actualNewMessageId, Is.EqualTo(expectedNewMessageId));
 				Assert.That(this.fakeCollection, Has.Count.EqualTo(messagesCountBefore + 1));
-				AssertSamePropertiesValuesAreEqual(actualNewMessage, inputModel);
+				Assert.That(actualDTO.IsSeen, Is.True);
+				Assert.That(actualDTO.IsSeen, Is.EqualTo(actualNewMessage.IsSeenByAuthor));
+				AssertSamePropertiesValuesAreEqual(actualDTO, inputModel);
+				AssertSamePropertiesValuesAreEqual(actualNewMessage, actualDTO);
 			});
 		}
 
