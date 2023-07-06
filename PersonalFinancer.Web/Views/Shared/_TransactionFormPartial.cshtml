@@ -1,0 +1,62 @@
+﻿@using PersonalFinancer.Data.Models.Enums;
+@using PersonalFinancer.Web.Models.Account;
+@using static PersonalFinancer.Common.Constants.UrlPathConstants;
+@model TransactionFormViewModel
+
+<div class="row justify-content-center">
+	<div class="col-11 col-sm-8 col-md-6 col-xl-5">
+		<section>
+			<form method="post">
+				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+				<div class="form-floating formField">
+					<input type="number" asp-for="@Model.Amount" class="form-control form-control-lg" placeholder=".form-control-lg" />
+					<label asp-for="@Model.Amount" class="form-label"></label>
+					<span asp-validation-for="@Model.Amount" class="text-danger"></span>
+				</div>
+				<div class="form-floating formField">
+					<input value="@Model.CreatedOn.ToString("yyyy-MM-ddTHH:mm")" name="@nameof(Model.CreatedOn)" type="datetime-local" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+					<label asp-for="@Model.CreatedOn" class="form-label"></label>
+					<span asp-validation-for="@Model.CreatedOn" class="text-danger"></span>
+				</div>
+				<div class="newElemDiv dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField" ownerId="@Model.OwnerId" apiUrl="@ApiCategoriesEndpoint">
+					<label asp-for="@Model.CategoryId" class="form-label"></label>
+					<select asp-for="@Model.CategoryId" class="form-select">
+						@foreach (var category in @Model.OwnerCategories)
+						{
+							<option value="@category.Id" id="@category.Id">@category.Name</option>
+						}
+					</select>
+					<div class="form-floating formField" style="display: none;">
+						<input class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
+						<label class="form-label">Write new Category name...</label>
+						<p class="text-danger"></p>
+					</div>
+					<a class="btn btn-secondary createBtn">Create New Category</a>
+					<a class="btn btn-danger deleteBtn">Delete This Category</a>
+				</div>
+				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
+					<label asp-for="@Model.AccountId" class="form-label"></label>
+					<select asp-for="@Model.AccountId" class="form-select">
+						@foreach (var account in @Model.OwnerAccounts)
+						{
+							<option value="@account.Id">@account.Name</option>
+						}
+					</select>
+				</div>
+				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 formField">
+					<label asp-for="@Model.TransactionType" class="form-label"></label>
+					<select asp-for="@Model.TransactionType" asp-items="@(Html.GetEnumSelectList<TransactionType>())" class="form-select"></select>
+				</div>
+				<div class="form-floating formField">
+					<input type="text" asp-for="@Model.Reference" class="form-control form-control-lg" placeholder=".form-control-lg" />
+					<label asp-for="@Model.Reference" class="form-lebel"></label>
+					<span asp-validation-for="@Model.Reference" class="text-danger"></span>
+				</div>
+				<input type="hidden" asp-for="@Model.OwnerId" />
+				<div>
+					<button type="submit" class="w-100 btn btn-lg btn-success">Create</button>
+				</div>
+			</form>
+		</section>
+	</div>
+</div>
