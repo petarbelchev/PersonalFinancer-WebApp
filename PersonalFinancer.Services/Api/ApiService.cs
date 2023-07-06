@@ -20,14 +20,10 @@
             this.mapper = mapper;
 		}
 
-        /// <summary>
-        /// Throws Argument Exception if you try to create entity with existing name.
-        /// </summary>
-        /// <exception cref="ArgumentException"></exception>
         public async Task<ApiEntityDTO> CreateEntityAsync(string name, Guid ownerId)
         {
-            T? entity = await this.repo.All().FirstOrDefaultAsync(
-                x => x.Name == name && x.OwnerId == ownerId);
+            T? entity = await this.repo.All()
+                .FirstOrDefaultAsync(x => x.Name == name && x.OwnerId == ownerId);
 
             if (entity != null)
             {
@@ -55,16 +51,10 @@
             return outputModel;
         }
 
-        /// <summary>
-        /// Throws Invalid Operation Exception when the entity does not exist
-        /// and Argument Exception when the user is not owner or administrator.
-        /// </summary>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="InvalidOperationException"></exception>
         public async Task DeleteEntityAsync(Guid entityId, Guid userId, bool isUserAdmin)
         {
-            T? entity = await this.repo.FindAsync(entityId) 
-                ?? throw new InvalidOperationException(ExceptionMessages.EntityDoesNotExist);
+            T? entity = await this.repo.FindAsync(entityId) ?? 
+                throw new InvalidOperationException(ExceptionMessages.EntityDoesNotExist);
             
             if (isUserAdmin)
                 userId = entity.OwnerId;

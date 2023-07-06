@@ -20,14 +20,11 @@
 		protected BaseApiController(IApiService<T> apiService)
 			=> this.apiService = apiService;
 
-		/// <summary>
-		/// Throws Argument Exception if you try to create entity with existing name.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
+		/// <exception cref="ArgumentException">When try to create entity with existing name.</exception>
 		protected async Task<IActionResult> CreateEntityAsync(IApiEntityInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
-				return this.BadRequest(this.GetErrors(this.ModelState.Values));
+				return this.BadRequest(GetErrors(this.ModelState.Values));
 
 			ApiEntityDTO model = await this.apiService.CreateEntityAsync(
 				inputModel.Name,
@@ -40,7 +37,7 @@
 		protected async Task<IActionResult> DeleteEntityAsync([Required] Guid id)
 		{
 			if (!this.ModelState.IsValid)
-				return this.BadRequest(this.GetErrors(this.ModelState.Values));
+				return this.BadRequest(GetErrors(this.ModelState.Values));
 
 			try
 			{
@@ -58,7 +55,7 @@
 			return this.NoContent();
 		}
 
-		private string GetErrors(ModelStateDictionary.ValueEnumerable modelStateValues)
+		private static string GetErrors(ModelStateDictionary.ValueEnumerable modelStateValues)
 		{
 			var errors = new StringBuilder();
 

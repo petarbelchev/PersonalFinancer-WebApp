@@ -29,11 +29,6 @@
 			this.mapper = mapper;
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the account does not exist
-		/// or the user is not owner or administrator.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<AccountDetailsLongDTO> GetAccountDetailsAsync(
 			Guid accountId, DateTime startDate, DateTime endDate, Guid userId, bool isUserAdmin)
 		{
@@ -43,11 +38,6 @@
 				.FirstAsync();
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the account does not exist 
-		/// or the user is not owner or administrator.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<CreateEditAccountDTO> GetAccountFormDataAsync(
 			Guid accountId, Guid userId, bool isUserAdmin)
 		{
@@ -57,11 +47,6 @@
 				.FirstAsync();
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the account does not exist
-		/// or the user is not owner or administrator.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> GetAccountNameAsync(Guid accountId, Guid userId, bool isUserAdmin)
 		{
 			return await this.accountsRepo.All()
@@ -70,10 +55,6 @@
 				.FirstAsync();
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception if the account does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<Guid> GetAccountOwnerIdAsync(Guid accountId)
 		{
 			return await this.accountsRepo.All()
@@ -101,10 +82,6 @@
 		public async Task<int> GetAccountsCountAsync()
 			=> await this.accountsRepo.All().CountAsync(a => !a.IsDeleted);
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the account does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<AccountDetailsShortDTO> GetAccountShortDetailsAsync(Guid accountId)
 		{
 			return await this.accountsRepo.All()
@@ -113,10 +90,6 @@
 				.FirstAsync();
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the account does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<TransactionsDTO> GetAccountTransactionsAsync(AccountTransactionsFilterDTO dto)
 		{
 			return await this.accountsRepo.All()
@@ -145,12 +118,6 @@
 				.ToArrayAsync();
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the transaction does not exist
-		/// and Argument Exception when the user is not owner or administrator.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<TransactionDetailsDTO> GetTransactionDetailsAsync(
 			Guid transactionId, Guid ownerId, bool isUserAdmin)
 		{
@@ -165,11 +132,6 @@
 			return transaction;
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the user is not owner, 
-		/// transaction does not exist or is initial.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<CreateEditTransactionDTO> GetTransactionFormDataAsync(Guid transactionId, Guid userId, bool isUserAdmin)
 		{
 			return await this.transactionsRepo.All()
@@ -180,10 +142,6 @@
 				.FirstAsync();
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception if the transaction does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<Guid> GetTransactionOwnerIdAsync(Guid transactionId)
 		{
 			// TODO: Write Unit tests!

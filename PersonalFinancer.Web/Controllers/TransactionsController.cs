@@ -61,13 +61,13 @@
 			{
 				viewModel = this.mapper.Map<UserTransactionsViewModel>(inputModel);
 				viewModel.UserId = userId;
-				var dropdownDTO = await this.usersService.GetUserDropdownDataAsync(userId);
+				UserDropdownDTO dropdownDTO = await this.usersService.GetUserDropdownDataAsync(userId);
 				this.mapper.Map(dropdownDTO, viewModel);
 
 				return this.View(viewModel);
 			}
 
-			var filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
+			TransactionsFilterDTO filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
 			filterDTO.UserId = userId;
 			viewModel = await this.PrepareUserTransactionsViewModelAsync(filterDTO);
 
@@ -99,7 +99,7 @@
 
 			try
 			{
-				var dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
+				CreateEditTransactionDTO dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
 				Guid newTransactionId = await this.accountsUpdateService.CreateTransactionAsync(dto);
 				this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.CreatedTransaction;
 
@@ -139,30 +139,6 @@
 				: this.RedirectToAction("Index", "Home");
 		}
 
-		public async Task<IActionResult> TransactionDetails([Required] Guid id)
-		{
-			if (!this.ModelState.IsValid)
-				return this.BadRequest();
-
-			TransactionDetailsDTO viewModel;
-
-			try
-			{
-				viewModel = await this.accountsInfoService
-					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
-			}
-			catch (ArgumentException)
-			{
-				return this.Unauthorized();
-			}
-			catch (InvalidOperationException)
-			{
-				return this.BadRequest();
-			}
-
-			return this.View(viewModel);
-		}
-
 		public async Task<IActionResult> EditTransaction([Required] Guid id)
 		{
 			// TODO: Add option for create and delete category!
@@ -172,10 +148,10 @@
 
 			try
 			{
-				var transactionDTO = await this.accountsInfoService
+				CreateEditTransactionDTO transactionDTO = await this.accountsInfoService
 					.GetTransactionFormDataAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 
-				var viewModel = this.mapper.Map<TransactionFormViewModel>(transactionDTO);
+				TransactionFormViewModel viewModel = this.mapper.Map<TransactionFormViewModel>(transactionDTO);
 
 				return this.View(viewModel);
 			}
@@ -200,7 +176,7 @@
 					return this.View(inputModel);
 				}
 
-				var dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
+				CreateEditTransactionDTO dto = this.mapper.Map<CreateEditTransactionDTO>(inputModel);
 
 				await this.accountsUpdateService.EditTransactionAsync(id, dto);
 			}
@@ -216,16 +192,39 @@
 			return this.RedirectToAction(nameof(TransactionDetails), new { id });
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the owner ID is invalid.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
+		public async Task<IActionResult> TransactionDetails([Required] Guid id)
+		{
+			if (!this.ModelState.IsValid)
+				return this.BadRequest();
+
+			TransactionDetailsDTO viewModel;
+
+			try
+			{
+				viewModel = await this.accountsInfoService
+					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
+			}
+			catch (ArgumentException)
+			{
+				return this.Unauthorized();
+			}
+			catch (InvalidOperationException)
+			{
+				return this.BadRequest();
+			}
+
+			return this.View(viewModel);
+		}
+
+		/// <exception cref="InvalidOperationException">When the owner ID is invalid.</exception>
 		private async Task PrepareAccountsAndCategoriesAsync(TransactionFormViewModel formModel)
 		{
 			Guid ownerId = formModel.OwnerId ?? throw new InvalidOperationException(
 				string.Format(ExceptionMessages.NotNullableProperty, formModel.OwnerId));
 
-			var accountsAndCategoriesDTO = await this.usersService.GetUserAccountsAndCategoriesDropdownDataAsync(ownerId);
+			AccountsAndCategoriesDropdownDTO accountsAndCategoriesDTO = 
+				await this.usersService.GetUserAccountsAndCategoriesDropdownDataAsync(ownerId);
+
 			this.mapper.Map(accountsAndCategoriesDTO, formModel);
 		}
 

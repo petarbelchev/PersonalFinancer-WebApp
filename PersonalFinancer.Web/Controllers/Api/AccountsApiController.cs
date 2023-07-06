@@ -51,7 +51,8 @@
 			if (!this.User.IsAdmin() && inputModel.OwnerId != this.User.IdToGuid())
 				return this.Unauthorized();
 
-			var filterDTO = this.mapper.Map<AccountTransactionsFilterDTO>(inputModel);
+			AccountTransactionsFilterDTO filterDTO = 
+				this.mapper.Map<AccountTransactionsFilterDTO>(inputModel);
 
 			TransactionsDTO transactionsDTO =
 				await this.accountsInfoService.GetAccountTransactionsAsync(filterDTO);

@@ -91,7 +91,7 @@
 			if (inputModel.Id != userId)
 				return this.Unauthorized();
 
-			var filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
+			TransactionsFilterDTO filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
 			TransactionsDTO transactionsDTO;
 
 			try

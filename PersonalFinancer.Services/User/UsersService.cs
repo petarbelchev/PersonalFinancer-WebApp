@@ -35,6 +35,97 @@
 			this.mapper = mapper;
 		}
 
+		public async Task<IEnumerable<string>> GetAdminsIds()
+		{
+			return await this.usersRepo.All()
+				.Where(u => u.IsAdmin)
+				.Select(u => u.Id.ToString().ToLower()) // .ToString().ToLower() because of SignalR Hubs
+				.ToListAsync();
+		}
+
+		public async Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownDataAsync(Guid userId)
+		{
+			return await this.usersRepo.All()
+				.Where(u => u.Id == userId)
+				.ProjectTo<AccountsAndCategoriesDropdownDTO>(this.mapper.ConfigurationProvider)
+				.FirstAsync();
+		}
+
+		public async Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownDataAsync(Guid userId)
+		{
+			return await this.usersRepo.All()
+				.Where(u => u.Id == userId)
+				.ProjectTo<AccountTypesAndCurrenciesDropdownDTO>(this.mapper.ConfigurationProvider)
+				.FirstAsync();
+		}
+
+		public async Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime startDate, DateTime endDate)
+		{
+			DateTime startDateUtc = startDate.ToUniversalTime();
+			DateTime endDateUtc = endDate.ToUniversalTime();
+		
+			var dto = new UserDashboardDTO
+			{
+				Accounts = await this.accountsRepo.All()
+					.Where(a => a.OwnerId == userId && !a.IsDeleted)
+					.OrderBy(a => a.Name)
+					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
+					.ToArrayAsync(),
+
+				LastTransactions = await this.transactionsRepo.All()
+					.Where(t => t.OwnerId == userId
+								&& t.CreatedOn >= startDateUtc
+								&& t.CreatedOn <= endDateUtc)
+					.OrderByDescending(t => t.CreatedOn)
+					.Take(5)
+					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
+					.ToArrayAsync(),
+				
+				CurrenciesCashFlow = await this.accountsRepo.All()
+					.Where(a => a.OwnerId == userId && a.Transactions.Any())
+					.GroupBy(a => a.Currency.Name)
+					.Select(group => new CurrencyCashFlowWithExpensesByCategoriesDTO
+					{
+						Name = group.Key,
+						Incomes = group
+							.SelectMany(a => a.Transactions)
+							.Where(t => t.TransactionType == TransactionType.Income
+										&& t.CreatedOn >= startDateUtc
+										&& t.CreatedOn <= endDateUtc)
+							.Sum(t => t.Amount),
+						Expenses = group
+							.SelectMany(a => a.Transactions)
+							.Where(t => t.TransactionType == TransactionType.Expense
+										&& t.CreatedOn >= startDateUtc
+										&& t.CreatedOn <= endDateUtc)
+							.Sum(t => t.Amount),
+						ExpensesByCategories = group
+							.SelectMany(a => a.Transactions
+								.Where(t => t.TransactionType == TransactionType.Expense
+											&& t.CreatedOn >= startDateUtc
+											&& t.CreatedOn <= endDateUtc))
+							.GroupBy(t => t.Category.Name)
+							.Select(cGroup => new CategoryExpensesDTO
+							{
+								CategoryName = cGroup.Key,
+								ExpensesAmount = cGroup.Sum(t => t.Amount)
+							})
+					})
+					.OrderBy(c => c.Name)
+					.ToArrayAsync()
+			};
+
+			return dto;
+		}
+
+		public Task<UserDropdownDTO> GetUserDropdownDataAsync(Guid userId)
+		{
+			return this.usersRepo.All()
+				.Where(u => u.Id == userId)
+				.ProjectTo<UserDropdownDTO>(this.mapper.ConfigurationProvider)
+				.FirstAsync();
+		}
+
 		public async Task<UsersInfoDTO> GetUsersInfoAsync(int page)
 		{
 			return new UsersInfoDTO
@@ -108,97 +199,6 @@
 			return resultDTO;
 		}
 
-		public async Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownDataAsync(Guid userId)
-		{
-			return await this.usersRepo.All()
-				.Where(u => u.Id == userId)
-				.ProjectTo<AccountsAndCategoriesDropdownDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync();
-		}
-
-		public async Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownDataAsync(Guid userId)
-		{
-			return await this.usersRepo.All()
-				.Where(u => u.Id == userId)
-				.ProjectTo<AccountTypesAndCurrenciesDropdownDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync();
-		}
-
-		public async Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime startDate, DateTime endDate)
-		{
-			DateTime startDateUtc = startDate.ToUniversalTime();
-			DateTime endDateUtc = endDate.ToUniversalTime();
-		
-			var dto = new UserDashboardDTO
-			{
-				Accounts = await this.accountsRepo.All()
-					.Where(a => a.OwnerId == userId && !a.IsDeleted)
-					.OrderBy(a => a.Name)
-					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
-					.ToArrayAsync(),
-				LastTransactions = await this.transactionsRepo.All()
-					.Where(t => t.OwnerId == userId
-								&& t.CreatedOn >= startDateUtc
-								&& t.CreatedOn <= endDateUtc)
-					.OrderByDescending(t => t.CreatedOn)
-					.Take(5)
-					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
-					.ToArrayAsync(),
-				CurrenciesCashFlow = await this.accountsRepo.All()
-					.Where(a => a.OwnerId == userId && a.Transactions.Any())
-					.GroupBy(a => a.Currency.Name)
-					.Select(group => new CurrencyCashFlowWithExpensesByCategoriesDTO
-					{
-						Name = group.Key,
-						Incomes = group
-							.SelectMany(a => a.Transactions)
-							.Where(t => t.TransactionType == TransactionType.Income
-										&& t.CreatedOn >= startDateUtc
-										&& t.CreatedOn <= endDateUtc)
-							.Sum(t => t.Amount),
-						Expenses = group
-							.SelectMany(a => a.Transactions)
-							.Where(t => t.TransactionType == TransactionType.Expense
-										&& t.CreatedOn >= startDateUtc
-										&& t.CreatedOn <= endDateUtc)
-							.Sum(t => t.Amount),
-						ExpensesByCategories = group
-							.SelectMany(a => a.Transactions
-								.Where(t => t.TransactionType == TransactionType.Expense
-											&& t.CreatedOn >= startDateUtc
-											&& t.CreatedOn <= endDateUtc))
-							.GroupBy(t => t.Category.Name)
-							.Select(cGroup => new CategoryExpensesDTO
-							{
-								CategoryName = cGroup.Key,
-								ExpensesAmount = cGroup.Sum(t => t.Amount)
-							})
-					})
-					.OrderBy(c => c.Name)
-					.ToArrayAsync()
-			};
-
-			return dto;
-		}
-
-		public Task<UserDropdownDTO> GetUserDropdownDataAsync(Guid userId)
-		{
-			return this.usersRepo.All()
-				.Where(u => u.Id == userId)
-				.ProjectTo<UserDropdownDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync();
-		}
-
-		public async Task<IEnumerable<string>> GetAdminsIds() 
-			=> await this.usersRepo.All()
-				.Where(u => u.IsAdmin)
-				.Select(u => u.Id.ToString().ToLower()) // .ToString().ToLower() because of SignalR Hubs
-				.ToListAsync();
-
-		/// <summary>
-		/// Throws Invalid Operation Exception if the user does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<UserDetailsDTO> UserDetailsAsync(Guid userId)
 		{
 			return await this.usersRepo.All()
@@ -207,10 +207,6 @@
 				.FirstAsync();
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception if the user does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<string> UserFullNameAsync(Guid userId)
 		{
 			return await this.usersRepo.All()

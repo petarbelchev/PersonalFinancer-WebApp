@@ -3,28 +3,22 @@
 	using PersonalFinancer.Services.Messages.Models;
 
 	public interface IMessagesService
-    {
-        Task<IEnumerable<MessageOutputDTO>> GetAllAsync();
+	{
+		/// <exception cref="ArgumentException">When the user is unauthorized.</exception>
+		/// <exception cref="InvalidOperationException">When adding a reply was unsuccessful.</exception>
+		Task<ReplyOutputDTO> AddReplyAsync(ReplyInputDTO model);
 
-        Task<IEnumerable<MessageOutputDTO>> GetUserMessagesAsync(string userId);
+		Task<MessageOutputDTO> CreateAsync(MessageInputDTO model);
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the message does not exist,
-		/// the user is not owner or administrator or message update was unsuccessful.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
+		Task<IEnumerable<MessageOutputDTO>> GetAllAsync();
+
+		/// <exception cref="InvalidOperationException">When the message does not exist, 
+		/// the user is not owner or administrator or message update was unsuccessful.</exception>
 		Task<MessageDetailsDTO> GetMessageAsync(string id, string userId, bool isUserAdmin);
 
 		Task<string> GetMessageAuthorIdAsync(string messageId);
 
-        Task<MessageOutputDTO> CreateAsync(MessageInputDTO model);
-
-		/// <summary>
-		/// Throws Argument Exception when the user is unauthorized 
-		/// and returns null when adding a reply was unsuccessful.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		Task<ReplyOutputDTO?> AddReplyAsync(ReplyInputDTO model);
+		Task<IEnumerable<MessageOutputDTO>> GetUserMessagesAsync(string userId);
 
 		Task<bool> HasUnseenMessagesByAdminAsync();
 
@@ -32,18 +26,11 @@
 
 		Task<bool> IsMessageSeenAsync(string messageId, bool isUserAdmin);
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the update was unsuccessful.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="InvalidOperationException">When the update was unsuccessful.</exception>
 		Task MarkMessageAsSeenAsync(string messageId, string userId, bool isUserAdmin);
 
-		/// <summary>
-		/// Throws Argument Exception when the user is unauthorized 
-		/// and Invalid Operation Exception when deleting a message was unsuccessful.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="ArgumentException">When the user is unauthorized.</exception>
+		/// <exception cref="InvalidOperationException">When deleting a message was unsuccessful.</exception>
 		Task RemoveAsync(string messageId, string userId, bool isUserAdmin);
 	}
 }

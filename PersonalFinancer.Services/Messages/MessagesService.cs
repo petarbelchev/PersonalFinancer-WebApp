@@ -21,6 +21,33 @@
 			this.mapper = mapper;
 		}
 
+		public async Task<ReplyOutputDTO> AddReplyAsync(ReplyInputDTO model)
+		{
+			if (!model.IsAuthorAdmin && !await this.messagesRepo.IsUserDocumentAuthor(model.MessageId, model.AuthorId))
+				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
+
+			Reply reply = this.mapper.Map<Reply>(model);
+
+			UpdateDefinition<Message> update = Builders<Message>.Update
+				.Push(x => x.Replies, reply)
+				.Set(x => model.IsAuthorAdmin ? x.IsSeenByAuthor : x.IsSeenByAdmin, false);
+
+			UpdateResult result = await this.messagesRepo.UpdateOneAsync(x => x.Id == model.MessageId, update);
+
+			return result.IsAcknowledged
+				? this.mapper.Map<ReplyOutputDTO>(reply)
+				: throw new InvalidOperationException(ExceptionMessages.UnsuccessfulUpdate);
+		}
+
+		public async Task<MessageOutputDTO> CreateAsync(MessageInputDTO model)
+		{
+			Message newMessage = this.mapper.Map<Message>(model);
+
+			await this.messagesRepo.InsertOneAsync(newMessage);
+
+			return this.mapper.Map<MessageOutputDTO>(newMessage);
+		}
+
 		public async Task<IEnumerable<MessageOutputDTO>> GetAllAsync()
 		{
 			return await this.messagesRepo
@@ -33,24 +60,6 @@
 				});
 		}
 
-		public async Task<IEnumerable<MessageOutputDTO>> GetUserMessagesAsync(string userId)
-		{
-			return await this.messagesRepo.FindAsync(
-				x => x.AuthorId == userId,
-				m => new MessageOutputDTO
-				{
-					Id = m.Id,
-					CreatedOn = m.CreatedOn,
-					Subject = m.Subject,
-					IsSeen = m.IsSeenByAuthor
-				});
-		}
-
-		/// <summary>
-		/// Throws Invalid Operation Exception when the message does not exist,
-		/// the user is not owner or administrator or message update was unsuccessful.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<MessageDetailsDTO> GetMessageAsync(string messageId, string userId, bool isUserAdmin)
 		{
 			MessageDetailsDTO message = await this.messagesRepo.FindOneAsync(
@@ -81,36 +90,17 @@
 		public async Task<string> GetMessageAuthorIdAsync(string messageId)
 			=> await this.messagesRepo.FindOneAsync(m => m.Id == messageId, m => m.AuthorId);
 
-		public async Task<MessageOutputDTO> CreateAsync(MessageInputDTO model)
+		public async Task<IEnumerable<MessageOutputDTO>> GetUserMessagesAsync(string userId)
 		{
-			Message newMessage = this.mapper.Map<Message>(model);
-
-			await this.messagesRepo.InsertOneAsync(newMessage);
-
-			return this.mapper.Map<MessageOutputDTO>(newMessage);
-		}
-
-		/// <summary>
-		/// Throws Argument Exception when the user is unauthorized 
-		/// and returns null when adding a reply was unsuccessful.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		public async Task<ReplyOutputDTO?> AddReplyAsync(ReplyInputDTO model)
-		{
-			if (!model.IsAuthorAdmin && !await this.messagesRepo.IsUserDocumentAuthor(model.MessageId, model.AuthorId))
-				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
-
-			Reply reply = this.mapper.Map<Reply>(model);
-
-			UpdateDefinition<Message> update = Builders<Message>.Update
-				.Push(x => x.Replies, reply)
-				.Set(x => model.IsAuthorAdmin ? x.IsSeenByAuthor : x.IsSeenByAdmin, false);
-
-			UpdateResult result = await this.messagesRepo.UpdateOneAsync(x => x.Id == model.MessageId, update);
-
-			return result.IsAcknowledged 
-				? this.mapper.Map<ReplyOutputDTO>(reply) 
-				: null;
+			return await this.messagesRepo.FindAsync(
+				x => x.AuthorId == userId,
+				m => new MessageOutputDTO
+				{
+					Id = m.Id,
+					CreatedOn = m.CreatedOn,
+					Subject = m.Subject,
+					IsSeen = m.IsSeenByAuthor
+				});
 		}
 
 		public async Task<bool> HasUnseenMessagesByAdminAsync()
@@ -128,10 +118,6 @@
 			return result;
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the update was unsuccessful.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task MarkMessageAsSeenAsync(string messageId, string userId, bool isUserAdmin)
 		{
 			UpdateResult updateResult = await this.MarkAsSeen(messageId, userId, isUserAdmin);
@@ -140,12 +126,6 @@
 				throw new InvalidOperationException(ExceptionMessages.UnsuccessfulUpdate);
 		}
 
-		/// <summary>
-		/// Throws Argument Exception when the user is unauthorized 
-		/// and Invalid Operation Exception when deleting a message was unsuccessful.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task RemoveAsync(string messageId, string userId, bool isUserAdmin)
 		{
 			if (!isUserAdmin && !await this.messagesRepo.IsUserDocumentAuthor(messageId, userId))

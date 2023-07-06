@@ -5,7 +5,9 @@
 
 	public interface IUsersService
 	{
-        Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownDataAsync(Guid userId);
+		Task<IEnumerable<string>> GetAdminsIds();
+
+		Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownDataAsync(Guid userId);
 
         Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownDataAsync(Guid userId);
 		
@@ -13,24 +15,16 @@
 
         Task<UserDropdownDTO> GetUserDropdownDataAsync(Guid userId);
 
-		Task<IEnumerable<string>> GetAdminsIds();
-	
         Task<UsersInfoDTO> GetUsersInfoAsync(int page);
 
 		Task<TransactionsDTO> GetUserTransactionsAsync(TransactionsFilterDTO dto);
 
 		Task<TransactionsPageDTO> GetUserTransactionsPageDataAsync(TransactionsFilterDTO dto);
 
-		/// <summary>
-		/// Throws Invalid Operation Exception if the user does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="InvalidOperationException">When the user does not exist.</exception>
 		Task<UserDetailsDTO> UserDetailsAsync(Guid userId);
 
-		/// <summary>
-		/// Throws Invalid Operation Exception if the user does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="InvalidOperationException">When the user does not exist.</exception>
 		Task<string> UserFullNameAsync(Guid userId);
 
         Task<int> UsersCountAsync();

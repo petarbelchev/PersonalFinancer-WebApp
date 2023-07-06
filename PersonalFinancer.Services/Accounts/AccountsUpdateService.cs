@@ -34,11 +34,6 @@
 			this.mapper = mapper;
 		}
 
-		/// <summary>
-		/// Throws Argument Exception when the user already have account with the given name.
-		/// </summary>
-		/// <returns>New Account Id.</returns>
-		/// <exception cref="ArgumentException"></exception>
 		public async Task<Guid> CreateAccountAsync(CreateEditAccountDTO model)
 		{
 			if (await this.IsNameExistAsync(model.Name, model.OwnerId))
@@ -62,11 +57,6 @@
 			return newAccount.Id;
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception if the account does not exist.
-		/// </summary>
-		/// <returns>New transaction Id.</returns>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<Guid> CreateTransactionAsync(CreateEditTransactionDTO model)
 		{
 			Account account = await this.FindAccountAsync(model.AccountId);
@@ -84,12 +74,6 @@
 			return newTransaction.Id;
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the account does not exist
-		/// and Argument Exception when the user is not owner or administrator.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task DeleteAccountAsync(
 			Guid accountId, Guid userId, bool isUserAdmin, bool shouldDeleteTransactions = false)
 		{
@@ -106,12 +90,6 @@
 			await this.accountsRepo.SaveChangesAsync();
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the transaction does not exist
-		/// and Argument Exception when the user is not owner or administrator.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task<decimal> DeleteTransactionAsync(Guid transactionId, Guid userId, bool isUserAdmin)
 		{
 			Transaction transaction = await this.transactionsRepo.All()
@@ -130,12 +108,6 @@
 			return transaction.Account.Balance;
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the account does now exist,
-		/// and Argument Exception when the user already have account with the given name.
-		/// </summary>
-		/// <exception cref="ArgumentException"></exception>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task EditAccountAsync(Guid accountId, CreateEditAccountDTO model)
 		{
 			Account account = await this.FindAccountAsync(accountId);
@@ -176,11 +148,6 @@
 			await this.accountsRepo.SaveChangesAsync();
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception when the transaction, category or account does not exist
-		/// or the transaction is initial.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
 		public async Task EditTransactionAsync(Guid transactionId, CreateEditTransactionDTO model)
 		{
 			Transaction transactionInDb = await this.transactionsRepo.All()
@@ -220,6 +187,14 @@
 			await this.transactionsRepo.SaveChangesAsync();
 		}
 
+		private static void ChangeAccountBalance(Account account, decimal amount, TransactionType transactionType)
+		{
+			if (transactionType == TransactionType.Income)
+				account.Balance += amount;
+			else if (transactionType == TransactionType.Expense)
+				account.Balance -= amount;
+		}
+
 		private static Transaction CreateInitialTransaction(Guid accountId, Guid ownerId, decimal amount)
 		{
 			return new Transaction()
@@ -237,26 +212,12 @@
 			};
 		}
 
-		private static void ChangeAccountBalance(Account account, decimal amount, TransactionType transactionType)
-		{
-			if (transactionType == TransactionType.Income)
-				account.Balance += amount;
-			else if (transactionType == TransactionType.Expense)
-				account.Balance -= amount;
-		}
-
-		/// <summary>
-		/// Throws Invalid Operation Exception if the account does not exist.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
 		private async Task<Account> FindAccountAsync(Guid accountId)
 			=> await this.accountsRepo.All().FirstAsync(a => a.Id == accountId && !a.IsDeleted);
 
 		private async Task<bool> IsNameExistAsync(string name, Guid userId)
-		{
-			return await this.accountsRepo.All()
-				.AnyAsync(a => a.OwnerId == userId && a.Name == name);
-		}
+			=> await this.accountsRepo.All().AnyAsync(a => a.OwnerId == userId && a.Name == name);
 
 		private static void RestoreAccountBalance(Transaction transaction)
 		{
@@ -268,36 +229,27 @@
 					: TransactionType.Income);
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception if the account type or currency is invalid.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="InvalidOperationException">When the account type or currency is invalid.</exception>
 		private async Task ValidateAccountTypeAndCurrencyAsync(CreateEditAccountDTO model)
 		{
-			bool isAccountTypeValid = await this.accountTypesRepo.All().AnyAsync(at =>
-				at.Id == model.AccountTypeId
-				&& at.OwnerId == model.OwnerId);
+			bool isAccountTypeValid = await this.accountTypesRepo.All()
+				.AnyAsync(at => at.Id == model.AccountTypeId && at.OwnerId == model.OwnerId);
 
 			if (!isAccountTypeValid)
 				throw new InvalidOperationException(ExceptionMessages.InvalidAccountType);
 
-			bool isCurrencyValid = await this.currenciesRepo.All().AnyAsync(c =>
-				c.Id == model.CurrencyId
-				&& c.OwnerId == model.OwnerId);
+			bool isCurrencyValid = await this.currenciesRepo.All()
+				.AnyAsync(c => c.Id == model.CurrencyId && c.OwnerId == model.OwnerId);
 
 			if (!isCurrencyValid)
 				throw new InvalidOperationException(ExceptionMessages.InvalidCurrency);
 		}
 
-		/// <summary>
-		/// Throws Invalid Operation Exception if the category is invalid.
-		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
+		/// <exception cref="InvalidOperationException">When the category is invalid.</exception>
 		private async Task ValidateCategoryAsync(Guid categoryId, Guid ownerId)
 		{
-			bool isCategoryValid = await this.categoriesRepo.All().AnyAsync(c =>
-				c.Id == categoryId
-				&& c.OwnerId == ownerId);
+			bool isCategoryValid = await this.categoriesRepo.All()
+				.AnyAsync(c => c.Id == categoryId && c.OwnerId == ownerId);
 
 			if (!isCategoryValid)
 				throw new InvalidOperationException(ExceptionMessages.InvalidCategory);

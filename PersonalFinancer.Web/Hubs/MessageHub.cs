@@ -50,9 +50,10 @@
 			{
 				return ex.Message;
 			}
-
-			if (reply == null)
-				throw new InvalidOperationException();
+			catch (InvalidOperationException ex)
+			{
+				return ex.Message;
+			}
 
 			await this.Clients.Group(messageId).SendAsync("ReceiveMessage", reply);
 			await this.Clients.Group(messageId).SendAsync("MarkAsSeen");
