@@ -18,7 +18,7 @@
             => this.usersService = usersService;
 
         [HttpGet("{page}")]
-        public async Task<ActionResult<UsersViewModel>> AllUsers(int page)
+        public async Task<IActionResult> AllUsers(int page)
         {
             UsersInfoDTO usersData =
                 await this.usersService.GetUsersInfoAsync(page);

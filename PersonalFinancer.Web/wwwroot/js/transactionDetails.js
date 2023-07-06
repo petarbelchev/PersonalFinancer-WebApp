@@ -48,13 +48,14 @@ function renderTransaction(data) {
 			<li class="list-group-item d-flex justify-content-between">
 				<div class="p-2"><span>Created On: </span></div>
 				<div class="p-2">
-                    <span>${new Date(data.createdOn).toLocaleString('en-US', {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric"
-    })}
+                    <span>
+                        ${new Date(data.createdOn).toLocaleString('en-US', {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "numeric"
+                        })}
                     </span>
 				</div>
 			</li>

@@ -3,14 +3,14 @@ let paginations = document.getElementsByClassName('pagination');
 for (let pagination of paginations) {
     pagination.addEventListener('click', async (e) => {
         if (e.target.tagName == 'A') {
-            await getUsers(e.target.getAttribute('page'));
+            await getMessages(e.target.getAttribute('page'));
         }
     })
 }
 
 let tbody = document.querySelector('tbody');
 
-async function getUsers(page) {
+async function getMessages(page) {
     tbody.innerHTML = `
         <tr>
             <td colspan="5">
@@ -27,25 +27,34 @@ async function getUsers(page) {
 
     if (response.status == 200) {
         let model = await response.json();
-        renderUsers(model);
+        renderMessages(model);
         setUpPagination(page, model.pagination);
     } else {
         let error = await response.json();
         alert(`${error.status} ${error.title}`)
     }
 }
-
-function renderUsers(model) {
+function renderMessages(model) {
     let innerHtml = '';
-    let row = model.pagination.firstElement;
 
-    for (let user of model.users) {
+    for (let message of model.messages) {
         let tr = `
-            <tr role="button" onclick="location.href='${'/Admin/Users/Details/' + user.id}'">
-				<th scope="row">${row++}.</th>
-				<td><img src="/icons/icons8-budget-64.png" style="max-width: 30px;">${user.firstName} ${user.lastName}</td>
-				<td>${user.userName}</td>
-				<td>${user.email}</td>
+			<tr role="button" onclick="location.href='/Messages/MessageDetails/${message.id}'">
+				<td messageId="${message.id}">
+					<img src="/icons/icons8-message-64.png" style="max-width: 30px;" />
+					<span>	${message.subject}</span>
+					${message.isSeen ? '' : '<span class="badge text-bg-danger">New messages</span>' }
+				</td>
+				<td>
+                    ${new Date(message.createdOn).toLocaleString('en-US', {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric"
+                    })}
+                </td>
 			</tr>
         `;
 

@@ -10,7 +10,7 @@
 
 		Task<MessageOutputDTO> CreateAsync(MessageInputDTO model);
 
-		Task<IEnumerable<MessageOutputDTO>> GetAllAsync();
+		Task<MessagesDTO> GetAllAsync(int page = 1);
 
 		/// <exception cref="InvalidOperationException">When the message does not exist, 
 		/// the user is not owner or administrator or message update was unsuccessful.</exception>
@@ -18,7 +18,7 @@
 
 		Task<string> GetMessageAuthorIdAsync(string messageId);
 
-		Task<IEnumerable<MessageOutputDTO>> GetUserMessagesAsync(string userId);
+		Task<MessagesDTO> GetUserMessagesAsync(string userId, int page = 1);
 
 		Task<bool> HasUnseenMessagesByAdminAsync();
 

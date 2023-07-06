@@ -8,7 +8,21 @@ for (let pagination of paginations) {
     })
 }
 
+let accountsDiv = document.getElementById('accounts');
+
 async function getAccounts(page) {
+    accountsDiv.innerHTML = `
+        <tr>
+            <td colspan="5">
+	            <div class="d-flex justify-content-center">
+		            <div class="spinner-border" role="status">
+			            <span class="visually-hidden">Loading...</span>
+		            </div>
+	            </div>
+            </td>
+        </tr>
+	`;
+
     let response = await fetch(params.url + page);
 
     if (response.status == 200) {
@@ -48,5 +62,5 @@ function renderAccounts(model) {
         innerHtml += div;
     }
 
-    document.getElementById('accounts').innerHTML = innerHtml;
+    accountsDiv.innerHTML = innerHtml;
 }

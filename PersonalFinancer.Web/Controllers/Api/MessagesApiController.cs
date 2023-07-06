@@ -3,7 +3,9 @@
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Services.Messages;
+	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.Models.Message;
 
 	[Authorize]
 	[Route("api/messages")]
@@ -14,6 +16,18 @@
 
 		public MessagesApiController(IMessagesService messagesService)
 			=> this.messagesService = messagesService;
+
+		[HttpGet("{page}")]
+		public async Task<IActionResult> AllMessages(int page)
+		{
+			MessagesDTO messagesDTO = this.User.IsAdmin()
+				? await this.messagesService.GetAllAsync(page)
+				: await this.messagesService.GetUserMessagesAsync(this.User.Id(), page);
+
+			var model = new MessagesViewModel(messagesDTO, page);
+
+			return this.Ok(model);
+		}
 
 		[HttpPatch("{messageId}")]
 		public async Task<IActionResult> MarkAsSeen(string messageId)

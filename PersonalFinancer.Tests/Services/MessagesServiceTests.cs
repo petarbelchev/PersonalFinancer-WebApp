@@ -5,6 +5,7 @@
 	using MongoDB.Driver.Linq;
 	using Moq;
 	using NUnit.Framework;
+	using static PersonalFinancer.Common.Constants.PaginationConstants;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Repositories;
@@ -42,6 +43,8 @@
 		public async Task GelAllAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
+			int page = 1;
+
 			MessageOutputDTO[] expected = this.fakeCollection
 				.Select(m => new MessageOutputDTO
 				{
@@ -50,16 +53,19 @@
 					Subject = m.Subject,
 					IsSeen = m.IsSeenByAdmin
 				})
+				.Skip(MessagesPerPage * (page - 1))
+				.Take(MessagesPerPage)
 				.ToArray();
 
-			this.repoMock.Setup(x => x
-				.FindAsync(m => new MessageOutputDTO
-				{
-					Id = m.Id,
-					CreatedOn = m.CreatedOn,
-					Subject = m.Subject,
-					IsSeen = m.IsSeenByAdmin
-				}))
+			this.repoMock.Setup(x => x.FindAsync(
+					m => new MessageOutputDTO
+					{
+						Id = m.Id,
+						CreatedOn = m.CreatedOn,
+						Subject = m.Subject,
+						IsSeen = m.IsSeenByAdmin
+					},
+					page))
 				.ReturnsAsync(expected);
 
 			//Act
@@ -77,6 +83,8 @@
 		public async Task GetUserMessagesAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
+			int page = 1;
+
 			MessageOutputDTO[] expected = this.fakeCollection
 				.Where(m => m.AuthorId == this.FirstUserId)
 				.Select(m => new MessageOutputDTO
@@ -86,6 +94,8 @@
 					Subject = m.Subject,
 					IsSeen = m.IsSeenByAuthor
 				})
+				.Skip(MessagesPerPage * (page - 1))
+				.Take(MessagesPerPage)
 				.ToArray();
 
 			string userId = this.FirstUserId;
@@ -98,7 +108,8 @@
 						CreatedOn = m.CreatedOn,
 						Subject = m.Subject,
 						IsSeen = m.IsSeenByAuthor
-					}))
+					},
+					page))
 				.ReturnsAsync(expected);
 
 			//Act

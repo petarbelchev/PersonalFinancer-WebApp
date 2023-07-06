@@ -38,11 +38,13 @@
 
         public async Task<IActionResult> AllMessages()
         {
-            IEnumerable<MessageOutputDTO> messages = this.User.IsAdmin()
+            MessagesDTO messagesDTO = this.User.IsAdmin()
                 ? await this.messagesService.GetAllAsync()
                 : await this.messagesService.GetUserMessagesAsync(this.User.Id());
 
-            return this.View(messages);
+            var viewModel = new MessagesViewModel(messagesDTO);
+
+            return this.View(viewModel);
         }
 
         [Authorize(Roles = UserRoleName)]

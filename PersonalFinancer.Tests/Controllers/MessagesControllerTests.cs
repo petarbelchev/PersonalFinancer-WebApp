@@ -11,6 +11,7 @@
 	using PersonalFinancer.Web.Controllers;
 	using PersonalFinancer.Web.Hubs;
 	using PersonalFinancer.Web.Models.Message;
+	using static PersonalFinancer.Common.Constants.PaginationConstants;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[TestFixture]
@@ -67,7 +68,9 @@
         [Test]
         public async Task AllMessages_ShouldReturnViewModelWithUserMessages_WhenUserIsNotAdmin()
         {
-			//Arrange
+            //Arrange
+            int page = 1;
+
 			IEnumerable<MessageOutputDTO> serviceReturnDto = this.fakeCollection
                 .Where(m => m.AuthorId == this.userId.ToString())
                 .Select(m => new MessageOutputDTO
@@ -75,14 +78,16 @@
                     Id = m.Id,
                     CreatedOn = m.CreatedOn,
                     Subject = m.Subject
-                });
+                })
+				.Skip(MessagesPerPage * (page - 1))
+				.Take(MessagesPerPage);
 
             this.userMock.Setup(x => x
                 .IsInRole(AdminRoleName))
                 .Returns(false);
 
             this.messagesServiceMock.Setup(x => x
-                .GetUserMessagesAsync(this.userId.ToString()))
+                .GetUserMessagesAsync(this.userId.ToString(), page))
                 .ReturnsAsync(serviceReturnDto);
 
             //Act
@@ -103,21 +108,25 @@
         [Test]
         public async Task AllMessages_ShouldReturnViewModelWithAllUsersMessages_WhenUserIsAdmin()
         {
-			//Arrange
+            //Arrange
+            int page = 1;
+
 			IEnumerable<MessageOutputDTO> serviceReturnDto = this.fakeCollection
 				.Select(m => new MessageOutputDTO
 				{
 					Id = m.Id,
 					CreatedOn = m.CreatedOn,
 					Subject = m.Subject
-				});
+				})
+				.Skip(MessagesPerPage * (page - 1))
+				.Take(MessagesPerPage);
 
 			this.userMock.Setup(x => x
                 .IsInRole(AdminRoleName))
                 .Returns(true);
 
             this.messagesServiceMock.Setup(x => x
-                .GetAllAsync())
+                .GetAllAsync(page))
                 .ReturnsAsync(serviceReturnDto);
 
             //Act

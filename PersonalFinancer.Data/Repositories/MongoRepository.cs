@@ -3,7 +3,8 @@
     using Microsoft.EntityFrameworkCore;
     using MongoDB.Driver;
     using MongoDB.Driver.Linq;
-    using PersonalFinancer.Data;
+	using PersonalFinancer.Common.Constants;
+	using PersonalFinancer.Data;
     using PersonalFinancer.Data.Models.Contracts;
     using System.Linq.Expressions;
 
@@ -17,6 +18,9 @@
 		public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
             => await this.collection.AsQueryable().AnyAsync(predicate);
 
+        public async Task<int> CountAsync()
+            => (int)await this.collection.CountDocumentsAsync(FilterDefinition<T>.Empty);
+
 		/// <summary>
 		/// Gets a value indicating whether the result is acknowledged.
 		/// </summary>
@@ -24,19 +28,25 @@
 		   => await this.collection.DeleteOneAsync(x => x.Id == documentId);
 
         public async Task<IEnumerable<TProjected>> FindAsync<TProjected>(
-           Expression<Func<T, TProjected>> projectionExpression)
+           Expression<Func<T, TProjected>> projectionExpression,
+           int page = 1)
            => await this.collection
-              .Find(Builders<T>.Filter.Empty)
-              .Project(projectionExpression)
-              .ToListAsync();
+                .Find(Builders<T>.Filter.Empty)
+				.Skip(PaginationConstants.MessagesPerPage * (page - 1))
+				.Limit(PaginationConstants.MessagesPerPage)
+                .Project(projectionExpression)
+                .ToListAsync();
 
         public async Task<IEnumerable<TProjected>> FindAsync<TProjected>(
            Expression<Func<T, bool>> filterExpression,
-           Expression<Func<T, TProjected>> projectionExpression)
+           Expression<Func<T, TProjected>> projectionExpression,
+           int page = 1)
            => await this.collection
-              .Find(filterExpression)
-              .Project(projectionExpression)
-              .ToListAsync();
+                .Find(filterExpression)
+                .Skip(PaginationConstants.MessagesPerPage * (page - 1))
+                .Limit(PaginationConstants.MessagesPerPage)
+                .Project(projectionExpression)
+                .ToListAsync();
 
         /// <summary>
         /// Throws Invalid Operation Exception when the document is not found with the given filter.
@@ -46,17 +56,17 @@
            Expression<Func<T, bool>> filterExpression,
            Expression<Func<T, TProjected>> projectionExpression)
            => await this.collection
-              .Find(filterExpression)
-              .Project(projectionExpression)
-              .FirstAsync();
+                .Find(filterExpression)
+                .Project(projectionExpression)
+                .FirstAsync();
 
 		public async Task InsertOneAsync(T entity)
 		   => await this.collection.InsertOneAsync(entity);
 
 		public async Task<bool> IsUserDocumentAuthor(string documentId, string authorId)
 		   => await this.collection
-			  .AsQueryable()
-			  .AnyAsync(x => x.Id == documentId && x.AuthorId == authorId);
+                .AsQueryable()
+                .AnyAsync(x => x.Id == documentId && x.AuthorId == authorId);
 
 		public async Task<UpdateResult> UpdateOneAsync(
            Expression<Func<T, bool>> filterExpression,

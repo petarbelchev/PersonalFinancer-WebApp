@@ -10,5 +10,8 @@
 
 		public const int UsersPerPage = 10;
 		public const string UsersName = "users";
+
+		public const int MessagesPerPage = 10;
+		public const string MessagesName = "messages";
 	}
 }

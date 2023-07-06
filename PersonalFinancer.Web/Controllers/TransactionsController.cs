@@ -141,8 +141,6 @@
 
 		public async Task<IActionResult> EditTransaction([Required] Guid id)
 		{
-			// TODO: Add option for create and delete category!
-
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 

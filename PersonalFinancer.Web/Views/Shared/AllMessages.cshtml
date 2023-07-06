@@ -1,46 +1,56 @@
-﻿@using PersonalFinancer.Services.Messages.Models;
-@using System.Globalization;
-@model IEnumerable<MessageOutputDTO>
+﻿@using System.Globalization;
+@using PersonalFinancer.Common.Constants;
+@using PersonalFinancer.Web.Models.Message;
+@model MessagesViewModel
 @{
 	ViewData["Title"] = "Messages";
 }
 
-<p class="display-6 text-center">@ViewData["Title"]</p>
 
 <div class="row d-flex justify-content-center">
-	<div id="tableContainer" class="col-md-10 col-lg-8">
-		<table class="table table-hover">
-			<thead>
-				<tr>
-					<th scope="col">Subject</th>
-					<th scope="col">Date</th>
-				</tr>
-			</thead>
-			<tbody style="vertical-align: text-top;">
-		
-				@if (Model.Any())
-				{
-					@foreach (var message in Model)
+	<div class="col-md-10 col-lg-8">
+
+		<partial name="_PaginationPartial" />
+
+		<div id="tableContainer" class="card shadow">
+			<div class="card-header">
+				<p class="display-6 text-center">@ViewData["Title"]</p>
+			</div>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+						<th scope="col">Subject</th>
+						<th scope="col">Date</th>
+					</tr>
+				</thead>
+				<tbody style="vertical-align: text-top;">
+
+					@if (Model.Messages.Any())
 					{
-						<tr role="button" onclick="location.href='@Url.Action("MessageDetails", "Messages", new { id = message.Id })'">
-							<td messageId="@message.Id">
-								<img src="/icons/icons8-message-64.png" style="max-width: 45px;" />
-								<span>	@message.Subject</span>
+						@foreach (var message in Model.Messages)
+						{
+							<tr role="button" onclick="location.href='@Url.Action("MessageDetails", "Messages", new { id = message.Id })'">
+								<td messageId="@message.Id">
+									<img src="/icons/icons8-message-64.png" style="max-width: 30px;" />
+									<span>	@message.Subject</span>
 
-								@if (!message.IsSeen)
-								{
-									<span class="badge text-bg-danger">New messages</span>
-								}
-							</td>
-							<td><p>@message.CreatedOn.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</p></td>
-						</tr>
+									@if (!message.IsSeen)
+									{
+										<span class="badge text-bg-danger">New messages</span>
+									}
+								</td>
+								<td>@message.CreatedOn.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</td>
+							</tr>
+						}
 					}
-				}
 
-			</tbody>
-		</table>
+				</tbody>
+			</table>
+		</div>
 
-		@if (!Model.Any())
+		<partial name="_PaginationPartial" />
+
+		@if (!Model.Messages.Any())
 		{
 			<p id="noMessagesNote" class="display-6 fs-4 text-center">You don't have any messages.</p>
 		}
@@ -49,4 +59,11 @@
 
 @section Scripts {
 	<script src="~/js/hubs/allMessagesHub.js"></script>
+	<script>
+		let params = {
+			url: '@UrlPathConstants.ApiMessagesEndpoint'
+		};
+	</script>
+	<script src="~/js/setUpPagination.js"></script>
+	<script src="~/js/getMessages.js"></script>
 }

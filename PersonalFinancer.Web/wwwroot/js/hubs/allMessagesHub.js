@@ -10,12 +10,11 @@ allMessagesHub.on('ReceiveNotification', (messageId, subject, createdOn) => {
         tbody.innerHTML += `
 			<tr role="button" onclick='location.href="/Messages/MessageDetails/${messageId}"'>
 				<td messageId="${messageId}">
-					<img src="/icons/icons8-message-64.png" style="max-width: 45px;" />
+					<img src="/icons/icons8-message-64.png" style="max-width: 30px;" />
 					<span>	${subject}</span>
 					<span class="badge text-bg-danger">New messages</span>
 				</td>
 				<td>
-                    <p>
                         ${new Date(createdOn).toLocaleString('en-US', {
                             year: "numeric",
                             month: "long",
@@ -24,7 +23,6 @@ allMessagesHub.on('ReceiveNotification', (messageId, subject, createdOn) => {
                             minute: "numeric",
                             weekday: "long"
                         })}
-                    </p>
                 </td>
 			</tr>
         `;

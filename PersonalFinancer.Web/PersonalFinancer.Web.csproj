@@ -14,15 +14,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\getMessages.js" />
     <Content Remove="wwwroot\js\qr.js" />
   </ItemGroup>
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="appsettings.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\getMessages.js" />
     <_ContentIncludedByDefault Remove="wwwroot\js\qr.js" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\js\getMessages.js" />
     <None Include="wwwroot\js\qr.js" />
   </ItemGroup>
 

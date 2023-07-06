@@ -48,16 +48,24 @@
 			return this.mapper.Map<MessageOutputDTO>(newMessage);
 		}
 
-		public async Task<IEnumerable<MessageOutputDTO>> GetAllAsync()
+		public async Task<MessagesDTO> GetAllAsync(int page = 1)
 		{
-			return await this.messagesRepo
-				.FindAsync(m => new MessageOutputDTO
-				{
-					Id = m.Id,
-					CreatedOn = m.CreatedOn,
-					Subject = m.Subject,
-					IsSeen = m.IsSeenByAdmin
-				});
+			var messages = new MessagesDTO
+			{
+				Messages = await this.messagesRepo.FindAsync(
+					m => new MessageOutputDTO
+					{
+						Id = m.Id,
+						CreatedOn = m.CreatedOn,
+						Subject = m.Subject,
+						IsSeen = m.IsSeenByAdmin
+					},
+					page),
+
+				TotalMessagesCount = await this.messagesRepo.CountAsync()
+			};
+
+			return messages;
 		}
 
 		public async Task<MessageDetailsDTO> GetMessageAsync(string messageId, string userId, bool isUserAdmin)
@@ -90,17 +98,25 @@
 		public async Task<string> GetMessageAuthorIdAsync(string messageId)
 			=> await this.messagesRepo.FindOneAsync(m => m.Id == messageId, m => m.AuthorId);
 
-		public async Task<IEnumerable<MessageOutputDTO>> GetUserMessagesAsync(string userId)
+		public async Task<MessagesDTO> GetUserMessagesAsync(string userId, int page = 1)
 		{
-			return await this.messagesRepo.FindAsync(
-				x => x.AuthorId == userId,
-				m => new MessageOutputDTO
-				{
-					Id = m.Id,
-					CreatedOn = m.CreatedOn,
-					Subject = m.Subject,
-					IsSeen = m.IsSeenByAuthor
-				});
+			var messages = new MessagesDTO
+			{
+				Messages = await this.messagesRepo.FindAsync(
+					x => x.AuthorId == userId,
+					m => new MessageOutputDTO
+					{
+						Id = m.Id,
+						CreatedOn = m.CreatedOn,
+						Subject = m.Subject,
+						IsSeen = m.IsSeenByAuthor
+					},
+					page),
+
+				TotalMessagesCount = await this.messagesRepo.CountAsync()
+			};
+
+			return messages;
 		}
 
 		public async Task<bool> HasUnseenMessagesByAdminAsync()
