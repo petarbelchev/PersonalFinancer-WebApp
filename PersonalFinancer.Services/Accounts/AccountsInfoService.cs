@@ -151,15 +151,5 @@
 				.Select(t => t.OwnerId)
 				.FirstAsync();
 		}
-
-		// NOTE: Move it to Users Service?
-		public async Task<IEnumerable<AccountCardDTO>> GetUserAccountsCardsAsync(Guid userId)
-		{
-			return await this.accountsRepo.All()
-				.Where(a => a.OwnerId == userId && !a.IsDeleted)
-				.OrderBy(a => a.Name)
-				.Select(a => this.mapper.Map<AccountCardDTO>(a))
-				.ToArrayAsync();
-		}
 	}
 }

@@ -35,7 +35,7 @@
 			this.mapper = mapper;
 		}
 
-		public async Task<IEnumerable<string>> GetAdminsIds()
+		public async Task<IEnumerable<string>> GetAdminsIdsAsync()
 		{
 			return await this.usersRepo.All()
 				.Where(u => u.IsAdmin)
@@ -49,6 +49,15 @@
 				.Where(u => u.Id == userId)
 				.ProjectTo<AccountsAndCategoriesDropdownDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
+		}
+
+		public async Task<IEnumerable<AccountCardDTO>> GetUserAccountsCardsAsync(Guid userId)
+		{
+			return await this.accountsRepo.All()
+				.Where(a => a.OwnerId == userId && !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.Select(a => this.mapper.Map<AccountCardDTO>(a))
+				.ToArrayAsync();
 		}
 
 		public async Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownDataAsync(Guid userId)

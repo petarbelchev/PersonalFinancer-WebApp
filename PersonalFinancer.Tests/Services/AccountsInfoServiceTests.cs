@@ -31,6 +31,180 @@
 		}
 
 		[Test]
+		public async Task GetAccountCardsData_ShouldReturnCorrectData()
+		{
+			//Arrange
+			var expected = new AccountsCardsDTO
+			{
+				Accounts = await this.accountsRepo.All()
+					.Where(a => !a.IsDeleted)
+					.OrderBy(a => a.Name)
+					.Take(AccountsPerPage)
+					.ProjectTo<AccountCardDTO>(this.mapperMock.ConfigurationProvider)
+					.ToArrayAsync(),
+				TotalAccountsCount = await this.accountsRepo.All()
+					.CountAsync(a => !a.IsDeleted)
+			};
+
+			//Act
+			AccountsCardsDTO actual = await this.accountsInfoService.GetAccountsCardsDataAsync(1);
+
+			//Assert
+			AssertAreEqualAsJson(actual, expected);
+		}
+
+		[Test]
+		public async Task GetAccountDetails_ShouldReturnAccountDetails_WhenUserIsOwner()
+		{
+			//Arrange
+			DateTime startDate = DateTime.Now.AddMonths(-1);
+			DateTime endDate = DateTime.Now;
+
+			AccountDetailsLongDTO expected = await this.accountsRepo.All()
+				.Where(a => a.Id == this.Account1_User1_WithTransactions.Id && !a.IsDeleted)
+				.ProjectTo<AccountDetailsLongDTO>(this.mapperMock.ConfigurationProvider, new { startDate, endDate })
+				.FirstAsync();
+
+			//Act
+			AccountDetailsLongDTO actual = await this.accountsInfoService.GetAccountDetailsAsync(
+				this.Account1_User1_WithTransactions.Id, startDate, endDate, this.User1.Id, isUserAdmin: false);
+
+			//Assert
+			AssertAreEqualAsJson(actual, expected);
+		}
+
+		[Test]
+		public void GetAccountDetails_ShouldThrowException_WithInvalidId()
+		{
+			//Arrange
+			var id = Guid.NewGuid();
+			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
+			DateTime endDate = DateTime.UtcNow;
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsInfoService
+				  .GetAccountDetailsAsync(id, startDate, endDate, this.User1.Id, isUserAdmin: false),
+			Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task GetAccountFormData_ShouldReturnCorrectData()
+		{
+			//Arrange
+			CreateEditAccountDTO expected = this.mapperMock
+				.Map<CreateEditAccountDTO>(this.Account1_User1_WithTransactions);
+
+			//Act
+			CreateEditAccountDTO actual = await this.accountsInfoService
+				.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User1.Id, isUserAdmin: false);
+
+			//Assert
+			AssertAreEqualAsJson(actual, expected);
+		}
+
+		[Test]
+		public async Task GetAccountFormData_ShouldReturnCorrectData_WhenUserIsAdmin()
+		{
+			//Arrange
+			CreateEditAccountDTO expected = this.mapperMock
+				.Map<CreateEditAccountDTO>(this.Account1_User1_WithTransactions);
+
+			//Act
+			CreateEditAccountDTO actual = await this.accountsInfoService
+				.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User2.Id, isUserAdmin: true);
+
+			//Assert
+			AssertAreEqualAsJson(actual, expected);
+		}
+
+		[Test]
+		public void GetAccountFormData_ShouldThrowException_WhenAccountDoesNotExist()
+		{
+			//Arrange
+			var invalidId = Guid.NewGuid();
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsInfoService
+				  .GetAccountFormDataAsync(invalidId, this.User1.Id, isUserAdmin: false),
+			Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public void GetAccountFormData_ShouldThrowException_WhenUserIsNotOwner()
+		{
+			//Arrange
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsInfoService
+				  .GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User2.Id, isUserAdmin: false),
+			Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task GetAccountName_ShouldReturnAccountName_WithValidId()
+		{
+			//Act
+			string actualName = await this.accountsInfoService
+				.GetAccountNameAsync(this.Account1_User1_WithTransactions.Id, this.User1.Id, isUserAdmin: false);
+
+			//Assert
+			Assert.That(actualName, Is.EqualTo(this.Account1_User1_WithTransactions.Name));
+		}
+
+		[Test]
+		public void GetAccountName_ShouldThrowException_WithInvalidId()
+		{
+			//Arrange
+			var invalidId = Guid.NewGuid();
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsInfoService
+				  .GetAccountNameAsync(invalidId, this.User1.Id, isUserAdmin: false),
+			Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task GetAccountsCountAsync_ShouldReturnAccountsCount()
+		{
+			//Arrange
+			int expectedCount = await this.accountsRepo.All().CountAsync(a => !a.IsDeleted);
+
+			//Act
+			int actualCount = await this.accountsInfoService.GetAccountsCountAsync();
+
+			//Assert
+			Assert.That(actualCount, Is.EqualTo(expectedCount));
+		}
+
+		[Test]
+		public async Task GetAccountShortDetails_ShouldReturnCorrectData_WithValidInput()
+		{
+			//Arrange
+			AccountDetailsShortDTO expected = await this.accountsRepo.All()
+				.Where(a => a.Id == this.Account1_User1_WithTransactions.Id)
+				.ProjectTo<AccountDetailsShortDTO>(this.mapperMock.ConfigurationProvider)
+				.FirstAsync();
+
+			//Act
+			AccountDetailsShortDTO actual = await this.accountsInfoService
+				.GetAccountShortDetailsAsync(this.Account1_User1_WithTransactions.Id);
+
+			//Assert
+			AssertAreEqualAsJson(actual, expected);
+		}
+
+		[Test]
+		public void GetAccountShortDetails_ShouldThrowException_WithInvalidInput()
+		{
+			//Arrange
+			var invalidId = Guid.NewGuid();
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsInfoService.GetAccountShortDetailsAsync(invalidId),
+			Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
 		public async Task GetAccountTransactions_ShouldReturnCorrectData()
 		{
 			//Arrange
@@ -84,63 +258,6 @@
 		}
 
 		[Test]
-		public async Task GetAccountDetails_ShouldReturnAccountDetails_WhenUserIsOwner()
-		{
-			//Arrange
-			DateTime startDate = DateTime.Now.AddMonths(-1);
-			DateTime endDate = DateTime.Now;
-
-			AccountDetailsLongDTO expected = await this.accountsRepo.All()
-				.Where(a => a.Id == this.Account1_User1_WithTransactions.Id && !a.IsDeleted)
-				.ProjectTo<AccountDetailsLongDTO>(this.mapperMock.ConfigurationProvider, new { startDate, endDate })
-				.FirstAsync();
-
-			//Act
-			AccountDetailsLongDTO actual = await this.accountsInfoService.GetAccountDetailsAsync(
-				this.Account1_User1_WithTransactions.Id, startDate, endDate, this.User1.Id, isUserAdmin: false);
-
-			//Assert
-			AssertAreEqualAsJson(actual, expected);
-		}
-
-		[Test]
-		public void GetAccountDetails_ShouldThrowException_WithInvalidId()
-		{
-			//Arrange
-			var id = Guid.NewGuid();
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService
-				  .GetAccountDetailsAsync(id, startDate, endDate, this.User1.Id, isUserAdmin: false),
-			Throws.TypeOf<InvalidOperationException>());
-		}
-
-		[Test]
-		public async Task GetAccountCardsData_ShouldReturnCorrectData()
-		{
-			//Arrange
-			var expected = new AccountsCardsDTO
-			{
-				Accounts = await this.accountsRepo.All()
-					.Where(a => !a.IsDeleted)
-					.OrderBy(a => a.Name)
-					.Take(AccountsPerPage)
-					.ProjectTo<AccountCardDTO>(this.mapperMock.ConfigurationProvider)
-					.ToArrayAsync(),
-				TotalAccountsCount = await this.accountsRepo.All()
-					.CountAsync(a => !a.IsDeleted)
-			};
-
-			//Act
-			AccountsCardsDTO actual = await this.accountsInfoService.GetAccountsCardsDataAsync(1);
-
-			//Assert
-			AssertAreEqualAsJson(actual, expected);
-		}
-
-		[Test]
 		public async Task GetCashFlowByCurrenciesAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
@@ -167,121 +284,6 @@
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
-		}
-
-		[Test]
-		public async Task GetAccountName_ShouldReturnAccountName_WithValidId()
-		{
-			//Act
-			string actualName = await this.accountsInfoService
-				.GetAccountNameAsync(this.Account1_User1_WithTransactions.Id, this.User1.Id, isUserAdmin: false);
-
-			//Assert
-			Assert.That(actualName, Is.EqualTo(this.Account1_User1_WithTransactions.Name));
-		}
-
-		[Test]
-		public void GetAccountName_ShouldThrowException_WithInvalidId()
-		{
-			//Arrange
-			var invalidId = Guid.NewGuid();
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService
-				  .GetAccountNameAsync(invalidId, this.User1.Id, isUserAdmin: false),
-			Throws.TypeOf<InvalidOperationException>());
-		}
-
-		[Test]
-		public async Task GetAccountsCountAsync_ShouldReturnAccountsCount()
-		{
-			//Arrange
-			int expectedCount = await this.accountsRepo.All().CountAsync(a => !a.IsDeleted);
-
-			//Act
-			int actualCount = await this.accountsInfoService.GetAccountsCountAsync();
-
-			//Assert
-			Assert.That(actualCount, Is.EqualTo(expectedCount));
-		}
-
-		[Test]
-		public async Task GetAccountFormData_ShouldReturnCorrectData()
-		{
-			//Arrange
-			var expected = this.mapperMock.Map<CreateEditAccountDTO>(this.Account1_User1_WithTransactions);
-
-			//Act
-			CreateEditAccountDTO actual = await this.accountsInfoService
-				.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User1.Id, isUserAdmin: false);
-
-			//Assert
-			AssertAreEqualAsJson(actual, expected);
-		}
-
-		[Test]
-		public async Task GetAccountFormData_ShouldReturnCorrectData_WhenUserIsAdmin()
-		{
-			//Arrange
-			var expected = this.mapperMock.Map<CreateEditAccountDTO>(this.Account1_User1_WithTransactions);
-
-			//Act
-			CreateEditAccountDTO actual = await this.accountsInfoService
-				.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User2.Id, isUserAdmin: true);
-
-			//Assert
-			AssertAreEqualAsJson(actual, expected);
-		}
-
-		[Test]
-		public void GetAccountFormData_ShouldThrowException_WhenAccountDoesNotExist()
-		{
-			//Arrange
-			var invalidId = Guid.NewGuid();
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService
-				  .GetAccountFormDataAsync(invalidId, this.User1.Id, isUserAdmin: false),
-			Throws.TypeOf<InvalidOperationException>());
-		}
-
-		[Test]
-		public void GetAccountFormData_ShouldThrowException_WhenUserIsNotOwner()
-		{
-			//Arrange
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService
-				  .GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User2.Id, isUserAdmin: false),
-			Throws.TypeOf<InvalidOperationException>());
-		}
-
-		[Test]
-		public async Task GetTransactionFormData_ShouldReturnCorrectData_WhenTransactionIsNotInitial()
-		{
-			//Arrange
-			CreateEditTransactionDTO expected = await this.transactionsRepo.All()
-				.Where(t => t.Id == this.Transaction1_Expense_Account1_User1.Id)
-				.ProjectTo<CreateEditTransactionDTO>(this.mapperMock.ConfigurationProvider)
-				.FirstAsync();
-
-			//Act
-			CreateEditTransactionDTO actual = await this.accountsInfoService
-				.GetTransactionFormDataAsync(this.Transaction1_Expense_Account1_User1.Id, this.User1.Id, isUserAdmin: false);
-
-			//Assert
-			AssertAreEqualAsJson(actual, expected);
-		}
-
-		[Test]
-		public void GetTransactionFormData_ShouldThrowException_WhenTransactionIsInitial()
-		{
-			//Arrange
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService
-				  .GetTransactionFormDataAsync(this.InitialTransaction_Income_Account1_User1.Id, this.User1.Id, isUserAdmin: true),
-			Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -375,48 +377,31 @@
 		}
 
 		[Test]
-		public async Task GetAccountShortDetails_ShouldReturnCorrectData_WithValidInput()
+		public async Task GetTransactionFormData_ShouldReturnCorrectData_WhenTransactionIsNotInitial()
 		{
 			//Arrange
-			AccountDetailsShortDTO expected = await this.accountsRepo.All()
-				.Where(a => a.Id == this.Account1_User1_WithTransactions.Id)
-				.ProjectTo<AccountDetailsShortDTO>(this.mapperMock.ConfigurationProvider)
+			CreateEditTransactionDTO expected = await this.transactionsRepo.All()
+				.Where(t => t.Id == this.Transaction1_Expense_Account1_User1.Id)
+				.ProjectTo<CreateEditTransactionDTO>(this.mapperMock.ConfigurationProvider)
 				.FirstAsync();
 
 			//Act
-			AccountDetailsShortDTO actual = await this.accountsInfoService
-				.GetAccountShortDetailsAsync(this.Account1_User1_WithTransactions.Id);
+			CreateEditTransactionDTO actual = await this.accountsInfoService
+				.GetTransactionFormDataAsync(this.Transaction1_Expense_Account1_User1.Id, this.User1.Id, isUserAdmin: false);
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
-		public void GetAccountShortDetails_ShouldThrowException_WithInvalidInput()
+		public void GetTransactionFormData_ShouldThrowException_WhenTransactionIsInitial()
 		{
 			//Arrange
-			var invalidId = Guid.NewGuid();
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService.GetAccountShortDetailsAsync(invalidId),
+			Assert.That(async () => await this.accountsInfoService
+				  .GetTransactionFormDataAsync(this.InitialTransaction_Income_Account1_User1.Id, this.User1.Id, isUserAdmin: true),
 			Throws.TypeOf<InvalidOperationException>());
-		}
-
-		[Test]
-		public async Task GetUserAccounts_ShouldReturnUsersAccounts_WithValidId()
-		{
-			//Arrange
-			List<AccountCardDTO> expected = await this.accountsRepo.All()
-				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
-				.OrderBy(a => a.Name)
-				.ProjectTo<AccountCardDTO>(this.mapperMock.ConfigurationProvider)
-				.ToListAsync();
-
-			//Act
-			IEnumerable<AccountCardDTO> actual = await this.accountsInfoService.GetUserAccountsCardsAsync(this.User1.Id);
-
-			//Assert
-			AssertAreEqualAsJson(actual, expected);
 		}
 	}
 }

@@ -88,6 +88,23 @@
 		}
 
 		[Test]
+		public async Task GetUserAccountsCards_ShouldReturnUsersAccounts_WithValidId()
+		{
+			//Arrange
+			List<AccountCardDTO> expected = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
+				.OrderBy(a => a.Name)
+				.ProjectTo<AccountCardDTO>(this.mapperMock.ConfigurationProvider)
+				.ToListAsync();
+
+			//Act
+			IEnumerable<AccountCardDTO> actual = await this.usersService.GetUserAccountsCardsAsync(this.User1.Id);
+
+			//Assert
+			AssertAreEqualAsJson(actual, expected);
+		}
+
+		[Test]
 		public async Task GetUserAccountTypesAndCurrenciesDropdownDataAsync_ShouldReturnCorrectData()
 		{
 			//Arrange

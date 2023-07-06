@@ -1,15 +1,18 @@
 ﻿namespace PersonalFinancer.Services.User
 {
 	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Services.User.Models;
 
 	public interface IUsersService
 	{
-		Task<IEnumerable<string>> GetAdminsIds();
+		Task<IEnumerable<string>> GetAdminsIdsAsync();
 
 		Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownDataAsync(Guid userId);
 
-        Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownDataAsync(Guid userId);
+		Task<IEnumerable<AccountCardDTO>> GetUserAccountsCardsAsync(Guid userId);
+
+		Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownDataAsync(Guid userId);
 		
 		Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime startDate, DateTime endDate);
 

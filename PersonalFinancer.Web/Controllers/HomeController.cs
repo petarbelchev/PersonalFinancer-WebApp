@@ -1,28 +1,21 @@
 ﻿namespace PersonalFinancer.Web.Controllers
 {
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Services.Accounts;
-    using PersonalFinancer.Services.User;
-    using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Extensions;
-    using PersonalFinancer.Web.Models.Home;
-    using PersonalFinancer.Web.Models.Shared;
-    using static PersonalFinancer.Common.Constants.UrlPathConstants;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.Models.Home;
+	using PersonalFinancer.Web.Models.Shared;
+	using static PersonalFinancer.Common.Constants.UrlPathConstants;
 
-    public class HomeController : Controller
+	public class HomeController : Controller
     {
-        private readonly IUsersService userService;
-        private readonly IAccountsInfoService accountsInfoService;
+        private readonly IUsersService usersService;
 
-		public HomeController(
-            IUsersService userService,
-            IAccountsInfoService accountsInfoService)
-		{
-			this.userService = userService;
-            this.accountsInfoService = accountsInfoService;
-		}
+		public HomeController(IUsersService usersService) 
+            => this.usersService = usersService;
 
 		public async Task<IActionResult> Index()
         {
@@ -34,7 +27,7 @@
                 DateTime startDate = DateTime.Now.AddMonths(-1);
                 DateTime endDate = DateTime.Now;
 
-                UserDashboardDTO userDashboardData = await this.userService
+                UserDashboardDTO userDashboardData = await this.usersService
                     .GetUserDashboardDataAsync(this.User.IdToGuid(), startDate, endDate);
 
                 var viewModel = new UserDashboardViewModel
@@ -64,13 +57,13 @@
 
             if (!this.ModelState.IsValid)
             {
-                viewModel.Accounts = await this.accountsInfoService.GetUserAccountsCardsAsync(this.User.IdToGuid());
+                viewModel.Accounts = await this.usersService.GetUserAccountsCardsAsync(this.User.IdToGuid());
 
                 return this.View(viewModel);
             }
 
             UserDashboardDTO userDashboardData =
-                await this.userService.GetUserDashboardDataAsync(
+                await this.usersService.GetUserDashboardDataAsync(
                     this.User.IdToGuid(), 
                     viewModel.StartDate ?? throw new InvalidOperationException(
                         string.Format(ExceptionMessages.NotNullableProperty, inputModel.StartDate)), 

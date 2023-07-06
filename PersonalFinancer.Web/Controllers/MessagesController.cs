@@ -64,7 +64,7 @@
                     Content = model.Content
                 });
 
-			IEnumerable<string> adminsIds = await this.usersService.GetAdminsIds();
+			IEnumerable<string> adminsIds = await this.usersService.GetAdminsIdsAsync();
 
 			await this.notificationsHub.Clients
 				.Users(adminsIds)
@@ -82,7 +82,7 @@
 		{
 			IEnumerable<string> ids = this.User.IsAdmin()
 				? new List<string> { await this.messagesService.GetMessageAuthorIdAsync(id) }
-				: await this.usersService.GetAdminsIds();
+				: await this.usersService.GetAdminsIdsAsync();
 
 			try
 			{

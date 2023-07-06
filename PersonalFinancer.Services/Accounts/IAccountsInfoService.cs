@@ -40,7 +40,5 @@
 
 		/// <exception cref="InvalidOperationException">When the transaction does not exist.</exception>
 		Task<Guid> GetTransactionOwnerIdAsync(Guid transactionId);
-
-		Task<IEnumerable<AccountCardDTO>> GetUserAccountsCardsAsync(Guid userId);
 	}
 }

@@ -81,11 +81,11 @@
 				.GetUserDashboardDataAsync(this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
 				.ReturnsAsync(this.expUserDashboard);
 
-			this.accountsInfoServiceMock.Setup(x => x
+			this.usersServiceMock.Setup(x => x
 				.GetUserAccountsCardsAsync(this.userId))
 				.ReturnsAsync(this.expAccountCard);
 
-			this.controller = new HomeController(this.usersServiceMock.Object, this.accountsInfoServiceMock.Object)
+			this.controller = new HomeController(this.usersServiceMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
