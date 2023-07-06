@@ -24,6 +24,7 @@
 					NormalizedUserName = "ADMIN",
 					PhoneNumber = "0987654321",
 					EmailConfirmed = true,
+					IsAdmin = true
 				};
 
 				IdentityResult creationResult =

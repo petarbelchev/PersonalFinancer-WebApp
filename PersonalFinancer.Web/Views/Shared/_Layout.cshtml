@@ -30,29 +30,33 @@
 
 				<div class="collapse navbar-collapse" id="navbarNav">
 					<ul class="navbar-nav flex-grow-1">
-						@if ((User?.Identity?.IsAuthenticated ?? false) && !User.IsAdmin())
+						@if (this.User.IsAuthenticated())
 						{
-							<a class="nav-link text-light" asp-area="" asp-controller="Transactions" asp-action="All">Transactions</a>
-							<li class="nav-item dropdown">
-								<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-									Create
-								</a>
-								<ul class="dropdown-menu dropdown-menu-end">
-									<li class="dropdown-item">
-										<a class="nav-link text-dark" asp-area="" asp-controller="Transactions" asp-action="Create">Transaction</a>
-									</li>
-									<li class="dropdown-item">
-										<a class="nav-link text-dark" asp-area="" asp-controller="Accounts" asp-action="Create">Account</a>
-									</li>
-								</ul>
-							</li>
-						}
-						else if (User?.IsAdmin() ?? false)
-						{
-							<a class="nav-link text-light" asp-area="Admin" asp-controller="Users" asp-action="Index">All Users</a>
-							<a class="nav-link text-light" asp-area="Admin" asp-controller="Accounts" asp-action="Index">All Accounts</a>
+							if (this.User.IsAdmin())
+							{
+								<a class="nav-link text-light" asp-area="Admin" asp-controller="Users" asp-action="Index">All Users</a>
+								<a class="nav-link text-light" asp-area="Admin" asp-controller="Accounts" asp-action="Index">All Accounts</a>
+							}
+							else
+							{
+								<a class="nav-link text-light" asp-area="" asp-controller="Transactions" asp-action="All">Transactions</a>
+								<li class="nav-item dropdown">
+									<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+										Create
+									</a>
+									<ul class="dropdown-menu dropdown-menu-end">
+										<li class="dropdown-item">
+											<a class="nav-link text-dark" asp-area="" asp-controller="Transactions" asp-action="Create">Transaction</a>
+										</li>
+										<li class="dropdown-item">
+											<a class="nav-link text-dark" asp-area="" asp-controller="Accounts" asp-action="Create">Account</a>
+										</li>
+									</ul>
+								</li>
+							}
 						}
 					</ul>
+
 					<partial name="_LoginPartial" />
 				</div>
 
@@ -84,6 +88,15 @@
 
 	<script src="~/lib/jquery/dist/jquery.min.js"></script>
 	<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+	@if (this.User.IsAuthenticated())
+	{
+		<script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+		<script>
+			let userId = '@this.User.Id()';
+		</script>
+		<script src="~/js/hubs/notificationsHub.js"></script>
+	}
 
 	@await RenderSectionAsync("Scripts", required: false)
 

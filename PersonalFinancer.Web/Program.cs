@@ -3,6 +3,7 @@ using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.EmailSender;
 using PersonalFinancer.Web.Extensions;
+using PersonalFinancer.Web.Hubs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,8 @@ builder.ConfigureDefaultIdentity();
 builder.ConfigureControllersWithViews();
 
 builder.AddServices();
+
+builder.Services.AddSignalR();
 
 builder.Services.AddAutoMapper(typeof(IAccountsUpdateService).Assembly, typeof(HomeController).Assembly);
 
@@ -55,6 +58,10 @@ app.UseEndpoints(endpoints =>
 
     endpoints.MapDefaultControllerRoute();
 });
+
+app.MapHub<MessageHub>("/message");
+app.MapHub<NotificationsHub>("/notifications");
+app.MapHub<AllMessagesHub>("/allMessages");
 
 app.MapRazorPages();
 

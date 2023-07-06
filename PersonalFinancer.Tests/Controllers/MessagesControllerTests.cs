@@ -2,44 +2,57 @@
 {
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.AspNetCore.SignalR;
 	using Moq;
 	using NUnit.Framework;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Web.Controllers;
+	using PersonalFinancer.Web.Hubs;
 	using PersonalFinancer.Web.Models.Message;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[TestFixture]
     internal class MessagesControllerTests : ControllersUnitTestsBase
 	{
-        private string userName;
-        private string secondUserId;
-        private string secondUserName;
-        private string adminId;
-        private string adminName;
 		private ICollection<Message> fakeCollection;
 		private Mock<IMessagesService> messagesServiceMock;
-        private MessagesController controller;
+        private Mock<IHubContext<AllMessagesHub>> allMessagesHubMock;
+        private Mock<IHubContext<NotificationsHub>> notificationsHubMock;
+		private MessagesController controller;
 
         [SetUp]
         public void SetUp()
         {
-            this.userName = "CurrentUser";
-            this.secondUserId = "secondUserId";
-            this.secondUserName = "SecondUserName";
-            this.adminId = "adminId";
-            this.adminName = "AdminName";
-
             this.fakeCollection = this.SeedFakeCollection();
-
             this.messagesServiceMock = new Mock<IMessagesService>();
-			
-            this.controller = new MessagesController(
+
+            this.allMessagesHubMock = new Mock<IHubContext<AllMessagesHub>>();
+            this.notificationsHubMock = new Mock<IHubContext<NotificationsHub>>();
+
+            var clientProxyMock = new Mock<IClientProxy>();
+            clientProxyMock.Setup(x => x
+                .SendCoreAsync(
+                    It.IsAny<string>(), 
+                    It.IsAny<object[]>(), 
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            var iHubClientsMock = new Mock<IHubClients>();
+            iHubClientsMock.Setup(x => x
+                .Users(It.IsAny<IReadOnlyList<string>>()))
+                .Returns(clientProxyMock.Object);
+
+            this.notificationsHubMock.Setup(x => x.Clients).Returns(iHubClientsMock.Object);
+            this.allMessagesHubMock.Setup(x => x.Clients).Returns(iHubClientsMock.Object);
+
+			this.controller = new MessagesController(
 				this.messagesServiceMock.Object,
 				this.usersServiceMock.Object,
-				this.mapper)
+				this.mapper,
+                this.allMessagesHubMock.Object,
+                this.notificationsHubMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -80,7 +93,7 @@
             {
                 Assert.That(viewResult, Is.Not.Null);
 
-				var viewModel = viewResult.Model as IEnumerable<MessageOutputDTO> ??
+				IEnumerable<MessageOutputDTO> viewModel = viewResult.Model as IEnumerable<MessageOutputDTO> ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
@@ -115,7 +128,7 @@
             {
                 Assert.That(viewResult, Is.Not.Null);
 
-				var viewModel = viewResult.Model as IEnumerable<MessageOutputDTO> ??
+				IEnumerable<MessageOutputDTO> viewModel = viewResult.Model as IEnumerable<MessageOutputDTO> ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
@@ -186,29 +199,35 @@
             };
 
             string userFullName = "User Full Name";
-            string newMessageId = "new message id";
 
-            this.usersServiceMock.Setup(x => x
+            var expected = new MessageOutputDTO
+            {
+                Id = "new message id",
+                Subject = inputModel.Subject,
+                IsSeen = true,
+			};
+
+			this.usersServiceMock.Setup(x => x
                 .UserFullNameAsync(this.userId))
                 .ReturnsAsync(userFullName);
 
-            this.messagesServiceMock.Setup(x =>
-                x.CreateAsync(It.Is<MessageInputDTO>(m =>
+            this.messagesServiceMock.Setup(x => x
+                .CreateAsync(It.Is<MessageInputDTO>(m =>
                     m.Subject == inputModel.Subject
                     && m.Content == inputModel.Content
                     && m.AuthorId == this.userId.ToString()
                     && m.AuthorName == userFullName)))
-                .ReturnsAsync(newMessageId);
+                .ReturnsAsync(expected);
 
             //Act
-            var result = (RedirectToActionResult)await this.controller.Create(inputModel);
+            var actual = (RedirectToActionResult)await this.controller.Create(inputModel);
 
             //Assert
             Assert.Multiple(() =>
             {
-                Assert.That(result.ActionName, Is.EqualTo("MessageDetails"));
-                Assert.That(result.RouteValues, Is.Not.Null);
-                AssertRouteValueIsEqual(result.RouteValues!, "id", newMessageId);
+                Assert.That(actual.ActionName, Is.EqualTo("MessageDetails"));
+                Assert.That(actual.RouteValues, Is.Not.Null);
+                AssertRouteValueIsEqual(actual.RouteValues!, "id", expected.Id);
             });
         }
 
@@ -326,188 +345,6 @@
             Assert.That(result.StatusCode, Is.EqualTo(400));
         }
 
-        [Test]
-        public async Task MessageDetails_OnPost_ShouldReturnViewModelWithErrors_WhenTryToAddInvalidReply()
-        {
-            //Arrange
-            var inputModel = new ReplyInputModel
-            {
-                Id = "1",
-                ReplyContent = ""
-            };
-
-			MessageDetailsDTO serviceReturnDto = this.fakeCollection
-                .Where(m => m.Id == inputModel.Id)
-                .Select(m => this.mapper.Map<MessageDetailsDTO>(m))
-                .First();
-
-            this.userMock.Setup(x => x
-                .IsInRole(AdminRoleName))
-                .Returns(false);
-
-            this.messagesServiceMock.Setup(x => x
-                .GetMessageAsync(inputModel.Id, this.userId.ToString(), false))
-                .ReturnsAsync(serviceReturnDto);
-
-            this.controller.ModelState.AddModelError(nameof(inputModel.ReplyContent), "Invalid content.");
-
-            //Act
-            var viewResult = (ViewResult)await this.controller.MessageDetails(inputModel);
-
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(viewResult, Is.Not.Null);
-
-				MessageDetailsViewModel viewModel = viewResult.Model as MessageDetailsViewModel ??
-					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
-
-				AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
-
-				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.ReplyContent), "Invalid content.");
-            });
-        }
-
-        [Test]
-        public async Task MessageDetails_OnPost_ShouldReturnBadRequest_WhenModelIsInvalidAndExceptionWasThrowed()
-        {
-            //Arrange
-            var inputModel = new ReplyInputModel
-            {
-                Id = "Message id",
-                ReplyContent = ""
-            };
-
-            this.userMock.Setup(x => x
-                .IsInRole(AdminRoleName))
-                .Returns(false);
-
-            this.controller.ModelState.AddModelError(nameof(inputModel.ReplyContent), "Invalid content.");
-            
-            this.messagesServiceMock.Setup(x => x
-                .GetMessageAsync(inputModel.Id, this.userId.ToString(), false))
-                .Throws<InvalidOperationException>();
-
-            //Act
-            var result = (BadRequestResult)await this.controller.MessageDetails(inputModel);
-
-            //Assert
-            Assert.That(result.StatusCode, Is.EqualTo(400));
-        }
-
-        [Test]
-        public async Task MessageDetails_OnPost_ShouldRedirectToAction_WhenReplyWasAdded()
-        {
-            //Arrange
-            var inputModel = new ReplyInputModel
-            {
-                Id = "Message id",
-                ReplyContent = "Reply content"
-            };
-
-            string userName = "username";
-
-            this.userMock.Setup(x => x
-                .IsInRole(AdminRoleName))
-                .Returns(false);
-
-            this.usersServiceMock.Setup(x => x
-                .UserFullNameAsync(this.userId))
-                .ReturnsAsync(userName);
-
-            //Act
-            var result = (RedirectToActionResult)await this.controller.MessageDetails(inputModel);
-
-            this.messagesServiceMock.Verify(x => x
-                .AddReplyAsync(It.Is<ReplyInputDTO>(m =>
-                    m.MessageId == inputModel.Id
-                    && m.IsAuthorAdmin == false
-                    && m.Content == inputModel.ReplyContent
-                    && m.AuthorName == userName
-                    && m.AuthorId == this.userId.ToString())),
-                Times.Once);
-
-            //Assert
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.ActionName, Is.EqualTo("MessageDetails"));
-                Assert.That(result.RouteValues, Is.Not.Null);
-                AssertRouteValueIsEqual(result.RouteValues!, "id", inputModel.Id);
-            });
-        }
-
-        [Test]
-        public async Task MessageDetails_OnPost_ShouldReturnUnauthorized_WhenUserIsNotOwnerOrAdmin()
-        {
-            //Arrange
-            var inputModel = new ReplyInputModel
-            {
-                Id = "Message id",
-                ReplyContent = "Reply content"
-            };
-
-            string userName = "username";
-
-            this.userMock.Setup(x => x
-                .IsInRole(AdminRoleName))
-                .Returns(false);
-
-            this.usersServiceMock.Setup(x => x
-                .UserFullNameAsync(this.userId))
-                .ReturnsAsync(userName);
-
-            this.messagesServiceMock.Setup(x => x
-                .AddReplyAsync(It.Is<ReplyInputDTO>(m =>
-                    m.MessageId == inputModel.Id
-                    && m.IsAuthorAdmin == false
-                    && m.Content == inputModel.ReplyContent
-                    && m.AuthorName == userName
-                    && m.AuthorId == this.userId.ToString())))
-                .Throws<ArgumentException>();
-
-            //Act
-            var result = (UnauthorizedResult)await this.controller.MessageDetails(inputModel);
-
-            //Assert
-            Assert.That(result.StatusCode, Is.EqualTo(401));
-        }
-
-        [Test]
-        public async Task MessageDetails_OnPost_ShouldReturnBadRequest_WhenAddingReplyWasUnsuccessful()
-        {
-            //Arrange
-            var inputModel = new ReplyInputModel
-            {
-                Id = "Message id",
-                ReplyContent = "Reply content"
-            };
-
-            string userName = "user name";
-
-            this.userMock.Setup(x => x
-                .IsInRole(AdminRoleName))
-                .Returns(false);
-
-            this.usersServiceMock.Setup(x => x
-                .UserFullNameAsync(this.userId))
-                .ReturnsAsync(userName);
-
-            this.messagesServiceMock.Setup(x => x
-                .AddReplyAsync(It.Is<ReplyInputDTO>(m =>
-                    m.MessageId == inputModel.Id
-                    && m.IsAuthorAdmin == false
-                    && m.Content == inputModel.ReplyContent
-                    && m.AuthorName == userName
-                    && m.AuthorId == this.userId.ToString())))
-                .Throws<InvalidOperationException>();
-
-            //Act
-            var result = (BadRequestResult)await this.controller.MessageDetails(inputModel);
-
-            //Assert
-            Assert.That(result.StatusCode, Is.EqualTo(400));
-        }
-
 		private ICollection<Message> SeedFakeCollection()
 		{
 			return new List<Message>
@@ -518,14 +355,14 @@
 					CreatedOn = DateTime.UtcNow,
 					Subject = "First User First Message",
 					AuthorId = this.userId.ToString(),
-					AuthorName = this.userName,
+					AuthorName = "First User username",
 					Content = "First User First Message Content",
 					Replies = new List<Reply>
 					{
 						new Reply
 						{
-							AuthorId = this.adminId,
-							AuthorName = this.adminName,
+							AuthorId = "admin ID",
+							AuthorName = "Admin Name",
 							Content = "Admin First Message Reply Content",
 							CreatedOn = DateTime.UtcNow
 						}
@@ -537,7 +374,7 @@
 					CreatedOn = DateTime.UtcNow,
 					Subject = "First User Second Message",
 					AuthorId = this.userId.ToString(),
-					AuthorName = this.userName,
+					AuthorName = "First User username",
 					Content = "First User Second Message Content",
 				},
 				new Message
@@ -545,8 +382,8 @@
 					Id = "3",
 					CreatedOn = DateTime.UtcNow,
 					Subject = "Second User First Message",
-					AuthorId = this.secondUserId,
-					AuthorName = this.secondUserName,
+					AuthorId = "Second User ID",
+					AuthorName = "Second User Name",
 					Content = "Second User First Message Content",
 				}
 			};

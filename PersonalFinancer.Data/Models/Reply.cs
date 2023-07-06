@@ -2,7 +2,9 @@
 {
     public class Reply
     {
-        public string AuthorId { get; set; } = null!;
+		public Reply() => this.CreatedOn = DateTime.UtcNow;
+
+		public string AuthorId { get; set; } = null!;
 
         public string AuthorName { get; set; } = null!;
 

@@ -288,17 +288,6 @@
 				Assert.That(model.CategoryId, Is.Null);
 
 				AssertSamePropertiesValuesAreEqual(model, expAccountsAndCategories);
-
-				Assert.That(model.TransactionTypes, Has.Count.EqualTo(transactionTypes.Length));
-
-				for (int i = 0; i < transactionTypes.Length; i++)
-				{
-					Assert.That(model.TransactionTypes[i].Value,
-						Is.EqualTo(transactionTypes[i].ToString()));
-
-					Assert.That(model.TransactionTypes[i].Text,
-						Is.EqualTo(transactionTypes[i].ToString()));
-				}
 			});
 		}
 

@@ -20,8 +20,10 @@
 
         public const string InvalidCategory = "Invalid Category.";
 
+        public const string UnsuccessfulUpdate = "Update was unsuccessful.";
+
         public const string UnsuccessfulDelete = "Delete was unsuccessful.";
 
-        public const string NotNullableProperty = "{0} cannot be null.";
+		public const string NotNullableProperty = "{0} cannot be null.";
     }
 }

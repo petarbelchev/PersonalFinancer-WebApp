@@ -12,6 +12,8 @@
 		Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime startDate, DateTime endDate);
 
         Task<UserDropdownDTO> GetUserDropdownDataAsync(Guid userId);
+
+		Task<IEnumerable<string>> GetAdminsIds();
 	
         Task<UsersInfoDTO> GetUsersInfoAsync(int page);
 

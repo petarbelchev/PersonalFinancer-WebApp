@@ -14,8 +14,14 @@
         public MongoRepository(IMongoDbContext context)
            => this.collection = context.GetCollection<T>(typeof(T).Name);
 
-        public async Task InsertOneAsync(T entity)
-           => await this.collection.InsertOneAsync(entity);
+		public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
+            => await this.collection.AsQueryable().AnyAsync(predicate);
+
+		/// <summary>
+		/// Gets a value indicating whether the result is acknowledged.
+		/// </summary>
+		public async Task<DeleteResult> DeleteOneAsync(string documentId)
+		   => await this.collection.DeleteOneAsync(x => x.Id == documentId);
 
         public async Task<IEnumerable<TProjected>> FindAsync<TProjected>(
            Expression<Func<T, TProjected>> projectionExpression)
@@ -44,20 +50,17 @@
               .Project(projectionExpression)
               .FirstAsync();
 
-        /// <summary>
-        /// Gets a value indicating whether the result is acknowledged.
-        /// </summary>
-        public async Task<DeleteResult> DeleteOneAsync(string documentId)
-           => await this.collection.DeleteOneAsync(x => x.Id == documentId);
+		public async Task InsertOneAsync(T entity)
+		   => await this.collection.InsertOneAsync(entity);
 
-        public async Task<UpdateResult> UpdateOneAsync(
+		public async Task<bool> IsUserDocumentAuthor(string documentId, string authorId)
+		   => await this.collection
+			  .AsQueryable()
+			  .AnyAsync(x => x.Id == documentId && x.AuthorId == authorId);
+
+		public async Task<UpdateResult> UpdateOneAsync(
            Expression<Func<T, bool>> filterExpression,
            UpdateDefinition<T> update)
            => await this.collection.UpdateOneAsync(filterExpression, update);
-
-        public async Task<bool> IsUserDocumentAuthor(string documentId, string authorId)
-           => await this.collection
-              .AsQueryable()
-              .AnyAsync(x => x.Id == documentId && x.AuthorId == authorId);
-    }
+	}
 }

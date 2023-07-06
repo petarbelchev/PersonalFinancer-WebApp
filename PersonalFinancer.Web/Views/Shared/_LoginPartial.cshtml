@@ -1,19 +1,35 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using PersonalFinancer.Data.Models;
+@using PersonalFinancer.Services.Messages;
 @using PersonalFinancer.Services.User;
 @using PersonalFinancer.Web.Extensions;
+@inject IMessagesService messagesService;
 
 <ul class="navbar-nav">
-	@if (User?.Identity?.IsAuthenticated ?? false)
+	@if (this.User.IsAuthenticated())
 	{
-		if (User.IsAdmin())
+		if (this.User.IsAdmin())
 		{
-			<a class="nav-link text-light" asp-area="" asp-controller="Messages" asp-action="AllMessages">Users Messages</a>
+			<a class="nav-link text-light navpanMessagesBtn" asp-area="" asp-controller="Messages" asp-action="AllMessages">
+				Users Messages
+
+				@if (await this.messagesService.HasUnseenMessagesByAdminAsync())
+				{
+					<span class="badge text-bg-danger">New messages</span>
+				}
+			</a>
 		}
 		else
 		{
 			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Contact Us</a>
+				<a class="nav-link dropdown-toggle text-light navpanMessagesBtn" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+					Contact Us
+					
+					@if (await this.messagesService.HasUnseenMessagesByUserAsync(this.User.Id()))
+					{
+						<span class="badge text-bg-danger">New messages</span>
+					}
+				</a>
 				<ul class="dropdown-menu dropdown-menu-end">
 					<li class="nav-link btn btn-link dropdown-item">
 						<a class="text-dark" asp-area="" asp-controller="Messages" asp-action="Create" style="text-decoration: none;">Write Message</a>
@@ -24,6 +40,7 @@
 				</ul>
 			</li>
 		}
+
 		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 				@User.GetUserName()

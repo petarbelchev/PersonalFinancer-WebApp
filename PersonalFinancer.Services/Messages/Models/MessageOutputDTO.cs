@@ -7,5 +7,7 @@
         public DateTime CreatedOn { get; set; }
 
         public string Subject { get; set; } = null!;
-	}
+
+        public bool IsSeen { get; set; }
+    }
 }

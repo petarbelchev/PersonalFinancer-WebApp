@@ -14,6 +14,9 @@
         [MaxLength(UserLastNameMaxLength)]
         public string LastName { get; set; } = null!;
 
+        [Required]
+        public bool IsAdmin { get; set; }
+
         public ICollection<Account> Accounts { get; set; } 
             = new HashSet<Account>();
 
