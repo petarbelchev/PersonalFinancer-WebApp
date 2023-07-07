@@ -6,64 +6,62 @@
 	ViewData["Title"] = "Transactions";
 }
 
-<h1 class="display-6 text-center">@ViewData["Title"]</h1>
-
 <div class="row justify-content-center">
-	<div class="col-12 col-sm-4 col-md-3">
+	<div class="col-10 col-sm-8 col-md-4 col-lg-3">
 
 		@*Transactions Filter*@
 		<form method="post">
-			<div class="form-floating card shadow">
+			<div class="form-floating card shadow mb-2">
 				<input type="datetime-local" name="@nameof(Model.StartDate)" value="@Model.StartDate?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
 				<label asp-for="@Model.StartDate" class="form-label"></label>
 				<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
 			</div>
-			<div class="form-floating formField card shadow">
+			<div class="form-floating card shadow mb-2">
 				<input type="datetime-local" name="@nameof(Model.EndDate)" value="@Model.EndDate?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
 				<label asp-for="@Model.EndDate" class="form-label"></label>
 				<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
 			</div>
-			<select class="form-select formField card shadow" asp-for="@Model.AccountId">
+			<select class="form-select card shadow mb-2" asp-for="@Model.AccountId">
 				<option value="">All Accounts</option>
 				@foreach (var account in Model.OwnerAccounts)
 				{
 					<option value="@account.Id">@account.Name</option>
 				}
 			</select>
-			<select class="form-select formField card shadow" asp-for="@Model.AccountTypeId">
+			<select class="form-select card shadow mb-2" asp-for="@Model.AccountTypeId">
 				<option value="">All Account Types</option>
 				@foreach (var accountType in Model.OwnerAccountTypes)
 				{
 					<option value="@accountType.Id">@accountType.Name</option>
 				}
 			</select>
-			<select class="form-select formField card shadow" asp-for="@Model.CurrencyId">
+			<select class="form-select card shadow mb-2" asp-for="@Model.CurrencyId">
 				<option value="">All Currensies</option>
 				@foreach (var currency in Model.OwnerCurrencies)
 				{
 					<option value="@currency.Id">@currency.Name</option>
 				}
 			</select>
-			<select class="form-select formField card shadow" asp-for="@Model.CategoryId">
+			<select class="form-select card shadow mb-2" asp-for="@Model.CategoryId">
 				<option value="">All Categories</option>
 				@foreach (var category in Model.OwnerCategories)
 				{
 					<option value="@category.Id">@category.Name</option>
 				}
 			</select>
-			<div class="formField card shadow mb-4">
+			<div class=" card shadow mb-4">
 				<button type="submit" class="btn btn-secondary form-control">Filter</button>
 			</div>
 		</form>
 
 	</div>
-	<div class="col-12 col-sm-8 col-md-9">
+	<div class="col-12 col-sm-12 col-md-8 col-lg-9">
 		@if (Model.Transactions.Any())
 		{
 			@*Transactions Table*@
 			<div class="card shadow mb-4">
 				<div class="card-header">
-					<h6 class="text-center">Transactions matching the specified criteria</h6>
+					<h1 class="display-6 text-center">@ViewData["Title"]</h1>
 				</div>
 				<partial name="_TransactionsTablePartial" />
 			</div>
@@ -74,7 +72,7 @@
 		else
 		{
 			@*No Transactions Page*@
-			<div class="text-center" style="margin-top: 50px;">
+			<div class="text-center mt-4">
 				<p class="display-6 fs-4">
 					You have no transactions matching the specified criteria.
 				</p>

@@ -68,14 +68,18 @@
 					page))
 				.ReturnsAsync(expected);
 
+			this.repoMock.Setup(x => x
+				.CountAsync())
+				.ReturnsAsync(this.fakeCollection.Count);
+
 			//Act
-			IEnumerable<MessageOutputDTO> actual = await this.messagesService.GetAllAsync();
+			MessagesDTO actual = await this.messagesService.GetAllAsync();
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(actual.Count(), Is.EqualTo(expected.Length));
-				AssertAreEqualAsJson(actual, expected);
+				Assert.That(actual.TotalMessagesCount, Is.EqualTo(this.fakeCollection.Count));
+				AssertAreEqualAsJson(actual.Messages, expected);
 			});
 		}
 
@@ -112,14 +116,20 @@
 					page))
 				.ReturnsAsync(expected);
 
+			this.repoMock.Setup(x => x
+				.CountAsync())
+				.ReturnsAsync(this.fakeCollection.Count);
+
 			//Act
-			IEnumerable<MessageOutputDTO> actual = await this.messagesService.GetUserMessagesAsync(userId);
+			MessagesDTO actual = await this.messagesService.GetUserMessagesAsync(userId);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(actual.Count(), Is.EqualTo(expected.Length));
-				AssertAreEqualAsJson(actual, expected);
+				Assert.That(actual.TotalMessagesCount, 
+					Is.EqualTo(this.fakeCollection.Count(m => m.AuthorId == this.FirstUserId)));
+
+				AssertAreEqualAsJson(actual.Messages, expected);
 			});
 		}
 

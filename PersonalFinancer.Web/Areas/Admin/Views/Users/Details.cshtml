@@ -6,38 +6,40 @@
 
 <h1 class="display-6 text-center">@ViewData["Title"]</h1>
 <div class="row">
-	<div class="col-lg-4" style="margin-top: 25px;">
+	<div class="col-lg-4 mt-4">
 		<div class="card shadow">
 			<div class="card-header">
 				<h6>Person Information:</h6>
 			</div>
-			<table class="table table-hover">
-				<tbody>
-					<tr>
-						<td>First Name:</td>
-						<td>@Model.FirstName</td>
-					</tr>
-					<tr>
-						<td>Last Name:</td>
-						<td>@Model.LastName</td>
-					</tr>
-					<tr>
-						<td>Username:</td>
-						<td>@Model.UserName</td>
-					</tr>
-					<tr>
-						<td>Email:</td>
-						<td>@Model.Email</td>
-					</tr>
-					<tr>
-						<td>Phone Number:</td>
-						<td>@Model.PhoneNumber</td>
-					</tr>
-				</tbody>
-			</table>
+			<div class="table-responsive">
+				<table class="table table-hover">
+					<tbody>
+						<tr>
+							<td>First Name:</td>
+							<td>@Model.FirstName</td>
+						</tr>
+						<tr>
+							<td>Last Name:</td>
+							<td>@Model.LastName</td>
+						</tr>
+						<tr>
+							<td>Username:</td>
+							<td>@Model.UserName</td>
+						</tr>
+						<tr>
+							<td>Email:</td>
+							<td>@Model.Email</td>
+						</tr>
+						<tr>
+							<td>Phone Number:</td>
+							<td>@Model.PhoneNumber</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
-	<div class="col-lg-8" style="margin-top: 25px;">
+	<div class="col-lg-8 mt-4">
 		<div class="card shadow">
 			<div class="card-header">
 				<h6>Accounts</h6>
@@ -46,14 +48,14 @@
 				@foreach (var account in Model.Accounts)
 				{
 					<div class="col-md-6 col-sm-12" role="button" onclick="location.href='@Url.Action("AccountDetails", "Accounts", new { id = account.Id })'">
-						<div class="card shadow formField align-items-center" style="margin-left: 2px; margin-right: 2px;">
+						<div class="card shadow align-items-center m-3">
 							<div class="d-flex flex-row align-items-center mb-2">
 								<div class="p-2">
-									<img src="/icons/icons8-wallet-64.png">
+									<img src="/icons/icons8-wallet-64.png" style="width: 50px;">
 								</div>
 								<div class="card-body p-2 flex-grow-1">
-									<h5 class="card-title">@account.Name</h5>
-									<p class="card-text">@account.Balance @account.CurrencyName</p>
+									<h5 class="card-title display-6 fs-5"><b>@account.Name</b></h5>
+									<p class="card-text display-6 fs-6">@account.Balance @account.CurrencyName</p>
 								</div>
 							</div>
 						</div>

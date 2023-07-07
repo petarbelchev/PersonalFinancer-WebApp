@@ -7,53 +7,53 @@
 }
 
 
-<div class="row d-flex justify-content-center">
-	<div class="col-md-10 col-lg-8">
-
-		<partial name="_PaginationPartial" />
-
+<div class="row">
+	<div class="justify-content-center">
 		<div id="tableContainer" class="card shadow">
 			<div class="card-header">
-				<p class="display-6 text-center">@ViewData["Title"]</p>
+				<h1 class="display-6 text-center">@ViewData["Title"]</h1>
 			</div>
-			<table class="table table-hover">
-				<thead>
-					<tr>
-						<th scope="col">Subject</th>
-						<th scope="col">Date</th>
-					</tr>
-				</thead>
-				<tbody style="vertical-align: text-top;">
+			<div class="table-responsive">
+				<table class="table table-hover align-middle">
+					<thead>
+						<tr>
+							<th scope="col">Subject</th>
+							<th scope="col">Date</th>
+						</tr>
+					</thead>
+					<tbody>
 
-					@if (Model.Messages.Any())
-					{
-						@foreach (var message in Model.Messages)
+						@if (Model.Messages.Any())
 						{
-							<tr role="button" onclick="location.href='@Url.Action("MessageDetails", "Messages", new { id = message.Id })'">
-								<td messageId="@message.Id">
-									<img src="/icons/icons8-message-64.png" style="max-width: 30px;" />
-									<span>	@message.Subject</span>
+							@foreach (var message in Model.Messages)
+							{
+								<tr role="button" onclick="location.href='@Url.Action("MessageDetails", "Messages", new { id = message.Id })'">
+									<td messageId="@message.Id">
+										<img src="/icons/icons8-message-64.png" style="max-width: 30px;" />
+										<span>	@message.Subject</span>
 
-									@if (!message.IsSeen)
-									{
-										<span class="badge text-bg-danger">New messages</span>
-									}
-								</td>
-								<td>@message.CreatedOn.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</td>
-							</tr>
+										@if (!message.IsSeen)
+										{
+											<span class="badge text-bg-danger">New messages</span>
+										}
+
+									</td>
+									<td>@message.CreatedOn.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</td>
+								</tr>
+							}
 						}
-					}
 
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+			</div>
 		</div>
-
 		<partial name="_PaginationPartial" />
 
 		@if (!Model.Messages.Any())
 		{
 			<p id="noMessagesNote" class="display-6 fs-4 text-center">You don't have any messages.</p>
 		}
+
 	</div>
 </div>
 

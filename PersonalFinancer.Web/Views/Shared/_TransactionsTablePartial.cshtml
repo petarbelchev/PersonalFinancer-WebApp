@@ -17,44 +17,46 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<p class="text-center" style="margin-top:20px; display: none;">
+				<p class="text-center mt-2" style="display: none;">
 					<i>This is an initial balance transaction. If you want to change the transaction amount, you simply adjust the account's balance.</i>
 				</p>
-				<a class="btn btn-warning" style="display: none;">Edit</a>
-				<a class="btn btn-danger">Delete</a>
+				<a class="w-100 btn btn-lg btn-warning" style="display: none;">Edit</a>
+				<a class="w-100 btn btn-lg btn-danger">Delete</a>
 			</div>
 		</div>
 	</div>
 </div>
 
 @*Table*@
-<table class="table table-hover">
-	<thead>
-		<tr>
-			<th scope="col"></th>
-			<th scope="col">Date</th>
-			<th scope="col">Category</th>
-			<th scope="col">Amount</th>
-			<th scope="col">Reference</th>
-		</tr>
-	</thead>
-	<tbody style="vertical-align: text-top;">
-		@foreach (var transaction in Model.Transactions)
-		{
-			<tr role="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" transactionId="@transaction.Id">
-				@if (transaction.TransactionType == TransactionType.Income.ToString())
-				{
-					<td><img src="/icons/greenArrow.png" style="max-width: 25px;"></td>
-				}
-				else
-				{
-					<td><img src="/icons/redArrow.png" style="max-width: 25px;"></td>
-				}
-				<td>@transaction.CreatedOn.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
-				<td>@transaction.CategoryName</td>
-				<td>@transaction.Amount @transaction.AccountCurrencyName</td>
-				<td>@transaction.Reference</td>
+<div class="table-responsive">
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th scope="col"></th>
+				<th scope="col">Date</th>
+				<th scope="col">Category</th>
+				<th scope="col">Amount</th>
+				<th scope="col">Reference</th>
 			</tr>
-		}
-	</tbody>
-</table>
+		</thead>
+		<tbody style="vertical-align: text-top;">
+			@foreach (var transaction in Model.Transactions)
+			{
+				<tr role="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" transactionId="@transaction.Id">
+					@if (transaction.TransactionType == TransactionType.Income.ToString())
+					{
+						<td><img src="/icons/greenArrow.png" style="max-width: 25px;"></td>
+					}
+					else
+					{
+						<td><img src="/icons/redArrow.png" style="max-width: 25px;"></td>
+					}
+					<td>@transaction.CreatedOn.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
+					<td>@transaction.CategoryName</td>
+					<td>@transaction.Amount @transaction.AccountCurrencyName</td>
+					<td>@transaction.Reference</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>

@@ -1,46 +1,49 @@
-﻿<div class="row">
-	<div class="d-flex justify-content-between align-items-center">
-		<p class="elementsStats">@Model.Pagination.FirstElement to @Model.Pagination.LastElement from @Model.Pagination.TotalElements @Model.Pagination.ElementsName</p>
+﻿<div class="container mt-4">
+	<div class="row">
+		<div class="col">
+			<p class="elementsStats">@Model.Pagination.FirstElement to @Model.Pagination.LastElement from @Model.Pagination.TotalElements @Model.Pagination.ElementsName</p>
+		</div>
+		<div class="col-auto ml-auto">
+			<ul class="pagination">
+				<li class="page-item disabled">
+					<a class="page-link" role="button" style="color: black;" page="@(Model.Pagination.Page - 1)"><<</a>
+				</li>
 
-		<ul class="pagination" style="margin-top: 25px;">
-			<li class="page-item disabled">
-				<a class="page-link" role="button" style="color: black;" page="@(Model.Pagination.Page - 1)"><<</a>
-			</li>
+				<li class="page-item active">
+					<a class="page-link" role="button" style="color: black; background-color: gray; border-color: gray;" page="1">1</a>
+				</li>
 
-			<li class="page-item active">
-				<a class="page-link" role="button" style="color: black; background-color: gray; border-color: gray;" page="1">1</a>
-			</li>
-
-			@for (int i = 2; i <= Model.Pagination.Pages; i++)
-			{
-				if (i == 2)
+				@for (int i = 2; i <= Model.Pagination.Pages; i++)
 				{
-					<li class="page-item" role="button">
-						<a class="page-link" style="color: black;" page="@i">@i</a>
-					</li>
-				}
-				else
-				{
-					if (Model.Pagination.Pages > 3)
+					if (i == 2)
 					{
-						<li class="page-item"><span class="page-link" style="color: black;">...</span></li>
+						<li class="page-item" role="button">
+							<a class="page-link" style="color: black;" page="@i">@i</a>
+						</li>
 					}
+					else
+					{
+						if (Model.Pagination.Pages > 3)
+						{
+							<li class="page-item"><span class="page-link" style="color: black;">...</span></li>
+						}
 
-					<li class="page-item">
-						<a class="page-link" role="button" style="color: black;" page="@Model.Pagination.Pages">
-							@Model.Pagination.Pages
-						</a>
-					</li>
+						<li class="page-item">
+							<a class="page-link" role="button" style="color: black;" page="@Model.Pagination.Pages">
+								@Model.Pagination.Pages
+							</a>
+						</li>
 
-					break;
+						break;
+					}
 				}
-			}
 
-			<li class="page-item @(Model.Pagination.Pages == 1 ? "disabled" : string.Empty)">
-				<a class="page-link" role="button" style="color: black;" page="@(Model.Pagination.Page + 1)">
-					>>
-				</a>
-			</li>
-		</ul>
+				<li class="page-item @(Model.Pagination.Pages == 1 ? "disabled" : string.Empty)">
+					<a class="page-link" role="button" style="color: black;" page="@(Model.Pagination.Page + 1)">
+						>>
+					</a>
+				</li>
+			</ul>
+		</div>
 	</div>
 </div>

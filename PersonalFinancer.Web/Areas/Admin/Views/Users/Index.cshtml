@@ -7,38 +7,36 @@
 	int row = 1;
 }
 
-<div class="row justify-content-center">
-	<div class="col-md-10 col-lg-8">
-
-		<partial name="_PaginationPartial" />
-
+<div class="row">
+	<div class="justify-content-center">
 		<div class="card shadow">
 			<div class="card-header">
 				<h1 class="display-6 text-center">@ViewData["Title"]</h1>
 			</div>
-			<table class="table table-hover">
-				<thead>
-					<tr>
-						<th scope="col"></th>
-						<th scope="col">Name</th>
-						<th scope="col">Username</th>
-						<th scope="col">Email</th>
-					</tr>
-				</thead>
-				<tbody style="vertical-align: text-top;">
-					@foreach (UserInfoDTO user in Model.Users)
-					{
-						<tr role="button" onclick="location.href='@Url.Action("Details", "Users", new { id = user.Id })'">
-							<th scope="row">@(row++).</th>
-							<td><img src="/icons/icons8-budget-64.png" style="max-width: 30px;"> @user.FirstName @user.LastName</td>
-							<td>@user.UserName</td>
-							<td>@user.Email</td>
+			<div class="table-responsive">
+				<table class="table table-hover align-middle">
+					<thead>
+						<tr>
+							<th scope="col"></th>
+							<th scope="col">Name</th>
+							<th scope="col">Username</th>
+							<th scope="col">Email</th>
 						</tr>
-					}
-				</tbody>
-			</table>
+					</thead>
+					<tbody style="vertical-align: text-top;">
+						@foreach (UserInfoDTO user in Model.Users)
+						{
+							<tr role="button" onclick="location.href='@Url.Action("Details", "Users", new { id = user.Id })'">
+								<th scope="row">@(row++).</th>
+								<td><img src="/icons/icons8-budget-64.png" style="max-width: 30px;"> @user.FirstName @user.LastName</td>
+								<td>@user.UserName</td>
+								<td>@user.Email</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
 		</div>
-
 		<partial name="_PaginationPartial" />
 	</div>
 </div>
@@ -52,4 +50,4 @@
 	</script>
 	<script src="~/js/getUsers.js"></script>
 	<script src="~/js/setUpPagination.js"></script>
-}
+	}

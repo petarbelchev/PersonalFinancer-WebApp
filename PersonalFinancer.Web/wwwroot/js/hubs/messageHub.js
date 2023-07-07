@@ -4,13 +4,13 @@ let repliesDiv = document.getElementById('replies');
 
 messageHub.on('ReceiveMessage', (reply) => {
     let replyDiv = document.createElement('div');
-    replyDiv.className = 'card formField shadow mb-4';
+    replyDiv.className = 'card shadow mb-4';
 
     replyDiv.innerHTML = `
 		<div class="card-body">
 			<blockquote class="blockquote mb-0">
 				<p>${reply.content}</p>
-				<footer class="blockquote-footer" style="margin-top: 10px;">
+				<footer class="blockquote-footer mt-1">
 					Writed from ${reply.authorName} on
 					<cite title="Source Title">${new Date(reply.createdOn).toLocaleString('en-US', {
                             year: "numeric",

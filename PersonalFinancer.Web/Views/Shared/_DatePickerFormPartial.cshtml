@@ -1,7 +1,7 @@
 ﻿@using PersonalFinancer.Web.Models.Shared;
 @model DateFilterModel
 
-<form method="post" class="row g-3 offset-md-2 col-md-8" style="margin-top: 25px;">
+<form method="post" class="row g-3 offset-md-2 col-md-8 mb-4">
 	<div class="col-lg-5 form-floating">
 		<input type="datetime-local" name="@nameof(Model.StartDate)" value="@Model.StartDate?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
 		<label asp-for="@Model.StartDate" class="form-label"></label>

@@ -17,14 +17,14 @@ function renderStatistics(data) {
 
     for (let i in data) {
         ulInnerHtml += `
-                <li class="list-group-item">
-					<img src="icons/icons8-banknotes-64.png" style="max-width: fit-content;">
-					<span>
-						<b>${data[i].name}</b>: <b>${data[i].incomes.toFixed(2)}</b> is a total <b>incomes </b> and 
-                        <b>${data[i].expenses.toFixed(2)}</b> is a total <b>expenses</b>  maded by our users!
-					</span>
-				</li>
-            `;
+            <li class="list-group-item">
+				<img src="icons/icons8-banknotes-64.png" style="max-width: fit-content;">
+				<span>
+					<b>${data[i].name}</b>: The total income made by our users is <b>${data[i].incomes.toFixed(2)}</b>, 
+                    and the total expense is <b>${data[i].expenses.toFixed(2)}</b>!
+				</span>
+			</li>
+        `;
     }
 
     ul.innerHTML = ulInnerHtml;

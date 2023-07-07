@@ -6,6 +6,7 @@ allMessagesHub.on('ReceiveNotification', (messageId, subject, createdOn) => {
     let tbody = tableContainer.querySelector('tbody');
     let messageRow = tbody.querySelector(`[messageId="${messageId}"]`);
 
+    // TODO: Check is the page already full before add new message.
     if (messageRow == null) {
         tbody.innerHTML += `
 			<tr role="button" onclick='location.href="/Messages/MessageDetails/${messageId}"'>
@@ -15,14 +16,14 @@ allMessagesHub.on('ReceiveNotification', (messageId, subject, createdOn) => {
 					<span class="badge text-bg-danger">New messages</span>
 				</td>
 				<td>
-                        ${new Date(createdOn).toLocaleString('en-US', {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "numeric",
-                            minute: "numeric",
-                            weekday: "long"
-                        })}
+                    ${new Date(createdOn).toLocaleString('en-US', {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "numeric",
+                        weekday: "long"
+                    })}
                 </td>
 			</tr>
         `;
@@ -43,6 +44,8 @@ allMessagesHub.on('DeleteMessage', (messageId) => {
     let tbody = tableContainer.querySelector('tbody');
     let messageRow = tbody.querySelector(`[messageId="${messageId}"]`);
     tbody.removeChild(messageRow.parentElement);
+
+    // TODO: Reduce the number of messages when delete message.
 
     if (tbody.children.length == 0) {
         tableContainer.innerHTML += `

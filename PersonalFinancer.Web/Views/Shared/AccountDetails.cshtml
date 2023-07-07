@@ -7,7 +7,7 @@
 }
 
 @*Account Details*@
-<div class="row" style="margin-top: 25px;">
+<div class="row mt-2">
 	<div class="d-flex bd-highlight offset-lg-1 col-lg-10">
 		<div class="p-2 bd-highlight">
 			<img src="/icons/icons8-wallet-64.png" style="max-width: fit-content;">
@@ -15,12 +15,6 @@
 		<div class="p-2 flex-grow-1 bd-highlight">
 			<h1 class="display-6 fs-3"><b>@Model.Name</b> (@Model.AccountTypeName)</h1>
 			<p class="display-6 fs-4" style="font-size: xx-large;" id="balanceField">@Model.Balance @Model.CurrencyName</p>
-		</div>
-		<div class="p-2 bd-highlight">
-			<a asp-controller="Accounts" asp-action="EditAccount" asp-route-id="@Model.Id"
-			   asp-route-returnUrl="@Model.Routing.ReturnUrl" class="btn btn-warning">Edit Account</a>
-			<a asp-controller="Accounts" asp-action="Delete" asp-route-id="@Model.Id"
-			   asp-route-returnUrl="@Model.Routing.ReturnUrl" class="btn btn-danger">Delete Account</a>
 		</div>
 	</div>
 </div>
@@ -32,13 +26,10 @@
 {
 	<div class="row justify-content-center">
 		<div class="col-xl-10">
-			@*Pagination*@
-			<partial name="_PaginationPartial" />
-
 			@*Table*@
 			<div class="card shadow mb-4">
 				<div class="card-header">
-					<h6>Transactions</h6>
+					<h6 class="text-center">Transactions</h6>
 				</div>
 				<partial name="_TransactionsTablePartial" />
 			</div>
@@ -51,17 +42,28 @@
 else
 {
 	@*No Transaction Page*@
-	<div class="text-center" style="margin-top: 50px;">
+	<div class="text-center mt-4">
 		<p class="display-6">
 			You do not have any transactions for that period.
 		</p>
 	</div>
 }
 
+<div class="d-flex justify-content-center">
+	<div class="p-2">
+		<a asp-controller="Accounts" asp-action="EditAccount" asp-route-id="@Model.Id"
+		   asp-route-returnUrl="@Model.Routing.ReturnUrl" class="btn btn-warning">Edit Account</a>
+	</div>
+	<div class="p-2">
+		<a asp-controller="Accounts" asp-action="Delete" asp-route-id="@Model.Id"
+		   asp-route-returnUrl="@Model.Routing.ReturnUrl" class="btn btn-danger">Delete Account</a>
+	</div>
+</div>
+
 @section Scripts {
 	<partial name="_ValidationScriptsPartial" />
 	<script>
-		let params = { 
+		let params = {
 			id: '@Model.Id',
 			startDate: '@Model.StartDate.ToString("yyyy-MM-ddTHH:mm")',
 			endDate: '@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")',

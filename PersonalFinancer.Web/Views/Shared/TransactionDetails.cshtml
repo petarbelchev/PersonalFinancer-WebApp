@@ -5,47 +5,51 @@
 	ViewData["Title"] = "Transaction Details";
 }
 
-<h1 class="display-6 text-center">@ViewData["Title"]</h1>
 <div class="row justify-content-center">
-	<div class="card col-11 col-sm-8 col-md-6 col-xl-5">
-		<ul class="list-group list-group-flush">
-			<li class="list-group-item d-flex justify-content-between">
-				<span class="p-2">Amount: </span>
-				<span class="p-2">@Model.Amount @Model.AccountCurrencyName</span>
-			</li>
-			<li class="list-group-item d-flex justify-content-between">
-				<div class="p-2"><span>Created On: </span></div>
-				<div class="p-2"><span>@Model.CreatedOn.ToString("f", CultureInfo.GetCultureInfo("en-US"))</span></div>
-			</li>
-			<li class="list-group-item d-flex justify-content-between">
-				<span class="p-2">Category: </span>
-				<span class="p-2">@Model.CategoryName</span>
-			</li>
-			<li class="list-group-item d-flex justify-content-between">
-				<span class="p-2">Account: </span>
-				<span class="p-2">@Model.AccountName</span>
-			</li>
-			<li class="list-group-item d-flex justify-content-between">
-				<span class="p-2">Type: </span>
-				<span class="p-2">@Model.TransactionType</span>
-			</li>
-			<li class="list-group-item d-flex justify-content-between">
-				<span class="p-2">Reference: </span>
-				<span class="p-2">@Model.Reference</span>
-			</li>
-		</ul>
-		@if (!Model.IsInitialBalance)
-		{
-			<div style="margin-top:20px;">
-				<a asp-controller="Transactions" asp-action="EditTransaction" asp-route-id="@Model.Id" class="w-100 btn btn-lg btn-warning">Edit</a>
+	<div class="col-11 col-sm-8 col-md-6 col-xl-5">
+		<div class="card">
+			<div class="card-header">
+				<h1 class="display-6 text-center">@ViewData["Title"]</h1>
 			</div>
-		}
-		else
-		{
-			<p class="text-center" style="margin-top:20px;"><i>This is an initial balance transaction. If you want to change the transaction amount, you simply adjust the account's balance.</i></p>
-		}
-		<form method="post" asp-controller="Transactions" asp-action="Delete" asp-route-id="@Model.Id" style="margin-top:20px; margin-bottom: 20px;">
-			<input type="submit" class="w-100 btn btn-lg btn-danger" onclick="return confirm('Are you sure you want to delete this Transaction?')" value="Delete" />
-		</form>
+			<ul class="list-group list-group-flush">
+				<li class="list-group-item d-flex justify-content-between">
+					<span class="p-2">Amount: </span>
+					<span class="p-2">@Model.Amount @Model.AccountCurrencyName</span>
+				</li>
+				<li class="list-group-item d-flex justify-content-between">
+					<div class="p-2"><span>Created On: </span></div>
+					<div class="p-2"><span>@Model.CreatedOn.ToString("f", CultureInfo.GetCultureInfo("en-US"))</span></div>
+				</li>
+				<li class="list-group-item d-flex justify-content-between">
+					<span class="p-2">Category: </span>
+					<span class="p-2">@Model.CategoryName</span>
+				</li>
+				<li class="list-group-item d-flex justify-content-between">
+					<span class="p-2">Account: </span>
+					<span class="p-2">@Model.AccountName</span>
+				</li>
+				<li class="list-group-item d-flex justify-content-between">
+					<span class="p-2">Type: </span>
+					<span class="p-2">@Model.TransactionType</span>
+				</li>
+				<li class="list-group-item d-flex justify-content-between">
+					<span class="p-2">Reference: </span>
+					<span class="p-2">@Model.Reference</span>
+				</li>
+			</ul>
+			@if (!Model.IsInitialBalance)
+			{
+				<div class="m-3">
+					<a asp-controller="Transactions" asp-action="EditTransaction" asp-route-id="@Model.Id" class="w-100 btn btn-lg btn-warning">Edit</a>
+				</div>
+			}
+			else
+			{
+				<p class="text-center m-3"><i>This is an initial balance transaction. If you want to change the transaction amount, you simply adjust the account's balance.</i></p>
+			}
+			<form method="post" class="m-3" asp-controller="Transactions" asp-action="Delete" asp-route-id="@Model.Id">
+				<input type="submit" class="w-100 btn btn-lg btn-danger" onclick="return confirm('Are you sure you want to delete this Transaction?')" value="Delete" />
+			</form>
+		</div>
 	</div>
 </div>

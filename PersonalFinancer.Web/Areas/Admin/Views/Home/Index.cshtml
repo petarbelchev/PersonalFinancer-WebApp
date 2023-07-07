@@ -4,42 +4,41 @@
 	ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="text-center" style="margin-top: 50px;">
+<div class="text-center mt-4">
 	<p class="display-5">Hello @Model.AdminFullName!</p>
 	<p class="display-6">Welcome to your Admin Dashboard!</p>
 	<p class="display-6">Here are the statistics at the moment!</p>
 </div>
 
-<div class="container text-center" style="margin-top: 50px; margin-bottom: 50px;">
+<div class="container text-center mt-4">
 	<div class="row row-cols-auto d-flex justify-content-center">
-		<div class="col formField">
+		<div class="col">
 			<div class="card shadow mb-4" style="width: 18rem;">
 				<div class="d-flex justify-content-center">
 					<img src="icons/icons8-budget-64.png" style="max-width: fit-content;">
 				</div>
 				<div class="card-body">
 					<h5 class="card-title">Users</h5>
-					<p class="card-text">There a <b>@Model.RegisteredUsers users</b> currently registered in our Web Application!</p>
+					<p class="card-text">There are <b>@Model.RegisteredUsers users</b> currently registered in our Web Application!</p>
 					<a asp-controller="Users" asp-action="Index" class="btn btn-secondary">Go to All Users</a>
 				</div>
 			</div>
 		</div>
-		<div class="col formField">
+		<div class="col">
 			<div class="card shadow mb-4" style="width: 18rem;">
 				<div class="d-flex justify-content-center">
 					<img src="icons/icons8-wallet-64.png" style="max-width: fit-content;">
 				</div>
 				<div class="card-body">
 					<h5 class="card-title">Accounts</h5>
-					<p class="card-text">They have at the moment <b>@Model.CreatedAccounts accounts</b> created!</p>
+					<p class="card-text">They currently have <b>@Model.CreatedAccounts accounts</b> created!</p>
 					<a asp-controller="Accounts" asp-action="Index" class="btn btn-secondary">Go to All Accounts</a>
 				</div>
 			</div>
 		</div>
 	</div>
-	<button class="btn btn-secondary" style="margin-top: 50px;" onclick="getMoreStatistics('@Model.AccountsCashFlowEndpoint')">More statistics...</button>
-	<div id="statistics" style="margin-top: 50px;">
-	</div>
+	<button class="btn btn-secondary mt-4" onclick="getMoreStatistics('@Model.AccountsCashFlowEndpoint')">More statistics...</button>
+	<div id="statistics" class="mt-4"></div>
 </div>
 
 @section Scripts {

@@ -17,11 +17,6 @@ body {
   margin-bottom: 60px;
 }
 
-.formField {
-    margin-top: 8px;
-    margin-bottom: 8px;
-}
-
 .nav-pills .nav-link.active {
     background-color: silver;
 }
