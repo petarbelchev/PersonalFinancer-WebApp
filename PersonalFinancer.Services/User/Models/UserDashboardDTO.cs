@@ -4,6 +4,10 @@
 
     public class UserDashboardDTO
     {
+        public DateTime FromLocalTime { get; set; }
+
+        public DateTime ToLocalTime { get; set; }
+
         public IEnumerable<TransactionTableDTO> LastTransactions { get; set; }
             = new List<TransactionTableDTO>();
 

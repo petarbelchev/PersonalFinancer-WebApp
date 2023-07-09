@@ -19,7 +19,7 @@
 						<p>@Model.Content</p>
 						<footer class="blockquote-footer mt-1">
 							Writed from  @Model.AuthorName on
-							<cite title="Source Title">@Model.CreatedOn.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</cite>
+							<cite title="Source Title">@Model.CreatedOnUtc.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</cite>
 						</footer>
 					</blockquote>
 				</div>
@@ -35,7 +35,7 @@
 								<p>@reply.Content</p>
 								<footer class="blockquote-footer mt-1">
 									Writed from  @reply.AuthorName on
-									<cite title="Source Title">@reply.CreatedOn.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</cite>
+									<cite title="Source Title">@reply.CreatedOnUtc.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</cite>
 								</footer>
 							</blockquote>
 						</div>

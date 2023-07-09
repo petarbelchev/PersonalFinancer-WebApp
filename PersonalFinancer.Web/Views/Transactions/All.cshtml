@@ -12,43 +12,55 @@
 		@*Transactions Filter*@
 		<form method="post">
 			<div class="form-floating card shadow mb-2">
-				<input type="datetime-local" name="@nameof(Model.StartDate)" value="@Model.StartDate?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
-				<label asp-for="@Model.StartDate" class="form-label"></label>
-				<span asp-validation-for="@Model.StartDate" class="text-danger"></span>
+				<input type="datetime-local" name="@nameof(Model.FromLocalTime)" value="@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+				<label asp-for="@Model.FromLocalTime" class="form-label"></label>
+				<span asp-validation-for="@Model.FromLocalTime" class="text-danger"></span>
 			</div>
-			<div class="form-floating card shadow mb-2">
-				<input type="datetime-local" name="@nameof(Model.EndDate)" value="@Model.EndDate?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
-				<label asp-for="@Model.EndDate" class="form-label"></label>
-				<span asp-validation-for="@Model.EndDate" class="text-danger"></span>
+			<div class="form-floating card shadow mb-4">
+				<input type="datetime-local" name="@nameof(Model.ToLocalTime)" value="@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+				<label asp-for="@Model.ToLocalTime" class="form-label"></label>
+				<span asp-validation-for="@Model.ToLocalTime" class="text-danger"></span>
 			</div>
-			<select class="form-select card shadow mb-2" asp-for="@Model.AccountId">
-				<option value="">All Accounts</option>
-				@foreach (var account in Model.OwnerAccounts)
-				{
-					<option value="@account.Id">@account.Name</option>
-				}
-			</select>
-			<select class="form-select card shadow mb-2" asp-for="@Model.AccountTypeId">
-				<option value="">All Account Types</option>
-				@foreach (var accountType in Model.OwnerAccountTypes)
-				{
-					<option value="@accountType.Id">@accountType.Name</option>
-				}
-			</select>
-			<select class="form-select card shadow mb-2" asp-for="@Model.CurrencyId">
-				<option value="">All Currensies</option>
-				@foreach (var currency in Model.OwnerCurrencies)
-				{
-					<option value="@currency.Id">@currency.Name</option>
-				}
-			</select>
-			<select class="form-select card shadow mb-2" asp-for="@Model.CategoryId">
-				<option value="">All Categories</option>
-				@foreach (var category in Model.OwnerCategories)
-				{
-					<option value="@category.Id">@category.Name</option>
-				}
-			</select>
+			<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 mb-2 shadow">
+				<label asp-for="@Model.AccountId" class="form-label"></label>
+				<select class="form-select" asp-for="@Model.AccountId">
+					<option value="">All Accounts</option>
+					@foreach (var account in Model.OwnerAccounts)
+					{
+						<option value="@account.Id">@account.Name</option>
+					}
+				</select>
+			</div>
+			<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 mb-2 shadow">
+				<label asp-for="@Model.AccountTypeId" class="form-label"></label>
+				<select class="form-select" asp-for="@Model.AccountTypeId">
+					<option value="">All Account Types</option>
+					@foreach (var accountType in Model.OwnerAccountTypes)
+					{
+						<option value="@accountType.Id">@accountType.Name</option>
+					}
+				</select>
+			</div>
+			<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 mb-2 shadow">
+				<label asp-for="@Model.CurrencyId" class="form-label"></label>
+				<select class="form-select" asp-for="@Model.CurrencyId">
+					<option value="">All Currensies</option>
+					@foreach (var currency in Model.OwnerCurrencies)
+					{
+						<option value="@currency.Id">@currency.Name</option>
+					}
+				</select>
+			</div>
+			<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 mb-2 shadow">
+				<label asp-for="@Model.CategoryId" class="form-label"></label>
+				<select class="form-select" asp-for="@Model.CategoryId">
+					<option value="">All Categories</option>
+					@foreach (var category in Model.OwnerCategories)
+					{
+						<option value="@category.Id">@category.Name</option>
+					}
+				</select>
+			</div>
 			<div class=" card shadow mb-4">
 				<button type="submit" class="btn btn-secondary form-control">Filter</button>
 			</div>
@@ -86,8 +98,8 @@
 	<script>
 		let params = {
 			id: '@Model.UserId',
-			startDate: '@Model.StartDate?.ToString("yyyy-MM-ddTHH:mm")',
-			endDate: '@Model.EndDate?.ToString("yyyy-MM-ddTHH:mm")',
+			fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+			toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
 			accountId: '@Model.AccountId',
 			accountTypeId: '@Model.AccountTypeId',
 			currencyId: '@Model.CurrencyId',

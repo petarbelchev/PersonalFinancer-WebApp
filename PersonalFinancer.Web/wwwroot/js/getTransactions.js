@@ -33,8 +33,8 @@ async function getTransactions(page) {
         body: JSON.stringify({
             id: params.id,
             page: page,
-            startDate: params.startDate,
-            endDate: params.endDate,
+            fromLocalTime: params.fromLocalTime,
+            toLocalTime: params.toLocalTime,
             accountId: params.accountId == '' ? null : params.accountId,
             accountTypeId: params.accountTypeId == '' ? null : params.accountTypeId,
             currencyId: params.currencyId == '' ? null : params.currencyId,
@@ -59,7 +59,7 @@ function renderTransactions(model) {
         let tr = `
                 <tr role="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" transactionId="${transaction.id}">
 					<td><img src="${transaction.transactionType == 'Income' ? '/icons/greenArrow.png' : '/icons/redArrow.png'}" style="max-width: 25px;"></td>
-				    <td>${new Date(transaction.createdOn).toLocaleString('en-US', {
+				    <td>${new Date(transaction.createdOnLocalTime).toLocaleString('en-US', {
                         year: "numeric",
                         month: "numeric",
                         day: "numeric",

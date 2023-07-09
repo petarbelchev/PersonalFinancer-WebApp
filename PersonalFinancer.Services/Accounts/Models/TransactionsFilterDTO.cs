@@ -12,9 +12,9 @@
 
 		public Guid? CategoryId { get; set; }
 
-		public DateTime StartDate { get; set; }
+		public DateTime FromLocalTime { get; set; }
 
-		public DateTime EndDate { get; set; }
+		public DateTime ToLocalTime { get; set; }
 
 		public int Page { get; set; } = 1;
     }

@@ -4,6 +4,7 @@
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
+	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Message;
 
@@ -30,6 +31,7 @@
 		}
 
 		[HttpPatch("{messageId}")]
+		[NotRequireHtmlEncoding]
 		public async Task<IActionResult> MarkAsSeen(string messageId)
 		{
 			try

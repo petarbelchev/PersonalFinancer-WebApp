@@ -6,7 +6,6 @@
 	ViewData["Title"] = "Messages";
 }
 
-
 <div class="row">
 	<div class="justify-content-center">
 		<div id="tableContainer" class="card shadow">
@@ -38,7 +37,7 @@
 										}
 
 									</td>
-									<td>@message.CreatedOn.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</td>
+									<td>@message.CreatedOnUtc.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</td>
 								</tr>
 							}
 						}

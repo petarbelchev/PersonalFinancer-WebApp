@@ -5,6 +5,7 @@
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Account;
 	using PersonalFinancer.Web.Models.Shared;
@@ -43,6 +44,7 @@
 			=> this.Ok(await this.accountsInfoService.GetCashFlowByCurrenciesAsync());
 
 		[HttpPost("transactions")]
+		[NotRequireHtmlEncoding]
 		public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
@@ -57,8 +59,7 @@
 			TransactionsDTO transactionsDTO =
 				await this.accountsInfoService.GetAccountTransactionsAsync(filterDTO);
 
-			var accountTransactions = new TransactionsViewModel(
-				transactionsDTO, inputModel.Page);
+			var accountTransactions = new TransactionsViewModel(transactionsDTO, inputModel.Page);
 
 			return this.Ok(accountTransactions);
 		}

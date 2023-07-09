@@ -30,20 +30,20 @@
 		}
 
 		public async Task<AccountDetailsLongDTO> GetAccountDetailsAsync(
-			Guid accountId, DateTime startDate, DateTime endDate, Guid userId, bool isUserAdmin)
+			Guid accountId, DateTime fromLocalTime, DateTime toLocalTime, Guid userId, bool isUserAdmin)
 		{
 			return await this.accountsRepo.All()
 				.Where(a => a.Id == accountId && !a.IsDeleted && (isUserAdmin || a.OwnerId == userId))
-				.ProjectTo<AccountDetailsLongDTO>(this.mapper.ConfigurationProvider, new { startDate, endDate })
+				.ProjectTo<AccountDetailsLongDTO>(this.mapper.ConfigurationProvider, new { fromLocalTime, toLocalTime })
 				.FirstAsync();
 		}
 
-		public async Task<CreateEditAccountDTO> GetAccountFormDataAsync(
+		public async Task<CreateEditAccountOutputDTO> GetAccountFormDataAsync(
 			Guid accountId, Guid userId, bool isUserAdmin)
 		{
 			return await this.accountsRepo.All()
 				.Where(a => a.Id == accountId && !a.IsDeleted && (isUserAdmin || a.OwnerId == userId))
-				.ProjectTo<CreateEditAccountDTO>(this.mapper.ConfigurationProvider)
+				.ProjectTo<CreateEditAccountOutputDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
@@ -96,7 +96,7 @@
 				.Where(a => a.Id == dto.AccountId && !a.IsDeleted)
 				.ProjectTo<TransactionsDTO>(
 					this.mapper.ConfigurationProvider, 
-					new { startDate = dto.StartDate, endDate = dto.EndDate, page = dto.Page })
+					new { fromLocalTime = dto.FromLocalTime, toLocalTime = dto.ToLocalTime, page = dto.Page })
 				.FirstAsync();
 		}
 
@@ -132,13 +132,13 @@
 			return transaction;
 		}
 
-		public async Task<CreateEditTransactionDTO> GetTransactionFormDataAsync(Guid transactionId, Guid userId, bool isUserAdmin)
+		public async Task<CreateEditTransactionOutputDTO> GetTransactionFormDataAsync(Guid transactionId, Guid userId, bool isUserAdmin)
 		{
 			return await this.transactionsRepo.All()
 				.Where(t => t.Id == transactionId && 
 							(isUserAdmin || t.OwnerId == userId) && 
 							!t.IsInitialBalance)
-				.ProjectTo<CreateEditTransactionDTO>(this.mapper.ConfigurationProvider)
+				.ProjectTo<CreateEditTransactionOutputDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 

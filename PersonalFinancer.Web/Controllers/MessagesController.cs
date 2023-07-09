@@ -7,7 +7,8 @@
 	using PersonalFinancer.Services.Messages;
     using PersonalFinancer.Services.Messages.Models;
     using PersonalFinancer.Services.User;
-    using PersonalFinancer.Web.Extensions;
+	using PersonalFinancer.Web.CustomAttributes;
+	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Hubs;
 	using PersonalFinancer.Web.Models.Message;
 	using System.ComponentModel.DataAnnotations;
@@ -74,18 +75,15 @@
 
 			await this.allMessagesHub.Clients
                 .Users(adminsIds)
-                .SendAsync("ReceiveNotification", messageDTO.Id, messageDTO.Subject, messageDTO.CreatedOn);
+                .SendAsync("ReceiveNotification", messageDTO.Id, messageDTO.Subject, messageDTO.CreatedOnUtc);
 
             return this.RedirectToAction(nameof(MessageDetails), new { id = messageDTO.Id });
         }
 
         [HttpPost]
+        [NotRequireHtmlEncoding]
         public async Task<IActionResult> Delete([Required] string id)
 		{
-			IEnumerable<string> ids = this.User.IsAdmin()
-				? new List<string> { await this.messagesService.GetMessageAuthorIdAsync(id) }
-				: await this.usersService.GetAdminsIdsAsync();
-
 			try
 			{
                 await this.messagesService.RemoveAsync(id, this.User.Id(), this.User.IsAdmin());
@@ -98,6 +96,10 @@
             {
                 return this.BadRequest();
             }
+
+			IEnumerable<string> ids = this.User.IsAdmin()
+				? new List<string> { await this.messagesService.GetMessageAuthorIdAsync(id) }
+				: await this.usersService.GetAdminsIdsAsync();
 
 			await this.allMessagesHub.Clients
 				.Users(ids)

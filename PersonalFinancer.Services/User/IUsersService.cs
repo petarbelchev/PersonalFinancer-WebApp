@@ -14,7 +14,7 @@
 
 		Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownDataAsync(Guid userId);
 		
-		Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime startDate, DateTime endDate);
+		Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime fromLocalTime, DateTime toLocalTime);
 
         Task<UserDropdownDTO> GetUserDropdownDataAsync(Guid userId);
 

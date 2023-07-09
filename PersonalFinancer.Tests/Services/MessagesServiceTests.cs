@@ -49,7 +49,7 @@
 				.Select(m => new MessageOutputDTO
 				{
 					Id = m.Id,
-					CreatedOn = m.CreatedOn,
+					CreatedOnUtc = m.CreatedOnUtc,
 					Subject = m.Subject,
 					IsSeen = m.IsSeenByAdmin
 				})
@@ -61,7 +61,7 @@
 					m => new MessageOutputDTO
 					{
 						Id = m.Id,
-						CreatedOn = m.CreatedOn,
+						CreatedOnUtc = m.CreatedOnUtc,
 						Subject = m.Subject,
 						IsSeen = m.IsSeenByAdmin
 					},
@@ -94,7 +94,7 @@
 				.Select(m => new MessageOutputDTO
 				{
 					Id = m.Id,
-					CreatedOn = m.CreatedOn,
+					CreatedOnUtc = m.CreatedOnUtc,
 					Subject = m.Subject,
 					IsSeen = m.IsSeenByAuthor
 				})
@@ -109,7 +109,7 @@
 					m => new MessageOutputDTO
 					{
 						Id = m.Id,
-						CreatedOn = m.CreatedOn,
+						CreatedOnUtc = m.CreatedOnUtc,
 						Subject = m.Subject,
 						IsSeen = m.IsSeenByAuthor
 					},
@@ -150,11 +150,11 @@
 					AuthorName = m.AuthorName,
 					Content = m.Content,
 					Subject = m.Subject,
-					CreatedOn = m.CreatedOn,
+					CreatedOnUtc = m.CreatedOnUtc,
 					Replies = m.Replies.Select(r => new ReplyOutputDTO
 					{
 						AuthorName = r.AuthorName,
-						CreatedOn = r.CreatedOn,
+						CreatedOnUtc = r.CreatedOnUtc,
 						Content = r.Content
 					})
 				})
@@ -170,11 +170,11 @@
 						AuthorName = m.AuthorName,
 						Content = m.Content,
 						Subject = m.Subject,
-						CreatedOn = m.CreatedOn,
+						CreatedOnUtc = m.CreatedOnUtc,
 						Replies = m.Replies.Select(r => new ReplyOutputDTO
 						{
 							AuthorName = r.AuthorName,
-							CreatedOn = r.CreatedOn,
+							CreatedOnUtc = r.CreatedOnUtc,
 							Content = r.Content
 						})
 					}))
@@ -212,11 +212,11 @@
 					AuthorName = m.AuthorName,
 					Content = m.Content,
 					Subject = m.Subject,
-					CreatedOn = m.CreatedOn,
+					CreatedOnUtc = m.CreatedOnUtc,
 					Replies = m.Replies.Select(r => new ReplyOutputDTO
 					{
 						AuthorName = r.AuthorName,
-						CreatedOn = r.CreatedOn,
+						CreatedOnUtc = r.CreatedOnUtc,
 						Content = r.Content
 					})
 				})
@@ -232,11 +232,11 @@
 						AuthorName = m.AuthorName,
 						Content = m.Content,
 						Subject = m.Subject,
-						CreatedOn = m.CreatedOn,
+						CreatedOnUtc = m.CreatedOnUtc,
 						Replies = m.Replies.Select(r => new ReplyOutputDTO
 						{
 							AuthorName = r.AuthorName,
-							CreatedOn = r.CreatedOn,
+							CreatedOnUtc = r.CreatedOnUtc,
 							Content = r.Content
 						})
 					}))
@@ -275,11 +275,11 @@
 						AuthorName = m.AuthorName,
 						Content = m.Content,
 						Subject = m.Subject,
-						CreatedOn = m.CreatedOn,
+						CreatedOnUtc = m.CreatedOnUtc,
 						Replies = m.Replies.Select(r => new ReplyOutputDTO
 						{
 							AuthorName = r.AuthorName,
-							CreatedOn = r.CreatedOn,
+							CreatedOnUtc = r.CreatedOnUtc,
 							Content = r.Content
 						})
 					}))
@@ -517,7 +517,7 @@
 				new Message
 				{
 					Id = "1",
-					CreatedOn = DateTime.UtcNow,
+					CreatedOnUtc = DateTime.UtcNow,
 					Subject = "First User First Message",
 					AuthorId = this.FirstUserId,
 					AuthorName = this.FirstUserName,
@@ -529,14 +529,14 @@
 							AuthorId = this.AdminId,
 							AuthorName = this.AdminName,
 							Content = "Admin First Message Reply Content",
-							CreatedOn = DateTime.UtcNow
+							CreatedOnUtc = DateTime.UtcNow
 						}
 					}
 				},
 				new Message
 				{
 					Id = "2",
-					CreatedOn = DateTime.UtcNow,
+					CreatedOnUtc = DateTime.UtcNow,
 					Subject = "First User Second Message",
 					AuthorId = this.FirstUserId,
 					AuthorName = this.FirstUserName,

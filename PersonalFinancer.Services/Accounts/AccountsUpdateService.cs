@@ -34,7 +34,7 @@
 			this.mapper = mapper;
 		}
 
-		public async Task<Guid> CreateAccountAsync(CreateEditAccountDTO model)
+		public async Task<Guid> CreateAccountAsync(CreateEditAccountInputDTO model)
 		{
 			if (await this.IsNameExistAsync(model.Name, model.OwnerId))
 				throw new ArgumentException(string.Format(ExceptionMessages.ExistingUserEntityName, "account", model.Name));
@@ -57,7 +57,7 @@
 			return newAccount.Id;
 		}
 
-		public async Task<Guid> CreateTransactionAsync(CreateEditTransactionDTO model)
+		public async Task<Guid> CreateTransactionAsync(CreateEditTransactionInputDTO model)
 		{
 			Account account = await this.FindAccountAsync(model.AccountId);
 
@@ -108,7 +108,7 @@
 			return transaction.Account.Balance;
 		}
 
-		public async Task EditAccountAsync(Guid accountId, CreateEditAccountDTO model)
+		public async Task EditAccountAsync(Guid accountId, CreateEditAccountInputDTO model)
 		{
 			Account account = await this.FindAccountAsync(accountId);
 
@@ -148,7 +148,7 @@
 			await this.accountsRepo.SaveChangesAsync();
 		}
 
-		public async Task EditTransactionAsync(Guid transactionId, CreateEditTransactionDTO model)
+		public async Task EditTransactionAsync(Guid transactionId, CreateEditTransactionInputDTO model)
 		{
 			Transaction transactionInDb = await this.transactionsRepo.All()
 				.Include(t => t.Account)
@@ -182,7 +182,7 @@
 
 			transactionInDb.Reference = model.Reference.Trim();
 			transactionInDb.CategoryId = model.CategoryId;
-			transactionInDb.CreatedOn = model.CreatedOn.ToUniversalTime();
+			transactionInDb.CreatedOnUtc = model.CreatedOnLocalTime.ToUniversalTime();
 
 			await this.transactionsRepo.SaveChangesAsync();
 		}
@@ -203,7 +203,7 @@
 				OwnerId = ownerId,
 				CategoryId = Guid.Parse(InitialBalanceCategoryId),
 				Amount = amount,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnUtc = DateTime.UtcNow,
 				TransactionType = amount < 0
 					? TransactionType.Expense
 					: TransactionType.Income,
@@ -230,7 +230,7 @@
 		}
 
 		/// <exception cref="InvalidOperationException">When the account type or currency is invalid.</exception>
-		private async Task ValidateAccountTypeAndCurrencyAsync(CreateEditAccountDTO model)
+		private async Task ValidateAccountTypeAndCurrencyAsync(CreateEditAccountInputDTO model)
 		{
 			bool isAccountTypeValid = await this.accountTypesRepo.All()
 				.AnyAsync(at => at.Id == model.AccountTypeId && at.OwnerId == model.OwnerId);

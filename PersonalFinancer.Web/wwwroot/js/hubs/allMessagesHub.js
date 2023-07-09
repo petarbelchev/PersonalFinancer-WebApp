@@ -2,7 +2,7 @@
 
 let tableContainer = document.getElementById('tableContainer');
 
-allMessagesHub.on('ReceiveNotification', (messageId, subject, createdOn) => {
+allMessagesHub.on('ReceiveNotification', (messageId, subject, createdOnUtc) => {
     let tbody = tableContainer.querySelector('tbody');
     let messageRow = tbody.querySelector(`[messageId="${messageId}"]`);
 
@@ -16,7 +16,7 @@ allMessagesHub.on('ReceiveNotification', (messageId, subject, createdOn) => {
 					<span class="badge text-bg-danger">New messages</span>
 				</td>
 				<td>
-                    ${new Date(createdOn).toLocaleString('en-US', {
+                    ${new Date(createdOnUtc).toLocaleString('en-US', {
                         year: "numeric",
                         month: "long",
                         day: "numeric",

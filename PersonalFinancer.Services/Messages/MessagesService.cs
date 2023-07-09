@@ -56,7 +56,7 @@
 					m => new MessageOutputDTO
 					{
 						Id = m.Id,
-						CreatedOn = m.CreatedOn,
+						CreatedOnUtc = m.CreatedOnUtc,
 						Subject = m.Subject,
 						IsSeen = m.IsSeenByAdmin
 					},
@@ -79,11 +79,11 @@
 					AuthorName = m.AuthorName,
 					Content = m.Content,
 					Subject = m.Subject,
-					CreatedOn = m.CreatedOn,
+					CreatedOnUtc = m.CreatedOnUtc,
 					Replies = m.Replies.Select(r => new ReplyOutputDTO
 					{
 						AuthorName = r.AuthorName,
-						CreatedOn = r.CreatedOn,
+						CreatedOnUtc = r.CreatedOnUtc,
 						Content = r.Content
 					})
 				});
@@ -107,7 +107,7 @@
 					m => new MessageOutputDTO
 					{
 						Id = m.Id,
-						CreatedOn = m.CreatedOn,
+						CreatedOnUtc = m.CreatedOnUtc,
 						Subject = m.Subject,
 						IsSeen = m.IsSeenByAuthor
 					},

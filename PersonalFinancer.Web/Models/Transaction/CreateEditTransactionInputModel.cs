@@ -1,22 +1,22 @@
-﻿namespace PersonalFinancer.Web.Models.Account
+﻿namespace PersonalFinancer.Web.Models.Transaction
 {
 	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models.Enums;
-	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.ModelBinders;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.TransactionConstants;
+	using static PersonalFinancer.Common.Messages.ValidationMessages;
 
-	public class TransactionFormViewModel
+	public class CreateEditTransactionInputModel
 	{
-		public TransactionFormViewModel() 
-			=> this.CreatedOn = DateTime.Now;
+		public CreateEditTransactionInputModel()
+			=> this.CreatedOnLocalTime = DateTime.Now;
 
 		[Required]
 		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		[Range(TransactionMinValue, TransactionMaxValue,
-			ErrorMessage = ValidationMessages.InvalidNumericLength)]
+			ErrorMessage = InvalidNumericLength)]
 		public decimal Amount { get; set; }
 
 		[Required]
@@ -32,23 +32,18 @@
 
 		[Required]
 		[Display(Name = "Date")]
-		public DateTime CreatedOn { get; set; }
+		public DateTime CreatedOnLocalTime { get; set; }
 
-		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+		[Required(ErrorMessage = RequiredProperty)]
 		[StringLength(TransactionReferenceMaxLength,
 			MinimumLength = TransactionReferenceMinLength,
-			ErrorMessage = ValidationMessages.InvalidLength)]
+			ErrorMessage = InvalidLength)]
 		[Display(Name = "Payment Reference")]
+		[RequireHtmlEncoding]
 		public string Reference { get; set; } = null!;
 
 		[Required]
 		[Display(Name = "Transaction Type")]
 		public TransactionType TransactionType { get; set; }
-
-		public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; set; }
-			= new List<CategoryDropdownDTO>();
-
-		public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
-			= new List<AccountDropdownDTO>();
 	}
 }

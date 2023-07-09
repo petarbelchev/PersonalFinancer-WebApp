@@ -1,7 +1,7 @@
 ﻿@using PersonalFinancer.Data.Models.Enums;
-@using PersonalFinancer.Web.Models.Account;
+@using PersonalFinancer.Web.Models.Transaction;
 @using static PersonalFinancer.Common.Constants.UrlPathConstants;
-@model TransactionFormViewModel
+@model CreateEditTransactionViewModel
 
 <div class="row justify-content-center">
 	<div class="col-11 col-sm-8 col-md-6 col-xl-5">
@@ -14,9 +14,9 @@
 					<span asp-validation-for="@Model.Amount" class="text-danger"></span>
 				</div>
 				<div class="form-floating mb-2">
-					<input value="@Model.CreatedOn.ToString("yyyy-MM-ddTHH:mm")" name="@nameof(Model.CreatedOn)" type="datetime-local" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
-					<label asp-for="@Model.CreatedOn" class="form-label"></label>
-					<span asp-validation-for="@Model.CreatedOn" class="text-danger"></span>
+					<input value="@Model.CreatedOnLocalTime.ToString("yyyy-MM-ddTHH:mm")" name="@nameof(Model.CreatedOnLocalTime)" type="datetime-local" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+					<label asp-for="@Model.CreatedOnLocalTime" class="form-label"></label>
+					<span asp-validation-for="@Model.CreatedOnLocalTime" class="text-danger"></span>
 				</div>
 				<div class="newElemDiv dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 mb-2" ownerId="@Model.OwnerId" apiUrl="@ApiCategoriesEndpoint">
 					<label asp-for="@Model.CategoryId" class="form-label"></label>
@@ -54,7 +54,7 @@
 				</div>
 				<input type="hidden" asp-for="@Model.OwnerId" />
 				<div>
-					<button type="submit" class="w-100 btn btn-lg btn-success">Create</button>
+					<button type="submit" class="w-100 btn btn-lg btn-success">Submit</button>
 				</div>
 			</form>
 		</section>

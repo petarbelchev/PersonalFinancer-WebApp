@@ -1,6 +1,6 @@
 ﻿@using PersonalFinancer.Web.Models.Account;
 @using static PersonalFinancer.Common.Constants.UrlPathConstants
-@model AccountFormViewModel
+@model CreateEditAccountViewModel
 
 <div class="row justify-content-center">
 	<div class="col-11 col-sm-8 col-md-6 col-xl-5">
@@ -52,7 +52,7 @@
 				</div>
 				<input type="hidden" asp-for="@Model.OwnerId" />
 				<div class="mt-2">
-					<button type="submit" class="w-100 btn btn-lg btn-success">Create</button>
+					<button type="submit" class="w-100 btn btn-lg btn-success">Submit</button>
 				</div>
 			</form>
 		</section>

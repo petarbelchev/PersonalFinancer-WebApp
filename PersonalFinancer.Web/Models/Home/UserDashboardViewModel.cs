@@ -5,7 +5,7 @@
 
     public class UserDashboardViewModel : DateFilterModel
     {
-        public IEnumerable<TransactionTableDTO> Transactions { get; set; }
+        public IEnumerable<TransactionTableDTO> LastTransactions { get; set; }
             = new List<TransactionTableDTO>();
 
         public IEnumerable<AccountCardDTO> Accounts { get; set; }

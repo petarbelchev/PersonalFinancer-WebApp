@@ -12,7 +12,7 @@ messageHub.on('ReceiveMessage', (reply) => {
 				<p>${reply.content}</p>
 				<footer class="blockquote-footer mt-1">
 					Writed from ${reply.authorName} on
-					<cite title="Source Title">${new Date(reply.createdOn).toLocaleString('en-US', {
+					<cite title="Source Title">${new Date(reply.createdOnUtc).toLocaleString('en-US', {
                             year: "numeric",
                             month: "long",
                             day: "numeric",

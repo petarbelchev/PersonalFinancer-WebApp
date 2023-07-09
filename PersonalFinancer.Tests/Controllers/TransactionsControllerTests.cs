@@ -1,21 +1,20 @@
 ﻿namespace PersonalFinancer.Tests.Controllers
 {
-	using Microsoft.AspNetCore.Http;
-	using Microsoft.AspNetCore.Mvc;
-	using Microsoft.AspNetCore.Mvc.ViewFeatures;
-	using Moq;
-	using NUnit.Framework;
-	using PersonalFinancer.Common.Messages;
-	using PersonalFinancer.Data.Models.Enums;
-	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User.Models;
-	using PersonalFinancer.Web.Controllers;
-	using PersonalFinancer.Web.Models.Account;
-	using PersonalFinancer.Web.Models.Transaction;
-	using static PersonalFinancer.Common.Constants.RoleConstants;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.ViewFeatures;
+    using Moq;
+    using NUnit.Framework;
+    using PersonalFinancer.Common.Messages;
+    using PersonalFinancer.Data.Models.Enums;
+    using PersonalFinancer.Services.Accounts.Models;
+    using PersonalFinancer.Services.Shared.Models;
+    using PersonalFinancer.Services.User.Models;
+    using PersonalFinancer.Web.Controllers;
+    using PersonalFinancer.Web.Models.Transaction;
+    using static PersonalFinancer.Common.Constants.RoleConstants;
 
-	[TestFixture]
+    [TestFixture]
 	internal class TransactionsControllerTests : ControllersUnitTestsBase
 	{
 		private static readonly TransactionsDTO expTransactionsDto = new()
@@ -28,7 +27,7 @@
 					Amount = 10,
 					AccountCurrencyName = "Currency",
 					CategoryName = "Category",
-					CreatedOn = DateTime.UtcNow.AddDays(-1),
+					CreatedOnLocalTime = DateTime.Now.AddDays(-1),
 					Reference = "Reference",
 					TransactionType = TransactionType.Expense.ToString()
 				},
@@ -38,7 +37,7 @@
 					Amount = 15,
 					AccountCurrencyName = "Currency2",
 					CategoryName = "Category2",
-					CreatedOn = DateTime.UtcNow,
+					CreatedOnLocalTime = DateTime.Now,
 					Reference = "Reference2",
 					TransactionType = TransactionType.Expense.ToString()
 				}
@@ -176,15 +175,15 @@
 			//Arrange
 			var inputModel = new UserTransactionsInputModel
 			{
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
 			};
 
 			var expected = new UserTransactionsViewModel(expTransactionsDto.TotalTransactionsCount)
 			{
 				UserId = this.userId,
-				StartDate = inputModel.StartDate,
-				EndDate = inputModel.EndDate,
+				FromLocalTime = inputModel.FromLocalTime,
+				ToLocalTime = inputModel.ToLocalTime,
 				OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
 				OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
 				OwnerCategories = expAccountsAndCategories.OwnerCategories,
@@ -195,8 +194,8 @@
 			this.usersServiceMock.Setup(x => x
 				.GetUserTransactionsPageDataAsync(It.Is<TransactionsFilterDTO>(
 					x => x.UserId == this.userId
-					&& x.StartDate == inputModel.StartDate
-					&& x.EndDate == inputModel.EndDate
+					&& x.FromLocalTime == inputModel.FromLocalTime
+					&& x.ToLocalTime == inputModel.ToLocalTime
 					&& x.Page == 1)))
 				.ReturnsAsync(expTransactionsPageDTO);
 
@@ -221,15 +220,15 @@
 			//Arrange
 			var inputModel = new UserTransactionsInputModel
 			{
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
 			};
 
 			var expected = new UserTransactionsViewModel
 			{
 				UserId = this.userId,
-				StartDate = inputModel.StartDate,
-				EndDate = inputModel.EndDate,
+				FromLocalTime = inputModel.FromLocalTime,
+				ToLocalTime = inputModel.ToLocalTime,
 				OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
 				OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
 				OwnerCategories = expAccountsAndCategories.OwnerCategories,
@@ -279,7 +278,7 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				var model = viewResult.Model as TransactionFormViewModel;
+				var model = viewResult.Model as CreateEditTransactionViewModel;
 				Assert.That(model, Is.Not.Null);
 				Assert.That(model!.Reference, Is.Null);
 				Assert.That(model.OwnerId, Is.EqualTo(this.userId));
@@ -295,10 +294,10 @@
 		public async Task Create_OnPost_ShouldReturnViewModelWithErrors_WhenModelIsInvalid()
 		{
 			//Arrange
-			var inputModel = new TransactionFormViewModel
+			var inputModel = new CreateEditTransactionViewModel
 			{
 				Amount = -10,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
 				OwnerId = this.userId,
@@ -316,7 +315,7 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				TransactionFormViewModel model = viewResult.Model as TransactionFormViewModel ??
+				CreateEditTransactionViewModel model = viewResult.Model as CreateEditTransactionViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(model, inputModel);
@@ -333,10 +332,10 @@
 		public async Task Create_OnPost_ShouldReturnBadRequest_WhenUserIsNotOwnerInInputModel()
 		{
 			//Arrange
-			var inputModel = new TransactionFormViewModel
+			var inputModel = new CreateEditTransactionViewModel
 			{
 				Amount = -10,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
 				OwnerId = Guid.NewGuid(),
@@ -359,10 +358,10 @@
 		public async Task Create_OnPost_ShouldRedirectToAction_WhenTransactionWasCreated()
 		{
 			//Arrange
-			var inputModel = new TransactionFormViewModel
+			var inputModel = new CreateEditTransactionInputModel
 			{
 				Amount = 10,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
 				OwnerId = this.userId,
@@ -372,10 +371,10 @@
 			var newTransactionId = Guid.Parse("e8befb1f-72a9-4bb7-831c-cbe678a11af8");
 
 			this.accountsUpdateServiceMock.Setup(x => x
-				.CreateTransactionAsync(It.Is<CreateEditTransactionDTO>(x =>
+				.CreateTransactionAsync(It.Is<CreateEditTransactionInputDTO>(x =>
 					x.OwnerId == inputModel.OwnerId
 					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
 					&& x.Reference == inputModel.Reference
 					&& x.AccountId == inputModel.AccountId
 					&& x.Amount == inputModel.Amount
@@ -405,10 +404,10 @@
 		public async Task Create_OnPost_ShouldReturnBadRequest_WhenAccountDoesNotExist()
 		{
 			//Arrange
-			var inputModel = new TransactionFormViewModel
+			var inputModel = new CreateEditTransactionInputModel
 			{
 				Amount = 10,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
 				OwnerId = this.userId,
@@ -417,10 +416,10 @@
 			};
 
 			this.accountsUpdateServiceMock.Setup(x => x
-				.CreateTransactionAsync(It.Is<CreateEditTransactionDTO>(x =>
+				.CreateTransactionAsync(It.Is<CreateEditTransactionInputDTO>(x =>
 					x.OwnerId == inputModel.OwnerId
 					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
 					&& x.Reference == inputModel.Reference
 					&& x.AccountId == inputModel.AccountId
 					&& x.Amount == inputModel.Amount
@@ -614,7 +613,7 @@
 				AccountName = "Account name",
 				Amount = 10,
 				CategoryName = "Category",
-				CreatedOn = DateTime.UtcNow.AddDays(-1),
+				CreatedOnLocalTime = DateTime.Now.AddDays(-1),
 				OwnerId = this.userId,
 				Reference = "Reference",
 				TransactionType = TransactionType.Income.ToString()
@@ -688,10 +687,10 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var serviceReturnDto = new CreateEditTransactionDTO
+			var serviceReturnDto = new CreateEditTransactionOutputDTO
 			{
 				Amount = 10,
-				CreatedOn = DateTime.UtcNow.AddDays(-1),
+				CreatedOnLocalTime = DateTime.Now.AddDays(-1),
 				OwnerId = this.userId,
 				Reference = "Reference",
 				AccountId = Guid.NewGuid(),
@@ -715,7 +714,7 @@
 			//Assert
 			Assert.Multiple(() =>
 			{
-				TransactionFormViewModel viewModel = viewResult.Model as TransactionFormViewModel ??
+				CreateEditTransactionViewModel viewModel = viewResult.Model as CreateEditTransactionViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
@@ -748,10 +747,10 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var inputModel = new TransactionFormViewModel
+			var inputModel = new CreateEditTransactionViewModel
 			{
 				Amount = -10,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
 				OwnerId = this.userId,
@@ -771,7 +770,7 @@
 
 				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Amount), "Amount is invalid.");
 
-				TransactionFormViewModel viewModel = viewResult.Model as TransactionFormViewModel ??
+				CreateEditTransactionViewModel viewModel = viewResult.Model as CreateEditTransactionViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
@@ -784,10 +783,10 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var inputModel = new TransactionFormViewModel
+			var inputModel = new CreateEditTransactionInputModel
 			{
 				Amount = 10,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
 				OwnerId = this.userId,
@@ -796,10 +795,10 @@
 			};
 
 			this.accountsUpdateServiceMock.Setup(x => x
-				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionDTO>(x =>
+				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionInputDTO>(x =>
 					x.OwnerId == inputModel.OwnerId
 					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
 					&& x.Reference == inputModel.Reference
 					&& x.AccountId == inputModel.AccountId
 					&& x.Amount == inputModel.Amount
@@ -822,10 +821,10 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var inputModel = new TransactionFormViewModel
+			var inputModel = new CreateEditTransactionViewModel
 			{
 				Amount = 10,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
 				OwnerId = Guid.NewGuid(),
@@ -849,10 +848,10 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var inputModel = new TransactionFormViewModel
+			var inputModel = new CreateEditTransactionInputModel
 			{
 				Amount = 10,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
 				OwnerId = this.userId,
@@ -863,10 +862,10 @@
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x
-				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionDTO>(x =>
+				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionInputDTO>(x =>
 					x.OwnerId == inputModel.OwnerId
 					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
 					&& x.Reference == inputModel.Reference
 					&& x.AccountId == inputModel.AccountId
 					&& x.Amount == inputModel.Amount
@@ -885,10 +884,10 @@
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
-			var inputModel = new TransactionFormViewModel
+			var inputModel = new CreateEditTransactionInputModel
 			{
 				Amount = 10,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
 				OwnerId = this.userId,
@@ -905,10 +904,10 @@
 			var result = (RedirectToActionResult)await this.controller.EditTransaction(transactionId, inputModel);
 
 			this.accountsUpdateServiceMock.Verify(x => x
-				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionDTO>(x =>
+				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionInputDTO>(x =>
 					x.OwnerId == inputModel.OwnerId
 					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
 					&& x.Reference == inputModel.Reference
 					&& x.AccountId == inputModel.AccountId
 					&& x.Amount == inputModel.Amount
@@ -935,10 +934,10 @@
 			var transactionId = Guid.NewGuid();
 			var ownerId = Guid.NewGuid();
 			var accountId = Guid.NewGuid();
-			var inputModel = new TransactionFormViewModel
+			var inputModel = new CreateEditTransactionInputModel
 			{
 				Amount = 10,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				AccountId = accountId,
 				CategoryId = Guid.NewGuid(),
 				OwnerId = ownerId,
@@ -961,10 +960,10 @@
 			var result = (RedirectToActionResult)await this.controller.EditTransaction(transactionId, inputModel);
 
 			this.accountsUpdateServiceMock.Verify(x => x
-				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionDTO>(x =>
+				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionInputDTO>(x =>
 					x.OwnerId == inputModel.OwnerId
 					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOn == inputModel.CreatedOn
+					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
 					&& x.Reference == inputModel.Reference
 					&& x.AccountId == inputModel.AccountId
 					&& x.Amount == inputModel.Amount

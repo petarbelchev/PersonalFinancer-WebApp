@@ -54,7 +54,7 @@
 					AccountCurrencyName = "Test Currency",
 					Amount = 100,
 					CategoryName = "Test Category",
-					CreatedOn = DateTime.UtcNow,
+					CreatedOnLocalTime = DateTime.Now,
 					Reference = "Test Reference",
 					TransactionType = TransactionType.Expense.ToString()
 				}
@@ -85,7 +85,7 @@
 				.GetUserAccountsCardsAsync(this.userId))
 				.ReturnsAsync(this.expAccountCard);
 
-			this.controller = new HomeController(this.usersServiceMock.Object)
+			this.controller = new HomeController(this.usersServiceMock.Object, this.mapper)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -154,8 +154,8 @@
 			//Arrange
 			var inputModel = new DateFilterModel
 			{
-				StartDate = DateTime.UtcNow.AddDays(-1),
-				EndDate = DateTime.UtcNow
+				FromLocalTime = DateTime.Now.AddDays(-1),
+				ToLocalTime = DateTime.Now
 			};
 
 			//Act
@@ -179,8 +179,8 @@
 			//Arrange
 			var inputModel = new DateFilterModel
 			{
-				StartDate = DateTime.UtcNow,
-				EndDate = DateTime.UtcNow.AddDays(-1)
+				FromLocalTime = DateTime.Now,
+				ToLocalTime = DateTime.Now.AddDays(-1)
 			};
 			string errorMessage = "error message";
 
@@ -197,9 +197,9 @@
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				Assert.That(viewModel.CurrenciesCashFlow.Count, Is.EqualTo(0));
-				Assert.That(viewModel.Transactions.Count, Is.EqualTo(0));
-				Assert.That(viewModel.StartDate, Is.EqualTo(inputModel.StartDate));
-				Assert.That(viewModel.EndDate, Is.EqualTo(inputModel.EndDate));
+				Assert.That(viewModel.LastTransactions.Count, Is.EqualTo(0));
+				Assert.That(viewModel.FromLocalTime, Is.EqualTo(inputModel.FromLocalTime));
+				Assert.That(viewModel.ToLocalTime, Is.EqualTo(inputModel.ToLocalTime));
 
 				AssertSamePropertiesValuesAreEqual(viewModel.Accounts, this.expAccountCard);
 			});
