@@ -1,6 +1,7 @@
 ﻿@using PersonalFinancer.Web.Models.Message;
 @using System.Globalization;
 @using static PersonalFinancer.Common.Constants.UrlPathConstants;
+@using static PersonalFinancer.Common.Constants.MessageConstants;
 @model MessageDetailsViewModel
 @{
 	ViewData["Title"] = "Message Details";
@@ -46,11 +47,11 @@
 		</div>
 		<hr class="mt-4" />
 		<div>
-			<div class="mb-3">
+			<form id="replyForm" class="mb-3">
 				<textarea asp-for="@Model.ReplyContent" class="form-control" rows="5" placeholder="Write your reply here..."></textarea>
 				<span asp-validation-for="@Model.ReplyContent" class="text-danger"></span>
-			</div>
-			<button id="sendReply" class="w-100 btn btn-lg btn-success">Send Reply</button>
+				<button type="submit" id="sendReply" class="w-100 btn btn-lg btn-success">Send Reply</button>
+			</form>
 		</div>
 		<hr class="mt-5" />
 		<form method="post" asp-action="Delete" asp-route-id="@Model.Id">
@@ -65,7 +66,9 @@
 		let params = {
 			messageId: '@Model.Id',
 			authorId: '@Model.AuthorId',
-			url: '@ApiMessagesEndpoint'
+			url: '@ApiMessagesEndpoint',
+			replyMinLenght: @ReplyMinLength,
+			replyMaxLenght: @ReplyMaxLength
 		};
 	</script>
 	<script src="~/js/hubs/messageHub.js"></script>

@@ -1,16 +1,20 @@
 ﻿namespace PersonalFinancer.Web.Models.Message
 {
     using PersonalFinancer.Common.Messages;
-    using System.ComponentModel.DataAnnotations;
+	using PersonalFinancer.Web.CustomAttributes;
+	using System.ComponentModel.DataAnnotations;
+	using static PersonalFinancer.Common.Constants.MessageConstants;
 
     public class ReplyInputModel
 	{
 		[Required]
-		public string Id { get; set; } = null!;
+		[RequireHtmlEncoding]
+		public string MessageId { get; set; } = null!;
 
 		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
-		[StringLength(1000, MinimumLength = 10, 
+		[StringLength(ReplyMaxLength, MinimumLength = ReplyMinLength, 
 			ErrorMessage = ValidationMessages.InvalidLength)]
+		[RequireHtmlEncoding]
         public string ReplyContent { get; set; } = null!;
     }
 }

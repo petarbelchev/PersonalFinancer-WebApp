@@ -3,6 +3,7 @@
     using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Services.Messages.Models;
     using System.ComponentModel.DataAnnotations;
+	using static PersonalFinancer.Common.Constants.MessageConstants;
 
     public class MessageDetailsViewModel
 	{
@@ -22,8 +23,9 @@
 			= new List<ReplyOutputDTO>();
 
 		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
-		[StringLength(1000, MinimumLength = 10,
+		[StringLength(ReplyMaxLength, MinimumLength = ReplyMinLength,
 			ErrorMessage = ValidationMessages.InvalidLength)]
+		[Display(Name = "Reply content")]
 		public string ReplyContent { get; set; } = null!;
 	}
 }

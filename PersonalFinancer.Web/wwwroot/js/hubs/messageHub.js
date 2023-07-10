@@ -1,5 +1,4 @@
 let messageHub = new signalR.HubConnectionBuilder().withUrl('/message').build();
-
 let repliesDiv = document.getElementById('replies');
 
 messageHub.on('ReceiveMessage', (reply) => {
@@ -12,7 +11,8 @@ messageHub.on('ReceiveMessage', (reply) => {
 				<p>${reply.content}</p>
 				<footer class="blockquote-footer mt-1">
 					Writed from ${reply.authorName} on
-					<cite title="Source Title">${new Date(reply.createdOnUtc).toLocaleString('en-US', {
+					<cite title="Source Title">
+                        ${new Date(reply.createdOnUtc).toLocaleString('en-US', {
                             year: "numeric",
                             month: "long",
                             day: "numeric",
@@ -28,11 +28,13 @@ messageHub.on('ReceiveMessage', (reply) => {
     repliesDiv.appendChild(replyDiv);
 });
 
+let requestVerificationToken = document.querySelector('[name="__RequestVerificationToken"]').value;
+
 messageHub.on('MarkAsSeen', async () => {
     let response = await fetch(params.url + params.messageId, {
         method: 'PATCH',
         headers: {
-            'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value
+            'RequestVerificationToken': requestVerificationToken
         }
     });
 
@@ -43,27 +45,56 @@ messageHub.on('MarkAsSeen', async () => {
 
 let sendReplyBtn = document.getElementById('sendReply');
 sendReplyBtn.disabled = true;
-
 let textArea = sendReplyBtn.parentElement.querySelector('textarea');
 
-sendReplyBtn.addEventListener('click', () => {
-    messageHub
-        .invoke('SendMessage', params.messageId, textArea.value)
-        .then((response) => {
-            textArea.value = '';
-            console.log(response);
+document.getElementById('replyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    let replyContent = textArea.value;
 
-            notificationsHub
-                .invoke('SendNotification', params.authorId, params.messageId)
-                .then((response) => {
-                    console.log(response);
-                });
-        })
-        .catch(() => {
-            alert('Oops... Something goes wrong!');
-            location.reload();
-        });
+    if (replyContent.length < params.replyMinLenght || replyContent.length > params.replyMaxLenght) {
+        return;
+    }
+
+    await sendReply(replyContent);
 });
+
+async function sendReply(replyContent) {
+    let response = await fetch(params.url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': requestVerificationToken
+        },
+        body: JSON.stringify({
+            messageId: params.messageId,
+            replyContent: replyContent
+        })
+    });
+
+    if (response.status == 200) {
+        let reply = await response.json();
+
+        messageHub
+            .invoke('SendMessage', params.messageId, reply)
+            .then((response) => {
+                textArea.value = '';
+                console.log(response);
+
+                notificationsHub
+                    .invoke('SendNotification', params.authorId, params.messageId)
+                    .then((response) => {
+                        console.log(response);
+                    });
+            })
+            .catch(() => {
+                alert('Oops... Something goes wrong!');
+                location.reload();
+            });
+    } else {
+        let error = await response.json();
+        alert(`${error.status} ${error.title}`);
+    }
+};
 
 messageHub
     .start()
