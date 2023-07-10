@@ -57,17 +57,17 @@
 		public async Task GetAccountDetails_ShouldReturnAccountDetails_WhenUserIsOwner()
 		{
 			//Arrange
-			DateTime startDate = DateTime.Now.AddMonths(-1);
-			DateTime endDate = DateTime.Now;
+			DateTime fromLocalTime = DateTime.Now.AddMonths(-1);
+			DateTime toLocalTime = DateTime.Now;
 
 			AccountDetailsLongDTO expected = await this.accountsRepo.All()
 				.Where(a => a.Id == this.Account1_User1_WithTransactions.Id && !a.IsDeleted)
-				.ProjectTo<AccountDetailsLongDTO>(this.mapperMock.ConfigurationProvider, new { startDate, endDate })
+				.ProjectTo<AccountDetailsLongDTO>(this.mapperMock.ConfigurationProvider, new { fromLocalTime, toLocalTime })
 				.FirstAsync();
 
 			//Act
 			AccountDetailsLongDTO actual = await this.accountsInfoService.GetAccountDetailsAsync(
-				this.Account1_User1_WithTransactions.Id, startDate, endDate, this.User1.Id, isUserAdmin: false);
+				this.Account1_User1_WithTransactions.Id, fromLocalTime, toLocalTime, this.User1.Id, isUserAdmin: false);
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
@@ -78,12 +78,12 @@
 		{
 			//Arrange
 			var id = Guid.NewGuid();
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
+			DateTime fromLocalTime = DateTime.Now.AddMonths(-1);
+			DateTime toLocalTime = DateTime.Now;
 
 			//Act & Assert
 			Assert.That(async () => await this.accountsInfoService
-				  .GetAccountDetailsAsync(id, startDate, endDate, this.User1.Id, isUserAdmin: false),
+				  .GetAccountDetailsAsync(id, fromLocalTime, toLocalTime, this.User1.Id, isUserAdmin: false),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -91,11 +91,11 @@
 		public async Task GetAccountFormData_ShouldReturnCorrectData()
 		{
 			//Arrange
-			CreateEditAccountDTO expected = this.mapperMock
-				.Map<CreateEditAccountDTO>(this.Account1_User1_WithTransactions);
+			CreateEditAccountOutputDTO expected = this.mapperMock
+				.Map<CreateEditAccountOutputDTO>(this.Account1_User1_WithTransactions);
 
 			//Act
-			CreateEditAccountDTO actual = await this.accountsInfoService
+			CreateEditAccountOutputDTO actual = await this.accountsInfoService
 				.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User1.Id, isUserAdmin: false);
 
 			//Assert
@@ -106,11 +106,11 @@
 		public async Task GetAccountFormData_ShouldReturnCorrectData_WhenUserIsAdmin()
 		{
 			//Arrange
-			CreateEditAccountDTO expected = this.mapperMock
-				.Map<CreateEditAccountDTO>(this.Account1_User1_WithTransactions);
+			CreateEditAccountOutputDTO expected = this.mapperMock
+				.Map<CreateEditAccountOutputDTO>(this.Account1_User1_WithTransactions);
 
 			//Act
-			CreateEditAccountDTO actual = await this.accountsInfoService
+			CreateEditAccountOutputDTO actual = await this.accountsInfoService
 				.GetAccountFormDataAsync(this.Account1_User1_WithTransactions.Id, this.User2.Id, isUserAdmin: true);
 
 			//Assert
@@ -211,21 +211,21 @@
 			var dto = new AccountTransactionsFilterDTO
 			{
 				AccountId = this.Account1_User1_WithTransactions.Id,
-				StartDate = DateTime.Now.AddMonths(-1),
-				EndDate = DateTime.Now,
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now,
 				Page = 1
 			};
 
 			Expression<Func<Transaction, bool>> filter = (t) =>
 				t.AccountId == this.Account1_User1_WithTransactions.Id
-				&& t.CreatedOn >= dto.StartDate.ToUniversalTime() 
-				&& t.CreatedOn <= dto.EndDate.ToUniversalTime();
+				&& t.CreatedOnUtc >= dto.FromLocalTime.ToUniversalTime() 
+				&& t.CreatedOnUtc <= dto.ToLocalTime.ToUniversalTime();
 
 			var expected = new TransactionsDTO
 			{
 				Transactions = await this.transactionsRepo.All()
 					.Where(filter)
-					.OrderByDescending(t => t.CreatedOn)
+					.OrderByDescending(t => t.CreatedOnUtc)
 					.Take(TransactionsPerPage)
 					.ProjectTo<TransactionTableDTO>(this.mapperMock.ConfigurationProvider)
 					.ToListAsync(),
@@ -247,8 +247,8 @@
 			var dto = new AccountTransactionsFilterDTO
 			{
 				AccountId = Guid.NewGuid(),
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow,
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now,
 				Page = 1
 			};
 
@@ -380,13 +380,13 @@
 		public async Task GetTransactionFormData_ShouldReturnCorrectData_WhenTransactionIsNotInitial()
 		{
 			//Arrange
-			CreateEditTransactionDTO expected = await this.transactionsRepo.All()
+			CreateEditTransactionOutputDTO expected = await this.transactionsRepo.All()
 				.Where(t => t.Id == this.Transaction1_Expense_Account1_User1.Id)
-				.ProjectTo<CreateEditTransactionDTO>(this.mapperMock.ConfigurationProvider)
+				.ProjectTo<CreateEditTransactionOutputDTO>(this.mapperMock.ConfigurationProvider)
 				.FirstAsync();
 
 			//Act
-			CreateEditTransactionDTO actual = await this.accountsInfoService
+			CreateEditTransactionOutputDTO actual = await this.accountsInfoService
 				.GetTransactionFormDataAsync(this.Transaction1_Expense_Account1_User1.Id, this.User1.Id, isUserAdmin: false);
 
 			//Assert

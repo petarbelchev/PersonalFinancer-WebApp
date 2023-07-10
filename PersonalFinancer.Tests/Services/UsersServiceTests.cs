@@ -134,37 +134,50 @@
 		public async Task GetUserDashboardData_ShouldReturnCorrectData_WithValidParams()
 		{
 			//Arrange
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
+			DateTime fromUtc = DateTime.UtcNow.AddMonths(-1);
+			DateTime toUtc = DateTime.UtcNow;
 
 			var expected = new UserDashboardDTO
 			{
+				FromLocalTime = fromUtc.ToLocalTime(),
+				ToLocalTime = toUtc.ToLocalTime(),
 				Accounts = await this.accountsRepo.All()
 					.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
 					.OrderBy(a => a.Name)
 					.Select(a => this.mapperMock.Map<AccountCardDTO>(a))
 					.ToListAsync(),
 				LastTransactions = await this.transactionsRepo.All()
-					.Where(t => t.OwnerId == this.User1.Id && t.CreatedOn >= startDate && t.CreatedOn <= endDate)
-					.OrderByDescending(t => t.CreatedOn)
+					.Where(t => t.OwnerId == this.User1.Id 
+								&& t.CreatedOnUtc >= fromUtc 
+								&& t.CreatedOnUtc <= toUtc)
+					.OrderByDescending(t => t.CreatedOnUtc)
 					.Take(5)
 					.Select(t => this.mapperMock.Map<TransactionTableDTO>(t))
 					.ToListAsync(),
 				CurrenciesCashFlow = await this.accountsRepo.All()
-					.Where(a => a.OwnerId == this.User1.Id && a.Transactions.Any())
-					.SelectMany(a => a.Transactions.Where(t => t.CreatedOn >= startDate && t.CreatedOn <= endDate))
+					.Where(a => a.OwnerId == this.User1.Id 
+								&& a.Transactions.Any(t => t.CreatedOnUtc >= fromUtc 
+														   && t.CreatedOnUtc <= toUtc))
+					.SelectMany(a => a.Transactions.Where(t => t.CreatedOnUtc >= fromUtc 
+															   && t.CreatedOnUtc <= toUtc))
 					.GroupBy(t => t.Account.Currency.Name)
 					.Select(t => new CurrencyCashFlowWithExpensesByCategoriesDTO
 					{
 						Name = t.Key,
-						Incomes = t.Where(t => t.TransactionType == TransactionType.Income).Sum(t => t.Amount),
-						Expenses = t.Where(t => t.TransactionType == TransactionType.Expense).Sum(t => t.Amount),
+						Incomes = t
+							.Where(t => t.TransactionType == TransactionType.Income)
+							.Sum(t => t.Amount),
+						Expenses = t
+							.Where(t => t.TransactionType == TransactionType.Expense)
+							.Sum(t => t.Amount),
 						ExpensesByCategories = t.Where(t => t.TransactionType == TransactionType.Expense)
 							.GroupBy(t => t.Category.Name)
 							.Select(t => new CategoryExpensesDTO
 							{
 								CategoryName = t.Key,
-								ExpensesAmount = t.Where(t => t.TransactionType == TransactionType.Expense).Sum(t => t.Amount)
+								ExpensesAmount = t
+									.Where(t => t.TransactionType == TransactionType.Expense)
+									.Sum(t => t.Amount)
 							})
 					})
 					.OrderBy(c => c.Name)
@@ -172,7 +185,8 @@
 			};
 
 			//Act
-			UserDashboardDTO actual = await this.usersService.GetUserDashboardDataAsync(this.User1.Id, startDate, endDate);
+			UserDashboardDTO actual = await this.usersService
+				.GetUserDashboardDataAsync(this.User1.Id, fromUtc.ToLocalTime(), toUtc.ToLocalTime());
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
@@ -185,20 +199,20 @@
 			var dto = new TransactionsFilterDTO
 			{
 				UserId = this.User1.Id,
-				StartDate = DateTime.Now.AddMonths(-1),
-				EndDate = DateTime.Now
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
 			};
 
 			Expression<Func<Transaction, bool>> filter = (t) =>
 				t.OwnerId == this.User1.Id
-				&& t.CreatedOn >= dto.StartDate.ToUniversalTime()
-				&& t.CreatedOn <= dto.EndDate.ToUniversalTime();
+				&& t.CreatedOnUtc >= dto.FromLocalTime.ToUniversalTime()
+				&& t.CreatedOnUtc <= dto.ToLocalTime.ToUniversalTime();
 
 			var expected = new TransactionsDTO
 			{
 				Transactions = await this.transactionsRepo.All()
 					.Where(filter)
-					.OrderByDescending(t => t.CreatedOn)
+					.OrderByDescending(t => t.CreatedOnUtc)
 					.Take(TransactionsPerPage)
 					.ProjectTo<TransactionTableDTO>(this.mapperMock.ConfigurationProvider)
 					.ToArrayAsync(),
@@ -219,8 +233,8 @@
 			var dto = new TransactionsFilterDTO
 			{
 				UserId = Guid.NewGuid(),
-				StartDate = DateTime.Now.AddMonths(-1),
-				EndDate = DateTime.Now
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
 			};
 
 			//Act

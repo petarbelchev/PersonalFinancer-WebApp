@@ -4,7 +4,7 @@
 	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
-	public class AccountDetailsViewModel
+	public class AccountDetailsViewModel : AccountDetailsInputModel
 	{
 		public AccountDetailsViewModel(int totalTransactionsCount)
 		{
@@ -21,10 +21,7 @@
 		}
 
 		public AccountDetailsViewModel() : this(0)
-		{
-		}
-
-		public Guid Id { get; set; }
+		{ }
 
 		public string Name { get; set; } = null!;
 
@@ -33,10 +30,6 @@
 		public string CurrencyName { get; set; } = null!;
 
 		public string AccountTypeName { get; set; } = null!;
-
-		public DateTime StartDate { get; set; }
-
-		public DateTime EndDate { get; set; }
 
 		public Guid OwnerId { get; set; }
 

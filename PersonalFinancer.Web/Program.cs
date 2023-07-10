@@ -1,6 +1,7 @@
 using PersonalFinancer.Data.Configurations;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Web.Controllers;
+using PersonalFinancer.Web.CustomFilters;
 using PersonalFinancer.Web.EmailSender;
 using PersonalFinancer.Web.Extensions;
 using PersonalFinancer.Web.Hubs;
@@ -26,6 +27,8 @@ builder.Services.AddSignalR();
 builder.Services.AddAutoMapper(typeof(IAccountsUpdateService).Assembly, typeof(HomeController).Assembly);
 
 builder.Services.ConfigureApplicationCookie(options => options.Cookie.HttpOnly = true);
+
+builder.Services.AddMvc(options => options.Filters.Add(new HtmlEncodeAsyncActionFilter()));
 
 WebApplication app = builder.Build();
 

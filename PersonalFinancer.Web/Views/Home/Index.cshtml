@@ -51,9 +51,9 @@ else
 		</div>
 
 		@*Date Picker*@
-		<partial name="_DatePickerFormPartial" model='new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }' />
+		<partial name="_DatePickerFormPartial" model='new DateFilterModel { FromLocalTime = Model.FromLocalTime, ToLocalTime = Model.ToLocalTime }' />
 
-		@if (Model.Transactions.Any())
+		@if (Model.LastTransactions.Any())
 		{
 			<div class="row">
 
@@ -76,7 +76,7 @@ else
 										</tr>
 									</thead>
 									<tbody style="vertical-align: text-top;">
-										@foreach (var transaction in Model.Transactions)
+										@foreach (var transaction in Model.LastTransactions)
 										{
 											<tr role="button" onclick="location.href='@Url.Action("TransactionDetails", "Transactions", new { id = transaction.Id })'">
 												@if (transaction.TransactionType == TransactionType.Income.ToString())
@@ -87,7 +87,7 @@ else
 												{
 													<td><img src="/icons/redArrow.png" style="max-width: 25px;"></td>
 												}
-												<td>@transaction.CreatedOn.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
+												<td>@transaction.CreatedOnLocalTime.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
 												<td>@transaction.CategoryName</td>
 												<td>@transaction.Amount @transaction.AccountCurrencyName</td>
 												<td>@transaction.Reference</td>

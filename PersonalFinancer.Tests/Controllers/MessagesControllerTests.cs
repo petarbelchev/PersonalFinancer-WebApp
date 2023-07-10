@@ -78,7 +78,7 @@
 					.Select(m => new MessageOutputDTO
 					{
 						Id = m.Id,
-						CreatedOn = m.CreatedOn,
+						CreatedOnUtc = m.CreatedOnUtc,
 						Subject = m.Subject
 					})
 					.Skip(MessagesPerPage * (page - 1))
@@ -127,7 +127,7 @@
 					.Select(m => new MessageOutputDTO
 					{
 						Id = m.Id,
-						CreatedOn = m.CreatedOn,
+						CreatedOnUtc = m.CreatedOnUtc,
 						Subject = m.Subject
 					})
 					.Skip(MessagesPerPage * (page - 1))
@@ -381,7 +381,7 @@
 				new Message
 				{
 					Id = "1",
-					CreatedOn = DateTime.UtcNow,
+					CreatedOnUtc = DateTime.UtcNow,
 					Subject = "First User First Message",
 					AuthorId = this.userId.ToString(),
 					AuthorName = "First User username",
@@ -393,14 +393,14 @@
 							AuthorId = "admin ID",
 							AuthorName = "Admin Name",
 							Content = "Admin First Message Reply Content",
-							CreatedOn = DateTime.UtcNow
+							CreatedOnUtc = DateTime.UtcNow
 						}
 					}
 				},
 				new Message
 				{
 					Id = "2",
-					CreatedOn = DateTime.UtcNow,
+					CreatedOnUtc = DateTime.UtcNow,
 					Subject = "First User Second Message",
 					AuthorId = this.userId.ToString(),
 					AuthorName = "First User username",
@@ -409,7 +409,7 @@
 				new Message
 				{
 					Id = "3",
-					CreatedOn = DateTime.UtcNow,
+					CreatedOnUtc = DateTime.UtcNow,
 					Subject = "Second User First Message",
 					AuthorId = "Second User ID",
 					AuthorName = "Second User Name",

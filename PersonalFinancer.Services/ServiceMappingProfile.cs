@@ -29,40 +29,40 @@
 			this.CreateMap<Account, AccountCardDTO>();
 			this.CreateMap<Account, AccountDetailsShortDTO>();
 
-			DateTime startDate = default;
-			DateTime endDate = default;
+			DateTime fromLocalTime = default;
+			DateTime toLocalTime = default;
 
 			this.CreateProjection<Account, AccountDetailsLongDTO>()
-				.ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => startDate))
-				.ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => endDate))
+				.ForMember(dest => dest.FromLocalTime, opt => opt.MapFrom(src => fromLocalTime))
+				.ForMember(dest => dest.ToLocalTime, opt => opt.MapFrom(src => toLocalTime))
 				.ForMember(dest => dest.Transactions, opt => opt
 					.MapFrom(src => src.Transactions
-						.Where(t =>	t.CreatedOn >= startDate.ToUniversalTime()
-									&& t.CreatedOn <= endDate.ToUniversalTime())
-						.OrderByDescending(t => t.CreatedOn)
+						.Where(t =>	t.CreatedOnUtc >= fromLocalTime.ToUniversalTime()
+									&& t.CreatedOnUtc <= toLocalTime.ToUniversalTime())
+						.OrderByDescending(t => t.CreatedOnUtc)
 						.Take(TransactionsPerPage)))
 				.ForMember(dest => dest.TotalAccountTransactions, opt => opt
 					.MapFrom(src => src.Transactions
-						.Count(t => t.CreatedOn >= startDate.ToUniversalTime()
-									&& t.CreatedOn <= endDate.ToUniversalTime())));
+						.Count(t => t.CreatedOnUtc >= fromLocalTime.ToUniversalTime()
+									&& t.CreatedOnUtc <= toLocalTime.ToUniversalTime())));
 
 			int page = 1;
 
 			this.CreateProjection<Account, TransactionsDTO>()
 				.ForMember(dest => dest.Transactions, opt => opt
 					.MapFrom(src => src.Transactions
-						.Where(t => t.CreatedOn >= startDate.ToUniversalTime() 
-									&& t.CreatedOn <= endDate.ToUniversalTime())
-						.OrderByDescending(t => t.CreatedOn)
+						.Where(t => t.CreatedOnUtc >= fromLocalTime.ToUniversalTime() 
+									&& t.CreatedOnUtc <= toLocalTime.ToUniversalTime())
+						.OrderByDescending(t => t.CreatedOnUtc)
 						.Skip(TransactionsPerPage * (page - 1))
 						.Take(TransactionsPerPage)))
 				.ForMember(dest => dest.TotalTransactionsCount, opt => opt
 					.MapFrom(src => src.Transactions
-						.Count(t => t.CreatedOn >= startDate.ToUniversalTime()
-									&& t.CreatedOn <= endDate.ToUniversalTime())));
+						.Count(t => t.CreatedOnUtc >= fromLocalTime.ToUniversalTime()
+									&& t.CreatedOnUtc <= toLocalTime.ToUniversalTime())));
 
-			this.CreateMap<Account, CreateEditAccountDTO>()
-                .ForMember(dest => dest.Name, opt => opt
+			this.CreateMap<Account, CreateEditAccountOutputDTO>()
+				.ForMember(dest => dest.Name, opt => opt
 					.MapFrom(src => src.Name))
 				.ForMember(dest => dest.OwnerCurrencies, opt => opt
 					.MapFrom(src => src.Owner.Currencies
@@ -71,8 +71,9 @@
 				.ForMember(dest => dest.OwnerAccountTypes, opt => opt
 					.MapFrom(src => src.Owner.AccountTypes
 						.Where(at => !at.IsDeleted || at.Id == src.AccountTypeId)
-						.OrderBy(at => at.Name)))
-				.ReverseMap()
+						.OrderBy(at => at.Name)));
+
+			this.CreateMap<CreateEditAccountInputDTO, Account>()
 				.ForMember(dest => dest.Name, opt => opt
 					.MapFrom(src => src.Name.Trim()))
 				.ForMember(dest => dest.Owner, opt => opt.Ignore());
@@ -81,9 +82,9 @@
 				.ForMember(dest => dest.Name, opt => opt
 					.MapFrom(src => src.Name + (src.IsDeleted ? " (Deleted)" : string.Empty)));
 
-			this.CreateMap<Transaction, CreateEditTransactionDTO>()
-				.ForMember(dest => dest.CreatedOn, opt => opt
-					.MapFrom(src => src.CreatedOn.ToLocalTime()))
+			this.CreateMap<Transaction, CreateEditTransactionOutputDTO>()
+				.ForMember(dest => dest.CreatedOnLocalTime, opt => opt
+					.MapFrom(src => src.CreatedOnUtc.ToLocalTime()))
 				.ForMember(dest => dest.OwnerCategories, opt => opt
 					.MapFrom(src => src.Owner.Categories
 						.Where(c => !c.IsDeleted || c.Id == src.CategoryId)
@@ -91,12 +92,13 @@
 				.ForMember(dest => dest.OwnerAccounts, opt => opt
 					.MapFrom(src => src.Owner.Accounts
 						.Where(a => !a.IsDeleted)
-						.OrderBy(a => a.Name)))
-				.ReverseMap()
+						.OrderBy(a => a.Name)));
+			
+			this.CreateMap<CreateEditTransactionInputDTO, Transaction>()
 				.ForMember(dest => dest.Reference, opt => opt
 					.MapFrom(src => src.Reference.Trim()))
-				.ForMember(dest => dest.CreatedOn, opt => opt
-					.MapFrom(src => src.CreatedOn.ToUniversalTime()))
+				.ForMember(dest => dest.CreatedOnUtc, opt => opt
+					.MapFrom(src => src.CreatedOnLocalTime.ToUniversalTime()))
 				.ForMember(dest => dest.Owner, opt => opt.Ignore());
 
 			this.CreateMap<Transaction, TransactionDetailsDTO>()
@@ -106,16 +108,16 @@
 					.MapFrom(src => src.Account.Name + (src.Account.IsDeleted ? " (Deleted)" : string.Empty)))
 				.ForMember(dest => dest.AccountCurrencyName, opt => opt
 					.MapFrom(src => src.Account.Currency.Name + (src.Account.Currency.IsDeleted ? " (Deleted)" : string.Empty)))
-				.ForMember(dest => dest.CreatedOn, opt => opt
-					.MapFrom(src => src.CreatedOn.ToLocalTime()));
+				.ForMember(dest => dest.CreatedOnLocalTime, opt => opt
+					.MapFrom(src => src.CreatedOnUtc.ToLocalTime()));
 
 			this.CreateMap<Transaction, TransactionTableDTO>()
 				.ForMember(dest => dest.AccountCurrencyName, opt => opt
 					.MapFrom(src => src.Account.Currency.Name + (src.Account.Currency.IsDeleted ? " (Deleted)" : string.Empty)))
 				.ForMember(dest => dest.CategoryName, opt => opt
 					.MapFrom(src => src.Category.Name + (src.Category.IsDeleted ? " (Deleted)" : string.Empty)))
-				.ForMember(dest => dest.CreatedOn, opt => opt
-					.MapFrom(src => src.CreatedOn.ToLocalTime()))
+				.ForMember(dest => dest.CreatedOnLocalTime, opt => opt
+					.MapFrom(src => src.CreatedOnUtc.ToLocalTime()))
 				.ForMember(dest => dest.TransactionType, opt => opt
 					.MapFrom(src => src.TransactionType.ToString()));
 
@@ -125,7 +127,9 @@
 
 			this.CreateMap<ApplicationUser, UserDetailsDTO>()
                 .ForMember(dest => dest.Accounts, opt => opt
-                    .MapFrom(src => src.Accounts.Where(a => !a.IsDeleted).OrderBy(a => a.Name)));
+                    .MapFrom(src => src.Accounts
+						.Where(a => !a.IsDeleted)
+						.OrderBy(a => a.Name)));
 
 			this.CreateMap<ApplicationUser, AccountsAndCategoriesDropdownDTO>()
 				.ForMember(dest => dest.OwnerCategories, opt => opt
@@ -149,14 +153,21 @@
 
 			this.CreateMap<BaseApiEntity, ApiEntityDTO>();
 
-			this.CreateMap<Reply, ReplyOutputDTO>();
-			this.CreateMap<MessageInputDTO, Message>();
+			this.CreateMap<MessageInputDTO, Message>()
+				.ForMember(dest => dest.Subject, opt => opt
+					.MapFrom(src => src.Subject.Trim()))
+				.ForMember(dest => dest.Content, opt => opt
+					.MapFrom(src => src.Content.Trim()));
 
 			this.CreateMap<Message, MessageOutputDTO>()
 				.ForMember(dest => dest.IsSeen, opt => opt
 					.MapFrom(src => src.IsSeenByAuthor));
 			
-			this.CreateMap<ReplyInputDTO, Reply>();
-        }
-    }
+			this.CreateMap<ReplyInputDTO, Reply>()
+				.ForMember(dest => dest.Content, opt => opt
+					.MapFrom(src => src.Content.Trim()));
+
+			this.CreateMap<Reply, ReplyOutputDTO>();
+		}
+	}
 }

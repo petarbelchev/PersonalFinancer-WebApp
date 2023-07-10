@@ -363,7 +363,7 @@ namespace PersonalFinancer.Data.Migrations
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedOn")
+                    b.Property<DateTime>("CreatedOnUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsInitialBalance")

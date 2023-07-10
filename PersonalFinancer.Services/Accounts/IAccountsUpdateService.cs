@@ -5,10 +5,10 @@
 	public interface IAccountsUpdateService
 	{
 		/// <exception cref="ArgumentException">When the user already have account with the given name.</exception>
-		Task<Guid> CreateAccountAsync(CreateEditAccountDTO model);
+		Task<Guid> CreateAccountAsync(CreateEditAccountInputDTO model);
 
 		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
-		Task<Guid> CreateTransactionAsync(CreateEditTransactionDTO model);
+		Task<Guid> CreateTransactionAsync(CreateEditTransactionInputDTO model);
 
 		/// <exception cref="ArgumentException">When the user is not owner or administrator.</exception>
 		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
@@ -20,9 +20,9 @@
 
 		/// <exception cref="ArgumentException">When the user already have account with the given name.</exception>
 		/// <exception cref="InvalidOperationException">When the account does now exist.</exception>
-		Task EditAccountAsync(Guid accountId, CreateEditAccountDTO model);
+		Task EditAccountAsync(Guid accountId, CreateEditAccountInputDTO model);
 
 		/// <exception cref="InvalidOperationException">When the transaction, category, or account does not exist, or when the transaction is initial.</exception>
-		Task EditTransactionAsync(Guid transactionId, CreateEditTransactionDTO model);
+		Task EditTransactionAsync(Guid transactionId, CreateEditTransactionInputDTO model);
 	}
 }

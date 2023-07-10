@@ -18,9 +18,9 @@ namespace PersonalFinancer.Services.Accounts.Models
 
         public Guid OwnerId { get; set; }
 
-		public DateTime StartDate { get; set; }
+		public DateTime FromLocalTime { get; set; }
 
-        public DateTime EndDate { get; set; }
+        public DateTime ToLocalTime { get; set; }
 
         public IEnumerable<TransactionTableDTO> Transactions { get; set; }
 

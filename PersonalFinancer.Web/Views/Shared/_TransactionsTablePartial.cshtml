@@ -51,7 +51,7 @@
 					{
 						<td><img src="/icons/redArrow.png" style="max-width: 25px;"></td>
 					}
-					<td>@transaction.CreatedOn.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
+					<td>@transaction.CreatedOnLocalTime.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
 					<td>@transaction.CategoryName</td>
 					<td>@transaction.Amount @transaction.AccountCurrencyName</td>
 					<td>@transaction.Reference</td>

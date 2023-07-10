@@ -63,7 +63,7 @@
 						AccountCurrencyName = "Currency",
 						Amount = 50,
 						CategoryName = "Category",
-						CreatedOn = DateTime.UtcNow,
+						CreatedOnLocalTime = DateTime.Now,
 						Reference = "Test transaction",
 						TransactionType = TransactionType.Expense.ToString()
 					}
@@ -108,7 +108,7 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+				CreateEditAccountViewModel viewModel = viewResult.Model as CreateEditAccountViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				Assert.That(viewModel.OwnerId, Is.EqualTo(this.userId));
@@ -125,7 +125,7 @@
 		public async Task Create_ShouldReturnViewResultWithModelErrors_WhenModelIsInvalid()
 		{
 			//Arrange
-			var inputModel = new AccountFormViewModel
+			var inputModel = new CreateEditAccountViewModel
 			{
 				Name = "Test",
 				Balance = -100,
@@ -146,7 +146,7 @@
 
 				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Balance), "Balance is invalid.");
 
-				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+				CreateEditAccountViewModel viewModel = viewResult.Model as CreateEditAccountViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
@@ -158,7 +158,7 @@
 		public async Task Create_ShouldReturnBadRequest_WhenOwnerIdIsDifferentFromUserId()
 		{
 			//Arrange
-			var inputModel = new AccountFormViewModel
+			var inputModel = new CreateEditAccountViewModel
 			{
 				Name = "Test",
 				Balance = -100,
@@ -182,7 +182,7 @@
 		public async Task Create_ShouldPassDtoToServiceAndRedirectToNewAccountDetailsPage()
 		{
 			//Arrange
-			var inputModel = new AccountFormViewModel
+			var inputModel = new CreateEditAccountViewModel
 			{
 				Name = "Test Account",
 				Balance = 100,
@@ -195,7 +195,7 @@
 
 			this.accountsUpdateServiceMock.Setup(x => x
 				.CreateAccountAsync(
-					It.Is<CreateEditAccountDTO>(a =>
+					It.Is<CreateEditAccountInputDTO>(a =>
 						a.Balance == inputModel.Balance
 						&& a.CurrencyId == inputModel.CurrencyId
 						&& a.Name == inputModel.Name
@@ -225,7 +225,7 @@
 		public async Task Create_ShouldCatchExceptionAndReturnViewResultWithModelErrors_WhenTryToCreateAccountWithExistingName()
 		{
 			//Arrange
-			var inputModel = new AccountFormViewModel
+			var inputModel = new CreateEditAccountViewModel
 			{
 				Name = "Test Account",
 				Balance = 100,
@@ -237,7 +237,7 @@
 			string errorMessage = string.Format(ExceptionMessages.ExistingUserEntityName, "account", inputModel.Name);
 
 			this.accountsUpdateServiceMock.Setup(x => x
-				.CreateAccountAsync(It.Is<CreateEditAccountDTO>(
+				.CreateAccountAsync(It.Is<CreateEditAccountInputDTO>(
 					x => x.CurrencyId == inputModel.CurrencyId
 					&& x.Balance == inputModel.Balance
 					&& x.AccountTypeId == inputModel.AccountTypeId
@@ -255,7 +255,7 @@
 
 				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Name), errorMessage);
 
-				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+				CreateEditAccountViewModel viewModel = viewResult.Model as CreateEditAccountViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
@@ -357,13 +357,13 @@
 			var inputModel = new AccountDetailsInputModel
 			{
 				Id = expectedAccountDetailsDto.Id,
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
 			};
 
 			expectedAccountDetailsDto.OwnerId = Guid.NewGuid();
-			expectedAccountDetailsDto.StartDate = inputModel.StartDate ?? throw new InvalidOperationException();
-			expectedAccountDetailsDto.EndDate = inputModel.EndDate ?? throw new InvalidOperationException();
+			expectedAccountDetailsDto.FromLocalTime = inputModel.FromLocalTime ?? throw new InvalidOperationException();
+			expectedAccountDetailsDto.ToLocalTime = inputModel.ToLocalTime ?? throw new InvalidOperationException();
 
 			this.userMock.Setup(x => x
 				.IsInRole(AdminRoleName))
@@ -372,8 +372,8 @@
 			this.accountsInfoServiceMock.Setup(x => x
 				.GetAccountDetailsAsync(
 					expectedAccountDetailsDto.Id,
-					expectedAccountDetailsDto.StartDate,
-					expectedAccountDetailsDto.EndDate,
+					expectedAccountDetailsDto.FromLocalTime,
+					expectedAccountDetailsDto.ToLocalTime,
 					this.userId,
 					true))
 				.ReturnsAsync(expectedAccountDetailsDto);
@@ -400,21 +400,21 @@
 			var inputModel = new AccountDetailsInputModel
 			{
 				Id = expectedAccountDetailsDto.Id,
-				StartDate = DateTime.UtcNow.AddMonths(-1),
-				EndDate = DateTime.UtcNow
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
 			};
 
 			expectedAccountDetailsDto.OwnerId = this.userId;
-			expectedAccountDetailsDto.StartDate = inputModel.StartDate ?? throw new InvalidOperationException();
-			expectedAccountDetailsDto.EndDate = inputModel.EndDate ?? throw new InvalidOperationException();
+			expectedAccountDetailsDto.FromLocalTime = inputModel.FromLocalTime ?? throw new InvalidOperationException();
+			expectedAccountDetailsDto.ToLocalTime = inputModel.ToLocalTime ?? throw new InvalidOperationException();
 
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
 				.GetAccountDetailsAsync(
 					expectedAccountDetailsDto.Id,
-					expectedAccountDetailsDto.StartDate,
-					expectedAccountDetailsDto.EndDate,
+					expectedAccountDetailsDto.FromLocalTime,
+					expectedAccountDetailsDto.ToLocalTime,
 					this.userId,
 					false))
 				.ReturnsAsync(expectedAccountDetailsDto);
@@ -438,20 +438,25 @@
 		public async Task AccountDetailsOnPost_ShouldReturnBadRequest_WhenUserNotOwnerOrAdminOrAccountDoesNotExist()
 		{
 			//Arrange
-			DateTime startDate = DateTime.UtcNow.AddMonths(-1);
-			DateTime endDate = DateTime.UtcNow;
+			DateTime fromLocalTime = DateTime.Now.AddMonths(-1);
+			DateTime toLocalTime = DateTime.Now;
 
 			var inputModel = new AccountDetailsInputModel
 			{
 				Id = expectedAccountDetailsDto.Id,
-				StartDate = startDate,
-				EndDate = endDate
+				FromLocalTime = fromLocalTime,
+				ToLocalTime = toLocalTime
 			};
 
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, startDate, endDate, this.userId, false))
+				.GetAccountDetailsAsync(
+					expectedAccountDetailsDto.Id, 
+					fromLocalTime, 
+					toLocalTime, 
+					this.userId, 
+					false))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -472,7 +477,7 @@
 			var inputModel = new AccountDetailsInputModel
 			{
 				Id = expectedAccountDetailsDto.Id,
-				EndDate = DateTime.UtcNow
+				ToLocalTime = DateTime.Now
 			};
 
 			var serviceModel = new AccountDetailsShortDTO
@@ -483,7 +488,7 @@
 				CurrencyName = expectedAccountDetailsDto.CurrencyName
 			};
 
-			this.controller.ModelState.AddModelError(nameof(inputModel.StartDate), "Start Date is invalid");
+			this.controller.ModelState.AddModelError(nameof(inputModel.FromLocalTime), "Start Date is invalid");
 
 			this.accountsInfoServiceMock
 				.Setup(x => x.GetAccountShortDetailsAsync(expectedAccountDetailsDto.Id))
@@ -498,7 +503,7 @@
 				Assert.That(viewResult, Is.Not.Null);
 				AssertModelStateErrorIsEqual(
 					viewResult.ViewData.ModelState,
-					nameof(inputModel.StartDate),
+					nameof(inputModel.FromLocalTime),
 					"Start Date is invalid");
 
 				AccountDetailsViewModel viewModel = viewResult.Model as AccountDetailsViewModel ??
@@ -516,7 +521,7 @@
 			var inputModel = new AccountDetailsInputModel
 			{
 				Id = accountId,
-				EndDate = DateTime.UtcNow
+				ToLocalTime = DateTime.Now
 			};
 
 			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid");
@@ -804,7 +809,7 @@
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
-			var expServiceDto = new CreateEditAccountDTO
+			var expServiceDto = new CreateEditAccountOutputDTO
 			{
 				Name = "name",
 				AccountTypeId = Guid.NewGuid(),
@@ -825,7 +830,7 @@
 			//Assert
 			Assert.Multiple(() =>
 			{
-				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+				CreateEditAccountViewModel viewModel = viewResult.Model as CreateEditAccountViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, expServiceDto);
@@ -857,7 +862,7 @@
 			//Arrange
 			var accId = Guid.NewGuid();
 			string returnUrl = "returnUrl";
-			var inputModel = new AccountFormViewModel
+			var inputModel = new CreateEditAccountViewModel
 			{
 				Name = "a",
 				Balance = 100,
@@ -878,7 +883,7 @@
 
 				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Name), "Name is invalid.");
 
-				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+				CreateEditAccountViewModel viewModel = viewResult.Model as CreateEditAccountViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
@@ -892,7 +897,7 @@
 			//Arrange
 			var accId = Guid.NewGuid();
 			string returnUrl = "returnUrl";
-			var inputFormModel = new AccountFormViewModel
+			var inputFormModel = new CreateEditAccountViewModel
 			{
 				Name = "Account name",
 				Balance = 100,
@@ -920,7 +925,7 @@
 			//Arrange
 			var accId = Guid.NewGuid();
 			string returnUrl = "returnUrl";
-			var inputFormModel = new AccountFormViewModel
+			var inputFormModel = new CreateEditAccountInputModel
 			{
 				Name = "Account name",
 				Balance = 100,
@@ -937,7 +942,7 @@
 			var result = (LocalRedirectResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
 
 			this.accountsUpdateServiceMock.Verify(x => x.EditAccountAsync(accId,
-				It.Is<CreateEditAccountDTO>(m =>
+				It.Is<CreateEditAccountInputDTO>(m =>
 					m.CurrencyId == inputFormModel.CurrencyId
 					&& m.Balance == inputFormModel.Balance
 					&& m.OwnerId == inputFormModel.OwnerId
@@ -961,7 +966,7 @@
 			var accId = Guid.NewGuid();
 			string returnUrl = "returnUrl";
 			var ownerId = Guid.NewGuid();
-			var inputFormModel = new AccountFormViewModel
+			var inputFormModel = new CreateEditAccountInputModel
 			{
 				Name = "Account name",
 				Balance = 100,
@@ -978,7 +983,7 @@
 			var result = (LocalRedirectResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
 
 			this.accountsUpdateServiceMock.Verify(x => x.EditAccountAsync(accId,
-				It.Is<CreateEditAccountDTO>(m =>
+				It.Is<CreateEditAccountInputDTO>(m =>
 					m.CurrencyId == inputFormModel.CurrencyId
 					&& m.Balance == inputFormModel.Balance
 					&& m.OwnerId == inputFormModel.OwnerId
@@ -1002,7 +1007,7 @@
 			var accId = Guid.NewGuid();
 			string returnUrl = "returnUrl";
 			var ownerId = Guid.NewGuid();
-			var inputModel = new AccountFormViewModel
+			var inputModel = new CreateEditAccountInputModel
 			{
 				Name = "Account name",
 				Balance = 100,
@@ -1020,7 +1025,7 @@
 				.ReturnsAsync(ownerId);
 
 			this.accountsUpdateServiceMock.Setup(x => x
-				.EditAccountAsync(accId, It.Is<CreateEditAccountDTO>(m =>
+				.EditAccountAsync(accId, It.Is<CreateEditAccountInputDTO>(m =>
 					m.CurrencyId == inputModel.CurrencyId
 					&& m.Balance == inputModel.Balance
 					&& m.OwnerId == inputModel.OwnerId
@@ -1043,7 +1048,7 @@
 				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Name),
 					string.Format(ExceptionMessages.AdminExistingUserEntityName, "account", inputModel.Name));
 
-				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+				CreateEditAccountViewModel viewModel = viewResult.Model as CreateEditAccountViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
@@ -1057,7 +1062,7 @@
 			//Arrange
 			var accId = Guid.NewGuid();
 			string returnUrl = "returnUrl";
-			var inputModel = new AccountFormViewModel
+			var inputModel = new CreateEditAccountInputModel
 			{
 				Name = "Account name",
 				Balance = 100,
@@ -1071,7 +1076,7 @@
 			string errorMessage = string.Format(ExceptionMessages.ExistingUserEntityName, "account", inputModel.Name);
 
 			this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
-				It.Is<CreateEditAccountDTO>(m =>
+				It.Is<CreateEditAccountInputDTO>(m =>
 					m.CurrencyId == inputModel.CurrencyId
 					&& m.Balance == inputModel.Balance
 					&& m.OwnerId == inputModel.OwnerId
@@ -1091,7 +1096,7 @@
 
 				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, nameof(inputModel.Name), errorMessage);
 
-				AccountFormViewModel viewModel = viewResult.Model as AccountFormViewModel ??
+				CreateEditAccountViewModel viewModel = viewResult.Model as CreateEditAccountViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
@@ -1105,7 +1110,7 @@
 			//Arrange
 			var accId = Guid.NewGuid();
 			string returnUrl = "returnUrl";
-			var inputFormModel = new AccountFormViewModel
+			var inputFormModel = new CreateEditAccountViewModel
 			{
 				Name = "Account name",
 				Balance = 100,
@@ -1117,7 +1122,7 @@
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsUpdateServiceMock.Setup(x => x.EditAccountAsync(accId,
-				It.Is<CreateEditAccountDTO>(m =>
+				It.Is<CreateEditAccountInputDTO>(m =>
 					m.CurrencyId == inputFormModel.CurrencyId
 					&& m.Balance == inputFormModel.Balance
 					&& m.OwnerId == inputFormModel.OwnerId

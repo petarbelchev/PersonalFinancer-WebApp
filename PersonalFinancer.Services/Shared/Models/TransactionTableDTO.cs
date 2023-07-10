@@ -8,7 +8,7 @@
 
         public decimal Amount { get; set; }
 
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedOnLocalTime { get; set; }
 
         public string CategoryName { get; set; } = null!;
 

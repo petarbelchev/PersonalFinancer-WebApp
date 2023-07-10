@@ -39,7 +39,7 @@
 		public async Task CreateAccount_ShouldAddNewAccountAndTransaction_WithValidInput()
 		{
 			//Arrange
-			var inputModel = new CreateEditAccountDTO
+			var inputModel = new CreateEditAccountOutputDTO
 			{
 				Name = "AccountWithNonZeroBalance",
 				AccountTypeId = this.AccType1_User1_WithAcc.Id,
@@ -77,7 +77,7 @@
 		public async Task CreateAccount_ShouldAddNewAccountWithoutTransaction_WithValidInput()
 		{
 			//Arrange
-			var newAccountModel = new CreateEditAccountDTO
+			var newAccountModel = new CreateEditAccountOutputDTO
 			{
 				Name = "AccountWithZeroBalance",
 				AccountTypeId = this.AccType1_User1_WithAcc.Id,
@@ -109,7 +109,7 @@
 		public void CreateAccount_ShouldThrowException_WhenUserHaveAccountWithSameName()
 		{
 			//Arrange
-			var newAccountModel = new CreateEditAccountDTO
+			var newAccountModel = new CreateEditAccountOutputDTO
 			{
 				Name = this.Account1_User1_WithTransactions.Name,
 				AccountTypeId = this.AccType1_User1_WithAcc.Id,
@@ -128,7 +128,7 @@
 		public void CreateAccount_ShouldThrowException_WhenAccountTypeIsNotValid()
 		{
 			//Arrange
-			var newAccountModel = new CreateEditAccountDTO
+			var newAccountModel = new CreateEditAccountOutputDTO
 			{
 				Name = "New Account With Invalid Account Type",
 				AccountTypeId = Guid.NewGuid(),
@@ -146,7 +146,7 @@
 		public void CreateAccount_ShouldThrowException_WhenCurrencyIsNotValid()
 		{
 			//Arrange
-			var newAccountModel = new CreateEditAccountDTO
+			var newAccountModel = new CreateEditAccountOutputDTO
 			{
 				Name = "New Account With Invalid Currency",
 				AccountTypeId = this.AccType1_User1_WithAcc.Id,
@@ -167,13 +167,13 @@
 		{
 			//Arrange
 			var account = this.Account1_User1_WithTransactions;
-			var dto = new CreateEditTransactionDTO()
+			var dto = new CreateEditTransactionOutputDTO()
 			{
 				Amount = 100,
 				AccountId = account.Id,
 				OwnerId = this.User1.Id,
 				CategoryId = this.Category1_User1_WithTransactions.Id,
-				CreatedOn = DateTime.UtcNow,
+				CreatedOnLocalTime = DateTime.Now,
 				Reference = "New transaction",
 				TransactionType = transactionType
 			};
@@ -207,7 +207,7 @@
 		public void CreateTransaction_ShouldThrowException_WhenAccountDoesNotExist()
 		{
 			//Arrange
-			var dto = this.mapperMock.Map<CreateEditTransactionDTO>(this.Transaction1_Expense_Account1_User1);
+			var dto = this.mapperMock.Map<CreateEditTransactionOutputDTO>(this.Transaction1_Expense_Account1_User1);
 			dto.AccountId = Guid.NewGuid();
 
 			//Act & Assert
@@ -219,7 +219,7 @@
 		public void CreateTransaction_ShouldThrowException_WhenCategoryIsNotValid()
 		{
 			//Arrange
-			var dto = this.mapperMock.Map<CreateEditTransactionDTO>(this.Transaction1_Expense_Account1_User1);
+			var dto = this.mapperMock.Map<CreateEditTransactionOutputDTO>(this.Transaction1_Expense_Account1_User1);
 			dto.CategoryId = Guid.NewGuid();
 
 			// Act & Assert
@@ -464,7 +464,7 @@
 		{
 			//Arrange
 			Account account = this.Account1_User1_WithTransactions;
-			var inputModel = new CreateEditAccountDTO
+			var inputModel = new CreateEditAccountOutputDTO
 			{
 				Name = "New Name", // Change
 				AccountTypeId = account.AccountTypeId,
@@ -485,7 +485,7 @@
 		{
 			//Arrange
 			Account account = this.Account1_User1_WithTransactions;
-			var inputModel = new CreateEditAccountDTO
+			var inputModel = new CreateEditAccountOutputDTO
 			{
 				Name = account.Name,
 				AccountTypeId = account.AccountTypeId,
@@ -506,7 +506,7 @@
 		{
 			//Arrange
 			Account account = this.Account1_User1_WithTransactions;
-			var inputModel = new CreateEditAccountDTO
+			var inputModel = new CreateEditAccountOutputDTO
 			{
 				Name = account.Name,
 				AccountTypeId = this.AccType2_User1_WithoutAcc.Id, // Change
@@ -530,7 +530,7 @@
 			Transaction initialTransaction = this.InitialTransaction_Income_Account1_User1;
 			decimal initialTransactionAmountBefore = initialTransaction.Amount;
 
-			var inputModel = new CreateEditAccountDTO
+			var inputModel = new CreateEditAccountOutputDTO
 			{
 				Name = account.Name,
 				AccountTypeId = account.AccountTypeId,
@@ -560,7 +560,7 @@
 			Transaction initialTransaction = this.InitialTransaction_Income_Account1_User1;
 			decimal initialTransactionAmountBefore = initialTransaction.Amount;
 
-			var inputModel = new CreateEditAccountDTO
+			var inputModel = new CreateEditAccountOutputDTO
 			{
 				Name = account.Name,
 				AccountTypeId = account.AccountTypeId,
@@ -587,7 +587,7 @@
 		{
 			//Arrange
 			Account account = this.Account2_User1_WithoutTransactions;
-			var inputModel = new CreateEditAccountDTO
+			var inputModel = new CreateEditAccountOutputDTO
 			{
 				Name = account.Name,
 				AccountTypeId = account.AccountTypeId,
@@ -624,7 +624,7 @@
 			Account account = this.Account1_User1_WithTransactions;
 			string anotherAccountName = this.Account2_User1_WithoutTransactions.Name;
 
-			var inputModel = new CreateEditAccountDTO
+			var inputModel = new CreateEditAccountOutputDTO
 			{
 				Name = anotherAccountName, // Change
 				AccountTypeId = account.AccountTypeId,
@@ -645,7 +645,7 @@
 			//Arrange
 			Account account = this.Account1_User1_WithTransactions;
 
-			var inputModel = new CreateEditAccountDTO
+			var inputModel = new CreateEditAccountOutputDTO
 			{
 				Name = account.Name,
 				AccountTypeId = Guid.NewGuid(), // Invalid Id
@@ -665,7 +665,7 @@
 			//Arrange
 			Account account = this.Account1_User1_WithTransactions;
 
-			var inputModel = new CreateEditAccountDTO
+			var inputModel = new CreateEditAccountOutputDTO
 			{
 				Name = account.Name,
 				AccountTypeId = account.AccountTypeId,
@@ -686,7 +686,7 @@
 			var account = this.Account1_User1_WithTransactions;
 			var transaction = this.Transaction1_Expense_Account1_User1;
 			decimal balanceBefore = account.Balance;
-			var dto = this.mapperMock.Map<CreateEditTransactionDTO>(transaction);
+			var dto = this.mapperMock.Map<CreateEditTransactionOutputDTO>(transaction);
 
 			//Act
 			dto.TransactionType = TransactionType.Income;
@@ -711,7 +711,7 @@
 			decimal firstAccBalanceBefore = firstAccount.Balance;
 			decimal secondAccBalanceBefore = secondAccount.Balance;
 			var transaction = this.Transaction1_Expense_Account1_User1;
-			var dto = this.mapperMock.Map<CreateEditTransactionDTO>(transaction);
+			var dto = this.mapperMock.Map<CreateEditTransactionOutputDTO>(transaction);
 
 			//Act
 			dto.AccountId = secondAccount.Id;
@@ -738,7 +738,7 @@
 			var account = this.Account1_User1_WithTransactions;
 			decimal balanceBefore = account.Balance;
 			var transaction = this.Transaction1_Expense_Account1_User1;
-			var dto = this.mapperMock.Map<CreateEditTransactionDTO>(transaction);
+			var dto = this.mapperMock.Map<CreateEditTransactionOutputDTO>(transaction);
 
 			//Act
 			dto.Reference = "Second Reference";
@@ -759,7 +759,7 @@
 			//Arrange
 			var account = this.Account1_User1_WithTransactions;
 			var transaction = this.Transaction1_Expense_Account1_User1;
-			var dto = this.mapperMock.Map<CreateEditTransactionDTO>(transaction);
+			var dto = this.mapperMock.Map<CreateEditTransactionOutputDTO>(transaction);
 
 			//Act
 			dto.CategoryId = Guid.NewGuid();
@@ -775,7 +775,7 @@
 			//Arrange
 			var account = this.Account1_User1_WithTransactions;
 			var transaction = this.InitialTransaction_Income_Account1_User1;
-			var dto = this.mapperMock.Map<CreateEditTransactionDTO>(transaction);
+			var dto = this.mapperMock.Map<CreateEditTransactionOutputDTO>(transaction);
 
 			//Act
 			dto.CategoryId = this.Category1_User1_WithTransactions.Id;

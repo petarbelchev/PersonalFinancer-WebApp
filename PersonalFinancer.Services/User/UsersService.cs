@@ -68,30 +68,32 @@
 				.FirstAsync();
 		}
 
-		public async Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime startDate, DateTime endDate)
+		public async Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime fromLocalTime, DateTime toLocalTime)
 		{
-			DateTime startDateUtc = startDate.ToUniversalTime();
-			DateTime endDateUtc = endDate.ToUniversalTime();
+			DateTime fromUtc = fromLocalTime.ToUniversalTime();
+			DateTime toUtc = toLocalTime.ToUniversalTime();
 		
 			var dto = new UserDashboardDTO
 			{
+				FromLocalTime = fromLocalTime,
+				ToLocalTime = toLocalTime,
 				Accounts = await this.accountsRepo.All()
 					.Where(a => a.OwnerId == userId && !a.IsDeleted)
 					.OrderBy(a => a.Name)
 					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
-
 				LastTransactions = await this.transactionsRepo.All()
 					.Where(t => t.OwnerId == userId
-								&& t.CreatedOn >= startDateUtc
-								&& t.CreatedOn <= endDateUtc)
-					.OrderByDescending(t => t.CreatedOn)
+								&& t.CreatedOnUtc >= fromUtc
+								&& t.CreatedOnUtc <= toUtc)
+					.OrderByDescending(t => t.CreatedOnUtc)
 					.Take(5)
 					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
-				
 				CurrenciesCashFlow = await this.accountsRepo.All()
-					.Where(a => a.OwnerId == userId && a.Transactions.Any())
+					.Where(a => a.OwnerId == userId 
+								&& a.Transactions.Any(t => t.CreatedOnUtc >= fromUtc
+														   && t.CreatedOnUtc <= toUtc))
 					.GroupBy(a => a.Currency.Name)
 					.Select(group => new CurrencyCashFlowWithExpensesByCategoriesDTO
 					{
@@ -99,20 +101,20 @@
 						Incomes = group
 							.SelectMany(a => a.Transactions)
 							.Where(t => t.TransactionType == TransactionType.Income
-										&& t.CreatedOn >= startDateUtc
-										&& t.CreatedOn <= endDateUtc)
+										&& t.CreatedOnUtc >= fromUtc
+										&& t.CreatedOnUtc <= toUtc)
 							.Sum(t => t.Amount),
 						Expenses = group
 							.SelectMany(a => a.Transactions)
 							.Where(t => t.TransactionType == TransactionType.Expense
-										&& t.CreatedOn >= startDateUtc
-										&& t.CreatedOn <= endDateUtc)
+										&& t.CreatedOnUtc >= fromUtc
+										&& t.CreatedOnUtc <= toUtc)
 							.Sum(t => t.Amount),
 						ExpensesByCategories = group
 							.SelectMany(a => a.Transactions
 								.Where(t => t.TransactionType == TransactionType.Expense
-											&& t.CreatedOn >= startDateUtc
-											&& t.CreatedOn <= endDateUtc))
+											&& t.CreatedOnUtc >= fromUtc
+											&& t.CreatedOnUtc <= toUtc))
 							.GroupBy(t => t.Category.Name)
 							.Select(cGroup => new CategoryExpensesDTO
 							{
@@ -154,8 +156,8 @@
 		{
 			IQueryable<Transaction> query = this.transactionsRepo.All().Where(t =>
 				t.OwnerId == dto.UserId &&
-				t.CreatedOn >= dto.StartDate.ToUniversalTime() &&
-				t.CreatedOn <= dto.EndDate.ToUniversalTime() &&
+				t.CreatedOnUtc >= dto.FromLocalTime.ToUniversalTime() &&
+				t.CreatedOnUtc <= dto.ToLocalTime.ToUniversalTime() &&
 				(dto.AccountId == null || t.AccountId == dto.AccountId) &&
 				(dto.CurrencyId == null || t.Account.CurrencyId == dto.CurrencyId) &&
 				(dto.CategoryId == null || t.CategoryId == dto.CategoryId) &&
@@ -164,7 +166,7 @@
 			var result = new TransactionsDTO
 			{
 				Transactions = await query
-					.OrderByDescending(t => t.CreatedOn)
+					.OrderByDescending(t => t.CreatedOnUtc)
 					.Skip(TransactionsPerPage * (dto.Page - 1))
 					.Take(TransactionsPerPage)
 					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)

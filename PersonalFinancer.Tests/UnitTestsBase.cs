@@ -34,7 +34,8 @@
 					object? expectedValue = propToCompare.GetValue(expected);
 					object? actualValue = actualProp.GetValue(actual);
 
-					if (actualProp.PropertyType != typeof(string) && IsCollectionType(actualProp.PropertyType))
+					if (actualProp.PropertyType != typeof(string) 
+						&& actualProp.PropertyType.IsAssignableTo(typeof(IEnumerable)))
 					{
 						var expectedCollection = expectedValue as IEnumerable<object>;
 						var actualCollection = actualValue as IEnumerable<object>;
@@ -67,8 +68,5 @@
 				}
 			});
 		}
-
-		private static bool IsCollectionType(Type type)
-			=> type.GetInterfaces().Any(i => i.Name == nameof(IEnumerable));
 	}
 }

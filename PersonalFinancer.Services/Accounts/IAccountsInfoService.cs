@@ -8,10 +8,10 @@
     public interface IAccountsInfoService
 	{
 		/// <exception cref="InvalidOperationException">When the account does not exist or the user is not owner or administrator.</exception>
-		Task<AccountDetailsLongDTO> GetAccountDetailsAsync(Guid accountId, DateTime startDate, DateTime endDate, Guid userId, bool isUserAdmin);
+		Task<AccountDetailsLongDTO> GetAccountDetailsAsync(Guid accountId, DateTime fromLocalTime, DateTime toLocalTime, Guid userId, bool isUserAdmin);
 
 		/// <exception cref="InvalidOperationException">When the account does not exist or the user is not owner or administrator.</exception>
-		Task<CreateEditAccountDTO> GetAccountFormDataAsync(Guid accountId, Guid userId, bool isUserAdmin);
+		Task<CreateEditAccountOutputDTO> GetAccountFormDataAsync(Guid accountId, Guid userId, bool isUserAdmin);
 
 		/// <exception cref="InvalidOperationException">When the account does not exist or the user is not owner or administrator.</exception>
 		Task<string> GetAccountNameAsync(Guid accountId, Guid userId, bool isUserAdmin);
@@ -36,7 +36,7 @@
 		Task<TransactionDetailsDTO> GetTransactionDetailsAsync(Guid transactionId, Guid ownerId, bool isUserAdmin);
 
 		/// <exception cref="InvalidOperationException">When the user is not owner, transaction does not exist or is initial.</exception>
-		Task<CreateEditTransactionDTO> GetTransactionFormDataAsync(Guid transactionId, Guid userId, bool isUserAdmin);
+		Task<CreateEditTransactionOutputDTO> GetTransactionFormDataAsync(Guid transactionId, Guid userId, bool isUserAdmin);
 
 		/// <exception cref="InvalidOperationException">When the transaction does not exist.</exception>
 		Task<Guid> GetTransactionOwnerIdAsync(Guid transactionId);

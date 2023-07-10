@@ -20,7 +20,7 @@
 </div>
 
 @*DatePicker*@
-<partial name="_DatePickerFormPartial" model='new DateFilterModel { StartDate = Model.StartDate, EndDate = Model.EndDate }' />
+<partial name="_DatePickerFormPartial" model='new DateFilterModel { FromLocalTime = Model.FromLocalTime, ToLocalTime = Model.ToLocalTime }' />
 
 @if (Model.Transactions.Any())
 {
@@ -65,8 +65,8 @@ else
 	<script>
 		let params = {
 			id: '@Model.Id',
-			startDate: '@Model.StartDate.ToString("yyyy-MM-ddTHH:mm")',
-			endDate: '@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")',
+			fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+			toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
 			ownerId: '@Model.OwnerId',
 			allTransactionsEndpoint: '@ApiAccountTransactionsEndpoint',
 			transactionEndpoint: '@ApiTransactionsEndpoint',

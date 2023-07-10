@@ -276,7 +276,7 @@
 				AccountId = this.Account1_User1_WithTransactions.Id,
 				Amount = 200,
 				CategoryId = Guid.Parse(InitialBalanceCategoryId),
-				CreatedOn = DateTime.UtcNow.AddMonths(-3),
+				CreatedOnUtc = DateTime.UtcNow.AddMonths(-3),
 				Reference = CategoryInitialBalanceName,
 				TransactionType = TransactionType.Income,
 				IsInitialBalance = true
@@ -288,7 +288,7 @@
 				AccountId = this.Account1_User1_WithTransactions.Id,
 				Amount = 5.65m,
 				CategoryId = this.Category1_User1_WithTransactions.Id,
-				CreatedOn = DateTime.UtcNow.AddMonths(-2),
+				CreatedOnUtc = DateTime.UtcNow.AddMonths(-2),
 				Reference = "Lunch",
 				TransactionType = TransactionType.Expense
 			};
@@ -299,7 +299,7 @@
 				AccountId = this.Account1_User1_WithTransactions.Id,
 				Amount = 4.80m,
 				CategoryId = this.Category3_User1_Deleted_WithTransactions.Id,
-				CreatedOn = DateTime.UtcNow.AddDays(-2),
+				CreatedOnUtc = DateTime.UtcNow.AddDays(-2),
 				Reference = "Taxi",
 				TransactionType = TransactionType.Expense
 			};
@@ -310,7 +310,7 @@
 				AccountId = this.Account3_User1_Deleted_WithTransactions.Id,
 				Amount = 200,
 				CategoryId = Guid.Parse(InitialBalanceCategoryId),
-				CreatedOn = DateTime.UtcNow.AddMonths(-3),
+				CreatedOnUtc = DateTime.UtcNow.AddMonths(-3),
 				Reference = CategoryInitialBalanceName,
 				TransactionType = TransactionType.Income,
 				IsInitialBalance = true
@@ -322,7 +322,7 @@
 				AccountId = this.Account3_User1_Deleted_WithTransactions.Id,
 				Amount = 750m,
 				CategoryId = this.Category3_User1_Deleted_WithTransactions.Id,
-				CreatedOn = DateTime.UtcNow.AddMonths(-2),
+				CreatedOnUtc = DateTime.UtcNow.AddMonths(-2),
 				Reference = "Salary",
 				TransactionType = TransactionType.Income
 			};
@@ -333,7 +333,7 @@
 				AccountId = this.Account3_User1_Deleted_WithTransactions.Id,
 				Amount = 49.99m,
 				CategoryId = this.Category3_User1_Deleted_WithTransactions.Id,
-				CreatedOn = DateTime.UtcNow.AddMonths(-2),
+				CreatedOnUtc = DateTime.UtcNow.AddMonths(-2),
 				Reference = "Flight ticket",
 				TransactionType = TransactionType.Expense
 			};

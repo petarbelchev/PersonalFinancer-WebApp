@@ -1,7 +1,8 @@
 ﻿namespace PersonalFinancer.Web.Models.Api
 {
     using PersonalFinancer.Common.Messages;
-    using System.ComponentModel.DataAnnotations;
+	using PersonalFinancer.Web.CustomAttributes;
+	using System.ComponentModel.DataAnnotations;
     using static PersonalFinancer.Common.Constants.CategoryConstants;
 
     public class CategoryInputModel : IApiEntityInputModel
@@ -10,6 +11,7 @@
         [StringLength(CategoryNameMaxLength, MinimumLength = CategoryNameMinLength,
             ErrorMessage = ValidationMessages.InvalidLength)]
 		[Display(Name = "Category")]
+        [RequireHtmlEncoding]
 		public string Name { get; set; } = null!;
 
         [Required]

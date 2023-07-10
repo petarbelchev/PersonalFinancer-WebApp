@@ -6,13 +6,13 @@
     {
 		public Message()
 		{
-            this.CreatedOn = DateTime.UtcNow;
+            this.CreatedOnUtc = DateTime.UtcNow;
 			this.IsSeenByAuthor = true;
 		}
 
 		public string AuthorName { get; set; } = null!;
 
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedOnUtc { get; set; }
 
         public string Subject { get; set; } = null!;
 

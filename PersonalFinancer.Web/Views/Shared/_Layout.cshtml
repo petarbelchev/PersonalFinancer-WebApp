@@ -91,7 +91,7 @@
 
 	@if (this.User.IsAuthenticated())
 	{
-		<script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+		<script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
 		<script>
 			let userId = '@this.User.Id()';
 		</script>

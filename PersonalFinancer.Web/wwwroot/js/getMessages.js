@@ -34,6 +34,7 @@ async function getMessages(page) {
         alert(`${error.status} ${error.title}`)
     }
 }
+
 function renderMessages(model) {
     let innerHtml = '';
 
@@ -46,7 +47,7 @@ function renderMessages(model) {
 					${message.isSeen ? '' : '<span class="badge text-bg-danger">New messages</span>' }
 				</td>
 				<td>
-                    ${new Date(message.createdOn).toLocaleString('en-US', {
+                    ${new Date(message.createdOnLocalTime).toLocaleString('en-US', {
                         weekday: "long",
                         year: "numeric",
                         month: "long",

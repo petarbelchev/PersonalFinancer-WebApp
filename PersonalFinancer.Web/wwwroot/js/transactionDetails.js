@@ -49,13 +49,13 @@ function renderTransaction(data) {
 				<div class="p-2"><span>Created On: </span></div>
 				<div class="p-2">
                     <span>
-                        ${new Date(data.createdOn).toLocaleString('en-US', {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "numeric",
-                            minute: "numeric"
-                        })}
+                        ${new Date(data.createdOnLocalTime).toLocaleString('en-US', {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric"
+    })}
                     </span>
 				</div>
 			</li>
@@ -86,8 +86,9 @@ function renderTransaction(data) {
     else {
         editBtn.href = params.editTransactionPath + data.id;
         editBtn.style.display = 'block';
-        deleteBtn.setAttribute('transactionId', data.id);
     }
+
+    deleteBtn.setAttribute('transactionId', data.id);
 }
 
 async function deleteTransaction(e) {
