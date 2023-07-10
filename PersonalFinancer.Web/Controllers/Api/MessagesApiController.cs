@@ -38,7 +38,7 @@
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> AddReplyAsync(ReplyInputModel inputModel)
+		public async Task<IActionResult> AddReply(ReplyInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();

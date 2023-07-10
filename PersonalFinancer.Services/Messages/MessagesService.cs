@@ -53,6 +53,7 @@
 			var messages = new MessagesDTO
 			{
 				Messages = await this.messagesRepo.FindAsync(
+					Builders<Message>.Sort.Descending("CreatedOnUtc"),
 					m => new MessageOutputDTO
 					{
 						Id = m.Id,
@@ -104,6 +105,7 @@
 			{
 				Messages = await this.messagesRepo.FindAsync(
 					x => x.AuthorId == userId,
+					Builders<Message>.Sort.Descending("CreatedOnUtc"),
 					m => new MessageOutputDTO
 					{
 						Id = m.Id,
@@ -158,10 +160,9 @@
 			UpdateDefinition<Message> updateDefinition = Builders<Message>.Update
 				.Set(x => isUserAdmin ? x.IsSeenByAdmin : x.IsSeenByAuthor, true);
 
-			UpdateResult result = await this.messagesRepo
-				.UpdateOneAsync(x => 
-					x.Id == messageId && (isUserAdmin || x.AuthorId == userId), 
-					updateDefinition);
+			UpdateResult result = await this.messagesRepo.UpdateOneAsync(x => 
+				x.Id == messageId && (isUserAdmin || x.AuthorId == userId), 
+				updateDefinition);
 
 			return result;
 		}

@@ -1,16 +1,7 @@
-let paginations = document.getElementsByClassName('pagination');
-
-for (let pagination of paginations) {
-    pagination.addEventListener('click', async (e) => {
-        if (e.target.tagName == 'A') {
-            await getMessages(e.target.getAttribute('page'));
-        }
-    })
-}
-
 let tbody = document.querySelector('tbody');
+let currentPage = 1;
 
-async function getMessages(page) {
+async function get(page) {
     tbody.innerHTML = `
         <tr>
             <td colspan="5">
@@ -27,18 +18,19 @@ async function getMessages(page) {
 
     if (response.status == 200) {
         let model = await response.json();
-        renderMessages(model);
-        setUpPagination(page, model.pagination);
+        renderMessages(model.messages);
+        setUpPagination(model.pagination);
+        currentPage = page;
     } else {
         let error = await response.json();
         alert(`${error.status} ${error.title}`)
     }
 }
 
-function renderMessages(model) {
+function renderMessages(messages) {
     let innerHtml = '';
 
-    for (let message of model.messages) {
+    for (let message of messages) {
         let tr = `
 			<tr role="button" onclick="location.href='/Messages/MessageDetails/${message.id}'">
 				<td messageId="${message.id}">
@@ -47,7 +39,7 @@ function renderMessages(model) {
 					${message.isSeen ? '' : '<span class="badge text-bg-danger">New messages</span>' }
 				</td>
 				<td>
-                    ${new Date(message.createdOnLocalTime).toLocaleString('en-US', {
+                    ${new Date(message.createdOnUtc).toLocaleString('en-US', {
                         weekday: "long",
                         year: "numeric",
                         month: "long",

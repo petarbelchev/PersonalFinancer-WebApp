@@ -1,5 +1,15 @@
-function setUpPagination(page, pagination) {
-    page = Number(page);
+let paginations = document.getElementsByClassName('pagination');
+
+for (let pagination of paginations) {
+    pagination.addEventListener('click', async (e) => {
+        if (e.target.tagName == 'A') {
+            await get(e.target.getAttribute('page'));
+        }
+    })
+}
+
+function setUpPagination(pagination) {
+    page = pagination.page;
 
     for (let element of document.getElementsByClassName('elementsStats')) {
         element.textContent = `${pagination.firstElement} to ${pagination.lastElement} from ${pagination.totalElements} ${pagination.elementsName}`;

@@ -75,7 +75,7 @@
 
 			await this.allMessagesHub.Clients
                 .Users(adminsIds)
-                .SendAsync("ReceiveNotification", messageDTO.Id, messageDTO.Subject, messageDTO.CreatedOnUtc);
+                .SendAsync("RefreshMessages");
 
             return this.RedirectToAction(nameof(MessageDetails), new { id = messageDTO.Id });
         }
@@ -84,6 +84,10 @@
         [NotRequireHtmlEncoding]
         public async Task<IActionResult> Delete([Required] string id)
 		{
+			IEnumerable<string> ids = this.User.IsAdmin()
+				? new List<string> { await this.messagesService.GetMessageAuthorIdAsync(id) }
+				: await this.usersService.GetAdminsIdsAsync();
+
 			try
 			{
                 await this.messagesService.RemoveAsync(id, this.User.Id(), this.User.IsAdmin());
@@ -97,13 +101,28 @@
                 return this.BadRequest();
             }
 
-			IEnumerable<string> ids = this.User.IsAdmin()
-				? new List<string> { await this.messagesService.GetMessageAuthorIdAsync(id) }
-				: await this.usersService.GetAdminsIdsAsync();
-
 			await this.allMessagesHub.Clients
 				.Users(ids)
-				.SendAsync("DeleteMessage", id);
+				.SendAsync("RefreshMessages");
+
+            if (this.User.IsAdmin())
+            {
+                if (!await this.messagesService.HasUnseenMessagesByUserAsync(ids.First()))
+                {
+                    await this.notificationsHub.Clients
+                        .Users(ids)
+                        .SendAsync("RemoveNotification");
+                }
+            }
+            else
+			{
+				if (!await this.messagesService.HasUnseenMessagesByAdminAsync())
+				{
+					await this.notificationsHub.Clients
+						.Users(ids)
+						.SendAsync("RemoveNotification");
+				}
+			}
 
 			return this.RedirectToAction(nameof(AllMessages));
         }

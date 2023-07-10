@@ -105,7 +105,7 @@ async function deleteTransaction(e) {
         if (response.status == 200) {
             alert(await response.text());
             closeBtn.click();
-            getTransactions(currentPage);
+            get(currentPage);
         } else {
             alert('Oops! Something was wrong!')
             closeBtn.click();

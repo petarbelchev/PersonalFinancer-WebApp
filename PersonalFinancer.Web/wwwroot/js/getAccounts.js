@@ -1,16 +1,6 @@
-let paginations = document.getElementsByClassName('pagination');
-
-for (let pagination of paginations) {
-    pagination.addEventListener('click', async (e) => {
-        if (e.target.tagName == 'A') {
-            await getAccounts(e.target.getAttribute('page'));
-        }
-    })
-}
-
 let accountsDiv = document.getElementById('accounts');
 
-async function getAccounts(page) {
+async function get(page) {
     accountsDiv.innerHTML = `
         <tr>
             <td colspan="5">
@@ -26,19 +16,19 @@ async function getAccounts(page) {
     let response = await fetch(params.url + page);
 
     if (response.status == 200) {
-        let model = await response.json();
-        renderAccounts(model);
-        setUpPagination(page, model.pagination);
+		let model = await response.json();
+		renderAccounts(model.accountsCards);
+        setUpPagination(model.pagination);
     } else {
         let error = await response.json();
         alert(`${error.status} ${error.title}`)
     }
 }
 
-function renderAccounts(model) {
+function renderAccounts(accountsCards) {
     let innerHtml = '';
 
-    for (let account of model.accountsCards) {
+    for (let account of accountsCards) {
         let div = `
 			<div class="col-sm-6 col-lg-4 col-xl-3">
 				<div class="card align-items-center shadow mb-4">

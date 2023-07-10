@@ -1,17 +1,7 @@
 ﻿const tbody = document.querySelector('tbody');
-let paginations = document.getElementsByClassName('pagination');
 let currentPage = 1;
 
-for (let pagination of paginations) {
-    pagination.addEventListener('click', async (e) => {
-        if (e.target.tagName == 'A') {
-            currentPage = e.target.getAttribute('page');
-            await getTransactions(currentPage);
-        }
-    })
-}
-
-async function getTransactions(page) {
+async function get(page) {
     tbody.innerHTML = `
         <tr>
             <td colspan="5">
@@ -45,17 +35,18 @@ async function getTransactions(page) {
 
     if (response.status == 200) {
         let model = await response.json();
-        renderTransactions(model);
-        setUpPagination(page, model.pagination);
+        renderTransactions(model.transactions);
+        setUpPagination(model.pagination);
+        currentPage = model.pagination.page;
     } else {
         alert('Oops! Something was wrong!')
     }
 }
 
-function renderTransactions(model) {
+function renderTransactions(transactions) {
     let innerHtml = '';
 
-    for (let transaction of model.transactions) {
+    for (let transaction of transactions) {
         let tr = `
                 <tr role="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" transactionId="${transaction.id}">
 					<td><img src="${transaction.transactionType == 'Income' ? '/icons/greenArrow.png' : '/icons/redArrow.png'}" style="max-width: 25px;"></td>

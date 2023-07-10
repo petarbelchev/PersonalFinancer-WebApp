@@ -27,7 +27,7 @@
 				: await this.usersService.GetAdminsIdsAsync();
 
 			await this.Clients.Users(ids).SendAsync("ReceiveNotification");
-			await this.allMessagesHub.Clients.Users(ids).SendAsync("ReceiveNotification", messageId);
+			await this.allMessagesHub.Clients.Users(ids).SendAsync("ReceiveNewReplyNotification", messageId);
 
 			return ResponseMessages.NotificationSuccessfullySent;
 		}
