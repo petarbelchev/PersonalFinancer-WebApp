@@ -8,6 +8,10 @@
 		/// <exception cref="InvalidOperationException">When adding a reply was unsuccessful.</exception>
 		Task<ReplyOutputDTO> AddReplyAsync(ReplyInputDTO model);
 
+		/// <exception cref="ArgumentException">When the user is unauthorized.</exception>
+		/// <exception cref="InvalidOperationException">When archiving a message was unsuccessful.</exception>
+		Task ArchiveAsync(string messageId, string userId, bool isUserAdmin);
+
 		Task<MessageOutputDTO> CreateAsync(MessageInputDTO model);
 
 		Task<MessagesDTO> GetAllAsync(int page = 1);

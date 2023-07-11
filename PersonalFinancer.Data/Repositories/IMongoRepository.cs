@@ -10,6 +10,8 @@
 
         Task<int> CountAsync();
 
+		Task<int> CountAsync(Expression<Func<T, bool>> filterExpression);
+
 		Task<DeleteResult> DeleteOneAsync(string documentId);
 
 		Task<IEnumerable<TProjected>> FindAsync<TProjected>(

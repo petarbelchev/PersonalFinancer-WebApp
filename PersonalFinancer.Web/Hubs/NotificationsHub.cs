@@ -18,7 +18,7 @@
 			this.allMessagesHub = allMessagesHub;
 		}
 
-		public async Task<string> SendNotification(string authorId, string messageId)
+		public async Task<string> SendNotification(string authorId)
 		{
 			bool isUserAdmin = this.Context.User?.IsAdmin() ?? throw new InvalidOperationException();
 
@@ -27,9 +27,9 @@
 				: await this.usersService.GetAdminsIdsAsync();
 
 			await this.Clients.Users(ids).SendAsync("ReceiveNotification");
-			await this.allMessagesHub.Clients.Users(ids).SendAsync("ReceiveNewReplyNotification", messageId);
+			await this.allMessagesHub.Clients.Users(ids).SendAsync("RefreshMessages");
 
-			return ResponseMessages.NotificationSuccessfullySent;
+			return ResponseMessages.NotificationSuccessfullySend;
 		}
 	}
 }

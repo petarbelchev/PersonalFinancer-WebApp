@@ -21,6 +21,9 @@
         public async Task<int> CountAsync()
             => (int)await this.collection.CountDocumentsAsync(FilterDefinition<T>.Empty);
 
+		public async Task<int> CountAsync(Expression<Func<T, bool>> filterExpression)
+			=> (int)await this.collection.CountDocumentsAsync(filterExpression);
+
 		public async Task<DeleteResult> DeleteOneAsync(string documentId)
             => await this.collection.DeleteOneAsync(x => x.Id == documentId);
 

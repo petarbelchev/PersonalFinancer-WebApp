@@ -30,6 +30,16 @@ async function get(page) {
 function renderMessages(messages) {
     let innerHtml = '';
 
+    if (messages.length == 0) {
+        innerHtml = `
+            <tr>
+                <td colspan="2">
+                    <p id="noMessagesNote" class="display-6 fs-4 text-center">You don't have any messages.</p>
+                </td>
+            </tr>
+        `;
+    }
+
     for (let message of messages) {
         let tr = `
 			<tr role="button" onclick="location.href='/Messages/MessageDetails/${message.id}'">

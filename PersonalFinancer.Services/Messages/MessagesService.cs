@@ -30,7 +30,8 @@
 
 			UpdateDefinition<Message> update = Builders<Message>.Update
 				.Push(x => x.Replies, reply)
-				.Set(x => model.IsAuthorAdmin ? x.IsSeenByAuthor : x.IsSeenByAdmin, false);
+				.Set(x => model.IsAuthorAdmin ? x.IsSeenByAuthor : x.IsSeenByAdmin, false)
+				.Set(x => model.IsAuthorAdmin ? x.IsArchivedByAuthor : x.IsArchivedByAdmin, false);
 
 			UpdateResult result = await this.messagesRepo.UpdateOneAsync(x => x.Id == model.MessageId, update);
 
@@ -39,8 +40,23 @@
 				: throw new InvalidOperationException(ExceptionMessages.UnsuccessfulUpdate);
 		}
 
+		public async Task ArchiveAsync(string messageId, string userId, bool isUserAdmin)
+		{
+			if (!isUserAdmin && !await this.messagesRepo.IsUserDocumentAuthor(messageId, userId))
+				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
+
+			UpdateResult result = await this.messagesRepo.UpdateOneAsync(
+				x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
+				Builders<Message>.Update.Set(x => isUserAdmin ? x.IsArchivedByAdmin : x.IsArchivedByAuthor, true));
+
+			if (!result.IsAcknowledged)
+				throw new InvalidOperationException(ExceptionMessages.UnsuccessfulUpdate);
+		}
+
 		public async Task<MessageOutputDTO> CreateAsync(MessageInputDTO model)
 		{
+			// TODO: Add validation for adding a new message!
+
 			Message newMessage = this.mapper.Map<Message>(model);
 
 			await this.messagesRepo.InsertOneAsync(newMessage);
@@ -53,6 +69,7 @@
 			var messages = new MessagesDTO
 			{
 				Messages = await this.messagesRepo.FindAsync(
+					m => !m.IsArchivedByAdmin,
 					Builders<Message>.Sort.Descending("CreatedOnUtc"),
 					m => new MessageOutputDTO
 					{
@@ -63,7 +80,7 @@
 					},
 					page),
 
-				TotalMessagesCount = await this.messagesRepo.CountAsync()
+				TotalMessagesCount = await this.messagesRepo.CountAsync(m => !m.IsArchivedByAdmin)
 			};
 
 			return messages;
@@ -89,11 +106,9 @@
 					})
 				});
 
-			UpdateResult result = await this.MarkAsSeen(messageId, userId, isUserAdmin);
+			await this.MarkAsSeen(messageId, userId, isUserAdmin);
 
-			return result.IsAcknowledged
-				? message
-				: throw new InvalidOperationException(ExceptionMessages.UnsuccessfulUpdate);
+			return message;
 		}
 
 		public async Task<string> GetMessageAuthorIdAsync(string messageId)
@@ -104,7 +119,7 @@
 			var messages = new MessagesDTO
 			{
 				Messages = await this.messagesRepo.FindAsync(
-					x => x.AuthorId == userId,
+					x => x.AuthorId == userId && !x.IsArchivedByAuthor,
 					Builders<Message>.Sort.Descending("CreatedOnUtc"),
 					m => new MessageOutputDTO
 					{
@@ -115,7 +130,7 @@
 					},
 					page),
 
-				TotalMessagesCount = await this.messagesRepo.CountAsync()
+				TotalMessagesCount = await this.messagesRepo.CountAsync(m => !m.IsArchivedByAuthor)
 			};
 
 			return messages;
@@ -137,12 +152,7 @@
 		}
 
 		public async Task MarkMessageAsSeenAsync(string messageId, string userId, bool isUserAdmin)
-		{
-			UpdateResult updateResult = await this.MarkAsSeen(messageId, userId, isUserAdmin);
-
-			if (!updateResult.IsAcknowledged)
-				throw new InvalidOperationException(ExceptionMessages.UnsuccessfulUpdate);
-		}
+			=> await this.MarkAsSeen(messageId, userId, isUserAdmin);
 
 		public async Task RemoveAsync(string messageId, string userId, bool isUserAdmin)
 		{
@@ -155,7 +165,8 @@
 				throw new InvalidOperationException(ExceptionMessages.UnsuccessfulDelete);
 		}
 
-		private async Task<UpdateResult> MarkAsSeen(string messageId, string userId, bool isUserAdmin)
+		/// <exception cref="InvalidOperationException">When the update was unsuccessful.</exception>
+		private async Task MarkAsSeen(string messageId, string userId, bool isUserAdmin)
 		{
 			UpdateDefinition<Message> updateDefinition = Builders<Message>.Update
 				.Set(x => isUserAdmin ? x.IsSeenByAdmin : x.IsSeenByAuthor, true);
@@ -164,7 +175,8 @@
 				x.Id == messageId && (isUserAdmin || x.AuthorId == userId), 
 				updateDefinition);
 
-			return result;
+			if (!result.IsAcknowledged)
+				throw new InvalidOperationException(ExceptionMessages.UnsuccessfulUpdate);
 		}
 	}
 }

@@ -53,11 +53,13 @@
 					Subject = m.Subject,
 					IsSeen = m.IsSeenByAdmin
 				})
+				.OrderByDescending(m => m.CreatedOnUtc)
 				.Skip(MessagesPerPage * (page - 1))
 				.Take(MessagesPerPage)
 				.ToArray();
 
 			this.repoMock.Setup(x => x.FindAsync(
+					Builders<Message>.Sort.Descending("CreatedOnUtc"),
 					m => new MessageOutputDTO
 					{
 						Id = m.Id,
@@ -98,6 +100,7 @@
 					Subject = m.Subject,
 					IsSeen = m.IsSeenByAuthor
 				})
+				.OrderByDescending(m => m.CreatedOnUtc)
 				.Skip(MessagesPerPage * (page - 1))
 				.Take(MessagesPerPage)
 				.ToArray();
@@ -106,6 +109,7 @@
 
 			this.repoMock.Setup(x => x.FindAsync(
 					m => m.AuthorId == userId,
+					Builders<Message>.Sort.Descending("CreatedOnUtc"),
 					m => new MessageOutputDTO
 					{
 						Id = m.Id,

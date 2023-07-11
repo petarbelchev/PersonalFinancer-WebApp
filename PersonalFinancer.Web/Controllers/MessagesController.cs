@@ -48,6 +48,26 @@
             return this.View(viewModel);
         }
 
+        [HttpPost]
+        [NotRequireHtmlEncoding]
+        public async Task<IActionResult> Archive([Required] string id)
+        {
+            try
+            {
+                await this.messagesService.ArchiveAsync(id, this.User.Id(), this.User.IsAdmin());
+            }
+            catch (ArgumentException)
+            {
+                return this.Unauthorized();
+            }
+            catch (InvalidOperationException) 
+            {
+                return this.BadRequest();
+            }
+
+            return this.RedirectToAction(nameof(AllMessages));
+        }
+
         [Authorize(Roles = UserRoleName)]
         public IActionResult Create() => this.View(new MessageInputModel());
 

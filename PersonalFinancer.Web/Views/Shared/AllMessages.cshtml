@@ -41,18 +41,18 @@
 								</tr>
 							}
 						}
+						else
+						{
+							<tr>
+								<td colspan="2"><p id="noMessagesNote" class="display-6 fs-4 text-center">You don't have any messages.</p></td>
+							</tr>
+						}
 
 					</tbody>
 				</table>
 			</div>
 		</div>
 		<partial name="_PaginationPartial" />
-
-		@if (!Model.Messages.Any())
-		{
-			<p id="noMessagesNote" class="display-6 fs-4 text-center">You don't have any messages.</p>
-		}
-
 	</div>
 </div>
 
