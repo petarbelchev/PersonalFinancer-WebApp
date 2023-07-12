@@ -13,19 +13,10 @@
 
 			this.Pagination = new PaginationModel(
 				AccountsName, AccountsPerPage, usersCardsData.TotalAccountsCount);
-
-			this.Routing = new RoutingModel
-			{
-				Area = "Admin",
-				Controller = "Accounts",
-				Action = "Index"
-			};
 		}
 
         public IEnumerable<AccountCardDTO> AccountsCards { get; set; }
 
 		public PaginationModel Pagination { get; private set; }
-
-		public RoutingModel Routing { get; set; }
 	}
 }

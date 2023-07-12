@@ -66,7 +66,7 @@
 		}
 
 		[Test]
-		public async Task AllMessages_ShouldReturnViewModelWithUserMessages_WhenUserIsNotAdmin()
+		public async Task All_ShouldReturnViewModelWithUserMessages_WhenUserIsNotAdmin()
 		{
 			//Arrange
 			int page = 1;
@@ -74,17 +74,18 @@
 			var serviceReturnDto = new MessagesDTO
 			{
 				Messages = this.fakeCollection
-					.Where(m => m.AuthorId == this.userId.ToString())
+					.Where(m => m.AuthorId == this.userId.ToString() && !m.IsArchivedByAuthor)
 					.Select(m => new MessageOutputDTO
 					{
 						Id = m.Id,
 						CreatedOnUtc = m.CreatedOnUtc,
-						Subject = m.Subject
+						Subject = m.Subject,
+						IsSeen = m.IsSeenByAuthor
 					})
 					.Skip(MessagesPerPage * (page - 1))
 					.Take(MessagesPerPage),
 				TotalMessagesCount = this.fakeCollection
-					.Count(m => m.AuthorId == this.userId.ToString())
+					.Count(m => m.AuthorId == this.userId.ToString() && !m.IsArchivedByAuthor)
 			};
 
 			this.userMock.Setup(x => x
@@ -96,7 +97,7 @@
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.AllMessages();
+			var viewResult = (ViewResult)await this.controller.All();
 
 			//Assert
 			Assert.Multiple(() =>
@@ -116,7 +117,7 @@
 		}
 
 		[Test]
-		public async Task AllMessages_ShouldReturnViewModelWithAllUsersMessages_WhenUserIsAdmin()
+		public async Task All_ShouldReturnViewModelWithAllUsersMessages_WhenUserIsAdmin()
 		{
 			//Arrange
 			int page = 1;
@@ -124,16 +125,18 @@
 			var serviceReturnDto = new MessagesDTO
 			{
 				Messages = this.fakeCollection
+					.Where(m => !m.IsArchivedByAdmin)
 					.Select(m => new MessageOutputDTO
 					{
 						Id = m.Id,
 						CreatedOnUtc = m.CreatedOnUtc,
-						Subject = m.Subject
+						Subject = m.Subject,
+						IsSeen = m.IsSeenByAdmin
 					})
 					.Skip(MessagesPerPage * (page - 1))
 					.Take(MessagesPerPage),
 				TotalMessagesCount = this.fakeCollection
-					.Count(m => m.AuthorId == this.userId.ToString())
+					.Count(m => !m.IsArchivedByAdmin)
 			};
 
 			this.userMock.Setup(x => x
@@ -141,11 +144,11 @@
 				.Returns(true);
 
 			this.messagesServiceMock.Setup(x => x
-				.GetAllAsync(page))
+				.GetAllMessagesAsync(page))
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.AllMessages();
+			var viewResult = (ViewResult)await this.controller.All();
 
 			//Assert
 			Assert.Multiple(() =>
@@ -254,7 +257,7 @@
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(actual.ActionName, Is.EqualTo("MessageDetails"));
+				Assert.That(actual.ActionName, Is.EqualTo("Details"));
 				Assert.That(actual.RouteValues, Is.Not.Null);
 				AssertRouteValueIsEqual(actual.RouteValues!, "id", expected.Id);
 			});
@@ -280,7 +283,7 @@
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(result.ActionName, Is.EqualTo("AllMessages"));
+				Assert.That(result.ActionName, Is.EqualTo("All"));
 				Assert.That(result.RouteValues, Is.Null);
 			});
 		}
@@ -343,7 +346,7 @@
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.MessageDetails(messageId);
+			var viewResult = (ViewResult)await this.controller.Details(messageId);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -368,7 +371,7 @@
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.MessageDetails(messageId);
+			var result = (BadRequestResult)await this.controller.Details(messageId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));

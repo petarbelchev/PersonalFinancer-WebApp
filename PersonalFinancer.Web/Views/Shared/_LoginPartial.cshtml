@@ -8,23 +8,31 @@
 <ul class="navbar-nav">
 	@if (this.User.IsAuthenticated())
 	{
-		if (this.User.IsAdmin())
-		{
-			<a class="nav-link text-light navpanMessagesBtn" asp-area="" asp-controller="Messages" asp-action="AllMessages">
-				Users Messages
+		<li class="nav-item dropdown">
+			@if (this.User.IsAdmin())
+			{
+				<a class="nav-link dropdown-toggle text-light navpanMessagesBtn" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+					Messages
 
-				@if (await this.messagesService.HasUnseenMessagesByAdminAsync())
-				{
-					<span class="badge text-bg-danger">New messages</span>
-				}
-			</a>
-		}
-		else
-		{
-			<li class="nav-item dropdown">
+					@if (await this.messagesService.HasUnseenMessagesByAdminAsync())
+					{
+						<span class="badge text-bg-danger">New messages</span>
+					}
+				</a>
+				<ul class="dropdown-menu dropdown-menu-end">
+					<li class="nav-link btn btn-link dropdown-item">
+						<a class="text-dark" asp-area="" asp-controller="Messages" asp-action="All" style="text-decoration: none;">Users Messages</a>
+					</li>
+					<li class="nav-link btn btn-link dropdown-item">
+						<a class="text-dark" asp-area="" asp-controller="Messages" asp-action="Archived" style="text-decoration: none;">Archived Messages</a>
+					</li>
+				</ul>
+			}
+			else
+			{
 				<a class="nav-link dropdown-toggle text-light navpanMessagesBtn" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 					Contact Us
-					
+
 					@if (await this.messagesService.HasUnseenMessagesByUserAsync(this.User.Id()))
 					{
 						<span class="badge text-bg-danger">New messages</span>
@@ -35,11 +43,14 @@
 						<a class="text-dark" asp-area="" asp-controller="Messages" asp-action="Create" style="text-decoration: none;">Write Message</a>
 					</li>
 					<li class="nav-link btn btn-link dropdown-item">
-						<a class="text-dark" asp-area="" asp-controller="Messages" asp-action="AllMessages" style="text-decoration: none;">Your Messages</a>
+						<a class="text-dark" asp-area="" asp-controller="Messages" asp-action="All" style="text-decoration: none;">Your Messages</a>
+					</li>
+					<li class="nav-link btn btn-link dropdown-item">
+						<a class="text-dark" asp-area="" asp-controller="Messages" asp-action="Archived" style="text-decoration: none;">Archived Messages</a>
 					</li>
 				</ul>
-			</li>
-		}
+			}
+		</li>
 
 		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

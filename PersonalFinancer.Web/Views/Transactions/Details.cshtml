@@ -40,7 +40,7 @@
 			@if (!Model.IsInitialBalance)
 			{
 				<div class="m-3">
-					<a asp-controller="Transactions" asp-action="EditTransaction" asp-route-id="@Model.Id" class="w-100 btn btn-lg btn-warning">Edit</a>
+					<a asp-controller="Transactions" asp-action="Edit" asp-route-id="@Model.Id" class="w-100 btn btn-lg btn-warning">Edit</a>
 				</div>
 			}
 			else

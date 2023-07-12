@@ -7,6 +7,7 @@
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Messages.Models;
+	using System.Linq.Expressions;
 
 	public class MessagesService : IMessagesService
 	{
@@ -64,27 +65,11 @@
 			return this.mapper.Map<MessageOutputDTO>(newMessage);
 		}
 
-		public async Task<MessagesDTO> GetAllAsync(int page = 1)
-		{
-			var messages = new MessagesDTO
-			{
-				Messages = await this.messagesRepo.FindAsync(
-					m => !m.IsArchivedByAdmin,
-					Builders<Message>.Sort.Descending("CreatedOnUtc"),
-					m => new MessageOutputDTO
-					{
-						Id = m.Id,
-						CreatedOnUtc = m.CreatedOnUtc,
-						Subject = m.Subject,
-						IsSeen = m.IsSeenByAdmin
-					},
-					page),
+		public async Task<MessagesDTO> GetAllArchivedAsync(int page = 1)
+			=> await this.GetMessagesAsync(m => m.IsArchivedByAdmin, page, isUserAdmin: true);
 
-				TotalMessagesCount = await this.messagesRepo.CountAsync(m => !m.IsArchivedByAdmin)
-			};
-
-			return messages;
-		}
+		public async Task<MessagesDTO> GetAllMessagesAsync(int page = 1)
+			=> await this.GetMessagesAsync(m => !m.IsArchivedByAdmin, page, isUserAdmin: true);
 
 		public async Task<MessageDetailsDTO> GetMessageAsync(string messageId, string userId, bool isUserAdmin)
 		{
@@ -106,7 +91,7 @@
 					})
 				});
 
-			await this.MarkAsSeen(messageId, userId, isUserAdmin);
+			await this.MarkAsSeenAsync(messageId, userId, isUserAdmin);
 
 			return message;
 		}
@@ -114,27 +99,11 @@
 		public async Task<string> GetMessageAuthorIdAsync(string messageId)
 			=> await this.messagesRepo.FindOneAsync(m => m.Id == messageId, m => m.AuthorId);
 
+		public async Task<MessagesDTO> GetUserArchivedAsync(string userId, int page = 1)
+			=> await this.GetMessagesAsync(m => m.AuthorId == userId && m.IsArchivedByAuthor, page, isUserAdmin: false);
+
 		public async Task<MessagesDTO> GetUserMessagesAsync(string userId, int page = 1)
-		{
-			var messages = new MessagesDTO
-			{
-				Messages = await this.messagesRepo.FindAsync(
-					x => x.AuthorId == userId && !x.IsArchivedByAuthor,
-					Builders<Message>.Sort.Descending("CreatedOnUtc"),
-					m => new MessageOutputDTO
-					{
-						Id = m.Id,
-						CreatedOnUtc = m.CreatedOnUtc,
-						Subject = m.Subject,
-						IsSeen = m.IsSeenByAuthor
-					},
-					page),
-
-				TotalMessagesCount = await this.messagesRepo.CountAsync(m => !m.IsArchivedByAuthor)
-			};
-
-			return messages;
-		}
+			=> await this.GetMessagesAsync(m => m.AuthorId == userId && !m.IsArchivedByAuthor, page, isUserAdmin: false);
 
 		public async Task<bool> HasUnseenMessagesByAdminAsync()
 			=> await this.messagesRepo.AnyAsync(m => !m.IsSeenByAdmin);
@@ -152,7 +121,7 @@
 		}
 
 		public async Task MarkMessageAsSeenAsync(string messageId, string userId, bool isUserAdmin)
-			=> await this.MarkAsSeen(messageId, userId, isUserAdmin);
+			=> await this.MarkAsSeenAsync(messageId, userId, isUserAdmin);
 
 		public async Task RemoveAsync(string messageId, string userId, bool isUserAdmin)
 		{
@@ -165,8 +134,33 @@
 				throw new InvalidOperationException(ExceptionMessages.UnsuccessfulDelete);
 		}
 
+		private async Task<MessagesDTO> GetMessagesAsync(
+			Expression<Func<Message, bool>> filterExpression,
+			int page,
+			bool isUserAdmin)
+		{
+			var messages = new MessagesDTO
+			{
+				Messages = await this.messagesRepo.FindAsync(
+					filterExpression,
+					Builders<Message>.Sort.Descending("CreatedOnUtc"),
+					m => new MessageOutputDTO
+					{
+						Id = m.Id,
+						CreatedOnUtc = m.CreatedOnUtc,
+						Subject = m.Subject,
+						IsSeen = isUserAdmin ? m.IsSeenByAdmin : m.IsSeenByAuthor
+					},
+					page),
+
+				TotalMessagesCount = await this.messagesRepo.CountAsync(filterExpression)
+			};
+
+			return messages;
+		}
+
 		/// <exception cref="InvalidOperationException">When the update was unsuccessful.</exception>
-		private async Task MarkAsSeen(string messageId, string userId, bool isUserAdmin)
+		private async Task MarkAsSeenAsync(string messageId, string userId, bool isUserAdmin)
 		{
 			UpdateDefinition<Message> updateDefinition = Builders<Message>.Update
 				.Set(x => isUserAdmin ? x.IsSeenByAdmin : x.IsSeenByAuthor, true);

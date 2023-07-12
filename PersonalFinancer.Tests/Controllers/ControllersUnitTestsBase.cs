@@ -59,15 +59,16 @@
 			});
 		}
 
-		protected static void AssertRouteValueIsEqual(RouteValueDictionary routeValues, string key, object value)
+		protected static void AssertRouteValueIsEqual(
+			RouteValueDictionary routeValues, string key, object value, int totalRouteValues = 1)
 		{
 			Assert.Multiple(() =>
 			{
 				Assert.That(routeValues, Is.Not.Null);
-				Assert.That(routeValues.Keys, Has.Count.EqualTo(1));
+				Assert.That(routeValues.Keys, Has.Count.EqualTo(totalRouteValues));
 				Assert.That(routeValues.ContainsKey(key), Is.True);
-				Assert.That(routeValues.Values, Has.Count.EqualTo(1));
-				Assert.That(routeValues.Values.First(), Is.EqualTo(value));
+				Assert.That(routeValues.Values, Has.Count.EqualTo(totalRouteValues));
+				Assert.That(routeValues.Values.Contains(value), Is.True);
 			});
 		}
 	}

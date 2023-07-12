@@ -25,18 +25,6 @@
 			this.usersService = usersService;
 		}
 
-		[HttpGet("{page}")]
-		public async Task<IActionResult> AllMessages(int page)
-		{
-			MessagesDTO messagesDTO = this.User.IsAdmin()
-				? await this.messagesService.GetAllAsync(page)
-				: await this.messagesService.GetUserMessagesAsync(this.User.Id(), page);
-
-			var model = new MessagesViewModel(messagesDTO, page);
-
-			return this.Ok(model);
-		}
-
 		[HttpPost]
 		public async Task<IActionResult> AddReply(ReplyInputModel inputModel)
 		{
@@ -67,6 +55,28 @@
 			{
 				return this.BadRequest();
 			}			
+		}
+
+		[HttpGet]
+		[Route("all/{page}")]
+		public async Task<IActionResult> All(int page)
+		{
+			MessagesDTO messagesDTO = this.User.IsAdmin()
+				? await this.messagesService.GetAllMessagesAsync(page)
+				: await this.messagesService.GetUserMessagesAsync(this.User.Id(), page);
+
+			return this.Ok(new MessagesViewModel(messagesDTO, page));
+		}
+
+		[HttpGet]
+		[Route("archived/{page}")]
+		public async Task<IActionResult> Archived(int page)
+		{
+			MessagesDTO messagesDTO = this.User.IsAdmin()
+				? await this.messagesService.GetAllArchivedAsync(page)
+				: await this.messagesService.GetUserArchivedAsync(this.User.Id(), page);
+
+			return this.Ok(new MessagesViewModel(messagesDTO, page));
 		}
 
 		[HttpPatch("{messageId}")]

@@ -6,9 +6,6 @@
 
 	public class MessageHub : Hub
 	{
-		public MessageHub()
-		{ }
-
 		public async Task JoinGroup(string messageId)
 		{
 			string groupName = messageId;

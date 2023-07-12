@@ -12,19 +12,10 @@
 
 			this.Pagination = new PaginationModel(
 				UsersName, UsersPerPage, usersInfoDTO.TotalUsersCount, page);
-
-			this.Routing = new RoutingModel
-			{
-				Area = "Admin",
-				Controller = "Users",
-				Action = "Index"
-			};
 		}
 
 		public IEnumerable<UserInfoDTO> Users { get; private set; }
 
 		public PaginationModel Pagination { get; private set; }
-
-		public RoutingModel Routing { get; private set; }
 	}
 }

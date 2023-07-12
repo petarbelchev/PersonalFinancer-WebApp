@@ -32,7 +32,7 @@ else
 			<div class="row mt-4">
 				@foreach (var account in Model.Accounts)
 				{
-					<div class="col-xl-3 col-lg-4 col-md-6" role="button" onclick="location.href='@Url.Action("AccountDetails", "Accounts", new { id = account.Id })'">
+					<div class="col-xl-3 col-lg-4 col-md-6" role="button" onclick="location.href='@Url.Action("Details", "Accounts", new { id = account.Id })'">
 						<div class="card align-items-center shadow mb-4">
 							<div class="d-flex flex-row align-items-center mb-2">
 								<div class="p-2">
@@ -78,7 +78,7 @@ else
 									<tbody style="vertical-align: text-top;">
 										@foreach (var transaction in Model.LastTransactions)
 										{
-											<tr role="button" onclick="location.href='@Url.Action("TransactionDetails", "Transactions", new { id = transaction.Id })'">
+											<tr role="button" onclick="location.href='/Transactions/Details/@(transaction.Id)'">
 												@if (transaction.TransactionType == TransactionType.Income.ToString())
 												{
 													<td><img src="/icons/greenArrow.png" style="max-width: 25px;"></td>

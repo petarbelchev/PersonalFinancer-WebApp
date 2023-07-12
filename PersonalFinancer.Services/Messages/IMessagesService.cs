@@ -1,6 +1,8 @@
 ﻿namespace PersonalFinancer.Services.Messages
 {
+	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Services.Messages.Models;
+	using System.Linq.Expressions;
 
 	public interface IMessagesService
 	{
@@ -14,13 +16,17 @@
 
 		Task<MessageOutputDTO> CreateAsync(MessageInputDTO model);
 
-		Task<MessagesDTO> GetAllAsync(int page = 1);
+		Task<MessagesDTO> GetAllArchivedAsync(int page = 1);
+
+		Task<MessagesDTO> GetAllMessagesAsync(int page = 1);
 
 		/// <exception cref="InvalidOperationException">When the message does not exist, 
 		/// the user is not owner or administrator or message update was unsuccessful.</exception>
 		Task<MessageDetailsDTO> GetMessageAsync(string id, string userId, bool isUserAdmin);
 
 		Task<string> GetMessageAuthorIdAsync(string messageId);
+
+		Task<MessagesDTO> GetUserArchivedAsync(string userId, int page = 1);
 
 		Task<MessagesDTO> GetUserMessagesAsync(string userId, int page = 1);
 

@@ -16,9 +16,6 @@
 		/// <exception cref="InvalidOperationException">When the account does not exist or the user is not owner or administrator.</exception>
 		Task<string> GetAccountNameAsync(Guid accountId, Guid userId, bool isUserAdmin);
 
-		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
-		Task<Guid> GetAccountOwnerIdAsync(Guid accountId);
-
 		Task<AccountsCardsDTO> GetAccountsCardsDataAsync(int page);
 
 		Task<int> GetAccountsCountAsync();

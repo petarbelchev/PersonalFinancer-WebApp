@@ -37,15 +37,13 @@
             this.notificationsHub = notificationsHub;
         }
 
-        public async Task<IActionResult> AllMessages()
+        public async Task<IActionResult> All()
         {
             MessagesDTO messagesDTO = this.User.IsAdmin()
-                ? await this.messagesService.GetAllAsync()
+                ? await this.messagesService.GetAllMessagesAsync()
                 : await this.messagesService.GetUserMessagesAsync(this.User.Id());
 
-            var viewModel = new MessagesViewModel(messagesDTO);
-
-            return this.View(viewModel);
+            return this.View(new MessagesViewModel(messagesDTO));
         }
 
         [HttpPost]
@@ -65,8 +63,17 @@
                 return this.BadRequest();
             }
 
-            return this.RedirectToAction(nameof(AllMessages));
+            return this.RedirectToAction(nameof(All));
         }
+
+        public async Task<IActionResult> Archived()
+		{
+			MessagesDTO messagesDTO = this.User.IsAdmin()
+				? await this.messagesService.GetAllArchivedAsync()
+				: await this.messagesService.GetUserArchivedAsync(this.User.Id());
+
+			return this.View(new MessagesViewModel(messagesDTO));
+		}
 
         [Authorize(Roles = UserRoleName)]
         public IActionResult Create() => this.View(new MessageInputModel());
@@ -97,7 +104,7 @@
                 .Users(adminsIds)
                 .SendAsync("RefreshMessages");
 
-            return this.RedirectToAction(nameof(MessageDetails), new { id = messageDTO.Id });
+            return this.RedirectToAction(nameof(Details), new { id = messageDTO.Id });
         }
 
         [HttpPost]
@@ -144,10 +151,10 @@
 				}
 			}
 
-			return this.RedirectToAction(nameof(AllMessages));
+			return this.RedirectToAction(nameof(All));
         }
 
-        public async Task<IActionResult> MessageDetails([Required] string id)
+        public async Task<IActionResult> Details([Required] string id)
         {
             try
             {

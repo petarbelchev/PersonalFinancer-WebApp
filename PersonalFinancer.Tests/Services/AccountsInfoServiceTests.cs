@@ -299,27 +299,6 @@
 		}
 
 		[Test]
-		public async Task GetOwnerId_ShouldReturnOwnerId_WithValidAccountId()
-		{
-			//Act
-			Guid ownerId = await this.accountsInfoService.GetAccountOwnerIdAsync(this.Account1_User1_WithTransactions.Id);
-
-			//Assert
-			Assert.That(ownerId, Is.EqualTo(this.User1.Id));
-		}
-
-		[Test]
-		public void GetOwnerId_ShouldThrowException_WhenAccountIdIsInvalid()
-		{
-			//Arrange
-			var invalidId = Guid.NewGuid();
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService.GetAccountOwnerIdAsync(invalidId),
-			Throws.TypeOf<InvalidOperationException>());
-		}
-
-		[Test]
 		public async Task GetTransactionDetails_ShouldReturnCorrectDTO_WithValidInput()
 		{
 			//Arrange

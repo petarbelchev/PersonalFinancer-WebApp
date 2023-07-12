@@ -42,7 +42,7 @@ function renderMessages(messages) {
 
     for (let message of messages) {
         let tr = `
-			<tr role="button" onclick="location.href='/Messages/MessageDetails/${message.id}'">
+			<tr role="button" onclick="location.href='/Messages/Details/${message.id}'">
 				<td messageId="${message.id}">
 					<img src="/icons/icons8-message-64.png" style="max-width: 30px;" />
 					<span>	${message.subject}</span>
