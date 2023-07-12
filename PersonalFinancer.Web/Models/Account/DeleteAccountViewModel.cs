@@ -5,5 +5,7 @@
 		public string Name { get; set; } = null!;
 
 		public bool ShouldDeleteTransactions { get; set; }
-	}
+
+		public string? ReturnUrl { get; set; }
+    }
 }

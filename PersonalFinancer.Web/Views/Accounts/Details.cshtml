@@ -38,6 +38,24 @@
 			<partial name="_PaginationPartial" />
 		</div>
 	</div>
+
+	@section Scripts {
+		<partial name="_ValidationScriptsPartial" />
+		<script>
+			let params = {
+				id: '@Model.Id',
+				fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+				toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+				ownerId: '@Model.OwnerId',
+				allTransactionsEndpoint: '@ApiAccountTransactionsEndpoint',
+				transactionEndpoint: '@ApiTransactionsEndpoint',
+				editTransactionPath: '@TransactionEditPath'
+			}
+		</script>
+		<script src="~/js/getTransactions.js"></script>
+		<script src="~/js/setUpPagination.js"></script>
+		<script src="~/js/transactionDetails.js"></script>
+	}
 }
 else
 {
@@ -51,29 +69,9 @@ else
 
 <div class="d-flex justify-content-center">
 	<div class="p-2">
-		<a asp-controller="Accounts" asp-action="EditAccount" asp-route-id="@Model.Id"
-		   asp-route-returnUrl="@Model.Routing.ReturnUrl" class="btn btn-warning">Edit Account</a>
+		<a asp-controller="Accounts" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit Account</a>
 	</div>
 	<div class="p-2">
-		<a asp-controller="Accounts" asp-action="Delete" asp-route-id="@Model.Id"
-		   asp-route-returnUrl="@Model.Routing.ReturnUrl" class="btn btn-danger">Delete Account</a>
+		<a asp-controller="Accounts" asp-action="Delete" asp-route-id="@Model.Id" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-danger">Delete Account</a>
 	</div>
 </div>
-
-@section Scripts {
-	<partial name="_ValidationScriptsPartial" />
-	<script>
-		let params = {
-			id: '@Model.Id',
-			fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
-			toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
-			ownerId: '@Model.OwnerId',
-			allTransactionsEndpoint: '@ApiAccountTransactionsEndpoint',
-			transactionEndpoint: '@ApiTransactionsEndpoint',
-			editTransactionPath: '@TransactionEditPath'
-		}
-	</script>
-	<script src="~/js/getTransactions.js"></script>
-	<script src="~/js/setUpPagination.js"></script>
-	<script src="~/js/transactionDetails.js"></script>
-}

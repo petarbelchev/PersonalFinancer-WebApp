@@ -155,7 +155,7 @@
 				.ReturnsAsync(expTransactionsPageDTO);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.All();
+			var viewResult = (ViewResult)await this.controller.Index();
 
 			//Assert
 			Assert.Multiple(() =>
@@ -200,7 +200,7 @@
 				.ReturnsAsync(expTransactionsPageDTO);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.All(inputModel);
+			var viewResult = (ViewResult)await this.controller.Index(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -248,7 +248,7 @@
 			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid.");
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.All(inputModel);
+			var viewResult = (ViewResult)await this.controller.Index(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -392,7 +392,7 @@
 			{
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.ControllerName, Is.Null);
-				Assert.That(result.ActionName, Is.EqualTo("TransactionDetails"));
+				Assert.That(result.ActionName, Is.EqualTo("Details"));
 				Assert.That(result.RouteValues, Is.Not.Null);
 
 				AssertRouteValueIsEqual(result.RouteValues!, "id", newTransactionId);
@@ -628,7 +628,7 @@
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.TransactionDetails(transactionId);
+			var viewResult = (ViewResult)await this.controller.Details(transactionId);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -655,7 +655,7 @@
 				.Throws<ArgumentException>();
 
 			//Act
-			var result = (UnauthorizedResult)await this.controller.TransactionDetails(transactionId);
+			var result = (UnauthorizedResult)await this.controller.Details(transactionId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(401));
@@ -676,7 +676,7 @@
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.TransactionDetails(transactionId);
+			var result = (BadRequestResult)await this.controller.Details(transactionId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
@@ -709,7 +709,7 @@
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.EditTransaction(transactionId);
+			var viewResult = (ViewResult)await this.controller.Edit(transactionId);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -736,7 +736,7 @@
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.EditTransaction(transactionId);
+			var result = (BadRequestResult)await this.controller.Edit(transactionId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
@@ -761,7 +761,7 @@
 			this.controller.ModelState.AddModelError(nameof(inputModel.Amount), "Amount is invalid.");
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.EditTransaction(transactionId, inputModel);
+			var viewResult = (ViewResult)await this.controller.Edit(transactionId, inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -806,7 +806,7 @@
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.EditTransaction(transactionId, inputModel);
+			var result = (BadRequestResult)await this.controller.Edit(transactionId, inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -837,7 +837,7 @@
 				.Returns(false);
 
 			//Act
-			var result = (BadRequestResult)await this.controller.EditTransaction(transactionId, inputModel);
+			var result = (BadRequestResult)await this.controller.Edit(transactionId, inputModel);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
@@ -873,7 +873,7 @@
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.EditTransaction(transactionId, inputModel);
+			var result = (BadRequestResult)await this.controller.Edit(transactionId, inputModel);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
@@ -901,7 +901,7 @@
 				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
 			//Act
-			var result = (RedirectToActionResult)await this.controller.EditTransaction(transactionId, inputModel);
+			var result = (RedirectToActionResult)await this.controller.Edit(transactionId, inputModel);
 
 			this.accountsUpdateServiceMock.Verify(x => x
 				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionInputDTO>(x =>
@@ -918,7 +918,7 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(result, Is.Not.Null);
-				Assert.That(result.ActionName, Is.EqualTo("TransactionDetails"));
+				Assert.That(result.ActionName, Is.EqualTo("Details"));
 
 				Assert.That(result.RouteValues, Is.Not.Null);
 				AssertRouteValueIsEqual(result.RouteValues!, "id", transactionId);
@@ -952,12 +952,8 @@
 			this.controller.TempData = new TempDataDictionary(
 				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountOwnerIdAsync(accountId))
-				.ReturnsAsync(ownerId);
-
 			//Act
-			var result = (RedirectToActionResult)await this.controller.EditTransaction(transactionId, inputModel);
+			var result = (RedirectToActionResult)await this.controller.Edit(transactionId, inputModel);
 
 			this.accountsUpdateServiceMock.Verify(x => x
 				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionInputDTO>(x =>
@@ -974,7 +970,7 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(result, Is.Not.Null);
-				Assert.That(result.ActionName, Is.EqualTo("TransactionDetails"));
+				Assert.That(result.ActionName, Is.EqualTo("Details"));
 
 				Assert.That(result.RouteValues, Is.Not.Null);
 				AssertRouteValueIsEqual(result.RouteValues!, "id", transactionId);

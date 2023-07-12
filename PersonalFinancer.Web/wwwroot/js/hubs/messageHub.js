@@ -1,7 +1,7 @@
 let messageHub = new signalR.HubConnectionBuilder().withUrl('/message').build();
 let repliesDiv = document.getElementById('replies');
 
-messageHub.on('ReceiveMessage', (reply) => {
+messageHub.on('ReceiveReply', (reply) => {
     let replyDiv = document.createElement('div');
     replyDiv.className = 'card shadow mb-4';
 
@@ -75,15 +75,18 @@ async function sendReply(replyContent) {
         let reply = await response.json();
 
         messageHub
-            .invoke('SendMessage', params.messageId, reply)
+            .invoke('SendReply', params.messageId, reply)
             .then((response) => {
                 textArea.value = '';
                 console.log(response);
 
                 notificationsHub
-                    .invoke('SendNotification', params.authorId, params.messageId)
+                    .invoke('SendNotification', params.authorId)
                     .then((response) => {
                         console.log(response);
+                    })
+                    .catch(() => {
+                        console.error('Sending the notification failed!');
                     });
             })
             .catch(() => {

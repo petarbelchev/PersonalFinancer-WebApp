@@ -40,12 +40,14 @@
 		}
 
 		[Test]
-		public async Task GelAllAsync_ShouldReturnCorrectData()
+		public async Task GetAllMessagesAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
 			int page = 1;
+			bool isUserAdmin = true;
 
 			MessageOutputDTO[] expected = this.fakeCollection
+				.Where(m => !m.IsArchivedByAdmin)
 				.Select(m => new MessageOutputDTO
 				{
 					Id = m.Id,
@@ -53,32 +55,37 @@
 					Subject = m.Subject,
 					IsSeen = m.IsSeenByAdmin
 				})
+				.OrderByDescending(m => m.CreatedOnUtc)
 				.Skip(MessagesPerPage * (page - 1))
 				.Take(MessagesPerPage)
 				.ToArray();
 
 			this.repoMock.Setup(x => x.FindAsync(
+					m => !m.IsArchivedByAdmin,
+					It.IsAny<SortDefinition<Message>>(),
 					m => new MessageOutputDTO
 					{
 						Id = m.Id,
 						CreatedOnUtc = m.CreatedOnUtc,
 						Subject = m.Subject,
-						IsSeen = m.IsSeenByAdmin
+						IsSeen = isUserAdmin ? m.IsSeenByAdmin : m.IsSeenByAuthor
 					},
 					page))
 				.ReturnsAsync(expected);
 
 			this.repoMock.Setup(x => x
-				.CountAsync())
-				.ReturnsAsync(this.fakeCollection.Count);
+				.CountAsync(m => !m.IsArchivedByAdmin))
+				.ReturnsAsync(this.fakeCollection.Count(m => !m.IsArchivedByAdmin));
 
 			//Act
-			MessagesDTO actual = await this.messagesService.GetAllAsync();
+			MessagesDTO actual = await this.messagesService.GetAllMessagesAsync();
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(actual.TotalMessagesCount, Is.EqualTo(this.fakeCollection.Count));
+				Assert.That(actual.TotalMessagesCount, 
+					Is.EqualTo(this.fakeCollection.Count(m => !m.IsArchivedByAdmin)));
+
 				AssertAreEqualAsJson(actual.Messages, expected);
 			});
 		}
@@ -88,9 +95,10 @@
 		{
 			//Arrange
 			int page = 1;
+			bool isUserAdmin = false;
 
 			MessageOutputDTO[] expected = this.fakeCollection
-				.Where(m => m.AuthorId == this.FirstUserId)
+				.Where(m => m.AuthorId == this.FirstUserId && !m.IsArchivedByAuthor)
 				.Select(m => new MessageOutputDTO
 				{
 					Id = m.Id,
@@ -98,6 +106,7 @@
 					Subject = m.Subject,
 					IsSeen = m.IsSeenByAuthor
 				})
+				.OrderByDescending(m => m.CreatedOnUtc)
 				.Skip(MessagesPerPage * (page - 1))
 				.Take(MessagesPerPage)
 				.ToArray();
@@ -105,20 +114,21 @@
 			string userId = this.FirstUserId;
 
 			this.repoMock.Setup(x => x.FindAsync(
-					m => m.AuthorId == userId,
+					m => m.AuthorId == userId && !m.IsArchivedByAuthor,
+					It.IsAny<SortDefinition<Message>>(),
 					m => new MessageOutputDTO
 					{
 						Id = m.Id,
 						CreatedOnUtc = m.CreatedOnUtc,
 						Subject = m.Subject,
-						IsSeen = m.IsSeenByAuthor
+						IsSeen = isUserAdmin ? m.IsSeenByAdmin : m.IsSeenByAuthor
 					},
 					page))
 				.ReturnsAsync(expected);
 
 			this.repoMock.Setup(x => x
-				.CountAsync())
-				.ReturnsAsync(this.fakeCollection.Count);
+				.CountAsync(m => m.AuthorId == userId && !m.IsArchivedByAuthor))
+				.ReturnsAsync(this.fakeCollection.Count(m => m.AuthorId == userId && !m.IsArchivedByAuthor));
 
 			//Act
 			MessagesDTO actual = await this.messagesService.GetUserMessagesAsync(userId);
@@ -127,7 +137,7 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(actual.TotalMessagesCount, 
-					Is.EqualTo(this.fakeCollection.Count(m => m.AuthorId == this.FirstUserId)));
+					Is.EqualTo(this.fakeCollection.Count(m => m.AuthorId == this.FirstUserId && !m.IsArchivedByAuthor)));
 
 				AssertAreEqualAsJson(actual.Messages, expected);
 			});

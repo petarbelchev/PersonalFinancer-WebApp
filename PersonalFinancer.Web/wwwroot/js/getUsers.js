@@ -1,16 +1,6 @@
-let paginations = document.getElementsByClassName('pagination');
-
-for (let pagination of paginations) {
-    pagination.addEventListener('click', async (e) => {
-        if (e.target.tagName == 'A') {
-            await getUsers(e.target.getAttribute('page'));
-        }
-    })
-}
-
 let tbody = document.querySelector('tbody');
 
-async function getUsers(page) {
+async function get(page) {
     tbody.innerHTML = `
         <tr>
             <td colspan="5">
@@ -28,7 +18,7 @@ async function getUsers(page) {
     if (response.status == 200) {
         let model = await response.json();
         renderUsers(model);
-        setUpPagination(page, model.pagination);
+        setUpPagination(model.pagination);
     } else {
         let error = await response.json();
         alert(`${error.status} ${error.title}`)

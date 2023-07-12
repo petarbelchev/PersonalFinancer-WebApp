@@ -22,6 +22,10 @@
 
         public bool IsSeenByAdmin { get; set; }
 
+        public bool IsArchivedByAdmin { get; set; }
+
+        public bool IsArchivedByAuthor { get; set; }
+
         public ICollection<Reply> Replies { get; set; }
            = new List<Reply>();
     }

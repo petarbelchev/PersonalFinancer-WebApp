@@ -1,10 +1,6 @@
-﻿@using System.Globalization;
-@using PersonalFinancer.Common.Constants;
-@using PersonalFinancer.Web.Models.Message;
+﻿@using PersonalFinancer.Web.Models.Message;
+@using System.Globalization;
 @model MessagesViewModel
-@{
-	ViewData["Title"] = "Messages";
-}
 
 <div class="row">
 	<div class="justify-content-center">
@@ -26,7 +22,7 @@
 						{
 							@foreach (var message in Model.Messages)
 							{
-								<tr role="button" onclick="location.href='@Url.Action("MessageDetails", "Messages", new { id = message.Id })'">
+								<tr role="button" onclick="location.href='@Url.Action("Details", "Messages", new { id = message.Id })'">
 									<td messageId="@message.Id">
 										<img src="/icons/icons8-message-64.png" style="max-width: 30px;" />
 										<span>	@message.Subject</span>
@@ -41,28 +37,17 @@
 								</tr>
 							}
 						}
+						else
+						{
+							<tr>
+								<td colspan="2"><p id="noMessagesNote" class="display-6 fs-4 text-center">You don't have any messages.</p></td>
+							</tr>
+						}
 
 					</tbody>
 				</table>
 			</div>
 		</div>
 		<partial name="_PaginationPartial" />
-
-		@if (!Model.Messages.Any())
-		{
-			<p id="noMessagesNote" class="display-6 fs-4 text-center">You don't have any messages.</p>
-		}
-
 	</div>
 </div>
-
-@section Scripts {
-	<script src="~/js/hubs/allMessagesHub.js"></script>
-	<script>
-		let params = {
-			url: '@UrlPathConstants.ApiMessagesEndpoint'
-		};
-	</script>
-	<script src="~/js/setUpPagination.js"></script>
-	<script src="~/js/getMessages.js"></script>
-}

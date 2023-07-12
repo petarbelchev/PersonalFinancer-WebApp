@@ -6,21 +6,18 @@
 
 	public class MessageHub : Hub
 	{
-		public MessageHub()
-		{ }
-
 		public async Task JoinGroup(string messageId)
 		{
 			string groupName = messageId;
 			await this.Groups.AddToGroupAsync(this.Context.ConnectionId, groupName);
 		}
 
-		public async Task<string> SendMessage(string messageId, ReplyOutputDTO reply)
+		public async Task<string> SendReply(string messageId, ReplyOutputDTO reply)
 		{
-			await this.Clients.Group(messageId).SendAsync("ReceiveMessage", reply);
+			await this.Clients.Group(messageId).SendAsync("ReceiveReply", reply);
 			await this.Clients.Group(messageId).SendAsync("MarkAsSeen");
 
-			return ResponseMessages.MessageSuccessfullySent;
+			return ResponseMessages.MessageSuccessfullySend;
 		}
 	}
 }

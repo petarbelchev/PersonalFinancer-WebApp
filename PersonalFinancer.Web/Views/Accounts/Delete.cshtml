@@ -5,6 +5,7 @@
 	<p class="fs-2">You are going to delete @Model.Name account!</p>
 
 	<form method="post">
+		<input type="hidden" asp-for="@Model.ReturnUrl" />
 		<div class="form-check">
 			<input class="form-check-input" type="checkbox" asp-for="@Model.ShouldDeleteTransactions">
 			<label class="form-check-label" asp-for="@Model.ShouldDeleteTransactions">Also delete all transactions!</label>

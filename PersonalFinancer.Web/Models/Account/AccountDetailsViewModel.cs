@@ -11,12 +11,6 @@
 			this.Pagination = new PaginationModel(
 				TransactionsName, TransactionsPerPage, totalTransactionsCount);
 
-			this.Routing = new RoutingModel
-			{
-				Controller = "Accounts",
-				Action = "AccountDetails"
-			};
-
 			this.Transactions = new List<TransactionTableDTO>();
 		}
 
@@ -35,8 +29,8 @@
 
 		public IEnumerable<TransactionTableDTO> Transactions { get; set; }
 
-		public RoutingModel Routing { get; private set; }
-
 		public PaginationModel Pagination { get; private set; }
-	}
+
+		public string? ReturnUrl { get; set; }
+    }
 }

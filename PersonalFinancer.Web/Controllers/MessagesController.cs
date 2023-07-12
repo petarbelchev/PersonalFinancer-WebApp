@@ -37,16 +37,43 @@
             this.notificationsHub = notificationsHub;
         }
 
-        public async Task<IActionResult> AllMessages()
+        public async Task<IActionResult> All()
         {
             MessagesDTO messagesDTO = this.User.IsAdmin()
-                ? await this.messagesService.GetAllAsync()
+                ? await this.messagesService.GetAllMessagesAsync()
                 : await this.messagesService.GetUserMessagesAsync(this.User.Id());
 
-            var viewModel = new MessagesViewModel(messagesDTO);
-
-            return this.View(viewModel);
+            return this.View(new MessagesViewModel(messagesDTO));
         }
+
+        [HttpPost]
+        [NotRequireHtmlEncoding]
+        public async Task<IActionResult> Archive([Required] string id)
+        {
+            try
+            {
+                await this.messagesService.ArchiveAsync(id, this.User.Id(), this.User.IsAdmin());
+            }
+            catch (ArgumentException)
+            {
+                return this.Unauthorized();
+            }
+            catch (InvalidOperationException) 
+            {
+                return this.BadRequest();
+            }
+
+            return this.RedirectToAction(nameof(All));
+        }
+
+        public async Task<IActionResult> Archived()
+		{
+			MessagesDTO messagesDTO = this.User.IsAdmin()
+				? await this.messagesService.GetAllArchivedAsync()
+				: await this.messagesService.GetUserArchivedAsync(this.User.Id());
+
+			return this.View(new MessagesViewModel(messagesDTO));
+		}
 
         [Authorize(Roles = UserRoleName)]
         public IActionResult Create() => this.View(new MessageInputModel());
@@ -75,15 +102,19 @@
 
 			await this.allMessagesHub.Clients
                 .Users(adminsIds)
-                .SendAsync("ReceiveNotification", messageDTO.Id, messageDTO.Subject, messageDTO.CreatedOnUtc);
+                .SendAsync("RefreshMessages");
 
-            return this.RedirectToAction(nameof(MessageDetails), new { id = messageDTO.Id });
+            return this.RedirectToAction(nameof(Details), new { id = messageDTO.Id });
         }
 
         [HttpPost]
         [NotRequireHtmlEncoding]
         public async Task<IActionResult> Delete([Required] string id)
 		{
+			IEnumerable<string> ids = this.User.IsAdmin()
+				? new List<string> { await this.messagesService.GetMessageAuthorIdAsync(id) }
+				: await this.usersService.GetAdminsIdsAsync();
+
 			try
 			{
                 await this.messagesService.RemoveAsync(id, this.User.Id(), this.User.IsAdmin());
@@ -97,18 +128,33 @@
                 return this.BadRequest();
             }
 
-			IEnumerable<string> ids = this.User.IsAdmin()
-				? new List<string> { await this.messagesService.GetMessageAuthorIdAsync(id) }
-				: await this.usersService.GetAdminsIdsAsync();
-
 			await this.allMessagesHub.Clients
 				.Users(ids)
-				.SendAsync("DeleteMessage", id);
+				.SendAsync("RefreshMessages");
 
-			return this.RedirectToAction(nameof(AllMessages));
+            if (this.User.IsAdmin())
+            {
+                if (!await this.messagesService.HasUnseenMessagesByUserAsync(ids.First()))
+                {
+                    await this.notificationsHub.Clients
+                        .Users(ids)
+                        .SendAsync("RemoveNotification");
+                }
+            }
+            else
+			{
+				if (!await this.messagesService.HasUnseenMessagesByAdminAsync())
+				{
+					await this.notificationsHub.Clients
+						.Users(ids)
+						.SendAsync("RemoveNotification");
+				}
+			}
+
+			return this.RedirectToAction(nameof(All));
         }
 
-        public async Task<IActionResult> MessageDetails([Required] string id)
+        public async Task<IActionResult> Details([Required] string id)
         {
             try
             {

@@ -3,7 +3,7 @@
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Web.CustomAttributes;
-	using PersonalFinancer.Web.ModelBinders;
+	using PersonalFinancer.Web.CustomModelBinders;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.TransactionConstants;
 	using static PersonalFinancer.Common.Messages.ValidationMessages;

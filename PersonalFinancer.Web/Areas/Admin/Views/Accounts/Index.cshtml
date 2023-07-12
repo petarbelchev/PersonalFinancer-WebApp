@@ -25,7 +25,7 @@
 						</div>
 					</div>
 					<div class="d-flex">
-						<a asp-area="Admin" asp-controller="Accounts" asp-action="AccountDetails" asp-route-id="@account.Id" class="btn btn-secondary m-2">Details</a>
+						<a asp-area="" asp-controller="Accounts" asp-action="Details" asp-route-id="@account.Id" class="btn btn-secondary m-2" asp-route-returnUrl="/Admin/Accounts">Details</a>
 						<a asp-area="Admin" asp-controller="Users" asp-action="Details" asp-route-id="@account.OwnerId" class="btn btn-secondary m-2">Owner</a>
 					</div>
 				</div>

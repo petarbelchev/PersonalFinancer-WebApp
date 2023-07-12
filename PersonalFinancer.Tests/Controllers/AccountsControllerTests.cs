@@ -213,7 +213,7 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(result, Is.Not.Null);
-				Assert.That(result.ActionName, Is.EqualTo("AccountDetails"));
+				Assert.That(result.ActionName, Is.EqualTo("Details"));
 				AssertTempDataMessageIsEqual(this.controller.TempData, "You create a new account successfully!");
 
 				Assert.That(result.RouteValues, Is.Not.Null);
@@ -281,7 +281,7 @@
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.AccountDetails(expectedAccountDetailsDto.Id);
+			var viewResult = (ViewResult)await this.controller.Details(expectedAccountDetailsDto.Id, null);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -300,6 +300,7 @@
 		{
 			//Arrange
 			expectedAccountDetailsDto.OwnerId = Guid.NewGuid();
+			string returnUrl = "return url";
 
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
 
@@ -308,7 +309,7 @@
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.AccountDetails(expectedAccountDetailsDto.Id);
+			var viewResult = (ViewResult)await this.controller.Details(expectedAccountDetailsDto.Id, returnUrl);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -317,6 +318,7 @@
 
 				AccountDetailsViewModel viewModel = viewResult.Model as AccountDetailsViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+				Assert.That(viewModel.ReturnUrl, Is.EqualTo(returnUrl));
 
 				AssertSamePropertiesValuesAreEqual(viewModel, expectedAccountDetailsDto);
 			});
@@ -340,7 +342,7 @@
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.AccountDetails(Guid.NewGuid());
+			var result = (BadRequestResult)await this.controller.Details(Guid.NewGuid(), null);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -379,7 +381,7 @@
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.AccountDetails(inputModel);
+			var viewResult = (ViewResult)await this.controller.Details(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -420,7 +422,7 @@
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.AccountDetails(inputModel);
+			var viewResult = (ViewResult)await this.controller.Details(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -452,15 +454,15 @@
 
 			this.accountsInfoServiceMock.Setup(x => x
 				.GetAccountDetailsAsync(
-					expectedAccountDetailsDto.Id, 
-					fromLocalTime, 
-					toLocalTime, 
-					this.userId, 
+					expectedAccountDetailsDto.Id,
+					fromLocalTime,
+					toLocalTime,
+					this.userId,
 					false))
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.AccountDetails(inputModel);
+			var result = (BadRequestResult)await this.controller.Details(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -495,7 +497,7 @@
 				.ReturnsAsync(serviceModel);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.AccountDetails(inputModel);
+			var viewResult = (ViewResult)await this.controller.Details(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -531,7 +533,7 @@
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.AccountDetails(inputModel);
+			var result = (BadRequestResult)await this.controller.Details(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -557,7 +559,7 @@
 				.ReturnsAsync(accountName);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.Delete(accountId);
+			var viewResult = (ViewResult)await this.controller.Delete(accountId, null);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -584,7 +586,7 @@
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.Delete(Guid.NewGuid());
+			var result = (BadRequestResult)await this.controller.Delete(Guid.NewGuid(), null);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -601,7 +603,7 @@
 			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid");
 
 			//Act
-			var result = (BadRequestResult)await this.controller.Delete(Guid.NewGuid());
+			var result = (BadRequestResult)await this.controller.Delete(Guid.NewGuid(), null);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -620,7 +622,6 @@
 			{
 				Id = accountId,
 				ConfirmButton = "accept",
-				ReturnUrl = "returnUrl",
 				ShouldDeleteTransactions = false
 			};
 
@@ -632,7 +633,7 @@
 				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
 			//Act
-			var result = (RedirectToActionResult)await this.controller.Delete(inputModel);
+			var result = (LocalRedirectResult)await this.controller.Delete(inputModel);
 
 			this.accountsUpdateServiceMock.Verify(x => x
 				.DeleteAccountAsync(accountId, this.userId, false, false),
@@ -642,8 +643,7 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(result, Is.Not.Null);
-				Assert.That(result.ControllerName, Is.EqualTo("Home"));
-				Assert.That(result.ActionName, Is.EqualTo("Index"));
+				Assert.That(result.Url, Is.EqualTo("/"));
 
 				AssertTempDataMessageIsEqual(this.controller.TempData, "Your account was successfully deleted!");
 			});
@@ -654,23 +654,18 @@
 		{
 			//Arrange
 			var accountId = Guid.NewGuid();
+			var ownerId = Guid.NewGuid();
 			var inputModel = new DeleteAccountInputModel
 			{
 				Id = accountId,
 				ConfirmButton = "button",
-				ReturnUrl = "returnUrl",
-				ShouldDeleteTransactions = false
+				ShouldDeleteTransactions = false,
+				ReturnUrl = "/Admin/Users/Details/" + ownerId,
 			};
-
-			var ownerId = Guid.NewGuid();
 
 			this.userMock.Setup(x => x
 				.IsInRole(AdminRoleName))
 				.Returns(true);
-
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountOwnerIdAsync(accountId))
-				.ReturnsAsync(ownerId);
 
 			this.controller.TempData = new TempDataDictionary(
 				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
@@ -701,7 +696,6 @@
 			{
 				Id = accountId,
 				ConfirmButton = "accept",
-				ReturnUrl = "returnUrl",
 				ShouldDeleteTransactions = false
 			};
 
@@ -733,7 +727,6 @@
 			{
 				Id = accountId,
 				ConfirmButton = "accept",
-				ReturnUrl = "returnUrl",
 				ShouldDeleteTransactions = false
 			};
 
@@ -764,19 +757,28 @@
 			{
 				Id = Guid.NewGuid(),
 				ConfirmButton = "reject",
+				ShouldDeleteTransactions = false,
 				ReturnUrl = "returnUrl",
-				ShouldDeleteTransactions = false
 			};
 
 			//Act
-			var result = (LocalRedirectResult)await this.controller.Delete(inputModel);
+			var result = (RedirectToActionResult)await this.controller.Delete(inputModel);
 
 			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(result, Is.Not.Null);
-				Assert.That(result.Url, Is.EqualTo(inputModel.ReturnUrl));
-			});
+			Assert.That(result, Is.Not.Null);
+			Assert.That(result.ActionName, Is.EqualTo("Details"));
+
+			AssertRouteValueIsEqual(
+				result.RouteValues!, 
+				nameof(inputModel.Id), 
+				inputModel.Id, 
+				totalRouteValues: 2);
+
+			AssertRouteValueIsEqual(
+				result.RouteValues!, 
+				nameof(inputModel.ReturnUrl), 
+				inputModel.ReturnUrl, 
+				totalRouteValues: 2);
 		}
 
 		[Test]
@@ -787,7 +789,6 @@
 			{
 				Id = Guid.NewGuid(),
 				ConfirmButton = "accept",
-				ReturnUrl = "returnUrl",
 				ShouldDeleteTransactions = false
 			};
 
@@ -825,7 +826,7 @@
 				.ReturnsAsync(expServiceDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.EditAccount(accId);
+			var viewResult = (ViewResult)await this.controller.Edit(accId);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -846,7 +847,7 @@
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.EditAccount(Guid.NewGuid());
+			var result = (BadRequestResult)await this.controller.Edit(Guid.NewGuid());
 
 			//Assert
 			Assert.Multiple(() =>
@@ -861,7 +862,6 @@
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
-			string returnUrl = "returnUrl";
 			var inputModel = new CreateEditAccountViewModel
 			{
 				Name = "a",
@@ -874,7 +874,7 @@
 			this.controller.ModelState.AddModelError(nameof(inputModel.Name), "Name is invalid.");
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.EditAccount(accId, inputModel, returnUrl);
+			var viewResult = (ViewResult)await this.controller.Edit(accId, inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -896,7 +896,6 @@
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
-			string returnUrl = "returnUrl";
 			var inputFormModel = new CreateEditAccountViewModel
 			{
 				Name = "Account name",
@@ -909,7 +908,7 @@
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			//Act
-			var viewResult = (BadRequestResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
+			var viewResult = (BadRequestResult)await this.controller.Edit(accId, inputFormModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -924,7 +923,6 @@
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
-			string returnUrl = "returnUrl";
 			var inputFormModel = new CreateEditAccountInputModel
 			{
 				Name = "Account name",
@@ -939,7 +937,7 @@
 			this.controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
 			//Act
-			var result = (LocalRedirectResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
+			var result = (RedirectToActionResult)await this.controller.Edit(accId, inputFormModel);
 
 			this.accountsUpdateServiceMock.Verify(x => x.EditAccountAsync(accId,
 				It.Is<CreateEditAccountInputDTO>(m =>
@@ -954,7 +952,8 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(result, Is.Not.Null);
-				Assert.That(result.Url, Is.EqualTo(returnUrl));
+				Assert.That(result.ActionName, Is.EqualTo("Details"));
+				AssertRouteValueIsEqual(result.RouteValues!, "Id", accId);
 				AssertTempDataMessageIsEqual(this.controller.TempData, "Your account was successfully edited!");
 			});
 		}
@@ -964,7 +963,6 @@
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
-			string returnUrl = "returnUrl";
 			var ownerId = Guid.NewGuid();
 			var inputFormModel = new CreateEditAccountInputModel
 			{
@@ -976,11 +974,10 @@
 			};
 
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
-			this.accountsInfoServiceMock.Setup(x => x.GetAccountOwnerIdAsync(accId)).ReturnsAsync(ownerId);
 			this.controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
 			//Act
-			var result = (LocalRedirectResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
+			var result = (RedirectToActionResult)await this.controller.Edit(accId, inputFormModel);
 
 			this.accountsUpdateServiceMock.Verify(x => x.EditAccountAsync(accId,
 				It.Is<CreateEditAccountInputDTO>(m =>
@@ -995,7 +992,8 @@
 			Assert.Multiple(() =>
 			{
 				Assert.That(result, Is.Not.Null);
-				Assert.That(result.Url, Is.EqualTo(returnUrl));
+				Assert.That(result.ActionName, Is.EqualTo("Details"));
+				AssertRouteValueIsEqual(result.RouteValues!, "Id", accId);
 				AssertTempDataMessageIsEqual(this.controller.TempData, "You successfully edited user's account!");
 			});
 		}
@@ -1005,7 +1003,6 @@
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
-			string returnUrl = "returnUrl";
 			var ownerId = Guid.NewGuid();
 			var inputModel = new CreateEditAccountInputModel
 			{
@@ -1019,10 +1016,6 @@
 			this.userMock.Setup(x => x
 				.IsInRole(AdminRoleName))
 				.Returns(true);
-
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountOwnerIdAsync(accId))
-				.ReturnsAsync(ownerId);
 
 			this.accountsUpdateServiceMock.Setup(x => x
 				.EditAccountAsync(accId, It.Is<CreateEditAccountInputDTO>(m =>
@@ -1038,7 +1031,7 @@
 				.ReturnsAsync(expAccountTypesAndCurrencies);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.EditAccount(accId, inputModel, returnUrl);
+			var viewResult = (ViewResult)await this.controller.Edit(accId, inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -1061,7 +1054,6 @@
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
-			string returnUrl = "returnUrl";
 			var inputModel = new CreateEditAccountInputModel
 			{
 				Name = "Account name",
@@ -1087,7 +1079,7 @@
 			Guid userId = inputModel.OwnerId ?? throw new InvalidOperationException();
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.EditAccount(accId, inputModel, returnUrl);
+			var viewResult = (ViewResult)await this.controller.Edit(accId, inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -1109,7 +1101,6 @@
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
-			string returnUrl = "returnUrl";
 			var inputFormModel = new CreateEditAccountViewModel
 			{
 				Name = "Account name",
@@ -1131,7 +1122,7 @@
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.EditAccount(accId, inputFormModel, returnUrl);
+			var result = (BadRequestResult)await this.controller.Edit(accId, inputFormModel);
 
 			//Assert
 			Assert.Multiple(() =>

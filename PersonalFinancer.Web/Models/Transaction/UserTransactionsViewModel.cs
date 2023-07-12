@@ -11,12 +11,6 @@
 			this.Pagination = new PaginationModel(
 				TransactionsName, TransactionsPerPage, totalTransactionsCount, page);
 
-			this.Routing = new RoutingModel
-			{
-				Controller = "Transactions",
-				Action = "All"
-			};
-
 			this.Transactions = new List<TransactionTableDTO>();
 			this.OwnerAccounts = new List<AccountDropdownDTO>();
 			this.OwnerAccountTypes = new List<AccountTypeDropdownDTO>();
@@ -38,8 +32,6 @@
 		public IEnumerable<CurrencyDropdownDTO> OwnerCurrencies { get; set; }
 
 		public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; set; }
-
-		public RoutingModel Routing { get; private set; }
 
 		public PaginationModel Pagination { get; private set; }
 	}

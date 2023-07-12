@@ -1,0 +1,19 @@
+﻿@using PersonalFinancer.Common.Constants;
+@using PersonalFinancer.Web.Models.Message;
+@model MessagesViewModel
+@{
+	ViewData["Title"] = "Archived Messages";
+}
+
+<partial name="_MessagesTablePartial" model="Model" />
+
+@section Scripts {
+	@*<script src="~/js/hubs/allMessagesHub.js"></script>*@
+	<script>
+		let params = {
+			url: '@UrlPathConstants.ApiArchivedMessagesEndpoint'
+		};
+	</script>
+	<script src="~/js/setUpPagination.js"></script>
+	<script src="~/js/getMessages.js"></script>
+}

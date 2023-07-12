@@ -35,66 +35,6 @@
 			this.mapper = mapper;
 		}
 
-		public async Task<IActionResult> AccountDetails([Required] Guid id)
-		{
-			if (!this.ModelState.IsValid)
-				return this.BadRequest();
-
-			DateTime fromLocalTime = DateTime.Now.AddMonths(-1);
-			DateTime toLocalTime = DateTime.Now;
-
-			AccountDetailsViewModel viewModel;
-
-			try
-			{
-				viewModel = await this.GetAccountDetailsViewModel(
-					id, fromLocalTime, toLocalTime, this.User.IdToGuid(), this.User.IsAdmin());
-			}
-			catch (InvalidOperationException)
-			{
-				return this.BadRequest();
-			}
-
-			return this.View(viewModel);
-		}
-
-		[HttpPost]
-		[NotRequireHtmlEncoding]
-		public async Task<IActionResult> AccountDetails(AccountDetailsInputModel inputModel)
-		{
-			AccountDetailsViewModel viewModel;
-
-			try
-			{
-				Guid accountId = inputModel.Id ?? throw new InvalidOperationException();
-
-				if (!this.ModelState.IsValid)
-				{
-					AccountDetailsShortDTO accountDetails =
-						await this.accountsInfoService.GetAccountShortDetailsAsync(accountId);
-
-					viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
-				}
-				else
-				{
-					viewModel = await this.GetAccountDetailsViewModel(
-						accountId,
-						inputModel.FromLocalTime ?? throw new InvalidOperationException(
-							string.Format(ExceptionMessages.NotNullableProperty, inputModel.FromLocalTime)),
-						inputModel.ToLocalTime ?? throw new InvalidOperationException(
-							string.Format(ExceptionMessages.NotNullableProperty, inputModel.ToLocalTime)),
-						this.User.IdToGuid(),
-						this.User.IsAdmin());
-				}
-			}
-			catch (InvalidOperationException)
-			{
-				return this.BadRequest();
-			}
-
-			return this.View(viewModel);
-		}
-
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Create()
 		{
@@ -129,7 +69,7 @@
 				Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(accountDTO);
 				this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.CreatedAccount;
 
-				return this.RedirectToAction(nameof(AccountDetails), new { id = newAccountId });
+				return this.RedirectToAction(nameof(Details), new { id = newAccountId });
 			}
 			catch (ArgumentException ex)
 			{
@@ -144,12 +84,12 @@
 			}
 		}
 
-		public async Task<IActionResult> Delete([Required] Guid id)
+		public async Task<IActionResult> Delete([Required] Guid id, string? returnUrl)
 		{
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 
-			var viewModel = new DeleteAccountViewModel();
+			var viewModel = new DeleteAccountViewModel { ReturnUrl = returnUrl };
 
 			try
 			{
@@ -172,7 +112,7 @@
 				return this.BadRequest();
 
 			if (inputModel.ConfirmButton == "reject")
-				return this.LocalRedirect(inputModel.ReturnUrl);
+				return this.RedirectToAction(nameof(Details), new { inputModel.Id, inputModel.ReturnUrl });
 
 			try
 			{
@@ -185,16 +125,16 @@
 				if (this.User.IsAdmin())
 				{
 					this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.AdminDeletedUserAccount;
-					Guid ownerId = await this.accountsInfoService.GetAccountOwnerIdAsync(accountId);
 
-					return this.LocalRedirect(AdminUserDetailsPath + ownerId);
+					if (inputModel.ReturnUrl != null)
+						return this.LocalRedirect(inputModel.ReturnUrl);
 				}
 				else
 				{
 					this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.DeletedAccount;
-
-					return this.RedirectToAction("Index", "Home");
 				}
+
+				return this.LocalRedirect("/");
 			}
 			catch (ArgumentException)
 			{
@@ -206,7 +146,69 @@
 			}
 		}
 
-		public async Task<IActionResult> EditAccount([Required] Guid id)
+		public async Task<IActionResult> Details([Required] Guid id, string? returnUrl)
+		{
+			if (!this.ModelState.IsValid)
+				return this.BadRequest();
+
+			DateTime fromLocalTime = DateTime.Now.AddMonths(-1);
+			DateTime toLocalTime = DateTime.Now;
+
+			AccountDetailsViewModel viewModel;
+
+			try
+			{
+				viewModel = await this.GetAccountDetailsViewModel(
+					id, fromLocalTime, toLocalTime, this.User.IdToGuid(), this.User.IsAdmin());
+			}
+			catch (InvalidOperationException)
+			{
+				return this.BadRequest();
+			}
+
+			viewModel.ReturnUrl = returnUrl;
+
+			return this.View(viewModel);
+		}
+
+		[HttpPost]
+		[NotRequireHtmlEncoding]
+		public async Task<IActionResult> Details(AccountDetailsInputModel inputModel)
+		{
+			AccountDetailsViewModel viewModel;
+
+			try
+			{
+				Guid accountId = inputModel.Id ?? throw new InvalidOperationException();
+
+				if (!this.ModelState.IsValid)
+				{
+					AccountDetailsShortDTO accountDetails =
+						await this.accountsInfoService.GetAccountShortDetailsAsync(accountId);
+
+					viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
+				}
+				else
+				{
+					viewModel = await this.GetAccountDetailsViewModel(
+						accountId,
+						inputModel.FromLocalTime ?? throw new InvalidOperationException(
+							string.Format(ExceptionMessages.NotNullableProperty, inputModel.FromLocalTime)),
+						inputModel.ToLocalTime ?? throw new InvalidOperationException(
+							string.Format(ExceptionMessages.NotNullableProperty, inputModel.ToLocalTime)),
+						this.User.IdToGuid(),
+						this.User.IsAdmin());
+				}
+			}
+			catch (InvalidOperationException)
+			{
+				return this.BadRequest();
+			}
+
+			return this.View(viewModel);
+		}
+
+		public async Task<IActionResult> Edit([Required] Guid id)
 		{
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
@@ -230,8 +232,7 @@
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> EditAccount(
-			[Required] Guid id, CreateEditAccountInputModel inputModel, [Required] string returnUrl)
+		public async Task<IActionResult> Edit([Required] Guid id, CreateEditAccountInputModel inputModel)
 		{
 			if (!this.User.IsAdmin() && this.User.IdToGuid() != inputModel.OwnerId)
 				return this.BadRequest();
@@ -275,7 +276,7 @@
 				? ResponseMessages.AdminEditedUserAccount
 				: ResponseMessages.EditedAccount;
 
-			return this.LocalRedirect(returnUrl);
+			return this.RedirectToAction(nameof(Details), new { id });
 		}
 
 		/// <exception cref="InvalidOperationException">When the owner ID is invalid.</exception>
@@ -298,8 +299,6 @@
 
 			var viewModel = new AccountDetailsViewModel(accountDetails.TotalAccountTransactions);
 			this.mapper.Map(accountDetails, viewModel);
-
-			viewModel.Routing.ReturnUrl = AccountDetailsPath + accountId;
 
 			return viewModel;
 		}

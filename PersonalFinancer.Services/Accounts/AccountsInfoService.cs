@@ -55,14 +55,6 @@
 				.FirstAsync();
 		}
 
-		public async Task<Guid> GetAccountOwnerIdAsync(Guid accountId)
-		{
-			return await this.accountsRepo.All()
-				.Where(a => a.Id == accountId && !a.IsDeleted)
-				.Select(a => a.OwnerId)
-				.FirstAsync();
-		}
-
 		public async Task<AccountsCardsDTO> GetAccountsCardsDataAsync(int page)
 		{
 			return new AccountsCardsDTO

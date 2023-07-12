@@ -6,7 +6,7 @@
 		<div class="col-auto ml-auto">
 			<ul class="pagination">
 				<li class="page-item disabled">
-					<a class="page-link" role="button" style="color: black;" page="@(Model.Pagination.Page - 1)"><<</a>
+					<a class="page-link" role="button" style="color: black;" page="@(Model.Pagination.Page - 1)">Previous</a>
 				</li>
 
 				<li class="page-item active">
@@ -39,9 +39,7 @@
 				}
 
 				<li class="page-item @(Model.Pagination.Pages == 1 ? "disabled" : string.Empty)">
-					<a class="page-link" role="button" style="color: black;" page="@(Model.Pagination.Page + 1)">
-						>>
-					</a>
+					<a class="page-link" role="button" style="color: black;" page="@(Model.Pagination.Page + 1)">Next</a>
 				</li>
 			</ul>
 		</div>

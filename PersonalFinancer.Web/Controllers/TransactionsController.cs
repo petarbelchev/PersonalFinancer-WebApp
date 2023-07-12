@@ -35,47 +35,6 @@
 		}
 
 		[Authorize(Roles = UserRoleName)]
-		public async Task<IActionResult> All()
-		{
-			var filterDTO = new TransactionsFilterDTO
-			{
-				UserId = this.User.IdToGuid(),
-				FromLocalTime = DateTime.Now.AddMonths(-1),
-				ToLocalTime = DateTime.Now
-			};
-
-			UserTransactionsViewModel viewModel =
-				await this.PrepareUserTransactionsViewModelAsync(filterDTO);
-
-			return this.View(viewModel);
-		}
-
-		[Authorize(Roles = UserRoleName)]
-		[HttpPost]
-		[NotRequireHtmlEncoding]
-		public async Task<IActionResult> All(UserTransactionsInputModel inputModel)
-		{
-			Guid userId = this.User.IdToGuid();
-			UserTransactionsViewModel viewModel;
-
-			if (!this.ModelState.IsValid)
-			{
-				viewModel = this.mapper.Map<UserTransactionsViewModel>(inputModel);
-				viewModel.UserId = userId;
-				UserDropdownDTO dropdownDTO = await this.usersService.GetUserDropdownDataAsync(userId);
-				this.mapper.Map(dropdownDTO, viewModel);
-
-				return this.View(viewModel);
-			}
-
-			TransactionsFilterDTO filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
-			filterDTO.UserId = userId;
-			viewModel = await this.PrepareUserTransactionsViewModelAsync(filterDTO);
-
-			return this.View(viewModel);
-		}
-
-		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Create()
 		{
 			var viewModel = new CreateEditTransactionViewModel() { OwnerId = this.User.IdToGuid() };
@@ -107,7 +66,7 @@
 				Guid newTransactionId = await this.accountsUpdateService.CreateTransactionAsync(dto);
 				this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.CreatedTransaction;
 
-				return this.RedirectToAction(nameof(TransactionDetails), new { id = newTransactionId });
+				return this.RedirectToAction(nameof(Details), new { id = newTransactionId });
 			}
 			catch (InvalidOperationException)
 			{
@@ -144,7 +103,31 @@
 				: this.RedirectToAction("Index", "Home");
 		}
 
-		public async Task<IActionResult> EditTransaction([Required] Guid id)
+		public async Task<IActionResult> Details([Required] Guid id)
+		{
+			if (!this.ModelState.IsValid)
+				return this.BadRequest();
+
+			TransactionDetailsDTO viewModel;
+
+			try
+			{
+				viewModel = await this.accountsInfoService
+					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
+			}
+			catch (ArgumentException)
+			{
+				return this.Unauthorized();
+			}
+			catch (InvalidOperationException)
+			{
+				return this.BadRequest();
+			}
+
+			return this.View(viewModel);
+		}
+
+		public async Task<IActionResult> Edit([Required] Guid id)
 		{
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
@@ -165,7 +148,7 @@
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> EditTransaction([Required] Guid id, CreateEditTransactionInputModel inputModel)
+		public async Task<IActionResult> Edit([Required] Guid id, CreateEditTransactionInputModel inputModel)
 		{
 			if (!this.User.IsAdmin() && this.User.IdToGuid() != inputModel.OwnerId)
 				return this.BadRequest();
@@ -196,29 +179,46 @@
 				? ResponseMessages.AdminEditedUserTransaction
 				: ResponseMessages.EditedTransaction;
 
-			return this.RedirectToAction(nameof(TransactionDetails), new { id });
+			return this.RedirectToAction(nameof(Details), new { id });
 		}
 
-		public async Task<IActionResult> TransactionDetails([Required] Guid id)
+		[Authorize(Roles = UserRoleName)]
+		public async Task<IActionResult> Index()
 		{
+			var filterDTO = new TransactionsFilterDTO
+			{
+				UserId = this.User.IdToGuid(),
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
+			};
+
+			UserTransactionsViewModel viewModel =
+				await this.PrepareUserTransactionsViewModelAsync(filterDTO);
+
+			return this.View(viewModel);
+		}
+
+		[Authorize(Roles = UserRoleName)]
+		[HttpPost]
+		[NotRequireHtmlEncoding]
+		public async Task<IActionResult> Index(UserTransactionsInputModel inputModel)
+		{
+			Guid userId = this.User.IdToGuid();
+			UserTransactionsViewModel viewModel;
+
 			if (!this.ModelState.IsValid)
-				return this.BadRequest();
+			{
+				viewModel = this.mapper.Map<UserTransactionsViewModel>(inputModel);
+				viewModel.UserId = userId;
+				UserDropdownDTO dropdownDTO = await this.usersService.GetUserDropdownDataAsync(userId);
+				this.mapper.Map(dropdownDTO, viewModel);
 
-			TransactionDetailsDTO viewModel;
+				return this.View(viewModel);
+			}
 
-			try
-			{
-				viewModel = await this.accountsInfoService
-					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
-			}
-			catch (ArgumentException)
-			{
-				return this.Unauthorized();
-			}
-			catch (InvalidOperationException)
-			{
-				return this.BadRequest();
-			}
+			TransactionsFilterDTO filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
+			filterDTO.UserId = userId;
+			viewModel = await this.PrepareUserTransactionsViewModelAsync(filterDTO);
 
 			return this.View(viewModel);
 		}

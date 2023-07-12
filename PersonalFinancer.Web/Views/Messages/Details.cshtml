@@ -47,13 +47,16 @@
 		</div>
 		<hr class="mt-4" />
 		<div>
-			<form id="replyForm" class="mb-3">
+			<form id="replyForm">
 				<textarea asp-for="@Model.ReplyContent" class="form-control" rows="5" placeholder="Write your reply here..."></textarea>
 				<span asp-validation-for="@Model.ReplyContent" class="text-danger"></span>
-				<button type="submit" id="sendReply" class="w-100 btn btn-lg btn-success">Send Reply</button>
+				<button type="submit" id="sendReply" class="w-100 btn btn-lg btn-success mt-2">Send Reply</button>
 			</form>
 		</div>
-		<hr class="mt-5" />
+		<hr class="mt-4" />
+		<form method="post" asp-action="Archive" asp-route-id="@Model.Id">
+			<button type="submit" class="w-100 btn btn-warning mb-2" onclick="return confirm('Are you sure you want to archive this message?')">Archive the message</button>
+		</form>
 		<form method="post" asp-action="Delete" asp-route-id="@Model.Id">
 			<button type="submit" class="w-100 btn btn-danger" onclick="return confirm('Are you sure you want to delete this message?')">Delete the message</button>
 		</form>
