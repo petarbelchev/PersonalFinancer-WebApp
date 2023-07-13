@@ -36,6 +36,10 @@
 		}
 
 		[HttpDelete("{id}")]
+		[Produces("text/plain")]
+		[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<IActionResult> DeleteTransaction(Guid id)
 		{
 			try
@@ -59,6 +63,10 @@
 		}
 
 		[HttpGet("{id}")]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(TransactionDetailsDTO), StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<IActionResult> GetTransactionDetails(Guid id)
 		{
 			TransactionDetailsDTO viewModel;
@@ -82,6 +90,10 @@
 
 		[Authorize(Roles = UserRoleName)]
 		[HttpPost]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(TransactionsViewModel), StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		[NoHtmlSanitizing]
 		public async Task<IActionResult> GetUserTransactions(UserTransactionsApiInputModel inputModel)
 		{

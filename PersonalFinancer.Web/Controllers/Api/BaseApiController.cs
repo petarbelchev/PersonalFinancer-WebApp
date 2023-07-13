@@ -8,7 +8,7 @@
     using PersonalFinancer.Services.Api;
     using PersonalFinancer.Services.Api.Models;
     using PersonalFinancer.Web.Extensions;
-    using PersonalFinancer.Web.Models.Api;
+	using PersonalFinancer.Web.Models.Api;
     using System.ComponentModel.DataAnnotations;
     using System.Text;
 
@@ -21,6 +21,9 @@
 			=> this.apiService = apiService;
 
 		/// <exception cref="ArgumentException">When try to create entity with existing name.</exception>
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(ApiEntityDTO), StatusCodes.Status201Created)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		protected async Task<IActionResult> CreateEntityAsync(IApiEntityInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
@@ -34,6 +37,9 @@
 			return this.Created(string.Empty, model);
 		}
 
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		protected async Task<IActionResult> DeleteEntityAsync([Required] Guid id)
 		{
 			if (!this.ModelState.IsValid)

@@ -4,7 +4,8 @@
     using PersonalFinancer.Common.Messages;
     using PersonalFinancer.Data.Models;
     using PersonalFinancer.Services.Api;
-    using PersonalFinancer.Web.Models.Api;
+	using PersonalFinancer.Services.Api.Models;
+	using PersonalFinancer.Web.Models.Api;
     using System.ComponentModel.DataAnnotations;
 
     [Route("api/currencies")]
@@ -16,7 +17,10 @@
         { }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCurrency(CurrencyInputModel inputModel)
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(ApiEntityDTO), StatusCodes.Status201Created)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public async Task<IActionResult> CreateCurrency(CurrencyInputModel inputModel)
         {
             try
             {
@@ -29,7 +33,10 @@
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCurrency([Required] Guid id)
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+		public async Task<IActionResult> DeleteCurrency([Required] Guid id)
             => await this.DeleteEntityAsync(id);
     }
 }

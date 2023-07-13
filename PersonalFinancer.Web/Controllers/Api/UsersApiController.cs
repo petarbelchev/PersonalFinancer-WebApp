@@ -18,6 +18,8 @@
             => this.usersService = usersService;
 
         [HttpGet("{page}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(UsersViewModel), StatusCodes.Status200OK)]
         public async Task<IActionResult> AllUsers(int page)
         {
             UsersInfoDTO usersData =

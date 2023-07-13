@@ -26,6 +26,10 @@
 		}
 
 		[HttpPost]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(ReplyOutputDTO), StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<IActionResult> AddReply(ReplyInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
@@ -59,6 +63,8 @@
 
 		[HttpGet]
 		[Route("all/{page}")]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(MessagesViewModel), StatusCodes.Status200OK)]
 		public async Task<IActionResult> All(int page)
 		{
 			MessagesDTO messagesDTO = this.User.IsAdmin()
@@ -70,6 +76,8 @@
 
 		[HttpGet]
 		[Route("archived/{page}")]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(MessagesViewModel), StatusCodes.Status200OK)]
 		public async Task<IActionResult> Archived(int page)
 		{
 			MessagesDTO messagesDTO = this.User.IsAdmin()
@@ -81,6 +89,8 @@
 
 		[HttpPatch("{messageId}")]
 		[NoHtmlSanitizing]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> MarkAsSeen(string messageId)
 		{
 			try

@@ -5,6 +5,7 @@
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Account;
@@ -29,6 +30,8 @@
 
 		[Authorize(Roles = AdminRoleName)]
 		[HttpGet("{page}")]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(UsersAccountsCardsViewModel), StatusCodes.Status200OK)]
 		public async Task<IActionResult> GetAccounts(int page)
 		{
 			AccountsCardsDTO usersCardsData =
@@ -40,11 +43,17 @@
 
 		[Authorize(Roles = AdminRoleName)]
 		[HttpGet("cashflow")]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(IEnumerable<CurrencyCashFlowDTO>), StatusCodes.Status200OK)]
 		public async Task<IActionResult> GetAccountsCashFlow()
 			=> this.Ok(await this.accountsInfoService.GetCashFlowByCurrenciesAsync());
 
 		[HttpPost("transactions")]
 		[NoHtmlSanitizing]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(TransactionsViewModel), StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
