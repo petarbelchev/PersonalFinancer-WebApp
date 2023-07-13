@@ -49,7 +49,7 @@
 
         [Authorize]
         [HttpPost]
-        [NotRequireHtmlEncoding]
+        [NoHtmlSanitizing]
         public async Task<IActionResult> Index(DateFilterModel inputModel)
         {
             UserDashboardViewModel viewModel;

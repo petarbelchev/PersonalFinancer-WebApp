@@ -82,7 +82,7 @@
 
 		[Authorize(Roles = UserRoleName)]
 		[HttpPost]
-		[NotRequireHtmlEncoding]
+		[NoHtmlSanitizing]
 		public async Task<IActionResult> GetUserTransactions(UserTransactionsApiInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)

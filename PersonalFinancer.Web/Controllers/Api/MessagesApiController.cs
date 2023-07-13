@@ -80,7 +80,7 @@
 		}
 
 		[HttpPatch("{messageId}")]
-		[NotRequireHtmlEncoding]
+		[NoHtmlSanitizing]
 		public async Task<IActionResult> MarkAsSeen(string messageId)
 		{
 			try

@@ -1,17 +1,15 @@
 ﻿namespace PersonalFinancer.Web.Models.Api
 {
-    using PersonalFinancer.Common.Messages;
-	using PersonalFinancer.Web.CustomAttributes;
+	using PersonalFinancer.Common.Messages;
 	using System.ComponentModel.DataAnnotations;
-    using static PersonalFinancer.Common.Constants.CurrencyConstants;
+	using static PersonalFinancer.Common.Constants.CurrencyConstants;
 
-    public class CurrencyInputModel : IApiEntityInputModel
+	public class CurrencyInputModel : IApiEntityInputModel
     {
         [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
         [StringLength(CurrencyNameMaxLength, MinimumLength = CurrencyNameMinLength,
             ErrorMessage = ValidationMessages.InvalidLength)]
 		[Display(Name = "Currency")]
-        [RequireHtmlEncoding]
 		public string Name { get; set; } = null!;
 
         [Required]

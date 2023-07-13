@@ -47,7 +47,7 @@
         }
 
         [HttpPost]
-        [NotRequireHtmlEncoding]
+        [NoHtmlSanitizing]
         public async Task<IActionResult> Archive([Required] string id)
         {
             try
@@ -108,7 +108,7 @@
         }
 
         [HttpPost]
-        [NotRequireHtmlEncoding]
+        [NoHtmlSanitizing]
         public async Task<IActionResult> Delete([Required] string id)
 		{
 			IEnumerable<string> ids = this.User.IsAdmin()

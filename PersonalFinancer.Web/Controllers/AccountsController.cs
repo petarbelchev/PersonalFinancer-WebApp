@@ -13,7 +13,6 @@
 	using PersonalFinancer.Web.Models.Account;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
-	using static PersonalFinancer.Common.Constants.UrlPathConstants;
 
 	[Authorize]
 	public class AccountsController : Controller
@@ -105,7 +104,7 @@
 		}
 
 		[HttpPost]
-		[NotRequireHtmlEncoding]
+		[NoHtmlSanitizing]
 		public async Task<IActionResult> Delete(DeleteAccountInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
@@ -172,7 +171,7 @@
 		}
 
 		[HttpPost]
-		[NotRequireHtmlEncoding]
+		[NoHtmlSanitizing]
 		public async Task<IActionResult> Details(AccountDetailsInputModel inputModel)
 		{
 			AccountDetailsViewModel viewModel;

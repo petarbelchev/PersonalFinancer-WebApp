@@ -13,6 +13,7 @@
 	using PersonalFinancer.Services.Cache;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Web.CustomFilters;
 	using PersonalFinancer.Web.EmailSender;
 	using static PersonalFinancer.Common.Constants.UserConstants;
 
@@ -47,7 +48,11 @@
 		public static WebApplicationBuilder ConfigureControllersWithViews(this WebApplicationBuilder builder)
 		{
 			builder.Services
-				.AddControllersWithViews(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()))
+				.AddControllersWithViews(options =>
+				{
+					options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+					options.Filters.Add(new HtmlSanitizeAsyncActionFilter());
+				})
 				.ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
 
 			return builder;

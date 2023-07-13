@@ -1,22 +1,24 @@
 ﻿namespace PersonalFinancer.Web.CustomFilters
 {
+	using Ganss.Xss;
 	using Microsoft.AspNetCore.Mvc.Filters;
 	using PersonalFinancer.Web.CustomAttributes;
-	using System.Net;
 	using System.Reflection;
 	using System.Threading.Tasks;
 
-	public class HtmlEncodeAsyncActionFilter : IAsyncActionFilter
+	public class HtmlSanitizeAsyncActionFilter : IAsyncActionFilter
 	{
 		public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 		{
 			string[] httpMethodsForSanitize = new string[] { "POST", "PUT", "PATCH" };
 
-			if (!httpMethodsForSanitize.Contains(context.HttpContext.Request.Method)
-				|| context.ActionDescriptor.FilterDescriptors.Any(f => f.Filter is NotRequireHtmlEncodingAttribute))
+			if (httpMethodsForSanitize.Contains(context.HttpContext.Request.Method) == false
+				|| context.ActionDescriptor.FilterDescriptors.Any(f => f.Filter is NoHtmlSanitizingAttribute))
 			{
 				return next();
 			}
+
+			var sanitizer = new HtmlSanitizer();
 
 			foreach (string key in context.ActionArguments.Keys)
 			{
@@ -29,21 +31,23 @@
 
 				if (argumentValueType == typeof(string))
 				{
-					argumentValue = WebUtility.HtmlEncode(argumentValue as string);
+					argumentValue = sanitizer.Sanitize((argumentValue as string)!);
 
 					continue;
 				}
 
-				IEnumerable<PropertyInfo> typeProperties = argumentValueType.GetProperties()
-					.Where(p => p.GetCustomAttribute<RequireHtmlEncodingAttribute>() != null);
+				IEnumerable<PropertyInfo> typeProperties = argumentValueType
+					.GetProperties()
+					.Where(p => p.PropertyType == typeof(string));
 
 				foreach (PropertyInfo property in typeProperties)
 				{
-					if (property.PropertyType == typeof(string))
-					{
-						string? propertyValue = property.GetValue(argumentValue)?.ToString();
-						property.SetValue(argumentValue, WebUtility.HtmlEncode(propertyValue));
-					}
+					string? propertyValue = property.GetValue(argumentValue)?.ToString();
+
+					if (propertyValue == null)
+						continue;
+
+					property.SetValue(argumentValue, sanitizer.Sanitize(propertyValue));
 				}
 			}
 

@@ -2,7 +2,6 @@
 {
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Data.Models.Enums;
-	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.CustomModelBinders;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.TransactionConstants;
@@ -39,7 +38,6 @@
 			MinimumLength = TransactionReferenceMinLength,
 			ErrorMessage = InvalidLength)]
 		[Display(Name = "Payment Reference")]
-		[RequireHtmlEncoding]
 		public string Reference { get; set; } = null!;
 
 		[Required]

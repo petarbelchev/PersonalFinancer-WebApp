@@ -2,7 +2,6 @@
 {
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Common.Messages;
-	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.CustomModelBinders;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.AccountConstants;
@@ -13,7 +12,6 @@
 		[StringLength(AccountNameMaxLength,
 			MinimumLength = AccountNameMinLength,
 			ErrorMessage = ValidationMessages.InvalidLength)]
-		[RequireHtmlEncoding]
 		public string Name { get; set; } = null!;
 
 		[Required]

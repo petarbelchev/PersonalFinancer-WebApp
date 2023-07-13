@@ -44,7 +44,7 @@
 			=> this.Ok(await this.accountsInfoService.GetCashFlowByCurrenciesAsync());
 
 		[HttpPost("transactions")]
-		[NotRequireHtmlEncoding]
+		[NoHtmlSanitizing]
 		public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)

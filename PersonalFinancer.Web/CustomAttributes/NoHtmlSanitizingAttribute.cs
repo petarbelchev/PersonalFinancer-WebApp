@@ -3,6 +3,6 @@
 	using Microsoft.AspNetCore.Mvc.Filters;
 
 	[AttributeUsage(AttributeTargets.Method)]
-	public class NotRequireHtmlEncodingAttribute : ActionFilterAttribute
+	public class NoHtmlSanitizingAttribute : ActionFilterAttribute
 	{ }
 }

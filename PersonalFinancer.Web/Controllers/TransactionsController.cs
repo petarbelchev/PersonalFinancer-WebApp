@@ -75,7 +75,7 @@
 		}
 
 		[HttpPost]
-		[NotRequireHtmlEncoding]
+		[NoHtmlSanitizing]
 		public async Task<IActionResult> Delete([Required] Guid id, string? returnUrl = null)
 		{
 			if (!this.ModelState.IsValid)
@@ -200,7 +200,7 @@
 
 		[Authorize(Roles = UserRoleName)]
 		[HttpPost]
-		[NotRequireHtmlEncoding]
+		[NoHtmlSanitizing]
 		public async Task<IActionResult> Index(UserTransactionsInputModel inputModel)
 		{
 			Guid userId = this.User.IdToGuid();
