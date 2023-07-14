@@ -5,13 +5,13 @@
 	using MongoDB.Driver.Linq;
 	using Moq;
 	using NUnit.Framework;
-	using static PersonalFinancer.Common.Constants.PaginationConstants;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
-	using PersonalFinancer.Tests.Mocks;
+	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	[TestFixture]
 	internal class MessagesServiceTests : UnitTestsBase
@@ -26,7 +26,7 @@
 
 		private Mock<UpdateResult> updateResultMock;
 		private Mock<IMongoRepository<Message>> repoMock;
-		private readonly IMapper mapper = ServicesMapperMock.Instance;
+		private IMapper mapper;
 
 		private MessagesService messagesService;
 
@@ -36,6 +36,10 @@
 			this.fakeCollection = this.SeedFakeCollection();
 			this.updateResultMock = new Mock<UpdateResult>();
 			this.repoMock = new Mock<IMongoRepository<Message>>();
+
+			var config = new MapperConfiguration(cfg => cfg.AddProfile<ServiceMappingProfile>());
+			this.mapper = config.CreateMapper();
+
 			this.messagesService = new MessagesService(this.repoMock.Object, this.mapper);
 		}
 

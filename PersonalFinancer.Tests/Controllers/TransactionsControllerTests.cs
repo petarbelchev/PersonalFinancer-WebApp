@@ -106,7 +106,7 @@
 			},
 			TotalTransactionsCount = 10
 		};
-		private static readonly UserDropdownsDTO expUserDropdowns = new()
+		private static readonly UserUsedDropdownsDTO expUserDropdowns = new()
 		{
 			OwnerAccounts = expAccountsDropdown,
 			OwnerAccountTypes = expAccountTypesDropdown,
@@ -134,15 +134,15 @@
 			};
 
 			this.usersServiceMock.Setup(x => x
-				.GetUserAccountsAndCategoriesDropdownDataAsync(this.userId))
+				.GetUserAccountsAndCategoriesDropdownsAsync(this.userId))
 				.ReturnsAsync(expAccountsAndCategoriesDropdowns);
 
 			this.usersServiceMock.Setup(x => x
-				.GetUserAccountTypesAndCurrenciesDropdownDataAsync(this.userId))
+				.GetUserAccountTypesAndCurrenciesDropdownsAsync(this.userId))
 				.ReturnsAsync(expAccountTypesAndCurrenciesDropdowns);
 
 			this.usersServiceMock.Setup(x => x
-				.GetUserDropdownsDataAsync(this.userId))
+				.GetUserUsedDropdownsAsync(this.userId))
 				.ReturnsAsync(expUserDropdowns);
 
 			this.usersServiceMock.Setup(x => x

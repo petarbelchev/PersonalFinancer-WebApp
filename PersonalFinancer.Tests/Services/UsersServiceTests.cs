@@ -28,15 +28,20 @@
 		[SetUp]
 		public void SetUp()
 		{
-			this.usersRepo = new EfRepository<ApplicationUser>(this.dbContextMock);
-			this.categoriesRepo = new EfRepository<Category>(this.dbContextMock);
-			this.accountsRepo = new EfRepository<Account>(this.dbContextMock);
-			this.accountTypeRepo = new EfRepository<AccountType>(this.dbContextMock);
-			this.currenciesRepo = new EfRepository<Currency>(this.dbContextMock);
-			this.transactionsRepo = new EfRepository<Transaction>(this.dbContextMock);
+			this.usersRepo = new EfRepository<ApplicationUser>(this.dbContext);
+			this.categoriesRepo = new EfRepository<Category>(this.dbContext);
+			this.accountsRepo = new EfRepository<Account>(this.dbContext);
+			this.accountTypeRepo = new EfRepository<AccountType>(this.dbContext);
+			this.currenciesRepo = new EfRepository<Currency>(this.dbContext);
+			this.transactionsRepo = new EfRepository<Transaction>(this.dbContext);
 
-			this.usersService = new UsersService(this.usersRepo, this.accountsRepo,
-				this.transactionsRepo, this.categoriesRepo, this.mapperMock);
+			this.usersService = new UsersService(
+				this.usersRepo, 
+				this.accountsRepo,
+				this.transactionsRepo, 
+				this.categoriesRepo, 
+				this.mapper, 
+				this.memoryCache);
 		}
 
 		[Test]
@@ -49,7 +54,7 @@
 					.OrderBy(u => u.FirstName)
 					.ThenBy(u => u.LastName)
 					.Take(UsersPerPage)
-					.ProjectTo<UserInfoDTO>(this.mapperMock.ConfigurationProvider)
+					.ProjectTo<UserInfoDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
 				TotalUsersCount = await this.usersRepo.All().CountAsync()
 			};
@@ -70,18 +75,18 @@
 				OwnerAccounts = await this.accountsRepo.All()
 					.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
 					.OrderBy(a => a.Name)
-					.Select(a => this.mapperMock.Map<AccountDropdownDTO>(a))
+					.Select(a => this.mapper.Map<AccountDropdownDTO>(a))
 					.ToArrayAsync(),
 				OwnerCategories = await this.categoriesRepo.All()
 					.Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
 					.OrderBy(c => c.Name)
-					.Select(c => this.mapperMock.Map<CategoryDropdownDTO>(c))
+					.Select(c => this.mapper.Map<CategoryDropdownDTO>(c))
 					.ToArrayAsync()
 			};
 
 			//Act
 			AccountsAndCategoriesDropdownDTO actual = await this.usersService
-				.GetUserAccountsAndCategoriesDropdownDataAsync(this.User1.Id);
+				.GetUserAccountsAndCategoriesDropdownsAsync(this.User1.Id);
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
@@ -94,7 +99,7 @@
 			List<AccountCardDTO> expected = await this.accountsRepo.All()
 				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
 				.OrderBy(a => a.Name)
-				.ProjectTo<AccountCardDTO>(this.mapperMock.ConfigurationProvider)
+				.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
 				.ToListAsync();
 
 			//Act
@@ -113,18 +118,18 @@
 				OwnerAccountTypes = await this.accountTypeRepo.All()
 					.Where(at => at.OwnerId == this.User1.Id && !at.IsDeleted)
 					.OrderBy(at => at.Name)
-					.Select(at => this.mapperMock.Map<AccountTypeDropdownDTO>(at))
+					.Select(at => this.mapper.Map<AccountTypeDropdownDTO>(at))
 					.ToArrayAsync(),
 				OwnerCurrencies = await this.currenciesRepo.All()
 					.Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
 					.OrderBy(c => c.Name)
-					.Select(c => this.mapperMock.Map<CurrencyDropdownDTO>(c))
+					.Select(c => this.mapper.Map<CurrencyDropdownDTO>(c))
 					.ToArrayAsync()
 			};
 
 			//Act
 			AccountTypesAndCurrenciesDropdownDTO actual =
-				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownDataAsync(this.User1.Id);
+				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownsAsync(this.User1.Id);
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
@@ -144,7 +149,7 @@
 				Accounts = await this.accountsRepo.All()
 					.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
 					.OrderBy(a => a.Name)
-					.Select(a => this.mapperMock.Map<AccountCardDTO>(a))
+					.Select(a => this.mapper.Map<AccountCardDTO>(a))
 					.ToListAsync(),
 				LastTransactions = await this.transactionsRepo.All()
 					.Where(t => t.OwnerId == this.User1.Id 
@@ -152,7 +157,7 @@
 								&& t.CreatedOnUtc <= toUtc)
 					.OrderByDescending(t => t.CreatedOnUtc)
 					.Take(5)
-					.Select(t => this.mapperMock.Map<TransactionTableDTO>(t))
+					.Select(t => this.mapper.Map<TransactionTableDTO>(t))
 					.ToListAsync(),
 				CurrenciesCashFlow = await this.accountsRepo.All()
 					.Where(a => a.OwnerId == this.User1.Id 
@@ -214,7 +219,7 @@
 					.Where(filter)
 					.OrderByDescending(t => t.CreatedOnUtc)
 					.Take(TransactionsPerPage)
-					.ProjectTo<TransactionTableDTO>(this.mapperMock.ConfigurationProvider)
+					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
 				TotalTransactionsCount = await this.transactionsRepo.All().CountAsync(filter)
 			};
@@ -255,7 +260,7 @@
 			//Arrange
 			var expected = await this.usersRepo.All()
 				.Where(u => u.Id == this.User1.Id)
-				.ProjectTo<UserDetailsDTO>(this.mapperMock.ConfigurationProvider)
+				.ProjectTo<UserDetailsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			//Act

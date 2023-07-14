@@ -16,8 +16,9 @@
         [SetUp]
         public void SetUp()
         {
-            this.repo = new EfRepository<AccountType>(this.dbContextMock);
-			this.accountTypeService = new ApiService<AccountType>(this.repo, this.mapperMock);
+            this.repo = new EfRepository<AccountType>(this.dbContext);
+			this.accountTypeService = new ApiService<AccountType>(
+                this.repo, this.mapper, this.memoryCache);
         }
 
         [Test]

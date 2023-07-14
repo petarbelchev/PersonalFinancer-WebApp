@@ -9,13 +9,13 @@
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Tests.Mocks;
+	using PersonalFinancer.Web;
 	using System.Security.Claims;
 
 	[TestFixture]
 	abstract class ControllersUnitTestsBase : UnitTestsBase
 	{
-		protected IMapper mapper = ControllersMapperMock.Instance;
+		protected IMapper mapper;
 		protected Mock<IAccountsUpdateService> accountsUpdateServiceMock;
 		protected Mock<IAccountsInfoService> accountsInfoServiceMock;
 		protected Mock<IUsersService> usersServiceMock;
@@ -26,6 +26,9 @@
 		[SetUp]
 		protected void SetUpBase()
 		{
+			var config = new MapperConfiguration(cfg => cfg.AddProfile<ControllerMappingProfile>());
+			this.mapper = config.CreateMapper();
+
 			this.accountsUpdateServiceMock = new Mock<IAccountsUpdateService>();
 			this.accountsInfoServiceMock = new Mock<IAccountsInfoService>();
 			this.usersServiceMock = new Mock<IUsersService>();

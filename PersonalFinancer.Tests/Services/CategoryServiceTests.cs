@@ -16,8 +16,9 @@
         [SetUp]
         public void SetUp()
         {
-            this.repo = new EfRepository<Category>(this.dbContextMock);
-			this.categoryService = new ApiService<Category>(this.repo, this.mapperMock);
+            this.repo = new EfRepository<Category>(this.dbContext);
+			this.categoryService = new ApiService<Category>(
+                this.repo, this.mapper, this.memoryCache);
         }
 
         [Test]

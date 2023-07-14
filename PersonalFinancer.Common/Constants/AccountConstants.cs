@@ -7,8 +7,5 @@
 
 		public const double AccountInitialBalanceMaxValue = 10_000_000;
 		public const double AccountInitialBalanceMinValue = -10_000_000;
-
-		public const string AccountCacheKeyValue = "accounts/";
-		public const string DeletedAccountCacheKeyValue = "deletedAccounts/";
 	}
 }

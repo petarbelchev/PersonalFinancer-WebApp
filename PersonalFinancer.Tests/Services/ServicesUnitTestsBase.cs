@@ -1,30 +1,39 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
 	using AutoMapper;
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
 	using NUnit.Framework;
 	using PersonalFinancer.Data;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
-	using PersonalFinancer.Tests.Mocks;
+	using PersonalFinancer.Services;
 	using static PersonalFinancer.Common.Constants.CategoryConstants;
 
 	[TestFixture]
 	internal abstract class ServicesUnitTestsBase : UnitTestsBase
 	{
-		protected PersonalFinancerDbContext dbContextMock;
-		protected IMapper mapperMock;
+		protected PersonalFinancerDbContext dbContext;
+		protected IMapper mapper;
+		protected IMemoryCache memoryCache;
 
 		[SetUp]
 		protected async Task SetUpBase()
 		{
-			this.dbContextMock = PersonalFinancerDbContextMock.Instance;
-			this.mapperMock = ServicesMapperMock.Instance;
+			var dbContextOptionsBuilder = new DbContextOptionsBuilder<PersonalFinancerDbContext>()
+				.UseInMemoryDatabase("PersonalFinancerInMemoryDb" + DateTime.Now.Ticks.ToString()).Options;
+			this.dbContext = new PersonalFinancerDbContext(dbContextOptionsBuilder);
+
+			var config = new MapperConfiguration(cfg => cfg.AddProfile<ServiceMappingProfile>());
+			this.mapper = config.CreateMapper();
+
+			this.memoryCache = new MemoryCache(new MemoryCacheOptions());
 
 			await this.SeedDatabase();
 		}
 
 		[TearDown]
-		protected async Task TearDownBase() => await this.dbContextMock.DisposeAsync();
+		protected async Task TearDownBase() => await this.dbContext.DisposeAsync();
 
 		protected ApplicationUser User1 { get; private set; } = null!;
 		protected ApplicationUser User2 { get; private set; } = null!;
@@ -83,7 +92,7 @@
 				Email = "todor@mail.com",
 				NormalizedEmail = "TODOR@MAIL.COM"
 			};
-			await this.dbContextMock.Users.AddRangeAsync(
+			await this.dbContext.Users.AddRangeAsync(
 				this.User1,
 				this.User2);
 
@@ -123,7 +132,7 @@
 				OwnerId = this.User2.Id,
 				IsDeleted = false
 			};
-			await this.dbContextMock.AccountTypes.AddRangeAsync(
+			await this.dbContext.AccountTypes.AddRangeAsync(
 				this.AccType1_User1_WithAcc,
 				this.AccType2_User1_WithoutAcc,
 				this.AccType3_User1_Deleted_WithAcc,
@@ -166,7 +175,7 @@
 				OwnerId = this.User2.Id,
 				IsDeleted = false
 			};
-			await this.dbContextMock.Currencies.AddRangeAsync(
+			await this.dbContext.Currencies.AddRangeAsync(
 				this.Currency1_User1_WithAcc,
 				this.Currency2_User1_WithoutAcc,
 				this.Currency3_User1_Deleted_WithAcc,
@@ -214,7 +223,7 @@
 				OwnerId = this.User1.Id,
 				IsDeleted = true
 			};
-			await this.dbContextMock.Accounts.AddRangeAsync(
+			await this.dbContext.Accounts.AddRangeAsync(
 				this.Account1_User1_WithTransactions, 
 				this.Account2_User1_WithoutTransactions, 
 				this.Account3_User1_Deleted_WithTransactions,
@@ -260,7 +269,7 @@
 				OwnerId = this.User2.Id,
 				IsDeleted = false
 			};
-			await this.dbContextMock.Categories.AddRangeAsync(
+			await this.dbContext.Categories.AddRangeAsync(
 				this.Category_InitialBalance, 
 				this.Category1_User1_WithTransactions, 
 				this.Category2_User1_WithoutTransactions, 
@@ -337,7 +346,7 @@
 				Reference = "Flight ticket",
 				TransactionType = TransactionType.Expense
 			};
-			await this.dbContextMock.Transactions.AddRangeAsync(
+			await this.dbContext.Transactions.AddRangeAsync(
 				this.InitialTransaction_Income_Account1_User1, 
 				this.Transaction1_Expense_Account1_User1, 
 				this.Transaction2_Expense_Account1_User1,
@@ -345,7 +354,7 @@
 				this.Transaction4_Income_Account3_User1, 
 				this.Transaction5_Expense_Account3_User1);
 
-			await this.dbContextMock.SaveChangesAsync();
+			await this.dbContext.SaveChangesAsync();
 		}
 	}
 }

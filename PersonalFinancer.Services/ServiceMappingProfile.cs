@@ -149,7 +149,7 @@
 						.Where(at => !at.IsDeleted)
 						.OrderBy(at => at.Name)));
 
-			this.CreateProjection<ApplicationUser, UserDropdownsDTO>()
+			this.CreateProjection<ApplicationUser, UserUsedDropdownsDTO>()
 				.ForMember(dest => dest.OwnerAccounts, opt => opt
 					.MapFrom(src => src.Accounts
 						.Where(a => !a.IsDeleted || a.Transactions.Any())))

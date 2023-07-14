@@ -76,7 +76,7 @@
 		{
 			this.usersServiceMock
 				.Setup(x => x
-				.GetUserAccountTypesAndCurrenciesDropdownDataAsync(this.userId))
+				.GetUserAccountTypesAndCurrenciesDropdownsAsync(this.userId))
 				.ReturnsAsync(expAccountTypesAndCurrencies);
 
 			this.controller = new AccountsController(
@@ -1027,7 +1027,7 @@
 				.Throws<ArgumentException>();
 
 			this.usersServiceMock.Setup(x => x
-				.GetUserAccountTypesAndCurrenciesDropdownDataAsync(ownerId))
+				.GetUserAccountTypesAndCurrenciesDropdownsAsync(ownerId))
 				.ReturnsAsync(expAccountTypesAndCurrencies);
 
 			//Act

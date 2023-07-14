@@ -284,7 +284,7 @@
 			Guid userId = viewModel.OwnerId ?? throw new InvalidOperationException();
 
 			AccountTypesAndCurrenciesDropdownDTO typesAndCurrenciesDTO =
-				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownDataAsync(userId);
+				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownsAsync(userId);
 
 			this.mapper.Map(typesAndCurrenciesDTO, viewModel);
 		}

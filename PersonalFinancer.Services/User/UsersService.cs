@@ -3,6 +3,7 @@
 	using AutoMapper;
 	using AutoMapper.QueryableExtensions;
 	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Data.Repositories;
@@ -10,6 +11,7 @@
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Services.User.Models;
 	using System.Collections.Generic;
+	using static PersonalFinancer.Common.Constants.CacheConstants;
 	using static PersonalFinancer.Common.Constants.CategoryConstants;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
@@ -20,19 +22,22 @@
 		private readonly IEfRepository<Transaction> transactionsRepo;
 		private readonly IEfRepository<Category> categoriesRepo;
 		private readonly IMapper mapper;
+		private readonly IMemoryCache memoryCache;
 
 		public UsersService(
 			IEfRepository<ApplicationUser> usersRepo,
 			IEfRepository<Account> accountsRepo,
 			IEfRepository<Transaction> transactionsRepo,
 			IEfRepository<Category> categoriesRepo,
-			IMapper mapper)
+			IMapper mapper,
+			IMemoryCache memoryCache)
 		{
 			this.usersRepo = usersRepo;
 			this.accountsRepo = accountsRepo;
 			this.transactionsRepo = transactionsRepo;
 			this.categoriesRepo = categoriesRepo;
 			this.mapper = mapper;
+			this.memoryCache = memoryCache;
 		}
 
 		public async Task<IEnumerable<string>> GetAdminsIdsAsync()
@@ -43,12 +48,21 @@
 				.ToListAsync();
 		}
 
-		public async Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownDataAsync(Guid userId)
+		public async Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownsAsync(Guid userId)
 		{
-			return await this.usersRepo.All()
-				.Where(u => u.Id == userId)
-				.ProjectTo<AccountsAndCategoriesDropdownDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync();
+			string cacheKey = AccountsAndCategoriesKey + userId;
+
+			if (!this.memoryCache.TryGetValue(cacheKey, out AccountsAndCategoriesDropdownDTO dropdowns))
+			{
+				dropdowns = await this.usersRepo.All()
+					.Where(u => u.Id == userId)
+					.ProjectTo<AccountsAndCategoriesDropdownDTO>(this.mapper.ConfigurationProvider)
+					.FirstAsync();
+
+				this.memoryCache.Set(cacheKey, dropdowns);
+			}
+
+			return dropdowns;
 		}
 
 		public async Task<IEnumerable<AccountCardDTO>> GetUserAccountsCardsAsync(Guid userId)
@@ -60,19 +74,28 @@
 				.ToArrayAsync();
 		}
 
-		public async Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownDataAsync(Guid userId)
+		public async Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownsAsync(Guid userId)
 		{
-			return await this.usersRepo.All()
-				.Where(u => u.Id == userId)
-				.ProjectTo<AccountTypesAndCurrenciesDropdownDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync();
+			string cacheKey = AccountTypesAndCurrenciesKey + userId;
+
+			if (!this.memoryCache.TryGetValue(cacheKey, out AccountTypesAndCurrenciesDropdownDTO dropdowns))
+			{
+				dropdowns = await this.usersRepo.All()
+					.Where(u => u.Id == userId)
+					.ProjectTo<AccountTypesAndCurrenciesDropdownDTO>(this.mapper.ConfigurationProvider)
+					.FirstAsync();
+
+				this.memoryCache.Set(cacheKey, dropdowns);
+			}
+
+			return dropdowns;
 		}
 
 		public async Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime fromLocalTime, DateTime toLocalTime)
 		{
 			DateTime fromUtc = fromLocalTime.ToUniversalTime();
 			DateTime toUtc = toLocalTime.ToUniversalTime();
-		
+
 			var dto = new UserDashboardDTO
 			{
 				FromLocalTime = fromLocalTime,
@@ -91,7 +114,7 @@
 					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
 				CurrenciesCashFlow = await this.accountsRepo.All()
-					.Where(a => a.OwnerId == userId 
+					.Where(a => a.OwnerId == userId
 								&& a.Transactions.Any(t => t.CreatedOnUtc >= fromUtc
 														   && t.CreatedOnUtc <= toUtc))
 					.GroupBy(a => a.Currency.Name)
@@ -129,11 +152,11 @@
 			return dto;
 		}
 
-		public async Task<UserDropdownsDTO> GetUserDropdownsDataAsync(Guid userId)
+		public async Task<UserUsedDropdownsDTO> GetUserUsedDropdownsAsync(Guid userId)
 		{
-			UserDropdownsDTO resultDTO = await this.usersRepo.All()
+			UserUsedDropdownsDTO resultDTO = await this.usersRepo.All()
 				.Where(u => u.Id == userId)
-				.ProjectTo<UserDropdownsDTO>(this.mapper.ConfigurationProvider)
+				.ProjectTo<UserUsedDropdownsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			resultDTO.OwnerCategories.Add(await this.categoriesRepo.All()

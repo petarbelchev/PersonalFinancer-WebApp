@@ -8,15 +8,15 @@
 	{
 		Task<IEnumerable<string>> GetAdminsIdsAsync();
 
-		Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownDataAsync(Guid userId);
+		Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownsAsync(Guid userId);
 
 		Task<IEnumerable<AccountCardDTO>> GetUserAccountsCardsAsync(Guid userId);
 
-		Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownDataAsync(Guid userId);
+		Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownsAsync(Guid userId);
 		
 		Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime fromLocalTime, DateTime toLocalTime);
 
-        Task<UserDropdownsDTO> GetUserDropdownsDataAsync(Guid userId);
+        Task<UserUsedDropdownsDTO> GetUserUsedDropdownsAsync(Guid userId);
 
         Task<UsersInfoDTO> GetUsersInfoAsync(int page);
 

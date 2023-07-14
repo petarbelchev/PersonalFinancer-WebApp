@@ -1,23 +1,29 @@
 ﻿namespace PersonalFinancer.Services.Api
 {
-    using AutoMapper;
-    using Microsoft.EntityFrameworkCore;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models.Contracts;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.Api.Models;
+	using AutoMapper;
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Models.Contracts;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Api.Models;
+	using static PersonalFinancer.Common.Constants.CacheConstants;
 
-    public class ApiService<T> : IApiService<T> where T : BaseApiEntity, new()
+	public class ApiService<T> : IApiService<T> where T : BaseApiEntity, new()
     {
         private readonly IEfRepository<T> repo;
         private readonly IMapper mapper;
+		private readonly IMemoryCache memoryCache;
 
-        public ApiService(
+		public ApiService(
             IEfRepository<T> repo,
-            IMapper mapper)
+            IMapper mapper,
+			IMemoryCache memoryCache)
         {
             this.repo = repo;
             this.mapper = mapper;
+			this.memoryCache = memoryCache;
 		}
 
         public async Task<ApiEntityDTO> CreateEntityAsync(string name, Guid ownerId)
@@ -45,7 +51,7 @@
             }
 
             await this.repo.SaveChangesAsync();
-
+            this.RemoveCache(ownerId);
             ApiEntityDTO outputModel = this.mapper.Map<ApiEntityDTO>(entity);
 
             return outputModel;
@@ -63,8 +69,20 @@
                 throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
 
             entity.IsDeleted = true;
-
             await this.repo.SaveChangesAsync();
-        }
-    }
+            this.RemoveCache(userId);
+		}
+
+		private void RemoveCache(Guid userId)
+		{
+			if (typeof(T) == typeof(Category))
+			{
+				this.memoryCache.Remove(AccountsAndCategoriesKey + userId);
+			}
+			else if (typeof(T) == typeof(AccountType) || typeof(T) == typeof(Currency))
+			{
+				this.memoryCache.Remove(AccountTypesAndCurrenciesKey + userId);
+			}
+		}
+	}
 }

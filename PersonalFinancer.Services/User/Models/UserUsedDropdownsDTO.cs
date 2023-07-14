@@ -4,7 +4,7 @@ namespace PersonalFinancer.Services.User.Models
 {
 	using PersonalFinancer.Services.Shared.Models;
 
-	public class UserDropdownsDTO
+	public class UserUsedDropdownsDTO
 	{
 		public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
 

@@ -16,8 +16,9 @@
         [SetUp]
         public void SetUp()
         {
-            this.repo = new EfRepository<Currency>(this.dbContextMock);
-            this.currencyApiService = new ApiService<Currency>(this.repo, this.mapperMock);
+            this.repo = new EfRepository<Currency>(this.dbContext);
+            this.currencyApiService = new ApiService<Currency>(
+                this.repo, this.mapper, this.memoryCache);
         }
 
         [Test]

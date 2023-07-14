@@ -23,11 +23,11 @@
 		[SetUp]
 		public void SetUp()
 		{
-			this.transactionsRepo = new EfRepository<Transaction>(this.dbContextMock);
-			this.accountsRepo = new EfRepository<Account>(this.dbContextMock);
+			this.transactionsRepo = new EfRepository<Transaction>(this.dbContext);
+			this.accountsRepo = new EfRepository<Account>(this.dbContext);
 
 			this.accountsInfoService = new AccountsInfoService(
-				this.transactionsRepo, this.accountsRepo, this.mapperMock);
+				this.transactionsRepo, this.accountsRepo, this.mapper);
 		}
 
 		[Test]
@@ -40,7 +40,7 @@
 					.Where(a => !a.IsDeleted)
 					.OrderBy(a => a.Name)
 					.Take(AccountsPerPage)
-					.ProjectTo<AccountCardDTO>(this.mapperMock.ConfigurationProvider)
+					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
 				TotalAccountsCount = await this.accountsRepo.All()
 					.CountAsync(a => !a.IsDeleted)
@@ -62,7 +62,7 @@
 
 			AccountDetailsLongDTO expected = await this.accountsRepo.All()
 				.Where(a => a.Id == this.Account1_User1_WithTransactions.Id && !a.IsDeleted)
-				.ProjectTo<AccountDetailsLongDTO>(this.mapperMock.ConfigurationProvider, new { fromLocalTime, toLocalTime })
+				.ProjectTo<AccountDetailsLongDTO>(this.mapper.ConfigurationProvider, new { fromLocalTime, toLocalTime })
 				.FirstAsync();
 
 			//Act
@@ -91,7 +91,7 @@
 		public async Task GetAccountFormData_ShouldReturnCorrectData()
 		{
 			//Arrange
-			CreateEditAccountOutputDTO expected = this.mapperMock
+			CreateEditAccountOutputDTO expected = this.mapper
 				.Map<CreateEditAccountOutputDTO>(this.Account1_User1_WithTransactions);
 
 			//Act
@@ -106,7 +106,7 @@
 		public async Task GetAccountFormData_ShouldReturnCorrectData_WhenUserIsAdmin()
 		{
 			//Arrange
-			CreateEditAccountOutputDTO expected = this.mapperMock
+			CreateEditAccountOutputDTO expected = this.mapper
 				.Map<CreateEditAccountOutputDTO>(this.Account1_User1_WithTransactions);
 
 			//Act
@@ -182,7 +182,7 @@
 			//Arrange
 			AccountDetailsShortDTO expected = await this.accountsRepo.All()
 				.Where(a => a.Id == this.Account1_User1_WithTransactions.Id)
-				.ProjectTo<AccountDetailsShortDTO>(this.mapperMock.ConfigurationProvider)
+				.ProjectTo<AccountDetailsShortDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			//Act
@@ -227,7 +227,7 @@
 					.Where(filter)
 					.OrderByDescending(t => t.CreatedOnUtc)
 					.Take(TransactionsPerPage)
-					.ProjectTo<TransactionTableDTO>(this.mapperMock.ConfigurationProvider)
+					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
 					.ToListAsync(),
 				TotalTransactionsCount = await this.transactionsRepo.All()
 					.CountAsync(filter)
@@ -304,7 +304,7 @@
 			//Arrange
 			TransactionDetailsDTO expected = await this.transactionsRepo.All()
 				.Where(t => t.Id == this.InitialTransaction_Income_Account1_User1.Id)
-				.ProjectTo<TransactionDetailsDTO>(this.mapperMock.ConfigurationProvider)
+				.ProjectTo<TransactionDetailsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			//Act
@@ -321,7 +321,7 @@
 			//Arrange
 			TransactionDetailsDTO expected = await this.transactionsRepo.All()
 				.Where(t => t.Id == this.InitialTransaction_Income_Account1_User1.Id)
-				.ProjectTo<TransactionDetailsDTO>(this.mapperMock.ConfigurationProvider)
+				.ProjectTo<TransactionDetailsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			//Act
@@ -361,7 +361,7 @@
 			//Arrange
 			CreateEditTransactionOutputDTO expected = await this.transactionsRepo.All()
 				.Where(t => t.Id == this.Transaction1_Expense_Account1_User1.Id)
-				.ProjectTo<CreateEditTransactionOutputDTO>(this.mapperMock.ConfigurationProvider)
+				.ProjectTo<CreateEditTransactionOutputDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			//Act

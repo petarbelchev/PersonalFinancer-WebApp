@@ -192,7 +192,7 @@
 				ToLocalTime = DateTime.Now
 			};
 
-			UserDropdownsDTO dropdowns = await this.usersService.GetUserDropdownsDataAsync(filter.UserId);
+			UserUsedDropdownsDTO dropdowns = await this.usersService.GetUserUsedDropdownsAsync(filter.UserId);
 			TransactionsDTO transactions = await this.usersService.GetUserTransactionsAsync(filter);
 			var viewModel = new UserTransactionsViewModel(filter, dropdowns, transactions);
 
@@ -206,7 +206,7 @@
 		{
 			Guid userId = this.User.IdToGuid();
 			UserTransactionsViewModel viewModel;
-			UserDropdownsDTO dropdowns = await this.usersService.GetUserDropdownsDataAsync(userId);
+			UserUsedDropdownsDTO dropdowns = await this.usersService.GetUserUsedDropdownsAsync(userId);
 
 			if (!this.ModelState.IsValid)
 			{
@@ -230,7 +230,7 @@
 				string.Format(ExceptionMessages.NotNullableProperty, formModel.OwnerId));
 
 			AccountsAndCategoriesDropdownDTO accountsAndCategoriesDTO =
-				await this.usersService.GetUserAccountsAndCategoriesDropdownDataAsync(ownerId);
+				await this.usersService.GetUserAccountsAndCategoriesDropdownsAsync(ownerId);
 
 			this.mapper.Map(accountsAndCategoriesDTO, formModel);
 		}

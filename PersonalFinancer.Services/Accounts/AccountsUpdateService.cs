@@ -1,15 +1,17 @@
 ﻿namespace PersonalFinancer.Services.Accounts
 {
-    using AutoMapper;
-    using Microsoft.EntityFrameworkCore;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Data.Models.Enums;
-    using PersonalFinancer.Data.Repositories;
-    using PersonalFinancer.Services.Accounts.Models;
-    using static PersonalFinancer.Common.Constants.CategoryConstants;
+	using AutoMapper;
+	using Microsoft.EntityFrameworkCore;
+	using Microsoft.Extensions.Caching.Memory;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Data.Models.Enums;
+	using PersonalFinancer.Data.Repositories;
+	using PersonalFinancer.Services.Accounts.Models;
+	using static PersonalFinancer.Common.Constants.CacheConstants;
+	using static PersonalFinancer.Common.Constants.CategoryConstants;
 
-    public class AccountsUpdateService : IAccountsUpdateService
+	public class AccountsUpdateService : IAccountsUpdateService
 	{
 		private readonly IEfRepository<Account> accountsRepo;
 		private readonly IEfRepository<Transaction> transactionsRepo;
@@ -17,6 +19,7 @@
 		private readonly IEfRepository<Currency> currenciesRepo;
 		private readonly IEfRepository<Category> categoriesRepo;
 		private readonly IMapper mapper;
+		private readonly IMemoryCache memoryCache;
 
 		public AccountsUpdateService(
 			IEfRepository<Account> accountRepository,
@@ -24,7 +27,8 @@
 			IEfRepository<AccountType> accountTypesRepo,
 			IEfRepository<Currency> currenciesRepo,
 			IEfRepository<Category> categoriesRepo,
-			IMapper mapper)
+			IMapper mapper,
+			IMemoryCache memoryCache)
 		{
 			this.accountsRepo = accountRepository;
 			this.transactionsRepo = transactionRepository;
@@ -32,6 +36,7 @@
 			this.currenciesRepo = currenciesRepo;
 			this.categoriesRepo = categoriesRepo;
 			this.mapper = mapper;
+			this.memoryCache = memoryCache;
 		}
 
 		public async Task<Guid> CreateAccountAsync(CreateEditAccountInputDTO model)
@@ -53,6 +58,7 @@
 
 			await this.accountsRepo.AddAsync(newAccount);
 			await this.accountsRepo.SaveChangesAsync();
+			this.memoryCache.Remove(AccountsAndCategoriesKey + newAccount.OwnerId);
 
 			return newAccount.Id;
 		}
@@ -88,6 +94,7 @@
 				account.IsDeleted = true;
 
 			await this.accountsRepo.SaveChangesAsync();
+			this.memoryCache.Remove(AccountsAndCategoriesKey + account.OwnerId);
 		}
 
 		public async Task<decimal> DeleteTransactionAsync(Guid transactionId, Guid userId, bool isUserAdmin)
@@ -159,7 +166,7 @@
 
 			await this.ValidateCategoryAsync(model.CategoryId, model.OwnerId);
 
-			bool isNeedBalanceChange = 
+			bool isNeedBalanceChange =
 				model.AccountId != transactionInDb.AccountId ||
 				model.TransactionType != transactionInDb.TransactionType ||
 				model.Amount != transactionInDb.Amount;

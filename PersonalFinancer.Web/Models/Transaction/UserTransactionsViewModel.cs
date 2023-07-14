@@ -12,7 +12,7 @@ namespace PersonalFinancer.Web.Models.Transaction
 	{
 		public UserTransactionsViewModel(
 			UserTransactionsInputModel filter,
-			UserDropdownsDTO dropdowns,
+			UserUsedDropdownsDTO dropdowns,
 			Guid userId)
 			: this(dropdowns)
 		{
@@ -33,7 +33,7 @@ namespace PersonalFinancer.Web.Models.Transaction
 
 		public UserTransactionsViewModel(
 			TransactionsFilterDTO filter,
-			UserDropdownsDTO dropdowns,
+			UserUsedDropdownsDTO dropdowns,
 			TransactionsDTO transactions)
 			: this(dropdowns)
 		{
@@ -52,7 +52,7 @@ namespace PersonalFinancer.Web.Models.Transaction
 			this.Transactions = transactions.Transactions;
 		}
 
-		private UserTransactionsViewModel(UserDropdownsDTO dropdowns)
+		private UserTransactionsViewModel(UserUsedDropdownsDTO dropdowns)
 		{
 			this.OwnerAccounts = dropdowns.OwnerAccounts;
 			this.OwnerAccountTypes = dropdowns.OwnerAccountTypes;
