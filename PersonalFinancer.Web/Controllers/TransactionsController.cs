@@ -185,15 +185,16 @@
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Index()
 		{
-			var filterDTO = new TransactionsFilterDTO
+			var filter = new TransactionsFilterDTO
 			{
 				UserId = this.User.IdToGuid(),
 				FromLocalTime = DateTime.Now.AddMonths(-1),
 				ToLocalTime = DateTime.Now
 			};
 
-			UserTransactionsViewModel viewModel =
-				await this.PrepareUserTransactionsViewModelAsync(filterDTO);
+			UserDropdownsDTO dropdowns = await this.usersService.GetUserDropdownsDataAsync(filter.UserId);
+			TransactionsDTO transactions = await this.usersService.GetUserTransactionsAsync(filter);
+			var viewModel = new UserTransactionsViewModel(filter, dropdowns, transactions);
 
 			return this.View(viewModel);
 		}
@@ -205,20 +206,19 @@
 		{
 			Guid userId = this.User.IdToGuid();
 			UserTransactionsViewModel viewModel;
+			UserDropdownsDTO dropdowns = await this.usersService.GetUserDropdownsDataAsync(userId);
 
 			if (!this.ModelState.IsValid)
 			{
-				viewModel = this.mapper.Map<UserTransactionsViewModel>(inputModel);
-				viewModel.UserId = userId;
-				UserDropdownDTO dropdownDTO = await this.usersService.GetUserDropdownDataAsync(userId);
-				this.mapper.Map(dropdownDTO, viewModel);
+				viewModel = new UserTransactionsViewModel(inputModel, dropdowns, userId);
 
 				return this.View(viewModel);
 			}
 
-			TransactionsFilterDTO filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
-			filterDTO.UserId = userId;
-			viewModel = await this.PrepareUserTransactionsViewModelAsync(filterDTO);
+			TransactionsFilterDTO filter = this.mapper.Map<TransactionsFilterDTO>(inputModel);
+			filter.UserId = userId;
+			TransactionsDTO transactions = await this.usersService.GetUserTransactionsAsync(filter);
+			viewModel = new UserTransactionsViewModel(filter, dropdowns, transactions);
 
 			return this.View(viewModel);
 		}
@@ -233,18 +233,6 @@
 				await this.usersService.GetUserAccountsAndCategoriesDropdownDataAsync(ownerId);
 
 			this.mapper.Map(accountsAndCategoriesDTO, formModel);
-		}
-
-		private async Task<UserTransactionsViewModel> PrepareUserTransactionsViewModelAsync(TransactionsFilterDTO filterDTO)
-		{
-			TransactionsPageDTO transactionsDTO =
-				await this.usersService.GetUserTransactionsPageDataAsync(filterDTO);
-			var viewModel = new UserTransactionsViewModel(
-				transactionsDTO.TotalTransactionsCount, filterDTO.Page);
-			this.mapper.Map(filterDTO, viewModel);
-			this.mapper.Map(transactionsDTO, viewModel);
-
-			return viewModel;
 		}
 	}
 }

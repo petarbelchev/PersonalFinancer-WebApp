@@ -16,13 +16,11 @@
 		
 		Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime fromLocalTime, DateTime toLocalTime);
 
-        Task<UserDropdownDTO> GetUserDropdownDataAsync(Guid userId);
+        Task<UserDropdownsDTO> GetUserDropdownsDataAsync(Guid userId);
 
         Task<UsersInfoDTO> GetUsersInfoAsync(int page);
 
 		Task<TransactionsDTO> GetUserTransactionsAsync(TransactionsFilterDTO dto);
-
-		Task<TransactionsPageDTO> GetUserTransactionsPageDataAsync(TransactionsFilterDTO dto);
 
 		/// <exception cref="InvalidOperationException">When the user does not exist.</exception>
 		Task<UserDetailsDTO> UserDetailsAsync(Guid userId);

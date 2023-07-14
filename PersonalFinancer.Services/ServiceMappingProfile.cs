@@ -121,8 +121,6 @@
 				.ForMember(dest => dest.TransactionType, opt => opt
 					.MapFrom(src => src.TransactionType.ToString()));
 
-			this.CreateMap<TransactionsDTO, TransactionsPageDTO>();
-
 			this.CreateMap<ApplicationUser, UserInfoDTO>();
 
 			this.CreateMap<ApplicationUser, UserDetailsDTO>()
@@ -150,6 +148,20 @@
 					.MapFrom(src => src.AccountTypes
 						.Where(at => !at.IsDeleted)
 						.OrderBy(at => at.Name)));
+
+			this.CreateProjection<ApplicationUser, UserDropdownsDTO>()
+				.ForMember(dest => dest.OwnerAccounts, opt => opt
+					.MapFrom(src => src.Accounts
+						.Where(a => !a.IsDeleted || a.Transactions.Any())))
+				.ForMember(dest => dest.OwnerAccountTypes, opt => opt
+					.MapFrom(src => src.AccountTypes
+						.Where(at => !at.IsDeleted || at.Accounts.Any(a => a.Transactions.Any()))))
+				.ForMember(dest => dest.OwnerCurrencies, opt => opt
+					.MapFrom(src => src.Currencies
+						.Where(c => !c.IsDeleted || c.Accounts.Any(a => a.Transactions.Any()))))
+				.ForMember(dest => dest.OwnerCategories, opt => opt
+					.MapFrom(src => src.Categories
+						.Where(c => !c.IsDeleted || c.Transactions.Any())));
 
 			this.CreateMap<BaseApiEntity, ApiEntityDTO>();
 

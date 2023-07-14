@@ -2,10 +2,9 @@
 
 namespace PersonalFinancer.Services.User.Models
 {
-	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
 
-	public class TransactionsPageDTO : TransactionsDTO
+	public class UserDropdownsDTO
 	{
 		public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
 

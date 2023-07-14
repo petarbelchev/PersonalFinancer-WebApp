@@ -1,22 +1,84 @@
 ﻿namespace PersonalFinancer.Tests.Controllers
 {
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.ViewFeatures;
-    using Moq;
-    using NUnit.Framework;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models.Enums;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.Shared.Models;
-    using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Controllers;
-    using PersonalFinancer.Web.Models.Transaction;
-    using static PersonalFinancer.Common.Constants.RoleConstants;
+	using Microsoft.AspNetCore.Http;
+	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.AspNetCore.Mvc.ViewFeatures;
+	using Moq;
+	using NUnit.Framework;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Data.Models.Enums;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.Shared.Models;
+	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Web.Controllers;
+	using PersonalFinancer.Web.Models.Transaction;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
 
-    [TestFixture]
+	[TestFixture]
 	internal class TransactionsControllerTests : ControllersUnitTestsBase
 	{
+		private static readonly AccountDropdownDTO[] expAccountsDropdown = new AccountDropdownDTO[]
+		{
+			new AccountDropdownDTO
+			{
+				Id = Guid.NewGuid(),
+				Name = "Account name 1"
+			},
+			new AccountDropdownDTO
+			{
+				Id = Guid.NewGuid(),
+				Name = "Account name 2"
+			}
+		};
+		private static readonly CategoryDropdownDTO[] expCategoriesDropdown = new CategoryDropdownDTO[]
+		{
+			new CategoryDropdownDTO
+			{
+				Id = Guid.NewGuid(),
+				Name = "Category name 1"
+			},
+			new CategoryDropdownDTO
+			{
+				Id = Guid.NewGuid(),
+				Name = "Category name 2"
+			}
+		};
+		private static readonly AccountTypeDropdownDTO[] expAccountTypesDropdown = new AccountTypeDropdownDTO[]
+		{
+			new AccountTypeDropdownDTO
+			{
+				Id = Guid.NewGuid(),
+				Name = "AccType 1"
+			},
+			new AccountTypeDropdownDTO
+			{
+				Id = Guid.NewGuid(),
+				Name = "AccType 2"
+			}
+		};
+		private static readonly CurrencyDropdownDTO[] expCurrenciesDropdown = new CurrencyDropdownDTO[]
+		{
+			new CurrencyDropdownDTO
+			{
+				Id = Guid.NewGuid(),
+				Name = "Currency 1"
+			},
+			new CurrencyDropdownDTO
+			{
+				Id = Guid.NewGuid(),
+				Name = "Currency 2"
+			}
+		};
+		private static readonly AccountsAndCategoriesDropdownDTO expAccountsAndCategoriesDropdowns = new() 
+		{
+			OwnerAccounts = expAccountsDropdown,
+			OwnerCategories = expCategoriesDropdown
+		};
+		private static readonly AccountTypesAndCurrenciesDropdownDTO expAccountTypesAndCurrenciesDropdowns = new()
+		{
+			OwnerAccountTypes = expAccountTypesDropdown,
+			OwnerCurrencies = expCurrenciesDropdown
+		};
 		private static readonly TransactionsDTO expTransactionsDto = new()
 		{
 			Transactions = new TransactionTableDTO[]
@@ -44,77 +106,13 @@
 			},
 			TotalTransactionsCount = 10
 		};
-
-		private static readonly AccountsAndCategoriesDropdownDTO expAccountsAndCategories = new()
+		private static readonly UserDropdownsDTO expUserDropdowns = new()
 		{
-			OwnerAccounts = new AccountDropdownDTO[]
-			{
-				new AccountDropdownDTO
-				{
-					Id = Guid.NewGuid(),
-					Name = "Account name 1"
-				},
-				new AccountDropdownDTO
-				{
-					Id = Guid.NewGuid(),
-					Name = "Account name 2"
-				}
-			},
-			OwnerCategories = new CategoryDropdownDTO[]
-			{
-				new CategoryDropdownDTO
-				{
-					Id = Guid.NewGuid(),
-					Name = "Category name 1"
-				},
-				new CategoryDropdownDTO
-				{
-					Id = Guid.NewGuid(),
-					Name = "Category name 2"
-				}
-			}
+			OwnerAccounts = expAccountsDropdown,
+			OwnerAccountTypes = expAccountTypesDropdown,
+			OwnerCategories = expCategoriesDropdown,
+			OwnerCurrencies = expCurrenciesDropdown
 		};
-
-		private static readonly AccountTypesAndCurrenciesDropdownDTO expAccountTypesAndCurrencies = new()
-		{
-			OwnerAccountTypes = new AccountTypeDropdownDTO[]
-			{
-				new AccountTypeDropdownDTO
-				{
-					Id = Guid.NewGuid(),
-					Name = "AccType 1"
-				},
-				new AccountTypeDropdownDTO
-				{
-					Id = Guid.NewGuid(),
-					Name = "AccType 2"
-				}
-			},
-			OwnerCurrencies = new CurrencyDropdownDTO[]
-			{
-				new CurrencyDropdownDTO
-				{
-					Id = Guid.NewGuid(),
-					Name = "Currency 1"
-				},
-				new CurrencyDropdownDTO
-				{
-					Id = Guid.NewGuid(),
-					Name = "Currency 2"
-				}
-			}
-		};
-
-		private static readonly TransactionsPageDTO expTransactionsPageDTO = new()
-		{
-			Transactions = expTransactionsDto.Transactions,
-			TotalTransactionsCount = expTransactionsDto.TotalTransactionsCount,
-			OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
-			OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
-			OwnerCategories = expAccountsAndCategories.OwnerCategories.ToList(),
-			OwnerCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies
-		};
-
 		private TransactionsController controller;
 
 		[SetUp]
@@ -137,22 +135,30 @@
 
 			this.usersServiceMock.Setup(x => x
 				.GetUserAccountsAndCategoriesDropdownDataAsync(this.userId))
-				.ReturnsAsync(expAccountsAndCategories);
+				.ReturnsAsync(expAccountsAndCategoriesDropdowns);
 
 			this.usersServiceMock.Setup(x => x
 				.GetUserAccountTypesAndCurrenciesDropdownDataAsync(this.userId))
-				.ReturnsAsync(expAccountTypesAndCurrencies);
+				.ReturnsAsync(expAccountTypesAndCurrenciesDropdowns);
+
+			this.usersServiceMock.Setup(x => x
+				.GetUserDropdownsDataAsync(this.userId))
+				.ReturnsAsync(expUserDropdowns);
+
+			this.usersServiceMock.Setup(x => x
+				.GetUserTransactionsAsync(It.Is<TransactionsFilterDTO>(x =>
+					x.UserId == this.userId
+					&& x.CurrencyId == null
+					&& x.AccountId == null
+					&& x.AccountTypeId == null
+					&& x.CategoryId == null)))
+				.ReturnsAsync(expTransactionsDto);
 		}
 
 		[Test]
-		public async Task All_OnGet_ShouldReturnViewModel()
+		public async Task Index_OnGet_ShouldReturnViewModel()
 		{
 			//Arrange
-			this.usersServiceMock.Setup(x => x
-				.GetUserTransactionsPageDataAsync(It.Is<TransactionsFilterDTO>(
-					x => x.UserId == this.userId
-					&& x.Page == 1)))
-				.ReturnsAsync(expTransactionsPageDTO);
 
 			//Act
 			var viewResult = (ViewResult)await this.controller.Index();
@@ -164,13 +170,15 @@
 
 				UserTransactionsViewModel viewModel = viewResult.Model as UserTransactionsViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
-
-				AssertSamePropertiesValuesAreEqual(viewModel, expTransactionsPageDTO);
+				
+				Assert.That(viewModel.UserId, Is.EqualTo(this.userId));
+				AssertSamePropertiesValuesAreEqual(viewModel, expTransactionsDto);
+				AssertSamePropertiesValuesAreEqual(viewModel, expUserDropdowns);
 			});
 		}
 
 		[Test]
-		public async Task All_OnPost_ShouldReturnViewModel()
+		public async Task Index_OnPost_ShouldReturnViewModel()
 		{
 			//Arrange
 			var inputModel = new UserTransactionsInputModel
@@ -179,25 +187,9 @@
 				ToLocalTime = DateTime.Now
 			};
 
-			var expected = new UserTransactionsViewModel(expTransactionsDto.TotalTransactionsCount)
-			{
-				UserId = this.userId,
-				FromLocalTime = inputModel.FromLocalTime,
-				ToLocalTime = inputModel.ToLocalTime,
-				OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
-				OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
-				OwnerCategories = expAccountsAndCategories.OwnerCategories,
-				OwnerCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies,
-				Transactions = expTransactionsDto.Transactions,
-			};
-
-			this.usersServiceMock.Setup(x => x
-				.GetUserTransactionsPageDataAsync(It.Is<TransactionsFilterDTO>(
-					x => x.UserId == this.userId
-					&& x.FromLocalTime == inputModel.FromLocalTime
-					&& x.ToLocalTime == inputModel.ToLocalTime
-					&& x.Page == 1)))
-				.ReturnsAsync(expTransactionsPageDTO);
+			TransactionsFilterDTO filter = this.mapper.Map<TransactionsFilterDTO>(inputModel);
+			filter.UserId = this.userId;
+			var expectedViewModel = new UserTransactionsViewModel(filter, expUserDropdowns, expTransactionsDto);
 
 			//Act
 			var viewResult = (ViewResult)await this.controller.Index(inputModel);
@@ -207,15 +199,15 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				UserTransactionsViewModel viewModel = viewResult.Model as UserTransactionsViewModel ??
+				UserTransactionsViewModel actualViewModel = viewResult.Model as UserTransactionsViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				AssertAreEqualAsJson(viewModel, expected);
+				AssertAreEqualAsJson(actualViewModel, expectedViewModel);
 			});
 		}
 
 		[Test]
-		public async Task All_OnPost_ShouldReturnViewModelWithErrors_WhenModelIsInvalid()
+		public async Task Index_OnPost_ShouldReturnViewModelWithErrors_WhenModelIsInvalid()
 		{
 			//Arrange
 			var inputModel = new UserTransactionsInputModel
@@ -224,27 +216,7 @@
 				ToLocalTime = DateTime.Now
 			};
 
-			var expected = new UserTransactionsViewModel
-			{
-				UserId = this.userId,
-				FromLocalTime = inputModel.FromLocalTime,
-				ToLocalTime = inputModel.ToLocalTime,
-				OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
-				OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
-				OwnerCategories = expAccountsAndCategories.OwnerCategories,
-				OwnerCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies
-			};
-
-			this.usersServiceMock.Setup(x => x
-				.GetUserDropdownDataAsync(this.userId))
-				.ReturnsAsync(new UserDropdownDTO
-				{
-					OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
-					OwnerAccountTypes = expAccountTypesAndCurrencies.OwnerAccountTypes,
-					OwnerCategories = expAccountsAndCategories.OwnerCategories,
-					OwnerCurrencies = expAccountTypesAndCurrencies.OwnerCurrencies
-				});
-
+			var expectedViewModel = new UserTransactionsViewModel(inputModel, expUserDropdowns, this.userId);
 			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid.");
 
 			//Act
@@ -257,10 +229,10 @@
 
 				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, string.Empty, "Model is invalid.");
 
-				UserTransactionsViewModel viewModel = viewResult.Model as UserTransactionsViewModel ??
+				UserTransactionsViewModel actualViewModel = viewResult.Model as UserTransactionsViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				AssertAreEqualAsJson(viewModel, expected);
+				AssertAreEqualAsJson(actualViewModel, expectedViewModel);
 			});
 		}
 
@@ -286,7 +258,7 @@
 				Assert.That(model.Amount, Is.EqualTo(0));
 				Assert.That(model.CategoryId, Is.Null);
 
-				AssertSamePropertiesValuesAreEqual(model, expAccountsAndCategories);
+				AssertSamePropertiesValuesAreEqual(model, expAccountsAndCategoriesDropdowns);
 			});
 		}
 
@@ -319,7 +291,7 @@
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(model, inputModel);
-				AssertSamePropertiesValuesAreEqual(model, expAccountsAndCategories);
+				AssertSamePropertiesValuesAreEqual(model, expAccountsAndCategoriesDropdowns);
 
 				AssertModelStateErrorIsEqual(
 					viewResult.ViewData.ModelState,
@@ -695,8 +667,8 @@
 				Reference = "Reference",
 				AccountId = Guid.NewGuid(),
 				CategoryId = Guid.NewGuid(),
-				OwnerAccounts = expAccountsAndCategories.OwnerAccounts,
-				OwnerCategories = expAccountsAndCategories.OwnerCategories,
+				OwnerAccounts = expAccountsAndCategoriesDropdowns.OwnerAccounts,
+				OwnerCategories = expAccountsAndCategoriesDropdowns.OwnerCategories,
 				TransactionType = TransactionType.Income
 			};
 
@@ -774,7 +746,7 @@
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, inputModel);
-				AssertSamePropertiesValuesAreEqual(viewModel, expAccountsAndCategories);
+				AssertSamePropertiesValuesAreEqual(viewModel, expAccountsAndCategoriesDropdowns);
 			});
 		}
 
@@ -974,7 +946,7 @@
 
 				Assert.That(result.RouteValues, Is.Not.Null);
 				AssertRouteValueIsEqual(result.RouteValues!, "id", transactionId);
-				
+
 				AssertTempDataMessageIsEqual(this.controller.TempData, ResponseMessages.AdminEditedUserTransaction);
 			});
 		}

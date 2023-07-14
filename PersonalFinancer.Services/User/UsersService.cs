@@ -129,12 +129,19 @@
 			return dto;
 		}
 
-		public Task<UserDropdownDTO> GetUserDropdownDataAsync(Guid userId)
+		public async Task<UserDropdownsDTO> GetUserDropdownsDataAsync(Guid userId)
 		{
-			return this.usersRepo.All()
+			UserDropdownsDTO resultDTO = await this.usersRepo.All()
 				.Where(u => u.Id == userId)
-				.ProjectTo<UserDropdownDTO>(this.mapper.ConfigurationProvider)
+				.ProjectTo<UserDropdownsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
+
+			resultDTO.OwnerCategories.Add(await this.categoriesRepo.All()
+				.Where(c => c.Id == Guid.Parse(InitialBalanceCategoryId))
+				.ProjectTo<CategoryDropdownDTO>(this.mapper.ConfigurationProvider)
+				.FirstAsync());
+
+			return resultDTO;
 		}
 
 		public async Task<UsersInfoDTO> GetUsersInfoAsync(int page)
@@ -175,39 +182,6 @@
 			};
 
 			return result;
-		}
-
-		public async Task<TransactionsPageDTO> GetUserTransactionsPageDataAsync(TransactionsFilterDTO dto)
-		{
-			TransactionsPageDTO resultDTO = await this.usersRepo.All()
-				.Where(u => u.Id == dto.UserId)
-				.Select(u => new TransactionsPageDTO
-				{
-					OwnerAccounts = u.Accounts
-						.Where(a => !a.IsDeleted || a.Transactions.Any())
-						.Select(a => this.mapper.Map<AccountDropdownDTO>(a)),
-					OwnerAccountTypes = u.AccountTypes
-						.Where(at => !at.IsDeleted || at.Accounts.Any(a => a.Transactions.Any()))
-						.Select(at => this.mapper.Map<AccountTypeDropdownDTO>(at)),
-					OwnerCurrencies = u.Currencies
-						.Where(c => !c.IsDeleted || c.Accounts.Any(a => a.Transactions.Any()))
-						.Select(c => this.mapper.Map<CurrencyDropdownDTO>(c)),
-					OwnerCategories = u.Categories
-						.Where(c => !c.IsDeleted || c.Transactions.Any())
-						.Select(c => this.mapper.Map<CategoryDropdownDTO>(c))
-						.ToList()
-				})
-				.FirstAsync();
-
-			resultDTO.OwnerCategories.Add(await this.categoriesRepo.All()
-				.Where(c => c.Id == Guid.Parse(InitialBalanceCategoryId))
-				.ProjectTo<CategoryDropdownDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync());
-
-			TransactionsDTO transactionsDTO = await this.GetUserTransactionsAsync(dto);
-			this.mapper.Map(transactionsDTO, resultDTO);
-
-			return resultDTO;
 		}
 
 		public async Task<UserDetailsDTO> UserDetailsAsync(Guid userId)
