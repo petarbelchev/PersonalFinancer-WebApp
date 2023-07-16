@@ -10,7 +10,7 @@
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Home;
 	using PersonalFinancer.Web.Models.Shared;
-	using static PersonalFinancer.Common.Constants.UrlPathConstants;
+	using System.Diagnostics;
 
 	public class HomeController : Controller
     {
@@ -74,16 +74,36 @@
             return this.View(viewModel);
         }
 
-        public IActionResult Error(int statusCode)
+        public IActionResult StatusCodePage(int statusCode)
         {
-            if (statusCode == 400)
-                this.ViewBag.ImgUrl = BadRequestImgPath;
-            else if (statusCode == 404)
-                this.ViewBag.ImgUrl = NotFoundImgPath;
-            else
-                this.ViewBag.ImgUrl = InternalServerErrorImgPath;
+            var viewModel = new StatusCodePageViewModel();
 
-            return this.View();
+            if (statusCode == 400)
+            {
+                viewModel.Title = "Bad request";
+                viewModel.Message = "Something went wrong. Please try again or contact us.";
+            }
+            else if (statusCode == 401)
+			{
+				viewModel.Title = "Access denied";
+				viewModel.Message = "You do not have access to this resource.";
+			}
+            else if (statusCode == 404)
+			{
+				viewModel.Title = "Not found";
+				viewModel.Message = "The page you are looking for does not exist.";
+			}
+
+            return this.View(viewModel);
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return this.View(new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier
+            });
         }
     }
 }

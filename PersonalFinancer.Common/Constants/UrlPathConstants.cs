@@ -21,9 +21,5 @@
 		public const string AdminUserDetailsPath = "/Admin/Users/Details/";
 
 		public const string AccountDetailsPath = "/Accounts/Details/";
-
-		public const string BadRequestImgPath = "/images/400BadRequest.webp";
-		public const string InternalServerErrorImgPath = "/images/500InternalServerError.webp";
-		public const string NotFoundImgPath = "/images/404NotFound.webp";
 	}
 }

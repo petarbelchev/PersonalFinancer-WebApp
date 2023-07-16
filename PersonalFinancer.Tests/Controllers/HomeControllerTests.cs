@@ -206,41 +206,65 @@
 		}
 
 		[Test]
-		public void Error_ShouldReturnCorrectErrorImgUrl_WhenStatusCodeIs400()
+		public void StatusCodePage_ShouldReturnCorrectResult_WhenStatusCodeIs400()
 		{
+			//Arrange
+			var expected = new StatusCodePageViewModel
+			{
+				Title = "Bad request",
+				Message = "Something went wrong. Please try again or contact us."
+			};
+
 			//Act
-			var viewResult = (ViewResult)this.controller.Error(400);
-			ICollection<string> viewBagKeys = viewResult.ViewData.Keys;
-			ICollection<object?> viewBagValues = viewResult.ViewData.Values;
+			var viewResult = (ViewResult)this.controller.StatusCodePage(400);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(viewResult.ViewData, Has.Count.EqualTo(1));
-				Assert.That(viewBagKeys, Has.Count.EqualTo(1));
-				Assert.That(viewBagValues, Has.Count.EqualTo(1));
-				Assert.That(viewBagValues.First(),
-					Is.EqualTo(BadRequestImgPath));
+				var actual = viewResult.Model as StatusCodePageViewModel;
+				AssertAreEqualAsJson(actual!, expected);
 			});
 		}
 
 		[Test]
-		public void Error_ShouldReturnCorrectErrorImgUrl_WhenStatusCodeIsNot400()
+		public void StatusCodePage_ShouldReturnCorrectResult_WhenStatusCodeIs401()
 		{
+			//Arrange
+			var expected = new StatusCodePageViewModel
+			{
+				Title = "Access denied",
+				Message = "You do not have access to this resource."
+			};
+
 			//Act
-			IActionResult result = this.controller.Error(500);
-			var viewResult = (ViewResult)result;
-			ICollection<string> viewBagKeys = viewResult.ViewData.Keys;
-			ICollection<object?> viewBagValues = viewResult.ViewData.Values;
+			var viewResult = (ViewResult)this.controller.StatusCodePage(401);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(viewResult.ViewData, Has.Count.EqualTo(1));
-				Assert.That(viewBagKeys, Has.Count.EqualTo(1));
-				Assert.That(viewBagValues, Has.Count.EqualTo(1));
-				Assert.That(viewBagValues.First(),
-					Is.EqualTo(InternalServerErrorImgPath));
+				var actual = viewResult.Model as StatusCodePageViewModel;
+				AssertAreEqualAsJson(actual!, expected);
+			});
+		}
+
+		[Test]
+		public void StatusCodePage_ShouldReturnCorrectResult_WhenStatusCodeIs404()
+		{
+			//Arrange
+			var expected = new StatusCodePageViewModel
+			{
+				Title = "Not found",
+				Message = "The page you are looking for does not exist."
+			};
+
+			//Act
+			var viewResult = (ViewResult)this.controller.StatusCodePage(404);
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				var actual = viewResult.Model as StatusCodePageViewModel;
+				AssertAreEqualAsJson(actual!, expected);
 			});
 		}
 	}

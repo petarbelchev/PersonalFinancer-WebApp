@@ -1,5 +1,15 @@
-﻿@{
-	ViewData["Title"] = "Error";
+﻿@using PersonalFinancer.Web.Models.Home;
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
 }
 
-<img class="rounded mx-auto d-block img-fluid" src="@ViewBag.ImgUrl" />
+<h1 class="text-danger">Error.</h1>
+<h2 class="text-danger">An error occurred while processing your request.</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+    </p>
+}

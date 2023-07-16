@@ -7,49 +7,49 @@
 <h1 class="text-center display-6">@ViewData["Title"]</h1>
 
 <div class="row d-flex justify-content-center">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <h2 class="text-center display-6 fs-4">Create a new account.</h2>
             <hr />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-floating formField">
+            <div class="form-floating m-2">
                 <input asp-for="Input.UserName" class="form-control" autocomplete="first-name" aria-required="true" />
                 <label asp-for="Input.UserName"></label>
                 <span asp-validation-for="Input.UserName" class="text-danger"></span>
             </div>
-            <div class="form-floating formField">
+            <div class="form-floating m-2">
                 <input asp-for="Input.FirstName" class="form-control" autocomplete="first-name" aria-required="true" />
                 <label asp-for="Input.FirstName"></label>
                 <span asp-validation-for="Input.FirstName" class="text-danger"></span>
             </div>
-            <div class="form-floating formField">
+            <div class="form-floating m-2">
                 <input asp-for="Input.LastName" class="form-control" autocomplete="last-name" aria-required="true" />
                 <label asp-for="Input.LastName"></label>
                 <span asp-validation-for="Input.LastName" class="text-danger"></span>
             </div>
-            <div class="form-floating formField">
+            <div class="form-floating m-2">
                 <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
                 <label asp-for="Input.Email"></label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
-            <div class="form-floating formField">
+            <div class="form-floating m-2">
                 <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
                 <label asp-for="Input.Password"></label>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
-            <div class="form-floating formField">
+            <div class="form-floating m-2">
                 <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
                 <label asp-for="Input.ConfirmPassword"></label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
-            <div class="form-floating formField">
+            <div class="form-floating m-2">
                 <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="phone-number" aria-required="false" />
                 <label asp-for="Input.PhoneNumber">Phone number (<i>Optional</i>)</label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-secondary">Register</button>
         </form>
-        <div>
+        <div class="mt-4">
             <p>
                 <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">You have an account? Login here!</a>
             </p>

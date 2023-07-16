@@ -37,9 +37,11 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseStatusCodePagesWithRedirects("/Home/Error?statusCode={0}");
+    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+app.UseStatusCodePagesWithReExecute("/Home/StatusCodePage", "?statusCode={0}");
 
 app.UseHttpsRedirection();
 app.UseDefaultFiles();
