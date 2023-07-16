@@ -11,6 +11,7 @@
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Services.User.Models;
 	using System.Collections.Generic;
+	using System.Linq.Expressions;
 	using static PersonalFinancer.Common.Constants.CacheConstants;
 	using static PersonalFinancer.Common.Constants.CategoryConstants;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
@@ -96,58 +97,69 @@
 			DateTime fromUtc = fromLocalTime.ToUniversalTime();
 			DateTime toUtc = toLocalTime.ToUniversalTime();
 
-			var dto = new UserDashboardDTO
-			{
-				FromLocalTime = fromLocalTime,
-				ToLocalTime = toLocalTime,
-				Accounts = await this.accountsRepo.All()
-					.Where(a => a.OwnerId == userId && !a.IsDeleted)
-					.OrderBy(a => a.Name)
-					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
-					.ToArrayAsync(),
-				LastTransactions = await this.transactionsRepo.All()
-					.Where(t => t.OwnerId == userId
-								&& t.CreatedOnUtc >= fromUtc
-								&& t.CreatedOnUtc <= toUtc)
-					.OrderByDescending(t => t.CreatedOnUtc)
-					.Take(5)
-					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
-					.ToArrayAsync(),
-				CurrenciesCashFlow = await this.accountsRepo.All()
-					.Where(a => a.OwnerId == userId
-								&& a.Transactions.Any(t => t.CreatedOnUtc >= fromUtc
-														   && t.CreatedOnUtc <= toUtc))
-					.GroupBy(a => a.Currency.Name)
-					.Select(group => new CurrencyCashFlowWithExpensesByCategoriesDTO
-					{
-						Name = group.Key,
-						Incomes = group
-							.SelectMany(a => a.Transactions)
-							.Where(t => t.TransactionType == TransactionType.Income
-										&& t.CreatedOnUtc >= fromUtc
-										&& t.CreatedOnUtc <= toUtc)
-							.Sum(t => t.Amount),
-						Expenses = group
-							.SelectMany(a => a.Transactions)
-							.Where(t => t.TransactionType == TransactionType.Expense
-										&& t.CreatedOnUtc >= fromUtc
-										&& t.CreatedOnUtc <= toUtc)
-							.Sum(t => t.Amount),
-						ExpensesByCategories = group
-							.SelectMany(a => a.Transactions
-								.Where(t => t.TransactionType == TransactionType.Expense
-											&& t.CreatedOnUtc >= fromUtc
-											&& t.CreatedOnUtc <= toUtc))
-							.GroupBy(t => t.Category.Name)
-							.Select(cGroup => new CategoryExpensesDTO
-							{
-								CategoryName = cGroup.Key,
-								ExpensesAmount = cGroup.Sum(t => t.Amount)
-							})
-					})
-					.OrderBy(c => c.Name)
-					.ToArrayAsync()
-			};
+			Expression<Func<Transaction, bool>> dateFilter = (t) 
+				=> t.CreatedOnUtc >= fromUtc && t.CreatedOnUtc <= toUtc;
+
+			UserDashboardDTO dto = await this.usersRepo.All()
+				.Where(u => u.Id == userId)
+				.Select(u => new UserDashboardDTO
+				{
+					FromLocalTime = fromLocalTime,
+					ToLocalTime = toLocalTime,
+					Accounts = u.Accounts
+						.Where(a => !a.IsDeleted)
+						.OrderBy(a => a.Name)
+						.Select(a => new AccountCardDTO
+						{
+							Id = a.Id,
+							Name = a.Name,
+							Balance = a.Balance,
+							CurrencyName = a.Currency.Name,
+							OwnerId = a.OwnerId,
+						}),
+					CurrenciesCashFlow = u.Transactions
+						.AsQueryable()
+						.Where(dateFilter)
+						.GroupBy(t => t.Account.Currency.Name)
+						.Select(gr => new CurrencyCashFlowWithExpensesByCategoriesDTO
+						{
+							Name = gr.Key,
+							Incomes = gr
+								.Where(t => t.TransactionType == TransactionType.Income)
+								.Sum(t => t.Amount),
+							Expenses = gr
+								.Where(t => t.TransactionType == TransactionType.Expense)
+								.Sum(t => t.Amount),
+							ExpensesByCategories = gr
+								.Where(t => t.TransactionType == TransactionType.Expense)
+								.GroupBy(t => t.Category.Name)
+								.Select(subGr => new CategoryExpensesDTO
+								{
+									CategoryName = subGr.Key,
+									ExpensesAmount = subGr.Sum(t => t.Amount)
+								})
+						})
+						.ToArray(),
+					LastTransactions = u.Transactions
+						.AsQueryable()
+						.Where(dateFilter)
+						.OrderByDescending(t => t.CreatedOnUtc)
+						.Take(5)
+						.Select(t => new TransactionTableDTO
+						{
+							Id = t.Id,
+							Amount = t.Amount,
+							AccountCurrencyName = t.Account.Currency.Name +
+								(t.Account.Currency.IsDeleted ? " (Deleted)" : string.Empty),
+							CategoryName = t.Category.Name +
+								(t.Category.IsDeleted ? " (Deleted)" : string.Empty),
+							CreatedOnLocalTime = t.CreatedOnUtc.ToLocalTime(),
+							Reference = t.Reference,
+							TransactionType = t.TransactionType.ToString(),
+						})
+						.ToArray()
+				})
+				.FirstAsync();
 
 			return dto;
 		}
