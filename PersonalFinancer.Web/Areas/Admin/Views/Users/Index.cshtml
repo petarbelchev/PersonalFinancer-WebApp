@@ -4,7 +4,6 @@
 @model UsersViewModel
 @{
 	ViewData["Title"] = "All Users";
-	int row = 1;
 }
 
 <div class="row">
@@ -27,8 +26,8 @@
 						@foreach (UserInfoDTO user in Model.Users)
 						{
 							<tr role="button" onclick="location.href='@Url.Action("Details", "Users", new { id = user.Id })'">
-								<th scope="row">@(row++).</th>
-								<td><img src="/icons/icons8-budget-64.png" style="max-width: 30px;"> @user.FirstName @user.LastName</td>
+								<th><img src="/icons/icons8-customer-64.png" style="max-width: 30px;"></th>
+								<td>@user.FirstName @user.LastName</td>
 								<td>@user.UserName</td>
 								<td>@user.Email</td>
 							</tr>

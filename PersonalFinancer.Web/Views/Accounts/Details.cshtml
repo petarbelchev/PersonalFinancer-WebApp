@@ -16,6 +16,15 @@
 			<h1 class="display-6 fs-3"><b>@Model.Name</b> (@Model.AccountTypeName)</h1>
 			<p class="display-6 fs-4" style="font-size: xx-large;" id="balanceField">@Model.Balance @Model.CurrencyName</p>
 		</div>
+		<div class="p-2 dropdown">
+			<a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Account Menu">
+				<img src="~/icons/icons8-menu-64.png" style="max-width: 50px;" />
+			</a>
+			<ul class="dropdown-menu dropdown-menu-end">
+				<li class="m-2"><a class="btn btn-link dropdown-item" asp-controller="Accounts" asp-action="Edit" asp-route-id="@Model.Id">Edit Account</a></li>
+				<li class="m-2"><a class="btn btn-link dropdown-item" asp-controller="Accounts" asp-action="Delete" asp-route-id="@Model.Id" asp-route-returnUrl="@Model.ReturnUrl">Delete Account</a></li>
+			</ul>
+		</div>
 	</div>
 </div>
 
@@ -40,23 +49,23 @@
 	</div>
 
 	@section Scripts {
-		<partial name="_ValidationScriptsPartial" />
-		<script>
-			let params = {
-				url: '@ApiAccountTransactionsEndpoint',
-				transactionEndpoint: '@ApiTransactionsEndpoint',
-				editTransactionPath: '@TransactionEditPath',
-				body: {
-					id: '@Model.Id',
-					fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
-					toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
-					ownerId: '@Model.OwnerId',
-				}
+	<partial name="_ValidationScriptsPartial" />
+	<script>
+		let params = {
+			url: '@ApiAccountTransactionsEndpoint',
+			transactionEndpoint: '@ApiTransactionsEndpoint',
+			editTransactionPath: '@TransactionEditPath',
+			body: {
+				id: '@Model.Id',
+				fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+				toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+				ownerId: '@Model.OwnerId',
 			}
-		</script>
-		<script src="~/js/renderTransactions.js"></script>
-		<script src="~/js/pagination.js"></script>
-		<script src="~/js/transactionModal.js"></script>
+		}
+	</script>
+	<script src="~/js/renderTransactions.js"></script>
+	<script src="~/js/pagination.js"></script>
+	<script src="~/js/transactionModal.js"></script>
 	}
 }
 else
@@ -69,11 +78,3 @@ else
 	</div>
 }
 
-<div class="d-flex justify-content-center">
-	<div class="p-2">
-		<a asp-controller="Accounts" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit Account</a>
-	</div>
-	<div class="p-2">
-		<a asp-controller="Accounts" asp-action="Delete" asp-route-id="@Model.Id" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-danger">Delete Account</a>
-	</div>
-</div>

@@ -15,44 +15,43 @@
 
 <body class="bg-light">
 
-	<header>
-		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-secondary border-bottom box-shadow mb-3">
+	<header style="margin-bottom: 100px;">
+		<nav class="navbar navbar-expand navbar-toggleable navbar-dark bg-secondary border-bottom box-shadow fixed-top">
 			<div class="container-fluid">
 
 				<div class="navbar-brand">
-					<img src="~/favicon-64x64.png" style="max-height: 50px;" />
-					<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Personal Financer</a>
+					<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index" title="Personal Financer">
+						<img src="~/favicon-64x64.png" style="max-height: 40px;" />
+					</a>
 				</div>
 
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
-
-				<div class="collapse navbar-collapse" id="navbarNav">
+				<div class="navbar-collapse">
 					<ul class="navbar-nav flex-grow-1">
 						@if (this.User.IsAuthenticated())
 						{
 							if (this.User.IsAdmin())
 							{
-								<a class="nav-link text-light" asp-area="Admin" asp-controller="Users" asp-action="Index">All Users</a>
-								<a class="nav-link text-light" asp-area="Admin" asp-controller="Accounts" asp-action="Index">All Accounts</a>
+								<a class="nav-link text-light" asp-area="Admin" asp-controller="Users" asp-action="Index" title="All Users">
+									<img src="~/icons/icons8-people-64.png" style="max-height: 40px;" />
+								</a>
+								<a class="nav-link text-light" asp-area="Admin" asp-controller="Accounts" asp-action="Index" title="All Accounts">
+									<img src="~/icons/icons8-wallet-64.png" style="max-height: 40px;" />
+								</a>
 							}
 							else
 							{
-								<a class="nav-link text-light" asp-area="" asp-controller="Transactions" asp-action="Index">Transactions</a>
 								<li class="nav-item dropdown">
-									<a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-										Create
+									<a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Create">
+										<img src="~/icons/icons8-plus-64.png" style="max-height: 40px;" />
 									</a>
-									<ul class="dropdown-menu dropdown-menu-end">
-										<li class="dropdown-item">
-											<a class="nav-link text-dark" asp-area="" asp-controller="Transactions" asp-action="Create">Transaction</a>
-										</li>
-										<li class="dropdown-item">
-											<a class="nav-link text-dark" asp-area="" asp-controller="Accounts" asp-action="Create">Account</a>
-										</li>
+									<ul class="dropdown-menu dropdown-menu-start">
+										<li class="m-2"><a class="btn btn-link dropdown-item" asp-area="" asp-controller="Transactions" asp-action="Create">Transaction</a></li>
+										<li class="m-2"><a class="btn btn-link dropdown-item" asp-area="" asp-controller="Accounts" asp-action="Create">Account</a></li>
 									</ul>
 								</li>
+								<a class="nav-link" asp-area="" asp-controller="Transactions" asp-action="Index" title="Transactions">
+									<img src="/icons/icons8-transaction-64.png" style="max-height: 40px;" />
+								</a>
 							}
 						}
 					</ul>
