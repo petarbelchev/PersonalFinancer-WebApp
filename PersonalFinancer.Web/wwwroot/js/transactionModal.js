@@ -1,18 +1,18 @@
-const myModal = document.getElementById('staticBackdrop');
-const modalBody = myModal.querySelector('.modal-body');
-const modalFooter = myModal.querySelector('.modal-footer');
-const buttons = myModal.getElementsByTagName('a');
+const modal = document.getElementById('staticBackdrop');
+const modalBody = modal.querySelector('.modal-body');
+const modalFooter = modal.querySelector('.modal-footer');
+const buttons = modal.getElementsByTagName('a');
 const closeBtn = buttons[0];
 const editBtn = buttons[1];
 const deleteBtn = buttons[2];
 const initialBalanceMessage = modalFooter.querySelector('p');
 
-myModal.addEventListener('show.bs.modal', async (e) => {
+modal.addEventListener('show.bs.modal', async (e) => {
     let transactionId = e.relatedTarget.attributes.transactionId.textContent;
     await getTransactionData(transactionId);
 });
 
-myModal.addEventListener('hidden.bs.modal', () => {
+modal.addEventListener('hidden.bs.modal', () => {
     modalBody.innerHTML = `
 	    <div class="d-flex justify-content-center">
 		    <div class="spinner-border" role="status">
@@ -50,12 +50,12 @@ function renderTransaction(data) {
 				<div class="p-2">
                     <span>
                         ${new Date(data.createdOnLocalTime).toLocaleString('en-US', {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric"
-    })}
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "numeric"
+                        })}
                     </span>
 				</div>
 			</li>
@@ -105,7 +105,7 @@ async function deleteTransaction(e) {
         if (response.status == 200) {
             alert(await response.text());
             closeBtn.click();
-            get(currentPage);
+            loadPage(currentPage);
         } else {
             alert('Oops! Something was wrong!')
             closeBtn.click();

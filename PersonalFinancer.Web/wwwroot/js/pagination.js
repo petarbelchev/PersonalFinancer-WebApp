@@ -3,9 +3,68 @@ let paginations = document.getElementsByClassName('pagination');
 for (let pagination of paginations) {
     pagination.addEventListener('click', async (e) => {
         if (e.target.tagName == 'A') {
-            await get(e.target.getAttribute('page'));
+            let page = e.target.getAttribute('page');
+            loadPage(page);
         }
     })
+}
+
+let currentPage = 1;
+
+async function loadPage(page) {
+    let response = await getData(page);
+
+    if (response.status == 200) {
+        let model = await response.json();
+        render(model);
+        setUpPagination(model.pagination);
+        currentPage = page;
+    } else {
+        let error = await response.json();
+        alert(`${error.status} ${error.title}`)
+    }
+}
+
+async function getData(page) {
+    container.innerHTML = `
+        <tr>
+            <td colspan="5">
+	            <div class="d-flex justify-content-center">
+		            <div class="spinner-border" role="status">
+			            <span class="visually-hidden">Loading...</span>
+		            </div>
+	            </div>
+            </td>
+        </tr>
+	`;
+
+    let url = params.url + page;
+    let options = { method: "GET" };
+
+    if (params.body != undefined) {
+        url = params.url;
+
+        options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({
+                id: params.body.id,
+                page: page,
+                ownerId: params.body.ownerId,
+                fromLocalTime: params.body.fromLocalTime,
+                toLocalTime: params.body.toLocalTime,
+                accountId: params.body.accountId == '' ? null : params.body.accountId,
+                accountTypeId: params.body.accountTypeId == '' ? null : params.body.accountTypeId,
+                categoryId: params.body.categoryId == '' ? null : params.body.categoryId,
+                currencyId: params.body.currencyId == '' ? null : params.body.currencyId,
+            })
+        }
+    }
+
+    return await fetch(url, options);
 }
 
 function setUpPagination(pagination) {

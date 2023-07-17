@@ -26,7 +26,6 @@ async function eventHandler(e) {
         } else {
             await createEntity();
         }
-
     } else if (e.target.classList.contains('deleteBtn')) {
         if (confirm('Are you sure you want to delete this?')) {
             await deleteEntity();
@@ -65,6 +64,20 @@ async function createEntity() {
     }
 }
 
+function renderNewEntity(data, inputField, errorMsgField) {
+    let optionTag = document.createElement('option');
+    optionTag.value = data.id;
+    optionTag.setAttribute("id", data.id);
+    optionTag.textContent = data.name;
+
+    selectField.appendChild(optionTag);
+    selectField.value = data.id;
+
+    newElemDiv.style.display = 'none';
+    errorMsgField.textContent = '';
+    inputField.value = '';
+}
+
 async function deleteEntity() {
     let elemId = selectField.value;
 
@@ -82,20 +95,6 @@ async function deleteEntity() {
         let error = await response.json();
         alert(`${error.status} ${error.title}`);
     }
-}
-
-function renderNewEntity(data, inputField, errorMsgField) {
-    let optionTag = document.createElement('option');
-    optionTag.value = data.id;
-    optionTag.setAttribute("id", data.id);
-    optionTag.textContent = data.name;
-
-    selectField.appendChild(optionTag);
-    selectField.value = data.id;
-
-    newElemDiv.style.display = 'none';
-    errorMsgField.textContent = '';
-    inputField.value = '';
 }
 
 function deleteBtnController() {

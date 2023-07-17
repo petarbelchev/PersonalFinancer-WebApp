@@ -43,18 +43,20 @@
 		<partial name="_ValidationScriptsPartial" />
 		<script>
 			let params = {
-				id: '@Model.Id',
-				fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
-				toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
-				ownerId: '@Model.OwnerId',
-				allTransactionsEndpoint: '@ApiAccountTransactionsEndpoint',
+				url: '@ApiAccountTransactionsEndpoint',
 				transactionEndpoint: '@ApiTransactionsEndpoint',
-				editTransactionPath: '@TransactionEditPath'
+				editTransactionPath: '@TransactionEditPath',
+				body: {
+					id: '@Model.Id',
+					fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+					toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+					ownerId: '@Model.OwnerId',
+				}
 			}
 		</script>
-		<script src="~/js/getTransactions.js"></script>
-		<script src="~/js/setUpPagination.js"></script>
-		<script src="~/js/transactionDetails.js"></script>
+		<script src="~/js/renderTransactions.js"></script>
+		<script src="~/js/pagination.js"></script>
+		<script src="~/js/transactionModal.js"></script>
 	}
 }
 else

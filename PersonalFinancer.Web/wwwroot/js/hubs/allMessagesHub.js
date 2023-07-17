@@ -1,7 +1,7 @@
 ﻿let allMessagesHub = new signalR.HubConnectionBuilder().withUrl('/allMessages').build();
 
 allMessagesHub.on('RefreshMessages', async () => {
-    await get(currentPage);
+    await loadPage(currentPage);
 });
 
 allMessagesHub

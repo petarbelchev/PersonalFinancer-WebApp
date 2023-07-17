@@ -97,19 +97,21 @@
 	<partial name="_ValidationScriptsPartial" />
 	<script>
 		let params = {
-			id: '@Model.UserId',
-			fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
-			toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
-			accountId: '@Model.AccountId',
-			accountTypeId: '@Model.AccountTypeId',
-			currencyId: '@Model.CurrencyId',
-			categoryId: '@Model.CategoryId',
-			allTransactionsEndpoint: '@ApiTransactionsEndpoint',
+			url: '@ApiTransactionsEndpoint',
 			transactionEndpoint: '@ApiTransactionsEndpoint',
-			editTransactionPath: '@TransactionEditPath'
+			editTransactionPath: '@TransactionEditPath',
+			body: {
+				id: '@Model.UserId',
+				fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+				toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+				accountId: '@Model.AccountId',
+				accountTypeId: '@Model.AccountTypeId',
+				currencyId: '@Model.CurrencyId',
+				categoryId: '@Model.CategoryId',
+			}
 		}
 	</script>
-	<script src="~/js/getTransactions.js"></script>
-	<script src="~/js/setUpPagination.js"></script>
-	<script src="~/js/transactionDetails.js"></script>
+	<script src="~/js/renderTransactions.js"></script>
+	<script src="~/js/pagination.js"></script>
+	<script src="~/js/transactionModal.js"></script>
 }

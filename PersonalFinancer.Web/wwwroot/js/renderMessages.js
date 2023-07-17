@@ -1,36 +1,9 @@
-let tbody = document.querySelector('tbody');
-let currentPage = 1;
+let container = document.querySelector('tbody');
 
-async function get(page) {
-    tbody.innerHTML = `
-        <tr>
-            <td colspan="5">
-	            <div class="d-flex justify-content-center">
-		            <div class="spinner-border" role="status">
-			            <span class="visually-hidden">Loading...</span>
-		            </div>
-	            </div>
-            </td>
-        </tr>
-	`;
-
-    let response = await fetch(params.url + page);
-
-    if (response.status == 200) {
-        let model = await response.json();
-        renderMessages(model.messages);
-        setUpPagination(model.pagination);
-        currentPage = page;
-    } else {
-        let error = await response.json();
-        alert(`${error.status} ${error.title}`)
-    }
-}
-
-function renderMessages(messages) {
+function render(model) {
     let innerHtml = '';
 
-    if (messages.length == 0) {
+    if (model.messages.length == 0) {
         innerHtml = `
             <tr>
                 <td colspan="2">
@@ -40,7 +13,7 @@ function renderMessages(messages) {
         `;
     }
 
-    for (let message of messages) {
+    for (let message of model.messages) {
         let tr = `
 			<tr role="button" onclick="location.href='/Messages/Details/${message.id}'">
 				<td messageId="${message.id}">
@@ -64,5 +37,5 @@ function renderMessages(messages) {
         innerHtml += tr;
     }
 
-    tbody.innerHTML = innerHtml;
+    container.innerHTML = innerHtml;
 }

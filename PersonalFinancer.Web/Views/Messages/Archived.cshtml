@@ -3,6 +3,8 @@
 @model MessagesViewModel
 @{
 	ViewData["Title"] = "Archived Messages";
+
+	// NOTE: SignalR?
 }
 
 <partial name="_MessagesTablePartial" model="Model" />
@@ -14,6 +16,6 @@
 			url: '@UrlPathConstants.ApiArchivedMessagesEndpoint'
 		};
 	</script>
-	<script src="~/js/setUpPagination.js"></script>
-	<script src="~/js/getMessages.js"></script>
+	<script src="~/js/pagination.js"></script>
+	<script src="~/js/renderMessages.js"></script>
 }

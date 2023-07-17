@@ -15,13 +15,13 @@ function renderStatistics(data) {
     ul.className = 'list-group list-group-flush card offset-lg-2 col-lg-8';
     let ulInnerHtml = '';
 
-    for (let i in data) {
+    for (let currency of data) {
         ulInnerHtml += `
             <li class="list-group-item">
 				<img src="icons/icons8-banknotes-64.png" style="max-width: fit-content;">
 				<span>
-					<b>${data[i].name}</b>: The total income made by our users is <b>${data[i].incomes.toFixed(2)}</b>, 
-                    and the total expense is <b>${data[i].expenses.toFixed(2)}</b>!
+					<b>${currency.name}</b>: The total income made by our users is <b>${currency.incomes.toFixed(2)}</b>, 
+                    and the total expense is <b>${currency.expenses.toFixed(2)}</b>!
 				</span>
 			</li>
         `;
