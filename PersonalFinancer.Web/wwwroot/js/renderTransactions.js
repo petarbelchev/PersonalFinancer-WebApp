@@ -3,6 +3,18 @@
 function render(model) {
     let innerHtml = '';
 
+    if (model.transactions.length == 0) {
+        innerHtml = `
+            <tr>
+                <td colspan="5">
+                    <div class="d-flex justify-content-center">
+                        <p>You have no transactions matching the specified criteria.</p>
+                    </div>
+                </td>
+            </tr>
+		`;
+    }
+
     for (let transaction of model.transactions) {
         let tr = `
                 <tr role="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" transactionId="${transaction.id}">

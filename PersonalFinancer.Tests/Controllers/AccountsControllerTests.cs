@@ -49,31 +49,21 @@
 			}
 		};
 
-		private static readonly AccountDetailsLongDTO expectedAccountDetailsDto = new()
-		{
-			Id = Guid.NewGuid(),
-			Balance = 100,
-			CurrencyName = "Currency",
-			Name = "Account Name",
-			Transactions = new TransactionTableDTO[]
-				{
-					new TransactionTableDTO
-					{
-						Id = Guid.NewGuid(),
-						AccountCurrencyName = "Currency",
-						Amount = 50,
-						CategoryName = "Category",
-						CreatedOnLocalTime = DateTime.Now,
-						Reference = "Test transaction",
-						TransactionType = TransactionType.Expense.ToString()
-					}
-				},
-			TotalAccountTransactions = 10
-		};
+		private static AccountDetailsDTO expectedAccountDetailsDto;
 
 		[SetUp]
 		public void SetUp()
 		{
+			expectedAccountDetailsDto = new()
+			{
+				Id = Guid.NewGuid(),
+				Name = "Account Name",
+				Balance = 100,
+				CurrencyName = "Currency Name",
+				AccountTypeName = "Account TypeName",
+				OwnerId = this.userId,
+			};
+
 			this.usersServiceMock
 				.Setup(x => x
 				.GetUserAccountTypesAndCurrenciesDropdownsAsync(this.userId))
@@ -272,12 +262,7 @@
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(
-					expectedAccountDetailsDto.Id,
-					It.IsAny<DateTime>(),
-					It.IsAny<DateTime>(),
-					this.userId,
-					false))
+				.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, false))
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
@@ -305,7 +290,7 @@
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, It.IsAny<DateTime>(), It.IsAny<DateTime>(), this.userId, true))
+				.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, true))
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
@@ -333,12 +318,7 @@
 				.Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(
-					It.IsAny<Guid>(),
-					It.IsAny<DateTime>(),
-					It.IsAny<DateTime>(),
-					this.userId,
-					false))
+				.GetAccountDetailsAsync(It.IsAny<Guid>(), this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -364,24 +344,17 @@
 			};
 
 			expectedAccountDetailsDto.OwnerId = Guid.NewGuid();
-			expectedAccountDetailsDto.FromLocalTime = inputModel.FromLocalTime ?? throw new InvalidOperationException();
-			expectedAccountDetailsDto.ToLocalTime = inputModel.ToLocalTime ?? throw new InvalidOperationException();
 
 			this.userMock.Setup(x => x
 				.IsInRole(AdminRoleName))
 				.Returns(true);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(
-					expectedAccountDetailsDto.Id,
-					expectedAccountDetailsDto.FromLocalTime,
-					expectedAccountDetailsDto.ToLocalTime,
-					this.userId,
-					true))
+				.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, true))
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.Details(inputModel);
+			var viewResult = (ViewResult)await this.controller.Filtered(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -407,22 +380,15 @@
 			};
 
 			expectedAccountDetailsDto.OwnerId = this.userId;
-			expectedAccountDetailsDto.FromLocalTime = inputModel.FromLocalTime ?? throw new InvalidOperationException();
-			expectedAccountDetailsDto.ToLocalTime = inputModel.ToLocalTime ?? throw new InvalidOperationException();
 
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(
-					expectedAccountDetailsDto.Id,
-					expectedAccountDetailsDto.FromLocalTime,
-					expectedAccountDetailsDto.ToLocalTime,
-					this.userId,
-					false))
+				.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, false))
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.Details(inputModel);
+			var viewResult = (ViewResult)await this.controller.Filtered(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -440,29 +406,21 @@
 		public async Task AccountDetailsOnPost_ShouldReturnBadRequest_WhenUserNotOwnerOrAdminOrAccountDoesNotExist()
 		{
 			//Arrange
-			DateTime fromLocalTime = DateTime.Now.AddMonths(-1);
-			DateTime toLocalTime = DateTime.Now;
-
 			var inputModel = new AccountDetailsInputModel
 			{
 				Id = expectedAccountDetailsDto.Id,
-				FromLocalTime = fromLocalTime,
-				ToLocalTime = toLocalTime
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
 			};
 
 			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
 
 			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(
-					expectedAccountDetailsDto.Id,
-					fromLocalTime,
-					toLocalTime,
-					this.userId,
-					false))
+				.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.Details(inputModel);
+			var result = (BadRequestResult)await this.controller.Filtered(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -473,7 +431,7 @@
 		}
 
 		[Test]
-		public async Task AccountDetailsOnPost_ShouldReturnViewModelWithErrors_WhenModelIsInvalidButAccountExists()
+		public async Task AccountDetailsOnPost_ShouldReturnViewModelWithErrors_WhenDatesAreInvalidButAccountExists()
 		{
 			//Arrange
 			var inputModel = new AccountDetailsInputModel
@@ -482,22 +440,14 @@
 				ToLocalTime = DateTime.Now
 			};
 
-			var serviceModel = new AccountDetailsShortDTO
-			{
-				Name = expectedAccountDetailsDto.Name,
-				Balance = expectedAccountDetailsDto.Balance,
-				AccountTypeName = expectedAccountDetailsDto.AccountTypeName,
-				CurrencyName = expectedAccountDetailsDto.CurrencyName
-			};
-
 			this.controller.ModelState.AddModelError(nameof(inputModel.FromLocalTime), "Start Date is invalid");
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountShortDetailsAsync(expectedAccountDetailsDto.Id))
-				.ReturnsAsync(serviceModel);
+				.Setup(x => x.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, false))
+				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.Details(inputModel);
+			var viewResult = (ViewResult)await this.controller.Filtered(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -511,7 +461,7 @@
 				AccountDetailsViewModel viewModel = viewResult.Model as AccountDetailsViewModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				AssertSamePropertiesValuesAreEqual(viewModel, serviceModel);
+				AssertSamePropertiesValuesAreEqual(viewModel, expectedAccountDetailsDto);
 			});
 		}
 
@@ -519,7 +469,7 @@
 		public async Task AccountDetailsOnPost_ShouldReturnBadRequest_WhenModelIsInvalidAndAccountDoesNotExist()
 		{
 			//Arrange
-			var accountId = Guid.NewGuid();
+			Guid accountId = Guid.NewGuid();
 			var inputModel = new AccountDetailsInputModel
 			{
 				Id = accountId,
@@ -529,11 +479,11 @@
 			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid");
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountShortDetailsAsync(accountId))
+				.Setup(x => x.GetAccountDetailsAsync(accountId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			//Act
-			var result = (BadRequestResult)await this.controller.Details(inputModel);
+			var result = (BadRequestResult)await this.controller.Filtered(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -769,15 +719,15 @@
 			Assert.That(result.ActionName, Is.EqualTo("Details"));
 
 			AssertRouteValueIsEqual(
-				result.RouteValues!, 
-				nameof(inputModel.Id), 
-				inputModel.Id, 
+				result.RouteValues!,
+				nameof(inputModel.Id),
+				inputModel.Id,
 				totalRouteValues: 2);
 
 			AssertRouteValueIsEqual(
-				result.RouteValues!, 
-				nameof(inputModel.ReturnUrl), 
-				inputModel.ReturnUrl, 
+				result.RouteValues!,
+				nameof(inputModel.ReturnUrl),
+				inputModel.ReturnUrl,
 				totalRouteValues: 2);
 		}
 

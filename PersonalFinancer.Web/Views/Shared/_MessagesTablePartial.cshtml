@@ -1,8 +1,4 @@
-﻿@using PersonalFinancer.Web.Models.Message;
-@using System.Globalization;
-@model MessagesViewModel
-
-<div class="row">
+﻿<div class="row">
 	<div class="justify-content-center">
 		<div id="tableContainer" class="card shadow">
 			<div class="card-header">
@@ -18,32 +14,7 @@
 						</tr>
 					</thead>
 					<tbody>
-
-						@if (Model.Messages.Any())
-						{
-							@foreach (var message in Model.Messages)
-							{
-								<tr role="button" onclick="location.href='@Url.Action("Details", "Messages", new { id = message.Id })'">
-									<td><img src="/icons/icons8-message-64.png" style="max-width: 30px;" /></td>
-									<td messageId="@message.Id">										
-										<span>	@message.Subject</span>
-
-										@if (!message.IsSeen)
-										{
-											<span class="badge text-bg-danger">New messages</span>
-										}
-									</td>
-									<td>@message.CreatedOnUtc.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</td>
-								</tr>
-							}
-						}
-						else
-						{
-							<tr>
-								<td colspan="2"><p id="noMessagesNote" class="display-6 fs-4 text-center">You don't have any messages.</p></td>
-							</tr>
-						}
-
+						@*Place for messages data*@
 					</tbody>
 				</table>
 			</div>

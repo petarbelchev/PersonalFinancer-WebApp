@@ -4,9 +4,7 @@
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Web.Models.Account;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[Area("Admin")]
@@ -21,13 +19,6 @@
             : base(accountsUpdateService, accountsInfoService, usersService, mapper)
         { }
 
-        public async Task<IActionResult> Index(int page = 1)
-        {
-            AccountsCardsDTO cardsDTO =
-                await this.accountsInfoService.GetAccountsCardsDataAsync(page);
-            var viewModel = new UsersAccountsCardsViewModel(cardsDTO);
-
-            return this.View(viewModel);
-        }
-    }
+		public IActionResult Index() => this.View();
+	}
 }

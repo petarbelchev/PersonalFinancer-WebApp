@@ -185,40 +185,26 @@
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Index()
 		{
-			var filter = new TransactionsFilterDTO
+			Guid userId = this.User.IdToGuid();
+
+			var filter = new UserTransactionsInputModel
 			{
-				UserId = this.User.IdToGuid(),
 				FromLocalTime = DateTime.Now.AddMonths(-1),
 				ToLocalTime = DateTime.Now
 			};
 
-			UserUsedDropdownsDTO dropdowns = await this.usersService.GetUserUsedDropdownsAsync(filter.UserId);
-			TransactionsDTO transactions = await this.usersService.GetUserTransactionsAsync(filter);
-			var viewModel = new UserTransactionsViewModel(filter, dropdowns, transactions);
+			UserUsedDropdownsDTO dropdowns = await this.usersService.GetUserUsedDropdownsAsync(userId);
+			var viewModel = new UserTransactionsViewModel(filter, dropdowns, userId);
 
 			return this.View(viewModel);
 		}
 
 		[Authorize(Roles = UserRoleName)]
-		[HttpPost]
-		[NoHtmlSanitizing]
-		public async Task<IActionResult> Index(UserTransactionsInputModel inputModel)
+		public async Task<IActionResult> Filter(UserTransactionsInputModel inputModel)
 		{
 			Guid userId = this.User.IdToGuid();
-			UserTransactionsViewModel viewModel;
 			UserUsedDropdownsDTO dropdowns = await this.usersService.GetUserUsedDropdownsAsync(userId);
-
-			if (!this.ModelState.IsValid)
-			{
-				viewModel = new UserTransactionsViewModel(inputModel, dropdowns, userId);
-
-				return this.View(viewModel);
-			}
-
-			TransactionsFilterDTO filter = this.mapper.Map<TransactionsFilterDTO>(inputModel);
-			filter.UserId = userId;
-			TransactionsDTO transactions = await this.usersService.GetUserTransactionsAsync(filter);
-			viewModel = new UserTransactionsViewModel(filter, dropdowns, transactions);
+			var viewModel = new UserTransactionsViewModel(inputModel, dropdowns, userId);
 
 			return this.View(viewModel);
 		}

@@ -150,59 +150,46 @@
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 
-			DateTime fromLocalTime = DateTime.Now.AddMonths(-1);
-			DateTime toLocalTime = DateTime.Now;
-
-			AccountDetailsViewModel viewModel;
+			AccountDetailsDTO accountDetails;
 
 			try
 			{
-				viewModel = await this.GetAccountDetailsViewModel(
-					id, fromLocalTime, toLocalTime, this.User.IdToGuid(), this.User.IsAdmin());
+				accountDetails = await this.accountsInfoService
+					.GetAccountDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (InvalidOperationException)
 			{
 				return this.BadRequest();
 			}
 
+			AccountDetailsViewModel viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
+			viewModel.FromLocalTime = DateTime.Now.AddMonths(-1);
+			viewModel.ToLocalTime = DateTime.Now;
 			viewModel.ReturnUrl = returnUrl;
 
 			return this.View(viewModel);
 		}
 
-		[HttpPost]
-		[NoHtmlSanitizing]
-		public async Task<IActionResult> Details(AccountDetailsInputModel inputModel)
+		public async Task<IActionResult> Filtered(AccountDetailsInputModel inputModel)
 		{
-			AccountDetailsViewModel viewModel;
+			AccountDetailsDTO accountDetails;
 
 			try
 			{
-				Guid accountId = inputModel.Id ?? throw new InvalidOperationException();
+				Guid accountId = inputModel.Id ??
+					throw new InvalidOperationException(string.Format(
+						ExceptionMessages.NotNullableProperty, inputModel.Id));
 
-				if (!this.ModelState.IsValid)
-				{
-					AccountDetailsShortDTO accountDetails =
-						await this.accountsInfoService.GetAccountShortDetailsAsync(accountId);
-
-					viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
-				}
-				else
-				{
-					viewModel = await this.GetAccountDetailsViewModel(
-						accountId,
-						inputModel.FromLocalTime ?? throw new InvalidOperationException(
-							string.Format(ExceptionMessages.NotNullableProperty, inputModel.FromLocalTime)),
-						inputModel.ToLocalTime ?? throw new InvalidOperationException(
-							string.Format(ExceptionMessages.NotNullableProperty, inputModel.ToLocalTime)),
-						this.User.IdToGuid(),
-						this.User.IsAdmin());
-				}
+				accountDetails = await this.accountsInfoService
+					.GetAccountDetailsAsync(accountId, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (InvalidOperationException)
 			{
 				return this.BadRequest();
 			}
+
+			AccountDetailsViewModel viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
+			this.mapper.Map(inputModel, viewModel);
 
 			return this.View(viewModel);
 		}
@@ -287,19 +274,6 @@
 				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownsAsync(userId);
 
 			this.mapper.Map(typesAndCurrenciesDTO, viewModel);
-		}
-
-		/// <exception cref="InvalidOperationException">When the account does not exist or the user is not owner or administrator.</exception>
-		private async Task<AccountDetailsViewModel> GetAccountDetailsViewModel(
-			Guid accountId, DateTime fromLocalTime, DateTime toLocalTime, Guid userId, bool isUserAdmin)
-		{
-			AccountDetailsLongDTO accountDetails = await this.accountsInfoService
-				.GetAccountDetailsAsync(accountId, fromLocalTime, toLocalTime, userId, isUserAdmin);
-
-			var viewModel = new AccountDetailsViewModel(accountDetails.TotalAccountTransactions);
-			this.mapper.Map(accountDetails, viewModel);
-
-			return viewModel;
 		}
 	}
 }

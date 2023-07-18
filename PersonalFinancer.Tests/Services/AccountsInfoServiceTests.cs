@@ -57,17 +57,14 @@
 		public async Task GetAccountDetails_ShouldReturnAccountDetails_WhenUserIsOwner()
 		{
 			//Arrange
-			DateTime fromLocalTime = DateTime.Now.AddMonths(-1);
-			DateTime toLocalTime = DateTime.Now;
-
-			AccountDetailsLongDTO expected = await this.accountsRepo.All()
+			AccountDetailsDTO expected = await this.accountsRepo.All()
 				.Where(a => a.Id == this.Account1_User1_WithTransactions.Id && !a.IsDeleted)
-				.ProjectTo<AccountDetailsLongDTO>(this.mapper.ConfigurationProvider, new { fromLocalTime, toLocalTime })
+				.ProjectTo<AccountDetailsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			//Act
-			AccountDetailsLongDTO actual = await this.accountsInfoService.GetAccountDetailsAsync(
-				this.Account1_User1_WithTransactions.Id, fromLocalTime, toLocalTime, this.User1.Id, isUserAdmin: false);
+			AccountDetailsDTO actual = await this.accountsInfoService.GetAccountDetailsAsync(
+				this.Account1_User1_WithTransactions.Id, this.User1.Id, isUserAdmin: false);
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
@@ -78,12 +75,10 @@
 		{
 			//Arrange
 			var id = Guid.NewGuid();
-			DateTime fromLocalTime = DateTime.Now.AddMonths(-1);
-			DateTime toLocalTime = DateTime.Now;
 
 			//Act & Assert
 			Assert.That(async () => await this.accountsInfoService
-				  .GetAccountDetailsAsync(id, fromLocalTime, toLocalTime, this.User1.Id, isUserAdmin: false),
+				  .GetAccountDetailsAsync(id, this.User1.Id, isUserAdmin: false),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -174,34 +169,6 @@
 
 			//Assert
 			Assert.That(actualCount, Is.EqualTo(expectedCount));
-		}
-
-		[Test]
-		public async Task GetAccountShortDetails_ShouldReturnCorrectData_WithValidInput()
-		{
-			//Arrange
-			AccountDetailsShortDTO expected = await this.accountsRepo.All()
-				.Where(a => a.Id == this.Account1_User1_WithTransactions.Id)
-				.ProjectTo<AccountDetailsShortDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync();
-
-			//Act
-			AccountDetailsShortDTO actual = await this.accountsInfoService
-				.GetAccountShortDetailsAsync(this.Account1_User1_WithTransactions.Id);
-
-			//Assert
-			AssertAreEqualAsJson(actual, expected);
-		}
-
-		[Test]
-		public void GetAccountShortDetails_ShouldThrowException_WithInvalidInput()
-		{
-			//Arrange
-			var invalidId = Guid.NewGuid();
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService.GetAccountShortDetailsAsync(invalidId),
-			Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]

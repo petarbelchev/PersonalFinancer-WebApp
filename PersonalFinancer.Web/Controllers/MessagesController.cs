@@ -37,16 +37,9 @@
             this.notificationsHub = notificationsHub;
         }
 
-        public async Task<IActionResult> All()
-        {
-            MessagesDTO messagesDTO = this.User.IsAdmin()
-                ? await this.messagesService.GetAllMessagesAsync()
-                : await this.messagesService.GetUserMessagesAsync(this.User.Id());
+		public IActionResult All() => this.View();
 
-            return this.View(new MessagesViewModel(messagesDTO));
-        }
-
-        [HttpPost]
+		[HttpPost]
         [NoHtmlSanitizing]
         public async Task<IActionResult> Archive([Required] string id)
         {
@@ -66,14 +59,7 @@
             return this.RedirectToAction(nameof(All));
         }
 
-        public async Task<IActionResult> Archived()
-		{
-			MessagesDTO messagesDTO = this.User.IsAdmin()
-				? await this.messagesService.GetAllArchivedAsync()
-				: await this.messagesService.GetUserArchivedAsync(this.User.Id());
-
-			return this.View(new MessagesViewModel(messagesDTO));
-		}
+        public IActionResult Archived() => this.View();
 
         [Authorize(Roles = UserRoleName)]
         public IActionResult Create() => this.View(new MessageInputModel());

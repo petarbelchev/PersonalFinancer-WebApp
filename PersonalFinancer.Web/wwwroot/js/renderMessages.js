@@ -6,7 +6,7 @@ function render(model) {
     if (model.messages.length == 0) {
         innerHtml = `
             <tr>
-                <td colspan="2">
+                <td colspan="3">
                     <p id="noMessagesNote" class="display-6 fs-4 text-center">You don't have any messages.</p>
                 </td>
             </tr>
@@ -16,9 +16,9 @@ function render(model) {
     for (let message of model.messages) {
         let tr = `
 			<tr role="button" onclick="location.href='/Messages/Details/${message.id}'">
+				<td><img src="/icons/icons8-message-64.png" style="max-width: 30px;" /></td>
 				<td messageId="${message.id}">
-					<img src="/icons/icons8-message-64.png" style="max-width: 30px;" />
-					<span>	${message.subject}</span>
+					<span>${message.subject}</span>
 					${message.isSeen ? '' : '<span class="badge text-bg-danger">New messages</span>' }
 				</td>
 				<td>

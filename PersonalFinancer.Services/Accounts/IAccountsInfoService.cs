@@ -8,7 +8,7 @@
     public interface IAccountsInfoService
 	{
 		/// <exception cref="InvalidOperationException">When the account does not exist or the user is not owner or administrator.</exception>
-		Task<AccountDetailsLongDTO> GetAccountDetailsAsync(Guid accountId, DateTime fromLocalTime, DateTime toLocalTime, Guid userId, bool isUserAdmin);
+		Task<AccountDetailsDTO> GetAccountDetailsAsync(Guid accountId, Guid userId, bool isUserAdmin);
 
 		/// <exception cref="InvalidOperationException">When the account does not exist or the user is not owner or administrator.</exception>
 		Task<CreateEditAccountOutputDTO> GetAccountFormDataAsync(Guid accountId, Guid userId, bool isUserAdmin);
@@ -19,9 +19,6 @@
 		Task<AccountsCardsDTO> GetAccountsCardsDataAsync(int page);
 
 		Task<int> GetAccountsCountAsync();
-
-		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
-		Task<AccountDetailsShortDTO> GetAccountShortDetailsAsync(Guid accountId);
 
 		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
 		Task<TransactionsDTO> GetAccountTransactionsAsync(AccountTransactionsFilterDTO dto);

@@ -10,11 +10,11 @@
 				<a role="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></a>
 			</div>
 			<div class="modal-body">
+				@*Spinner*@
 				<div class="d-flex justify-content-center">
-					<div class="spinner-border" role="status">
-						<span class="visually-hidden">Loading...</span>
-					</div>
+					<div class="spinner-border" role="status"></div>
 				</div>
+				@*Place for transaction data*@
 			</div>
 			<div class="modal-footer">
 				<p class="text-center mt-2" style="display: none;">
@@ -40,23 +40,15 @@
 			</tr>
 		</thead>
 		<tbody style="vertical-align: text-top;">
-			@foreach (var transaction in Model.Transactions)
-			{
-				<tr role="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" transactionId="@transaction.Id">
-					@if (transaction.TransactionType == TransactionType.Income.ToString())
-					{
-						<td><img src="/icons/greenArrow.png" style="max-width: 25px;"></td>
-					}
-					else
-					{
-						<td><img src="/icons/redArrow.png" style="max-width: 25px;"></td>
-					}
-					<td>@transaction.CreatedOnLocalTime.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
-					<td>@transaction.CategoryName</td>
-					<td>@transaction.Amount @transaction.AccountCurrencyName</td>
-					<td>@transaction.Reference</td>
-				</tr>
-			}
+			@*Spinner*@
+			<tr>
+				<td colspan="5">
+					<div class="d-flex justify-content-center">
+						<div class="spinner-border" role="status"></div>
+					</div>
+				</td>
+			</tr>
+			@*Place for transactions data*@
 		</tbody>
 	</table>
 </div>

@@ -38,7 +38,11 @@
 		</div>
 	</div>
 	<button class="btn btn-secondary mt-4" onclick="getMoreStatistics('@Model.AccountsCashFlowEndpoint')">More statistics...</button>
-	<div id="statistics" class="mt-4"></div>
+	<div class="mt-4">
+		<ul id="statistics" class="list-group list-group-flush card offset-lg-2 col-lg-8 shadow">
+			@*Place for statistics data*@
+		</ul>
+	</div>
 </div>
 
 @section Scripts {

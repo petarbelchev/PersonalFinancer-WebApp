@@ -48,9 +48,7 @@
         }
 
         [Authorize]
-        [HttpPost]
-        [NoHtmlSanitizing]
-        public async Task<IActionResult> Index(DateFilterModel inputModel)
+        public async Task<IActionResult> Filtered(DateFilterModel inputModel)
         {
             UserDashboardViewModel viewModel;
 

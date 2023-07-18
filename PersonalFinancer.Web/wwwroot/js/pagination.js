@@ -1,13 +1,11 @@
-let paginations = document.getElementsByClassName('pagination');
+let pagination = document.getElementById('pagination');
 
-for (let pagination of paginations) {
-    pagination.addEventListener('click', async (e) => {
-        if (e.target.tagName == 'A') {
-            let page = e.target.getAttribute('page');
-            loadPage(page);
-        }
-    })
-}
+pagination.addEventListener('click', async (e) => {
+    if (e.target.tagName == 'A') {
+        let page = e.target.getAttribute('page');
+        loadPage(page);
+    }
+});
 
 let currentPage = 1;
 
@@ -20,8 +18,7 @@ async function loadPage(page) {
         setUpPagination(model.pagination);
         currentPage = page;
     } else {
-        let error = await response.json();
-        alert(`${error.status} ${error.title}`)
+        container.innerHTML = '';
     }
 }
 
@@ -30,9 +27,7 @@ async function getData(page) {
         <tr>
             <td colspan="5">
 	            <div class="d-flex justify-content-center">
-		            <div class="spinner-border" role="status">
-			            <span class="visually-hidden">Loading...</span>
-		            </div>
+		            <div class="spinner-border" role="status"></div>
 	            </div>
             </td>
         </tr>
@@ -67,12 +62,12 @@ async function getData(page) {
     return await fetch(url, options);
 }
 
+let elementsStats = pagination.querySelector('#elementsStats');
+let paginationPages = pagination.querySelector('#pages');
+
 function setUpPagination(pagination) {
     page = pagination.page;
-
-    for (let element of document.getElementsByClassName('elementsStats')) {
-        element.textContent = `${pagination.firstElement} to ${pagination.lastElement} from ${pagination.totalElements} ${pagination.elementsName}`;
-    }
+    elementsStats.textContent = `${pagination.firstElement} to ${pagination.lastElement} from ${pagination.totalElements} ${pagination.elementsName}`;
 
     let innerHtml = `
         <li class="page-item ${page == 1 ? 'disabled' : ''}">
@@ -117,7 +112,7 @@ function setUpPagination(pagination) {
 		</li>
     `;
 
-    for (let pagination of paginations) {
-        pagination.innerHTML = innerHtml;
-    }
+    paginationPages.innerHTML = innerHtml;
 }
+
+window.addEventListener('DOMContentLoaded', async () => await loadPage(1));

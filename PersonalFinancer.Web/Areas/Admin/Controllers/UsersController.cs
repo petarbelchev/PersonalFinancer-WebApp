@@ -3,8 +3,6 @@
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Services.User.Models;
-	using PersonalFinancer.Web.Models.User;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
@@ -17,15 +15,9 @@
         public UsersController(IUsersService userService)
             => this.userService = userService;
 
-        public async Task<IActionResult> Index(int page = 1)
-        {
-            UsersInfoDTO usersData = await this.userService.GetUsersInfoAsync(page);
-            var viewModel = new UsersViewModel(usersData, page);
+		public IActionResult Index() => this.View();
 
-            return this.View(viewModel);
-        }
-
-        public async Task<IActionResult> Details([Required] Guid id)
+		public async Task<IActionResult> Details([Required] Guid id)
         {
             if (!this.ModelState.IsValid)
                 return this.BadRequest();

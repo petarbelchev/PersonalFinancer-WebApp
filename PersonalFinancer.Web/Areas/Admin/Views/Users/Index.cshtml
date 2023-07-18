@@ -1,7 +1,4 @@
 ﻿@using PersonalFinancer.Common.Constants;
-@using PersonalFinancer.Services.User.Models;
-@using PersonalFinancer.Web.Models.User;
-@model UsersViewModel
 @{
 	ViewData["Title"] = "All Users";
 }
@@ -23,15 +20,7 @@
 						</tr>
 					</thead>
 					<tbody style="vertical-align: text-top;">
-						@foreach (UserInfoDTO user in Model.Users)
-						{
-							<tr role="button" onclick="location.href='@Url.Action("Details", "Users", new { id = user.Id })'">
-								<th><img src="/icons/icons8-customer-64.png" style="max-width: 30px;"></th>
-								<td>@user.FirstName @user.LastName</td>
-								<td>@user.UserName</td>
-								<td>@user.Email</td>
-							</tr>
-						}
+						@*Place for users data*@
 					</tbody>
 				</table>
 			</div>

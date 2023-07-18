@@ -1,22 +1,27 @@
+let statisticsUl = document.getElementById('statistics');
+
 async function getMoreStatistics(url) {
+    statisticsUl.innerHTML = `
+	    <div class="d-flex justify-content-center m-2">
+		    <div class="spinner-border" role="status"></div>
+	    </div>
+    `;
+
     let response = await fetch(url);
 
     if (response.status == 200) {
         let data = await response.json();
         renderStatistics(data);
     } else {
-        let error = await response.json();
-        alert(`${error.status} ${error.title}`);
+        statisticsUl.innerHTML = '';
     }
 }
 
 function renderStatistics(data) {
-    let ul = document.createElement('ul');
-    ul.className = 'list-group list-group-flush card offset-lg-2 col-lg-8';
-    let ulInnerHtml = '';
+    let innerHtml = '';
 
     for (let currency of data) {
-        ulInnerHtml += `
+        innerHtml += `
             <li class="list-group-item">
 				<img src="icons/icons8-banknotes-64.png" style="max-width: fit-content;">
 				<span>
@@ -27,6 +32,5 @@ function renderStatistics(data) {
         `;
     }
 
-    ul.innerHTML = ulInnerHtml;
-    document.getElementById('statistics').replaceChildren(ul);
+    statisticsUl.innerHTML = innerHtml;
 }

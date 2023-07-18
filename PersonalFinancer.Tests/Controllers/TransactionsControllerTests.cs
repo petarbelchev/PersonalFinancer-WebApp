@@ -187,12 +187,10 @@
 				ToLocalTime = DateTime.Now
 			};
 
-			TransactionsFilterDTO filter = this.mapper.Map<TransactionsFilterDTO>(inputModel);
-			filter.UserId = this.userId;
-			var expectedViewModel = new UserTransactionsViewModel(filter, expUserDropdowns, expTransactionsDto);
+			var expectedViewModel = new UserTransactionsViewModel(inputModel, expUserDropdowns, this.userId);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.Index(inputModel);
+			var viewResult = (ViewResult)await this.controller.Filter(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -220,7 +218,7 @@
 			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid.");
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.Index(inputModel);
+			var viewResult = (ViewResult)await this.controller.Filter(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>

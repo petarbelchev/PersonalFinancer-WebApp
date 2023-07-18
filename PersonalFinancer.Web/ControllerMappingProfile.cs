@@ -16,8 +16,8 @@
     {
         public ControllerMappingProfile()
         {
-			this.CreateMap<AccountDetailsLongDTO, AccountDetailsViewModel>();
-			this.CreateMap<AccountDetailsShortDTO, AccountDetailsViewModel>();
+			this.CreateMap<AccountDetailsDTO, AccountDetailsViewModel>();
+			this.CreateMap<AccountDetailsInputModel, AccountDetailsViewModel>();
 			this.CreateMap<CreateEditAccountInputModel, CreateEditAccountViewModel>();
 			this.CreateMap<CreateEditAccountOutputDTO, CreateEditAccountViewModel>();
 			this.CreateMap<CreateEditAccountInputModel, CreateEditAccountInputDTO>();

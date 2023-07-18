@@ -11,7 +11,6 @@
 	using PersonalFinancer.Web.Controllers;
 	using PersonalFinancer.Web.Hubs;
 	using PersonalFinancer.Web.Models.Message;
-	using static PersonalFinancer.Common.Constants.PaginationConstants;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[TestFixture]
@@ -66,104 +65,104 @@
 		}
 
 		[Test]
-		public async Task All_ShouldReturnViewModelWithUserMessages_WhenUserIsNotAdmin()
+		public async Task All_ShouldReturnView_WhenUserIsNotAdmin()
 		{
 			//Arrange
-			int page = 1;
+			//int page = 1;
 
-			var serviceReturnDto = new MessagesDTO
-			{
-				Messages = this.fakeCollection
-					.Where(m => m.AuthorId == this.userId.ToString() && !m.IsArchivedByAuthor)
-					.Select(m => new MessageOutputDTO
-					{
-						Id = m.Id,
-						CreatedOnUtc = m.CreatedOnUtc,
-						Subject = m.Subject,
-						IsSeen = m.IsSeenByAuthor
-					})
-					.Skip(MessagesPerPage * (page - 1))
-					.Take(MessagesPerPage),
-				TotalMessagesCount = this.fakeCollection
-					.Count(m => m.AuthorId == this.userId.ToString() && !m.IsArchivedByAuthor)
-			};
+			//var serviceReturnDto = new MessagesDTO
+			//{
+			//	Messages = this.fakeCollection
+			//		.Where(m => m.AuthorId == this.userId.ToString() && !m.IsArchivedByAuthor)
+			//		.Select(m => new MessageOutputDTO
+			//		{
+			//			Id = m.Id,
+			//			CreatedOnUtc = m.CreatedOnUtc,
+			//			Subject = m.Subject,
+			//			IsSeen = m.IsSeenByAuthor
+			//		})
+			//		.Skip(MessagesPerPage * (page - 1))
+			//		.Take(MessagesPerPage),
+			//	TotalMessagesCount = this.fakeCollection
+			//		.Count(m => m.AuthorId == this.userId.ToString() && !m.IsArchivedByAuthor)
+			//};
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
-				.Returns(false);
+			//this.userMock.Setup(x => x
+			//	.IsInRole(AdminRoleName))
+			//	.Returns(false);
 
-			this.messagesServiceMock.Setup(x => x
-				.GetUserMessagesAsync(this.userId.ToString(), page))
-				.ReturnsAsync(serviceReturnDto);
+			//this.messagesServiceMock.Setup(x => x
+			//	.GetUserMessagesAsync(this.userId.ToString(), page))
+			//	.ReturnsAsync(serviceReturnDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.All();
+			var viewResult = (ViewResult)this.controller.All();
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				MessagesViewModel viewModel = viewResult.Model as MessagesViewModel ??
-					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+				//MessagesViewModel viewModel = viewResult.Model as MessagesViewModel ??
+				//	throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				Assert.That(viewModel.Pagination.TotalElements, 
-					Is.EqualTo(serviceReturnDto.TotalMessagesCount));
+				//Assert.That(viewModel.Pagination.TotalElements, 
+				//	Is.EqualTo(serviceReturnDto.TotalMessagesCount));
 
-				Assert.That(viewModel.Pagination.Page, Is.EqualTo(page));
+				//Assert.That(viewModel.Pagination.Page, Is.EqualTo(page));
 
-				AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
+				//AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
 			});
 		}
 
 		[Test]
-		public async Task All_ShouldReturnViewModelWithAllUsersMessages_WhenUserIsAdmin()
+		public async Task All_ShouldReturnView_WhenUserIsAdmin()
 		{
 			//Arrange
 			int page = 1;
 
-			var serviceReturnDto = new MessagesDTO
-			{
-				Messages = this.fakeCollection
-					.Where(m => !m.IsArchivedByAdmin)
-					.Select(m => new MessageOutputDTO
-					{
-						Id = m.Id,
-						CreatedOnUtc = m.CreatedOnUtc,
-						Subject = m.Subject,
-						IsSeen = m.IsSeenByAdmin
-					})
-					.Skip(MessagesPerPage * (page - 1))
-					.Take(MessagesPerPage),
-				TotalMessagesCount = this.fakeCollection
-					.Count(m => !m.IsArchivedByAdmin)
-			};
+			//var serviceReturnDto = new MessagesDTO
+			//{
+			//	Messages = this.fakeCollection
+			//		.Where(m => !m.IsArchivedByAdmin)
+			//		.Select(m => new MessageOutputDTO
+			//		{
+			//			Id = m.Id,
+			//			CreatedOnUtc = m.CreatedOnUtc,
+			//			Subject = m.Subject,
+			//			IsSeen = m.IsSeenByAdmin
+			//		})
+			//		.Skip(MessagesPerPage * (page - 1))
+			//		.Take(MessagesPerPage),
+			//	TotalMessagesCount = this.fakeCollection
+			//		.Count(m => !m.IsArchivedByAdmin)
+			//};
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
-				.Returns(true);
+			//this.userMock.Setup(x => x
+			//	.IsInRole(AdminRoleName))
+			//	.Returns(true);
 
-			this.messagesServiceMock.Setup(x => x
-				.GetAllMessagesAsync(page))
-				.ReturnsAsync(serviceReturnDto);
+			//this.messagesServiceMock.Setup(x => x
+			//	.GetAllMessagesAsync(page))
+			//	.ReturnsAsync(serviceReturnDto);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.All();
+			var viewResult = (ViewResult)this.controller.All();
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				MessagesViewModel viewModel = viewResult.Model as MessagesViewModel ??
-					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+				//MessagesViewModel viewModel = viewResult.Model as MessagesViewModel ??
+				//	throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				Assert.That(viewModel.Pagination.TotalElements,
-					Is.EqualTo(serviceReturnDto.TotalMessagesCount));
+				//Assert.That(viewModel.Pagination.TotalElements,
+				//	Is.EqualTo(serviceReturnDto.TotalMessagesCount));
 
-				Assert.That(viewModel.Pagination.Page, Is.EqualTo(page));
+				//Assert.That(viewModel.Pagination.Page, Is.EqualTo(page));
 
-				AssertSamePropertiesValuesAreEqual(viewModel.Messages, serviceReturnDto);
+				//AssertSamePropertiesValuesAreEqual(viewModel.Messages, serviceReturnDto);
 			});
 		}
 

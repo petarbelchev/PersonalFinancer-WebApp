@@ -17,7 +17,7 @@ function render(model) {
 						</div>
 					</div>
 					<div class="d-flex">
-						<a href = '/Admin/Accounts/AccountDetails/${account.id}' class="btn btn-secondary m-2">Details</a>
+						<a href = '/Accounts/Details/${account.id}' class="btn btn-secondary m-2">Details</a>
 						<a href = '/Admin/Users/Details/${account.ownerId}' class="btn btn-secondary m-2">Owner</a>
 					</div>
 				</div>

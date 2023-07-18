@@ -1,0 +1,202 @@
+﻿@using System.Globalization;
+@using PersonalFinancer.Data.Models.Enums;
+@using PersonalFinancer.Web.Models.Home;
+@model UserDashboardViewModel
+
+@if (!this.User?.Identity?.IsAuthenticated ?? false)
+{
+	@*Guest Home Page*@
+	ViewData["Title"] = "Home Page";
+
+	<div class="text-center mt-5">
+		<p class="display-6">Personal Financer</p>
+		<p class="display-6 fs-4">Your Finances in One Place!</p>
+		<p class="display-6 fs-4 mt-5">
+			<a style="text-decoration: none;" asp-area="Identity" asp-page="/Account/Login">Login</a> if you already track your finances or
+			<a style="text-decoration: none;" asp-area="Identity" asp-page="/Account/Register">register</a> to start now.
+		</p>
+	</div>
+}
+else
+{
+	@*User Home Page*@
+	ViewData["Title"] = "Dashboard";
+
+	@if (Model.Accounts.Any())
+	{
+		@*User Accounts*@
+		<div class="mt-4">
+			<p class="display-6 text-center">Your Accounts</p>
+			<div class="row mt-4">
+				@foreach (var account in Model.Accounts)
+				{
+					<div class="col-xl-3 col-lg-4 col-md-6" role="button" onclick="location.href='@Url.Action("Details", "Accounts", new { id = account.Id })'">
+						<div class="card align-items-center shadow mb-4">
+							<div class="d-flex flex-row align-items-center mb-2">
+								<div class="p-2">
+									<img src="/icons/icons8-wallet-64.png" style="width: 50px;">
+								</div>
+								<div class="card-body p-2 flex-grow-1">
+									<h5 class="card-title display-6 fs-5"><b>@account.Name</b></h5>
+									<p class="card-text display-6 fs-6">@account.Balance @account.CurrencyName</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+			<hr />
+		</div>
+
+		<form method="get" asp-action="Filtered" class="row g-3 offset-md-2 col-md-8 mb-4">
+			<div class="col-lg-5 form-floating">
+				<input type="datetime-local" name="@nameof(Model.FromLocalTime)" value="@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+				<label asp-for="@Model.FromLocalTime" class="form-label"></label>
+				<span asp-validation-for="@Model.FromLocalTime" class="text-danger"></span>
+			</div>
+			<div class="col-lg-5 form-floating">
+				<input type="datetime-local" name="@nameof(Model.ToLocalTime)" value="@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+				<label asp-for="@Model.ToLocalTime" class="form-label"></label>
+				<span asp-validation-for="@Model.ToLocalTime" class="text-danger"></span>
+			</div>
+			<div class="col-lg-2">
+				<button type="submit" class="btn btn-lg btn-secondary form-control">Filter</button>
+			</div>
+		</form>
+
+		@if (Model.LastTransactions.Any())
+		{
+			<div class="row">
+
+				<div class="col-lg-8">
+					@*Last Five Transactions*@
+					<div>
+						<div class="card shadow mb-4">
+							<div class="card-header">
+								<h6 class="text-center">Last Five Transactions</h6>
+							</div>
+							<div class="table-responsive">
+								<table class="table table-hover">
+									<thead>
+										<tr>
+											<th scope="col"></th>
+											<th scope="col">Date</th>
+											<th scope="col">Category</th>
+											<th scope="col">Amount</th>
+											<th scope="col">Reference</th>
+										</tr>
+									</thead>
+									<tbody style="vertical-align: text-top;">
+										@foreach (var transaction in Model.LastTransactions)
+										{
+											<tr role="button" onclick="location.href='/Transactions/Details/@(transaction.Id)'">
+												@if (transaction.TransactionType == TransactionType.Income.ToString())
+												{
+													<td><img src="/icons/greenArrow.png" style="max-width: 25px;"></td>
+												}
+												else
+												{
+													<td><img src="/icons/redArrow.png" style="max-width: 25px;"></td>
+												}
+												<td>@transaction.CreatedOnLocalTime.ToString("g", CultureInfo.GetCultureInfo("en-US"))</td>
+												<td>@transaction.CategoryName</td>
+												<td>@transaction.Amount @transaction.AccountCurrencyName</td>
+												<td>@transaction.Reference</td>
+											</tr>
+										}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					@if (Model.CurrenciesCashFlow.Any(c => c.Expenses > 0))
+					{
+						@*Doughnut Chart*@
+						<div>
+							<div class="card shadow mb-4">
+								<div class="card-header">
+									<h6 class="text-center">Expenses Structure</h6>
+								</div>
+								<div class="card-body">
+									<div class="row align-content-center">
+										<div class="offset-md-0 offset-sm-3 offset-3 col-md-2 col-sm-6 col-6">
+											<div class="row">
+												@{
+													int index = 0;
+													foreach (var currency in Model.CurrenciesCashFlow.Where(c => c.ExpensesByCategories.Any()))
+													{
+														<button class="col-12 btn btn-secondary m-1" onclick="loadChart(@(index++))">@currency.Name</button>
+													}
+												}
+											</div>
+										</div>
+										<div class="col">
+											<canvas id="doughnutChart" style="max-height: 400px;"></canvas>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+
+				@*Cash Flow*@
+				<div class="col-lg-4">
+					<div class="card shadow mb-4">
+						<div class="card-header">
+							<h6 class="text-center">Cash Flow</h6>
+						</div>
+						<div class="card-body">
+							@foreach (var currency in Model.CurrenciesCashFlow)
+							{
+								decimal cashFlow = currency.Incomes + currency.Expenses;
+								decimal income = cashFlow != 0 ? Math.Round(currency.Incomes / cashFlow * 100, 2) : 0;
+								decimal expence = cashFlow != 0 ? Math.Round(currency.Expenses / cashFlow * 100, 2) : 0;
+
+								<div class="card-title">
+									<div class="row row-cols-auto">
+										<div class="col">
+											<img src="/icons/icons8-profit-64.png" style="max-width: 50px;">
+										</div>
+										<h4 class="col">@currency.Name</h4>
+									</div>
+								</div>
+								<h4 class="small font-weight-bold">Income <span class="float-right">@currency.Incomes (@income%)</span></h4>
+								<div class="progress mb-4">
+									<div class="progress-bar bg-success" role="progressbar" style="width: @income%"></div>
+								</div>
+								<h4 class="small font-weight-bold">Expense <span class="float-right">@currency.Expenses (@expence%)</span></h4>
+								<div class="progress mb-4">
+									<div class="progress-bar bg-danger" role="progressbar" style="width: @expence%"></div>
+								</div>
+							}
+						</div>
+					</div>
+				</div>
+
+			</div>
+		}
+		else
+		{
+			@*No Transactions Page*@
+			<div class="text-center mt-4">
+				<p class="display-6 fs-4">
+					You do not have any transactions for thar period.
+				</p>
+			</div>
+		}
+	}
+	else
+	{
+		@*Empty Dashboard Page*@
+		<div class="text-center mt-5">
+			<p class="display-6">
+				Your Dashboard is empty.
+			</p>
+			<p class="display-6 fs-4 mt-5">
+				<a style="text-decoration: none;" asp-controller="Accounts" asp-action="Create">Create</a> your first account and start record your Finances!
+			</p>
+		</div>
+	}
+}

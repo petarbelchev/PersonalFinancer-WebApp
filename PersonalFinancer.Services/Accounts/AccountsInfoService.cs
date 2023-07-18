@@ -29,12 +29,12 @@
 			this.mapper = mapper;
 		}
 
-		public async Task<AccountDetailsLongDTO> GetAccountDetailsAsync(
-			Guid accountId, DateTime fromLocalTime, DateTime toLocalTime, Guid userId, bool isUserAdmin)
+		public async Task<AccountDetailsDTO> GetAccountDetailsAsync(
+			Guid accountId, Guid userId, bool isUserAdmin)
 		{
 			return await this.accountsRepo.All()
 				.Where(a => a.Id == accountId && !a.IsDeleted && (isUserAdmin || a.OwnerId == userId))
-				.ProjectTo<AccountDetailsLongDTO>(this.mapper.ConfigurationProvider, new { fromLocalTime, toLocalTime })
+				.ProjectTo<AccountDetailsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
 
@@ -73,14 +73,6 @@
 
 		public async Task<int> GetAccountsCountAsync()
 			=> await this.accountsRepo.All().CountAsync(a => !a.IsDeleted);
-
-		public async Task<AccountDetailsShortDTO> GetAccountShortDetailsAsync(Guid accountId)
-		{
-			return await this.accountsRepo.All()
-				.Where(a => a.Id == accountId)
-				.ProjectTo<AccountDetailsShortDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync();
-		}
 
 		public async Task<TransactionsDTO> GetAccountTransactionsAsync(AccountTransactionsFilterDTO dto)
 		{

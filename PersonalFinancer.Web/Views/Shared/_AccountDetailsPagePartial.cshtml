@@ -1,0 +1,56 @@
+﻿@using PersonalFinancer.Web.Models.Account;
+@model AccountDetailsViewModel
+
+@*Account Details*@
+<div class="row mt-2">
+	<div class="d-flex bd-highlight offset-lg-1 col-lg-10">
+		<div class="p-2 bd-highlight">
+			<img src="/icons/icons8-wallet-64.png" style="max-width: fit-content;">
+		</div>
+		<div class="p-2 flex-grow-1 bd-highlight">
+			<h1 class="display-6 fs-3"><b>@Model.Name</b> (@Model.AccountTypeName)</h1>
+			<p class="display-6 fs-4" style="font-size: xx-large;" id="balanceField">@Model.Balance @Model.CurrencyName</p>
+		</div>
+		<div class="p-2 dropdown">
+			<a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Account Menu">
+				<img src="~/icons/icons8-menu-64.png" style="max-width: 50px;" />
+			</a>
+			<ul class="dropdown-menu dropdown-menu-end">
+				<li class="m-2"><a class="btn btn-link dropdown-item" asp-controller="Accounts" asp-action="Edit" asp-route-id="@Model.Id">Edit Account</a></li>
+				<li class="m-2"><a class="btn btn-link dropdown-item" asp-controller="Accounts" asp-action="Delete" asp-route-id="@Model.Id" asp-route-returnUrl="@Model.ReturnUrl">Delete Account</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<form method="get" asp-action="Filtered" class="row g-3 offset-md-2 col-md-8 mb-4">
+	<input type="hidden" asp-for="@Model.Id" />
+	<div class="col-lg-5 form-floating">
+		<input type="datetime-local" name="@nameof(Model.FromLocalTime)" value="@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+		<label asp-for="@Model.FromLocalTime" class="form-label"></label>
+		<span asp-validation-for="@Model.FromLocalTime" class="text-danger"></span>
+	</div>
+	<div class="col-lg-5 form-floating">
+		<input type="datetime-local" name="@nameof(Model.ToLocalTime)" value="@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+		<label asp-for="@Model.ToLocalTime" class="form-label"></label>
+		<span asp-validation-for="@Model.ToLocalTime" class="text-danger"></span>
+	</div>
+	<div class="col-lg-2">
+		<button type="submit" class="btn btn-lg btn-secondary form-control">Filter</button>
+	</div>
+</form>
+
+<div class="row justify-content-center">
+	<div class="col-xl-10">
+		@*Table*@
+		<div class="card shadow mb-4">
+			<div class="card-header">
+				<h6 class="text-center">Transactions</h6>
+			</div>
+			<partial name="_TransactionsTablePartial" />
+		</div>
+
+		@*Pagination*@
+		<partial name="_PaginationPartial" />
+	</div>
+</div>

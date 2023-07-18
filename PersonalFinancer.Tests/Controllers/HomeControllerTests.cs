@@ -159,7 +159,7 @@
 			};
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.Index(inputModel);
+			var viewResult = (ViewResult)await this.controller.Filtered(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -186,7 +186,7 @@
 
 			//Act
 			this.controller.ModelState.AddModelError("error", errorMessage);
-			var viewResult = (ViewResult)await this.controller.Index(inputModel);
+			var viewResult = (ViewResult)await this.controller.Filtered(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>

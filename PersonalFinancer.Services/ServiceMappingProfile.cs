@@ -27,25 +27,10 @@
 					.MapFrom(src => src.Name + (src.IsDeleted ? " (Deleted)" : string.Empty)));
 
 			this.CreateMap<Account, AccountCardDTO>();
-			this.CreateMap<Account, AccountDetailsShortDTO>();
+			this.CreateProjection<Account, AccountDetailsDTO>();
 
 			DateTime fromLocalTime = default;
 			DateTime toLocalTime = default;
-
-			this.CreateProjection<Account, AccountDetailsLongDTO>()
-				.ForMember(dest => dest.FromLocalTime, opt => opt.MapFrom(src => fromLocalTime))
-				.ForMember(dest => dest.ToLocalTime, opt => opt.MapFrom(src => toLocalTime))
-				.ForMember(dest => dest.Transactions, opt => opt
-					.MapFrom(src => src.Transactions
-						.Where(t =>	t.CreatedOnUtc >= fromLocalTime.ToUniversalTime()
-									&& t.CreatedOnUtc <= toLocalTime.ToUniversalTime())
-						.OrderByDescending(t => t.CreatedOnUtc)
-						.Take(TransactionsPerPage)))
-				.ForMember(dest => dest.TotalAccountTransactions, opt => opt
-					.MapFrom(src => src.Transactions
-						.Count(t => t.CreatedOnUtc >= fromLocalTime.ToUniversalTime()
-									&& t.CreatedOnUtc <= toLocalTime.ToUniversalTime())));
-
 			int page = 1;
 
 			this.CreateProjection<Account, TransactionsDTO>()
