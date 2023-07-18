@@ -14,7 +14,7 @@
 					<span asp-validation-for="@Model.Amount" class="text-danger"></span>
 				</div>
 				<div class="form-floating mb-2">
-					<input value="@Model.CreatedOnLocalTime.ToString("yyyy-MM-ddTHH:mm")" name="@nameof(Model.CreatedOnLocalTime)" type="datetime-local" class="form-control form-control-lg datepicker" placeholder=".form-control-lg">
+					<input value="@Model.CreatedOnLocalTime.ToString("yyyy-MM-ddTHH:mm")" name="@nameof(Model.CreatedOnLocalTime)" type="datetime-local" class="form-control datepicker" placeholder=".form-control-lg">
 					<label asp-for="@Model.CreatedOnLocalTime" class="form-label"></label>
 					<span asp-validation-for="@Model.CreatedOnLocalTime" class="text-danger"></span>
 				</div>
@@ -28,11 +28,14 @@
 					</select>
 					<div class="form-floating " style="display: none;">
 						<input class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
-						<label class="form-label">Write new Category name...</label>
+						<label class="form-label">Write the new category name...</label>
 						<p class="text-danger"></p>
 					</div>
-					<a class="btn btn-secondary createBtn">Create New Category</a>
-					<a class="btn btn-danger deleteBtn">Delete This Category</a>
+					<div class="d-flex justify-content-center m-2">
+						<div class="spinner-border" role="status" style="display: none;"></div>
+					</div>
+					<a class="btn btn-secondary createBtn mb-2">Create new category</a>
+					<a class="btn btn-danger deleteBtn">Delete selected category</a>
 				</div>
 				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 mb-2">
 					<label asp-for="@Model.AccountId" class="form-label"></label>

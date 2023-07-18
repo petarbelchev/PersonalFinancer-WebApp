@@ -1,9 +1,10 @@
 const divs = document.getElementsByClassName('newElemDiv')
 let mainDiv;
-let selectField;
+let selectTag;
 let ownerId;
 let url;
-let newElemDiv;
+let newElemInputDiv;
+let spinner;
 
 for (var div of divs) {
     div.addEventListener('click', async (e) => await eventHandler(e));
@@ -15,14 +16,15 @@ async function eventHandler(e) {
     }
 
     mainDiv = e.target.parentElement;
-    selectField = mainDiv.querySelector('select');
+    selectTag = mainDiv.querySelector('select');
     ownerId = mainDiv.attributes[1].value;
     url = mainDiv.attributes[2].value;
-    newElemDiv = mainDiv.querySelector('div');
+    newElemInputDiv = mainDiv.querySelector('div');
+    spinner = mainDiv.querySelector('.spinner-border');
 
     if (e.target.classList.contains('createBtn')) {
-        if (newElemDiv.style.display == 'none') {
-            newElemDiv.style.display = 'block';
+        if (newElemInputDiv.style.display == 'none') {
+            newElemInputDiv.style.display = 'block';
         } else {
             await createEntity();
         }
@@ -34,15 +36,18 @@ async function eventHandler(e) {
 }
 
 async function createEntity() {
-    let inputField = newElemDiv.querySelector('input');
-    let errorMsgField = newElemDiv.querySelector('p');
+    let inputField = newElemInputDiv.querySelector('input');
+    let errorMsgField = newElemInputDiv.querySelector('p');
 
-    for (let elem of selectField.children) {
+    for (let elem of selectTag.children) {
         if (elem.innerText.toLowerCase() == inputField.value.toLowerCase().trim()) {
             errorMsgField.textContent = 'You already have this. Try another one!';
             return;
         }
     }
+
+    newElemInputDiv.style.display = 'none';
+    spinner.style.display = 'block';
 
     let response = await fetch(url, {
         method: 'POST',
@@ -60,7 +65,7 @@ async function createEntity() {
         deleteBtnController();
     } else if (response.status == 400) {
         let error = await response.json();
-        newElemDiv.querySelector('p').textContent = error;
+        newElemInputDiv.querySelector('p').textContent = error;
     }
 }
 
@@ -70,16 +75,17 @@ function renderNewEntity(data, inputField, errorMsgField) {
     optionTag.setAttribute("id", data.id);
     optionTag.textContent = data.name;
 
-    selectField.appendChild(optionTag);
-    selectField.value = data.id;
+    selectTag.appendChild(optionTag);
+    selectTag.value = data.id;
 
-    newElemDiv.style.display = 'none';
+    spinner.style.display = 'none';
     errorMsgField.textContent = '';
     inputField.value = '';
 }
 
 async function deleteEntity() {
-    let elemId = selectField.value;
+    spinner.style.display = 'block';
+    let elemId = selectTag.value;
 
     let response = await fetch(url + elemId, {
         method: 'DELETE',
@@ -89,7 +95,8 @@ async function deleteEntity() {
     });
 
     if (response.status == 204) {
-        selectField.removeChild(document.getElementById(elemId));
+        selectTag.removeChild(document.getElementById(elemId));
+        spinner.style.display = 'none';
         deleteBtnController();
     } else {
         let error = await response.json();
@@ -100,7 +107,7 @@ async function deleteEntity() {
 function deleteBtnController() {
     deleteBtn = mainDiv.querySelector('.deleteBtn');
 
-    if (selectField.selectedOptions[0] != undefined) {
+    if (selectTag.selectedOptions[0] != undefined) {
         deleteBtn.style.display = 'block';
     } else {
         deleteBtn.style.display = 'none';
