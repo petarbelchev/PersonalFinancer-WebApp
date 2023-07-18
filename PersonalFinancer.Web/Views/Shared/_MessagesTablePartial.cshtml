@@ -12,7 +12,8 @@
 				<table class="table table-hover align-middle">
 					<thead>
 						<tr>
-							<th scope="col">Subject</th>
+							<th></th>
+							<th class="w-50" scope="col">Subject</th>
 							<th scope="col">Date</th>
 						</tr>
 					</thead>
@@ -23,15 +24,14 @@
 							@foreach (var message in Model.Messages)
 							{
 								<tr role="button" onclick="location.href='@Url.Action("Details", "Messages", new { id = message.Id })'">
-									<td messageId="@message.Id">
-										<img src="/icons/icons8-message-64.png" style="max-width: 30px;" />
+									<td><img src="/icons/icons8-message-64.png" style="max-width: 30px;" /></td>
+									<td messageId="@message.Id">										
 										<span>	@message.Subject</span>
 
 										@if (!message.IsSeen)
 										{
 											<span class="badge text-bg-danger">New messages</span>
 										}
-
 									</td>
 									<td>@message.CreatedOnUtc.ToLocalTime().ToString("f", CultureInfo.GetCultureInfo("en-US"))</td>
 								</tr>
