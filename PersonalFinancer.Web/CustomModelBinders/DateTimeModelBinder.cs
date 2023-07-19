@@ -16,9 +16,7 @@
 			else
 			{
 				bindingContext.Result = ModelBindingResult.Failed();
-
-				bindingContext.ModelState.AddModelError(
-					bindingContext.FieldName, ValidationMessages.InvalidDate);
+				bindingContext.ModelState.AddModelError(bindingContext.FieldName, ValidationMessages.InvalidDate);
 			}
 
 			return Task.CompletedTask;

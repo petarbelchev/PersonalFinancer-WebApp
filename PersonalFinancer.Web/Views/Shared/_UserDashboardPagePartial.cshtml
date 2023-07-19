@@ -6,8 +6,6 @@
 @if (!this.User?.Identity?.IsAuthenticated ?? false)
 {
 	@*Guest Home Page*@
-	ViewData["Title"] = "Home Page";
-
 	<div class="text-center mt-5">
 		<p class="display-6">Personal Financer</p>
 		<p class="display-6 fs-4">Your Finances in One Place!</p>
@@ -20,8 +18,6 @@
 else
 {
 	@*User Home Page*@
-	ViewData["Title"] = "Dashboard";
-
 	@if (Model.Accounts.Any())
 	{
 		@*User Accounts*@
@@ -50,12 +46,12 @@ else
 
 		<form method="get" asp-action="Filtered" class="row g-3 offset-md-2 col-md-8 mb-4">
 			<div class="col-lg-5 form-floating">
-				<input type="datetime-local" name="@nameof(Model.FromLocalTime)" value="@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+				<input type="datetime-local" name="@nameof(Model.FromLocalTime)" value="@Model.FromLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
 				<label asp-for="@Model.FromLocalTime" class="form-label"></label>
 				<span asp-validation-for="@Model.FromLocalTime" class="text-danger"></span>
 			</div>
 			<div class="col-lg-5 form-floating">
-				<input type="datetime-local" name="@nameof(Model.ToLocalTime)" value="@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+				<input type="datetime-local" name="@nameof(Model.ToLocalTime)" value="@Model.ToLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
 				<label asp-for="@Model.ToLocalTime" class="form-label"></label>
 				<span asp-validation-for="@Model.ToLocalTime" class="text-danger"></span>
 			</div>

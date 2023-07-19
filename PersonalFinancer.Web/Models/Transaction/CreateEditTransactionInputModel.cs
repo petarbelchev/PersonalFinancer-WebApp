@@ -31,6 +31,7 @@
 
 		[Required]
 		[Display(Name = "Date")]
+		[ModelBinder(BinderType = typeof(DateTimeModelBinder))]
 		public DateTime CreatedOnLocalTime { get; set; }
 
 		[Required(ErrorMessage = RequiredProperty)]

@@ -16,8 +16,8 @@
 			editTransactionPath: '@TransactionEditPath',
 			body: {
 				id: '@Model.UserId',
-				fromLocalTime: '@Model.FromLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
-				toLocalTime: '@Model.ToLocalTime?.ToString("yyyy-MM-ddTHH:mm")',
+				fromLocalTime: '@Model.FromLocalTime.ToString("yyyy-MM-ddTHH:mm")',
+				toLocalTime: '@Model.ToLocalTime.AddMinutes(1).ToString("yyyy-MM-ddTHH:mm")',
 				accountId: '@Model.AccountId',
 				accountTypeId: '@Model.AccountTypeId',
 				currencyId: '@Model.CurrencyId',

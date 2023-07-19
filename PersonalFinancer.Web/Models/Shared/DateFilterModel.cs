@@ -1,17 +1,20 @@
 ﻿namespace PersonalFinancer.Web.Models.Shared
 {
-    using PersonalFinancer.Common.Messages;
-    using System.ComponentModel.DataAnnotations;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Web.CustomModelBinders;
+	using System.ComponentModel.DataAnnotations;
 
-    public class DateFilterModel : IValidatableObject
+	public class DateFilterModel : IValidatableObject
     {
-        [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+        [Required]
         [Display(Name = "From")]
-        public DateTime? FromLocalTime { get; set; }
+        [ModelBinder(BinderType = typeof(DateTimeModelBinder))]
+        public DateTime FromLocalTime { get; set; }
 
-        [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+        [Required]
         [Display(Name = "To")]
-        public DateTime? ToLocalTime { get; set; }
+		[ModelBinder(BinderType = typeof(DateTimeModelBinder))]
+		public DateTime ToLocalTime { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

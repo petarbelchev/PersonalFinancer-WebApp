@@ -23,7 +23,8 @@
 			= new List<ReplyOutputDTO>();
 
 		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
-		[StringLength(ReplyMaxLength, MinimumLength = ReplyMinLength,
+		[StringLength(ReplyMaxLength, 
+			MinimumLength = ReplyMinLength,
 			ErrorMessage = ValidationMessages.InvalidLength)]
 		[Display(Name = "Reply content")]
 		public string ReplyContent { get; set; } = null!;

@@ -36,15 +36,18 @@
 		}
 
 		[HttpDelete("{id}")]
-		[Produces("text/plain")]
-		[ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<IActionResult> DeleteTransaction(Guid id)
 		{
+			decimal balance;
+
 			try
 			{
-				await this.accountsUpdateService.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
+				balance = await this.accountsUpdateService
+					.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (ArgumentException)
 			{
@@ -59,7 +62,7 @@
 				? ResponseMessages.AdminDeletedUserTransaction
 				: ResponseMessages.DeletedTransaction;
 
-			return this.Content(message);
+			return this.Ok(new { message, balance });
 		}
 
 		[HttpGet("{id}")]

@@ -3,10 +3,8 @@
 	using AutoMapper;
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Services.User.Models;
-	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Home;
 	using PersonalFinancer.Web.Models.Shared;
@@ -60,12 +58,8 @@
                 return this.View(viewModel);
             }
 
-            UserDashboardDTO userDashboardData = await this.usersService.GetUserDashboardDataAsync(
-                this.User.IdToGuid(), 
-                inputModel.FromLocalTime ?? throw new InvalidOperationException(
-                    string.Format(ExceptionMessages.NotNullableProperty, inputModel.FromLocalTime)), 
-                inputModel.ToLocalTime ?? throw new InvalidOperationException(
-                    string.Format(ExceptionMessages.NotNullableProperty, inputModel.ToLocalTime)));
+            UserDashboardDTO userDashboardData = await this.usersService
+                .GetUserDashboardDataAsync(this.User.IdToGuid(), inputModel.FromLocalTime, inputModel.ToLocalTime);
 
 			viewModel = this.mapper.Map<UserDashboardViewModel>(userDashboardData);
 

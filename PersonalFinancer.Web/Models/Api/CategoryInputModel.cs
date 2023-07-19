@@ -7,7 +7,8 @@
 	public class CategoryInputModel : IApiEntityInputModel
     {
         [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
-        [StringLength(CategoryNameMaxLength, MinimumLength = CategoryNameMinLength,
+        [StringLength(CategoryNameMaxLength, 
+            MinimumLength = CategoryNameMinLength,
             ErrorMessage = ValidationMessages.InvalidLength)]
 		[Display(Name = "Category")]
 		public string Name { get; set; } = null!;

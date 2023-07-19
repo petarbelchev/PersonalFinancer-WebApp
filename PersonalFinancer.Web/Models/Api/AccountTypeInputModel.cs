@@ -7,7 +7,8 @@
 	public class AccountTypeInputModel : IApiEntityInputModel
     {
         [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
-        [StringLength(AccountTypeNameMaxLength, MinimumLength = AccountTypeNameMinLength,
+        [StringLength(AccountTypeNameMaxLength, 
+            MinimumLength = AccountTypeNameMinLength,
             ErrorMessage = ValidationMessages.InvalidLength)]
         [Display(Name = "Account Type")]
 		public string Name { get; set; } = null!;

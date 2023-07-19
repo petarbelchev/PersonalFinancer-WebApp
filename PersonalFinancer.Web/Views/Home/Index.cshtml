@@ -6,6 +6,8 @@
 
 @if (this.User?.Identity?.IsAuthenticated ?? false)
 {
+	ViewData["Title"] = "Dashboard";
+
 	@section Scripts {
 		<partial name="_ValidationScriptsPartial" />
 		<script src="~/lib/Chart.js/chart.umd.js"></script>
@@ -14,4 +16,8 @@
 		</script>
 		<script src="~/js/doughnutChart.js"></script>
 	}
+}
+else
+{
+	ViewData["Title"] = "Home Page";
 }

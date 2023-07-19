@@ -33,7 +33,7 @@ async function getTransactionData(transactionId) {
     if (response.status == 200) {
         renderTransaction(await response.json());
     } else {
-        alert('Oops! Something was wrong!')
+        alert('Oops! Something went wrong!')
         closeBtn.click();
     }
 }
@@ -103,12 +103,23 @@ async function deleteTransaction(e) {
         });
 
         if (response.status == 200) {
-            alert(await response.text());
+            let model = await response.json();
+            alert(model.message);
             closeBtn.click();
             loadPage(currentPage);
+            refreshBalance(model.balance);
         } else {
-            alert('Oops! Something was wrong!')
+            alert('Oops! Something went wrong!')
             closeBtn.click();
         }
+    }
+}
+
+function refreshBalance(newBalance) {
+    let balanceField = document.getElementById('balanceField');
+
+    if (balanceField != undefined) {
+        let currency = balanceField.textContent.split(' ')[1];
+        balanceField.textContent = `${newBalance.toFixed(2)} ${currency}`;
     }
 }

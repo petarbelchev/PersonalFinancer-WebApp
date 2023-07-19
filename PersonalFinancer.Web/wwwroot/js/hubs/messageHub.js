@@ -90,7 +90,7 @@ async function sendReply(replyContent) {
                     });
             })
             .catch(() => {
-                alert('Oops... Something goes wrong!');
+                alert('Oops... Something went wrong!');
                 location.reload();
             });
     } else {

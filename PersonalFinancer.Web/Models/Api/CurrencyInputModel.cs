@@ -7,7 +7,8 @@
 	public class CurrencyInputModel : IApiEntityInputModel
     {
         [Required(ErrorMessage = ValidationMessages.RequiredProperty)]
-        [StringLength(CurrencyNameMaxLength, MinimumLength = CurrencyNameMinLength,
+        [StringLength(CurrencyNameMaxLength, 
+            MinimumLength = CurrencyNameMinLength,
             ErrorMessage = ValidationMessages.InvalidLength)]
 		[Display(Name = "Currency")]
 		public string Name { get; set; } = null!;

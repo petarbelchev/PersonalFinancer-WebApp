@@ -10,7 +10,8 @@
 		public string MessageId { get; set; } = null!;
 
 		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
-		[StringLength(ReplyMaxLength, MinimumLength = ReplyMinLength, 
+		[StringLength(ReplyMaxLength, 
+			MinimumLength = ReplyMinLength, 
 			ErrorMessage = ValidationMessages.InvalidLength)]
         public string ReplyContent { get; set; } = null!;
     }

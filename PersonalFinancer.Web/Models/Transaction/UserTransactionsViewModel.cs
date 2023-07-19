@@ -25,7 +25,7 @@
 			this.UserId = userId;
 		}
 
-		public Guid UserId { get; set; }
+		public Guid UserId { get; private set; }
 
 		public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; private set; }
 
