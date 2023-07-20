@@ -5,7 +5,9 @@
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.EntityFrameworkCore;
 	using Microsoft.Extensions.Caching.Memory;
+	using Microsoft.Extensions.DependencyInjection;
 	using PersonalFinancer.Data;
+	using PersonalFinancer.Data.Configurations;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Accounts;
@@ -29,13 +31,17 @@
 
 		public static WebApplicationBuilder ConfigureDefaultIdentity(this WebApplicationBuilder builder)
 		{
+			var settings = builder.Configuration
+				.GetSection("DefaultIdentityConfigurationSettings")
+				.Get<DefaultIdentityConfigurationSettings>();
+
 			builder.Services
 				.AddDefaultIdentity<ApplicationUser>(options =>
 				{
-					options.SignIn.RequireConfirmedAccount = true;
-					options.User.RequireUniqueEmail = true;
-					options.Password.RequireUppercase = false;
-					options.Password.RequireNonAlphanumeric = false;
+					options.SignIn.RequireConfirmedAccount = settings.RequireConfirmedAccount;
+					options.User.RequireUniqueEmail = settings.RequireUniqueEmail;
+					options.Password.RequireUppercase = settings.RequireUppercase;
+					options.Password.RequireNonAlphanumeric = settings.RequireNonAlphanumeric;
 					options.Password.RequiredLength = UserPasswordMinLength;
 				})
 				.AddRoles<IdentityRole<Guid>>()
@@ -57,7 +63,7 @@
 			return builder;
 		}
 
-		public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
+		public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
 		{
 			builder.Services
 				.AddScoped<IAccountsUpdateService, AccountsUpdateService>()

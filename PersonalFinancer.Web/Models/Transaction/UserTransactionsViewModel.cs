@@ -27,12 +27,12 @@
 
 		public Guid UserId { get; private set; }
 
-		public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; private set; }
+		public IEnumerable<DropdownDTO> OwnerAccounts { get; private set; }
 
-		public IEnumerable<AccountTypeDropdownDTO> OwnerAccountTypes { get; private set; }
+		public IEnumerable<DropdownDTO> OwnerAccountTypes { get; private set; }
 
-		public IEnumerable<CurrencyDropdownDTO> OwnerCurrencies { get; private set; }
+		public IEnumerable<DropdownDTO> OwnerCurrencies { get; private set; }
 
-		public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; private set; }
+		public IEnumerable<DropdownDTO> OwnerCategories { get; private set; }
 	}
 }

@@ -24,17 +24,17 @@
 
 		public async Task<ReplyOutputDTO> AddReplyAsync(ReplyInputDTO model)
 		{
-			if (!model.IsAuthorAdmin && !await this.messagesRepo.IsUserDocumentAuthor(model.MessageId, model.AuthorId))
-				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
+			await this.AuthorizeUser(model.MessageId, model.AuthorId, model.IsAuthorAdmin);
 
 			Reply reply = this.mapper.Map<Reply>(model);
 
-			UpdateDefinition<Message> update = Builders<Message>.Update
+			UpdateDefinition<Message> updateDefinition = Builders<Message>.Update
 				.Push(x => x.Replies, reply)
 				.Set(x => model.IsAuthorAdmin ? x.IsSeenByAuthor : x.IsSeenByAdmin, false)
 				.Set(x => model.IsAuthorAdmin ? x.IsArchivedByAuthor : x.IsArchivedByAdmin, false);
 
-			UpdateResult result = await this.messagesRepo.UpdateOneAsync(x => x.Id == model.MessageId, update);
+			UpdateResult result = await this.messagesRepo
+				.UpdateOneAsync(x => x.Id == model.MessageId, updateDefinition);
 
 			return result.IsAcknowledged
 				? this.mapper.Map<ReplyOutputDTO>(reply)
@@ -43,8 +43,7 @@
 
 		public async Task ArchiveAsync(string messageId, string userId, bool isUserAdmin)
 		{
-			if (!isUserAdmin && !await this.messagesRepo.IsUserDocumentAuthor(messageId, userId))
-				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
+			await this.AuthorizeUser(messageId, userId, isUserAdmin);
 
 			UpdateResult result = await this.messagesRepo.UpdateOneAsync(
 				x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
@@ -56,16 +55,13 @@
 
 		public async Task<MessageOutputDTO> CreateAsync(MessageInputDTO model)
 		{
-			// TODO: Add validation for adding a new message!
-
 			Message newMessage = this.mapper.Map<Message>(model);
-
 			await this.messagesRepo.InsertOneAsync(newMessage);
 
 			return this.mapper.Map<MessageOutputDTO>(newMessage);
 		}
 
-		public async Task<MessagesDTO> GetAllArchivedAsync(int page = 1)
+		public async Task<MessagesDTO> GetAllArchivedMessagesAsync(int page = 1)
 			=> await this.GetMessagesAsync(m => m.IsArchivedByAdmin, page, isUserAdmin: true);
 
 		public async Task<MessagesDTO> GetAllMessagesAsync(int page = 1)
@@ -99,7 +95,7 @@
 		public async Task<string> GetMessageAuthorIdAsync(string messageId)
 			=> await this.messagesRepo.FindOneAsync(m => m.Id == messageId, m => m.AuthorId);
 
-		public async Task<MessagesDTO> GetUserArchivedAsync(string userId, int page = 1)
+		public async Task<MessagesDTO> GetUserArchivedMessagesAsync(string userId, int page = 1)
 			=> await this.GetMessagesAsync(m => m.AuthorId == userId && m.IsArchivedByAuthor, page, isUserAdmin: false);
 
 		public async Task<MessagesDTO> GetUserMessagesAsync(string userId, int page = 1)
@@ -111,27 +107,23 @@
 		public async Task<bool> HasUnseenMessagesByUserAsync(string userId)
 			=> await this.messagesRepo.AnyAsync(m => m.AuthorId == userId && !m.IsSeenByAuthor);
 
-		public async Task<bool> IsMessageSeenAsync(string messageId, bool isUserAdmin)
-		{
-			bool result = await this.messagesRepo.FindOneAsync(
-				m => m.Id == messageId, 
-				m => isUserAdmin ? m.IsSeenByAuthor : m.IsSeenByAdmin);
-
-			return result;
-		}
-
 		public async Task MarkMessageAsSeenAsync(string messageId, string userId, bool isUserAdmin)
 			=> await this.MarkAsSeenAsync(messageId, userId, isUserAdmin);
 
 		public async Task RemoveAsync(string messageId, string userId, bool isUserAdmin)
 		{
-			if (!isUserAdmin && !await this.messagesRepo.IsUserDocumentAuthor(messageId, userId))
-				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
-
+			await this.AuthorizeUser(messageId, userId, isUserAdmin);
 			DeleteResult result = await this.messagesRepo.DeleteOneAsync(messageId);
 
 			if (!result.IsAcknowledged)
 				throw new InvalidOperationException(ExceptionMessages.UnsuccessfulDelete);
+		}
+
+		/// <exception cref="ArgumentException">When the user is unauthorized.</exception>
+		private async Task AuthorizeUser(string messageId, string userId, bool isUserAdmin)
+		{
+			if (!isUserAdmin && !await this.messagesRepo.IsUserDocumentAuthor(messageId, userId))
+				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
 		}
 
 		private async Task<MessagesDTO> GetMessagesAsync(

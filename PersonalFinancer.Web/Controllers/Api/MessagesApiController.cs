@@ -81,8 +81,8 @@
 		public async Task<IActionResult> Archived(int page)
 		{
 			MessagesDTO messagesDTO = this.User.IsAdmin()
-				? await this.messagesService.GetAllArchivedAsync(page)
-				: await this.messagesService.GetUserArchivedAsync(this.User.Id(), page);
+				? await this.messagesService.GetAllArchivedMessagesAsync(page)
+				: await this.messagesService.GetUserArchivedMessagesAsync(this.User.Id(), page);
 
 			return this.Ok(new MessagesViewModel(messagesDTO, page));
 		}

@@ -3,7 +3,6 @@ using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Web.Controllers;
 using PersonalFinancer.Web.EmailSender;
 using PersonalFinancer.Web.Extensions;
-using PersonalFinancer.Web.Hubs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -11,19 +10,23 @@ builder.WebHost.UseStaticWebAssets();
 
 builder.ConfigurePersonalFinancerDbContext();
 
-builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
+builder.Services.Configure<MongoDbConfigurationSettings>(
+    builder.Configuration.GetSection("MongoDbConfigurationSettings"));
 
-builder.Services.Configure<AuthEmailSenderOptions>(builder.Configuration.GetSection("SendGrid"));
+builder.Services.Configure<AuthEmailSenderOptions>(
+    builder.Configuration.GetSection("SendGrid"));
 
 builder.ConfigureDefaultIdentity();
 
 builder.ConfigureControllersWithViews();
 
-builder.AddServices();
+builder.AddApplicationServices();
 
 builder.Services.AddSignalR();
 
-builder.Services.AddAutoMapper(typeof(IAccountsUpdateService).Assembly, typeof(HomeController).Assembly);
+builder.Services.AddAutoMapper(
+    typeof(IAccountsUpdateService).Assembly, 
+    typeof(HomeController).Assembly);
 
 builder.Services.ConfigureApplicationCookie(options => options.Cookie.HttpOnly = true);
 
@@ -61,9 +64,7 @@ app.UseEndpoints(endpoints =>
     endpoints.MapDefaultControllerRoute();
 });
 
-app.MapHub<MessageHub>("/message");
-app.MapHub<NotificationsHub>("/notifications");
-app.MapHub<AllMessagesHub>("/allMessages");
+app.UseSignalRHubs();
 
 app.MapRazorPages();
 

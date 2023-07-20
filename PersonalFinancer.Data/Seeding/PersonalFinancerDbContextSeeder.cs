@@ -9,9 +9,9 @@
 	using static PersonalFinancer.Common.Constants.CategoryConstants;
 	using static PersonalFinancer.Common.Constants.SeedConstants;
 
-	public class PersonalFinancerDbContextSeeder
+	public static class PersonalFinancerDbContextSeeder
 	{
-		public async Task SeedAsync(PersonalFinancerDbContext dbContext, IServiceProvider serviceProvider)
+		public static async Task SeedAsync(PersonalFinancerDbContext dbContext, IServiceProvider serviceProvider)
 		{
 			RoleManager<IdentityRole<Guid>> roleManager =
 				serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
@@ -21,7 +21,7 @@
 			// This seed is mandatory, except for seeding the test user.
 			await RoleSeeder.SeedAsync(roleManager);
 			await UserSeeder.SeedAsync(userManager);
-			await this.SeedInitialBalanceCategory(dbContext, userManager);
+			await SeedInitialBalanceCategory(dbContext, userManager);
 
 			// This seed is for the test user and is not mandatory.
 			// If you don't have a test user, don't execute this seed.
@@ -39,7 +39,7 @@
 				await seeder.SeedAsync(dbContext, testUser);
 		}
 
-		private async Task SeedInitialBalanceCategory(PersonalFinancerDbContext dbContext, UserManager<ApplicationUser> userManager)
+		private static async Task SeedInitialBalanceCategory(PersonalFinancerDbContext dbContext, UserManager<ApplicationUser> userManager)
 		{
 			var initialBalanceCategoryId = Guid.Parse(InitialBalanceCategoryId);
 

@@ -54,7 +54,8 @@ function renderTransaction(data) {
                             month: "long",
                             day: "numeric",
                             hour: "numeric",
-                            minute: "numeric"
+                            minute: "numeric",
+                            weekday: "long"
                         })}
                     </span>
 				</div>

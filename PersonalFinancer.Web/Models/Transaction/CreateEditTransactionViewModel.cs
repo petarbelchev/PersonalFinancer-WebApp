@@ -4,10 +4,10 @@
 
 	public class CreateEditTransactionViewModel : CreateEditTransactionInputModel
     {
-        public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; set; }
-            = new List<CategoryDropdownDTO>();
+        public IEnumerable<DropdownDTO> OwnerCategories { get; set; }
+            = new List<DropdownDTO>();
 
-        public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
-            = new List<AccountDropdownDTO>();
+        public IEnumerable<DropdownDTO> OwnerAccounts { get; set; }
+            = new List<DropdownDTO>();
     }
 }

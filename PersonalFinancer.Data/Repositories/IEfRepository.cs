@@ -4,12 +4,12 @@
     {
         Task AddAsync(T entity);
 
-        Task<int> SaveChangesAsync();
-
-        void Remove(T entity);
-
         IQueryable<T> All();
 
         Task<T?> FindAsync(Guid id);
+
+        void Remove(T entity);
+
+        Task<int> SaveChangesAsync();
     }
 }

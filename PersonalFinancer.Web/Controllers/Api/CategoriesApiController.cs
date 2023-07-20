@@ -28,7 +28,10 @@
 			}
 			catch (ArgumentException)
 			{
-				return this.BadRequest(string.Format(ExceptionMessages.ExistingUserEntityName, "category", inputModel.Name));
+				return this.BadRequest(string.Format(
+					ExceptionMessages.ExistingUserEntityName, 
+					"category", 
+					inputModel.Name));
 			}
 		}
 

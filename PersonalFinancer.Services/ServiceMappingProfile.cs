@@ -14,15 +14,15 @@
     {
         public ServiceMappingProfile()
         {
-			this.CreateMap<Category, CategoryDropdownDTO>()
+			this.CreateMap<Category, DropdownDTO>()
 				.ForMember(dest => dest.Name, opt => opt
 					.MapFrom(src => src.Name + (src.IsDeleted ? " (Deleted)" : string.Empty)));
 
-			this.CreateMap<Currency, CurrencyDropdownDTO>()
+			this.CreateMap<Currency, DropdownDTO>()
 				.ForMember(dest => dest.Name, opt => opt
 					.MapFrom(src => src.Name + (src.IsDeleted ? " (Deleted)" : string.Empty)));
 
-			this.CreateMap<Account, AccountDropdownDTO>()
+			this.CreateMap<Account, DropdownDTO>()
 				.ForMember(dest => dest.Name, opt => opt
 					.MapFrom(src => src.Name + (src.IsDeleted ? " (Deleted)" : string.Empty)));
 
@@ -63,7 +63,7 @@
 					.MapFrom(src => src.Name.Trim()))
 				.ForMember(dest => dest.Owner, opt => opt.Ignore());
 
-			this.CreateMap<AccountType, AccountTypeDropdownDTO>()
+			this.CreateMap<AccountType, DropdownDTO>()
 				.ForMember(dest => dest.Name, opt => opt
 					.MapFrom(src => src.Name + (src.IsDeleted ? " (Deleted)" : string.Empty)));
 

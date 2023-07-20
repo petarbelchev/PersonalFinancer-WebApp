@@ -1,8 +1,6 @@
 ﻿namespace PersonalFinancer.Services.Messages
 {
-	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Services.Messages.Models;
-	using System.Linq.Expressions;
 
 	public interface IMessagesService
 	{
@@ -16,7 +14,7 @@
 
 		Task<MessageOutputDTO> CreateAsync(MessageInputDTO model);
 
-		Task<MessagesDTO> GetAllArchivedAsync(int page = 1);
+		Task<MessagesDTO> GetAllArchivedMessagesAsync(int page = 1);
 
 		Task<MessagesDTO> GetAllMessagesAsync(int page = 1);
 
@@ -26,15 +24,13 @@
 
 		Task<string> GetMessageAuthorIdAsync(string messageId);
 
-		Task<MessagesDTO> GetUserArchivedAsync(string userId, int page = 1);
+		Task<MessagesDTO> GetUserArchivedMessagesAsync(string userId, int page = 1);
 
 		Task<MessagesDTO> GetUserMessagesAsync(string userId, int page = 1);
 
 		Task<bool> HasUnseenMessagesByAdminAsync();
 
 		Task<bool> HasUnseenMessagesByUserAsync(string userId);
-
-		Task<bool> IsMessageSeenAsync(string messageId, bool isUserAdmin);
 
 		/// <exception cref="InvalidOperationException">When the update was unsuccessful.</exception>
 		Task MarkMessageAsSeenAsync(string messageId, string userId, bool isUserAdmin);

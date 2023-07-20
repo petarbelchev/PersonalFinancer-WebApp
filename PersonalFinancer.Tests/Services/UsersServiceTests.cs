@@ -75,12 +75,12 @@
 				OwnerAccounts = await this.accountsRepo.All()
 					.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
 					.OrderBy(a => a.Name)
-					.Select(a => this.mapper.Map<AccountDropdownDTO>(a))
+					.Select(a => this.mapper.Map<DropdownDTO>(a))
 					.ToArrayAsync(),
 				OwnerCategories = await this.categoriesRepo.All()
 					.Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
 					.OrderBy(c => c.Name)
-					.Select(c => this.mapper.Map<CategoryDropdownDTO>(c))
+					.Select(c => this.mapper.Map<DropdownDTO>(c))
 					.ToArrayAsync()
 			};
 
@@ -118,12 +118,12 @@
 				OwnerAccountTypes = await this.accountTypeRepo.All()
 					.Where(at => at.OwnerId == this.User1.Id && !at.IsDeleted)
 					.OrderBy(at => at.Name)
-					.Select(at => this.mapper.Map<AccountTypeDropdownDTO>(at))
+					.Select(at => this.mapper.Map<DropdownDTO>(at))
 					.ToArrayAsync(),
 				OwnerCurrencies = await this.currenciesRepo.All()
 					.Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
 					.OrderBy(c => c.Name)
-					.Select(c => this.mapper.Map<CurrencyDropdownDTO>(c))
+					.Select(c => this.mapper.Map<DropdownDTO>(c))
 					.ToArrayAsync()
 			};
 
@@ -258,7 +258,7 @@
 		public async Task UserDetails_ShouldReturnCorrectData_WithValidUserId()
 		{
 			//Arrange
-			var expected = await this.usersRepo.All()
+			UserDetailsDTO expected = await this.usersRepo.All()
 				.Where(u => u.Id == this.User1.Id)
 				.ProjectTo<UserDetailsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();

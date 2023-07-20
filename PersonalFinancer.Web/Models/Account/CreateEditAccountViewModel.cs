@@ -4,10 +4,10 @@
 
 	public class CreateEditAccountViewModel : CreateEditAccountInputModel
 	{
-		public IEnumerable<AccountTypeDropdownDTO> OwnerAccountTypes { get; set; }
-			= new List<AccountTypeDropdownDTO>();
+		public IEnumerable<DropdownDTO> OwnerAccountTypes { get; set; }
+			= new List<DropdownDTO>();
 
-		public IEnumerable<CurrencyDropdownDTO> OwnerCurrencies { get; set; }
-			= new List<CurrencyDropdownDTO>();
+		public IEnumerable<DropdownDTO> OwnerCurrencies { get; set; }
+			= new List<DropdownDTO>();
 	}
 }

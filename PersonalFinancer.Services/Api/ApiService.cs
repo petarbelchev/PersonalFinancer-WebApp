@@ -28,8 +28,11 @@
 
         public async Task<ApiEntityDTO> CreateEntityAsync(string name, Guid ownerId)
         {
+            string trimmedName = name.Trim();
+
             T? entity = await this.repo.All()
-                .FirstOrDefaultAsync(x => x.Name == name && x.OwnerId == ownerId);
+                .FirstOrDefaultAsync(x => x.Name.ToLower() == trimmedName.ToLower() && 
+                                          x.OwnerId == ownerId);
 
             if (entity != null)
             {
@@ -37,13 +40,13 @@
                     throw new ArgumentException(ExceptionMessages.ExistingEntityName);
 
                 entity.IsDeleted = false;
-                entity.Name = name.Trim();
+                entity.Name = trimmedName;
             }
             else
             {
                 entity = new T
                 {
-                    Name = name.Trim(),
+                    Name = trimmedName,
                     OwnerId = ownerId
                 };
 
@@ -62,15 +65,12 @@
             T? entity = await this.repo.FindAsync(entityId) ?? 
                 throw new InvalidOperationException(ExceptionMessages.EntityDoesNotExist);
             
-            if (isUserAdmin)
-                userId = entity.OwnerId;
-
-            if (entity.OwnerId != userId)
+            if (!isUserAdmin && entity.OwnerId != userId)
                 throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
 
             entity.IsDeleted = true;
             await this.repo.SaveChangesAsync();
-            this.RemoveCache(userId);
+            this.RemoveCache(entity.OwnerId);
 		}
 
 		private void RemoveCache(Guid userId)

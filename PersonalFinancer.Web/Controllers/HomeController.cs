@@ -28,7 +28,7 @@
             if (this.User.IsAdmin())
                 return this.LocalRedirect("/Admin");
 
-            if (this.User.Identity?.IsAuthenticated ?? false)
+            if (this.User.IsAuthenticated())
             {
                 DateTime fromLocalTime = DateTime.Now.AddMonths(-1);
                 DateTime toLocalTime = DateTime.Now;
@@ -54,14 +54,14 @@
             {
                 viewModel = this.mapper.Map<UserDashboardViewModel>(inputModel);
                 viewModel.Accounts = await this.usersService.GetUserAccountsCardsAsync(this.User.IdToGuid());
-
-                return this.View(viewModel);
             }
+            else
+			{
+				UserDashboardDTO userDashboardData = await this.usersService
+					.GetUserDashboardDataAsync(this.User.IdToGuid(), inputModel.FromLocalTime, inputModel.ToLocalTime);
 
-            UserDashboardDTO userDashboardData = await this.usersService
-                .GetUserDashboardDataAsync(this.User.IdToGuid(), inputModel.FromLocalTime, inputModel.ToLocalTime);
-
-			viewModel = this.mapper.Map<UserDashboardViewModel>(userDashboardData);
+				viewModel = this.mapper.Map<UserDashboardViewModel>(userDashboardData);
+			}
 
             return this.View(viewModel);
         }

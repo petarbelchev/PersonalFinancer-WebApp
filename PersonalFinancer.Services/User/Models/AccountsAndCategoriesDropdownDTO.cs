@@ -6,8 +6,8 @@ namespace PersonalFinancer.Services.User.Models
 
 	public class AccountsAndCategoriesDropdownDTO
 	{
-		public IEnumerable<AccountDropdownDTO> OwnerAccounts { get; set; }
+		public IEnumerable<DropdownDTO> OwnerAccounts { get; set; }
 
-		public IEnumerable<CategoryDropdownDTO> OwnerCategories { get; set; }
+		public IEnumerable<DropdownDTO> OwnerCategories { get; set; }
 	}
 }

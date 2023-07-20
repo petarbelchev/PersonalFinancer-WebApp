@@ -17,53 +17,53 @@
 	[TestFixture]
 	internal class TransactionsControllerTests : ControllersUnitTestsBase
 	{
-		private static readonly AccountDropdownDTO[] expAccountsDropdown = new AccountDropdownDTO[]
+		private static readonly DropdownDTO[] expAccountsDropdown = new DropdownDTO[]
 		{
-			new AccountDropdownDTO
+			new DropdownDTO
 			{
 				Id = Guid.NewGuid(),
 				Name = "Account name 1"
 			},
-			new AccountDropdownDTO
+			new DropdownDTO
 			{
 				Id = Guid.NewGuid(),
 				Name = "Account name 2"
 			}
 		};
-		private static readonly CategoryDropdownDTO[] expCategoriesDropdown = new CategoryDropdownDTO[]
+		private static readonly DropdownDTO[] expCategoriesDropdown = new DropdownDTO[]
 		{
-			new CategoryDropdownDTO
+			new DropdownDTO
 			{
 				Id = Guid.NewGuid(),
 				Name = "Category name 1"
 			},
-			new CategoryDropdownDTO
+			new DropdownDTO
 			{
 				Id = Guid.NewGuid(),
 				Name = "Category name 2"
 			}
 		};
-		private static readonly AccountTypeDropdownDTO[] expAccountTypesDropdown = new AccountTypeDropdownDTO[]
+		private static readonly DropdownDTO[] expAccountTypesDropdown = new DropdownDTO[]
 		{
-			new AccountTypeDropdownDTO
+			new DropdownDTO
 			{
 				Id = Guid.NewGuid(),
 				Name = "AccType 1"
 			},
-			new AccountTypeDropdownDTO
+			new DropdownDTO
 			{
 				Id = Guid.NewGuid(),
 				Name = "AccType 2"
 			}
 		};
-		private static readonly CurrencyDropdownDTO[] expCurrenciesDropdown = new CurrencyDropdownDTO[]
+		private static readonly DropdownDTO[] expCurrenciesDropdown = new DropdownDTO[]
 		{
-			new CurrencyDropdownDTO
+			new DropdownDTO
 			{
 				Id = Guid.NewGuid(),
 				Name = "Currency 1"
 			},
-			new CurrencyDropdownDTO
+			new DropdownDTO
 			{
 				Id = Guid.NewGuid(),
 				Name = "Currency 2"

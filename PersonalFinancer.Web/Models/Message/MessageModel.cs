@@ -4,7 +4,7 @@
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.MessageConstants;
 
-	public class MessageInputModel
+	public class MessageModel
 	{
 		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
 		[StringLength(MessageSubjectMaxLength, 

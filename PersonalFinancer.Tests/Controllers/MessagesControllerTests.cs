@@ -65,7 +65,7 @@
 		}
 
 		[Test]
-		public async Task All_ShouldReturnView_WhenUserIsNotAdmin()
+		public void All_ShouldReturnView_WhenUserIsNotAdmin()
 		{
 			//Arrange
 			//int page = 1;
@@ -99,27 +99,28 @@
 			var viewResult = (ViewResult)this.controller.All();
 
 			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(viewResult, Is.Not.Null);
+			Assert.That(viewResult, Is.Not.Null);
 
-				//MessagesViewModel viewModel = viewResult.Model as MessagesViewModel ??
-				//	throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+			//Assert.Multiple(() =>
+			//{
 
-				//Assert.That(viewModel.Pagination.TotalElements, 
-				//	Is.EqualTo(serviceReturnDto.TotalMessagesCount));
+			//	//MessagesViewModel viewModel = viewResult.Model as MessagesViewModel ??
+			//	//	throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				//Assert.That(viewModel.Pagination.Page, Is.EqualTo(page));
+			//	//Assert.That(viewModel.Pagination.TotalElements, 
+			//	//	Is.EqualTo(serviceReturnDto.TotalMessagesCount));
 
-				//AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
-			});
+			//	//Assert.That(viewModel.Pagination.Page, Is.EqualTo(page));
+
+			//	//AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
+			//});
 		}
 
 		[Test]
-		public async Task All_ShouldReturnView_WhenUserIsAdmin()
+		public void All_ShouldReturnView_WhenUserIsAdmin()
 		{
 			//Arrange
-			int page = 1;
+			//int page = 1;
 
 			//var serviceReturnDto = new MessagesDTO
 			//{
@@ -150,27 +151,28 @@
 			var viewResult = (ViewResult)this.controller.All();
 
 			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(viewResult, Is.Not.Null);
+			Assert.That(viewResult, Is.Not.Null);
+			
+			//Assert.Multiple(() =>
+			//{
 
-				//MessagesViewModel viewModel = viewResult.Model as MessagesViewModel ??
-				//	throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+			//	//MessagesViewModel viewModel = viewResult.Model as MessagesViewModel ??
+			//	//	throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				//Assert.That(viewModel.Pagination.TotalElements,
-				//	Is.EqualTo(serviceReturnDto.TotalMessagesCount));
+			//	//Assert.That(viewModel.Pagination.TotalElements,
+			//	//	Is.EqualTo(serviceReturnDto.TotalMessagesCount));
 
-				//Assert.That(viewModel.Pagination.Page, Is.EqualTo(page));
+			//	//Assert.That(viewModel.Pagination.Page, Is.EqualTo(page));
 
-				//AssertSamePropertiesValuesAreEqual(viewModel.Messages, serviceReturnDto);
-			});
+			//	//AssertSamePropertiesValuesAreEqual(viewModel.Messages, serviceReturnDto);
+			//});
 		}
 
 		[Test]
 		public void Create_OnGet_ShouldReturnViewModel()
 		{
 			//Arrange
-			var expected = new MessageInputModel();
+			var expected = new MessageModel();
 
 			//Act
 			var viewResult = (ViewResult)this.controller.Create();
@@ -180,7 +182,7 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				MessageInputModel viewModel = viewResult.Model as MessageInputModel ??
+				MessageModel viewModel = viewResult.Model as MessageModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(viewModel, expected);
@@ -191,7 +193,7 @@
 		public async Task Create_OnPost_ShouldReturnViewModelWithErrors_WhenModelIsInvalid()
 		{
 			//Arrange
-			var inputModel = new MessageInputModel
+			var inputModel = new MessageModel
 			{
 				Subject = "Subject",
 				Content = ""
@@ -207,7 +209,7 @@
 			{
 				Assert.That(viewResult, Is.Not.Null);
 
-				MessageInputModel model = viewResult.Model as MessageInputModel ??
+				MessageModel model = viewResult.Model as MessageModel ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
 				AssertSamePropertiesValuesAreEqual(model, inputModel);
@@ -223,7 +225,7 @@
 		public async Task Create_OnPost_ShouldRedirectToAction_WhenMessageWasCreated()
 		{
 			//Arrange
-			var inputModel = new MessageInputModel
+			var inputModel = new MessageModel
 			{
 				Subject = "Subject",
 				Content = "Message Valid Content"

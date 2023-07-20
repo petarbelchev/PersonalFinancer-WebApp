@@ -60,7 +60,7 @@
 					.ProjectTo<AccountsAndCategoriesDropdownDTO>(this.mapper.ConfigurationProvider)
 					.FirstAsync();
 
-				this.memoryCache.Set(cacheKey, dropdowns);
+				this.memoryCache.Set(cacheKey, dropdowns, TimeSpan.FromDays(3));
 			}
 
 			return dropdowns;
@@ -86,7 +86,7 @@
 					.ProjectTo<AccountTypesAndCurrenciesDropdownDTO>(this.mapper.ConfigurationProvider)
 					.FirstAsync();
 
-				this.memoryCache.Set(cacheKey, dropdowns);
+				this.memoryCache.Set(cacheKey, dropdowns, TimeSpan.FromDays(3));
 			}
 
 			return dropdowns;
@@ -159,6 +159,7 @@
 						})
 						.ToArray()
 				})
+				.AsSplitQuery()
 				.FirstAsync();
 
 			return dto;
@@ -173,7 +174,7 @@
 
 			resultDTO.OwnerCategories.Add(await this.categoriesRepo.All()
 				.Where(c => c.Id == Guid.Parse(InitialBalanceCategoryId))
-				.ProjectTo<CategoryDropdownDTO>(this.mapper.ConfigurationProvider)
+				.ProjectTo<DropdownDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync());
 
 			return resultDTO;

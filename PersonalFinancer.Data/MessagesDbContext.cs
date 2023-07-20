@@ -10,7 +10,7 @@
         private readonly IMongoClient client;
         private readonly IMongoDatabase database;
 
-        public MessagesDbContext(IOptions<MongoDbSettings> settings)
+        public MessagesDbContext(IOptions<MongoDbConfigurationSettings> settings)
         {
             var camelCaseConvention = new ConventionPack { new CamelCaseElementNameConvention() };
             ConventionRegistry.Register("camelCase", camelCaseConvention, type => true);

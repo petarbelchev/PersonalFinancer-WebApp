@@ -28,7 +28,10 @@
 			}
 			catch (ArgumentException)
 			{
-				return this.BadRequest(string.Format(ExceptionMessages.ExistingUserEntityName, "account type", inputModel.Name));
+				return this.BadRequest(string.Format(
+					ExceptionMessages.ExistingUserEntityName, 
+					"account type", 
+					inputModel.Name));
 			}
 		}
 

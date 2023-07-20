@@ -21,27 +21,27 @@
 
 		private static readonly AccountTypesAndCurrenciesDropdownDTO expAccountTypesAndCurrencies = new()
 		{
-			OwnerAccountTypes = new AccountTypeDropdownDTO[]
+			OwnerAccountTypes = new DropdownDTO[]
 			{
-				new AccountTypeDropdownDTO
+				new DropdownDTO
 				{
 					Id = Guid.NewGuid(),
 					Name = "AccType 1"
 				},
-				new AccountTypeDropdownDTO
+				new DropdownDTO
 				{
 					Id = Guid.NewGuid(),
 					Name = "AccType 2"
 				}
 			},
-			OwnerCurrencies = new CurrencyDropdownDTO[]
+			OwnerCurrencies = new DropdownDTO[]
 			{
-				new CurrencyDropdownDTO
+				new DropdownDTO
 				{
 					Id = Guid.NewGuid(),
 					Name = "Currency 1"
 				},
-				new CurrencyDropdownDTO
+				new DropdownDTO
 				{
 					Id = Guid.NewGuid(),
 					Name = "Currency 2"
@@ -469,7 +469,7 @@
 		public async Task AccountDetailsOnPost_ShouldReturnBadRequest_WhenModelIsInvalidAndAccountDoesNotExist()
 		{
 			//Arrange
-			Guid accountId = Guid.NewGuid();
+			var accountId = Guid.NewGuid();
 			var inputModel = new AccountDetailsInputModel
 			{
 				Id = accountId,

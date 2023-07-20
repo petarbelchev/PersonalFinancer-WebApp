@@ -1,6 +1,6 @@
 ﻿namespace PersonalFinancer.Data.Configurations
 {
-    public class MongoDbSettings
+    public class MongoDbConfigurationSettings
     {
         public string ConnectionString { get; set; } = null!;
 

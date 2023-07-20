@@ -2,6 +2,7 @@
 {
 	using PersonalFinancer.Data;
 	using PersonalFinancer.Data.Seeding;
+	using PersonalFinancer.Web.Hubs;
 
 	public static class WebApplicationExtensions
 	{
@@ -13,10 +14,19 @@
 			PersonalFinancerDbContext dbContext =
 				serviceProvider.GetRequiredService<PersonalFinancerDbContext>();
 
-			new PersonalFinancerDbContextSeeder()
+			PersonalFinancerDbContextSeeder
 				.SeedAsync(dbContext, serviceProvider)
 				.GetAwaiter()
 				.GetResult();
+
+			return app;
+		}
+
+		public static WebApplication UseSignalRHubs(this WebApplication app)
+		{
+			app.MapHub<MessageHub>("/message");
+			app.MapHub<NotificationsHub>("/notifications");
+			app.MapHub<AllMessagesHub>("/allMessages");
 
 			return app;
 		}

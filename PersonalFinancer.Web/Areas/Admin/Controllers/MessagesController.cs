@@ -1,14 +1,17 @@
 ﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers
 {
-    using AutoMapper;
-    using Microsoft.AspNetCore.Mvc;
+	using AutoMapper;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.SignalR;
 	using PersonalFinancer.Services.Messages;
-    using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Web.Hubs;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[Area("Admin")]
-    public class MessagesController : Web.Controllers.MessagesController
+	[Authorize(Roles = AdminRoleName)]
+	public class MessagesController : Web.Controllers.MessagesController
     {
         public MessagesController(
             IMessagesService messagesService,

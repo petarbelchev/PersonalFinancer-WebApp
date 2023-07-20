@@ -6,8 +6,8 @@ namespace PersonalFinancer.Services.User.Models
 
 	public class AccountTypesAndCurrenciesDropdownDTO
 	{
-		public IEnumerable<AccountTypeDropdownDTO> OwnerAccountTypes { get; set; }
+		public IEnumerable<DropdownDTO> OwnerAccountTypes { get; set; }
 
-		public IEnumerable<CurrencyDropdownDTO> OwnerCurrencies { get; set; }
+		public IEnumerable<DropdownDTO> OwnerCurrencies { get; set; }
 	}
 }

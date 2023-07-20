@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-
-#nullable disable
+﻿#nullable disable
 
 namespace PersonalFinancer.Data.Migrations
 {
-    public partial class RenameDateTimeProperty : Migration
+	using Microsoft.EntityFrameworkCore.Migrations;
+
+	public partial class RenameDateTimeProperty : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

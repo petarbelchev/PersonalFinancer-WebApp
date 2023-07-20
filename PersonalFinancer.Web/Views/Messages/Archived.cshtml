@@ -3,14 +3,11 @@
 @model MessagesViewModel
 @{
 	ViewData["Title"] = "Archived Messages";
-
-	// NOTE: SignalR?
 }
 
 <partial name="_MessagesTablePartial" model="Model" />
 
 @section Scripts {
-	@*<script src="~/js/hubs/allMessagesHub.js"></script>*@
 	<script>
 		let params = {
 			url: '@UrlPathConstants.ApiArchivedMessagesEndpoint'

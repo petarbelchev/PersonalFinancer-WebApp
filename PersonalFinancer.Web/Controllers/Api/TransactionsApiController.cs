@@ -72,11 +72,11 @@
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<IActionResult> GetTransactionDetails(Guid id)
 		{
-			TransactionDetailsDTO viewModel;
+			TransactionDetailsDTO model;
 
 			try
 			{
-				viewModel = await this.accountsInfoService
+				model = await this.accountsInfoService
 					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (ArgumentException)
@@ -88,7 +88,7 @@
 				return this.BadRequest();
 			}
 
-			return this.Ok(viewModel);
+			return this.Ok(model);
 		}
 
 		[Authorize(Roles = UserRoleName)]
@@ -103,9 +103,7 @@
 			if (!this.ModelState.IsValid)
 				return this.BadRequest();
 
-			Guid userId = this.User.IdToGuid();
-
-			if (inputModel.Id != userId)
+			if (inputModel.Id != this.User.IdToGuid())
 				return this.Unauthorized();
 
 			TransactionsFilterDTO filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
@@ -120,9 +118,7 @@
 				return this.BadRequest();
 			}
 
-			var userTransactions = new TransactionsViewModel(
-				transactionsDTO,
-				inputModel.Page);
+			var userTransactions = new TransactionsViewModel(transactionsDTO, inputModel.Page);
 
 			return this.Ok(userTransactions);
 		}

@@ -97,7 +97,8 @@
 			this.memoryCache.Remove(AccountsAndCategoriesKey + account.OwnerId);
 		}
 
-		public async Task<decimal> DeleteTransactionAsync(Guid transactionId, Guid userId, bool isUserAdmin)
+		public async Task<decimal> DeleteTransactionAsync(
+			Guid transactionId, Guid userId, bool isUserAdmin)
 		{
 			Transaction transaction = await this.transactionsRepo.All()
 			   .Include(t => t.Account)
@@ -194,7 +195,8 @@
 			await this.transactionsRepo.SaveChangesAsync();
 		}
 
-		private static void ChangeAccountBalance(Account account, decimal amount, TransactionType transactionType)
+		private static void ChangeAccountBalance(
+			Account account, decimal amount, TransactionType transactionType)
 		{
 			if (transactionType == TransactionType.Income)
 				account.Balance += amount;
@@ -224,7 +226,7 @@
 			=> await this.accountsRepo.All().FirstAsync(a => a.Id == accountId && !a.IsDeleted);
 
 		private async Task<bool> IsNameExistAsync(string name, Guid userId)
-			=> await this.accountsRepo.All().AnyAsync(a => a.OwnerId == userId && a.Name == name);
+			=> await this.accountsRepo.All().AnyAsync(a => a.OwnerId == userId && a.Name == name.Trim());
 
 		private static void RestoreAccountBalance(Transaction transaction)
 		{
