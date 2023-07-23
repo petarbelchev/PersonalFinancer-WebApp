@@ -13,6 +13,11 @@
 	[TestFixture]
 	internal class AccountsUpdateServiceTests : ServicesUnitTestsBase
 	{
+		private Guid mainTestAccountTypeId;
+		private Guid mainTestCurrencyId;
+		private Guid mainTestCategoryId;
+		private Guid mainTestAccountId;
+
 		private IEfRepository<Account> accountsRepo;
 		private IEfRepository<Transaction> transactionsRepo;
 		private IEfRepository<AccountType> accountTypesRepo;
@@ -22,7 +27,7 @@
 		private IAccountsUpdateService accountsUpdateService;
 
 		[SetUp]
-		public void SetUp()
+		public async Task SetUp()
 		{
 			this.accountsRepo = new EfRepository<Account>(this.dbContext);
 			this.transactionsRepo = new EfRepository<Transaction>(this.dbContext);
@@ -31,26 +36,46 @@
 			this.categoriesRepo = new EfRepository<Category>(this.dbContext);
 
 			this.accountsUpdateService = new AccountsUpdateService(
-				this.accountsRepo, 
-				this.transactionsRepo, 
+				this.accountsRepo,
+				this.transactionsRepo,
 				this.accountTypesRepo,
-				this.currenciesRepo, 
-				this.categoriesRepo, 
+				this.currenciesRepo,
+				this.categoriesRepo,
 				this.mapper,
 				this.memoryCache);
+
+			this.mainTestAccountTypeId = await this.accountTypesRepo.All()
+				.Where(at => at.OwnerId == this.mainTestUserId && !at.IsDeleted)
+				.Select(at => at.Id)
+				.FirstAsync();
+
+			this.mainTestCurrencyId = await this.currenciesRepo.All()
+				.Where(c => c.OwnerId == this.mainTestUserId && !c.IsDeleted)
+				.Select(at => at.Id)
+				.FirstAsync();
+
+			this.mainTestCategoryId = await this.categoriesRepo.All()
+				.Where(at => at.OwnerId == this.mainTestUserId && !at.IsDeleted)
+				.Select(at => at.Id)
+				.FirstAsync();
+
+			this.mainTestAccountId = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.Select(at => at.Id)
+				.FirstAsync();
 		}
 
 		[Test]
-		public async Task CreateAccount_ShouldAddNewAccountAndTransaction_WithValidInput()
+		public async Task CreateAccountAsync_ShouldAddNewAccountAndInitialBalanceTransaction_WhenInputIsValid()
 		{
 			//Arrange
-			var inputModel = new CreateEditAccountOutputDTO
+			var inputModel = new CreateEditAccountInputDTO
 			{
 				Name = "AccountWithNonZeroBalance",
-				AccountTypeId = this.AccType1_User1_WithAcc.Id,
+				AccountTypeId = this.mainTestAccountTypeId,
 				Balance = 100,
-				CurrencyId = this.Currency1_User1_WithAcc.Id,
-				OwnerId = this.User1.Id
+				CurrencyId = this.mainTestCurrencyId,
+				OwnerId = this.mainTestUserId
 			};
 
 			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
@@ -70,31 +95,31 @@
 
 				Assert.That(await this.accountsRepo.All().CountAsync(), Is.EqualTo(accountsCountBefore + 1));
 				Assert.That(newAccount.Transactions, Has.Count.EqualTo(1));
-				Assert.That(initialBalanceTransaction.CategoryId, Is.EqualTo(this.Category_InitialBalance.Id));
+				Assert.That(initialBalanceTransaction.CategoryId, Is.EqualTo(Guid.Parse(InitialBalanceCategoryId)));
 				Assert.That(initialBalanceTransaction.IsInitialBalance, Is.True);
 				Assert.That(initialBalanceTransaction.TransactionType, Is.EqualTo(TransactionType.Income));
 				Assert.That(initialBalanceTransaction.Amount, Is.EqualTo(inputModel.Balance));
-				Assert.That(initialBalanceTransaction.Reference, Is.EqualTo(this.Category_InitialBalance.Name));
+				Assert.That(initialBalanceTransaction.Reference, Is.EqualTo(CategoryInitialBalanceName));
 			});
 		}
 
 		[Test]
-		public async Task CreateAccount_ShouldAddNewAccountWithoutTransaction_WithValidInput()
+		public async Task CreateAccountAsync_ShouldAddNewAccountWithoutTransaction_WhenInputIsValid()
 		{
 			//Arrange
-			var newAccountModel = new CreateEditAccountOutputDTO
+			var inputModel = new CreateEditAccountInputDTO
 			{
 				Name = "AccountWithZeroBalance",
-				AccountTypeId = this.AccType1_User1_WithAcc.Id,
+				AccountTypeId = this.mainTestAccountTypeId,
 				Balance = 0,
-				CurrencyId = this.Currency1_User1_WithAcc.Id,
-				OwnerId = this.User1.Id
+				CurrencyId = this.mainTestCurrencyId,
+				OwnerId = this.mainTestUserId
 			};
 
 			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
 
 			//Act
-			Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(newAccountModel);
+			Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(inputModel);
 			Account newAccount = await this.accountsRepo.All()
 				.Where(a => a.Id == newAccountId)
 				.Include(a => a.Transactions)
@@ -103,7 +128,7 @@
 			//Assert
 			Assert.Multiple(async () =>
 			{
-				AssertSamePropertiesValuesAreEqual(newAccount, newAccountModel);
+				AssertSamePropertiesValuesAreEqual(newAccount, inputModel);
 
 				Assert.That(await this.accountsRepo.All().CountAsync(), Is.EqualTo(accountsCountBefore + 1));
 				Assert.That(newAccount.Transactions.Any(), Is.False);
@@ -111,35 +136,40 @@
 		}
 
 		[Test]
-		public void CreateAccount_ShouldThrowException_WhenUserHaveAccountWithSameName()
+		public async Task CreateAccountAsync_ShouldThrowArgumentException_WhenUserHaveAccountWithTheSameName()
 		{
 			//Arrange
-			var newAccountModel = new CreateEditAccountOutputDTO
+			string existingName = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId)
+				.Select(a => a.Name)
+				.FirstAsync();
+
+			var inputModel = new CreateEditAccountInputDTO
 			{
-				Name = this.Account1_User1_WithTransactions.Name,
-				AccountTypeId = this.AccType1_User1_WithAcc.Id,
+				Name = existingName,
+				AccountTypeId = this.mainTestAccountTypeId,
 				Balance = 0,
-				CurrencyId = this.Currency1_User1_WithAcc.Id,
-				OwnerId = this.User1.Id
+				CurrencyId = this.mainTestCurrencyId,
+				OwnerId = this.mainTestUserId
 			};
 
 			// Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.CreateAccountAsync(newAccountModel),
-			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(
-				string.Format(ExceptionMessages.ExistingUserEntityName, "account", this.Account1_User1_WithTransactions.Name)));
+			Assert.That(async () => await this.accountsUpdateService.CreateAccountAsync(inputModel),
+			Throws.TypeOf<ArgumentException>().With.Message
+				  .EqualTo(string.Format(ExceptionMessages.ExistingUserEntityName, "account", existingName)));
 		}
 
 		[Test]
-		public void CreateAccount_ShouldThrowException_WhenAccountTypeIsNotValid()
+		public void CreateAccountAsync_ShouldThrowInvalidOperationException_WhenTheAccountTypeIsNotValid()
 		{
 			//Arrange
-			var newAccountModel = new CreateEditAccountOutputDTO
+			var newAccountModel = new CreateEditAccountInputDTO
 			{
 				Name = "New Account With Invalid Account Type",
 				AccountTypeId = Guid.NewGuid(),
 				Balance = 0,
-				CurrencyId = this.Currency1_User1_WithAcc.Id,
-				OwnerId = this.User1.Id
+				CurrencyId = this.mainTestCurrencyId,
+				OwnerId = this.mainTestUserId
 			};
 
 			// Act & Assert
@@ -148,16 +178,16 @@
 		}
 
 		[Test]
-		public void CreateAccount_ShouldThrowException_WhenCurrencyIsNotValid()
+		public void CreateAccountAsync_ShouldThrowInvalidOperationException_WhenTheCurrencyIsNotValid()
 		{
 			//Arrange
-			var newAccountModel = new CreateEditAccountOutputDTO
+			var newAccountModel = new CreateEditAccountInputDTO
 			{
 				Name = "New Account With Invalid Currency",
-				AccountTypeId = this.AccType1_User1_WithAcc.Id,
+				AccountTypeId = this.mainTestAccountTypeId,
 				Balance = 0,
 				CurrencyId = Guid.NewGuid(),
-				OwnerId = this.User1.Id
+				OwnerId = this.mainTestUserId
 			};
 
 			// Act & Assert
@@ -168,445 +198,595 @@
 		[Test]
 		[TestCase(TransactionType.Income)]
 		[TestCase(TransactionType.Expense)]
-		public async Task CreateTransaction_ShouldAddNewTransactionAndChangeAccountBalance(TransactionType transactionType)
+		public async Task CreateTransactionAsync_ShouldAddNewTransactionAndChangeAccountBalance(TransactionType transactionType)
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			var dto = new CreateEditTransactionOutputDTO()
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.Include(a => a.Transactions)
+				.FirstAsync();
+
+			var inputDto = new CreateEditTransactionInputDTO()
 			{
 				Amount = 100,
-				AccountId = account.Id,
-				OwnerId = this.User1.Id,
-				CategoryId = this.Category1_User1_WithTransactions.Id,
+				AccountId = testAccount.Id,
+				OwnerId = this.mainTestUserId,
+				CategoryId = this.mainTestCategoryId,
 				CreatedOnLocalTime = DateTime.Now,
 				Reference = "New transaction",
 				TransactionType = transactionType
 			};
-			int transactionsCountBefore = account.Transactions.Count;
-			decimal balanceBefore = account.Balance;
+			int transactionsCountBefore = testAccount.Transactions.Count;
+			decimal balanceBefore = testAccount.Balance;
 
 			//Act
-			Guid id = await this.accountsUpdateService.CreateTransactionAsync(dto);
+			Guid id = await this.accountsUpdateService.CreateTransactionAsync(inputDto);
 			Transaction? transaction = await this.transactionsRepo.FindAsync(id);
 
 			//Assert
-			Assert.That(transaction, Is.Not.Null);
 			Assert.Multiple(() =>
 			{
-				if (transactionType == TransactionType.Income)
-				{
-					Assert.That(account.Transactions, Has.Count.EqualTo(transactionsCountBefore + 1));
-					Assert.That(account.Balance, Is.EqualTo(balanceBefore + transaction.Amount));
-				}
-				else
-				{
-					Assert.That(account.Transactions, Has.Count.EqualTo(transactionsCountBefore + 1));
-					Assert.That(account.Balance, Is.EqualTo(balanceBefore - transaction.Amount));
-				}
+				Assert.That(transaction, Is.Not.Null);
+				Assert.That(testAccount.Transactions, Has.Count.EqualTo(transactionsCountBefore + 1));
 
-				AssertSamePropertiesValuesAreEqual(transaction, dto);
+				if (transactionType == TransactionType.Income)
+					Assert.That(testAccount.Balance, Is.EqualTo(balanceBefore + transaction!.Amount));
+				else
+					Assert.That(testAccount.Balance, Is.EqualTo(balanceBefore - transaction!.Amount));
+
+				AssertSamePropertiesValuesAreEqual(transaction, inputDto);
 			});
 		}
 
 		[Test]
-		public void CreateTransaction_ShouldThrowException_WhenAccountDoesNotExist()
+		public void CreateTransactionAsync_ShouldThrowInvalidOperationException_WhenTheAccountDoesNotExist()
 		{
 			//Arrange
-			CreateEditTransactionOutputDTO dto = 
-				this.mapper.Map<CreateEditTransactionOutputDTO>(this.Transaction1_Expense_Account1_User1);
-			dto.AccountId = Guid.NewGuid();
+			var inputDto = new CreateEditTransactionInputDTO()
+			{
+				Amount = 100,
+				AccountId = Guid.NewGuid(),
+				OwnerId = this.mainTestUserId,
+				CategoryId = this.mainTestCategoryId,
+				CreatedOnLocalTime = DateTime.Now,
+				Reference = "New transaction",
+				TransactionType = TransactionType.Expense
+			};
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.CreateTransactionAsync(dto),
+			Assert.That(async () => await this.accountsUpdateService.CreateTransactionAsync(inputDto),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
-		public void CreateTransaction_ShouldThrowException_WhenCategoryIsNotValid()
+		public void CreateTransactionAsync_ShouldThrowInvalidOperationException_WhenTheCategoryDoesNotExist()
 		{
 			//Arrange
-			CreateEditTransactionOutputDTO dto = 
-				this.mapper.Map<CreateEditTransactionOutputDTO>(this.Transaction1_Expense_Account1_User1);
-			dto.CategoryId = Guid.NewGuid();
+			var inputDto = new CreateEditTransactionInputDTO()
+			{
+				Amount = 100,
+				AccountId = this.mainTestAccountId,
+				OwnerId = this.mainTestUserId,
+				CategoryId = Guid.NewGuid(),
+				CreatedOnLocalTime = DateTime.Now,
+				Reference = "New transaction",
+				TransactionType = TransactionType.Expense
+			};
 
 			// Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.CreateTransactionAsync(dto),
+			Assert.That(async () => await this.accountsUpdateService.CreateTransactionAsync(inputDto),
 			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(ExceptionMessages.InvalidCategory));
 		}
 
 		[Test]
-		public async Task DeleteAccount_ShouldDeleteAccountWithoutTransactions_WithValidId()
+		public async Task DeleteAccountAsync_ShouldMarkAccountAsDeletedWithoutDeleteTransactions_WhenTheUserIsOwner()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			int accountTransactionsCount = account.Transactions.Count;
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.Include(a => a.Transactions)
+				.FirstAsync();
+
+			int accountTransactionsCount = testAccount.Transactions.Count;
+			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
+			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
 
 			//Act
 			await this.accountsUpdateService.DeleteAccountAsync(
-				account.Id, this.User1.Id, isUserAdmin: false, shouldDeleteTransactions: false);
+				testAccount.Id, testAccount.OwnerId, isUserAdmin: false, shouldDeleteTransactions: false);
 
 			//Assert
-			Assert.Multiple(() =>
+			Assert.Multiple(async () =>
 			{
-				Assert.That(account.IsDeleted, Is.True);
+				Assert.That(testAccount.IsDeleted, Is.True);
 
-				Assert.That(account.Transactions, 
+				Assert.That(testAccount.Transactions,
 				   Has.Count.EqualTo(accountTransactionsCount));
-			});
-		}
 
-		[Test]
-		public async Task DeleteAccount_ShouldDeleteAccountAndTransactions_WithValidId()
-		{
-			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			int accountTransactionsCount = account.Transactions.Count;
-			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
-			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
-
-			//Act
-			await this.accountsUpdateService.DeleteAccountAsync(
-				account.Id, this.User1.Id, isUserAdmin: false, shouldDeleteTransactions: true);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(await this.accountsRepo.All().CountAsync(), 
-					Is.EqualTo(accountsCountBefore - 1));
-
-				Assert.That(await this.transactionsRepo.All().CountAsync(), 
-					Is.EqualTo(transactionsCountBefore - accountTransactionsCount));
-			});
-		}
-
-		[Test]
-		public void DeleteAccount_ShouldThrowException_WhenIdIsInvalid()
-		{
-			//Arrange
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsUpdateService
-				  .DeleteAccountAsync(Guid.NewGuid(), this.User1.Id, isUserAdmin: false, shouldDeleteTransactions: true),
-			Throws.TypeOf<InvalidOperationException>());
-		}
-
-		[Test]
-		public void DeleteAccount_ShouldThrowException_WhenUserIsNotOwner()
-		{
-			//Arrange
-			Guid accountId = this.Account1_User1_WithTransactions.Id;
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsUpdateService
-				  .DeleteAccountAsync(accountId, this.User2.Id, isUserAdmin: false, shouldDeleteTransactions: true),
-			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
-		}
-
-		[Test]
-		public async Task DeleteAccount_ShouldDeleteAccountAndTransactions_WhenUserIsAdmin()
-		{
-			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			int accountTransactionsCount = account.Transactions.Count;
-			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
-			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
-
-			//Act
-			await this.accountsUpdateService.DeleteAccountAsync(
-				account.Id, this.User2.Id, isUserAdmin: true, shouldDeleteTransactions: true);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(await this.accountsRepo.All().CountAsync(),
-					Is.EqualTo(accountsCountBefore - 1));
-
-				Assert.That(await this.transactionsRepo.All().CountAsync(), 
-					Is.EqualTo(transactionsCountBefore - accountTransactionsCount));
-			});
-		}
-
-		[Test]
-		public async Task DeleteAccount_ShouldDeleteAccountWithoutTransactions_WhenUserIsAdmin()
-		{
-			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
-			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
-
-			//Act
-			await this.accountsUpdateService.DeleteAccountAsync(
-				account.Id, this.User2.Id, isUserAdmin: true, shouldDeleteTransactions: false);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(account.IsDeleted, Is.True);
-				
 				Assert.That(await this.accountsRepo.All().CountAsync(),
 					Is.EqualTo(accountsCountBefore));
 
-				Assert.That(await this.transactionsRepo.All().CountAsync(), 
+				Assert.That(await this.transactionsRepo.All().CountAsync(),
 					Is.EqualTo(transactionsCountBefore));
 			});
 		}
 
 		[Test]
-		public async Task DeleteTransaction_ShouldDeleteIncomeTransactionAndDecreaseBalance_WithValidInput()
+		public async Task DeleteAccountAsync_ShouldMarkAccountAsDeletedWithoutDeleteTransactions_WhenTheUserIsAdmin()
 		{
 			//Arrange
-			Transaction transaction = this.Transaction3_Income_Account3_User1;
-			Account account = this.Account3_User1_Deleted_WithTransactions;
-			decimal balanceBefore = account.Balance;
-			int accountTransactionsCountBefore = account.Transactions.Count;
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.Include(a => a.Transactions)
+				.FirstAsync();
+
+			int accountTransactionsCount = testAccount.Transactions.Count;
+			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
+			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
 
 			//Act
-			decimal newBalance = await this.accountsUpdateService
-				.DeleteTransactionAsync(transaction.Id, this.User1.Id, isUserAdmin: false);
+			await this.accountsUpdateService.DeleteAccountAsync(
+				testAccount.Id, this.adminId, isUserAdmin: true, shouldDeleteTransactions: false);
 
 			//Assert
 			Assert.Multiple(async () =>
 			{
-				Assert.That(account.Balance, Is.EqualTo(balanceBefore - transaction.Amount));
-				Assert.That(account.Balance, Is.EqualTo(newBalance));
-				Assert.That(account.Transactions, Has.Count.EqualTo(accountTransactionsCountBefore - 1));
-				Assert.That(await this.transactionsRepo.FindAsync(transaction.Id), Is.Null);
+				Assert.That(testAccount.IsDeleted, Is.True);
+
+				Assert.That(testAccount.Transactions,
+				   Has.Count.EqualTo(accountTransactionsCount));
+
+				Assert.That(await this.accountsRepo.All().CountAsync(),
+					Is.EqualTo(accountsCountBefore));
+
+				Assert.That(await this.transactionsRepo.All().CountAsync(),
+					Is.EqualTo(transactionsCountBefore));
 			});
 		}
 
 		[Test]
-		public async Task DeleteTransaction_ShouldDeleteIncomeTransactionAndDecreaseBalance_WhenUserIsAdmin()
+		public async Task DeleteAccountAsync_ShouldDeleteAccountAndTransactions_WhenTheUserIsOwner()
 		{
 			//Arrange
-			Transaction transaction = this.Transaction3_Income_Account3_User1;
-			Account account = this.Account3_User1_Deleted_WithTransactions;
-			decimal balanceBefore = account.Balance;
-			int accountTransactionsCountBefore = account.Transactions.Count;
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.Include(a => a.Transactions)
+				.FirstAsync();
+			int accountTransactionsCount = testAccount.Transactions.Count;
+			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
+			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
 
 			//Act
-			decimal newBalance = await this.accountsUpdateService
-				.DeleteTransactionAsync(transaction.Id, this.User2.Id, isUserAdmin: true);
+			await this.accountsUpdateService.DeleteAccountAsync(
+				testAccount.Id, this.mainTestUserId, isUserAdmin: false, shouldDeleteTransactions: true);
 
 			//Assert
 			Assert.Multiple(async () =>
 			{
-				Assert.That(account.Balance, Is.EqualTo(balanceBefore - transaction.Amount));
-				Assert.That(account.Balance, Is.EqualTo(newBalance));
-				Assert.That(account.Transactions, Has.Count.EqualTo(accountTransactionsCountBefore - 1));
-				Assert.That(await this.transactionsRepo.FindAsync(transaction.Id), Is.Null);
+				Assert.That(await this.accountsRepo.All().CountAsync(),
+					Is.EqualTo(accountsCountBefore - 1));
+
+				Assert.That(await this.transactionsRepo.All().CountAsync(),
+					Is.EqualTo(transactionsCountBefore - accountTransactionsCount));
 			});
 		}
 
 		[Test]
-		public async Task DeleteTransaction_ShouldDeleteExpenseTransactionIncreaseBalanceAndNewBalance_WithValidInput()
+		public async Task DeleteAccountAsync_ShouldDeleteAccountAndTransactions_WhenTheUserIsAdmin()
 		{
 			//Arrange
-			Transaction transaction = this.Transaction1_Expense_Account1_User1;
-			Account account = this.Account1_User1_WithTransactions;
-			decimal balanceBefore = account.Balance;
-			int accountTransactionsCountBefore = account.Transactions.Count;
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.Include(a => a.Transactions)
+				.FirstAsync();
+			int accountTransactionsCount = testAccount.Transactions.Count;
+			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
+			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
 
 			//Act
-			decimal newBalance = await this.accountsUpdateService
-				.DeleteTransactionAsync(transaction.Id, this.User1.Id, isUserAdmin: false);
+			await this.accountsUpdateService.DeleteAccountAsync(
+				testAccount.Id, this.adminId, isUserAdmin: true, shouldDeleteTransactions: true);
 
 			//Assert
 			Assert.Multiple(async () =>
 			{
-				Assert.That(account.Balance, Is.EqualTo(balanceBefore + transaction.Amount));
-				Assert.That(account.Balance, Is.EqualTo(newBalance));
-				Assert.That(account.Transactions, Has.Count.EqualTo(accountTransactionsCountBefore - 1));
-				Assert.That(await this.transactionsRepo.FindAsync(transaction.Id), Is.Null);
+				Assert.That(await this.accountsRepo.All().CountAsync(),
+					Is.EqualTo(accountsCountBefore - 1));
+
+				Assert.That(await this.transactionsRepo.All().CountAsync(),
+					Is.EqualTo(transactionsCountBefore - accountTransactionsCount));
 			});
 		}
 
 		[Test]
-		public async Task DeleteTransaction_ShouldDeleteExpenseTransactionIncreaseBalanceAndNewBalance_WhenUserIsAdmin()
-		{
-			//Arrange
-			Transaction transaction = this.Transaction1_Expense_Account1_User1;
-			Account account = this.Account1_User1_WithTransactions;
-			decimal balanceBefore = account.Balance;
-			int accountTransactionsCountBefore = account.Transactions.Count;
-
-			//Act
-			decimal newBalance = await this.accountsUpdateService
-				.DeleteTransactionAsync(transaction.Id, this.User2.Id, isUserAdmin: true);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(this.Account1_User1_WithTransactions.Balance, Is.EqualTo(balanceBefore + transaction.Amount));
-				Assert.That(this.Account1_User1_WithTransactions.Balance, Is.EqualTo(newBalance));
-				Assert.That(this.Account1_User1_WithTransactions.Transactions, Has.Count.EqualTo(accountTransactionsCountBefore - 1));
-				Assert.That(await this.transactionsRepo.FindAsync(transaction.Id), Is.Null);
-			});
-		}
-
-		[Test]
-		public void DeleteTransaction_ShouldThrowAnException_WithInvalidInput()
+		public void DeleteAccountAsync_ShouldThrowInvalidOperationException_WhenTheAccountDoesNotExist()
 		{
 			//Arrange
 
 			//Act & Assert
 			Assert.That(async () => await this.accountsUpdateService
-				  .DeleteTransactionAsync(Guid.NewGuid(), this.User1.Id, isUserAdmin: false),
+				  .DeleteAccountAsync(Guid.NewGuid(), this.mainTestUserId, isUserAdmin: false, shouldDeleteTransactions: true),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
-		public void DeleteTransaction_ShouldThrowAnException_WithUserIsNotOwner()
+		public async Task DeleteAccountAsync_ShouldThrowArgumentException_WhenTheUserIsNotOwner()
 		{
 			//Arrange
-			Guid transactionId = this.Transaction1_Expense_Account1_User1.Id;
+			Guid notOwnerId = await this.dbContext.Users
+				.Where(u => u.Id != this.mainTestUserId)
+				.Select(u => u.Id)
+				.FirstAsync();
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsUpdateService
-				  .DeleteTransactionAsync(transactionId, this.User2.Id, isUserAdmin: false),
+			Assert.That(async () => await this.accountsUpdateService.DeleteAccountAsync(
+				this.mainTestAccountId,
+				notOwnerId,
+				isUserAdmin: false,
+				shouldDeleteTransactions: true),
 			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 
 		[Test]
-		public async Task EditAccount_ShouldChangeAccountName()
+		public async Task DeleteTransactionAsync_ShouldDeleteIncomeTransactionAndDecreaseBalance_WhenTheUserIsOwner()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			var inputModel = new CreateEditAccountOutputDTO
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId &&
+							!a.IsDeleted &&
+							a.Transactions.Any(t => t.TransactionType == TransactionType.Income))
+				.Include(a => a.Transactions)
+				.FirstAsync();
+
+			Transaction transactionForDelete = testAccount.Transactions
+				.First(t => t.TransactionType == TransactionType.Income);
+
+			decimal balanceBefore = testAccount.Balance;
+			int accountTransactionsCountBefore = testAccount.Transactions.Count;
+
+			//Act
+			decimal newBalance = await this.accountsUpdateService
+				.DeleteTransactionAsync(transactionForDelete.Id, testAccount.OwnerId, isUserAdmin: false);
+
+			//Assert
+			Assert.Multiple(async () =>
+			{
+				Assert.That(testAccount.Balance,
+					Is.EqualTo(balanceBefore - transactionForDelete.Amount));
+
+				Assert.That(testAccount.Balance,
+					Is.EqualTo(newBalance));
+
+				Assert.That(testAccount.Transactions,
+				   Has.Count.EqualTo(accountTransactionsCountBefore - 1));
+
+				Assert.That(await this.transactionsRepo.FindAsync(transactionForDelete.Id),
+					Is.Null);
+			});
+		}
+
+		[Test]
+		public async Task DeleteTransaction_ShouldDeleteIncomeTransactionAndDecreaseBalance_WhenTheUserIsAdmin()
+		{
+			//Arrange
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId &&
+							!a.IsDeleted &&
+							a.Transactions.Any(t => t.TransactionType == TransactionType.Income))
+				.Include(a => a.Transactions)
+				.FirstAsync();
+
+			Transaction transactionForDelete = testAccount.Transactions
+				.First(t => t.TransactionType == TransactionType.Income);
+
+			decimal balanceBefore = testAccount.Balance;
+			int accountTransactionsCountBefore = testAccount.Transactions.Count;
+
+			//Act
+			decimal newBalance = await this.accountsUpdateService
+				.DeleteTransactionAsync(transactionForDelete.Id, this.adminId, isUserAdmin: true);
+
+			//Assert
+			Assert.Multiple(async () =>
+			{
+				Assert.That(testAccount.Balance,
+					Is.EqualTo(balanceBefore - transactionForDelete.Amount));
+
+				Assert.That(testAccount.Balance,
+					Is.EqualTo(newBalance));
+
+				Assert.That(testAccount.Transactions,
+				   Has.Count.EqualTo(accountTransactionsCountBefore - 1));
+
+				Assert.That(await this.transactionsRepo.FindAsync(transactionForDelete.Id),
+					Is.Null);
+			});
+		}
+
+		[Test]
+		public async Task DeleteTransactionAsync_ShouldDeleteExpenseTransactionIncreaseBalance_WhenTheUserIsOwner()
+		{
+			//Arrange
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId &&
+							!a.IsDeleted &&
+							a.Transactions.Any(t => t.TransactionType == TransactionType.Expense))
+				.Include(a => a.Transactions)
+				.FirstAsync();
+
+			Transaction transactionForDelete = testAccount.Transactions
+				.First(t => t.TransactionType == TransactionType.Expense);
+
+			decimal balanceBefore = testAccount.Balance;
+			int accountTransactionsCountBefore = testAccount.Transactions.Count;
+
+			//Act
+			decimal newBalance = await this.accountsUpdateService
+				.DeleteTransactionAsync(transactionForDelete.Id, testAccount.OwnerId, isUserAdmin: false);
+
+			//Assert
+			Assert.Multiple(async () =>
+			{
+				Assert.That(testAccount.Balance,
+					Is.EqualTo(balanceBefore + transactionForDelete.Amount));
+
+				Assert.That(testAccount.Balance,
+					Is.EqualTo(newBalance));
+
+				Assert.That(testAccount.Transactions,
+				   Has.Count.EqualTo(accountTransactionsCountBefore - 1));
+
+				Assert.That(await this.transactionsRepo.FindAsync(transactionForDelete.Id),
+					Is.Null);
+			});
+		}
+
+		[Test]
+		public async Task DeleteTransactionAsync_ShouldDeleteExpenseTransactionIncreaseBalance_WhenTheUserIsAdmin()
+		{
+			//Arrange
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId &&
+							!a.IsDeleted &&
+							a.Transactions.Any(t => t.TransactionType == TransactionType.Expense))
+				.Include(a => a.Transactions)
+				.FirstAsync();
+
+			Transaction transactionForDelete = testAccount.Transactions
+				.First(t => t.TransactionType == TransactionType.Expense);
+
+			decimal balanceBefore = testAccount.Balance;
+			int accountTransactionsCountBefore = testAccount.Transactions.Count;
+
+			//Act
+			decimal newBalance = await this.accountsUpdateService
+				.DeleteTransactionAsync(transactionForDelete.Id, this.adminId, isUserAdmin: true);
+
+			//Assert
+			Assert.Multiple(async () =>
+			{
+				Assert.That(testAccount.Balance,
+					Is.EqualTo(balanceBefore + transactionForDelete.Amount));
+
+				Assert.That(testAccount.Balance,
+					Is.EqualTo(newBalance));
+
+				Assert.That(testAccount.Transactions,
+				   Has.Count.EqualTo(accountTransactionsCountBefore - 1));
+
+				Assert.That(await this.transactionsRepo.FindAsync(transactionForDelete.Id),
+					Is.Null);
+			});
+		}
+
+		[Test]
+		public void DeleteTransactionAsync_ShouldThrowInvalidOperationException_WhenTheTransactionDoesNotExist()
+		{
+			//Arrange
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsUpdateService
+				  .DeleteTransactionAsync(Guid.NewGuid(), this.mainTestUserId, isUserAdmin: false),
+			Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task DeleteTransactionAsync_ShouldThrowArgumentException_WhenTheUserIsNotOwner()
+		{
+			//Arrange
+			Guid transactionId = await this.transactionsRepo.All()
+				.Where(t => t.OwnerId != this.mainTestUserId)
+				.Select(t => t.Id)
+				.FirstAsync();
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsUpdateService
+				  .DeleteTransactionAsync(transactionId, this.mainTestUserId, isUserAdmin: false),
+			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
+		}
+
+		[Test]
+		public async Task EditAccountAsync_ShouldChangeAccountName()
+		{
+			//Arrange
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => !a.IsDeleted)
+				.FirstAsync();
+
+			var inputModel = new CreateEditAccountInputDTO
 			{
 				Name = "New Name", // Change
-				AccountTypeId = account.AccountTypeId,
-				Balance = account.Balance,
-				CurrencyId = account.CurrencyId,
-				OwnerId = account.OwnerId
+				AccountTypeId = testAccount.AccountTypeId,
+				Balance = testAccount.Balance,
+				CurrencyId = testAccount.CurrencyId,
+				OwnerId = testAccount.OwnerId
 			};
 
 			//Act
-			await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel);
+			await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel);
 
 			//Assert
-			AssertSamePropertiesValuesAreEqual(account, inputModel);
+			AssertSamePropertiesValuesAreEqual(testAccount, inputModel);
 		}
 
 		[Test]
-		public async Task EditAccount_ShouldChangeCurrency()
+		public async Task EditAccountAsync_ShouldChangeCurrency()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			var inputModel = new CreateEditAccountOutputDTO
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => !a.IsDeleted)
+				.FirstAsync();
+
+			Guid newCurrencyId = await this.currenciesRepo.All()
+				.Where(c => c.Id != testAccount.CurrencyId &&
+							c.OwnerId == testAccount.OwnerId &&
+							!c.IsDeleted)
+				.Select(c => c.Id)
+				.FirstAsync();
+
+			var inputModel = new CreateEditAccountInputDTO
 			{
-				Name = account.Name,
-				AccountTypeId = account.AccountTypeId,
-				Balance = account.Balance,
-				CurrencyId = this.Currency2_User1_WithoutAcc.Id, // Change
-				OwnerId = account.OwnerId
+				Name = testAccount.Name,
+				AccountTypeId = testAccount.AccountTypeId,
+				Balance = testAccount.Balance,
+				CurrencyId = newCurrencyId, // Change
+				OwnerId = testAccount.OwnerId
 			};
 
 			//Act
-			await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel);
+			await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel);
 
 			//Assert
-			AssertSamePropertiesValuesAreEqual(account, inputModel);
+			AssertSamePropertiesValuesAreEqual(testAccount, inputModel);
 		}
 
 		[Test]
-		public async Task EditAccount_ShouldChangeAccountAccountType()
+		public async Task EditAccountAsync_ShouldChangeAccountAccountType()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			var inputModel = new CreateEditAccountOutputDTO
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.FirstAsync();
+
+			Guid newAccountTypeId = await this.accountTypesRepo.All()
+				.Where(at => !at.IsDeleted &&
+							  at.OwnerId == this.mainTestUserId &&
+							  at.Id != testAccount.AccountTypeId)
+				.Select(at => at.Id)
+				.FirstAsync();
+
+			var inputModel = new CreateEditAccountInputDTO
 			{
-				Name = account.Name,
-				AccountTypeId = this.AccType2_User1_WithoutAcc.Id, // Change
-				Balance = account.Balance,
-				CurrencyId = account.CurrencyId,
-				OwnerId = account.OwnerId
+				Name = testAccount.Name,
+				AccountTypeId = newAccountTypeId, // Change
+				Balance = testAccount.Balance,
+				CurrencyId = testAccount.CurrencyId,
+				OwnerId = testAccount.OwnerId
 			};
 
 			//Act
-			await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel);
+			await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel);
 
 			//Assert
-			AssertSamePropertiesValuesAreEqual(account, inputModel);
+			AssertSamePropertiesValuesAreEqual(testAccount, inputModel);
 		}
 
 		[Test]
-		public async Task EditAccount_ShouldChangeAccountBalanceAndInitialBalanceTransactionAmount()
+		public async Task EditAccountAsync_ShouldChangeAccountBalanceAndInitialBalanceTransactionAmount()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			Transaction initialTransaction = this.InitialTransaction_Income_Account1_User1;
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => !a.IsDeleted
+							&& a.Transactions.Any(t => t.IsInitialBalance
+													   && t.TransactionType == TransactionType.Income))
+				.FirstAsync();
+
+			Transaction initialTransaction = testAccount.Transactions.First(t => t.IsInitialBalance);
+
 			decimal initialTransactionAmountBefore = initialTransaction.Amount;
 
-			var inputModel = new CreateEditAccountOutputDTO
+			var inputModel = new CreateEditAccountInputDTO
 			{
-				Name = account.Name,
-				AccountTypeId = account.AccountTypeId,
-				Balance = account.Balance + 100, // Change
-				CurrencyId = account.CurrencyId,
-				OwnerId = account.OwnerId
+				Name = testAccount.Name,
+				AccountTypeId = testAccount.AccountTypeId,
+				Balance = testAccount.Balance + 100, // Change
+				CurrencyId = testAccount.CurrencyId,
+				OwnerId = testAccount.OwnerId
 			};
 
 			//Act
-			await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel);
+			await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(initialTransaction.Amount, Is.EqualTo(initialTransactionAmountBefore + 100));
-				Assert.That(initialTransaction.TransactionType, Is.EqualTo(TransactionType.Income));
+				Assert.That(initialTransaction.Amount,
+					Is.EqualTo(initialTransactionAmountBefore + 100));
 
-				AssertSamePropertiesValuesAreEqual(account, inputModel);
+				Assert.That(initialTransaction.TransactionType,
+					Is.EqualTo(TransactionType.Income));
+
+				AssertSamePropertiesValuesAreEqual(testAccount, inputModel);
 			});
 		}
 
 		[Test]
-		public async Task EditAccount_ShouldChangeAccountBalanceAndInitialBalanceTransactionAmountAndType()
+		public async Task EditAccountAsync_ShouldChangeAccountBalanceAndInitialBalanceTransactionAmountAndType()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			Transaction initialTransaction = this.InitialTransaction_Income_Account1_User1;
-			decimal initialTransactionAmountBefore = initialTransaction.Amount;
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => !a.IsDeleted
+							&& a.Transactions.Any(t => t.IsInitialBalance
+													   && t.TransactionType == TransactionType.Income))
+				.FirstAsync();
 
-			var inputModel = new CreateEditAccountOutputDTO
+			Transaction initialTransaction = testAccount.Transactions.First(t => t.IsInitialBalance);
+			decimal initialTransactionAmountBefore = initialTransaction.Amount;
+			decimal balanceBefore = testAccount.Balance;
+
+			var inputModel = new CreateEditAccountInputDTO
 			{
-				Name = account.Name,
-				AccountTypeId = account.AccountTypeId,
-				Balance = account.Balance - 1000, // Change
-				CurrencyId = account.CurrencyId,
-				OwnerId = account.OwnerId
+				Name = testAccount.Name,
+				AccountTypeId = testAccount.AccountTypeId,
+				Balance = -1000, // Change
+				CurrencyId = testAccount.CurrencyId,
+				OwnerId = testAccount.OwnerId
 			};
 
 			//Act
-			await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel);
+			await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(initialTransaction.Amount, Is.EqualTo(initialTransactionAmountBefore - 1000));
+				Assert.That(initialTransaction.Amount, Is.EqualTo(initialTransactionAmountBefore - (balanceBefore + 1000)));
 				Assert.That(initialTransaction.TransactionType, Is.EqualTo(TransactionType.Expense));
 
-				AssertSamePropertiesValuesAreEqual(account, inputModel);
+				AssertSamePropertiesValuesAreEqual(testAccount, inputModel);
 			});
 		}
 
 		[Test]
-		public async Task EditAccount_ShouldChangeAccountBalanceAndCreateInitialBalanceTransaction()
+		public async Task EditAccountAsync_ShouldChangeAccountBalanceAndCreateInitialBalanceTransaction()
 		{
 			//Arrange
-			Account account = this.Account2_User1_WithoutTransactions;
-			var inputModel = new CreateEditAccountOutputDTO
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => !a.IsDeleted && 
+							!a.Transactions.Any(t => t.IsInitialBalance))
+				.FirstAsync();
+
+			var inputModel = new CreateEditAccountInputDTO
 			{
-				Name = account.Name,
-				AccountTypeId = account.AccountTypeId,
-				Balance = account.Balance + 100, // Change
-				CurrencyId = account.CurrencyId,
-				OwnerId = account.OwnerId
+				Name = testAccount.Name,
+				AccountTypeId = testAccount.AccountTypeId,
+				Balance = testAccount.Balance + 100, // Change
+				CurrencyId = testAccount.CurrencyId,
+				OwnerId = testAccount.OwnerId
 			};
 
 			//Act
-			await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel);
-
-			Transaction initialBalTransaction = account.Transactions.First(t => t.IsInitialBalance);
+			await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel);
+			Transaction initialBalTransaction = testAccount.Transactions.First(t => t.IsInitialBalance);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -614,87 +794,103 @@
 				Assert.That(initialBalTransaction.Amount, Is.EqualTo(100));
 				Assert.That(initialBalTransaction.IsInitialBalance, Is.True);
 				Assert.That(initialBalTransaction.Reference, Is.EqualTo(CategoryInitialBalanceName));
-				Assert.That(initialBalTransaction.OwnerId, Is.EqualTo(account.OwnerId));
-				Assert.That(initialBalTransaction.AccountId, Is.EqualTo(account.Id));
-				Assert.That(initialBalTransaction.CategoryId, Is.EqualTo(this.Category_InitialBalance.Id));
+				Assert.That(initialBalTransaction.CategoryId, Is.EqualTo(Guid.Parse(InitialBalanceCategoryId)));
+				Assert.That(initialBalTransaction.OwnerId, Is.EqualTo(testAccount.OwnerId));
+				Assert.That(initialBalTransaction.AccountId, Is.EqualTo(testAccount.Id));
 				Assert.That(initialBalTransaction.TransactionType, Is.EqualTo(TransactionType.Income));
 
-				Assert.That(account.Balance, Is.EqualTo(100));
-				AssertSamePropertiesValuesAreEqual(account, inputModel);
+				Assert.That(testAccount.Balance, Is.EqualTo(100));
+				AssertSamePropertiesValuesAreEqual(testAccount, inputModel);
 			});
 		}
 
 		[Test]
-		public void EditAccount_ShouldThrowExceptionWhenUserHaveAccountWithSameName()
+		public async Task EditAccountAsync_ShouldThrowArgumentException_WhenTheUserHaveAccountWithTheSameName()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			string anotherAccountName = this.Account2_User1_WithoutTransactions.Name;
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.FirstAsync();
 
-			var inputModel = new CreateEditAccountOutputDTO
+			string existingName = await this.accountsRepo.All()
+				.Where(a => a.Id != testAccount.Id &&
+							a.OwnerId == this.mainTestUserId)
+				.Select(a => a.Name)
+				.FirstAsync();
+
+			var inputModel = new CreateEditAccountInputDTO
 			{
-				Name = anotherAccountName, // Change
-				AccountTypeId = account.AccountTypeId,
-				Balance = account.Balance,
-				CurrencyId = account.CurrencyId,
-				OwnerId = account.OwnerId
+				Name = existingName, // Change
+				AccountTypeId = testAccount.AccountTypeId,
+				Balance = testAccount.Balance,
+				CurrencyId = testAccount.CurrencyId,
+				OwnerId = testAccount.OwnerId
 			};
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel),
+			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel),
 			Throws.TypeOf<ArgumentException>().With.Message
-				  .EqualTo(string.Format(ExceptionMessages.ExistingUserEntityName, "account", anotherAccountName)));
+				  .EqualTo(string.Format(ExceptionMessages.ExistingUserEntityName, "account", existingName)));
 		}
 
 		[Test]
-		public void EditAccount_ShouldThrowException_WhenAccountTypeIsNotValid()
+		public async Task EditAccountAsync_ShouldThrowInvalidOperationException_WhenTheAccountTypeIsInvalid()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.FirstAsync();
 
-			var inputModel = new CreateEditAccountOutputDTO
+			var inputModel = new CreateEditAccountInputDTO
 			{
-				Name = account.Name,
+				Name = testAccount.Name,
 				AccountTypeId = Guid.NewGuid(), // Invalid Id
-				Balance = account.Balance,
-				CurrencyId = account.CurrencyId,
-				OwnerId = account.OwnerId
+				Balance = testAccount.Balance,
+				CurrencyId = testAccount.CurrencyId,
+				OwnerId = testAccount.OwnerId
 			};
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel),
+			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel),
 			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(ExceptionMessages.InvalidAccountType));
 		}
 
 		[Test]
-		public void EditAccount_ShouldThrowException_WhenCurrencyIsNotValid()
+		public async Task EditAccountAsync_ShouldThrowInvalidOperationException_WhenTheCurrencyIsInvalid()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.FirstAsync();
 
-			var inputModel = new CreateEditAccountOutputDTO
+			var inputModel = new CreateEditAccountInputDTO
 			{
-				Name = account.Name,
-				AccountTypeId = account.AccountTypeId,
-				Balance = account.Balance,
+				Name = testAccount.Name,
+				AccountTypeId = testAccount.AccountTypeId,
+				Balance = testAccount.Balance,
 				CurrencyId = Guid.NewGuid(), // Invalid Id
-				OwnerId = account.OwnerId
+				OwnerId = testAccount.OwnerId
 			};
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(account.Id, inputModel),
+			Assert.That(async () => await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel),
 			Throws.TypeOf<InvalidOperationException>().With.Message.EqualTo(ExceptionMessages.InvalidCurrency));
 		}
 
 		[Test]
-		public async Task EditTransaction_ShouldEditTransactionAndChangeBalance_WhenTransactionTypeIsChanged()
+		public async Task EditTransactionAsync_ShouldEditTransactionAndChangeBalance_WhenTheTransactionTypeIsChanged()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			Transaction transaction = this.Transaction1_Expense_Account1_User1;
-			decimal balanceBefore = account.Balance;
-			CreateEditTransactionOutputDTO dto = 
-				this.mapper.Map<CreateEditTransactionOutputDTO>(transaction);
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.FirstAsync();
+
+			Transaction transaction = testAccount.Transactions
+				.First(t => t.TransactionType == TransactionType.Expense &&
+							!t.IsInitialBalance);
+			
+			decimal balanceBefore = testAccount.Balance;
+			var dto = this.mapper.Map<CreateEditTransactionInputDTO>(transaction);
 
 			//Act
 			dto.TransactionType = TransactionType.Income;
@@ -705,21 +901,34 @@
 			{
 				AssertSamePropertiesValuesAreEqual(transaction, dto);
 
-				Assert.That(account.Balance,
+				Assert.That(testAccount.Balance,
 					Is.EqualTo(balanceBefore + (transaction.Amount * 2)));
 			});
 		}
 
 		[Test]
-		public async Task EditTransaction_ShouldEditTransactionAndChangeBalanceOnTwoAccounts_WhenAccountIsChanged()
+		public async Task EditTransactionAsync_ShouldEditTransactionAndChangeBalanceOnBothAccounts_WhenTheAccountIsChanged()
 		{
 			//Arrange
-			Account firstAccount = this.Account1_User1_WithTransactions;
-			Account secondAccount = this.Account2_User1_WithoutTransactions;
+			Account firstAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && 
+							!a.IsDeleted)
+				.FirstAsync();
+
+			Account secondAccount = await this.accountsRepo.All()
+				.Where(a => a.Id != firstAccount.Id && 
+							a.OwnerId == this.mainTestUserId && 
+							!a.IsDeleted)
+				.FirstAsync();
+			
+			Transaction transaction = firstAccount.Transactions
+				.First(t => t.TransactionType == TransactionType.Expense && 
+							!t.IsInitialBalance);
+
+			var dto = this.mapper.Map<CreateEditTransactionInputDTO>(transaction);
+
 			decimal firstAccBalanceBefore = firstAccount.Balance;
 			decimal secondAccBalanceBefore = secondAccount.Balance;
-			Transaction transaction = this.Transaction1_Expense_Account1_User1;
-			CreateEditTransactionOutputDTO dto = this.mapper.Map<CreateEditTransactionOutputDTO>(transaction);
 
 			//Act
 			dto.AccountId = secondAccount.Id;
@@ -728,8 +937,7 @@
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(transaction.AccountId,
-					Is.EqualTo(secondAccount.Id));
+				AssertSamePropertiesValuesAreEqual(transaction, dto);
 
 				Assert.That(firstAccount.Balance,
 					Is.EqualTo(firstAccBalanceBefore + transaction.Amount));
@@ -740,13 +948,17 @@
 		}
 
 		[Test]
-		public async Task EditTransaction_ShouldEditTransaction_WhenPaymentReferenceIsChanged()
+		public async Task EditTransactionAsync_ShouldEditTransaction_WhenThePaymentReferenceIsChanged()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			decimal balanceBefore = account.Balance;
-			Transaction transaction = this.Transaction1_Expense_Account1_User1;
-			CreateEditTransactionOutputDTO dto = this.mapper.Map<CreateEditTransactionOutputDTO>(transaction);
+			Account testAccount = await this.accountsRepo.All()
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
+				.FirstAsync();
+
+			Transaction transaction = testAccount.Transactions.First(t => !t.IsInitialBalance);
+			var dto = this.mapper.Map<CreateEditTransactionInputDTO>(transaction);
+
+			decimal balanceBefore = testAccount.Balance;
 
 			//Act
 			dto.Reference = "Second Reference";
@@ -755,19 +967,20 @@
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(account.Balance, Is.EqualTo(balanceBefore));
+				Assert.That(testAccount.Balance, Is.EqualTo(balanceBefore));
 
-				AssertSamePropertiesValuesAreEqual(account, dto);
+				AssertSamePropertiesValuesAreEqual(transaction, dto);
 			});
 		}
 
 		[Test]
-		public void EditTransaction_ShouldThrowException_WhenCategoryIsNotValid()
+		public async Task EditTransactionAsync_ShouldThrowInvalidOperationException_WhenTheCategoryIsInvalid()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			Transaction transaction = this.Transaction1_Expense_Account1_User1;
-			CreateEditTransactionOutputDTO dto = this.mapper.Map<CreateEditTransactionOutputDTO>(transaction);
+			Transaction transaction = await this.transactionsRepo.All()
+				.FirstAsync(t => !t.IsInitialBalance);
+
+			var dto = this.mapper.Map<CreateEditTransactionOutputDTO>(transaction);
 
 			//Act
 			dto.CategoryId = Guid.NewGuid();
@@ -778,15 +991,16 @@
 		}
 
 		[Test]
-		public void EditTransaction_ShouldThrowException_WhenTransactionIsInitial()
+		public async Task EditTransactionAsync_ShouldThrowInvalidOperationException_WhenTheTransactionIsInitial()
 		{
 			//Arrange
-			Account account = this.Account1_User1_WithTransactions;
-			Transaction transaction = this.InitialTransaction_Income_Account1_User1;
-			CreateEditTransactionOutputDTO dto = this.mapper.Map<CreateEditTransactionOutputDTO>(transaction);
+			Transaction transaction = await this.transactionsRepo.All()
+				.FirstAsync(t => t.IsInitialBalance && t.CategoryId != this.mainTestCategoryId);
+
+			var dto = this.mapper.Map<CreateEditTransactionOutputDTO>(transaction);
 
 			//Act
-			dto.CategoryId = this.Category1_User1_WithTransactions.Id;
+			dto.CategoryId = this.mainTestCategoryId;
 
 			// Act & Assert
 			Assert.That(async () => await this.accountsUpdateService.EditTransactionAsync(transaction.Id, dto),

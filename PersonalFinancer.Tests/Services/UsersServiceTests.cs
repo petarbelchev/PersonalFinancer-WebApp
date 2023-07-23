@@ -36,16 +36,16 @@
 			this.transactionsRepo = new EfRepository<Transaction>(this.dbContext);
 
 			this.usersService = new UsersService(
-				this.usersRepo, 
+				this.usersRepo,
 				this.accountsRepo,
-				this.transactionsRepo, 
-				this.categoriesRepo, 
-				this.mapper, 
+				this.transactionsRepo,
+				this.categoriesRepo,
+				this.mapper,
 				this.memoryCache);
 		}
 
 		[Test]
-		public async Task GetAllUsers_ShouldReturnCollectionOfAllUsers()
+		public async Task GetUsersInfoAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
 			var expected = new UsersInfoDTO
@@ -67,18 +67,18 @@
 		}
 
 		[Test]
-		public async Task GetUserAccountsAndCategoriesDropdownData_ShouldReturnCorrectData()
+		public async Task GetUserAccountsAndCategoriesDropdownsAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
 			var expected = new AccountsAndCategoriesDropdownDTO
 			{
 				OwnerAccounts = await this.accountsRepo.All()
-					.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
+					.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
 					.OrderBy(a => a.Name)
 					.Select(a => this.mapper.Map<DropdownDTO>(a))
 					.ToArrayAsync(),
 				OwnerCategories = await this.categoriesRepo.All()
-					.Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
+					.Where(c => c.OwnerId == this.mainTestUserId && !c.IsDeleted)
 					.OrderBy(c => c.Name)
 					.Select(c => this.mapper.Map<DropdownDTO>(c))
 					.ToArrayAsync()
@@ -86,42 +86,42 @@
 
 			//Act
 			AccountsAndCategoriesDropdownDTO actual = await this.usersService
-				.GetUserAccountsAndCategoriesDropdownsAsync(this.User1.Id);
+				.GetUserAccountsAndCategoriesDropdownsAsync(this.mainTestUserId);
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
-		public async Task GetUserAccountsCards_ShouldReturnUsersAccounts_WithValidId()
+		public async Task GetUserAccountsCardsAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
 			List<AccountCardDTO> expected = await this.accountsRepo.All()
-				.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
+				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
 				.OrderBy(a => a.Name)
 				.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
 				.ToListAsync();
 
 			//Act
-			IEnumerable<AccountCardDTO> actual = await this.usersService.GetUserAccountsCardsAsync(this.User1.Id);
+			var actual = await this.usersService.GetUserAccountsCardsAsync(this.mainTestUserId);
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
-		public async Task GetUserAccountTypesAndCurrenciesDropdownDataAsync_ShouldReturnCorrectData()
+		public async Task GetUserAccountTypesAndCurrenciesDropdownsAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
 			var expected = new AccountTypesAndCurrenciesDropdownDTO
 			{
 				OwnerAccountTypes = await this.accountTypeRepo.All()
-					.Where(at => at.OwnerId == this.User1.Id && !at.IsDeleted)
+					.Where(at => at.OwnerId == this.mainTestUserId && !at.IsDeleted)
 					.OrderBy(at => at.Name)
 					.Select(at => this.mapper.Map<DropdownDTO>(at))
 					.ToArrayAsync(),
 				OwnerCurrencies = await this.currenciesRepo.All()
-					.Where(c => c.OwnerId == this.User1.Id && !c.IsDeleted)
+					.Where(c => c.OwnerId == this.mainTestUserId && !c.IsDeleted)
 					.OrderBy(c => c.Name)
 					.Select(c => this.mapper.Map<DropdownDTO>(c))
 					.ToArrayAsync()
@@ -129,42 +129,43 @@
 
 			//Act
 			AccountTypesAndCurrenciesDropdownDTO actual =
-				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownsAsync(this.User1.Id);
+				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownsAsync(this.mainTestUserId);
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
 		}
 
 		[Test]
-		public async Task GetUserDashboardData_ShouldReturnCorrectData_WithValidParams()
+		public async Task GetUserDashboardDataAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
-			DateTime fromUtc = DateTime.UtcNow.AddMonths(-1);
-			DateTime toUtc = DateTime.UtcNow;
+			DateTime fromLocalTime = DateTime.UtcNow.AddMonths(-1);
+			DateTime toLocalTime = DateTime.UtcNow;
+
+			Expression<Func<Transaction, bool>> dateFilter = (t) =>
+				t.CreatedOnUtc >= fromLocalTime && t.CreatedOnUtc <= toLocalTime;
 
 			var expected = new UserDashboardDTO
 			{
-				FromLocalTime = fromUtc.ToLocalTime(),
-				ToLocalTime = toUtc.ToLocalTime(),
+				FromLocalTime = fromLocalTime.ToLocalTime(),
+				ToLocalTime = toLocalTime.ToLocalTime(),
 				Accounts = await this.accountsRepo.All()
-					.Where(a => a.OwnerId == this.User1.Id && !a.IsDeleted)
+					.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
 					.OrderBy(a => a.Name)
 					.Select(a => this.mapper.Map<AccountCardDTO>(a))
 					.ToListAsync(),
 				LastTransactions = await this.transactionsRepo.All()
-					.Where(t => t.OwnerId == this.User1.Id 
-								&& t.CreatedOnUtc >= fromUtc 
-								&& t.CreatedOnUtc <= toUtc)
+					.Where(t => t.OwnerId == this.mainTestUserId)
+					.AsQueryable()
+					.Where(dateFilter)
 					.OrderByDescending(t => t.CreatedOnUtc)
 					.Take(5)
 					.Select(t => this.mapper.Map<TransactionTableDTO>(t))
 					.ToListAsync(),
 				CurrenciesCashFlow = await this.accountsRepo.All()
-					.Where(a => a.OwnerId == this.User1.Id 
-								&& a.Transactions.Any(t => t.CreatedOnUtc >= fromUtc 
-														   && t.CreatedOnUtc <= toUtc))
-					.SelectMany(a => a.Transactions.Where(t => t.CreatedOnUtc >= fromUtc 
-															   && t.CreatedOnUtc <= toUtc))
+					.Where(a => a.OwnerId == this.mainTestUserId
+								&& a.Transactions.AsQueryable().Any(dateFilter))
+					.SelectMany(a => a.Transactions.AsQueryable().Where(dateFilter))
 					.GroupBy(t => t.Account.Currency.Name)
 					.Select(t => new CurrencyCashFlowWithExpensesByCategoriesDTO
 					{
@@ -191,7 +192,7 @@
 
 			//Act
 			UserDashboardDTO actual = await this.usersService
-				.GetUserDashboardDataAsync(this.User1.Id, fromUtc.ToLocalTime(), toUtc.ToLocalTime());
+				.GetUserDashboardDataAsync(this.mainTestUserId, fromLocalTime.ToLocalTime(), toLocalTime.ToLocalTime());
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
@@ -203,13 +204,13 @@
 			//Arrange
 			var dto = new TransactionsFilterDTO
 			{
-				UserId = this.User1.Id,
+				UserId = this.mainTestUserId,
 				FromLocalTime = DateTime.Now.AddMonths(-1),
 				ToLocalTime = DateTime.Now
 			};
 
 			Expression<Func<Transaction, bool>> filter = (t) =>
-				t.OwnerId == this.User1.Id
+				t.OwnerId == this.mainTestUserId
 				&& t.CreatedOnUtc >= dto.FromLocalTime.ToUniversalTime()
 				&& t.CreatedOnUtc <= dto.ToLocalTime.ToUniversalTime();
 
@@ -259,12 +260,12 @@
 		{
 			//Arrange
 			UserDetailsDTO expected = await this.usersRepo.All()
-				.Where(u => u.Id == this.User1.Id)
+				.Where(u => u.Id == this.mainTestUserId)
 				.ProjectTo<UserDetailsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			//Act
-			UserDetailsDTO actual = await this.usersService.UserDetailsAsync(this.User1.Id);
+			UserDetailsDTO actual = await this.usersService.UserDetailsAsync(this.mainTestUserId);
 
 			//Assert
 			AssertAreEqualAsJson(actual, expected);
@@ -274,10 +275,11 @@
 		public async Task UserFullName_ShouldReturnUsersFullName_WithValidId()
 		{
 			//Arrange
-			string expectedFullName = $"{this.User1.FirstName} {this.User1.LastName}";
+			ApplicationUser? testUser = await this.dbContext.Users.FindAsync(this.mainTestUserId);
+			string expectedFullName = $"{testUser!.FirstName} {testUser.LastName}";
 
 			//Act
-			string actualFullName = await this.usersService.UserFullNameAsync(this.User1.Id);
+			string actualFullName = await this.usersService.UserFullNameAsync(this.mainTestUserId);
 
 			//Assert
 			Assert.That(actualFullName, Is.EqualTo(expectedFullName));

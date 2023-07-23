@@ -84,7 +84,10 @@
 					.MapFrom(src => src.Reference.Trim()))
 				.ForMember(dest => dest.CreatedOnUtc, opt => opt
 					.MapFrom(src => src.CreatedOnLocalTime.ToUniversalTime()))
-				.ForMember(dest => dest.Owner, opt => opt.Ignore());
+				.ForMember(dest => dest.Owner, opt => opt.Ignore())
+				.ReverseMap()
+				.ForMember(dest => dest.CreatedOnLocalTime, opt => opt
+					.MapFrom(src => src.CreatedOnUtc.ToLocalTime()));
 
 			this.CreateMap<Transaction, TransactionDetailsDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt
