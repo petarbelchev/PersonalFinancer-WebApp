@@ -83,7 +83,7 @@
 		public async Task<TransactionsDTO> GetAccountTransactionsAsync(AccountTransactionsFilterDTO dto)
 		{
 			return await this.accountsRepo.All()
-				.Where(a => a.Id == dto.AccountId && !a.IsDeleted)
+				.Where(a => a.Id == dto.Id && !a.IsDeleted)
 				.ProjectTo<TransactionsDTO>(
 					this.mapper.ConfigurationProvider,
 					new

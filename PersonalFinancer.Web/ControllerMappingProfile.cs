@@ -22,8 +22,7 @@
 			this.CreateMap<CreateEditAccountOutputDTO, CreateEditAccountViewModel>();
 			this.CreateMap<CreateEditAccountInputModel, CreateEditAccountInputDTO>();
 			this.CreateMap<AccountTypesAndCurrenciesDropdownDTO, CreateEditAccountViewModel>();
-			this.CreateMap<AccountTransactionsInputModel, AccountTransactionsFilterDTO>()
-				.ForMember(dest => dest.AccountId, opt => opt.MapFrom(src => src.Id));
+			this.CreateMap<AccountTransactionsInputModel, AccountTransactionsFilterDTO>();
 
 			this.CreateMap<UserTransactionsApiInputModel, TransactionsFilterDTO>()
 				.ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id));

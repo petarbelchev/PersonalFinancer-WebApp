@@ -37,16 +37,16 @@
 
 		[HttpDelete("{id}")]
 		[Produces("application/json")]
-		[ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+		[ProducesResponseType(typeof(DeleteTransactionOutputModel), StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 		public async Task<IActionResult> DeleteTransaction(Guid id)
 		{
-			decimal balance;
+			var outputModel = new DeleteTransactionOutputModel();
 
 			try
 			{
-				balance = await this.accountsUpdateService
+				outputModel.Balance = await this.accountsUpdateService
 					.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (ArgumentException)
@@ -58,11 +58,11 @@
 				return this.BadRequest();
 			}
 
-			string message = this.User.IsAdmin()
+			outputModel.Message = this.User.IsAdmin()
 				? ResponseMessages.AdminDeletedUserTransaction
 				: ResponseMessages.DeletedTransaction;
 
-			return this.Ok(new { message, balance });
+			return this.Ok(outputModel);
 		}
 
 		[HttpGet("{id}")]
@@ -106,18 +106,8 @@
 			if (inputModel.Id != this.User.IdToGuid())
 				return this.Unauthorized();
 
-			TransactionsFilterDTO filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
-			TransactionsDTO transactionsDTO;
-
-			try
-			{
-				transactionsDTO = await this.usersService.GetUserTransactionsAsync(filterDTO);
-			}
-			catch (InvalidOperationException)
-			{
-				return this.BadRequest();
-			}
-
+			var filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
+			var transactionsDTO = await this.usersService.GetUserTransactionsAsync(filterDTO);
 			var userTransactions = new TransactionsViewModel(transactionsDTO, inputModel.Page);
 
 			return this.Ok(userTransactions);

@@ -2,7 +2,7 @@
 {
 	public class AccountTransactionsFilterDTO
 	{
-		public Guid AccountId { get; set; } 
+		public Guid Id { get; set; } 
 		
 		public DateTime FromLocalTime { get; set; } 
 		

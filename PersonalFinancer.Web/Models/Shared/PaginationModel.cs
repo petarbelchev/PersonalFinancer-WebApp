@@ -22,18 +22,9 @@
 
 		public int TotalElements { get; private set; }
 
-		public int FirstElement
-		{
-			get
-			{
-				int result = (this.ElementsPerPage * (this.Page - 1)) + 1;
-
-				if (this.TotalElements == 0)
-					result = 0;
-
-				return result;
-			}
-		}
+		public int FirstElement => this.TotalElements > 0
+			? (this.ElementsPerPage * (this.Page - 1)) + 1
+			: 0;
 
 		public int LastElement
 		{

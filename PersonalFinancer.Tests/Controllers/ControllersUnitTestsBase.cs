@@ -11,6 +11,7 @@
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Web;
+	using PersonalFinancer.Web.Models.Shared;
 	using System.Security.Claims;
 
 	[TestFixture]
@@ -49,6 +50,38 @@
 				Assert.That(modelState.Values.Count(), Is.EqualTo(1));
 				Assert.That(modelState.Values.First().Errors, Has.Count.EqualTo(1));
 				Assert.That(modelState.Values.First().Errors.First().ErrorMessage, Is.EqualTo(errorMessage));
+			});
+		}
+
+		protected static void AssertPaginationModelIsEqual(
+			PaginationModel model, string elementsName, int elementsPerPage, int totalElements, int page)
+		{
+			int firstElement = totalElements > 0
+				? (elementsPerPage * (page - 1)) + 1
+				: 0;
+
+			int lastElement = elementsPerPage * page;
+
+			if (lastElement > totalElements)
+				lastElement = totalElements;
+
+			int pages = totalElements / elementsPerPage;
+
+			if (totalElements % elementsPerPage != 0)
+				pages++;
+
+			if (pages == 0)
+				pages = 1;
+
+			Assert.Multiple(() =>
+			{
+				Assert.That(model.FirstElement, Is.EqualTo(firstElement));
+				Assert.That(model.LastElement, Is.EqualTo(lastElement));
+				Assert.That(model.ElementsName, Is.EqualTo(elementsName));
+				Assert.That(model.TotalElements, Is.EqualTo(totalElements));
+				Assert.That(model.ElementsPerPage, Is.EqualTo(elementsPerPage));
+				Assert.That(model.Page, Is.EqualTo(page));
+				Assert.That(model.Pages, Is.EqualTo(pages));
 			});
 		}
 

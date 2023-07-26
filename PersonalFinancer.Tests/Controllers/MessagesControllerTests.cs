@@ -5,7 +5,6 @@
 	using Microsoft.AspNetCore.SignalR;
 	using Moq;
 	using NUnit.Framework;
-	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Web.Controllers;

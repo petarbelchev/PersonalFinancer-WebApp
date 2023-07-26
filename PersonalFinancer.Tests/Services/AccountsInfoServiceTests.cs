@@ -179,7 +179,7 @@
 
 			var filterDto = new AccountTransactionsFilterDTO
 			{
-				AccountId = testAccount.Id,
+				Id = testAccount.Id,
 				FromLocalTime = DateTime.Now.AddMonths(-1),
 				ToLocalTime = DateTime.Now,
 				Page = 1
@@ -212,7 +212,7 @@
 			//Arrange
 			var dto = new AccountTransactionsFilterDTO
 			{
-				AccountId = Guid.NewGuid(),
+				Id = Guid.NewGuid(),
 				FromLocalTime = DateTime.Now.AddMonths(-1),
 				ToLocalTime = DateTime.Now,
 				Page = 1
