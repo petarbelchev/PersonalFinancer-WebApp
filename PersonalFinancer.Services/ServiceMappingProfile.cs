@@ -168,6 +168,8 @@
 					.MapFrom(src => src.Content.Trim()));
 
 			this.CreateMap<Reply, ReplyOutputDTO>();
+
+			this.CreateMap<Message, MessageDetailsDTO>();
 		}
 	}
 }

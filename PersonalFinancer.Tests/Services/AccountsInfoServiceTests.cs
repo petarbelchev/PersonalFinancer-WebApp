@@ -2,6 +2,7 @@
 {
 	using AutoMapper.QueryableExtensions;
 	using Microsoft.EntityFrameworkCore;
+	using MongoDB.Bson;
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models;
@@ -49,7 +50,7 @@
 			AccountsCardsDTO actual = await this.accountsInfoService.GetAccountsCardsDataAsync(page: 1);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -66,7 +67,7 @@
 				expected.Id, expected.OwnerId, isUserAdmin: false);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -82,33 +83,21 @@
 		}
 
 		[Test]
-		public async Task GetAccountFormDataAsync_ShouldReturnCorrectData_WhenUserIsOwner()
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task GetAccountFormDataAsync_ShouldReturnCorrectData(bool isUserAdmin)
 		{
 			//Arrange
 			Account testAccount = await this.accountsRepo.All().FirstAsync();
-			CreateEditAccountOutputDTO expected = this.mapper.Map<CreateEditAccountOutputDTO>(testAccount);
+			var expected = this.mapper.Map<CreateEditAccountOutputDTO>(testAccount);
+			Guid currentUserId = isUserAdmin ? this.adminId : testAccount.OwnerId;
 
 			//Act
-			CreateEditAccountOutputDTO actual = await this.accountsInfoService
-				.GetAccountFormDataAsync(testAccount.Id, testAccount.OwnerId, isUserAdmin: false);
+			var actual = await this.accountsInfoService
+				.GetAccountFormDataAsync(testAccount.Id, currentUserId, isUserAdmin);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
-		}
-
-		[Test]
-		public async Task GetAccountFormDataAsync_ShouldReturnCorrectData_WhenUserIsAdmin()
-		{
-			//Arrange
-			Account testAccount = await this.accountsRepo.All().FirstAsync();
-			CreateEditAccountOutputDTO expected = this.mapper.Map<CreateEditAccountOutputDTO>(testAccount);
-
-			//Act
-			CreateEditAccountOutputDTO actual = await this.accountsInfoService
-				.GetAccountFormDataAsync(testAccount.Id, this.adminId, isUserAdmin: true);
-
-			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -124,7 +113,7 @@
 		}
 
 		[Test]
-		public async Task GetAccountFormDataAsync_ShouldThrowInvalidOperationException_WhenUserIsNotOwner()
+		public async Task GetAccountFormDataAsync_ShouldThrowInvalidOperationException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			Guid testAccountId = await this.accountsRepo.All()
@@ -214,7 +203,7 @@
 			TransactionsDTO actual = await this.accountsInfoService.GetAccountTransactionsAsync(filterDto);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -260,7 +249,7 @@
 				await this.accountsInfoService.GetCashFlowByCurrenciesAsync();
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -276,7 +265,9 @@
 		}
 
 		[Test]
-		public async Task GetTransactionDetailsAsync_ShouldReturnCorrectData_WhenTransactionIsValidAndUserIsOwner()
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task GetTransactionDetailsAsync_ShouldReturnCorrectData_WhenTransactionIsValid(bool isUserAdmin)
 		{
 			//Arrange
 			Transaction testTransaction = await this.transactionsRepo.All()
@@ -284,29 +275,14 @@
 
 			TransactionDetailsDTO expected = this.mapper.Map<TransactionDetailsDTO>(testTransaction);
 
-			//Act
-			TransactionDetailsDTO actual = await this.accountsInfoService
-				.GetTransactionDetailsAsync(testTransaction.Id, testTransaction.OwnerId, isUserAdmin: false);
-
-			//Assert
-			AssertAreEqualAsJson(actual, expected);
-		}
-
-		[Test]
-		public async Task GetTransactionDetailsAsync_ShouldReturnCorrectData_WhenTransactionIsValidAndUserIsAdmin()
-		{
-			//Arrange
-			Transaction testTransaction = await this.transactionsRepo.All()
-				.FirstAsync(t => t.OwnerId == this.mainTestUserId);
-
-			TransactionDetailsDTO expected = this.mapper.Map<TransactionDetailsDTO>(testTransaction);
+			Guid currentUserId = isUserAdmin ? this.adminId : testTransaction.OwnerId;
 
 			//Act
 			TransactionDetailsDTO actual = await this.accountsInfoService
-				.GetTransactionDetailsAsync(testTransaction.Id, this.adminId, isUserAdmin: true);
+				.GetTransactionDetailsAsync(testTransaction.Id, currentUserId, isUserAdmin);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -350,7 +326,7 @@
 				.GetTransactionFormDataAsync(testTransaction.Id, testTransaction.OwnerId, isUserAdmin: false);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]

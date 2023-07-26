@@ -12,6 +12,7 @@
 	using PersonalFinancer.Services.User.Models;
 	using PersonalFinancer.Web.Controllers;
 	using PersonalFinancer.Web.Models.Transaction;
+	using System.Security.Claims;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[TestFixture]
@@ -43,41 +44,10 @@
 				Name = "Category name 2"
 			}
 		};
-		private static readonly DropdownDTO[] expAccountTypesDropdown = new DropdownDTO[]
-		{
-			new DropdownDTO
-			{
-				Id = Guid.NewGuid(),
-				Name = "AccType 1"
-			},
-			new DropdownDTO
-			{
-				Id = Guid.NewGuid(),
-				Name = "AccType 2"
-			}
-		};
-		private static readonly DropdownDTO[] expCurrenciesDropdown = new DropdownDTO[]
-		{
-			new DropdownDTO
-			{
-				Id = Guid.NewGuid(),
-				Name = "Currency 1"
-			},
-			new DropdownDTO
-			{
-				Id = Guid.NewGuid(),
-				Name = "Currency 2"
-			}
-		};
 		private static readonly AccountsAndCategoriesDropdownDTO expAccountsAndCategoriesDropdowns = new() 
 		{
 			OwnerAccounts = expAccountsDropdown,
 			OwnerCategories = expCategoriesDropdown
-		};
-		private static readonly AccountTypesAndCurrenciesDropdownDTO expAccountTypesAndCurrenciesDropdowns = new()
-		{
-			OwnerAccountTypes = expAccountTypesDropdown,
-			OwnerCurrencies = expCurrenciesDropdown
 		};
 		private static readonly TransactionsDTO expTransactionsDto = new()
 		{
@@ -109,9 +79,33 @@
 		private static readonly UserUsedDropdownsDTO expUserDropdowns = new()
 		{
 			OwnerAccounts = expAccountsDropdown,
-			OwnerAccountTypes = expAccountTypesDropdown,
 			OwnerCategories = expCategoriesDropdown,
-			OwnerCurrencies = expCurrenciesDropdown
+			OwnerAccountTypes = new DropdownDTO[]
+			{
+				new DropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "AccType 1"
+				},
+				new DropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "AccType 2"
+				}
+			},
+			OwnerCurrencies = new DropdownDTO[]
+			{
+				new DropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "Currency 1"
+				},
+				new DropdownDTO
+				{
+					Id = Guid.NewGuid(),
+					Name = "Currency 2"
+				}
+			}
 		};
 		private TransactionsController controller;
 
@@ -133,105 +127,22 @@
 				}
 			};
 
-			this.usersServiceMock.Setup(x => x
-				.GetUserAccountsAndCategoriesDropdownsAsync(this.userId))
+			this.usersServiceMock
+				.Setup(x => x.GetUserAccountsAndCategoriesDropdownsAsync(this.userId))
 				.ReturnsAsync(expAccountsAndCategoriesDropdowns);
 
-			this.usersServiceMock.Setup(x => x
-				.GetUserAccountTypesAndCurrenciesDropdownsAsync(this.userId))
-				.ReturnsAsync(expAccountTypesAndCurrenciesDropdowns);
-
-			this.usersServiceMock.Setup(x => x
-				.GetUserUsedDropdownsAsync(this.userId))
+			this.usersServiceMock
+				.Setup(x => x.GetUserUsedDropdownsAsync(this.userId))
 				.ReturnsAsync(expUserDropdowns);
 
-			this.usersServiceMock.Setup(x => x
-				.GetUserTransactionsAsync(It.Is<TransactionsFilterDTO>(x =>
+			this.usersServiceMock
+				.Setup(x => x.GetUserTransactionsAsync(It.Is<TransactionsFilterDTO>(x =>
 					x.UserId == this.userId
 					&& x.CurrencyId == null
 					&& x.AccountId == null
 					&& x.AccountTypeId == null
 					&& x.CategoryId == null)))
 				.ReturnsAsync(expTransactionsDto);
-		}
-
-		[Test]
-		public async Task Index_OnGet_ShouldReturnViewModel()
-		{
-			//Arrange
-
-			//Act
-			var viewResult = (ViewResult)await this.controller.Index();
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(viewResult, Is.Not.Null);
-
-				UserTransactionsViewModel viewModel = viewResult.Model as UserTransactionsViewModel ??
-					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
-				
-				Assert.That(viewModel.UserId, Is.EqualTo(this.userId));
-				AssertSamePropertiesValuesAreEqual(viewModel, expTransactionsDto);
-				AssertSamePropertiesValuesAreEqual(viewModel, expUserDropdowns);
-			});
-		}
-
-		[Test]
-		public async Task Index_OnPost_ShouldReturnViewModel()
-		{
-			//Arrange
-			var inputModel = new UserTransactionsInputModel
-			{
-				FromLocalTime = DateTime.Now.AddMonths(-1),
-				ToLocalTime = DateTime.Now
-			};
-
-			var expectedViewModel = new UserTransactionsViewModel(inputModel, expUserDropdowns, this.userId);
-
-			//Act
-			var viewResult = (ViewResult)await this.controller.Filter(inputModel);
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(viewResult, Is.Not.Null);
-
-				UserTransactionsViewModel actualViewModel = viewResult.Model as UserTransactionsViewModel ??
-					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
-
-				AssertAreEqualAsJson(actualViewModel, expectedViewModel);
-			});
-		}
-
-		[Test]
-		public async Task Index_OnPost_ShouldReturnViewModelWithErrors_WhenModelIsInvalid()
-		{
-			//Arrange
-			var inputModel = new UserTransactionsInputModel
-			{
-				FromLocalTime = DateTime.Now.AddMonths(-1),
-				ToLocalTime = DateTime.Now
-			};
-
-			var expectedViewModel = new UserTransactionsViewModel(inputModel, expUserDropdowns, this.userId);
-			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid.");
-
-			//Act
-			var viewResult = (ViewResult)await this.controller.Filter(inputModel);
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(viewResult, Is.Not.Null);
-
-				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, string.Empty, "Model is invalid.");
-
-				UserTransactionsViewModel actualViewModel = viewResult.Model as UserTransactionsViewModel ??
-					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
-
-				AssertAreEqualAsJson(actualViewModel, expectedViewModel);
-			});
 		}
 
 		[Test]
@@ -340,19 +251,11 @@
 			};
 			var newTransactionId = Guid.Parse("e8befb1f-72a9-4bb7-831c-cbe678a11af8");
 
-			this.accountsUpdateServiceMock.Setup(x => x
-				.CreateTransactionAsync(It.Is<CreateEditTransactionInputDTO>(x =>
-					x.OwnerId == inputModel.OwnerId
-					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
-					&& x.Reference == inputModel.Reference
-					&& x.AccountId == inputModel.AccountId
-					&& x.Amount == inputModel.Amount
-					&& x.CategoryId == inputModel.CategoryId)))
+			this.accountsUpdateServiceMock
+				.Setup(x => x.CreateTransactionAsync(It.Is<CreateEditTransactionInputDTO>(x => ValidateObjectsAreEqual(x, inputModel))))
 				.ReturnsAsync(newTransactionId);
 
-			this.controller.TempData = new TempDataDictionary(
-				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+			this.controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
 			//Act
 			var result = (RedirectToActionResult)await this.controller.Create(inputModel);
@@ -366,7 +269,7 @@
 				Assert.That(result.RouteValues, Is.Not.Null);
 
 				AssertRouteValueIsEqual(result.RouteValues!, "id", newTransactionId);
-				AssertTempDataMessageIsEqual(this.controller.TempData, "You create a new transaction successfully!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, ResponseMessages.CreatedTransaction);
 			});
 		}
 
@@ -385,15 +288,8 @@
 				TransactionType = TransactionType.Expense
 			};
 
-			this.accountsUpdateServiceMock.Setup(x => x
-				.CreateTransactionAsync(It.Is<CreateEditTransactionInputDTO>(x =>
-					x.OwnerId == inputModel.OwnerId
-					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
-					&& x.Reference == inputModel.Reference
-					&& x.AccountId == inputModel.AccountId
-					&& x.Amount == inputModel.Amount
-					&& x.CategoryId == inputModel.CategoryId)))
+			this.accountsUpdateServiceMock
+				.Setup(x => x.CreateTransactionAsync(It.Is<CreateEditTransactionInputDTO>(x => ValidateObjectsAreEqual(x, inputModel))))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -408,138 +304,66 @@
 		}
 
 		[Test]
-		public async Task Delete_ShouldRedirectToHomeIndex_WhenTransactionWasDeletedAndUserIsOwner()
+		[TestCase(false, null)]
+		[TestCase(false, "return url")]
+		[TestCase(true, null)]
+		[TestCase(true, "return url")]
+		public async Task Delete_ShouldRedirect_WhenTransactionWasDeleted(bool isUserAdmin, string? returnUrl)
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
 			decimal newBalance = 100;
-			string? returnUrl = null;
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
-				.Returns(false);
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
+				.Returns(isUserAdmin);
 
-			this.accountsUpdateServiceMock.Setup(x => x
-				.DeleteTransactionAsync(transactionId, this.userId, false))
+			this.accountsUpdateServiceMock
+				.Setup(x => x.DeleteTransactionAsync(transactionId, this.userId, isUserAdmin))
 				.ReturnsAsync(newBalance);
 
 			this.controller.TempData = new TempDataDictionary(
 				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
+			string expectedTempDataMessage = isUserAdmin
+				? ResponseMessages.AdminDeletedUserTransaction
+				: ResponseMessages.DeletedTransaction;
+
 			//Act
-			var result = (RedirectToActionResult)await this.controller.Delete(transactionId, returnUrl);
+			var result = await this.controller.Delete(transactionId, returnUrl);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(result.ControllerName, Is.EqualTo("Home"));
-				Assert.That(result.ActionName, Is.EqualTo("Index"));
-				AssertTempDataMessageIsEqual(this.controller.TempData, "Your transaction was successfully deleted!");
+				if (returnUrl == null)
+				{
+					var redirectToActionResult = result as RedirectToActionResult;
+					Assert.That(redirectToActionResult!.ControllerName, Is.EqualTo("Home"));
+					Assert.That(redirectToActionResult.ActionName, Is.EqualTo("Index"));
+				}
+				else
+				{
+					var localRedirectResult = result as LocalRedirectResult;
+					Assert.That(localRedirectResult!.Url, Is.EqualTo(returnUrl));
+				}
+
+				AssertTempDataMessageIsEqual(this.controller.TempData, expectedTempDataMessage);
 			});
 		}
 
 		[Test]
-		public async Task Delete_ShouldRedirectToHomeIndex_WhenTransactionWasDeletedAndUserIsAdmin()
-		{
-			//Arrange
-			var transactionId = Guid.NewGuid();
-			decimal newBalance = 100;
-			string? returnUrl = null;
-
-			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
-
-			this.accountsUpdateServiceMock.Setup(x => x
-				.DeleteTransactionAsync(transactionId, this.userId, true))
-				.ReturnsAsync(newBalance);
-
-			this.controller.TempData = new TempDataDictionary(
-				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
-
-			//Act
-			var result = (RedirectToActionResult)await this.controller.Delete(transactionId, returnUrl);
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(result.ControllerName, Is.EqualTo("Home"));
-				Assert.That(result.ActionName, Is.EqualTo("Index"));
-				AssertTempDataMessageIsEqual(this.controller.TempData, "You successfully delete a user's transaction!");
-			});
-		}
-
-		[Test]
-		public async Task Delete_ShouldRedirectToReturnUrl_WhenTransactionWasDeletedAndUserIsOwner()
-		{
-			//Arrange
-			var transactionId = Guid.NewGuid();
-			decimal newBalance = 100;
-			string? returnUrl = "return url";
-
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
-				.Returns(false);
-
-			this.accountsUpdateServiceMock.Setup(x => x
-				.DeleteTransactionAsync(transactionId, this.userId, false))
-				.ReturnsAsync(newBalance);
-
-			this.controller.TempData = new TempDataDictionary(
-				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
-
-			//Act
-			var result = (LocalRedirectResult)await this.controller.Delete(transactionId, returnUrl);
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(result.Url, Is.EqualTo(returnUrl));
-				AssertTempDataMessageIsEqual(this.controller.TempData, "Your transaction was successfully deleted!");
-			});
-		}
-
-		[Test]
-		public async Task Delete_ShouldRedirectToReturnUrl_WhenTransactionWasDeletedAndUserIsAdmin()
-		{
-			//Arrange
-			var transactionId = Guid.NewGuid();
-			decimal newBalance = 100;
-			string? returnUrl = "return url";
-
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
-				.Returns(true);
-
-			this.accountsUpdateServiceMock.Setup(x => x
-				.DeleteTransactionAsync(transactionId, this.userId, true))
-				.ReturnsAsync(newBalance);
-
-			this.controller.TempData = new TempDataDictionary(
-				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
-
-			//Act
-			var result = (LocalRedirectResult)await this.controller.Delete(transactionId, returnUrl);
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(result.Url, Is.EqualTo(returnUrl));
-				AssertTempDataMessageIsEqual(this.controller.TempData, "You successfully delete a user's transaction!");
-			});
-		}
-
-		[Test]
-		public async Task Delete_ShouldReturnUnauthorized_WhenUserIsNotOwnerOrAdmin()
+		public async Task Delete_ShouldReturnUnauthorized_WhenUserIsUnauthorized()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
 			string? returnUrl = "return url";
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
-			this.accountsUpdateServiceMock.Setup(x => x
-				.DeleteTransactionAsync(transactionId, this.userId, false))
+			this.accountsUpdateServiceMock
+				.Setup(x => x.DeleteTransactionAsync(transactionId, this.userId, false))
 				.Throws<ArgumentException>();
 
 			//Act
@@ -556,12 +380,12 @@
 			var transactionId = Guid.NewGuid();
 			string? returnUrl = "return url";
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
-			this.accountsUpdateServiceMock.Setup(x => x
-				.DeleteTransactionAsync(transactionId, this.userId, false))
+			this.accountsUpdateServiceMock
+				.Setup(x => x.DeleteTransactionAsync(transactionId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -572,7 +396,20 @@
 		}
 
 		[Test]
-		public async Task TransactionDetails_ShouldReturnTransactionDetailsModel()
+		public async Task Delete_ShouldReturnBadRequest_WhenTheModelIsInvalid()
+		{
+			//Arrange
+			this.controller.ModelState.AddModelError("id", "invalid id");
+
+			//Act
+			var result = (BadRequestResult)await this.controller.Delete(Guid.Empty);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(400));
+		}
+
+		[Test]
+		public async Task Details_ShouldReturnTransactionDetailsModel()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
@@ -589,12 +426,12 @@
 				TransactionType = TransactionType.Income.ToString()
 			};
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetTransactionDetailsAsync(transactionId, this.userId, false))
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetTransactionDetailsAsync(transactionId, this.userId, false))
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
@@ -606,22 +443,22 @@
 				TransactionDetailsDTO actual = viewResult.Model as TransactionDetailsDTO ??
 					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				AssertAreEqualAsJson(actual, serviceReturnDto);
+				AssertSamePropertiesValuesAreEqual(actual, serviceReturnDto);
 			});
 		}
 
 		[Test]
-		public async Task TransactionDetails_ShouldReturnUnauthorized_WhenUserIsNowOwnerOrAdmin()
+		public async Task Details_ShouldReturnUnauthorized_WhenUserIsUnauthorized()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetTransactionDetailsAsync(transactionId, this.userId, false))
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetTransactionDetailsAsync(transactionId, this.userId, false))
 				.Throws<ArgumentException>();
 
 			//Act
@@ -632,17 +469,17 @@
 		}
 
 		[Test]
-		public async Task TransactionDetails_ShouldReturnBadRequest_WhenTransactionDoesNotExist()
+		public async Task Details_ShouldReturnBadRequest_WhenTransactionDoesNotExist()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetTransactionDetailsAsync(transactionId, this.userId, false))
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetTransactionDetailsAsync(transactionId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -653,7 +490,20 @@
 		}
 
 		[Test]
-		public async Task EditTransaction_OnGet_ShouldReturnTransactionFormModel_WhenTransactionIsNotInitial()
+		public async Task Details_ShouldReturnBadRequest_WhenTheModelIsInvalid()
+		{
+			//Arrange
+			this.controller.ModelState.AddModelError("id", "invalid id");
+
+			//Act
+			var result = (BadRequestResult)await this.controller.Details(Guid.Empty);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(400));
+		}
+
+		[Test]
+		public async Task Edit_OnGet_ShouldReturnTransactionFormModel_WhenTransactionIsNotInitial()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
@@ -670,12 +520,12 @@
 				TransactionType = TransactionType.Income
 			};
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetTransactionFormDataAsync(transactionId, this.userId, false))
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetTransactionFormDataAsync(transactionId, this.userId, false))
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
@@ -692,17 +542,17 @@
 		}
 
 		[Test]
-		public async Task EditTransaction_OnGet_ShouldReturnBadRequest_WhenTransactionDoesNotExistOrIsInitial()
+		public async Task Edit_OnGet_ShouldReturnBadRequest_WhenTransactionDoesNotExistOrIsInitial()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetTransactionFormDataAsync(transactionId, this.userId, false))
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetTransactionFormDataAsync(transactionId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -713,7 +563,20 @@
 		}
 
 		[Test]
-		public async Task EditTransaction_OnPost_ShouldReturnViewModelWithErrors_WhenModelIsInvalidAndTransactionIsNotInitial()
+		public async Task Edit_OnGet_ShouldReturnBadRequest_WhenTheModelIsInvalid()
+		{
+			//Arrange
+			this.controller.ModelState.AddModelError("id", "invalid id");
+
+			//Act
+			var result = (BadRequestResult)await this.controller.Edit(Guid.Empty);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(400));
+		}
+
+		[Test]
+		public async Task Edit_OnPost_ShouldReturnViewModelWithErrors_WhenModelIsInvalidAndTransactionIsNotInitial()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
@@ -749,7 +612,7 @@
 		}
 
 		[Test]
-		public async Task EditTransaction_OnPost_ShouldThrowException_WhenTransactionIsInitial()
+		public async Task Edit_OnPost_ShouldThrowInvalidOperationException_WhenTransactionIsInitial()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
@@ -764,15 +627,10 @@
 				TransactionType = TransactionType.Expense
 			};
 
-			this.accountsUpdateServiceMock.Setup(x => x
-				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionInputDTO>(x =>
-					x.OwnerId == inputModel.OwnerId
-					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
-					&& x.Reference == inputModel.Reference
-					&& x.AccountId == inputModel.AccountId
-					&& x.Amount == inputModel.Amount
-					&& x.CategoryId == inputModel.CategoryId)))
+			this.accountsUpdateServiceMock
+				.Setup(x => x.EditTransactionAsync(
+					transactionId, 
+					It.Is<CreateEditTransactionInputDTO>(x => ValidateObjectsAreEqual(x, inputModel))))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -787,7 +645,7 @@
 		}
 
 		[Test]
-		public async Task EditTransaction_OnPost_ShouldReturnBadRequest_WhenUserIsNotOwnerOrAdmin()
+		public async Task Edit_OnPost_ShouldReturnBadRequest_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
@@ -802,8 +660,8 @@
 				TransactionType = TransactionType.Expense
 			};
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
 			//Act
@@ -814,7 +672,7 @@
 		}
 
 		[Test]
-		public async Task EditTransaction_OnPost_ShouldReturnBadRequest_WhenTransactionDoesNotExist()
+		public async Task Edit_OnPost_ShouldReturnBadRequest_WhenTransactionDoesNotExist()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
@@ -829,17 +687,14 @@
 				TransactionType = TransactionType.Expense
 			};
 
-			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
+				.Returns(false);
 
-			this.accountsUpdateServiceMock.Setup(x => x
-				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionInputDTO>(x =>
-					x.OwnerId == inputModel.OwnerId
-					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
-					&& x.Reference == inputModel.Reference
-					&& x.AccountId == inputModel.AccountId
-					&& x.Amount == inputModel.Amount
-					&& x.CategoryId == inputModel.CategoryId)))
+			this.accountsUpdateServiceMock
+				.Setup(x => x.EditTransactionAsync(
+					transactionId, 
+					It.Is<CreateEditTransactionInputDTO>(x => ValidateObjectsAreEqual(x, inputModel))))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -850,7 +705,9 @@
 		}
 
 		[Test]
-		public async Task EditTransaction_OnPost_ShouldRedirectToAction_WhenTransactionWasEditedAndUserIsOwner()
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task Edit_OnPost_ShouldRedirectToAction_WhenTransactionWasEdited(bool isUserAdmin)
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
@@ -865,23 +722,30 @@
 				TransactionType = TransactionType.Expense
 			};
 
-			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
+				.Returns(isUserAdmin);
+
+			string currentUserId = isUserAdmin ? "adminId" : this.userId.ToString();
+
+			this.userMock
+				.Setup(x => x.FindFirst(ClaimTypes.NameIdentifier))
+				.Returns(new Claim(ClaimTypes.NameIdentifier, currentUserId));
 
 			this.controller.TempData = new TempDataDictionary(
 				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
+			string expectedTempDataMessage = isUserAdmin
+				? ResponseMessages.AdminEditedUserTransaction
+				: ResponseMessages.EditedTransaction;
+
 			//Act
 			var result = (RedirectToActionResult)await this.controller.Edit(transactionId, inputModel);
 
-			this.accountsUpdateServiceMock.Verify(x => x
-				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionInputDTO>(x =>
-					x.OwnerId == inputModel.OwnerId
-					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
-					&& x.Reference == inputModel.Reference
-					&& x.AccountId == inputModel.AccountId
-					&& x.Amount == inputModel.Amount
-					&& x.CategoryId == inputModel.CategoryId)),
+			this.accountsUpdateServiceMock.Verify(
+				x => x.EditTransactionAsync(
+					transactionId, 
+					It.Is<CreateEditTransactionInputDTO>(x => ValidateObjectsAreEqual(x, inputModel))),
 				Times.Once);
 
 			//Assert
@@ -893,59 +757,86 @@
 				Assert.That(result.RouteValues, Is.Not.Null);
 				AssertRouteValueIsEqual(result.RouteValues!, "id", transactionId);
 
-				AssertTempDataMessageIsEqual(this.controller.TempData, "Your transaction was successfully edited!");
+				AssertTempDataMessageIsEqual(this.controller.TempData, expectedTempDataMessage);
 			});
 		}
 
 		[Test]
-		public async Task EditTransaction_OnPost_ShouldRedirectToAction_WhenTransactionWasEditedAndUserIsAdmin()
+		public async Task Filter_ShouldReturnViewModel()
 		{
 			//Arrange
-			var transactionId = Guid.NewGuid();
-			var ownerId = Guid.NewGuid();
-			var accountId = Guid.NewGuid();
-			var inputModel = new CreateEditTransactionInputModel
+			var inputModel = new UserTransactionsInputModel
 			{
-				Amount = 10,
-				CreatedOnLocalTime = DateTime.Now,
-				AccountId = accountId,
-				CategoryId = Guid.NewGuid(),
-				OwnerId = ownerId,
-				Reference = "Test Transaction",
-				TransactionType = TransactionType.Expense
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
 			};
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
-				.Returns(true);
-
-			this.controller.TempData = new TempDataDictionary(
-				new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
+			var expectedViewModel = new UserTransactionsViewModel(inputModel, expUserDropdowns, this.userId);
 
 			//Act
-			var result = (RedirectToActionResult)await this.controller.Edit(transactionId, inputModel);
-
-			this.accountsUpdateServiceMock.Verify(x => x
-				.EditTransactionAsync(transactionId, It.Is<CreateEditTransactionInputDTO>(x =>
-					x.OwnerId == inputModel.OwnerId
-					&& x.TransactionType == inputModel.TransactionType
-					&& x.CreatedOnLocalTime == inputModel.CreatedOnLocalTime
-					&& x.Reference == inputModel.Reference
-					&& x.AccountId == inputModel.AccountId
-					&& x.Amount == inputModel.Amount
-					&& x.CategoryId == inputModel.CategoryId)),
-				Times.Once);
+			var viewResult = (ViewResult)await this.controller.Filter(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(result, Is.Not.Null);
-				Assert.That(result.ActionName, Is.EqualTo("Details"));
+				Assert.That(viewResult, Is.Not.Null);
 
-				Assert.That(result.RouteValues, Is.Not.Null);
-				AssertRouteValueIsEqual(result.RouteValues!, "id", transactionId);
+				UserTransactionsViewModel actualViewModel = viewResult.Model as UserTransactionsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				AssertTempDataMessageIsEqual(this.controller.TempData, ResponseMessages.AdminEditedUserTransaction);
+				AssertSamePropertiesValuesAreEqual(actualViewModel, expectedViewModel);
+			});
+		}
+
+		[Test]
+		public async Task Filter_ShouldReturnViewModelWithErrors_WhenModelIsInvalid()
+		{
+			//Arrange
+			var inputModel = new UserTransactionsInputModel
+			{
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
+			};
+
+			var expectedViewModel = new UserTransactionsViewModel(inputModel, expUserDropdowns, this.userId);
+			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid.");
+
+			//Act
+			var viewResult = (ViewResult)await this.controller.Filter(inputModel);
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(viewResult, Is.Not.Null);
+
+				AssertModelStateErrorIsEqual(viewResult.ViewData.ModelState, string.Empty, "Model is invalid.");
+
+				UserTransactionsViewModel actualViewModel = viewResult.Model as UserTransactionsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(actualViewModel, expectedViewModel);
+			});
+		}
+
+		[Test]
+		public async Task Index_ShouldReturnViewModel()
+		{
+			//Arrange
+
+			//Act
+			var viewResult = (ViewResult)await this.controller.Index();
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(viewResult, Is.Not.Null);
+
+				UserTransactionsViewModel viewModel = viewResult.Model as UserTransactionsViewModel ??
+					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				Assert.That(viewModel.UserId, Is.EqualTo(this.userId));
+				AssertSamePropertiesValuesAreEqual(viewModel, expTransactionsDto);
+				AssertSamePropertiesValuesAreEqual(viewModel, expUserDropdowns);
 			});
 		}
 	}

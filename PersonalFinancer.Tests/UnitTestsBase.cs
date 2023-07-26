@@ -1,6 +1,5 @@
 ﻿namespace PersonalFinancer.Tests
 {
-	using Newtonsoft.Json;
 	using NUnit.Framework;
 	using System.Collections;
 	using System.Reflection;
@@ -8,14 +7,6 @@
 	[TestFixture]
 	internal class UnitTestsBase
 	{
-		protected static void AssertAreEqualAsJson(object actual, object expected)
-		{
-			string actualAsJson = JsonConvert.SerializeObject(actual, Formatting.Indented);
-			string expectedAsJson = JsonConvert.SerializeObject(expected, Formatting.Indented);
-
-			Assert.That(actualAsJson, Is.EqualTo(expectedAsJson));
-		}
-
 		protected static void AssertSamePropertiesValuesAreEqual(object actual, object expected)
 		{
 			PropertyInfo[] propsToCompare = expected.GetType().GetProperties();

@@ -11,12 +11,12 @@
 	using PersonalFinancer.Web.Controllers;
 	using PersonalFinancer.Web.Hubs;
 	using PersonalFinancer.Web.Models.Message;
+	using System.Security.Claims;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[TestFixture]
 	internal class MessagesControllerTests : ControllersUnitTestsBase
 	{
-		private ICollection<Message> fakeCollection;
 		private Mock<IMessagesService> messagesServiceMock;
 		private Mock<IHubContext<AllMessagesHub>> allMessagesHubMock;
 		private Mock<IHubContext<NotificationsHub>> notificationsHubMock;
@@ -25,27 +25,35 @@
 		[SetUp]
 		public void SetUp()
 		{
-			this.fakeCollection = this.SeedFakeCollection();
 			this.messagesServiceMock = new Mock<IMessagesService>();
-
 			this.allMessagesHubMock = new Mock<IHubContext<AllMessagesHub>>();
 			this.notificationsHubMock = new Mock<IHubContext<NotificationsHub>>();
 
 			var clientProxyMock = new Mock<IClientProxy>();
-			clientProxyMock.Setup(x => x
-				.SendCoreAsync(
+			clientProxyMock
+				.Setup(x => x.SendCoreAsync(
 					It.IsAny<string>(),
 					It.IsAny<object[]>(),
 					It.IsAny<CancellationToken>()))
 				.Returns(Task.CompletedTask);
 
-			var iHubClientsMock = new Mock<IHubClients>();
-			iHubClientsMock.Setup(x => x
-				.Users(It.IsAny<IReadOnlyList<string>>()))
+			var notificationsHubClientsMock = new Mock<IHubClients>();
+			notificationsHubClientsMock
+				.Setup(x => x.Users(It.IsAny<IReadOnlyList<string>>()))
 				.Returns(clientProxyMock.Object);
 
-			this.notificationsHubMock.Setup(x => x.Clients).Returns(iHubClientsMock.Object);
-			this.allMessagesHubMock.Setup(x => x.Clients).Returns(iHubClientsMock.Object);
+			this.notificationsHubMock
+				.Setup(x => x.Clients)
+				.Returns(notificationsHubClientsMock.Object);
+
+			var allMessagesHubClientsMock = new Mock<IHubClients>();
+			allMessagesHubClientsMock
+				.Setup(x => x.Users(It.IsAny<IReadOnlyList<string>>()))
+				.Returns(clientProxyMock.Object);
+
+			this.allMessagesHubMock
+				.Setup(x => x.Clients)
+				.Returns(allMessagesHubClientsMock.Object);
 
 			this.controller = new MessagesController(
 				this.messagesServiceMock.Object,
@@ -65,107 +73,66 @@
 		}
 
 		[Test]
-		public void All_ShouldReturnView_WhenUserIsNotAdmin()
+		public async Task Archive_OnPost_ShouldRedirectToAction_WhenTheMessageWasArchived()
 		{
 			//Arrange
-			//int page = 1;
-
-			//var serviceReturnDto = new MessagesDTO
-			//{
-			//	Messages = this.fakeCollection
-			//		.Where(m => m.AuthorId == this.userId.ToString() && !m.IsArchivedByAuthor)
-			//		.Select(m => new MessageOutputDTO
-			//		{
-			//			Id = m.Id,
-			//			CreatedOnUtc = m.CreatedOnUtc,
-			//			Subject = m.Subject,
-			//			IsSeen = m.IsSeenByAuthor
-			//		})
-			//		.Skip(MessagesPerPage * (page - 1))
-			//		.Take(MessagesPerPage),
-			//	TotalMessagesCount = this.fakeCollection
-			//		.Count(m => m.AuthorId == this.userId.ToString() && !m.IsArchivedByAuthor)
-			//};
-
-			//this.userMock.Setup(x => x
-			//	.IsInRole(AdminRoleName))
-			//	.Returns(false);
-
-			//this.messagesServiceMock.Setup(x => x
-			//	.GetUserMessagesAsync(this.userId.ToString(), page))
-			//	.ReturnsAsync(serviceReturnDto);
+			string messageId = "1";
 
 			//Act
-			var viewResult = (ViewResult)this.controller.All();
+			var result = (RedirectToActionResult)await this.controller.Archive(messageId);
 
 			//Assert
-			Assert.That(viewResult, Is.Not.Null);
+			this.messagesServiceMock.Verify(
+				x => x.ArchiveAsync(messageId, this.userId.ToString(), false),
+				Times.Once);
 
-			//Assert.Multiple(() =>
-			//{
-
-			//	//MessagesViewModel viewModel = viewResult.Model as MessagesViewModel ??
-			//	//	throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
-
-			//	//Assert.That(viewModel.Pagination.TotalElements, 
-			//	//	Is.EqualTo(serviceReturnDto.TotalMessagesCount));
-
-			//	//Assert.That(viewModel.Pagination.Page, Is.EqualTo(page));
-
-			//	//AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
-			//});
+			Assert.That(result.ActionName, Is.EqualTo("Index"));
 		}
 
 		[Test]
-		public void All_ShouldReturnView_WhenUserIsAdmin()
+		public async Task Archive_OnPost_ShouldReturnUnauthorized_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
-			//int page = 1;
+			string messageId = "1";
 
-			//var serviceReturnDto = new MessagesDTO
-			//{
-			//	Messages = this.fakeCollection
-			//		.Where(m => !m.IsArchivedByAdmin)
-			//		.Select(m => new MessageOutputDTO
-			//		{
-			//			Id = m.Id,
-			//			CreatedOnUtc = m.CreatedOnUtc,
-			//			Subject = m.Subject,
-			//			IsSeen = m.IsSeenByAdmin
-			//		})
-			//		.Skip(MessagesPerPage * (page - 1))
-			//		.Take(MessagesPerPage),
-			//	TotalMessagesCount = this.fakeCollection
-			//		.Count(m => !m.IsArchivedByAdmin)
-			//};
-
-			//this.userMock.Setup(x => x
-			//	.IsInRole(AdminRoleName))
-			//	.Returns(true);
-
-			//this.messagesServiceMock.Setup(x => x
-			//	.GetAllMessagesAsync(page))
-			//	.ReturnsAsync(serviceReturnDto);
+			this.messagesServiceMock
+				.Setup(x => x.ArchiveAsync(messageId, this.userId.ToString(), false))
+				.Throws<ArgumentException>();
 
 			//Act
-			var viewResult = (ViewResult)this.controller.All();
+			var result = (UnauthorizedResult)await this.controller.Archive(messageId);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(401));
+		}
+
+		[Test]
+		public async Task Archive_OnPost_ShouldReturnBadRequest_WhenArchivingTheMessageWasUnsuccessful()
+		{
+			//Arrange
+			string messageId = "1";
+
+			this.messagesServiceMock
+				.Setup(x => x.ArchiveAsync(messageId, this.userId.ToString(), false))
+				.Throws<InvalidOperationException>();
+
+			//Act
+			var result = (BadRequestResult)await this.controller.Archive(messageId);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(400));
+		}
+
+		[Test]
+		public void Archived_ShouldReturnView()
+		{
+			//Arrange
+
+			//Act
+			var viewResult = (ViewResult)this.controller.Archived();
 
 			//Assert
 			Assert.That(viewResult, Is.Not.Null);
-			
-			//Assert.Multiple(() =>
-			//{
-
-			//	//MessagesViewModel viewModel = viewResult.Model as MessagesViewModel ??
-			//	//	throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
-
-			//	//Assert.That(viewModel.Pagination.TotalElements,
-			//	//	Is.EqualTo(serviceReturnDto.TotalMessagesCount));
-
-			//	//Assert.That(viewModel.Pagination.Page, Is.EqualTo(page));
-
-			//	//AssertSamePropertiesValuesAreEqual(viewModel.Messages, serviceReturnDto);
-			//});
 		}
 
 		[Test]
@@ -178,19 +145,16 @@
 			var viewResult = (ViewResult)this.controller.Create();
 
 			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(viewResult, Is.Not.Null);
+			Assert.That(viewResult, Is.Not.Null);
 
-				MessageModel viewModel = viewResult.Model as MessageModel ??
-					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+			MessageModel viewModel = viewResult.Model as MessageModel ??
+				throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
 
-				AssertSamePropertiesValuesAreEqual(viewModel, expected);
-			});
+			AssertSamePropertiesValuesAreEqual(viewModel, expected);
 		}
 
 		[Test]
-		public async Task Create_OnPost_ShouldReturnViewModelWithErrors_WhenModelIsInvalid()
+		public async Task Create_OnPost_ShouldReturnViewModelWithErrors_WhenTheModelIsInvalid()
 		{
 			//Arrange
 			var inputModel = new MessageModel
@@ -222,7 +186,7 @@
 		}
 
 		[Test]
-		public async Task Create_OnPost_ShouldRedirectToAction_WhenMessageWasCreated()
+		public async Task Create_OnPost_ShouldRedirectToAction_WhenTheMessageWasCreated()
 		{
 			//Arrange
 			var inputModel = new MessageModel
@@ -240,12 +204,12 @@
 				IsSeen = true,
 			};
 
-			this.usersServiceMock.Setup(x => x
-				.UserFullNameAsync(this.userId))
+			this.usersServiceMock
+				.Setup(x => x.UserFullNameAsync(this.userId))
 				.ReturnsAsync(userFullName);
 
-			this.messagesServiceMock.Setup(x => x
-				.CreateAsync(It.Is<MessageInputDTO>(m =>
+			this.messagesServiceMock
+				.Setup(x => x.CreateAsync(It.Is<MessageInputDTO>(m =>
 					m.Subject == inputModel.Subject
 					&& m.Content == inputModel.Content
 					&& m.AuthorId == this.userId.ToString()
@@ -265,42 +229,87 @@
 		}
 
 		[Test]
-		public async Task Delete_ShouldRedirectToAction_WhenMessageWasDeleted()
+		[TestCase(false, false)]
+		[TestCase(true, false)]
+		[TestCase(false, true)]
+		[TestCase(true, true)]
+		public async Task Delete_ShouldRedirectToAction_WhenTheMessageWasDeleted(bool isUserAdmin, bool hasUnseenMessages)
 		{
 			//Arrange
-			string messageId = "id";
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
+				.Returns(isUserAdmin);
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
-				.Returns(false);
+			string authorId = this.userId.ToString();
+			string adminId = "adminId";
+			string currUserId = isUserAdmin ? adminId : authorId;
+
+			this.userMock
+				.Setup(x => x.FindFirst(ClaimTypes.NameIdentifier))
+				.Returns(new Claim(ClaimTypes.NameIdentifier, currUserId));
+
+			string[] adminsIds = new[] { adminId };
+
+			this.usersServiceMock
+				.Setup(x => x.GetAdminsIdsAsync())
+				.ReturnsAsync(adminsIds);
+
+			string messageId = "id";
+			this.messagesServiceMock
+				.Setup(x => x.GetMessageAuthorIdAsync(messageId))
+				.ReturnsAsync(authorId);
+
+			this.messagesServiceMock
+				.Setup(x => x.HasUnseenMessagesByAdminAsync())
+				.ReturnsAsync(hasUnseenMessages);
+
+			this.messagesServiceMock
+				.Setup(x => x.HasUnseenMessagesByUserAsync(authorId))
+				.ReturnsAsync(hasUnseenMessages);
 
 			//Act
 			var result = (RedirectToActionResult)await this.controller.Delete(messageId);
 
-			this.messagesServiceMock.Verify(x => x
-				.RemoveAsync(messageId, this.userId.ToString(), false),
+			//Assert
+			this.messagesServiceMock.Verify(
+				x => x.RemoveAsync(messageId, currUserId, isUserAdmin),
 				Times.Once());
 
-			//Assert
+			this.allMessagesHubMock.Verify(
+				x => x.Clients.Users(adminsIds),
+				isUserAdmin ? Times.Never : Times.Once);
+
+			this.allMessagesHubMock.Verify(
+				x => x.Clients.Users(It.Is<List<string>>(x => x.Count() == 1 && x.First() == authorId)),
+				isUserAdmin ? Times.Once : Times.Never);
+
+			this.notificationsHubMock.Verify(
+				x => x.Clients.Users(adminsIds),
+				!isUserAdmin && !hasUnseenMessages ? Times.Once : Times.Never);
+
+			this.notificationsHubMock.Verify(
+				x => x.Clients.Users(It.Is<List<string>>(x => x.Count() == 1 && x.First() == authorId)),
+				isUserAdmin && !hasUnseenMessages ? Times.Once : Times.Never);
+
 			Assert.Multiple(() =>
 			{
-				Assert.That(result.ActionName, Is.EqualTo("All"));
+				Assert.That(result.ActionName, Is.EqualTo("Index"));
 				Assert.That(result.RouteValues, Is.Null);
 			});
 		}
 
 		[Test]
-		public async Task Delete_ShouldReturnUnauthorized_WhenUserIsNotOwnerOrAdmin()
+		public async Task Delete_ShouldReturnUnauthorized_WhenTheUserIsNotOwnerOrAdmin()
 		{
 			//Arrange
 			string messageId = "id";
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
-			this.messagesServiceMock.Setup(x => x
-				.RemoveAsync(messageId, this.userId.ToString(), false))
+			this.messagesServiceMock
+				.Setup(x => x.RemoveAsync(messageId, this.userId.ToString(), false))
 				.Throws<ArgumentException>();
 
 			//Act
@@ -311,17 +320,17 @@
 		}
 
 		[Test]
-		public async Task Delete_ShouldReturnBadRequest_WhenDeleteWasUnsuccessful()
+		public async Task Delete_ShouldReturnBadRequest_WhenTheDeleteWasUnsuccessful()
 		{
 			//Arrange
 			string messageId = "id";
 
-			this.userMock.Setup(x => x
-				.IsInRole(AdminRoleName))
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
-			this.messagesServiceMock.Setup(x => x
-				.RemoveAsync(messageId, this.userId.ToString(), false))
+			this.messagesServiceMock
+				.Setup(x => x.RemoveAsync(messageId, this.userId.ToString(), false))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -332,18 +341,44 @@
 		}
 
 		[Test]
-		public async Task MessageDetails_OnGet_ShouldReturnViewModel()
+		public void Index_ShouldReturnView()
+		{
+			//Arrange
+
+			//Act
+			var viewResult = (ViewResult)this.controller.Index();
+
+			//Assert
+			Assert.That(viewResult, Is.Not.Null);
+		}
+
+		[Test]
+		public async Task Details_ShouldReturnViewModel()
 		{
 			//Arrange
 			string messageId = "1";
 
-			MessageDetailsDTO serviceReturnDto = this.fakeCollection
-				.Where(m => m.AuthorId == this.userId.ToString())
-				.Select(m => this.mapper.Map<MessageDetailsDTO>(m))
-				.First();
+			var serviceReturnDto = new MessageDetailsDTO
+			{
+				Id = messageId,
+				AuthorId = this.userId.ToString(),
+				AuthorName = "Author Name",
+				Subject = "Message Subject",
+				Content = "Message Content",
+				CreatedOnUtc = DateTime.UtcNow.AddDays(-1),
+				Replies = new ReplyOutputDTO[]
+				{
+					new ReplyOutputDTO
+					{
+						AuthorName = "Admin Name",
+						Content = "Admin First Message Reply Content",
+						CreatedOnUtc = DateTime.UtcNow
+					}
+				}
+			};
 
-			this.messagesServiceMock.Setup(x => x
-				.GetMessageAsync(messageId, this.userId.ToString(), false))
+			this.messagesServiceMock
+				.Setup(x => x.GetMessageAsync(messageId, this.userId.ToString(), false))
 				.ReturnsAsync(serviceReturnDto);
 
 			//Act
@@ -362,13 +397,13 @@
 		}
 
 		[Test]
-		public async Task MessageDetails_OnGet_ShouldReturnBadRequest_WhenMessageDoesNotExistOrUserIsNowOwnerOrAdmin()
+		public async Task Details_ShouldReturnBadRequest_WhenMessageDoesNotExistOrUserIsNowOwnerOrAdmin()
 		{
 			//Arrange
 			string messageId = "id";
 
-			this.messagesServiceMock.Setup(x => x
-				.GetMessageAsync(messageId, this.userId.ToString(), false))
+			this.messagesServiceMock
+				.Setup(x => x.GetMessageAsync(messageId, this.userId.ToString(), false))
 				.Throws<InvalidOperationException>();
 
 			//Act
@@ -376,50 +411,6 @@
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
-		}
-
-		private ICollection<Message> SeedFakeCollection()
-		{
-			return new List<Message>
-			{
-				new Message
-				{
-					Id = "1",
-					CreatedOnUtc = DateTime.UtcNow,
-					Subject = "First User First Message",
-					AuthorId = this.userId.ToString(),
-					AuthorName = "First User username",
-					Content = "First User First Message Content",
-					Replies = new List<Reply>
-					{
-						new Reply
-						{
-							AuthorId = "admin ID",
-							AuthorName = "Admin Name",
-							Content = "Admin First Message Reply Content",
-							CreatedOnUtc = DateTime.UtcNow
-						}
-					}
-				},
-				new Message
-				{
-					Id = "2",
-					CreatedOnUtc = DateTime.UtcNow,
-					Subject = "First User Second Message",
-					AuthorId = this.userId.ToString(),
-					AuthorName = "First User username",
-					Content = "First User Second Message Content",
-				},
-				new Message
-				{
-					Id = "3",
-					CreatedOnUtc = DateTime.UtcNow,
-					Subject = "Second User First Message",
-					AuthorId = "Second User ID",
-					AuthorName = "Second User Name",
-					Content = "Second User First Message Content",
-				}
-			};
 		}
 	}
 }

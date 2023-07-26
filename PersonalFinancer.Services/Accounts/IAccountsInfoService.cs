@@ -31,8 +31,5 @@
 
 		/// <exception cref="InvalidOperationException">When the user is not owner, transaction does not exist or is initial.</exception>
 		Task<CreateEditTransactionOutputDTO> GetTransactionFormDataAsync(Guid transactionId, Guid userId, bool isUserAdmin);
-
-		/// <exception cref="InvalidOperationException">When the transaction does not exist.</exception>
-		Task<Guid> GetTransactionOwnerIdAsync(Guid transactionId);
 	}
 }

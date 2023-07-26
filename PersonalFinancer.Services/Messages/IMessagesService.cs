@@ -22,6 +22,7 @@
 		/// the user is not owner or administrator or message update was unsuccessful.</exception>
 		Task<MessageDetailsDTO> GetMessageAsync(string id, string userId, bool isUserAdmin);
 
+		/// <exception cref="InvalidOperationException">When the message does not exist.</exception>
 		Task<string> GetMessageAuthorIdAsync(string messageId);
 
 		Task<MessagesDTO> GetUserArchivedMessagesAsync(string userId, int page = 1);

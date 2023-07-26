@@ -11,7 +11,6 @@
 	using PersonalFinancer.Web.Models.Home;
 	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
-	using static PersonalFinancer.Common.Constants.UrlPathConstants;
 
 	[TestFixture]
 	internal class HomeControllerTests : ControllersUnitTestsBase
@@ -60,7 +59,7 @@
 				}
 			}
 		};
-		private readonly AccountCardDTO[] expAccountCard = new AccountCardDTO[]
+		private readonly AccountCardDTO[] expAccountsCards = new AccountCardDTO[]
 		{
 			new AccountCardDTO
 			{
@@ -77,13 +76,13 @@
 		[SetUp]
 		public void SetUp()
 		{
-			this.usersServiceMock.Setup(x => x
-				.GetUserDashboardDataAsync(this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+			this.usersServiceMock
+				.Setup(x => x.GetUserDashboardDataAsync(this.userId, It.IsAny<DateTime>(), It.IsAny<DateTime>()))
 				.ReturnsAsync(this.expUserDashboard);
 
-			this.usersServiceMock.Setup(x => x
-				.GetUserAccountsCardsAsync(this.userId))
-				.ReturnsAsync(this.expAccountCard);
+			this.usersServiceMock
+				.Setup(x => x.GetUserAccountsCardsAsync(this.userId))
+				.ReturnsAsync(this.expAccountsCards);
 
 			this.controller = new HomeController(this.usersServiceMock.Object, this.mapper)
 			{
@@ -98,58 +97,21 @@
 		}
 
 		[Test]
-		public async Task Index_ShouldReturnCorrectModel_WhenUserIsAuthenticatedUser()
-		{
-			//Arrange			
-			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
-			this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(true);
-
-			//Act
-			var viewResult = (ViewResult)await this.controller.Index();
-			UserDashboardViewModel viewModel = viewResult.Model as UserDashboardViewModel ??
-					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
-
-			//Assert
-			AssertSamePropertiesValuesAreEqual(viewModel, this.expUserDashboard);
-		}
-
-		[Test]
-		public async Task Index_ShouldReturnEmptyResult_WhenUserIsNotAuthenticated()
+		public void Error_ShouldReturnViewModel()
 		{
 			//Arrange
-			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(false);
-			this.userMock.Setup(x => x.Identity!.IsAuthenticated).Returns(false);
 
 			//Act
-			var viewResult = (ViewResult)await this.controller.Index();
+			var result = (ViewResult)this.controller.Error();
+			var errorViewModel = result.Model as ErrorViewModel;
 
 			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(viewResult, Is.Not.Null);
-				Assert.That(viewResult.Model, Is.Null);
-			});
+			Assert.That(errorViewModel, Is.Not.Null);
+			Assert.That(errorViewModel.RequestId, Is.Not.Null);
 		}
 
 		[Test]
-		public async Task Index_ShouldRedirectToAdminArea_WhenUserIsAdmin()
-		{
-			//Arrange
-			this.userMock.Setup(x => x.IsInRole(AdminRoleName)).Returns(true);
-
-			//Act
-			var redirectResult = (LocalRedirectResult)await this.controller.Index();
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(redirectResult, Is.Not.Null);
-				Assert.That(redirectResult.Url, Is.EqualTo("/Admin"));
-			});
-		}
-
-		[Test]
-		public async Task Index_ShouldReturnCorrectViewModel_WhenInputIsValid()
+		public async Task Filtered_ShouldReturnCorrectViewModel_WhenInputIsValid()
 		{
 			//Arrange
 			var inputModel = new DateFilterModel
@@ -174,7 +136,7 @@
 		}
 
 		[Test]
-		public async Task Index_ShouldReturnCorrectViewModel_WhenInputIsInvalid()
+		public async Task Filtered_ShouldReturnCorrectViewModel_WhenInputIsInvalid()
 		{
 			//Arrange
 			var inputModel = new DateFilterModel
@@ -201,70 +163,97 @@
 				Assert.That(viewModel.FromLocalTime, Is.EqualTo(inputModel.FromLocalTime));
 				Assert.That(viewModel.ToLocalTime, Is.EqualTo(inputModel.ToLocalTime));
 
-				AssertSamePropertiesValuesAreEqual(viewModel.Accounts, this.expAccountCard);
+				AssertSamePropertiesValuesAreEqual(viewModel.Accounts, this.expAccountsCards);
 			});
 		}
 
 		[Test]
-		public void StatusCodePage_ShouldReturnCorrectResult_WhenStatusCodeIs400()
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task Index_ShouldReturnCorrectModel_WhenTheUserIsNotAdmin(bool isAuthenticated)
 		{
-			//Arrange
-			var expected = new StatusCodePageViewModel
-			{
-				Title = "Bad request",
-				Message = "Something went wrong. Please try again or contact us."
-			};
+			//Arrange			
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
+				.Returns(false);
+
+			this.userMock
+				.Setup(x => x.Identity!.IsAuthenticated)
+				.Returns(isAuthenticated);
 
 			//Act
-			var viewResult = (ViewResult)this.controller.StatusCodePage(400);
+			var viewResult = (ViewResult)await this.controller.Index();
+
+			//Assert
+			if (isAuthenticated)
+			{
+				UserDashboardViewModel viewModel = viewResult.Model as UserDashboardViewModel ??
+						throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
+
+				AssertSamePropertiesValuesAreEqual(viewModel, this.expUserDashboard);
+			}
+			else
+			{
+				Assert.Multiple(() =>
+				{
+					Assert.That(viewResult, Is.Not.Null);
+					Assert.That(viewResult.Model, Is.Null);
+				});
+			}
+		}
+
+		[Test]
+		public async Task Index_ShouldRedirectToAdminArea_WhenTheUserIsAdmin()
+		{
+			//Arrange
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
+				.Returns(true);
+
+			//Act
+			var redirectResult = (LocalRedirectResult)await this.controller.Index();
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(redirectResult, Is.Not.Null);
+				Assert.That(redirectResult.Url, Is.EqualTo("/Admin"));
+			});
+		}
+
+		[Test]
+		[TestCase(400)]
+		[TestCase(401)]
+		[TestCase(404)]
+		public void StatusCodePage_ShouldReturnCorrectStatusCodePageViewModel(int statusCode)
+		{
+			//Arrange
+			var expected = new StatusCodePageViewModel();
+
+			if (statusCode == 400)
+			{
+				expected.Title = "Bad request";
+				expected.Message = "Something went wrong. Please try again or contact us.";
+			}
+			else if (statusCode == 401)
+			{
+				expected.Title = "Access denied";
+				expected.Message = "You do not have access to this resource.";
+			}
+			else if (statusCode == 404)
+			{
+				expected.Title = "Not found";
+				expected.Message = "The page you are looking for does not exist.";
+			}
+
+			//Act
+			var viewResult = (ViewResult)this.controller.StatusCodePage(statusCode);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				var actual = viewResult.Model as StatusCodePageViewModel;
-				AssertAreEqualAsJson(actual!, expected);
-			});
-		}
-
-		[Test]
-		public void StatusCodePage_ShouldReturnCorrectResult_WhenStatusCodeIs401()
-		{
-			//Arrange
-			var expected = new StatusCodePageViewModel
-			{
-				Title = "Access denied",
-				Message = "You do not have access to this resource."
-			};
-
-			//Act
-			var viewResult = (ViewResult)this.controller.StatusCodePage(401);
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				var actual = viewResult.Model as StatusCodePageViewModel;
-				AssertAreEqualAsJson(actual!, expected);
-			});
-		}
-
-		[Test]
-		public void StatusCodePage_ShouldReturnCorrectResult_WhenStatusCodeIs404()
-		{
-			//Arrange
-			var expected = new StatusCodePageViewModel
-			{
-				Title = "Not found",
-				Message = "The page you are looking for does not exist."
-			};
-
-			//Act
-			var viewResult = (ViewResult)this.controller.StatusCodePage(404);
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				var actual = viewResult.Model as StatusCodePageViewModel;
-				AssertAreEqualAsJson(actual!, expected);
+				AssertSamePropertiesValuesAreEqual(actual!, expected);
 			});
 		}
 	}

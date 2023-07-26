@@ -279,7 +279,11 @@
 		}
 
 		[Test]
-		public async Task DeleteAccountAsync_ShouldMarkAccountAsDeletedWithoutDeleteTransactions_WhenTheUserIsOwner()
+		[TestCase(false, false)]
+		[TestCase(true, false)]
+		[TestCase(true, true)]
+		[TestCase(false, true)]
+		public async Task DeleteAccountAsync_ShouldMarkAccountAsDeletedWithoutDeleteTransactions(bool isUserAdmin, bool shouldDeleteTransactions)
 		{
 			//Arrange
 			Account testAccount = await this.accountsRepo.All()
@@ -291,111 +295,40 @@
 			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
 			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
 
-			//Act
-			await this.accountsUpdateService.DeleteAccountAsync(
-				testAccount.Id, testAccount.OwnerId, isUserAdmin: false, shouldDeleteTransactions: false);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(testAccount.IsDeleted, Is.True);
-
-				Assert.That(testAccount.Transactions,
-				   Has.Count.EqualTo(accountTransactionsCount));
-
-				Assert.That(await this.accountsRepo.All().CountAsync(),
-					Is.EqualTo(accountsCountBefore));
-
-				Assert.That(await this.transactionsRepo.All().CountAsync(),
-					Is.EqualTo(transactionsCountBefore));
-			});
-		}
-
-		[Test]
-		public async Task DeleteAccountAsync_ShouldMarkAccountAsDeletedWithoutDeleteTransactions_WhenTheUserIsAdmin()
-		{
-			//Arrange
-			Account testAccount = await this.accountsRepo.All()
-				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
-				.Include(a => a.Transactions)
-				.FirstAsync();
-
-			int accountTransactionsCount = testAccount.Transactions.Count;
-			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
-			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
+			Guid currentUserId = isUserAdmin ? this.adminId : testAccount.OwnerId;
 
 			//Act
 			await this.accountsUpdateService.DeleteAccountAsync(
-				testAccount.Id, this.adminId, isUserAdmin: true, shouldDeleteTransactions: false);
+				testAccount.Id, currentUserId, isUserAdmin, shouldDeleteTransactions);
 
 			//Assert
-			Assert.Multiple(async () =>
+			if (shouldDeleteTransactions)
 			{
-				Assert.That(testAccount.IsDeleted, Is.True);
+				Assert.Multiple(async () =>
+				{
+					Assert.That(await this.accountsRepo.All().CountAsync(),
+						Is.EqualTo(accountsCountBefore - 1));
 
-				Assert.That(testAccount.Transactions,
-				   Has.Count.EqualTo(accountTransactionsCount));
-
-				Assert.That(await this.accountsRepo.All().CountAsync(),
-					Is.EqualTo(accountsCountBefore));
-
-				Assert.That(await this.transactionsRepo.All().CountAsync(),
-					Is.EqualTo(transactionsCountBefore));
-			});
-		}
-
-		[Test]
-		public async Task DeleteAccountAsync_ShouldDeleteAccountAndTransactions_WhenTheUserIsOwner()
-		{
-			//Arrange
-			Account testAccount = await this.accountsRepo.All()
-				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
-				.Include(a => a.Transactions)
-				.FirstAsync();
-			int accountTransactionsCount = testAccount.Transactions.Count;
-			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
-			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
-
-			//Act
-			await this.accountsUpdateService.DeleteAccountAsync(
-				testAccount.Id, this.mainTestUserId, isUserAdmin: false, shouldDeleteTransactions: true);
-
-			//Assert
-			Assert.Multiple(async () =>
+					Assert.That(await this.transactionsRepo.All().CountAsync(),
+						Is.EqualTo(transactionsCountBefore - accountTransactionsCount));
+				});
+			}
+			else
 			{
-				Assert.That(await this.accountsRepo.All().CountAsync(),
-					Is.EqualTo(accountsCountBefore - 1));
+				Assert.Multiple(async () =>
+				{
+					Assert.That(testAccount.IsDeleted, Is.True);
 
-				Assert.That(await this.transactionsRepo.All().CountAsync(),
-					Is.EqualTo(transactionsCountBefore - accountTransactionsCount));
-			});
-		}
+					Assert.That(testAccount.Transactions,
+					   Has.Count.EqualTo(accountTransactionsCount));
 
-		[Test]
-		public async Task DeleteAccountAsync_ShouldDeleteAccountAndTransactions_WhenTheUserIsAdmin()
-		{
-			//Arrange
-			Account testAccount = await this.accountsRepo.All()
-				.Where(a => a.OwnerId == this.mainTestUserId && !a.IsDeleted)
-				.Include(a => a.Transactions)
-				.FirstAsync();
-			int accountTransactionsCount = testAccount.Transactions.Count;
-			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
-			int transactionsCountBefore = await this.transactionsRepo.All().CountAsync();
+					Assert.That(await this.accountsRepo.All().CountAsync(),
+						Is.EqualTo(accountsCountBefore));
 
-			//Act
-			await this.accountsUpdateService.DeleteAccountAsync(
-				testAccount.Id, this.adminId, isUserAdmin: true, shouldDeleteTransactions: true);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(await this.accountsRepo.All().CountAsync(),
-					Is.EqualTo(accountsCountBefore - 1));
-
-				Assert.That(await this.transactionsRepo.All().CountAsync(),
-					Is.EqualTo(transactionsCountBefore - accountTransactionsCount));
-			});
+					Assert.That(await this.transactionsRepo.All().CountAsync(),
+						Is.EqualTo(transactionsCountBefore));
+				});
+			}
 		}
 
 		[Test]
@@ -410,7 +343,7 @@
 		}
 
 		[Test]
-		public async Task DeleteAccountAsync_ShouldThrowArgumentException_WhenTheUserIsNotOwner()
+		public async Task DeleteAccountAsync_ShouldThrowArgumentException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			Guid notOwnerId = await this.dbContext.Users
@@ -428,145 +361,42 @@
 		}
 
 		[Test]
-		public async Task DeleteTransactionAsync_ShouldDeleteIncomeTransactionAndDecreaseBalance_WhenTheUserIsOwner()
+		[TestCase(false, TransactionType.Income)]
+		[TestCase(false, TransactionType.Expense)]
+		[TestCase(true, TransactionType.Income)]
+		[TestCase(true, TransactionType.Expense)]
+		public async Task DeleteTransactionAsync_ShouldDeleteTransactionAndChangeTheBalance(bool isUserAdmin, TransactionType transactionType)
 		{
 			//Arrange
 			Account testAccount = await this.accountsRepo.All()
 				.Where(a => a.OwnerId == this.mainTestUserId &&
 							!a.IsDeleted &&
-							a.Transactions.Any(t => t.TransactionType == TransactionType.Income))
+							a.Transactions.Any(t => t.TransactionType == transactionType))
 				.Include(a => a.Transactions)
 				.FirstAsync();
 
 			Transaction transactionForDelete = testAccount.Transactions
-				.First(t => t.TransactionType == TransactionType.Income);
+				.First(t => t.TransactionType == transactionType);
 
 			decimal balanceBefore = testAccount.Balance;
+
+			decimal expectedNewBalance = transactionType == TransactionType.Income
+				? balanceBefore - transactionForDelete.Amount
+				: balanceBefore + transactionForDelete.Amount;
+
 			int accountTransactionsCountBefore = testAccount.Transactions.Count;
+
+			Guid currentUserId = isUserAdmin ? this.adminId : testAccount.OwnerId;
 
 			//Act
 			decimal newBalance = await this.accountsUpdateService
-				.DeleteTransactionAsync(transactionForDelete.Id, testAccount.OwnerId, isUserAdmin: false);
+				.DeleteTransactionAsync(transactionForDelete.Id, currentUserId, isUserAdmin);
 
 			//Assert
 			Assert.Multiple(async () =>
 			{
 				Assert.That(testAccount.Balance,
-					Is.EqualTo(balanceBefore - transactionForDelete.Amount));
-
-				Assert.That(testAccount.Balance,
-					Is.EqualTo(newBalance));
-
-				Assert.That(testAccount.Transactions,
-				   Has.Count.EqualTo(accountTransactionsCountBefore - 1));
-
-				Assert.That(await this.transactionsRepo.FindAsync(transactionForDelete.Id),
-					Is.Null);
-			});
-		}
-
-		[Test]
-		public async Task DeleteTransaction_ShouldDeleteIncomeTransactionAndDecreaseBalance_WhenTheUserIsAdmin()
-		{
-			//Arrange
-			Account testAccount = await this.accountsRepo.All()
-				.Where(a => a.OwnerId == this.mainTestUserId &&
-							!a.IsDeleted &&
-							a.Transactions.Any(t => t.TransactionType == TransactionType.Income))
-				.Include(a => a.Transactions)
-				.FirstAsync();
-
-			Transaction transactionForDelete = testAccount.Transactions
-				.First(t => t.TransactionType == TransactionType.Income);
-
-			decimal balanceBefore = testAccount.Balance;
-			int accountTransactionsCountBefore = testAccount.Transactions.Count;
-
-			//Act
-			decimal newBalance = await this.accountsUpdateService
-				.DeleteTransactionAsync(transactionForDelete.Id, this.adminId, isUserAdmin: true);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(testAccount.Balance,
-					Is.EqualTo(balanceBefore - transactionForDelete.Amount));
-
-				Assert.That(testAccount.Balance,
-					Is.EqualTo(newBalance));
-
-				Assert.That(testAccount.Transactions,
-				   Has.Count.EqualTo(accountTransactionsCountBefore - 1));
-
-				Assert.That(await this.transactionsRepo.FindAsync(transactionForDelete.Id),
-					Is.Null);
-			});
-		}
-
-		[Test]
-		public async Task DeleteTransactionAsync_ShouldDeleteExpenseTransactionIncreaseBalance_WhenTheUserIsOwner()
-		{
-			//Arrange
-			Account testAccount = await this.accountsRepo.All()
-				.Where(a => a.OwnerId == this.mainTestUserId &&
-							!a.IsDeleted &&
-							a.Transactions.Any(t => t.TransactionType == TransactionType.Expense))
-				.Include(a => a.Transactions)
-				.FirstAsync();
-
-			Transaction transactionForDelete = testAccount.Transactions
-				.First(t => t.TransactionType == TransactionType.Expense);
-
-			decimal balanceBefore = testAccount.Balance;
-			int accountTransactionsCountBefore = testAccount.Transactions.Count;
-
-			//Act
-			decimal newBalance = await this.accountsUpdateService
-				.DeleteTransactionAsync(transactionForDelete.Id, testAccount.OwnerId, isUserAdmin: false);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(testAccount.Balance,
-					Is.EqualTo(balanceBefore + transactionForDelete.Amount));
-
-				Assert.That(testAccount.Balance,
-					Is.EqualTo(newBalance));
-
-				Assert.That(testAccount.Transactions,
-				   Has.Count.EqualTo(accountTransactionsCountBefore - 1));
-
-				Assert.That(await this.transactionsRepo.FindAsync(transactionForDelete.Id),
-					Is.Null);
-			});
-		}
-
-		[Test]
-		public async Task DeleteTransactionAsync_ShouldDeleteExpenseTransactionIncreaseBalance_WhenTheUserIsAdmin()
-		{
-			//Arrange
-			Account testAccount = await this.accountsRepo.All()
-				.Where(a => a.OwnerId == this.mainTestUserId &&
-							!a.IsDeleted &&
-							a.Transactions.Any(t => t.TransactionType == TransactionType.Expense))
-				.Include(a => a.Transactions)
-				.FirstAsync();
-
-			Transaction transactionForDelete = testAccount.Transactions
-				.First(t => t.TransactionType == TransactionType.Expense);
-
-			decimal balanceBefore = testAccount.Balance;
-			int accountTransactionsCountBefore = testAccount.Transactions.Count;
-
-			//Act
-			decimal newBalance = await this.accountsUpdateService
-				.DeleteTransactionAsync(transactionForDelete.Id, this.adminId, isUserAdmin: true);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(testAccount.Balance,
-					Is.EqualTo(balanceBefore + transactionForDelete.Amount));
+					Is.EqualTo(expectedNewBalance));
 
 				Assert.That(testAccount.Balance,
 					Is.EqualTo(newBalance));
@@ -591,7 +421,7 @@
 		}
 
 		[Test]
-		public async Task DeleteTransactionAsync_ShouldThrowArgumentException_WhenTheUserIsNotOwner()
+		public async Task DeleteTransactionAsync_ShouldThrowArgumentException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			Guid transactionId = await this.transactionsRepo.All()
@@ -692,45 +522,6 @@
 		}
 
 		[Test]
-		public async Task EditAccountAsync_ShouldChangeAccountBalanceAndInitialBalanceTransactionAmount()
-		{
-			//Arrange
-			Account testAccount = await this.accountsRepo.All()
-				.Where(a => !a.IsDeleted
-							&& a.Transactions.Any(t => t.IsInitialBalance
-													   && t.TransactionType == TransactionType.Income))
-				.FirstAsync();
-
-			Transaction initialTransaction = testAccount.Transactions.First(t => t.IsInitialBalance);
-
-			decimal initialTransactionAmountBefore = initialTransaction.Amount;
-
-			var inputModel = new CreateEditAccountInputDTO
-			{
-				Name = testAccount.Name,
-				AccountTypeId = testAccount.AccountTypeId,
-				Balance = testAccount.Balance + 100, // Change
-				CurrencyId = testAccount.CurrencyId,
-				OwnerId = testAccount.OwnerId
-			};
-
-			//Act
-			await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel);
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(initialTransaction.Amount,
-					Is.EqualTo(initialTransactionAmountBefore + 100));
-
-				Assert.That(initialTransaction.TransactionType,
-					Is.EqualTo(TransactionType.Income));
-
-				AssertSamePropertiesValuesAreEqual(testAccount, inputModel);
-			});
-		}
-
-		[Test]
 		public async Task EditAccountAsync_ShouldChangeAccountBalanceAndInitialBalanceTransactionAmountAndType()
 		{
 			//Arrange
@@ -771,7 +562,7 @@
 		{
 			//Arrange
 			Account testAccount = await this.accountsRepo.All()
-				.Where(a => !a.IsDeleted && 
+				.Where(a => !a.IsDeleted &&
 							!a.Transactions.Any(t => t.IsInitialBalance))
 				.FirstAsync();
 
@@ -888,7 +679,7 @@
 			Transaction transaction = testAccount.Transactions
 				.First(t => t.TransactionType == TransactionType.Expense &&
 							!t.IsInitialBalance);
-			
+
 			decimal balanceBefore = testAccount.Balance;
 			var dto = this.mapper.Map<CreateEditTransactionInputDTO>(transaction);
 
@@ -911,18 +702,18 @@
 		{
 			//Arrange
 			Account firstAccount = await this.accountsRepo.All()
-				.Where(a => a.OwnerId == this.mainTestUserId && 
+				.Where(a => a.OwnerId == this.mainTestUserId &&
 							!a.IsDeleted)
 				.FirstAsync();
 
 			Account secondAccount = await this.accountsRepo.All()
-				.Where(a => a.Id != firstAccount.Id && 
-							a.OwnerId == this.mainTestUserId && 
+				.Where(a => a.Id != firstAccount.Id &&
+							a.OwnerId == this.mainTestUserId &&
 							!a.IsDeleted)
 				.FirstAsync();
-			
+
 			Transaction transaction = firstAccount.Transactions
-				.First(t => t.TransactionType == TransactionType.Expense && 
+				.First(t => t.TransactionType == TransactionType.Expense &&
 							!t.IsInitialBalance);
 
 			var dto = this.mapper.Map<CreateEditTransactionInputDTO>(transaction);

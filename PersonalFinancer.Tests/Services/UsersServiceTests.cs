@@ -2,6 +2,7 @@
 {
 	using AutoMapper.QueryableExtensions;
 	using Microsoft.EntityFrameworkCore;
+	using MongoDB.Bson;
 	using NUnit.Framework;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
@@ -11,6 +12,7 @@
 	using PersonalFinancer.Services.User;
 	using PersonalFinancer.Services.User.Models;
 	using System.Linq.Expressions;
+	using static PersonalFinancer.Common.Constants.CategoryConstants;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	[TestFixture]
@@ -45,6 +47,22 @@
 		}
 
 		[Test]
+		public async Task GetAdminsIdsAsync_ShouldReturnAdminsIds()
+		{
+			//Arrange
+			var expected = await this.usersRepo.All()
+				.Where(u => u.IsAdmin)
+				.Select(u => u.Id.ToString())
+				.ToListAsync();
+
+			//Act
+			var actual = await this.usersService.GetAdminsIdsAsync();
+
+			//Arrange
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+		}
+
+		[Test]
 		public async Task GetUsersInfoAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
@@ -63,7 +81,7 @@
 			UsersInfoDTO actual = await this.usersService.GetUsersInfoAsync(1);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -89,7 +107,7 @@
 				.GetUserAccountsAndCategoriesDropdownsAsync(this.mainTestUserId);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -106,7 +124,7 @@
 			var actual = await this.usersService.GetUserAccountsCardsAsync(this.mainTestUserId);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -132,7 +150,7 @@
 				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownsAsync(this.mainTestUserId);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -195,7 +213,43 @@
 				.GetUserDashboardDataAsync(this.mainTestUserId, fromLocalTime.ToLocalTime(), toLocalTime.ToLocalTime());
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+		}
+
+		[Test]
+		public async Task GetUserUsedDropdownsAsync_ShouldReturnCorrectData()
+		{
+			//Arrange
+			var expected = await this.usersRepo.All()
+				.Where(u => u.Id == this.mainTestUserId)
+				.Select(u => new UserUsedDropdownsDTO
+				{
+					OwnerAccounts = u.Accounts
+						.Where(a => !a.IsDeleted || a.Transactions.Any())
+						.Select(a => this.mapper.Map<DropdownDTO>(a)),
+					OwnerAccountTypes = u.AccountTypes
+						.Where(at => !at.IsDeleted || at.Accounts.Any(a => !a.IsDeleted || a.Transactions.Any()))
+						.Select(at => this.mapper.Map<DropdownDTO>(at)),
+					OwnerCurrencies = u.Currencies
+						.Where(c => !c.IsDeleted || c.Accounts.Any(a => !a.IsDeleted || a.Transactions.Any()))
+						.Select(c => this.mapper.Map<DropdownDTO>(c)),
+					OwnerCategories = u.Categories
+						.Where(c => !c.IsDeleted || c.Transactions.Any())
+						.Select(c => this.mapper.Map<DropdownDTO>(c))
+						.ToList(),
+				})
+				.FirstAsync();
+
+			expected.OwnerCategories.Add(await this.categoriesRepo.All()
+				.Where(c => c.Id == Guid.Parse(InitialBalanceCategoryId))
+				.ProjectTo<DropdownDTO>(this.mapper.ConfigurationProvider)
+				.FirstAsync());
+
+			//Act
+			var actual = await this.usersService.GetUserUsedDropdownsAsync(this.mainTestUserId);
+
+			//Assert
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -229,7 +283,7 @@
 			TransactionsDTO actual = await this.usersService.GetUserTransactionsAsync(dto);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
@@ -256,7 +310,7 @@
 		}
 
 		[Test]
-		public async Task UserDetails_ShouldReturnCorrectData_WithValidUserId()
+		public async Task UserDetailsAsync_ShouldReturnCorrectData_WithValidUserId()
 		{
 			//Arrange
 			UserDetailsDTO expected = await this.usersRepo.All()
@@ -268,11 +322,11 @@
 			UserDetailsDTO actual = await this.usersService.UserDetailsAsync(this.mainTestUserId);
 
 			//Assert
-			AssertAreEqualAsJson(actual, expected);
+			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
 		}
 
 		[Test]
-		public async Task UserFullName_ShouldReturnUsersFullName_WithValidId()
+		public async Task UserFullNameAsync_ShouldReturnUsersFullName_WithValidId()
 		{
 			//Arrange
 			ApplicationUser? testUser = await this.dbContext.Users.FindAsync(this.mainTestUserId);
@@ -286,7 +340,7 @@
 		}
 
 		[Test]
-		public void UserFullName_ShouldThrowException_WithInvalidId()
+		public void UserFullNameAsync_ShouldThrowInvalidOperationException_WithInvalidId()
 		{
 			//Arrange
 			var invalidId = Guid.NewGuid();
@@ -297,7 +351,7 @@
 		}
 
 		[Test]
-		public async Task UsersCount_ShouldReturnCorrectData()
+		public async Task UsersCountAsync_ShouldReturnCorrectData()
 		{
 			//Arrange
 			int expected = await this.usersRepo.All().CountAsync();

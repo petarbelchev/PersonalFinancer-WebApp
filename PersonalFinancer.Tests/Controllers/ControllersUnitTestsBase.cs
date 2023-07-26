@@ -5,6 +5,7 @@
 	using Microsoft.AspNetCore.Mvc.ViewFeatures;
 	using Microsoft.AspNetCore.Routing;
 	using Moq;
+	using Newtonsoft.Json;
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Accounts;
@@ -34,8 +35,8 @@
 			this.usersServiceMock = new Mock<IUsersService>();
 			this.userMock = new Mock<ClaimsPrincipal>();
 
-			this.userMock.Setup(x => x
-				.FindFirst(ClaimTypes.NameIdentifier))
+			this.userMock
+				.Setup(x => x.FindFirst(ClaimTypes.NameIdentifier))
 				.Returns(new Claim(ClaimTypes.NameIdentifier, this.userId.ToString()));
 		}
 
@@ -74,5 +75,8 @@
 				Assert.That(routeValues.Values.Contains(value), Is.True);
 			});
 		}
+
+		protected static bool ValidateObjectsAreEqual(object x, object y) 
+			=> JsonConvert.SerializeObject(x).Equals(JsonConvert.SerializeObject(y));
 	}
 }

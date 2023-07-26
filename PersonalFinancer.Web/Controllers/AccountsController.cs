@@ -7,7 +7,6 @@
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Services.User.Models;
 	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Account;
@@ -38,7 +37,11 @@
 		public async Task<IActionResult> Create()
 		{
 			var viewModel = new CreateEditAccountViewModel { OwnerId = this.User.IdToGuid() };
-			await this.SetUserDropdownDataToViewModel(viewModel);
+
+			var typesAndCurrenciesDTO = await this.usersService
+				.GetUserAccountTypesAndCurrenciesDropdownsAsync(viewModel.OwnerId);
+
+			this.mapper.Map(typesAndCurrenciesDTO, viewModel);
 
 			return this.View(viewModel);
 		}
@@ -68,10 +71,12 @@
 				}
 			}
 
-			CreateEditAccountViewModel viewModel =
-				this.mapper.Map<CreateEditAccountViewModel>(inputModel);
+			var viewModel = this.mapper.Map<CreateEditAccountViewModel>(inputModel);
 
-			await this.SetUserDropdownDataToViewModel(viewModel);
+			var typesAndCurrenciesDTO = await this.usersService
+				.GetUserAccountTypesAndCurrenciesDropdownsAsync(viewModel.OwnerId);
+
+			this.mapper.Map(typesAndCurrenciesDTO, viewModel);
 
 			return this.View(viewModel);
 		}
@@ -243,24 +248,14 @@
 				}
 			}
 
-			CreateEditAccountViewModel viewModel =
-				this.mapper.Map<CreateEditAccountViewModel>(inputModel);
+			var viewModel = this.mapper.Map<CreateEditAccountViewModel>(inputModel);
 
-			await this.SetUserDropdownDataToViewModel(viewModel);
-
-			return this.View(viewModel);
-		}
-
-		/// <exception cref="InvalidOperationException">When the owner ID is invalid.</exception>
-		private async Task SetUserDropdownDataToViewModel(CreateEditAccountViewModel viewModel)
-		{
-			Guid userId = viewModel.OwnerId ?? throw new InvalidOperationException(
-				string.Format(ExceptionMessages.NotNullableProperty, viewModel.OwnerId));
-
-			AccountTypesAndCurrenciesDropdownDTO typesAndCurrenciesDTO =
-				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownsAsync(userId);
+			var typesAndCurrenciesDTO = await this.usersService
+				.GetUserAccountTypesAndCurrenciesDropdownsAsync(viewModel.OwnerId);
 
 			this.mapper.Map(typesAndCurrenciesDTO, viewModel);
+
+			return this.View(viewModel);
 		}
 	}
 }

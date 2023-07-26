@@ -136,13 +136,5 @@
 				.ProjectTo<CreateEditTransactionOutputDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 		}
-
-		public async Task<Guid> GetTransactionOwnerIdAsync(Guid transactionId)
-		{
-			return await this.transactionsRepo.All()
-				.Where(t => t.Id == transactionId)
-				.Select(t => t.OwnerId)
-				.FirstAsync();
-		}
 	}
 }

@@ -37,8 +37,6 @@
 			this.notificationsHub = notificationsHub;
 		}
 
-		public IActionResult All() => this.View();
-
 		[HttpPost]
 		[NoHtmlSanitizing]
 		public async Task<IActionResult> Archive([Required] string id)
@@ -56,7 +54,7 @@
 				return this.BadRequest();
 			}
 
-			return this.RedirectToAction(nameof(All));
+			return this.RedirectToAction(nameof(Index));
 		}
 
 		public IActionResult Archived() => this.View();
@@ -137,7 +135,7 @@
 				}
 			}
 
-			return this.RedirectToAction(nameof(All));
+			return this.RedirectToAction(nameof(Index));
 		}
 
 		public async Task<IActionResult> Details([Required] string id)
@@ -158,5 +156,7 @@
 
 			return this.View(viewModel);
 		}
+
+		public IActionResult Index() => this.View();
 	}
 }
