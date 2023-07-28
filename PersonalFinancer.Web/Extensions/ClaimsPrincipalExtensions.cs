@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Web.Extensions
+﻿namespace Microsoft.Extensions.DependencyInjection
 {
     using System.Security.Claims;
     using static PersonalFinancer.Common.Constants.RoleConstants;

@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Web.Extensions
+﻿namespace Microsoft.Extensions.DependencyInjection
 {
 	using PersonalFinancer.Data;
 	using PersonalFinancer.Data.Seeding;

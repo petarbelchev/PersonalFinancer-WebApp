@@ -8,7 +8,6 @@
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Web.CustomAttributes;
-	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Account;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.RoleConstants;

@@ -1,11 +1,10 @@
-﻿namespace PersonalFinancer.Web.Extensions
+﻿namespace Microsoft.Extensions.DependencyInjection
 {
 	using Microsoft.AspNetCore.Identity;
 	using Microsoft.AspNetCore.Identity.UI.Services;
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.EntityFrameworkCore;
 	using Microsoft.Extensions.Caching.Memory;
-	using Microsoft.Extensions.DependencyInjection;
 	using PersonalFinancer.Data;
 	using PersonalFinancer.Data.Configurations;
 	using PersonalFinancer.Data.Models;

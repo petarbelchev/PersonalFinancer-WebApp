@@ -2,7 +2,6 @@ using PersonalFinancer.Data.Configurations;
 using PersonalFinancer.Services.Accounts;
 using PersonalFinancer.Services.EmailSender;
 using PersonalFinancer.Web.Controllers;
-using PersonalFinancer.Web.Extensions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

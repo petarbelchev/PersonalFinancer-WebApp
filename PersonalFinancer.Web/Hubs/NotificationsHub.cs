@@ -3,7 +3,6 @@
 	using Microsoft.AspNetCore.SignalR;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Users;
-	using PersonalFinancer.Web.Extensions;
 
 	public class NotificationsHub : Hub
 	{

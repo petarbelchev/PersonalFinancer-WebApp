@@ -8,7 +8,6 @@
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Web.CustomAttributes;
-	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Hubs;
 	using PersonalFinancer.Web.Models.Message;
 	using System.ComponentModel.DataAnnotations;
