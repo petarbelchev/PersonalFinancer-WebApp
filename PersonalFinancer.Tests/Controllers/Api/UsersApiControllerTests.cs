@@ -4,7 +4,7 @@
 	using Microsoft.AspNetCore.Mvc;
 	using Moq;
 	using NUnit.Framework;
-	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Services.Users.Models;
 	using PersonalFinancer.Web.Controllers.Api;
 	using PersonalFinancer.Web.Models.User;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;

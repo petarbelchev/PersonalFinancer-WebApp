@@ -2,7 +2,7 @@
 {
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.Users;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 

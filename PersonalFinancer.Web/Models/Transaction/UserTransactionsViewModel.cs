@@ -1,7 +1,7 @@
 ﻿namespace PersonalFinancer.Web.Models.Transaction
 {
 	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Services.Users.Models;
 
 	public class UserTransactionsViewModel : UserTransactionsInputModel
 	{

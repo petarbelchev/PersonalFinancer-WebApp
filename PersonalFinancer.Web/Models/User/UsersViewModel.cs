@@ -1,6 +1,6 @@
 ﻿namespace PersonalFinancer.Web.Models.User
 {
-	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Services.Users.Models;
 	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 

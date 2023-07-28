@@ -3,8 +3,8 @@
 	using AutoMapper;
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Services.Users;
+	using PersonalFinancer.Services.Users.Models;
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Home;
 	using PersonalFinancer.Web.Models.Shared;

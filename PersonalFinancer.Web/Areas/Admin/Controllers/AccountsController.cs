@@ -4,7 +4,7 @@
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.Users;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[Area("Admin")]

@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Services.User
+﻿namespace PersonalFinancer.Services.Users
 {
 	using AutoMapper;
 	using AutoMapper.QueryableExtensions;
@@ -9,7 +9,7 @@
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Services.Users.Models;
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
 	using static PersonalFinancer.Common.Constants.CacheConstants;
@@ -97,7 +97,7 @@
 			DateTime fromUtc = fromLocalTime.ToUniversalTime();
 			DateTime toUtc = toLocalTime.ToUniversalTime();
 
-			Expression<Func<Transaction, bool>> dateFilter = (t) 
+			Expression<Func<Transaction, bool>> dateFilter = (t)
 				=> t.CreatedOnUtc >= fromUtc && t.CreatedOnUtc <= toUtc;
 
 			UserDashboardDTO dto = await this.usersRepo.All()

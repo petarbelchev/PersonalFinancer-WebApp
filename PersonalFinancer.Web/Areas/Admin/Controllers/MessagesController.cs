@@ -5,7 +5,7 @@
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.SignalR;
 	using PersonalFinancer.Services.Messages;
-	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Web.Hubs;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 

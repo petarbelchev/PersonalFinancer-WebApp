@@ -1,6 +1,6 @@
 ﻿#nullable disable
 
-namespace PersonalFinancer.Services.User.Models
+namespace PersonalFinancer.Services.Users.Models
 {
 	using PersonalFinancer.Services.Shared.Models;
 

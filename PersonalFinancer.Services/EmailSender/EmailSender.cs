@@ -1,37 +1,37 @@
-﻿namespace PersonalFinancer.Web.EmailSender
+﻿namespace PersonalFinancer.Services.EmailSender
 {
 	using Microsoft.AspNetCore.Identity.UI.Services;
+	using Microsoft.Extensions.Logging;
 	using Microsoft.Extensions.Options;
 	using SendGrid;
 	using SendGrid.Helpers.Mail;
 
 	public class EmailSender : IEmailSender
 	{
+		private readonly AuthEmailSenderOptions options;
 		private readonly ILogger<EmailSender> logger;
 
 		public EmailSender(
 			IOptions<AuthEmailSenderOptions> optionsAccessor,
 			ILogger<EmailSender> logger)
 		{
-			this.Options = optionsAccessor.Value;
+			this.options = optionsAccessor.Value;
 			this.logger = logger;
 		}
 
-		public AuthEmailSenderOptions Options { get; set; }
-
 		public async Task SendEmailAsync(string email, string subject, string message)
 		{
-			if (string.IsNullOrEmpty(this.Options.SendGridKey)
-				|| string.IsNullOrEmpty(this.Options.EmailSender))
+			if (string.IsNullOrEmpty(this.options.SendGridKey)
+				|| string.IsNullOrEmpty(this.options.EmailSender))
 			{
 				throw new Exception("Null Message Sender Options");
 			}
 
-			var client = new SendGridClient(this.Options.SendGridKey);
+			var client = new SendGridClient(this.options.SendGridKey);
 
 			var msg = new SendGridMessage()
 			{
-				From = new EmailAddress(this.Options.EmailSender),
+				From = new EmailAddress(this.options.EmailSender),
 				Subject = subject,
 				PlainTextContent = message,
 				HtmlContent = message

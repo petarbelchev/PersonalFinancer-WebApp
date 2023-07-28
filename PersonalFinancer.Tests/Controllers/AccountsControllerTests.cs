@@ -8,7 +8,7 @@
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Services.Users.Models;
 	using PersonalFinancer.Web.Controllers;
 	using PersonalFinancer.Web.Models.Account;
 	using System.Security.Claims;

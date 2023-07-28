@@ -1,13 +1,13 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Services.User;
-    using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Models.User;
-    using static PersonalFinancer.Common.Constants.RoleConstants;
+	using Microsoft.AspNetCore.Authorization;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Services.Users;
+	using PersonalFinancer.Services.Users.Models;
+	using PersonalFinancer.Web.Models.User;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
 
-    [Authorize(Roles = AdminRoleName)]
+	[Authorize(Roles = AdminRoleName)]
     [Route("api/users")]
     [ApiController]
     public class UsersApiController : ControllerBase

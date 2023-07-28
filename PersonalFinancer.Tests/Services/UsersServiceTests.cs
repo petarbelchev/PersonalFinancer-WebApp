@@ -9,8 +9,8 @@
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User;
-	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Services.Users;
+	using PersonalFinancer.Services.Users.Models;
 	using System.Linq.Expressions;
 	using static PersonalFinancer.Common.Constants.CategoryConstants;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;

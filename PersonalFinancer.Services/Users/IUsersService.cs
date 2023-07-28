@@ -1,8 +1,8 @@
-﻿namespace PersonalFinancer.Services.User
+﻿namespace PersonalFinancer.Services.Users
 {
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Services.Users.Models;
 
 	public interface IUsersService
 	{
@@ -13,12 +13,12 @@
 		Task<IEnumerable<AccountCardDTO>> GetUserAccountsCardsAsync(Guid userId);
 
 		Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownsAsync(Guid userId);
-		
+
 		Task<UserDashboardDTO> GetUserDashboardDataAsync(Guid userId, DateTime fromLocalTime, DateTime toLocalTime);
 
-        Task<UserUsedDropdownsDTO> GetUserUsedDropdownsAsync(Guid userId);
+		Task<UserUsedDropdownsDTO> GetUserUsedDropdownsAsync(Guid userId);
 
-        Task<UsersInfoDTO> GetUsersInfoAsync(int page);
+		Task<UsersInfoDTO> GetUsersInfoAsync(int page);
 
 		Task<TransactionsDTO> GetUserTransactionsAsync(TransactionsFilterDTO dto);
 
@@ -28,6 +28,6 @@
 		/// <exception cref="InvalidOperationException">When the user does not exist.</exception>
 		Task<string> UserFullNameAsync(Guid userId);
 
-        Task<int> UsersCountAsync();
+		Task<int> UsersCountAsync();
 	}
 }

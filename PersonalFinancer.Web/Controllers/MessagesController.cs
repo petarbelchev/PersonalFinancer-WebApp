@@ -6,7 +6,7 @@
 	using Microsoft.AspNetCore.SignalR;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
-	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Hubs;

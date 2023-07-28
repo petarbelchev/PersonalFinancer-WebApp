@@ -7,7 +7,7 @@
 	using PersonalFinancer.Services.Api.Models;
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Services.Users.Models;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	public class ServiceMappingProfile : Profile

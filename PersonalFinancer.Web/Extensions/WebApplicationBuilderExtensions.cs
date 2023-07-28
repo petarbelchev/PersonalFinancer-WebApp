@@ -12,10 +12,10 @@
 	using PersonalFinancer.Data.Repositories;
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Api;
+	using PersonalFinancer.Services.EmailSender;
 	using PersonalFinancer.Services.Messages;
-	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Web.CustomFilters;
-	using PersonalFinancer.Web.EmailSender;
 	using static PersonalFinancer.Common.Constants.UserConstants;
 
 	public static class WebApplicationBuilderExtensions

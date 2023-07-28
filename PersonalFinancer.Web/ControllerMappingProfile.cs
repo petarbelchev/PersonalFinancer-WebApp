@@ -1,18 +1,18 @@
 ﻿namespace PersonalFinancer.Web
 {
-    using AutoMapper;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Services.Accounts.Models;
-    using PersonalFinancer.Services.Messages.Models;
-    using PersonalFinancer.Services.User.Models;
-    using PersonalFinancer.Web.Models.Account;
-    using PersonalFinancer.Web.Models.Api;
+	using AutoMapper;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Services.Accounts.Models;
+	using PersonalFinancer.Services.Messages.Models;
+	using PersonalFinancer.Services.Users.Models;
+	using PersonalFinancer.Web.Models.Account;
+	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.Home;
 	using PersonalFinancer.Web.Models.Message;
 	using PersonalFinancer.Web.Models.Shared;
 	using PersonalFinancer.Web.Models.Transaction;
 
-    public class ControllerMappingProfile : Profile
+	public class ControllerMappingProfile : Profile
     {
         public ControllerMappingProfile()
         {

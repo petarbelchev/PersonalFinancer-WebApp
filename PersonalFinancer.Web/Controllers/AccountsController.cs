@@ -6,7 +6,7 @@
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
-	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Extensions;
 	using PersonalFinancer.Web.Models.Account;

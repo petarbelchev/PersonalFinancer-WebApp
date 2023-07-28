@@ -5,7 +5,7 @@
 	using Moq;
 	using NUnit.Framework;
 	using PersonalFinancer.Services.Shared.Models;
-	using PersonalFinancer.Services.User.Models;
+	using PersonalFinancer.Services.Users.Models;
 	using PersonalFinancer.Web.Areas.Admin.Controllers;
 
 	[TestFixture]

@@ -9,7 +9,7 @@
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Accounts;
-	using PersonalFinancer.Services.User;
+	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Web;
 	using PersonalFinancer.Web.Models.Shared;
 	using System.Security.Claims;
