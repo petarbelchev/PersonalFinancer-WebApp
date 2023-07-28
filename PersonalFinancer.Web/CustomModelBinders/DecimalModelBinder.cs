@@ -7,9 +7,18 @@
 	{
 		public Task BindModelAsync(ModelBindingContext bindingContext)
 		{
-			string? fieldValue = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;
-			fieldValue = fieldValue?.Replace(",", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
-			fieldValue = fieldValue?.Replace(".", CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+			string? fieldValue = bindingContext
+				.ValueProvider
+				.GetValue(bindingContext.FieldName)
+				.FirstValue;
+
+			fieldValue = fieldValue?.Replace(
+				",", 
+				CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
+
+			fieldValue = fieldValue?.Replace(
+				".", 
+				CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
 
 			if (decimal.TryParse(fieldValue, out decimal resultValue))
 			{

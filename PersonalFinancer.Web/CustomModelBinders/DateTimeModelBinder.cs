@@ -7,7 +7,10 @@
 	{
 		public Task BindModelAsync(ModelBindingContext bindingContext)
 		{
-			string? fieldValue = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;
+			string? fieldValue = bindingContext
+				.ValueProvider
+				.GetValue(bindingContext.FieldName)
+				.FirstValue;
 
 			if (DateTime.TryParse(fieldValue, out DateTime resultValue))
 			{
@@ -16,7 +19,10 @@
 			else
 			{
 				bindingContext.Result = ModelBindingResult.Failed();
-				bindingContext.ModelState.AddModelError(bindingContext.FieldName, ValidationMessages.InvalidDate);
+
+				bindingContext.ModelState.AddModelError(
+					bindingContext.FieldName, 
+					ValidationMessages.InvalidDate);
 			}
 
 			return Task.CompletedTask;

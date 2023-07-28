@@ -31,7 +31,7 @@
 
 				if (argumentValueType == typeof(string))
 				{
-					argumentValue = sanitizer.Sanitize((argumentValue as string)!);
+					context.ActionArguments[key] = sanitizer.Sanitize((argumentValue as string)!);
 
 					continue;
 				}
@@ -47,7 +47,7 @@
 					if (propertyValue == null)
 						continue;
 
-					property.SetValue(argumentValue, sanitizer.Sanitize(propertyValue));
+					property.SetValue(context.ActionArguments[key], sanitizer.Sanitize(propertyValue));
 				}
 			}
 
