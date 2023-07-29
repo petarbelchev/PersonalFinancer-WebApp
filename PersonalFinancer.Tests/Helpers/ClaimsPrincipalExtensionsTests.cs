@@ -1,7 +1,7 @@
 ﻿namespace PersonalFinancer.Tests.Helpers
 {
+	using Microsoft.Extensions.DependencyInjection;
 	using NUnit.Framework;
-	using PersonalFinancer.Web.Extensions;
 	using System.Security.Claims;
 
 	[TestFixture]
