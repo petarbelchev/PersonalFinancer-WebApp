@@ -12,7 +12,7 @@
 		public CreateEditTransactionInputModel()
 			=> this.CreatedOnLocalTime = DateTime.Now;
 
-		[Required]
+		[Required(ErrorMessage = RequiredProperty)]
 		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		[Range(TransactionMinValue, TransactionMaxValue,
 			ErrorMessage = InvalidNumericLength)]
@@ -21,15 +21,15 @@
 		[Required]
 		public Guid? OwnerId { get; set; }
 
-		[Required]
+		[Required(ErrorMessage = RequiredProperty)]
 		[Display(Name = "Category")]
 		public Guid? CategoryId { get; set; }
 
-		[Required]
+		[Required(ErrorMessage = RequiredProperty)]
 		[Display(Name = "Account")]
 		public Guid? AccountId { get; set; }
 
-		[Required]
+		[Required(ErrorMessage = RequiredProperty)]
 		[Display(Name = "Date")]
 		[ModelBinder(BinderType = typeof(DateTimeModelBinder))]
 		public DateTime CreatedOnLocalTime { get; set; }
@@ -41,7 +41,7 @@
 		[Display(Name = "Payment Reference")]
 		public string Reference { get; set; } = null!;
 
-		[Required]
+		[Required(ErrorMessage = RequiredProperty)]
 		[Display(Name = "Transaction Type")]
 		public TransactionType TransactionType { get; set; }
 	}

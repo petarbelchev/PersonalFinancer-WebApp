@@ -16,27 +16,30 @@
 				<img src="~/icons/icons8-menu-64.png" style="max-width: 50px;" />
 			</a>
 			<ul class="dropdown-menu dropdown-menu-end">
-				<li class="m-2"><a class="btn btn-link dropdown-item" asp-controller="Accounts" asp-action="Edit" asp-route-id="@Model.Id">Edit Account</a></li>
-				<li class="m-2"><a class="btn btn-link dropdown-item" asp-controller="Accounts" asp-action="Delete" asp-route-id="@Model.Id" asp-route-returnUrl="@Model.ReturnUrl">Delete Account</a></li>
+				<li class="m-2"><a class="btn btn-link dropdown-item" asp-controller="Accounts" asp-action="Edit" asp-route-id="@Model.Id">Edit @Model.Name</a></li>
+				<li class="m-2"><a class="btn btn-link dropdown-item" asp-controller="Accounts" asp-action="Delete" asp-route-id="@Model.Id" asp-route-returnUrl="@Model.ReturnUrl">Delete @Model.Name</a></li>
 			</ul>
 		</div>
 	</div>
 </div>
 
-<form method="get" asp-action="Filtered" class="row g-3 offset-md-2 col-md-8 mb-4">
-	<input type="hidden" asp-for="@Model.Id" />
-	<div class="col-lg-5 form-floating">
-		<input type="datetime-local" name="@nameof(Model.FromLocalTime)" value="@Model.FromLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
-		<label asp-for="@Model.FromLocalTime" class="form-label"></label>
-		<span asp-validation-for="@Model.FromLocalTime" class="text-danger"></span>
-	</div>
-	<div class="col-lg-5 form-floating">
-		<input type="datetime-local" name="@nameof(Model.ToLocalTime)" value="@Model.ToLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
-		<label asp-for="@Model.ToLocalTime" class="form-label"></label>
-		<span asp-validation-for="@Model.ToLocalTime" class="text-danger"></span>
-	</div>
-	<div class="col-lg-2">
-		<button type="submit" class="btn btn-lg btn-secondary form-control">Filter</button>
+@*Date filter*@
+<form method="get" asp-action="Filtered" class="mt-2 mb-4 offset-lg-2 col-lg-8 offset-sm-2 col-sm-8 offset-1 col-10">
+	<div class="row">
+		<input type="hidden" asp-for="@Model.Id" />
+		<div class="col-lg-5 form-floating mb-2">
+			<input type="datetime-local" name="@nameof(Model.FromLocalTime)" value="@Model.FromLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+			<label asp-for="@Model.FromLocalTime" class="form-label"></label>
+			<span asp-validation-for="@Model.FromLocalTime" class="text-danger"></span>
+		</div>
+		<div class="col-lg-5 form-floating mb-2">
+			<input type="datetime-local" name="@nameof(Model.ToLocalTime)" value="@Model.ToLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+			<label asp-for="@Model.ToLocalTime" class="form-label"></label>
+			<span asp-validation-for="@Model.ToLocalTime" class="text-danger"></span>
+		</div>
+		<div class="col-lg-2">
+			<button type="submit" class="btn btn-lg btn-secondary form-control">Filter</button>
+		</div>
 	</div>
 </form>
 

@@ -1,16 +1,20 @@
 ﻿@using PersonalFinancer.Web.Models.Account;
 @model DeleteAccountViewModel
+@{
+	ViewData["Title"] = "Delete Account";
+}
 
 <div class="row" style="margin-top: 50px;">
-	<p class="fs-2">You are going to delete @Model.Name account!</p>
+	<p class="fs-2">You are going to delete your "@Model.Name" account!</p>
+	<p class="fs-2">Are you sure?</p>
 
 	<form method="post">
 		<input type="hidden" asp-for="@Model.ReturnUrl" />
-		<div class="form-check">
+		<div class="form-check m-4">
 			<input class="form-check-input" type="checkbox" asp-for="@Model.ShouldDeleteTransactions">
-			<label class="form-check-label" asp-for="@Model.ShouldDeleteTransactions">Also delete all transactions!</label>
+			<label class="form-check-label" asp-for="@Model.ShouldDeleteTransactions">Also delete all account transactions!</label>
 		</div>
-		<button type="submit" name="confirmButton" value="accept" class="btn btn-danger" style="margin-top: 15px;">Delete @Model.Name!</button>
-		<button type="submit" name="confirmButton" value="reject" class="btn btn-secondary" style="margin-top: 15px;">Do Not Delete @Model.Name!</button>
+		<button type="submit" name="confirmButton" value="accept" class="btn btn-danger" style="margin-top: 15px;">Delete "@Model.Name"!</button>
+		<button type="submit" name="confirmButton" value="reject" class="btn btn-secondary" style="margin-top: 15px;">Don't delete "@Model.Name"!</button>
 	</form>
 </div>

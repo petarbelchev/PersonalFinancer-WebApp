@@ -10,8 +10,11 @@
 		<p class="display-6">Personal Financer</p>
 		<p class="display-6 fs-4">Your Finances in One Place!</p>
 		<p class="display-6 fs-4 mt-5">
-			<a style="text-decoration: none;" asp-area="Identity" asp-page="/Account/Login">Login</a> if you already track your finances or
-			<a style="text-decoration: none;" asp-area="Identity" asp-page="/Account/Register">register</a> to start now.
+			If you already track your finances, please
+			<a style="text-decoration: none;" asp-area="Identity" asp-page="/Account/Login"> log in.</a>
+			Otherwise,
+			<a style="text-decoration: none;" asp-area="Identity" asp-page="/Account/Register"> register </a>
+			now to start.
 		</p>
 	</div>
 }
@@ -26,7 +29,7 @@ else
 			<div class="row mt-4">
 				@foreach (var account in Model.Accounts)
 				{
-					<div class="col-xl-3 col-lg-4 col-md-6" role="button" onclick="location.href='@Url.Action("Details", "Accounts", new { id = account.Id })'">
+					<div class="col-xl-3 col-lg-4 col-sm-6" role="button" onclick="location.href='@Url.Action("Details", "Accounts", new { id = account.Id })'">
 						<div class="card align-items-center shadow mb-4">
 							<div class="d-flex flex-row align-items-center mb-2">
 								<div class="p-2">
@@ -44,19 +47,22 @@ else
 			<hr />
 		</div>
 
-		<form method="get" asp-action="Filtered" class="row g-3 offset-md-2 col-md-8 mb-4">
-			<div class="col-lg-5 form-floating">
-				<input type="datetime-local" name="@nameof(Model.FromLocalTime)" value="@Model.FromLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
-				<label asp-for="@Model.FromLocalTime" class="form-label"></label>
-				<span asp-validation-for="@Model.FromLocalTime" class="text-danger"></span>
-			</div>
-			<div class="col-lg-5 form-floating">
-				<input type="datetime-local" name="@nameof(Model.ToLocalTime)" value="@Model.ToLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
-				<label asp-for="@Model.ToLocalTime" class="form-label"></label>
-				<span asp-validation-for="@Model.ToLocalTime" class="text-danger"></span>
-			</div>
-			<div class="col-lg-2">
-				<button type="submit" class="btn btn-lg btn-secondary form-control">Filter</button>
+		@*Date filter*@
+		<form method="get" asp-action="Filtered" class="mt-2 mb-4 offset-lg-2 col-lg-8 offset-sm-2 col-sm-8 offset-1 col-10">
+			<div class="row">
+				<div class="col-lg-5 form-floating mb-2">
+					<input type="datetime-local" name="@nameof(Model.FromLocalTime)" value="@Model.FromLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+					<label asp-for="@Model.FromLocalTime" class="form-label"></label>
+					<span asp-validation-for="@Model.FromLocalTime" class="text-danger"></span>
+				</div>
+				<div class="col-lg-5 form-floating mb-2">
+					<input type="datetime-local" name="@nameof(Model.ToLocalTime)" value="@Model.ToLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+					<label asp-for="@Model.ToLocalTime" class="form-label"></label>
+					<span asp-validation-for="@Model.ToLocalTime" class="text-danger"></span>
+				</div>
+				<div class="col-lg-2">
+					<button type="submit" class="btn btn-lg btn-secondary form-control">Filter</button>
+				</div>
 			</div>
 		</form>
 
@@ -178,7 +184,7 @@ else
 			@*No Transactions Page*@
 			<div class="text-center mt-4">
 				<p class="display-6 fs-4">
-					You do not have any transactions for thar period.
+					You don't have any transactions for thar period.
 				</p>
 			</div>
 		}
@@ -191,7 +197,7 @@ else
 				Your Dashboard is empty.
 			</p>
 			<p class="display-6 fs-4 mt-5">
-				<a style="text-decoration: none;" asp-controller="Accounts" asp-action="Create">Create</a> your first account and start record your Finances!
+				<a style="text-decoration: none;" asp-controller="Accounts" asp-action="Create">Create</a> your first account and start recording your finances!
 			</p>
 		</div>
 	}

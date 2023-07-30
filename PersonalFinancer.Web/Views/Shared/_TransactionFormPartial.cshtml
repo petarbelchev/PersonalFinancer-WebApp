@@ -8,17 +8,17 @@
 		<section>
 			<form method="post">
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-				<div class="form-floating mb-2">
+				<div class="form-floating shadow rounded-3">
 					<input asp-for="@Model.Amount" class="form-control form-control-lg" placeholder=".form-control-lg" />
 					<label asp-for="@Model.Amount" class="form-label"></label>
-					<span asp-validation-for="@Model.Amount" class="text-danger"></span>
 				</div>
-				<div class="form-floating mb-2">
+				<span asp-validation-for="@Model.Amount" class="text-danger"></span>
+				<div class="form-floating shadow mt-3 rounded-3">
 					<input value="@Model.CreatedOnLocalTime.ToString("yyyy-MM-ddTHH:mm")" name="@nameof(Model.CreatedOnLocalTime)" type="datetime-local" class="form-control datepicker" placeholder=".form-control-lg">
 					<label asp-for="@Model.CreatedOnLocalTime" class="form-label"></label>
-					<span asp-validation-for="@Model.CreatedOnLocalTime" class="text-danger"></span>
 				</div>
-				<div class="newElemDiv dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 mb-2" ownerId="@Model.OwnerId" apiUrl="@ApiCategoriesEndpoint">
+				<span asp-validation-for="@Model.CreatedOnLocalTime" class="text-danger"></span>
+				<div class="newElemDiv card shadow dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 mt-3" ownerId="@Model.OwnerId" apiUrl="@ApiCategoriesEndpoint">
 					<label asp-for="@Model.CategoryId" class="form-label"></label>
 					<select asp-for="@Model.CategoryId" class="form-select">
 						@foreach (var category in @Model.OwnerCategories)
@@ -26,6 +26,7 @@
 							<option value="@category.Id" id="@category.Id">@category.Name</option>
 						}
 					</select>
+					<span asp-validation-for="@Model.CategoryId" class="text-danger"></span>
 					<div class="form-floating " style="display: none;">
 						<input class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
 						<label class="form-label">Write the new category name...</label>
@@ -37,7 +38,7 @@
 					<a class="btn btn-secondary createBtn mb-2">Create new category</a>
 					<a class="btn btn-danger deleteBtn" style="display: @(Model.OwnerCategories.Any() ? "block" : "none")">Delete selected category</a>
 				</div>
-				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 mb-2">
+				<div class="dropdown-menu card shadow position-static d-grid gap-1 p-2 rounded-3 mx-0 mt-3">
 					<label asp-for="@Model.AccountId" class="form-label"></label>
 					<select asp-for="@Model.AccountId" class="form-select">
 						@foreach (var account in @Model.OwnerAccounts)
@@ -45,19 +46,21 @@
 							<option value="@account.Id">@account.Name</option>
 						}
 					</select>
+					<span asp-validation-for="@Model.AccountId" class="text-danger"></span>
 				</div>
-				<div class="dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 mb-2">
+				<div class="dropdown-menu card shadow position-static d-grid gap-1 p-2 rounded-3 mx-0 mt-3">
 					<label asp-for="@Model.TransactionType" class="form-label"></label>
 					<select asp-for="@Model.TransactionType" asp-items="@(Html.GetEnumSelectList<TransactionType>())" class="form-select"></select>
 				</div>
-				<div class="form-floating mb-2">
+				<span asp-validation-for="@Model.TransactionType" class="text-danger"></span>
+				<div class="form-floating shadow mt-3 rounded-3">
 					<input type="text" asp-for="@Model.Reference" class="form-control form-control-lg" placeholder=".form-control-lg" />
 					<label asp-for="@Model.Reference" class="form-lebel"></label>
-					<span asp-validation-for="@Model.Reference" class="text-danger"></span>
 				</div>
+				<span asp-validation-for="@Model.Reference" class="text-danger"></span>
 				<input type="hidden" asp-for="@Model.OwnerId" />
-				<div>
-					<button type="submit" class="w-100 btn btn-lg btn-success">Submit</button>
+				<div class="mt-3">
+					<button type="submit" class="shadow w-100 btn btn-lg btn-success">Submit</button>
 				</div>
 			</form>
 		</section>

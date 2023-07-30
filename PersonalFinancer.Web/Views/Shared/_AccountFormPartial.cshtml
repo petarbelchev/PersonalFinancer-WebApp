@@ -7,18 +7,17 @@
 		<section>
 			<form method="post">
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-				<div class="form-floating mb-2">
+				<div class="form-floating shadow rounded-3">
 					<input asp-for="@Model.Name" class="form-control form-control-lg" type="text" placeholder=".form-control-lg" />
 					<label asp-for="@Model.Name" class="form-label"></label>
-					<span asp-validation-for="@Model.Name" class="text-danger"></span>
 				</div>
-				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-				<div class="form-floating">
+				<span asp-validation-for="@Model.Name" class="text-danger"></span>
+				<div class="form-floating shadow mt-3 rounded-3">
 					<input asp-for="@Model.Balance" class="form-control form-control-lg" placeholder=".form-control-lg" />
 					<label asp-for="@Model.Balance" class="form-label"></label>
-					<span asp-validation-for="@Model.Balance" class="text-danger"></span>
 				</div>
-				<div class="newElemDiv dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 m-2" ownerId="@Model.OwnerId" apiUrl="@ApiAccountTypesEndpoint">
+				<span asp-validation-for="@Model.Balance" class="text-danger"></span>
+				<div class="newElemDiv card shadow dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0 m-3" ownerId="@Model.OwnerId" apiUrl="@ApiAccountTypesEndpoint">
 					<label asp-for="@Model.AccountTypeId" class="form-label"></label>
 					<select asp-for="@Model.AccountTypeId" class="form-select">
 						@foreach (var accountType in @Model.OwnerAccountTypes)
@@ -26,6 +25,7 @@
 							<option value="@accountType.Id" id="@accountType.Id">@accountType.Name</option>
 						}
 					</select>
+					<span asp-validation-for="@Model.AccountTypeId" class="text-danger"></span>
 					<div class="form-floating" style="display: none;">
 						<input class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
 						<label class="form-label">Write the new account type name...</label>
@@ -37,7 +37,7 @@
 					<a class="btn btn-secondary createBtn mb-2">Create new account type</a>
 					<a class="btn btn-danger deleteBtn" style="display: @(Model.OwnerAccountTypes.Any() ? "block" : "none")">Delete selected account type</a>
 				</div>
-				<div class="newElemDiv dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0" ownerId="@Model.OwnerId" apiUrl="@ApiCurrencyEndpoint">
+				<div class="newElemDiv card shadow dropdown-menu position-static d-grid gap-1 p-2 rounded-3 mx-0" ownerId="@Model.OwnerId" apiUrl="@ApiCurrencyEndpoint">
 					<label asp-for="@Model.CurrencyId" class="form-label"></label>
 					<select asp-for="@Model.CurrencyId" class="form-select">
 						@foreach (var currency in @Model.OwnerCurrencies)
@@ -45,6 +45,7 @@
 							<option value="@currency.Id" id="@currency.Id">@currency.Name</option>
 						}
 					</select>
+					<span asp-validation-for="@Model.CurrencyId" class="text-danger"></span>
 					<div class="form-floating" style="display: none;">
 						<input class="form-control form-control-lg" type="text" placeholder=".form-control-lg">
 						<label class="form-label">Write the new currency name...</label>
@@ -57,8 +58,8 @@
 					<a class="btn btn-danger deleteBtn" style="display: @(Model.OwnerCurrencies.Any() ? "block" : "none")">Delete selected currency</a>
 				</div>
 				<input type="hidden" asp-for="@Model.OwnerId" />
-				<div class="mt-2">
-					<button type="submit" class="w-100 btn btn-lg btn-success">Submit</button>
+				<div>
+					<button type="submit" class="shadow mt-3 w-100 btn btn-lg btn-success">Submit</button>
 				</div>
 			</form>
 		</section>

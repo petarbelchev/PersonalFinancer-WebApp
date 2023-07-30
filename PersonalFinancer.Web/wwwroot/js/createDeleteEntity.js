@@ -46,7 +46,6 @@ async function createEntity() {
         }
     }
 
-    newElemInputDiv.style.display = 'none';
     spinner.style.display = 'block';
 
     let response = await fetch(url, {
@@ -60,12 +59,14 @@ async function createEntity() {
     });
 
     if (response.status == 201) {
+        newElemInputDiv.style.display = 'none';
         let data = await response.json();
         renderNewEntity(data, inputField, errorMsgField);
         deleteBtnController();
     } else if (response.status == 400) {
         let error = await response.json();
         newElemInputDiv.querySelector('p').textContent = error;
+        spinner.style.display = 'none';
     }
 }
 
