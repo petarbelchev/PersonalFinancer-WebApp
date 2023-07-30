@@ -1,19 +1,20 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Services.Api;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Services.Api;
 	using PersonalFinancer.Services.Api.Models;
 	using PersonalFinancer.Web.Models.Api;
-    using System.ComponentModel.DataAnnotations;
+	using System.ComponentModel.DataAnnotations;
 
-    [Route("api/accountTypes")]
+	[Route("api/accountTypes")]
 	[ApiController]
 	public class AccountTypesApiController : BaseApiController<AccountType>
 	{
-		public AccountTypesApiController(IApiService<AccountType> apiService)
-			: base(apiService)
+		public AccountTypesApiController(
+			IApiService<AccountType> apiService,
+			ILogger<BaseApiController<AccountType>> logger)
+			: base(apiService, logger)
 		{ }
 
 		[HttpPost]
@@ -21,19 +22,7 @@
 		[ProducesResponseType(typeof(ApiEntityDTO), StatusCodes.Status201Created)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> CreateAccountType(AccountTypeInputModel inputModel)
-		{
-			try
-			{
-				return await this.CreateEntityAsync(inputModel);
-			}
-			catch (ArgumentException)
-			{
-				return this.BadRequest(string.Format(
-					ExceptionMessages.ExistingUserEntityName, 
-					"account type", 
-					inputModel.Name));
-			}
-		}
+			=> await this.CreateEntityAsync(inputModel);
 
 		[HttpDelete("{id}")]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]

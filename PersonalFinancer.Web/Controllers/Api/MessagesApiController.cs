@@ -2,11 +2,13 @@
 {
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Models.Message;
+	using System.ComponentModel.DataAnnotations;
 
 	[Authorize]
 	[Route("api/messages")]
@@ -15,13 +17,16 @@
 	{
 		private readonly IMessagesService messagesService;
 		private readonly IUsersService usersService;
+		private readonly ILogger<MessagesApiController> logger;
 
 		public MessagesApiController(
 			IMessagesService messagesService,
-			IUsersService usersService)
+			IUsersService usersService,
+			ILogger<MessagesApiController> logger)
 		{
 			this.messagesService = messagesService;
 			this.usersService = usersService;
+			this.logger = logger;
 		}
 
 		[HttpPost]
@@ -32,7 +37,13 @@
 		public async Task<IActionResult> AddReply(ReplyInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.AddReplyWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
+			}
 
 			string userId = this.User.Id();
 			string userFullName = await this.usersService.UserFullNameAsync(Guid.Parse(userId));
@@ -50,12 +61,22 @@
 			{
 				return this.Ok(await this.messagesService.AddReplyAsync(dto));
 			}
-			catch (ArgumentException)
+			catch (UnauthorizedAccessException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedReplyAddition,
+					this.User.Id(),
+					inputModel.MessageId);
+
 				return this.Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnsuccessfulReplyAddition,
+					this.User.Id(),
+					inputModel.MessageId);
+
 				return this.BadRequest();
 			}			
 		}
@@ -90,14 +111,28 @@
 		[NoHtmlSanitizing]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		public async Task<IActionResult> MarkAsSeen(string messageId)
+		public async Task<IActionResult> MarkAsSeen([RegularExpression("^[0-9A-Fa-f]{24}$")] string messageId)
 		{
+			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.MarkAsSeenWithInvalidInputData,
+					this.User.Id());
+
+				return this.BadRequest();
+			}
+
 			try
 			{
 				await this.messagesService.MarkMessageAsSeenAsync(messageId, this.User.Id(), this.User.IsAdmin());
 			}
-			catch (InvalidOperationException)
+			catch (ArgumentException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnsuccessfulMarkMessageAsSeen, 
+					this.User.Id(), 
+					messageId);
+
 				return this.BadRequest();
 			}
 

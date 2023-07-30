@@ -2,10 +2,12 @@
 {
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.Extensions.Logging;
 	using MongoDB.Bson;
 	using MongoDB.Driver.Linq;
 	using Moq;
 	using NUnit.Framework;
+	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
@@ -18,14 +20,18 @@
 	[TestFixture]
 	internal class AccountsApiControllerTests : ControllersUnitTestsBase
 	{
+		private Mock<ILogger<AccountsApiController>> loggerMock;
 		private AccountsApiController apiController;
 
 		[SetUp]
 		public void SetUp()
 		{
+			this.loggerMock = new Mock<ILogger<AccountsApiController>>();
+
 			this.apiController = new AccountsApiController(
 				this.accountsInfoServiceMock.Object,
-				this.mapper)
+				this.mapper,
+				this.loggerMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -179,11 +185,17 @@
 
 			this.apiController.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetAccountTransactionsWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var actual = (BadRequestResult)await this.apiController.GetAccountTransactions(inputModel);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -192,7 +204,7 @@
 			//Arrange
 			var inputModel = new AccountTransactionsInputModel
 			{
-				Id = null,
+				Id = Guid.NewGuid(),
 				FromLocalTime = DateTime.Now.AddMonths(-1),
 				ToLocalTime = DateTime.Now,
 				OwnerId = Guid.NewGuid(),
@@ -203,11 +215,18 @@
 				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedGetAccountTransactions,
+				this.userId,
+				inputModel.Id);
+
 			//Act
 			var actual = (UnauthorizedResult)await this.apiController.GetAccountTransactions(inputModel);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status401Unauthorized));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		private static IEnumerable<AccountsCardsDTO> GetTestAccountsCardsDTOs()

@@ -7,6 +7,7 @@
 	public class ReplyInputModel
 	{
 		[Required]
+		[RegularExpression("^[0-9A-Fa-f]{24}$")]
 		public string MessageId { get; set; } = null!;
 
 		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]

@@ -86,7 +86,7 @@
 			Account account = await this.FindAccountAsync(accountId);
 
 			if (!isUserAdmin && account.OwnerId != userId)
-				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
+				throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 
 			if (shouldDeleteTransactions)
 				this.accountsRepo.Remove(account);
@@ -105,7 +105,7 @@
 			   .FirstAsync(t => t.Id == transactionId);
 
 			if (!isUserAdmin && transaction.OwnerId != userId)
-				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
+				throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 
 			this.transactionsRepo.Remove(transaction);
 

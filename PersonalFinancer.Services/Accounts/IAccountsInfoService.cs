@@ -7,13 +7,16 @@
 
     public interface IAccountsInfoService
 	{
-		/// <exception cref="InvalidOperationException">When the account does not exist or the user is not owner or administrator.</exception>
+		/// <exception cref="UnauthorizedAccessException">When user is unauthorized.</exception>
+		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
 		Task<AccountDetailsDTO> GetAccountDetailsAsync(Guid accountId, Guid userId, bool isUserAdmin);
 
-		/// <exception cref="InvalidOperationException">When the account does not exist or the user is not owner or administrator.</exception>
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
+		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
 		Task<CreateEditAccountOutputDTO> GetAccountFormDataAsync(Guid accountId, Guid userId, bool isUserAdmin);
 
-		/// <exception cref="InvalidOperationException">When the account does not exist or the user is not owner or administrator.</exception>
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
+		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
 		Task<string> GetAccountNameAsync(Guid accountId, Guid userId, bool isUserAdmin);
 
 		Task<AccountsCardsDTO> GetAccountsCardsDataAsync(int page);
@@ -25,11 +28,12 @@
 
 		Task<IEnumerable<CurrencyCashFlowDTO>> GetCashFlowByCurrenciesAsync();
 
-		/// <exception cref="ArgumentException">When the user is not owner or administrator.</exception>
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
 		/// <exception cref="InvalidOperationException">When the transaction does not exist.</exception>
 		Task<TransactionDetailsDTO> GetTransactionDetailsAsync(Guid transactionId, Guid ownerId, bool isUserAdmin);
 
-		/// <exception cref="InvalidOperationException">When the user is not owner, transaction does not exist or is initial.</exception>
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
+		/// <exception cref="InvalidOperationException">When the transaction does not exist.</exception>
 		Task<CreateEditTransactionOutputDTO> GetTransactionFormDataAsync(Guid transactionId, Guid userId, bool isUserAdmin);
 	}
 }

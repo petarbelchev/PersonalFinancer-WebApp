@@ -3,6 +3,7 @@
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.SignalR;
+	using Microsoft.Extensions.Logging;
 	using Moq;
 	using NUnit.Framework;
 	using PersonalFinancer.Services.Messages;
@@ -15,6 +16,7 @@
 		private Mock<IMessagesService> messagesServiceMock;
 		private Mock<IHubContext<AllMessagesHub>> allMessagesHubMock;
 		private Mock<IHubContext<NotificationsHub>> notificationsHubMock;
+		private Mock<ILogger<MessagesController>> loggerMock;
 
 		private MessagesController? controller;
 
@@ -24,6 +26,7 @@
 			this.allMessagesHubMock = new Mock<IHubContext<AllMessagesHub>>();
 			this.notificationsHubMock = new Mock<IHubContext<NotificationsHub>>();
 			this.messagesServiceMock = new Mock<IMessagesService>();
+			this.loggerMock = new Mock<ILogger<MessagesController>>();
 		}
 
 		[Test]
@@ -32,15 +35,13 @@
 			//Arrange
 
 			//Act
-			this.allMessagesHubMock = new Mock<IHubContext<AllMessagesHub>>();
-			this.notificationsHubMock = new Mock<IHubContext<NotificationsHub>>();
-			this.messagesServiceMock = new Mock<IMessagesService>();
 			this.controller = new MessagesController(
 				this.messagesServiceMock.Object,
 				this.usersServiceMock.Object,
 				this.mapper,
 				this.allMessagesHubMock.Object,
-				this.notificationsHubMock.Object)
+				this.notificationsHubMock.Object,
+				this.loggerMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{

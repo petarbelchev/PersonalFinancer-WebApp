@@ -3,6 +3,7 @@
 	using AutoMapper;
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
@@ -18,13 +19,16 @@
 	{
 		private readonly IAccountsInfoService accountsInfoService;
 		private readonly IMapper mapper;
+		private readonly ILogger<AccountsApiController> logger;
 
 		public AccountsApiController(
 			IAccountsInfoService accountsInfoService,
-			IMapper mapper)
+			IMapper mapper,
+			ILogger<AccountsApiController> logger)
 		{
 			this.accountsInfoService = accountsInfoService;
 			this.mapper = mapper;
+			this.logger = logger;
 		}
 
 		[Authorize(Roles = AdminRoleName)]
@@ -56,10 +60,23 @@
 		public async Task<IActionResult> GetAccountTransactions(AccountTransactionsInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetAccountTransactionsWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
+			}
 
 			if (!this.User.IsAdmin() && inputModel.OwnerId != this.User.IdToGuid())
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedGetAccountTransactions,
+					this.User.Id(),
+					inputModel.Id);
+
 				return this.Unauthorized();
+			}
 
 			AccountTransactionsFilterDTO filterDTO = 
 				this.mapper.Map<AccountTransactionsFilterDTO>(inputModel);

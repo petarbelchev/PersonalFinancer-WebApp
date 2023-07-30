@@ -3,8 +3,10 @@
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.SignalR;
+	using Microsoft.Extensions.Logging;
 	using Moq;
 	using NUnit.Framework;
+	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Web.Controllers;
@@ -19,6 +21,7 @@
 		private Mock<IMessagesService> messagesServiceMock;
 		private Mock<IHubContext<AllMessagesHub>> allMessagesHubMock;
 		private Mock<IHubContext<NotificationsHub>> notificationsHubMock;
+		private Mock<ILogger<MessagesController>> loggerMock;
 		private MessagesController controller;
 
 		[SetUp]
@@ -27,6 +30,7 @@
 			this.messagesServiceMock = new Mock<IMessagesService>();
 			this.allMessagesHubMock = new Mock<IHubContext<AllMessagesHub>>();
 			this.notificationsHubMock = new Mock<IHubContext<NotificationsHub>>();
+			this.loggerMock = new Mock<ILogger<MessagesController>>();
 
 			var clientProxyMock = new Mock<IClientProxy>();
 			clientProxyMock
@@ -59,7 +63,8 @@
 				this.usersServiceMock.Object,
 				this.mapper,
 				this.allMessagesHubMock.Object,
-				this.notificationsHubMock.Object)
+				this.notificationsHubMock.Object,
+				this.loggerMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -96,30 +101,66 @@
 
 			this.messagesServiceMock
 				.Setup(x => x.ArchiveAsync(messageId, this.userId.ToString(), false))
-				.Throws<ArgumentException>();
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedArchiveMessage,
+				this.userId,
+				messageId);
 
 			//Act
 			var result = (UnauthorizedResult)await this.controller.Archive(messageId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(401));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
 		public async Task Archive_OnPost_ShouldReturnBadRequest_WhenArchivingTheMessageWasUnsuccessful()
 		{
 			//Arrange
-			string messageId = "1";
+			string messageId = "valid id";
 
 			this.messagesServiceMock
 				.Setup(x => x.ArchiveAsync(messageId, this.userId.ToString(), false))
 				.Throws<InvalidOperationException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnsuccessfulMessageArchiving,
+				this.userId,
+				messageId);
 
 			//Act
 			var result = (BadRequestResult)await this.controller.Archive(messageId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task Archive_OnPost_ShouldReturnBadRequest_WhenTheModelStateIsInvalid()
+		{
+			//Arrange
+			string messageId = "invalid id";
+
+			this.controller.ModelState.AddModelError("id", "invalid id");
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.ArchiveMessageWithInvalidInputData,
+				this.userId,
+				messageId);
+
+			//Act
+			var result = (BadRequestResult)await this.controller.Archive(messageId);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -298,7 +339,7 @@
 		}
 
 		[Test]
-		public async Task Delete_ShouldReturnUnauthorized_WhenTheUserIsNotOwnerOrAdmin()
+		public async Task Delete_ShouldReturnUnauthorized_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			string messageId = "id";
@@ -309,13 +350,20 @@
 
 			this.messagesServiceMock
 				.Setup(x => x.RemoveAsync(messageId, this.userId.ToString(), false))
-				.Throws<ArgumentException>();
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedMessageDeletion,
+				this.userId,
+				messageId);
 
 			//Act
 			var result = (UnauthorizedResult)await this.controller.Delete(messageId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(401));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -332,11 +380,40 @@
 				.Setup(x => x.RemoveAsync(messageId, this.userId.ToString(), false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnsuccessfulMessageDeletion,
+				this.userId,
+				messageId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Delete(messageId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task Delete_ShouldReturnBadRequest_WhenTheModelStateIsInvalid()
+		{
+			//Arrange
+			string messageId = "id";
+
+			this.controller.ModelState.AddModelError("id", "invalid id");
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteMessageWithInvalidInputData,
+				this.userId,
+				messageId);
+
+			//Act
+			var result = (BadRequestResult)await this.controller.Delete(messageId);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -396,7 +473,7 @@
 		}
 
 		[Test]
-		public async Task Details_ShouldReturnBadRequest_WhenMessageDoesNotExistOrUserIsNowOwnerOrAdmin()
+		public async Task Details_ShouldReturnBadRequest_WhenMessageDoesNotExist()
 		{
 			//Arrange
 			string messageId = "id";
@@ -405,11 +482,86 @@
 				.Setup(x => x.GetMessageAsync(messageId, this.userId.ToString(), false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetMessageDetailsWithInvalidInputData,
+				this.userId,
+				messageId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Details(messageId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task Details_ShouldReturnBadRequest_WhenMarkingAsSeenIsUnsuccessful()
+		{
+			//Arrange
+			string messageId = "id";
+
+			this.messagesServiceMock
+				.Setup(x => x.GetMessageAsync(messageId, this.userId.ToString(), false))
+				.Throws<ArgumentException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnsuccessfulMarkMessageAsSeen,
+				this.userId,
+				messageId);
+
+			//Act
+			var result = (BadRequestResult)await this.controller.Details(messageId);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task Details_ShouldReturnBadRequest_WhenTheModelStateIsInvalid()
+		{
+			//Arrange
+			string messageId = "id";
+
+			this.controller.ModelState.AddModelError("id", "invalid id");
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetMessageDetailsWithInvalidInputData,
+				this.userId,
+				messageId);
+
+			//Act
+			var result = (BadRequestResult)await this.controller.Details(messageId);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task Details_ShouldReturnUnauthorized_WhenTheUserIsUnauthorized()
+		{
+			//Arrange
+			string messageId = "id";
+
+			this.messagesServiceMock
+				.Setup(x => x.GetMessageAsync(messageId, this.userId.ToString(), false))
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedGetMessageDetails,
+				this.userId,
+				messageId);
+
+			//Act
+			var result = (UnauthorizedResult)await this.controller.Details(messageId);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(401));
 		}
 	}
 }

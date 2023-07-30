@@ -83,6 +83,21 @@
 		}
 
 		[Test]
+		public async Task GetAccountDetailsAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
+		{
+			//Arrange
+			Guid accountId = await this.accountsRepo.All()
+				.Where(a => a.OwnerId != this.mainTestUserId && !a.IsDeleted)
+				.Select(a => a.Id)
+				.FirstAsync();
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsInfoService
+				  .GetAccountDetailsAsync(accountId, this.mainTestUserId, isUserAdmin: false),
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
+		}
+
+		[Test]
 		[TestCase(false)]
 		[TestCase(true)]
 		public async Task GetAccountFormDataAsync_ShouldReturnCorrectData(bool isUserAdmin)
@@ -113,7 +128,7 @@
 		}
 
 		[Test]
-		public async Task GetAccountFormDataAsync_ShouldThrowInvalidOperationException_WhenTheUserIsUnauthorized()
+		public async Task GetAccountFormDataAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			Guid testAccountId = await this.accountsRepo.All()
@@ -124,7 +139,7 @@
 			//Act & Assert
 			Assert.That(async () => await this.accountsInfoService
 				  .GetAccountFormDataAsync(testAccountId, this.mainTestUserId, isUserAdmin: false),
-			Throws.TypeOf<InvalidOperationException>());
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 
 		[Test]
@@ -153,6 +168,21 @@
 			Assert.That(async () => await this.accountsInfoService
 				  .GetAccountNameAsync(invalidId, this.mainTestUserId, isUserAdmin: false),
 			Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task GetAccountNameAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
+		{
+			//Arrange
+			Guid accountId = await this.accountsRepo.All()
+				.Where(a => a.OwnerId != this.mainTestUserId && !a.IsDeleted)
+				.Select(a => a.Id)
+				.FirstAsync();
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsInfoService
+				  .GetAccountNameAsync(accountId, this.mainTestUserId, isUserAdmin: false),
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 
 		[Test]
@@ -253,18 +283,6 @@
 		}
 
 		[Test]
-		public void GetTransactionFormDataAsync_ShouldThrowInvalidOperationException_WhenTransactionDoesNotExist()
-		{
-			//Arrange
-			var invalidId = Guid.NewGuid();
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService
-				  .GetTransactionFormDataAsync(invalidId, this.mainTestUserId, isUserAdmin: false),
-			Throws.TypeOf<InvalidOperationException>());
-		}
-
-		[Test]
 		[TestCase(false)]
 		[TestCase(true)]
 		public async Task GetTransactionDetailsAsync_ShouldReturnCorrectData_WhenTransactionIsValid(bool isUserAdmin)
@@ -298,7 +316,7 @@
 		}
 
 		[Test]
-		public async Task GetTransactionDetailsAsync_ShouldThrowArgumentException_WhenUserIsNotOwner()
+		public async Task GetTransactionDetailsAsync_ShouldThrowUnauthorizedAccessException_WhenUserIsNotOwner()
 		{
 			//Arrange
 			Guid testTransactionId = await this.transactionsRepo.All()
@@ -309,7 +327,7 @@
 			//Act & Assert
 			Assert.That(async () => await this.accountsInfoService
 				  .GetTransactionDetailsAsync(testTransactionId, this.mainTestUserId, isUserAdmin: false),
-			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 
 		[Test]
@@ -330,16 +348,45 @@
 		}
 
 		[Test]
-		public async Task GetTransactionFormDataAsync_ShouldThrowInvalidOperationException_WhenTransactionIsInitialAndUserIsOwner()
+		public void GetTransactionFormDataAsync_ShouldThrowInvalidOperationException_WhenTheTransactionDoesNotExist()
 		{
 			//Arrange
-			Transaction testTransaction = await this.transactionsRepo.All()
-				.FirstAsync(t => t.OwnerId == this.mainTestUserId && t.IsInitialBalance);
+			var invalidId = Guid.NewGuid();
 
 			//Act & Assert
 			Assert.That(async () => await this.accountsInfoService
-				  .GetTransactionFormDataAsync(testTransaction.Id, this.mainTestUserId, isUserAdmin: false),
+				  .GetTransactionFormDataAsync(invalidId, this.mainTestUserId, isUserAdmin: false),
 			Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task GetTransactionFormDataAsync_ShouldThrowInvalidOperationException_WhenTheTransactionIsInitial()
+		{
+			//Arrange
+			Guid testTransactionId = await this.transactionsRepo.All()
+				.Where(t => t.OwnerId == this.mainTestUserId && t.IsInitialBalance)
+				.Select(t => t.Id)
+				.FirstAsync();
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsInfoService
+				  .GetTransactionFormDataAsync(testTransactionId, this.mainTestUserId, isUserAdmin: false),
+			Throws.TypeOf<InvalidOperationException>());
+		}
+
+		[Test]
+		public async Task GetTransactionFormDataAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
+		{
+			//Arrange
+			Guid testTransactionId = await this.transactionsRepo.All()
+				.Where(t => t.OwnerId != this.mainTestUserId && !t.IsInitialBalance)
+				.Select(t => t.Id)
+				.FirstAsync();
+
+			//Act & Assert
+			Assert.That(async () => await this.accountsInfoService
+				  .GetTransactionFormDataAsync(testTransactionId, this.mainTestUserId, isUserAdmin: false),
+			Throws.TypeOf<UnauthorizedAccessException>());
 		}
 	}
 }

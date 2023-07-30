@@ -14,10 +14,22 @@
 	[Authorize]
 	public abstract class BaseApiController<T> : ControllerBase where T : BaseApiEntity, new()
 	{
+		private readonly string entityName;
 		private readonly IApiService<T> apiService;
+		private readonly ILogger<BaseApiController<T>> logger;
 
-		protected BaseApiController(IApiService<T> apiService)
-			=> this.apiService = apiService;
+		protected BaseApiController(
+			IApiService<T> apiService,
+			ILogger<BaseApiController<T>> logger)
+		{
+			this.entityName = typeof(T).Name.ToLower();
+
+			if (this.entityName == "accounttype")
+				this.entityName = "account type";
+
+			this.apiService = apiService;
+			this.logger = logger;
+		}
 
 		/// <exception cref="ArgumentException">When try to create entity with existing name.</exception>
 		[Produces("application/json")]
@@ -26,12 +38,31 @@
 		protected async Task<IActionResult> CreateEntityAsync(IApiEntityInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
-				return this.BadRequest(GetErrors(this.ModelState.Values));
+			{
+				this.logger.LogWarning(
+					LoggerMessages.CreateEntityWithInvalidInputData,
+					this.User.Id(),
+					this.entityName);
 
-			ApiEntityDTO model = await this.apiService.CreateEntityAsync(
-				inputModel.Name,
-				inputModel.OwnerId ?? throw new InvalidOperationException(
-					string.Format(ExceptionMessages.NotNullableProperty, inputModel.OwnerId)));
+				return this.BadRequest(GetErrors(this.ModelState.Values));
+			}
+
+			ApiEntityDTO model;
+
+			try
+			{
+				model = await this.apiService.CreateEntityAsync(
+					inputModel.Name,
+					inputModel.OwnerId ?? throw new InvalidOperationException(
+						string.Format(ExceptionMessages.NotNullableProperty, inputModel.OwnerId)));
+			}
+			catch (ArgumentException)
+			{
+				return this.BadRequest(string.Format(
+					ExceptionMessages.ExistingUserEntityName,
+					this.entityName,
+					inputModel.Name));
+			}
 
 			return this.Created(string.Empty, model);
 		}
@@ -42,18 +73,36 @@
 		protected async Task<IActionResult> DeleteEntityAsync([Required] Guid id)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteEntityWithInvalidInputData,
+					this.User.Id(),
+					this.entityName);
+
 				return this.BadRequest(GetErrors(this.ModelState.Values));
+			}
 
 			try
 			{
 				await this.apiService.DeleteEntityAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
-			catch (ArgumentException)
+			catch (UnauthorizedAccessException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedEntityDeletion,
+					this.User.Id(),
+					this.entityName,
+					id);
+
 				return this.Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteEntityWithInvalidInputData,
+					this.User.Id(),
+					this.entityName);
+
 				return this.BadRequest();
 			}
 

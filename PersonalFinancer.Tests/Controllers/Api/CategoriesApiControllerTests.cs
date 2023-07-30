@@ -2,6 +2,7 @@
 {
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.Extensions.Logging;
 	using Moq;
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
@@ -15,15 +16,19 @@
 	[TestFixture]
 	internal class CategoriesApiControllerTests : ControllersUnitTestsBase
 	{
+		private Mock<ILogger<BaseApiController<Category>>> loggerMock;
 		private Mock<IApiService<Category>> apiServiceMock;
 		private CategoriesApiController apiController;
 
 		[SetUp]
 		public void SetUp()
 		{
+			this.loggerMock = new Mock<ILogger<BaseApiController<Category>>>();
 			this.apiServiceMock = new Mock<IApiService<Category>>();
 
-			this.apiController = new CategoriesApiController(this.apiServiceMock.Object)
+			this.apiController = new CategoriesApiController(
+				this.apiServiceMock.Object,
+				this.loggerMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -113,6 +118,11 @@
 
 			this.apiController.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.CreateEntityWithInvalidInputData,
+				this.userId,
+				"category");
+
 			//Act
 			var actual = (BadRequestObjectResult)await this.apiController.CreateCategory(inputModel);
 
@@ -122,6 +132,8 @@
 				Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
 				Assert.That(actual.Value, Is.EqualTo("invalid id"));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -174,12 +186,19 @@
 			//Act
 			var actual = (BadRequestObjectResult)await this.apiController.DeleteCategory(id);
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteEntityWithInvalidInputData,
+				this.userId,
+				"category");
+
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
 				Assert.That(actual.Value, Is.EqualTo("invalid id"));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -194,13 +213,21 @@
 
 			this.apiServiceMock
 				.Setup(x => x.DeleteEntityAsync(id, this.userId, false))
-				.Throws<ArgumentException>();
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedEntityDeletion,
+				this.userId,
+				"category",
+				id);
 
 			//Act
 			var actual = (UnauthorizedResult)await this.apiController.DeleteCategory(id);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status401Unauthorized));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -216,6 +243,12 @@
 			this.apiServiceMock
 				.Setup(x => x.DeleteEntityAsync(id, this.userId, false))
 				.Throws<InvalidOperationException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteEntityWithInvalidInputData,
+				this.userId,
+				"category",
+				id);
 
 			//Act
 			var actual = (BadRequestResult)await this.apiController.DeleteCategory(id);

@@ -18,8 +18,9 @@
             IUsersService usersService,
             IMapper mapper,
             IHubContext<AllMessagesHub> allMessagesHub,
-            IHubContext<NotificationsHub> notificationsHub)
-            : base(messagesService, usersService, mapper, allMessagesHub, notificationsHub)
+            IHubContext<NotificationsHub> notificationsHub,
+			ILogger<MessagesController> logger)
+            : base(messagesService, usersService, mapper, allMessagesHub, notificationsHub, logger)
         { }
     }
 }

@@ -1,9 +1,11 @@
 ﻿namespace PersonalFinancer.Tests.Controllers
 {
 	using AutoMapper;
+	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.Mvc.ModelBinding;
 	using Microsoft.AspNetCore.Mvc.ViewFeatures;
 	using Microsoft.AspNetCore.Routing;
+	using Microsoft.Extensions.Logging;
 	using Moq;
 	using Newtonsoft.Json;
 	using NUnit.Framework;
@@ -111,5 +113,20 @@
 
 		protected static bool ValidateObjectsAreEqual(object x, object y) 
 			=> JsonConvert.SerializeObject(x).Equals(JsonConvert.SerializeObject(y));
+
+		protected static void VerifyLoggerLogWarning<T>(Mock<ILogger<T>> logger, string expectedLogMessage)
+			where T : ControllerBase
+		{
+			logger.Verify(
+				x => x.Log(
+					It.Is<LogLevel>(l => l == LogLevel.Warning),
+					It.IsAny<EventId>(),
+					It.Is<It.IsAnyType>((v, t) => 
+						v.ToString()!
+						.Contains(expectedLogMessage)),
+					It.IsAny<Exception>(),
+					(Func<It.IsAnyType, Exception?, string>)It.IsAny<object>()),
+				Times.Once);
+		}
 	}
 }

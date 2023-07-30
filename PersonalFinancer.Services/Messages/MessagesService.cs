@@ -70,7 +70,7 @@
 		public async Task<MessageDetailsDTO> GetMessageAsync(string messageId, string userId, bool isUserAdmin)
 		{
 			MessageDetailsDTO message = await this.messagesRepo.FindOneAsync(
-				x => x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
+				x => x.Id == messageId,
 				m => new MessageDetailsDTO
 				{
 					Id = m.Id,
@@ -86,6 +86,9 @@
 						Content = r.Content
 					})
 				});
+
+			if (!isUserAdmin && message.AuthorId != userId)
+				throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 
 			await this.MarkAsSeenAsync(messageId, userId, isUserAdmin);
 
@@ -119,11 +122,11 @@
 				throw new InvalidOperationException(ExceptionMessages.UnsuccessfulDelete);
 		}
 
-		/// <exception cref="ArgumentException">When the user is unauthorized.</exception>
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
 		private async Task AuthorizeUser(string messageId, string userId, bool isUserAdmin)
 		{
 			if (!isUserAdmin && !await this.messagesRepo.IsUserDocumentAuthor(messageId, userId))
-				throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
+				throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 		}
 
 		private async Task<MessagesDTO> GetMessagesAsync(
@@ -151,7 +154,7 @@
 			return messages;
 		}
 
-		/// <exception cref="InvalidOperationException">When the update was unsuccessful.</exception>
+		/// <exception cref="ArgumentException">When the update was unsuccessful.</exception>
 		private async Task MarkAsSeenAsync(string messageId, string userId, bool isUserAdmin)
 		{
 			UpdateDefinition<Message> updateDefinition = Builders<Message>.Update
@@ -162,7 +165,7 @@
 				updateDefinition);
 
 			if (!result.IsAcknowledged)
-				throw new InvalidOperationException(ExceptionMessages.UnsuccessfulUpdate);
+				throw new ArgumentException(ExceptionMessages.UnsuccessfulUpdate);
 		}
 	}
 }

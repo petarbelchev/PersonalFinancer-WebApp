@@ -19,17 +19,20 @@
 		protected readonly IAccountsInfoService accountsInfoService;
 		protected readonly IUsersService usersService;
 		protected readonly IMapper mapper;
+		protected readonly ILogger<AccountsController> logger;
 
 		public AccountsController(
 			IAccountsUpdateService accountsUpdateService,
 			IAccountsInfoService accountsInfoService,
 			IUsersService usersService,
-			IMapper mapper)
+			IMapper mapper,
+			ILogger<AccountsController> logger)
 		{
 			this.accountsUpdateService = accountsUpdateService;
 			this.accountsInfoService = accountsInfoService;
 			this.usersService = usersService;
 			this.mapper = mapper;
+			this.logger = logger;
 		}
 
 		[Authorize(Roles = UserRoleName)]
@@ -50,7 +53,14 @@
 		public async Task<IActionResult> Create(CreateEditAccountInputModel inputModel)
 		{
 			if (inputModel.OwnerId != this.User.IdToGuid())
+			{
+				this.logger.LogWarning(
+					LoggerMessages.CreateAccountWithAnotherUserId,
+					this.User.Id(),
+					inputModel.OwnerId);
+
 				return this.BadRequest();
+			}
 
 			if (this.ModelState.IsValid)
 			{
@@ -83,7 +93,13 @@
 		public async Task<IActionResult> Delete([Required] Guid id, string? returnUrl)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteAccountWithInvalidInputData, 
+					this.User.Id());
+
 				return this.BadRequest();
+			}
 
 			var viewModel = new DeleteAccountViewModel { ReturnUrl = returnUrl };
 
@@ -92,8 +108,21 @@
 				viewModel.Name = await this.accountsInfoService
 					.GetAccountNameAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
+			catch (UnauthorizedAccessException)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedAccountDeletion,
+					this.User.Id(),
+					id);
+
+				return this.Unauthorized();
+			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteAccountWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 
@@ -105,7 +134,13 @@
 		public async Task<IActionResult> Delete(DeleteAccountInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteAccountWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
+			}
 
 			if (inputModel.ConfirmButton == "reject")
 				return this.RedirectToAction(nameof(Details), new { inputModel.Id, inputModel.ReturnUrl });
@@ -132,12 +167,21 @@
 
 				return this.LocalRedirect("/");
 			}
-			catch (ArgumentException)
+			catch (UnauthorizedAccessException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedAccountDeletion,
+					this.User.Id(),
+					inputModel.Id);
+
 				return this.Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteAccountWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 		}
@@ -145,7 +189,13 @@
 		public async Task<IActionResult> Details([Required] Guid id, string? returnUrl)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetAccountDetailsWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
+			}
 
 			AccountDetailsDTO accountDetails;
 
@@ -154,8 +204,21 @@
 				accountDetails = await this.accountsInfoService
 					.GetAccountDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
+			catch (UnauthorizedAccessException)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedGetAccountDetails,
+					this.User.Id(),
+					id);
+
+				return this.Unauthorized();
+			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.GetAccountDetailsWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 
@@ -180,8 +243,21 @@
 				accountDetails = await this.accountsInfoService
 					.GetAccountDetailsAsync(accountId, this.User.IdToGuid(), this.User.IsAdmin());
 			}
+			catch (UnauthorizedAccessException)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedGetAccountDetails,
+					this.User.Id(),
+					inputModel.Id);
+
+				return this.Unauthorized();
+			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.GetAccountDetailsWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 
@@ -194,7 +270,13 @@
 		public async Task<IActionResult> Edit([Required] Guid id)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.EditAccountWithInvalidInputData, 
+					this.User.Id());
+
 				return this.BadRequest();
+			}
 
 			CreateEditAccountOutputDTO accountDTO;
 
@@ -203,13 +285,25 @@
 				accountDTO = await this.accountsInfoService
 					.GetAccountFormDataAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
+			catch (UnauthorizedAccessException)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedAccountEdit,
+					this.User.Id(),
+					id);
+
+				return this.Unauthorized();
+			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.EditAccountWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 
-			CreateEditAccountViewModel viewModel =
-				this.mapper.Map<CreateEditAccountViewModel>(accountDTO);
+			var viewModel = this.mapper.Map<CreateEditAccountViewModel>(accountDTO);
 
 			return this.View(viewModel);
 		}
@@ -218,14 +312,20 @@
 		public async Task<IActionResult> Edit([Required] Guid id, CreateEditAccountInputModel inputModel)
 		{
 			if (!this.User.IsAdmin() && this.User.IdToGuid() != inputModel.OwnerId)
-				return this.BadRequest();
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedAccountEdit,
+					this.User.Id(),
+					id);
+
+				return this.Unauthorized();
+			}
 
 			if (this.ModelState.IsValid)
 			{
 				try
 				{
-					CreateEditAccountInputDTO accountDTO =
-						this.mapper.Map<CreateEditAccountInputDTO>(inputModel);
+					var accountDTO = this.mapper.Map<CreateEditAccountInputDTO>(inputModel);
 
 					await this.accountsUpdateService.EditAccountAsync(id, accountDTO);
 
@@ -243,6 +343,10 @@
 				}
 				catch (InvalidOperationException)
 				{
+					this.logger.LogWarning(
+						LoggerMessages.EditAccountWithInvalidInputData,
+						this.User.Id());
+
 					return this.BadRequest();
 				}
 			}

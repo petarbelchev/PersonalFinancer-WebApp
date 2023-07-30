@@ -66,7 +66,7 @@
                 throw new InvalidOperationException(ExceptionMessages.EntityDoesNotExist);
             
             if (!isUserAdmin && entity.OwnerId != userId)
-                throw new ArgumentException(ExceptionMessages.UnauthorizedUser);
+                throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 
             entity.IsDeleted = true;
             await this.repo.SaveChangesAsync();

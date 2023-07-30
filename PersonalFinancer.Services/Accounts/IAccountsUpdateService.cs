@@ -10,11 +10,11 @@
 		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
 		Task<Guid> CreateTransactionAsync(CreateEditTransactionInputDTO model);
 
-		/// <exception cref="ArgumentException">When the user is unauthorized.</exception>
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
 		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
 		Task DeleteAccountAsync(Guid accountId, Guid userId, bool isUserAdmin, bool shouldDeleteTransactions = false);
 
-		/// <exception cref="ArgumentException">When the user is not owner or administrator.</exception>
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
 		/// <exception cref="InvalidOperationException">When the transaction does not exist.</exception>
 		Task<decimal> DeleteTransactionAsync(Guid transactionId, Guid userId, bool isUserAdmin);
 

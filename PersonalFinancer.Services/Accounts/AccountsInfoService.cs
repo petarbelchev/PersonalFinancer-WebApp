@@ -32,33 +32,38 @@
 		public async Task<AccountDetailsDTO> GetAccountDetailsAsync(
 			Guid accountId, Guid userId, bool isUserAdmin)
 		{
-			return await this.accountsRepo.All()
-				.Where(a => a.Id == accountId && 
-							!a.IsDeleted && 
-							(isUserAdmin || a.OwnerId == userId))
+			AccountDetailsDTO accountDetails = await this.accountsRepo.All()
+				.Where(a => a.Id == accountId && !a.IsDeleted)
 				.ProjectTo<AccountDetailsDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
+
+			return isUserAdmin || accountDetails.OwnerId == userId
+				? accountDetails
+				: throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 		}
 
 		public async Task<CreateEditAccountOutputDTO> GetAccountFormDataAsync(
 			Guid accountId, Guid userId, bool isUserAdmin)
 		{
-			return await this.accountsRepo.All()
-				.Where(a => a.Id == accountId && 
-							!a.IsDeleted && 
-							(isUserAdmin || a.OwnerId == userId))
+			var accountForm = await this.accountsRepo.All()
+				.Where(a => a.Id == accountId && !a.IsDeleted)
 				.ProjectTo<CreateEditAccountOutputDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
+
+			return isUserAdmin || accountForm.OwnerId == userId
+				? accountForm
+				: throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 		}
 
 		public async Task<string> GetAccountNameAsync(Guid accountId, Guid userId, bool isUserAdmin)
 		{
-			return await this.accountsRepo.All()
-				.Where(a => a.Id == accountId && 
-							!a.IsDeleted && 
-							(isUserAdmin || a.OwnerId == userId))
-				.Select(a => a.Name)
+			Account account = await this.accountsRepo.All()
+				.Where(a => a.Id == accountId && !a.IsDeleted)
 				.FirstAsync();
+
+			return isUserAdmin || account.OwnerId == userId 
+				? account.Name 
+				: throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 		}
 
 		public async Task<AccountsCardsDTO> GetAccountsCardsDataAsync(int page)
@@ -122,19 +127,21 @@
 				.FirstAsync();
 
 			return !isUserAdmin && transaction.OwnerId != ownerId
-				? throw new ArgumentException(ExceptionMessages.UnauthorizedUser)
+				? throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser)
 				: transaction;
 		}
 
 		public async Task<CreateEditTransactionOutputDTO> GetTransactionFormDataAsync(
 			Guid transactionId, Guid userId, bool isUserAdmin)
 		{
-			return await this.transactionsRepo.All()
-				.Where(t => t.Id == transactionId &&
-							(isUserAdmin || t.OwnerId == userId) &&
-							!t.IsInitialBalance)
+			var transactionDTO = await this.transactionsRepo.All()
+				.Where(t => t.Id == transactionId && !t.IsInitialBalance)
 				.ProjectTo<CreateEditTransactionOutputDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
+
+			return isUserAdmin || transactionDTO.OwnerId == userId
+				? transactionDTO
+				: throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 		}
 	}
 }

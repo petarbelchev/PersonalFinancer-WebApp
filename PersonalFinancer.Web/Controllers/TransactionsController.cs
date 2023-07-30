@@ -20,17 +20,20 @@
 		protected readonly IAccountsInfoService accountsInfoService;
 		protected readonly IUsersService usersService;
 		protected readonly IMapper mapper;
+		protected readonly ILogger<TransactionsController> logger;
 
 		public TransactionsController(
 			IAccountsUpdateService accountsUpdateService,
 			IAccountsInfoService accountsInfoService,
 			IUsersService usersService,
-			IMapper mapper)
+			IMapper mapper,
+			ILogger<TransactionsController> logger)
 		{
 			this.accountsUpdateService = accountsUpdateService;
 			this.accountsInfoService = accountsInfoService;
 			this.usersService = usersService;
 			this.mapper = mapper;
+			this.logger = logger;
 		}
 
 		[Authorize(Roles = UserRoleName)]
@@ -47,13 +50,18 @@
 		public async Task<IActionResult> Create(CreateEditTransactionInputModel inputModel)
 		{
 			if (inputModel.OwnerId != this.User.IdToGuid())
-				return this.BadRequest();
+			{
+				this.logger.LogWarning(
+					LoggerMessages.CreateTransactionWithAnotherUserId,
+					this.User.Id(),
+					inputModel.OwnerId);
+
+				return this.Unauthorized();
+			}
 
 			if (!this.ModelState.IsValid)
 			{
-				CreateEditTransactionViewModel viewModel =
-					this.mapper.Map<CreateEditTransactionViewModel>(inputModel);
-
+				var viewModel = this.mapper.Map<CreateEditTransactionViewModel>(inputModel);
 				await this.SetUserDropdownDataToViewModel(viewModel);
 
 				return this.View(viewModel);
@@ -61,7 +69,7 @@
 
 			try
 			{
-				CreateEditTransactionInputDTO dto = this.mapper.Map<CreateEditTransactionInputDTO>(inputModel);
+				var dto = this.mapper.Map<CreateEditTransactionInputDTO>(inputModel);
 				Guid newTransactionId = await this.accountsUpdateService.CreateTransactionAsync(dto);
 				this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.CreatedTransaction;
 
@@ -69,6 +77,10 @@
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.CreateTransactionWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 		}
@@ -78,19 +90,34 @@
 		public async Task<IActionResult> Delete([Required] Guid id, string? returnUrl = null)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteTransactionWithInvalidInputData, 
+					this.User.Id());
+
 				return this.BadRequest();
+			}
 
 			try
 			{
 				await this.accountsUpdateService
 					.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
-			catch (ArgumentException)
+			catch (UnauthorizedAccessException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedTransactionDeletion,
+					this.User.Id(),
+					id);
+
 				return this.Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteTransactionWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 
@@ -106,7 +133,13 @@
 		public async Task<IActionResult> Details([Required] Guid id)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetTransactionDetailsWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
+			}
 
 			TransactionDetailsDTO viewModel;
 
@@ -115,12 +148,21 @@
 				viewModel = await this.accountsInfoService
 					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
-			catch (ArgumentException)
+			catch (UnauthorizedAccessException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedGetTransactionDetails,
+					this.User.Id(),
+					id);
+
 				return this.Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.GetTransactionDetailsWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 
@@ -130,7 +172,13 @@
 		public async Task<IActionResult> Edit([Required] Guid id)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.EditTransactionWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
+			}
 
 			CreateEditTransactionOutputDTO transactionDTO;
 
@@ -139,13 +187,25 @@
 				transactionDTO = await this.accountsInfoService
 					.GetTransactionFormDataAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
+			catch (UnauthorizedAccessException)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedTransactionEdit,
+					this.User.Id(),
+					id);
+
+				return this.Unauthorized();
+			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.EditTransactionWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 
-			CreateEditTransactionViewModel viewModel = 
-				this.mapper.Map<CreateEditTransactionViewModel>(transactionDTO);
+			var viewModel = this.mapper.Map<CreateEditTransactionViewModel>(transactionDTO);
 
 			return this.View(viewModel);
 		}
@@ -154,27 +214,34 @@
 		public async Task<IActionResult> Edit([Required] Guid id, CreateEditTransactionInputModel inputModel)
 		{
 			if (!this.User.IsAdmin() && this.User.IdToGuid() != inputModel.OwnerId)
-				return this.BadRequest();
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedTransactionEdit,
+					this.User.Id(),
+					id);
+
+				return this.Unauthorized();
+			}
 
 			try
 			{
 				if (!this.ModelState.IsValid)
 				{
-					CreateEditTransactionViewModel viewModel =
-						this.mapper.Map<CreateEditTransactionViewModel>(inputModel);
-
+					var viewModel = this.mapper.Map<CreateEditTransactionViewModel>(inputModel);
 					await this.SetUserDropdownDataToViewModel(viewModel);
 
 					return this.View(viewModel);
 				}
 
-				CreateEditTransactionInputDTO dto =
-					this.mapper.Map<CreateEditTransactionInputDTO>(inputModel);
-
+				var dto = this.mapper.Map<CreateEditTransactionInputDTO>(inputModel);
 				await this.accountsUpdateService.EditTransactionAsync(id, dto);
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.EditTransactionWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 

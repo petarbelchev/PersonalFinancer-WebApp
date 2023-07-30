@@ -2,6 +2,7 @@
 {
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.Extensions.Logging;
 	using MongoDB.Bson;
 	using Moq;
 	using NUnit.Framework;
@@ -18,16 +19,20 @@
 	[TestFixture]
 	internal class TransactionsApiControllerTests : ControllersUnitTestsBase
 	{
+		private Mock<ILogger<TransactionsApiController>> loggerMock;
 		private TransactionsApiController apiController;
 
 		[SetUp]
 		public void SetUp()
 		{
+			this.loggerMock = new Mock<ILogger<TransactionsApiController>>();
+
 			this.apiController = new TransactionsApiController(
 				this.usersServiceMock.Object,
 				this.accountsInfoServiceMock.Object,
 				this.accountsUpdateServiceMock.Object,
-				this.mapper)
+				this.mapper,
+				this.loggerMock.Object)
 			{
 
 				ControllerContext = new ControllerContext
@@ -86,13 +91,20 @@
 
 			this.accountsUpdateServiceMock
 				.Setup(x => x.DeleteTransactionAsync(transactionId, this.userId, false))
-				.Throws<ArgumentException>();
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedTransactionDeletion,
+				this.userId,
+				transactionId);
 
 			//Act
 			var actual = (UnauthorizedResult)await this.apiController.DeleteTransaction(transactionId);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status401Unauthorized));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -109,11 +121,37 @@
 				.Setup(x => x.DeleteTransactionAsync(transactionId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteTransactionWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var actual = (BadRequestResult)await this.apiController.DeleteTransaction(transactionId);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task DeleteTransaction_ShouldReturnBadRequest_WhenTheModelStateIsInvalid()
+		{
+			//Arrange
+			var transactionId = Guid.Empty;
+			this.apiController.ModelState.AddModelError("id", "invalid id");
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteTransactionWithInvalidInputData,
+				this.userId);
+
+			//Act
+			var actual = (BadRequestResult)await this.apiController.DeleteTransaction(transactionId);
+
+			//Assert
+			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -169,13 +207,20 @@
 
 			this.accountsInfoServiceMock
 				.Setup(x => x.GetTransactionDetailsAsync(transactionId, this.userId, false))
-				.Throws<ArgumentException>();
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedGetTransactionDetails,
+				this.userId,
+				transactionId);
 
 			//Act
 			var actual = (UnauthorizedResult)await this.apiController.GetTransactionDetails(transactionId);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status401Unauthorized));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -192,11 +237,37 @@
 				.Setup(x => x.GetTransactionDetailsAsync(transactionId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetTransactionDetailsWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var actual = (BadRequestResult)await this.apiController.GetTransactionDetails(transactionId);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task GetTransactionDetails_ShouldReturnBadRequest_WhenTheModelStateIsInvalid()
+		{
+			//Arrange
+			var transactionId = Guid.Empty;
+			this.apiController.ModelState.AddModelError("id", "invalid id");
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetTransactionDetailsWithInvalidInputData,
+				this.userId);
+
+			//Act
+			var actual = (BadRequestResult)await this.apiController.GetTransactionDetails(transactionId);
+
+			//Assert
+			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -280,11 +351,17 @@
 
 			this.apiController.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetUserTransactionsWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var actual = (BadRequestResult)await this.apiController.GetUserTransactions(inputModel);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -299,11 +376,18 @@
 				Page = 1
 			};
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedGetUserTransactions,
+				this.userId,
+				inputModel.Id);
+
 			//Act
 			var actual = (UnauthorizedResult)await this.apiController.GetUserTransactions(inputModel);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status401Unauthorized));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 	}
 }

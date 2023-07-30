@@ -343,7 +343,7 @@
 		}
 
 		[Test]
-		public async Task DeleteAccountAsync_ShouldThrowArgumentException_WhenTheUserIsUnauthorized()
+		public async Task DeleteAccountAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			Guid notOwnerId = await this.dbContext.Users
@@ -357,7 +357,7 @@
 				notOwnerId,
 				isUserAdmin: false,
 				shouldDeleteTransactions: true),
-			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 
 		[Test]
@@ -421,7 +421,7 @@
 		}
 
 		[Test]
-		public async Task DeleteTransactionAsync_ShouldThrowArgumentException_WhenTheUserIsUnauthorized()
+		public async Task DeleteTransactionAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			Guid transactionId = await this.transactionsRepo.All()
@@ -432,7 +432,7 @@
 			//Act & Assert
 			Assert.That(async () => await this.accountsUpdateService
 				  .DeleteTransactionAsync(transactionId, this.mainTestUserId, isUserAdmin: false),
-			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 
 		[Test]

@@ -4,11 +4,11 @@
 
 	public interface IMessagesService
 	{
-		/// <exception cref="ArgumentException">When the user is unauthorized.</exception>
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
 		/// <exception cref="InvalidOperationException">When adding a reply was unsuccessful.</exception>
 		Task<ReplyOutputDTO> AddReplyAsync(ReplyInputDTO model);
 
-		/// <exception cref="ArgumentException">When the user is unauthorized.</exception>
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
 		/// <exception cref="InvalidOperationException">When archiving a message was unsuccessful.</exception>
 		Task ArchiveAsync(string messageId, string userId, bool isUserAdmin);
 
@@ -18,8 +18,9 @@
 
 		Task<MessagesDTO> GetAllMessagesAsync(int page = 1);
 
-		/// <exception cref="InvalidOperationException">When the message does not exist, 
-		/// the user is not owner or administrator or message update was unsuccessful.</exception>
+		/// <exception cref="UnauthorizedAccessException">The user is unauthorized.</exception>
+		/// <exception cref="ArgumentException">When marking the message as seen is unsuccessful.</exception>
+		/// <exception cref="InvalidOperationException">When the message does not exist.</exception>
 		Task<MessageDetailsDTO> GetMessageAsync(string id, string userId, bool isUserAdmin);
 
 		/// <exception cref="InvalidOperationException">When the message does not exist.</exception>
@@ -33,10 +34,10 @@
 
 		Task<bool> HasUnseenMessagesByUserAsync(string userId);
 
-		/// <exception cref="InvalidOperationException">When the update was unsuccessful.</exception>
+		/// <exception cref="ArgumentException">When the update was unsuccessful.</exception>
 		Task MarkMessageAsSeenAsync(string messageId, string userId, bool isUserAdmin);
 
-		/// <exception cref="ArgumentException">When the user is unauthorized.</exception>
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
 		/// <exception cref="InvalidOperationException">When deleting a message was unsuccessful.</exception>
 		Task RemoveAsync(string messageId, string userId, bool isUserAdmin);
 	}

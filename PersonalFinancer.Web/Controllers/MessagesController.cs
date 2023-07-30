@@ -4,6 +4,7 @@
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.SignalR;
+	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Services.Users;
@@ -21,35 +22,57 @@
 		private readonly IMapper mapper;
 		private readonly IHubContext<AllMessagesHub> allMessagesHub;
 		private readonly IHubContext<NotificationsHub> notificationsHub;
+		private readonly ILogger<MessagesController> logger;
 
 		public MessagesController(
 			IMessagesService messagesService,
 			IUsersService usersService,
 			IMapper mapper,
 			IHubContext<AllMessagesHub> allMessagesHub,
-			IHubContext<NotificationsHub> notificationsHub)
+			IHubContext<NotificationsHub> notificationsHub,
+			ILogger<MessagesController> logger)
 		{
 			this.messagesService = messagesService;
 			this.usersService = usersService;
 			this.mapper = mapper;
 			this.allMessagesHub = allMessagesHub;
 			this.notificationsHub = notificationsHub;
+			this.logger = logger;
 		}
 
 		[HttpPost]
 		[NoHtmlSanitizing]
-		public async Task<IActionResult> Archive([Required] string id)
+		public async Task<IActionResult> Archive([RegularExpression("^[0-9A-Fa-f]{24}$")] string id)
 		{
+			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.ArchiveMessageWithInvalidInputData,
+					this.User.Id());
+
+				return this.BadRequest();
+			}
+
 			try
 			{
 				await this.messagesService.ArchiveAsync(id, this.User.Id(), this.User.IsAdmin());
 			}
-			catch (ArgumentException)
+			catch (UnauthorizedAccessException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedArchiveMessage,
+					this.User.Id(),
+					id);
+
 				return this.Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnsuccessfulMessageArchiving,
+					this.User.Id(),
+					id);
+
 				return this.BadRequest();
 			}
 
@@ -92,8 +115,17 @@
 
 		[HttpPost]
 		[NoHtmlSanitizing]
-		public async Task<IActionResult> Delete([Required] string id)
+		public async Task<IActionResult> Delete([RegularExpression("^[0-9A-Fa-f]{24}$")] string id)
 		{
+			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteMessageWithInvalidInputData,
+					this.User.Id());
+
+				return this.BadRequest();
+			}
+
 			IEnumerable<string> ids = this.User.IsAdmin()
 				? new List<string> { await this.messagesService.GetMessageAuthorIdAsync(id) }
 				: await this.usersService.GetAdminsIdsAsync();
@@ -102,12 +134,22 @@
 			{
 				await this.messagesService.RemoveAsync(id, this.User.Id(), this.User.IsAdmin());
 			}
-			catch (ArgumentException)
+			catch (UnauthorizedAccessException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedMessageDeletion,
+					this.User.Id(),
+					id);
+
 				return this.Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnsuccessfulMessageDeletion,
+					this.User.Id(),
+					id);
+
 				return this.BadRequest();
 			}
 
@@ -137,8 +179,17 @@
 			return this.RedirectToAction(nameof(Index));
 		}
 
-		public async Task<IActionResult> Details([Required] string id)
+		public async Task<IActionResult> Details([RegularExpression("^[0-9A-Fa-f]{24}$")] string id)
 		{
+			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetMessageDetailsWithInvalidInputData,
+					this.User.Id());
+
+				return this.BadRequest();
+			}
+
 			MessageDetailsDTO messageDTO;
 
 			try
@@ -146,8 +197,30 @@
 				messageDTO = await this.messagesService
 					.GetMessageAsync(id, this.User.Id(), this.User.IsAdmin());
 			}
+			catch (UnauthorizedAccessException)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedGetMessageDetails,
+					this.User.Id(),
+					id);
+
+				return this.Unauthorized();
+			}
+			catch (ArgumentException)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnsuccessfulMarkMessageAsSeen,
+					this.User.Id(),
+					id);
+
+				return this.BadRequest();
+			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.GetMessageDetailsWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 

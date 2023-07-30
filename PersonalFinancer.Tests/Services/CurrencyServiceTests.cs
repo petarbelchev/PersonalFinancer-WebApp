@@ -113,34 +113,19 @@
 		}
 
 		[Test]
-		public async Task DeleteEntityAsync_ShouldMarkCurrencyAsDeleted_WhenTheUserIsOwner()
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task DeleteEntityAsync_ShouldMarkCurrencyAsDeleted(bool isUserAdmin)
 		{
 			//Arrange
 			Currency currency = await this.repo.All()
 				.Where(c => c.OwnerId == this.mainTestUserId && !c.IsDeleted)
 				.FirstAsync();
 
-			//Act
-			await this.currencyApiService.DeleteEntityAsync(currency.Id, this.mainTestUserId, isUserAdmin: false);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(currency.IsDeleted, Is.True);
-				Assert.That(await this.repo.FindAsync(currency.Id), Is.Not.Null);
-			});
-		}
-
-		[Test]
-		public async Task DeleteEntityAsync_ShouldMarkCurrencyAsDeleted_WhenTheUserIsAdmin()
-		{
-			//Arrange
-			Currency currency = await this.repo.All()
-				.Where(c => c.OwnerId == this.mainTestUserId && !c.IsDeleted)
-				.FirstAsync();
+			Guid currentUserId = isUserAdmin ? this.adminId : this.mainTestUserId;
 
 			//Act
-			await this.currencyApiService.DeleteEntityAsync(currency.Id, this.adminId, isUserAdmin: true);
+			await this.currencyApiService.DeleteEntityAsync(currency.Id, currentUserId, isUserAdmin);
 
 			//Assert
 			Assert.Multiple(async () =>
@@ -160,7 +145,7 @@
 		}
 
 		[Test]
-		public async Task DeleteEntityAsync_ShouldThrowArgumentException_WhenTheUserIsNotOwner()
+		public async Task DeleteEntityAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			Currency currency = await this.repo.All()
@@ -170,7 +155,7 @@
 			//Act & Assert
 			Assert.That(async () => await this.currencyApiService
 				  .DeleteEntityAsync(currency.Id, this.mainTestUserId, isUserAdmin: false),
-			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 	}
 }

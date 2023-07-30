@@ -2,22 +2,27 @@
 {
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.Extensions.Logging;
+	using Moq;
 	using NUnit.Framework;
-	using PersonalFinancer.Web.Areas.Admin.Controllers;
 
 	[TestFixture]
 	internal class AccountsControllerTests : ControllersUnitTestsBase
 	{
-		private AccountsController controller;
+		private Mock<ILogger<Web.Controllers.AccountsController>> loggerMock;
+		private Web.Areas.Admin.Controllers.AccountsController controller;
 
 		[SetUp]
 		public void SetUp()
 		{
-			this.controller = new AccountsController(
+			this.loggerMock = new Mock<ILogger<Web.Controllers.AccountsController>>();
+
+			this.controller = new Web.Areas.Admin.Controllers.AccountsController(
 				this.accountsUpdateServiceMock.Object,
 				this.accountsInfoServiceMock.Object,
 				this.usersServiceMock.Object,
-				this.mapper)
+				this.mapper,
+				this.loggerMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{

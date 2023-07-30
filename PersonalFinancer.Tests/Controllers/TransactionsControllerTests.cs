@@ -3,6 +3,7 @@
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.Mvc.ViewFeatures;
+	using Microsoft.Extensions.Logging;
 	using Moq;
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
@@ -107,16 +108,21 @@
 				}
 			}
 		};
+
+		private Mock<ILogger<TransactionsController>> logger;
 		private TransactionsController controller;
 
 		[SetUp]
 		public void SetUp()
 		{
+			this.logger = new Mock<ILogger<TransactionsController>>();
+
 			this.controller = new TransactionsController(
 				this.accountsUpdateServiceMock.Object,
 				this.accountsInfoServiceMock.Object,
 				this.usersServiceMock.Object,
-				this.mapper)
+				this.mapper,
+				this.logger.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -210,7 +216,7 @@
 		}
 
 		[Test]
-		public async Task Create_OnPost_ShouldReturnBadRequest_WhenUserIsNotOwnerInInputModel()
+		public async Task Create_OnPost_ShouldReturnUnauthorized_WhenUserIsUnauthorized()
 		{
 			//Arrange
 			var inputModel = new CreateEditTransactionViewModel
@@ -224,15 +230,22 @@
 				TransactionType = TransactionType.Expense
 			};
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.CreateTransactionWithAnotherUserId,
+				this.userId,
+				inputModel.OwnerId);
+
 			//Act
-			var result = (BadRequestResult)await this.controller.Create(inputModel);
+			var result = (UnauthorizedResult)await this.controller.Create(inputModel);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(result, Is.Not.Null);
-				Assert.That(result.StatusCode, Is.EqualTo(400));
+				Assert.That(result.StatusCode, Is.EqualTo(401));
 			});
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
@@ -274,7 +287,7 @@
 		}
 
 		[Test]
-		public async Task Create_OnPost_ShouldReturnBadRequest_WhenAccountDoesNotExist()
+		public async Task Create_OnPost_ShouldReturnBadRequest_WhenTheAccountDoesNotExist()
 		{
 			//Arrange
 			var inputModel = new CreateEditTransactionInputModel
@@ -292,6 +305,10 @@
 				.Setup(x => x.CreateTransactionAsync(It.Is<CreateEditTransactionInputDTO>(x => ValidateObjectsAreEqual(x, inputModel))))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.CreateTransactionWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Create(inputModel);
 
@@ -301,6 +318,8 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
@@ -364,13 +383,20 @@
 
 			this.accountsUpdateServiceMock
 				.Setup(x => x.DeleteTransactionAsync(transactionId, this.userId, false))
-				.Throws<ArgumentException>();
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedTransactionDeletion,
+				this.userId,
+				transactionId);
 
 			//Act
 			var result = (UnauthorizedResult)await this.controller.Delete(transactionId, returnUrl);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(401));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
@@ -388,11 +414,17 @@
 				.Setup(x => x.DeleteTransactionAsync(transactionId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteTransactionWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Delete(transactionId, returnUrl);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
@@ -401,11 +433,17 @@
 			//Arrange
 			this.controller.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteTransactionWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Delete(Guid.Empty);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
@@ -459,13 +497,20 @@
 
 			this.accountsInfoServiceMock
 				.Setup(x => x.GetTransactionDetailsAsync(transactionId, this.userId, false))
-				.Throws<ArgumentException>();
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedGetTransactionDetails,
+				this.userId,
+				transactionId);
 
 			//Act
 			var result = (UnauthorizedResult)await this.controller.Details(transactionId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(401));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
@@ -482,11 +527,17 @@
 				.Setup(x => x.GetTransactionDetailsAsync(transactionId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetTransactionDetailsWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Details(transactionId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
@@ -495,11 +546,17 @@
 			//Arrange
 			this.controller.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetTransactionDetailsWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Details(Guid.Empty);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
@@ -555,11 +612,17 @@
 				.Setup(x => x.GetTransactionFormDataAsync(transactionId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.EditTransactionWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Edit(transactionId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
@@ -568,11 +631,45 @@
 			//Arrange
 			this.controller.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.EditTransactionWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Edit(Guid.Empty);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task Edit_OnGet_ShouldReturnUnauthorized_WhenTheUserIsUnauthorized()
+		{
+			//Arrange
+			var transactionId = Guid.NewGuid();
+
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
+				.Returns(false);
+
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetTransactionFormDataAsync(transactionId, this.userId, false))
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedTransactionEdit,
+				this.userId,
+				transactionId);
+
+			//Act
+			var result = (UnauthorizedResult)await this.controller.Edit(transactionId);
+
+			//Assert
+			Assert.That(result.StatusCode, Is.EqualTo(401));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
@@ -612,40 +709,7 @@
 		}
 
 		[Test]
-		public async Task Edit_OnPost_ShouldThrowInvalidOperationException_WhenTransactionIsInitial()
-		{
-			//Arrange
-			var transactionId = Guid.NewGuid();
-			var inputModel = new CreateEditTransactionInputModel
-			{
-				Amount = 10,
-				CreatedOnLocalTime = DateTime.Now,
-				AccountId = Guid.NewGuid(),
-				CategoryId = Guid.NewGuid(),
-				OwnerId = this.userId,
-				Reference = "Test Transaction",
-				TransactionType = TransactionType.Expense
-			};
-
-			this.accountsUpdateServiceMock
-				.Setup(x => x.EditTransactionAsync(
-					transactionId, 
-					It.Is<CreateEditTransactionInputDTO>(x => ValidateObjectsAreEqual(x, inputModel))))
-				.Throws<InvalidOperationException>();
-
-			//Act
-			var result = (BadRequestResult)await this.controller.Edit(transactionId, inputModel);
-
-			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(result, Is.Not.Null);
-				Assert.That(result.StatusCode, Is.EqualTo(400));
-			});
-		}
-
-		[Test]
-		public async Task Edit_OnPost_ShouldReturnBadRequest_WhenTheUserIsUnauthorized()
+		public async Task Edit_OnPost_ShouldReturnUnauthorized_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
@@ -664,15 +728,22 @@
 				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedTransactionEdit,
+				this.userId,
+				transactionId);
+
 			//Act
-			var result = (BadRequestResult)await this.controller.Edit(transactionId, inputModel);
+			var result = (UnauthorizedResult)await this.controller.Edit(transactionId, inputModel);
 
 			//Assert
-			Assert.That(result.StatusCode, Is.EqualTo(400));
+			Assert.That(result.StatusCode, Is.EqualTo(401));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]
-		public async Task Edit_OnPost_ShouldReturnBadRequest_WhenTransactionDoesNotExist()
+		public async Task Edit_OnPost_ShouldReturnBadRequest_WhenTransactionDoesNotExistOrIsInitial()
 		{
 			//Arrange
 			var transactionId = Guid.NewGuid();
@@ -697,11 +768,17 @@
 					It.Is<CreateEditTransactionInputDTO>(x => ValidateObjectsAreEqual(x, inputModel))))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.EditTransactionWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Edit(transactionId, inputModel);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(400));
+
+			VerifyLoggerLogWarning(this.logger, expectedLogMessage);
 		}
 
 		[Test]

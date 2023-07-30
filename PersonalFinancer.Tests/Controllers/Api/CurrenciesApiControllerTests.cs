@@ -2,6 +2,7 @@
 {
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.Extensions.Logging;
 	using Moq;
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
@@ -15,15 +16,19 @@
 	[TestFixture]
 	internal class CurrenciesApiControllerTests : ControllersUnitTestsBase
 	{
+		private Mock<ILogger<BaseApiController<Currency>>> loggerMock;
 		private Mock<IApiService<Currency>> apiServiceMock;
 		private CurrenciesApiController apiController;
 
 		[SetUp]
 		public void SetUp()
 		{
+			this.loggerMock = new Mock<ILogger<BaseApiController<Currency>>>();
 			this.apiServiceMock = new Mock<IApiService<Currency>>();
 
-			this.apiController = new CurrenciesApiController(this.apiServiceMock.Object)
+			this.apiController = new CurrenciesApiController(
+				this.apiServiceMock.Object,
+				this.loggerMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -113,6 +118,11 @@
 
 			this.apiController.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.CreateEntityWithInvalidInputData,
+				this.userId,
+				"currency");
+
 			//Act
 			var actual = (BadRequestObjectResult)await this.apiController.CreateCurrency(inputModel);
 
@@ -122,6 +132,8 @@
 				Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
 				Assert.That(actual.Value, Is.EqualTo("invalid id"));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -171,6 +183,11 @@
 
 			this.apiController.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteEntityWithInvalidInputData,
+				this.userId,
+				"currency");
+
 			//Act
 			var actual = (BadRequestObjectResult)await this.apiController.DeleteCurrency(id);
 
@@ -180,6 +197,8 @@
 				Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
 				Assert.That(actual.Value, Is.EqualTo("invalid id"));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -194,13 +213,21 @@
 
 			this.apiServiceMock
 				.Setup(x => x.DeleteEntityAsync(id, this.userId, false))
-				.Throws<ArgumentException>();
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedEntityDeletion,
+				this.userId,
+				"currency",
+				id);
 
 			//Act
 			var actual = (UnauthorizedResult)await this.apiController.DeleteCurrency(id);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status401Unauthorized));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -217,11 +244,18 @@
 				.Setup(x => x.DeleteEntityAsync(id, this.userId, false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteEntityWithInvalidInputData,
+				this.userId,
+				"currency");
+
 			//Act
 			var actual = (BadRequestResult)await this.apiController.DeleteCurrency(id);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 	}
 }

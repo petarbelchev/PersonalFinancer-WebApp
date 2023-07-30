@@ -15,8 +15,9 @@
 			IAccountsUpdateService accountsService,
 			IAccountsInfoService accountsInfoService,
 			IUsersService usersService,
-			IMapper mapper)
-			: base(accountsService, accountsInfoService, usersService, mapper)
+			IMapper mapper,
+			ILogger<Web.Controllers.TransactionsController> logger)
+			: base(accountsService, accountsInfoService, usersService, mapper, logger)
 		{ }
 	}
 }

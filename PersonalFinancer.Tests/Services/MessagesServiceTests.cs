@@ -112,7 +112,7 @@
 		}
 
 		[Test]
-		public void AddReplyAsync_ShouldThrowArgumentException_WhenTheUserIsUnauthorized()
+		public void AddReplyAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			var inputModel = new ReplyInputDTO
@@ -133,7 +133,7 @@
 
 			//Act & Assert
 			Assert.That(async () => await this.messagesService.AddReplyAsync(inputModel),
-			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 
 		[Test]
@@ -392,7 +392,7 @@
 
 			this.repoMock
 				.Setup(x => x.FindOneAsync(
-					x => x.Id == messageId && (isUserAdmin || x.AuthorId == currentUserId),
+					x => x.Id == messageId,
 					m => new MessageDetailsDTO
 					{
 						Id = m.Id,
@@ -431,19 +431,21 @@
 		}
 
 		[Test]
-		public void GetMessageAsync_ShouldThrowInvalidOperationException_WhenTheUserIsUnauthorized()
+		public void GetMessageAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
-			string messageId = this.fakeCollection
+			MessageDetailsDTO message = this.fakeCollection
 				.Where(m => m.AuthorId == this.FirstUserId)
-				.Select(m => m.Id)
+				.Select(m => this.mapper.Map<MessageDetailsDTO>(m))
 				.First();
+
+			string messageId = message.Id;
 			bool isUserAdmin = false;
 			string notAuthorId = this.SecondUserId;
 
 			this.repoMock
 				.Setup(x => x.FindOneAsync(
-					x => x.Id == messageId && (isUserAdmin || x.AuthorId == notAuthorId),
+					x => x.Id == messageId,
 					m => new MessageDetailsDTO
 					{
 						Id = m.Id,
@@ -459,12 +461,12 @@
 							Content = r.Content
 						})
 					}))
-				.Throws<InvalidOperationException>();
+				.ReturnsAsync(message);
 
 			//Act & Assert
 			Assert.That(async () => await this.messagesService
 				  .GetMessageAsync(messageId, notAuthorId, isUserAdmin),
-			Throws.TypeOf<InvalidOperationException>());
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 
 		[Test]
@@ -684,7 +686,7 @@
 		}
 
 		[Test]
-		public void MarkMessageAsSeenAsync_ShouldThrowInvalidOperationException_WhenTheUpdateWasUnsuccessful()
+		public void MarkMessageAsSeenAsync_ShouldThrowArgumentException_WhenTheUpdateWasUnsuccessful()
 		{
 			//Arrange
 			bool isUserAdmin = false;
@@ -711,7 +713,7 @@
 			//Act & Assert
 			Assert.That(async () => await this.messagesService
 				  .MarkMessageAsSeenAsync(messageId, userId, isUserAdmin),
-			Throws.TypeOf<InvalidOperationException>().With.Message
+			Throws.TypeOf<ArgumentException>().With.Message
 				  .EqualTo(ExceptionMessages.UnsuccessfulUpdate));
 		}
 
@@ -743,7 +745,7 @@
 		}
 
 		[Test]
-		public void RemoveAsync_ShouldThrowArgumentException_WhenTheUserIsUnauthorized()
+		public void RemoveAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			string messageId = this.fakeCollection
@@ -760,7 +762,7 @@
 			//Act & Assert
 			Assert.That(async () => await this.messagesService
 				  .RemoveAsync(messageId, notAuthorId, isUserAdmin: false),
-			Throws.TypeOf<ArgumentException>().With.Message
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message
 				  .EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 

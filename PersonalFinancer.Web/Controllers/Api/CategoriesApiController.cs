@@ -1,19 +1,20 @@
 ﻿namespace PersonalFinancer.Web.Controllers.Api
 {
-    using Microsoft.AspNetCore.Mvc;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models;
-    using PersonalFinancer.Services.Api;
+	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Data.Models;
+	using PersonalFinancer.Services.Api;
 	using PersonalFinancer.Services.Api.Models;
 	using PersonalFinancer.Web.Models.Api;
-    using System.ComponentModel.DataAnnotations;
+	using System.ComponentModel.DataAnnotations;
 
-    [Route("api/categories")]
+	[Route("api/categories")]
 	[ApiController]
 	public class CategoriesApiController : BaseApiController<Category>
 	{
-		public CategoriesApiController(IApiService<Category> apiService)
-			: base(apiService)
+		public CategoriesApiController(
+			IApiService<Category> apiService,
+			ILogger<BaseApiController<Category>> logger)
+			: base(apiService, logger)
 		{ }
 
 		[HttpPost]
@@ -21,19 +22,7 @@
 		[ProducesResponseType(typeof(ApiEntityDTO), StatusCodes.Status201Created)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		public async Task<IActionResult> CreateCategory(CategoryInputModel inputModel)
-		{
-			try
-			{
-				return await this.CreateEntityAsync(inputModel);
-			}
-			catch (ArgumentException)
-			{
-				return this.BadRequest(string.Format(
-					ExceptionMessages.ExistingUserEntityName, 
-					"category", 
-					inputModel.Name));
-			}
-		}
+			=> await this.CreateEntityAsync(inputModel);
 
 		[HttpDelete("{id}")]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]

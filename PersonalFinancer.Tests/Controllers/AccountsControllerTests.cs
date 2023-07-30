@@ -3,9 +3,11 @@
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.Mvc.ViewFeatures;
+	using Microsoft.Extensions.Logging;
 	using Moq;
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Services.Users.Models;
@@ -47,7 +49,8 @@
 			}
 		};
 		private static AccountDetailsDTO expectedAccountDetailsDto;
-		
+
+		private Mock<ILogger<AccountsController>> loggerMock;
 		private AccountsController controller;
 
 		[SetUp]
@@ -68,11 +71,14 @@
 				.GetUserAccountTypesAndCurrenciesDropdownsAsync(this.userId))
 				.ReturnsAsync(expAccountTypesAndCurrencies);
 
+			this.loggerMock = new Mock<ILogger<AccountsController>>();
+
 			this.controller = new AccountsController(
 				this.accountsUpdateServiceMock.Object,
 				this.accountsInfoServiceMock.Object,
 				this.usersServiceMock.Object,
-				this.mapper)
+				this.mapper,
+				this.loggerMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -156,6 +162,11 @@
 				OwnerId = Guid.NewGuid()
 			};
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.CreateAccountWithAnotherUserId,
+				this.userId,
+				inputModel.OwnerId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Create(inputModel);
 
@@ -165,6 +176,8 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+			
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -280,7 +293,7 @@
 		}
 
 		[Test]
-		public async Task Details_ShouldReturnBadRequest_WhenTheUserIsUnauthorizedOrAccountDoesNotExist()
+		public async Task Details_ShouldReturnBadRequest_WhenTheAccountDoesNotExist()
 		{
 			//Arrange
 			this.userMock
@@ -291,6 +304,10 @@
 				.Setup(x => x.GetAccountDetailsAsync(It.IsAny<Guid>(), this.userId, false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetAccountDetailsWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Details(Guid.NewGuid(), null);
 
@@ -300,6 +317,40 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task Details_ShouldReturnUnauthorized_WhenTheUserIsUnauthorized()
+		{
+			//Arrange
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
+				.Returns(false);
+
+			var accountId = Guid.NewGuid();
+
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetAccountDetailsAsync(accountId, this.userId, false))
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedGetAccountDetails,
+				this.userId,
+				accountId);
+
+			//Act
+			var result = (UnauthorizedResult)await this.controller.Details(accountId, null);
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(result, Is.Not.Null);
+				Assert.That(result.StatusCode, Is.EqualTo(401));
+			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -308,6 +359,10 @@
 			//Arrange
 			this.controller.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetAccountDetailsWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Details(Guid.NewGuid(), null);
 
@@ -317,6 +372,8 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -357,12 +414,18 @@
 				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
+			var accountId = Guid.NewGuid();
+
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountNameAsync(It.IsAny<Guid>(), this.userId, false))
+				.Setup(x => x.GetAccountNameAsync(accountId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteAccountWithInvalidInputData,
+				this.userId);
+
 			//Act
-			var result = (BadRequestResult)await this.controller.Delete(Guid.NewGuid(), null);
+			var result = (BadRequestResult)await this.controller.Delete(accountId, null);
 
 			//Assert
 			Assert.Multiple(() =>
@@ -370,6 +433,40 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task Delete_OnGet_ShouldReturnUnauthorized_WhenTheUserIsUnauthorized()
+		{
+			//Arrange
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
+				.Returns(false);
+
+			var accountId = Guid.NewGuid();
+
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetAccountNameAsync(accountId, this.userId, false))
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedAccountDeletion,
+				this.userId,
+				accountId);
+
+			//Act
+			var result = (UnauthorizedResult)await this.controller.Delete(accountId, null);
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(result, Is.Not.Null);
+				Assert.That(result.StatusCode, Is.EqualTo(401));
+			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -378,6 +475,10 @@
 			//Arrange
 			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid");
 
+			string expectedLogMessage = string.Format(
+					LoggerMessages.DeleteAccountWithInvalidInputData,
+					this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Delete(Guid.NewGuid(), null);
 
@@ -387,6 +488,8 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -459,7 +562,12 @@
 
 			this.accountsUpdateServiceMock
 				.Setup(x =>x.DeleteAccountAsync(accountId, this.userId, false, false))
-				.Throws<ArgumentException>();
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedAccountDeletion,
+				this.userId,
+				accountId);
 
 			//Act
 			var result = (UnauthorizedResult)await this.controller.Delete(inputModel);
@@ -470,6 +578,8 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(401));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -492,6 +602,10 @@
 				.Setup(x => x.DeleteAccountAsync(accountId, this.userId, false, false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteAccountWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Delete(inputModel);
 
@@ -501,10 +615,12 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
-		public async Task Delete_OnPost_ShouldCatchExceptionAndReturnBadRequest_WhenTheAccountIdIsInvalid()
+		public async Task Delete_OnPost_ShouldCatchExceptionAndReturnBadRequest_WhenTheAccountIdIsNull()
 		{
 			//Arrange
 			var accountId = Guid.NewGuid();
@@ -515,6 +631,10 @@
 				ShouldDeleteTransactions = false
 			};
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteAccountWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Delete(inputModel);
 
@@ -524,6 +644,8 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -571,6 +693,10 @@
 
 			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid.");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.DeleteAccountWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Delete(inputModel);
 
@@ -580,6 +706,8 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -628,12 +756,16 @@
 		}
 
 		[Test]
-		public async Task Edit_OnGet_ShouldReturnBadRequest_WhenServiceThrowException()
+		public async Task Edit_OnGet_ShouldReturnBadRequest_WhenTheAccountDoesNotExist()
 		{
 			//Arrange
 			this.accountsInfoServiceMock
 				.Setup(x => x.GetAccountFormDataAsync(It.IsAny<Guid>(), this.userId, false))
 				.Throws<InvalidOperationException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.EditAccountWithInvalidInputData,
+				this.userId);
 
 			//Act
 			var result = (BadRequestResult)await this.controller.Edit(Guid.NewGuid());
@@ -644,6 +776,36 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task Edit_OnGet_ShouldReturnUnauthorized_WhenTheUserIsUnauthorized()
+		{
+			//Arrange
+			var accountId = Guid.NewGuid();
+
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetAccountFormDataAsync(accountId, this.userId, false))
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedAccountEdit,
+				this.userId,
+				accountId);
+
+			//Act
+			var result = (UnauthorizedResult)await this.controller.Edit(accountId);
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(result, Is.Not.Null);
+				Assert.That(result.StatusCode, Is.EqualTo(401));
+			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -652,6 +814,10 @@
 			//Arrange
 			this.controller.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.EditAccountWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Edit(Guid.NewGuid());
 
@@ -661,6 +827,8 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -698,7 +866,7 @@
 		}
 
 		[Test]
-		public async Task Edit_OnPost_ShouldReturnBadRequest_WhenTheUserIsUnauthorized()
+		public async Task Edit_OnPost_ShouldReturnUnauthorized_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			var accId = Guid.NewGuid();
@@ -715,15 +883,22 @@
 				.Setup(x => x.IsInRole(AdminRoleName))
 				.Returns(false);
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedAccountEdit,
+				this.userId,
+				accId);
+
 			//Act
-			var viewResult = (BadRequestResult)await this.controller.Edit(accId, inputFormModel);
+			var viewResult = (UnauthorizedResult)await this.controller.Edit(accId, inputFormModel);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
 				Assert.That(viewResult, Is.Not.Null);
-				Assert.That(viewResult.StatusCode, Is.EqualTo(400));
+				Assert.That(viewResult.StatusCode, Is.EqualTo(401));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -864,6 +1039,10 @@
 					It.Is<CreateEditAccountInputDTO>(m => ValidateObjectsAreEqual(m, inputFormModel))))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.EditAccountWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Edit(accId, inputFormModel);
 
@@ -873,6 +1052,8 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -918,7 +1099,7 @@
 		}
 
 		[Test]
-		public async Task Filtered_ShouldReturnBadRequest_WhenUserNotOwnerOrAdminOrAccountDoesNotExist()
+		public async Task Filtered_ShouldReturnBadRequest_WhenTheAccountDoesNotExist()
 		{
 			//Arrange
 			var inputModel = new AccountDetailsInputModel
@@ -936,6 +1117,10 @@
 				.Setup(x => x.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, false))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetAccountDetailsWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Filtered(inputModel);
 
@@ -945,6 +1130,45 @@
 				Assert.That(result, Is.Not.Null);
 				Assert.That(result.StatusCode, Is.EqualTo(400));
 			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task Filtered_ShouldReturnUnauthorized_WhenTheUserIsUnauthorized()
+		{
+			//Arrange
+			var inputModel = new AccountDetailsInputModel
+			{
+				Id = expectedAccountDetailsDto.Id,
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now
+			};
+
+			this.userMock
+				.Setup(x => x.IsInRole(AdminRoleName))
+				.Returns(false);
+
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, false))
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedGetAccountDetails,
+				this.userId,
+				expectedAccountDetailsDto.Id);
+
+			//Act
+			var result = (UnauthorizedResult)await this.controller.Filtered(inputModel);
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(result, Is.Not.Null);
+				Assert.That(result.StatusCode, Is.EqualTo(401));
+			});
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]

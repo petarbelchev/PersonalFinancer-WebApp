@@ -2,8 +2,10 @@
 {
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.Extensions.Logging;
 	using Moq;
 	using NUnit.Framework;
+	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Services.Users.Models;
 	using PersonalFinancer.Web.Areas.Admin.Controllers;
@@ -11,12 +13,17 @@
 	[TestFixture]
 	internal class UsersControllerTests : ControllersUnitTestsBase
 	{
+		private Mock<ILogger<UsersController>> loggerMock;
 		private UsersController controller;
 
 		[SetUp]
 		public void SetUp()
 		{
-			this.controller = new UsersController(this.usersServiceMock.Object)
+			this.loggerMock = new Mock<ILogger<UsersController>>();
+
+			this.controller = new UsersController(
+				this.usersServiceMock.Object,
+				this.loggerMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -78,11 +85,17 @@
 				.Setup(x => x.UserDetailsAsync(invalidUserId))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetUserDetailsWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Details(invalidUserId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -92,11 +105,17 @@
 			var invalidUserId = Guid.Empty;
 			this.controller.ModelState.AddModelError("id", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.GetUserDetailsWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var result = (BadRequestResult)await this.controller.Details(invalidUserId);
 
 			//Assert
 			Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]

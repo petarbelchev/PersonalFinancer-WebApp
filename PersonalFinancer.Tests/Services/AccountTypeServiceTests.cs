@@ -112,34 +112,19 @@
 		}
 
 		[Test]
-		public async Task DeleteEntityAsync_ShouldMarkAccountTypeAsDeleted_WhenTheUserIsOwner()
+		[TestCase(false)]
+		[TestCase(true)]
+		public async Task DeleteEntityAsync_ShouldMarkAccountTypeAsDeleted(bool isUserAdmin)
 		{
 			//Arrange
 			AccountType accountType = await this.repo.All()
 				.Where(c => c.OwnerId == this.mainTestUserId && !c.IsDeleted)
 				.FirstAsync();
 
-			//Act
-			await this.accountTypeService.DeleteEntityAsync(accountType.Id, this.mainTestUserId, isUserAdmin: false);
-
-			//Assert
-			Assert.Multiple(async () =>
-			{
-				Assert.That(accountType.IsDeleted, Is.True);
-				Assert.That(await this.repo.FindAsync(accountType.Id), Is.Not.Null);
-			});
-		}
-
-		[Test]
-		public async Task DeleteEntityAsync_ShouldMarkAccountTypeAsDeleted_WhenTheUserIsAdmin()
-		{
-			//Arrange
-			AccountType accountType = await this.repo.All()
-				.Where(c => c.OwnerId == this.mainTestUserId && !c.IsDeleted)
-				.FirstAsync();
+			Guid currentUserId = isUserAdmin ? this.adminId : this.mainTestUserId;
 
 			//Act
-			await this.accountTypeService.DeleteEntityAsync(accountType.Id, this.adminId, isUserAdmin: true);
+			await this.accountTypeService.DeleteEntityAsync(accountType.Id, currentUserId, isUserAdmin);
 
 			//Assert
 			Assert.Multiple(async () =>
@@ -162,7 +147,7 @@
 		}
 
 		[Test]
-		public async Task DeleteEntityAsync_ShouldThrowArgumentException_WhenTheUserIsNotOwner()
+		public async Task DeleteEntityAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			AccountType accountType = await this.repo.All()
@@ -172,7 +157,7 @@
 			//Act & Assert
 			Assert.That(async () => await this.accountTypeService
 				  .DeleteEntityAsync(accountType.Id, this.mainTestUserId, isUserAdmin: false),
-			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
+			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 	}
 }

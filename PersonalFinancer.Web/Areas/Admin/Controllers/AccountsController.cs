@@ -15,8 +15,9 @@
             IAccountsUpdateService accountsUpdateService,
             IAccountsInfoService accountsInfoService,
             IUsersService usersService,
-            IMapper mapper)
-            : base(accountsUpdateService, accountsInfoService, usersService, mapper)
+            IMapper mapper,
+			ILogger<Web.Controllers.AccountsController> logger)
+            : base(accountsUpdateService, accountsInfoService, usersService, mapper, logger)
         { }
 
 		public IActionResult Index() => this.View();

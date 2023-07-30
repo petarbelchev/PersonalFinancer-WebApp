@@ -10,6 +10,7 @@
 	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.Shared;
+	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[Authorize]
@@ -21,17 +22,20 @@
 		private readonly IAccountsInfoService accountsInfoService;
 		private readonly IAccountsUpdateService accountsUpdateService;
 		private readonly IMapper mapper;
+		private readonly ILogger<TransactionsApiController> logger;
 
 		public TransactionsApiController(
 			IUsersService usersService,
 			IAccountsInfoService accountsInfoService,
 			IAccountsUpdateService accountsUpdateService,
-			IMapper mapper)
+			IMapper mapper,
+			ILogger<TransactionsApiController> logger)
 		{
 			this.usersService = usersService;
 			this.accountsInfoService = accountsInfoService;
 			this.accountsUpdateService = accountsUpdateService;
 			this.mapper = mapper;
+			this.logger = logger;
 		}
 
 		[HttpDelete("{id}")]
@@ -39,8 +43,17 @@
 		[ProducesResponseType(typeof(DeleteTransactionOutputModel), StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-		public async Task<IActionResult> DeleteTransaction(Guid id)
+		public async Task<IActionResult> DeleteTransaction([Required] Guid id)
 		{
+			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteTransactionWithInvalidInputData,
+					this.User.Id());
+
+				return this.BadRequest();
+			}
+
 			var outputModel = new DeleteTransactionOutputModel();
 
 			try
@@ -48,12 +61,21 @@
 				outputModel.Balance = await this.accountsUpdateService
 					.DeleteTransactionAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
-			catch (ArgumentException)
+			catch (UnauthorizedAccessException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedTransactionDeletion,
+					this.User.Id(),
+					id);
+
 				return this.Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.DeleteTransactionWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 
@@ -69,8 +91,17 @@
 		[ProducesResponseType(typeof(TransactionDetailsDTO), StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-		public async Task<IActionResult> GetTransactionDetails(Guid id)
+		public async Task<IActionResult> GetTransactionDetails([Required] Guid id)
 		{
+			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetTransactionDetailsWithInvalidInputData,
+					this.User.Id());
+
+				return this.BadRequest();
+			}
+
 			TransactionDetailsDTO model;
 
 			try
@@ -78,12 +109,21 @@
 				model = await this.accountsInfoService
 					.GetTransactionDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
-			catch (ArgumentException)
+			catch (UnauthorizedAccessException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedGetTransactionDetails,
+					this.User.Id(),
+					id);
+
 				return this.Unauthorized();
 			}
 			catch (InvalidOperationException)
 			{
+				this.logger.LogWarning(
+					LoggerMessages.GetTransactionDetailsWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
 			}
 
@@ -100,10 +140,23 @@
 		public async Task<IActionResult> GetUserTransactions(UserTransactionsApiInputModel inputModel)
 		{
 			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetUserTransactionsWithInvalidInputData,
+					this.User.Id());
+
 				return this.BadRequest();
+			}
 
 			if (inputModel.Id != this.User.IdToGuid())
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedGetUserTransactions,
+					this.User.Id(),
+					inputModel.Id);
+
 				return this.Unauthorized();
+			}
 
 			var filterDTO = this.mapper.Map<TransactionsFilterDTO>(inputModel);
 			var transactionsDTO = await this.usersService.GetUserTransactionsAsync(filterDTO);

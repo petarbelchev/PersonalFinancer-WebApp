@@ -2,9 +2,11 @@
 {
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.Extensions.Logging;
 	using MongoDB.Bson;
 	using Moq;
 	using NUnit.Framework;
+	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Web.Controllers.Api;
@@ -15,17 +17,20 @@
 	[TestFixture]
 	internal class MessagesApiControllerTests : ControllersUnitTestsBase
 	{
+		private Mock<ILogger<MessagesApiController>> loggerMock;
 		private Mock<IMessagesService> messagesServiceMock;
 		private MessagesApiController apiController;
 
 		[SetUp]
 		public void SetUp()
 		{
+			this.loggerMock = new Mock<ILogger<MessagesApiController>>();
 			this.messagesServiceMock = new Mock<IMessagesService>();
 
 			this.apiController = new MessagesApiController(
 				this.messagesServiceMock.Object,
-				this.usersServiceMock.Object)
+				this.usersServiceMock.Object,
+				this.loggerMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -113,13 +118,20 @@
 					&& y.IsAuthorAdmin == false
 					&& y.MessageId == inputModel.MessageId
 					&& y.AuthorName == userFullName)))
-				.Throws<ArgumentException>();
+				.Throws<UnauthorizedAccessException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnauthorizedReplyAddition,
+				this.userId,
+				inputModel.MessageId);
 
 			//Act
 			var actual = (UnauthorizedResult)await this.apiController.AddReply(inputModel);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status401Unauthorized));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -151,11 +163,18 @@
 					&& y.AuthorName == userFullName)))
 				.Throws<InvalidOperationException>();
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnsuccessfulReplyAddition,
+				this.userId,
+				inputModel.MessageId);
+
 			//Act
 			var actual = (BadRequestResult)await this.apiController.AddReply(inputModel);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -170,11 +189,17 @@
 
 			this.apiController.ModelState.AddModelError("messageId", "invalid id");
 
+			string expectedLogMessage = string.Format(
+				LoggerMessages.AddReplyWithInvalidInputData,
+				this.userId);
+
 			//Act
 			var actual = (BadRequestResult)await this.apiController.AddReply(inputModel);
 
 			//Assert
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -239,10 +264,10 @@
 				Assert.That(value.Messages.ToJson(), Is.EqualTo(messagesDTO.Messages.ToJson()));
 
 				AssertPaginationModelIsEqual(
-					value.Pagination, 
-					"messages", 
-					MessagesPerPage, 
-					messagesDTO.TotalMessagesCount, 
+					value.Pagination,
+					"messages",
+					MessagesPerPage,
+					messagesDTO.TotalMessagesCount,
 					page);
 			});
 		}
@@ -352,14 +377,41 @@
 
 			this.messagesServiceMock
 				.Setup(x => x.MarkMessageAsSeenAsync(messageId, this.userId.ToString(), false))
-				.Throws<InvalidOperationException>();
+				.Throws<ArgumentException>();
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.UnsuccessfulMarkMessageAsSeen,
+				this.userId,
+				messageId);
 
 			//Act
 			var actual = (BadRequestResult)await this.apiController.MarkAsSeen(messageId);
 
 			//Assert
-
 			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
+		}
+
+		[Test]
+		public async Task MarkAsSeen_ShouldReturnBadRequest_WhenTheModelStateIsInvalid()
+		{
+			//Arrange
+			string messageId = "invalid id";
+
+			this.apiController.ModelState.AddModelError("id", "invalid id");
+
+			string expectedLogMessage = string.Format(
+				LoggerMessages.MarkAsSeenWithInvalidInputData,
+				this.userId);
+
+			//Act
+			var actual = (BadRequestResult)await this.apiController.MarkAsSeen(messageId);
+
+			//Assert
+			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 	}
 }
