@@ -24,6 +24,10 @@
 						</footer>
 					</blockquote>
 				</div>
+				@if (Model.ImageToBase64String != null)
+				{
+					<img src="data:image/png;base64,@Model.ImageToBase64String" alt="Image">
+				}
 			</div>
 			<div class="container" id="replies">
 				<p class="display-6 fs-4 text-center mt-2">Replies</p>

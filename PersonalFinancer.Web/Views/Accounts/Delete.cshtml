@@ -5,7 +5,7 @@
 }
 
 <div class="row" style="margin-top: 50px;">
-	<p class="fs-2">You are going to delete your "@Model.Name" account!</p>
+	<p class="fs-2">You are going to delete @(this.User.IsAdmin() ? "user's" : "your") "@Model.Name" account!</p>
 	<p class="fs-2">Are you sure?</p>
 
 	<form method="post">

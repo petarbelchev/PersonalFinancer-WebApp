@@ -15,5 +15,11 @@
         public const string InvalidEmailAddress = "Please enter a valid email address.";
 
         public const string InvalidDate = "Please enter a valid date.";
-    }
+
+		public const string MessageImageConstraints = "must be a JPEG or PNG file with maximum of 200 KB";
+
+		public const string InvalidImageFileType = "Please choose a valid image file (JPEG or PNG).";
+
+		public const string InvalidImageSize = "The image must not exceed 200 KB.";
+	}
 }

@@ -1,6 +1,7 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
 	using AutoMapper;
+	using Microsoft.AspNetCore.Http;
 	using MongoDB.Bson;
 	using MongoDB.Bson.Serialization;
 	using MongoDB.Driver;
@@ -14,6 +15,7 @@
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
 	using System.Linq.Expressions;
+	using System.Text;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	[TestFixture]
@@ -238,15 +240,40 @@
 		}
 
 		[Test]
-		public async Task CreateAsync_ShouldCreateNewMessage()
+		[TestCase("image/jpeg", 0 * 1024)]
+		[TestCase("image/png", 100 * 1024)]
+		[TestCase("image/jpeg", 199 * 1024)]
+		[TestCase("image/png", 200 * 1024)]
+		public async Task CreateAsync_ShouldCreateNewMessageWithImage_WhenTheConstraintsAreMet(string contentType, int byteArrLength)
 		{
 			//Arrange
+			string fakeImageFile = "This is a fake image file.";
+			byte[] fakeByteArr = Encoding.UTF8.GetBytes(fakeImageFile);
+			var formFileMock = new Mock<IFormFile>();
+
+			formFileMock
+				.Setup(x => x.ContentType)
+				.Returns(contentType);
+
+			formFileMock
+				.Setup(x => x.Length)
+				.Returns(byteArrLength);
+
+			formFileMock
+				.Setup(x => x.CopyToAsync(It.IsAny<Stream>(), CancellationToken.None))
+				.Callback((Stream memoryStream, CancellationToken token) =>
+				{
+					using var writer = new StreamWriter(memoryStream);
+					writer.Write(fakeImageFile);
+				});
+
 			var inputModel = new MessageInputDTO
 			{
 				AuthorId = this.FirstUserId,
 				AuthorName = this.FirstUserName,
 				Subject = "New Message Subject",
-				Content = "New Message Content"
+				Content = "New Message Content",
+				Image = formFileMock.Object
 			};
 
 			string expectedNewMessageId = Guid.NewGuid().ToString();
@@ -256,20 +283,104 @@
 					m.AuthorId == inputModel.AuthorId 
 					&& m.AuthorName == inputModel.AuthorName
 					&& m.Subject == inputModel.Subject
-					&& m.Content == inputModel.Content)))
+					&& m.Content == inputModel.Content
+					&& m.Image!.SequenceEqual(fakeByteArr))))
 				.Callback((Message message) => message.Id = expectedNewMessageId);
 
 			//Act
-			MessageOutputDTO actualDTO = await this.messagesService.CreateAsync(inputModel);
+			string newMessageId = await this.messagesService.CreateAsync(inputModel);
 
 			//Assert
-			Assert.Multiple(() =>
+			Assert.That(newMessageId, Is.EqualTo(expectedNewMessageId));
+		}
+
+		[Test]
+		public async Task CreateAsync_ShouldCreateNewMessageWithoutImage_WhenTheImageIsNotProvided()
+		{
+			//Arrange
+			var inputModel = new MessageInputDTO
 			{
-				Assert.That(actualDTO.IsSeen, Is.True);
-				Assert.That(actualDTO.Id, Is.EqualTo(expectedNewMessageId));
-				Assert.That(actualDTO.CreatedOnUtc, Is.Not.EqualTo(default));
-				AssertSamePropertiesValuesAreEqual(actualDTO, inputModel);
-			});
+				AuthorId = this.FirstUserId,
+				AuthorName = this.FirstUserName,
+				Subject = "New Message Subject",
+				Content = "New Message Content",
+				Image = null
+			};
+
+			string expectedNewMessageId = Guid.NewGuid().ToString();
+
+			this.repoMock
+				.Setup(x => x.InsertOneAsync(It.Is<Message>(m =>
+					m.AuthorId == inputModel.AuthorId
+					&& m.AuthorName == inputModel.AuthorName
+					&& m.Subject == inputModel.Subject
+					&& m.Content == inputModel.Content
+					&& m.Image == null)))
+				.Callback((Message message) => message.Id = expectedNewMessageId);
+
+			//Act
+			string newMessageId = await this.messagesService.CreateAsync(inputModel);
+
+			//Assert
+			Assert.That(newMessageId, Is.EqualTo(expectedNewMessageId));
+		}
+
+		[Test]
+		public void CreateAsync_ShouldThrowArgumentException_WhenTheImageFileTypeIsInvalid()
+		{
+			//Arrange
+			string fakeImageFile = "This is a fake image file.";
+			byte[] fakeByteArr = Encoding.UTF8.GetBytes(fakeImageFile);
+			var formFileMock = new Mock<IFormFile>();
+
+			formFileMock
+				.Setup(x => x.ContentType)
+				.Returns("invalid content type");
+
+			var inputModel = new MessageInputDTO
+			{
+				AuthorId = this.FirstUserId,
+				AuthorName = this.FirstUserName,
+				Subject = "New Message Subject",
+				Content = "New Message Content",
+				Image = formFileMock.Object
+			};
+
+			//Act & Assert
+			Assert.That(async () => await this.messagesService.CreateAsync(inputModel), 
+			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ValidationMessages.InvalidImageFileType));
+		}
+
+		[Test]
+		[TestCase(201 * 1024)]
+		[TestCase(1000 * 1024)]
+		public void CreateAsync_ShouldThrowArgumentException_WhenTheImageSizeIsInvalid(int byteArrLength)
+		{
+			//Arrange
+			string fakeImageFile = "This is a fake image file.";
+			byte[] fakeByteArr = Encoding.UTF8.GetBytes(fakeImageFile);
+			var formFileMock = new Mock<IFormFile>();
+
+			formFileMock
+				.Setup(x => x.ContentType)
+				.Returns("image/jpeg");
+
+			formFileMock
+				.Setup(x => x.Length)
+				.Returns(byteArrLength);
+
+			var inputModel = new MessageInputDTO
+			{
+				AuthorId = this.FirstUserId,
+				AuthorName = this.FirstUserName,
+				Subject = "New Message Subject",
+				Content = "New Message Content",
+				Image = formFileMock.Object
+			};
+
+			//Act & Assert
+			Assert.That(async () => await this.messagesService.CreateAsync(inputModel),
+			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ValidationMessages.InvalidImageSize));
 		}
 
 		[Test]
@@ -406,7 +517,8 @@
 							AuthorName = r.AuthorName,
 							CreatedOnUtc = r.CreatedOnUtc,
 							Content = r.Content
-						})
+						}),
+						Image = m.Image
 					}))
 				.ReturnsAsync(expectedMessage);
 
@@ -459,7 +571,8 @@
 							AuthorName = r.AuthorName,
 							CreatedOnUtc = r.CreatedOnUtc,
 							Content = r.Content
-						})
+						}),
+						Image = m.Image
 					}))
 				.ReturnsAsync(message);
 

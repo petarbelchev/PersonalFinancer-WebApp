@@ -157,12 +157,9 @@
 				.ForMember(dest => dest.Subject, opt => opt
 					.MapFrom(src => src.Subject.Trim()))
 				.ForMember(dest => dest.Content, opt => opt
-					.MapFrom(src => src.Content.Trim()));
+					.MapFrom(src => src.Content.Trim()))
+				.ForMember(dest => dest.Image, opt => opt.Ignore());
 
-			this.CreateMap<Message, MessageOutputDTO>()
-				.ForMember(dest => dest.IsSeen, opt => opt
-					.MapFrom(src => src.IsSeenByAuthor));
-			
 			this.CreateMap<ReplyInputDTO, Reply>()
 				.ForMember(dest => dest.Content, opt => opt
 					.MapFrom(src => src.Content.Trim()));

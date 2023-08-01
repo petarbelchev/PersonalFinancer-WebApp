@@ -39,7 +39,7 @@
 		public const string UnsuccessfulMarkMessageAsSeen = "User with ID: \"{0}\", unsuccessfully tried to mark a message as seen with ID: \"{1}\".";
 
 		// Users
-		public const string GetUserDetailsWithInvalidInputData = "Admin with ID: \"{0}\", tried to get an user details with invalid input data.";
+		public const string GetUserDetailsWithInvalidInputData = "Admin with ID: \"{0}\", tried to get a user details with invalid input data.";
 		public const string GetUserTransactionsWithInvalidInputData = "User with ID: \"{0}\", tried to get his transactions with invalid input data.";
 		public const string UnauthorizedGetUserTransactions = "Unauthorized user with ID: \"{0}\", tried to get an user transactions with ID: \"{1}\".";
 

@@ -1,11 +1,11 @@
 ﻿namespace PersonalFinancer.Web.Models.Message
 {
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Services.Messages.Models;
-    using System.ComponentModel.DataAnnotations;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Services.Messages.Models;
+	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.MessageConstants;
 
-    public class MessageDetailsViewModel
+	public class MessageDetailsViewModel
 	{
         public string Id { get; set; } = null!;
 
@@ -28,5 +28,7 @@
 			ErrorMessage = ValidationMessages.InvalidLength)]
 		[Display(Name = "Reply content")]
 		public string ReplyContent { get; set; } = null!;
+
+		public string? ImageToBase64String { get; set; }
 	}
 }

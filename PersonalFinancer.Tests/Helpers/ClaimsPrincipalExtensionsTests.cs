@@ -23,6 +23,49 @@
 		}
 
 		[Test]
+		public void IdToGuid_ShouldReturnCorrectNameIdentifier()
+		{
+			//Assert
+			var expected = Guid.NewGuid();
+			var claim = new Claim(ClaimTypes.NameIdentifier, expected.ToString());
+			var identity = new ClaimsIdentity(new[] { claim });
+			var claimsPrincipal = new ClaimsPrincipal(identity);
+
+			//Act
+			var actual = claimsPrincipal.IdToGuid();
+
+			//Assert
+			Assert.That(actual, Is.EqualTo(expected));
+		}
+
+		[Test]
+		public void IdToGuid_ShouldThrowFormatException_WhenTheNameIdentifierIsInvalidGuid()
+		{
+			//Assert
+			var claim = new Claim(ClaimTypes.NameIdentifier, "Invalid Guid");
+			var identity = new ClaimsIdentity(new[] { claim });
+			var claimsPrincipal = new ClaimsPrincipal(identity);
+
+			//Act
+
+			//Assert
+			Assert.That(() => claimsPrincipal.IdToGuid(), Throws.TypeOf<FormatException>());
+		}
+
+		[Test]
+		public void IdToGuid_ShouldThrowArgumentNullException_WhenTheNameIdentifierIsNull()
+		{
+			//Assert
+			var identity = new ClaimsIdentity();
+			var claimsPrincipal = new ClaimsPrincipal(identity);
+
+			//Act
+
+			//Assert
+			Assert.That(() => claimsPrincipal.IdToGuid(), Throws.TypeOf<ArgumentNullException>());
+		}
+
+		[Test]
 		public void IsAuthenticated_ShouldReturnCorrectData_WhenThePrincipalIsUnauthenticated()
 		{
 			//Assert

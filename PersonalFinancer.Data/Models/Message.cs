@@ -1,8 +1,8 @@
 ﻿namespace PersonalFinancer.Data.Models
 {
-    using PersonalFinancer.Data.Models.Contracts;
+	using PersonalFinancer.Data.Models.Contracts;
 
-    public class Message : BaseMongoDocument
+	public class Message : BaseMongoDocument
     {
 		public Message()
 		{
@@ -28,5 +28,7 @@
 
         public ICollection<Reply> Replies { get; set; }
            = new List<Reply>();
-    }
+
+		public byte[]? Image { get; set; }
+	}
 }

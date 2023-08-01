@@ -100,6 +100,7 @@
 		public void Error_ShouldReturnViewModel()
 		{
 			//Arrange
+			string traceIdentifier = this.controller.ControllerContext.HttpContext.TraceIdentifier;
 
 			//Act
 			var result = (ViewResult)this.controller.Error();
@@ -107,7 +108,7 @@
 
 			//Assert
 			Assert.That(errorViewModel, Is.Not.Null);
-			Assert.That(errorViewModel.RequestId, Is.Not.Null);
+			Assert.That(errorViewModel.RequestId, Is.EqualTo(traceIdentifier));
 		}
 
 		[Test]

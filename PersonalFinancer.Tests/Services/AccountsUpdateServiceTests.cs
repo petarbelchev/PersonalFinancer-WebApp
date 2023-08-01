@@ -66,19 +66,25 @@
 		}
 
 		[Test]
-		public async Task CreateAccountAsync_ShouldAddNewAccountAndInitialBalanceTransaction_WhenInputIsValid()
+		[TestCase(100)]
+		[TestCase(-100)]
+		public async Task CreateAccountAsync_ShouldAddNewAccountAndInitialBalanceTransaction_WhenInputIsValid(decimal balance)
 		{
 			//Arrange
 			var inputModel = new CreateEditAccountInputDTO
 			{
 				Name = "AccountWithNonZeroBalance",
 				AccountTypeId = this.mainTestAccountTypeId,
-				Balance = 100,
+				Balance = balance,
 				CurrencyId = this.mainTestCurrencyId,
 				OwnerId = this.mainTestUserId
 			};
 
 			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
+
+			var expectedTransactionType = balance < 0
+				? TransactionType.Expense
+				: TransactionType.Income;
 
 			//Act
 			Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(inputModel);
@@ -97,7 +103,7 @@
 				Assert.That(newAccount.Transactions, Has.Count.EqualTo(1));
 				Assert.That(initialBalanceTransaction.CategoryId, Is.EqualTo(Guid.Parse(InitialBalanceCategoryId)));
 				Assert.That(initialBalanceTransaction.IsInitialBalance, Is.True);
-				Assert.That(initialBalanceTransaction.TransactionType, Is.EqualTo(TransactionType.Income));
+				Assert.That(initialBalanceTransaction.TransactionType, Is.EqualTo(expectedTransactionType));
 				Assert.That(initialBalanceTransaction.Amount, Is.EqualTo(inputModel.Balance));
 				Assert.That(initialBalanceTransaction.Reference, Is.EqualTo(CategoryInitialBalanceName));
 			});

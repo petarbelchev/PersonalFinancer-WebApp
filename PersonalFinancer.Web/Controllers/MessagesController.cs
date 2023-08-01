@@ -91,14 +91,27 @@
 			if (!this.ModelState.IsValid)
 				return this.View(model);
 
-			MessageOutputDTO messageDTO = await this.messagesService
-				.CreateAsync(new MessageInputDTO
-				{
-					AuthorId = this.User.Id(),
-					AuthorName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
-					Subject = model.Subject,
-					Content = model.Content
-				});
+			var inputDTO = new MessageInputDTO
+			{
+				AuthorId = this.User.Id(),
+				AuthorName = await this.usersService.UserFullNameAsync(this.User.IdToGuid()),
+				Subject = model.Subject,
+				Content = model.Content,
+				Image = model.Image
+			};
+
+			string newMessageId;
+
+			try
+			{
+				newMessageId = await this.messagesService.CreateAsync(inputDTO);
+			}
+			catch (ArgumentException ex)
+			{
+				this.ModelState.AddModelError(nameof(model.Image), ex.Message);
+
+				return this.View(model);
+			}
 
 			IEnumerable<string> adminsIds = await this.usersService.GetAdminsIdsAsync();
 
@@ -110,7 +123,7 @@
 				.Users(adminsIds)
 				.SendAsync("RefreshMessages");
 
-			return this.RedirectToAction(nameof(Details), new { id = messageDTO.Id });
+			return this.RedirectToAction(nameof(Details), new { id = newMessageId });
 		}
 
 		[HttpPost]
@@ -224,7 +237,10 @@
 				return this.BadRequest();
 			}
 
-			MessageDetailsViewModel viewModel = this.mapper.Map<MessageDetailsViewModel>(messageDTO);
+			var viewModel = this.mapper.Map<MessageDetailsViewModel>(messageDTO);
+
+			if (messageDTO.Image?.Length > 0)
+				viewModel.ImageToBase64String = Convert.ToBase64String(messageDTO.Image);
 
 			return this.View(viewModel);
 		}

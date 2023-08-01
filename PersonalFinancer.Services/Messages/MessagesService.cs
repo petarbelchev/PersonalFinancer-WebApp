@@ -1,6 +1,7 @@
 ﻿namespace PersonalFinancer.Services.Messages
 {
 	using AutoMapper;
+	using Microsoft.AspNetCore.Http;
 	using MongoDB.Driver;
 	using MongoDB.Driver.Linq;
 	using PersonalFinancer.Common.Messages;
@@ -53,12 +54,14 @@
 				throw new InvalidOperationException(ExceptionMessages.UnsuccessfulUpdate);
 		}
 
-		public async Task<MessageOutputDTO> CreateAsync(MessageInputDTO model)
+		public async Task<string> CreateAsync(MessageInputDTO model)
 		{
-			Message newMessage = this.mapper.Map<Message>(model);
+			var newMessage = this.mapper.Map<Message>(model);
+			newMessage.Image = await GetImageByteArray(model.Image);
+
 			await this.messagesRepo.InsertOneAsync(newMessage);
 
-			return this.mapper.Map<MessageOutputDTO>(newMessage);
+			return newMessage.Id;
 		}
 
 		public async Task<MessagesDTO> GetAllArchivedMessagesAsync(int page = 1)
@@ -84,7 +87,8 @@
 						AuthorName = r.AuthorName,
 						CreatedOnUtc = r.CreatedOnUtc,
 						Content = r.Content
-					})
+					}),
+					Image = m.Image
 				});
 
 			if (!isUserAdmin && message.AuthorId != userId)
@@ -127,6 +131,27 @@
 		{
 			if (!isUserAdmin && !await this.messagesRepo.IsUserDocumentAuthor(messageId, userId))
 				throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
+		}
+
+		/// <exception cref="ArgumentException">When the image constraints are not met.</exception>
+		private static async Task<byte[]?> GetImageByteArray(IFormFile? formFile)
+		{
+			if (formFile != null)
+			{
+				string[] validImageTypes = { "image/jpeg", "image/png" };
+
+				if (!validImageTypes.Contains(formFile.ContentType))
+					throw new ArgumentException(ValidationMessages.InvalidImageFileType);
+
+				if (formFile.Length > 200 * 1024)
+					throw new ArgumentException(ValidationMessages.InvalidImageSize);
+
+				using var memoryStream = new MemoryStream();
+				await formFile.CopyToAsync(memoryStream);
+				return memoryStream.ToArray();
+			}
+
+			return null;
 		}
 
 		private async Task<MessagesDTO> GetMessagesAsync(

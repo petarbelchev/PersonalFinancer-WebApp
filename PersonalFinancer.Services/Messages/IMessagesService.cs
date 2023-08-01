@@ -12,7 +12,8 @@
 		/// <exception cref="InvalidOperationException">When archiving a message was unsuccessful.</exception>
 		Task ArchiveAsync(string messageId, string userId, bool isUserAdmin);
 
-		Task<MessageOutputDTO> CreateAsync(MessageInputDTO model);
+		/// <exception cref="ArgumentException">When the image constraints are not met.</exception>
+		Task<string> CreateAsync(MessageInputDTO model);
 
 		Task<MessagesDTO> GetAllArchivedMessagesAsync(int page = 1);
 

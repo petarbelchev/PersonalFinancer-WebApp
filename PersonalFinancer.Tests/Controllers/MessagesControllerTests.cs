@@ -4,7 +4,9 @@
 	using Microsoft.AspNetCore.Mvc;
 	using Microsoft.AspNetCore.SignalR;
 	using Microsoft.Extensions.Logging;
+	using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 	using Moq;
+	using Newtonsoft.Json;
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Messages;
@@ -13,6 +15,7 @@
 	using PersonalFinancer.Web.Hubs;
 	using PersonalFinancer.Web.Models.Message;
 	using System.Security.Claims;
+	using System.Text;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[TestFixture]
@@ -236,13 +239,7 @@
 			};
 
 			string userFullName = "User Full Name";
-
-			var expected = new MessageOutputDTO
-			{
-				Id = "new message id",
-				Subject = inputModel.Subject,
-				IsSeen = true,
-			};
+			string expectedId = "new message id";
 
 			this.usersServiceMock
 				.Setup(x => x.UserFullNameAsync(this.userId))
@@ -253,8 +250,9 @@
 					m.Subject == inputModel.Subject
 					&& m.Content == inputModel.Content
 					&& m.AuthorId == this.userId.ToString()
-					&& m.AuthorName == userFullName)))
-				.ReturnsAsync(expected);
+					&& m.AuthorName == userFullName
+					&& m.Image == inputModel.Image)))
+				.ReturnsAsync(expectedId);
 
 			//Act
 			var actual = (RedirectToActionResult)await this.controller.Create(inputModel);
@@ -264,7 +262,46 @@
 			{
 				Assert.That(actual.ActionName, Is.EqualTo("Details"));
 				Assert.That(actual.RouteValues, Is.Not.Null);
-				AssertRouteValueIsEqual(actual.RouteValues!, "id", expected.Id);
+				AssertRouteValueIsEqual(actual.RouteValues!, "id", expectedId);
+			});
+		}
+
+		[Test]
+		public async Task Create_OnPost_ShouldReturnModelWithErrors_WhenTheMessageImageConstraintsAreNotMet()
+		{
+			//Arrange
+			var inputModel = new MessageModel
+			{
+				Subject = "Subject",
+				Content = "Message Valid Content"
+			};
+
+			string userFullName = "User Full Name";
+
+			this.usersServiceMock
+				.Setup(x => x.UserFullNameAsync(this.userId))
+				.ReturnsAsync(userFullName);
+
+			this.messagesServiceMock
+				.Setup(x => x.CreateAsync(It.Is<MessageInputDTO>(m =>
+					m.Subject == inputModel.Subject
+					&& m.Content == inputModel.Content
+					&& m.AuthorId == this.userId.ToString()
+					&& m.AuthorName == userFullName
+					&& m.Image == inputModel.Image)))
+				.Throws(new ArgumentException(ValidationMessages.InvalidImageSize));
+
+			//Act
+			var actual = (ViewResult)await this.controller.Create(inputModel);
+			var viewModel = actual.Model as MessageModel;
+
+			//Assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(viewModel, Is.Not.Null);
+
+				Assert.That(JsonConvert.SerializeObject(viewModel),
+					Is.EqualTo(JsonConvert.SerializeObject(inputModel)));
 			});
 		}
 
@@ -429,7 +466,10 @@
 		}
 
 		[Test]
-		public async Task Details_ShouldReturnViewModel()
+		[TestCase("This is a fake image file.")]
+		[TestCase("")]
+		[TestCase(null)]
+		public async Task Details_ShouldReturnViewModel(string? fakeImageFile)
 		{
 			//Arrange
 			string messageId = "1";
@@ -450,7 +490,8 @@
 						Content = "Admin First Message Reply Content",
 						CreatedOnUtc = DateTime.UtcNow
 					}
-				}
+				},
+				Image = fakeImageFile != null ? Encoding.UTF8.GetBytes(fakeImageFile) : null
 			};
 
 			this.messagesServiceMock
@@ -459,17 +500,12 @@
 
 			//Act
 			var viewResult = (ViewResult)await this.controller.Details(messageId);
+			var viewModel = viewResult.Model as MessageDetailsViewModel;
 
 			//Assert
-			Assert.Multiple(() =>
-			{
-				Assert.That(viewResult, Is.Not.Null);
-
-				MessageDetailsViewModel viewModel = viewResult.Model as MessageDetailsViewModel ??
-					throw new InvalidOperationException($"{nameof(viewResult.Model)} should not be null.");
-
-				AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
-			});
+			Assert.That(viewResult, Is.Not.Null);
+			Assert.That(viewModel, Is.Not.Null);
+			AssertSamePropertiesValuesAreEqual(viewModel, serviceReturnDto);
 		}
 
 		[Test]
