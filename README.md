@@ -1,7 +1,7 @@
 # Personal Financer
 
 ## Link to the App: <a href='https://financer.azurewebsites.net/'><b>financer.azurewebsites.net</b></a>
-You can use user with test data - email: petar@mail.com, password: petar123
+You can use user with test data - email: test.user@mail.com, password: TestUser123!
 
 ## Overview
 Personal Financer is a web application that provides its users with the ability to record their incomes and expenses structured into accounts and transactions.
@@ -26,8 +26,7 @@ I created this project to practice my skills, and it will also serve as my defen
     - Admin Area
     - Partial views
     - Two-factor authentication
-    - Moq
-    - NUnit
+    - NUnit & Moq (329 unit tests with 100% coverage of services and 99% coverage of controllers and helpers)
     - Bootstrap
     - Modal components (for transaction details)
     - HTML5 Canvas
@@ -46,8 +45,8 @@ The Project can be easy tested locally. All you need to do:
 ![Appsettings File](./Screenshots/appsettings-file.png)
 
 When the App is fired up its will seed the database with: 
-- Admin - email: admin@admin.com, password: admin123
-- User with accounts and transactions for easy and fast tests - email: petar@mail.com, password: petar123
+- Admin - email: admin@admin.com, password: Admin123!
+- User with accounts and transactions for easy and fast tests - email: test.user@mail.com, password: TestUser123!
 
 ## Databases
 
