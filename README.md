@@ -15,18 +15,26 @@ I created this project to practice my skills, and it will also serve as my defen
 - ASP.NET Core 6
     - MVC
     - Web API
-    - SendGrid
+    - SignalR (in the messages functionality)
+    - SendGrid (for email confirmation)
     - AutoMapper
-    - Cache in-memory
+    - Cache in-memory (on the create account and transactions pages, loading users dropdown data)
+    - Logger
+    - Custom action filter and attribute (for HTML sanitizing)
+    - Model binders (for decimal and datetime binding)
     - TempData messages
+    - Admin Area
+    - Partial views
     - Moq
     - NUnit
     - Bootstrap
+    - Modal components (for transaction details)
     - HTML5 Canvas
 - JavaScript for AJAX requests and DOM manipulations
 - Entity Framework Core
 - Microsoft SQL Server
 - MongoDB (for Messages)
+- Azure
 
 ## How to Run the Project
 
@@ -34,26 +42,34 @@ The Project can be easy tested locally. All you need to do:
 1. Populate the appsettings.json file with the required configurations;
 2. That's it! Run the App & Enjoy! :)
 
+![Appsettings File](./Screenshots/appsettings-file.png)
+
 When the App is fired up its will seed the Database with: 
 - Admin - email: admin@admin.com, password: admin123
 - User with accounts and transactions for easy and fast tests - email: petar@mail.com, password: petar123
 
-## Database Diagram
+## Databases
 
+The application uses MS SQL database with 6 entities and MongoDB with 2 entities (Message and Reply).
+
+MS SQL Database Diagram:
 ![Database Diagram](./Screenshots/database-diagram.png)
+
+Mongo DB example of saved documents:
+![MongoDB Documents](./Screenshots/mongodb-documents.png)
 
 ## Features
 
 - [Create, edit and delete accounts, account types and currencies](#accounts-with-type-and-currency)
 - [Create, edit and delete transactions and categories](#transactions-with-category)
 - [User Dashboard](#user-dashboard)
-- [All Transactions page](#all-transactions-page)
+- [Transactions page](#all-transactions-page)
 - [Messages](#messages)
 - [User Roles](#user-roles)
 - [Responsive design](#responsive-design)
 
 
-Personal Financer is a website for recording your cash flow and analyzing it.
+Personal Financer is a website for recording your money flow and analyzing it.
 
 ![Welcome Guest Page](./Screenshots/welcome-page.jpeg)
 
@@ -65,25 +81,27 @@ Personal Financer is a website for recording your cash flow and analyzing it.
 
 You can create your own accounts with name, balance, account type and currency.
 
+When you click on 'Create new account type' or 'Create new currency', you can create your own account types like 'Bank account' or 'Savings account', for example, and currencies. If the 'Delete' buttons are clicked, the selected account type or currency will be deleted after confirmation. This feature utilizes AJAX and Web APIs.
+
 ![Create Account Page](./Screenshots/create-account-page.jpeg)
 
-When you click on 'Create New Account Type' or 'Create New Currency', you can create your own account types and currencies. If the 'Delete' buttons are clicked, the selected account type or currency will be deleted after confirmation. This feature utilizes AJAX and Web APIs.
-
-![Create Delete Types](./Screenshots/create-delete-account-type-or-currency.jpeg)
-
-When an account is created, you will be redirected to the new Account Details page. The Personal Financer app automatically creates an Initial Balance Transaction with the amount provided as the Account Balance by you.
+When an account is created, you will be redirected to the new account details page. The Personal Financer app automatically creates an initial balance transaction with the amount provided as the account balance by you.
 
 ![New Account Details Page](./Screenshots/new-account-page.jpeg)
 
-The Details page provides options to Edit and Delete the account, filter transactions for a given period, and display them on separate pages, with 10 transactions per page. The page navigation is handled through AJAX requests and Web APIs on the backend.
+The details page provides options to edit and delete the account (from the three dots dropdown menu), filter transactions for a given period, and display them on separate pages, with 10 transactions per page. The loading of transactions and pages navigation is handled through AJAX requests and Web APIs on the backend.
 
 ![Account Details Page](./Screenshots/account-details-page.jpeg)
 
-On the Edit Account page, you can change the name, balance, account type, and currency of the account. When you change the balance of the account, the app will automatically update the Initial Balance Transaction or create it if the account was initially created with a zero balance. This ensures that all incomes and expenses are adjusted to match the new balance.
+When you click on some transaction a modal window with transaction details shows up.
+
+![Transaction Details Modal](./Screenshots/transaction-details-modal.jpeg)
+
+On the edit account page, you can change the name, balance, account type, and currency of the account. When you change the balance of the account, the app will automatically update the initial balance transaction or create it if the account was initially created with a zero balance. This ensures that all incomes and expenses are adjusted to match the new balance.
 
 ![Edit Account Page](./Screenshots/edit-account-page.jpeg)
 
-If you press 'Delete Account', you will be redirected to confirm your decision. You also have the option to delete all transactions related to the account or leave them to remain in your records.
+On the delete account page, you will need to confirm your decision. You also have the option to delete all transactions related to the account or leave them to remain in your records.
 
 ![Delete Account Confirm Page](./Screenshots/confirm-delete-account-page.jpeg)
 
@@ -91,11 +109,11 @@ If you press 'Delete Account', you will be redirected to confirm your decision. 
 
 ### Transactions with Category
 
-On the Create Transaction page, you can create a transaction with the following details: amount, date, category, account, transaction type, and payment reference. The app provides an option to add and remove categories, utilizing AJAX and Web API.
+On the create transaction page, you can create a transaction with the following details: amount, date, category, account, transaction type, and payment reference. The app provides an option to add and remove categories, utilizing AJAX and Web API.
 
 ![Create Transaction Page](./Screenshots/create-transaction-page.jpeg)
 
-When a transaction is created, you will be redirected to the Transaction Details page. There, the app provides options to edit and delete the transaction.
+When a transaction is created, you will be redirected to the transaction details page. There, the app provides options to edit and delete the transaction.
 
 ![Transaction Details Page](./Screenshots/transaction-details-page.jpeg)
 
@@ -113,40 +131,53 @@ The Dashboard page provides the user with the following information:
 - A section displaying the user's accounts;
 - The last five transactions made from all accounts;
 - Cash flow for the selected period;
-- Expenses structure for the selected period.
+- Expenses structure for the selected period (uses HTML5 Canvas).
 
 ![User Dashboard Page](./Screenshots/user-dashboard-page.jpeg)
 
 [Back to Features <<](#features)
 
-### All transactions page
+### Transactions page
 
-On the All Transactions page, you can manage all of your transactions and filter them by a specific period, for example.
+On the Transactions page, you can manage all of your transactions and filter them by a specific period, account, currency, account type or category, for example. The loading of transactions and pages navigation is handled through AJAX requests and Web APIs on the backend.
 
 ![All Transactions Page](./Screenshots/all-transactions-page.jpeg)
+
+When you click on some transaction a modal window with transaction details shows up.
+
+![Transaction Details Modal](./Screenshots/transactions-page-modal.jpeg)
 
 [Back to Features <<](#features)
 
 ### Messages
 
-Users can write messages to the support team. Every admin can see users messages and reply to them. Messages can be deleted by both users and admins. They are stored in a separate database (MongoDB).
+Users can write messages to the support team. The users also can attach an image to the message. Every admin can see users messages and reply to them. 
+
+The messages functionality uses a SignalR, and all new messages and replies are received in real time by the recipients. They will also receive notifications on the navigation panel and the messages page.
+
+Messages can be archived (only for the user when he archived it or only for the admin when admin archived it) and deleted by both users and admins (will be deleted permanently for everybody). 
+
+The messages are stored in a separate database (MongoDB).
 
 ![Create Message Page](./Screenshots/create-message-page.jpeg)
 
 ![User Messages Page](./Screenshots/user-messages.jpeg)
 
+![User Messages Page](./Screenshots/user-archived-messages.jpeg)
+
 ![Message Details Page](./Screenshots/message-details-page.jpeg)
+
+![Message Details Page](./Screenshots/message-details-page-with-attached-image.jpeg)
 
 [Back to Features <<](#features)
 
 ### User Roles
 
-Personal Financer has two roles - User and Admin.
-Here's what an Admin can do.
+Personal Financer has two roles - User and Admin. Here's what an Admin can do.
 
 ![Admin Home Page](./Screenshots/admin-homepage.jpeg)
 
-An admin can manage all users and their accounts. They can edit and delete accounts and transactions. The administrator has access to information about the number of users and accounts. When the 'More statistics' button on the Home page is pressed, an AJAX request is made to the server to retrieve up-to-date data on the total amount of transactions made by users, grouped by currencies.
+The administrators can manage all users and their accounts. They can edit and delete accounts and transactions, and have access to information about the number of users and accounts. When the 'More statistics' button on the Home page is pressed, an AJAX request is made to the server to retrieve up-to-date data on the total amount of transactions made by users, grouped by currencies.
 
 ![More statistics](./Screenshots/admin-more-statistics.jpeg)
 
