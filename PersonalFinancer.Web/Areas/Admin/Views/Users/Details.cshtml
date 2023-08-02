@@ -45,20 +45,29 @@
 				<h6>Accounts</h6>
 			</div>
 			<div class="row">
-				@foreach (var account in Model.Accounts)
+				@if (Model.Accounts.Any())
 				{
-					<div class="col-md-6 col-sm-12" role="button" onclick="location.href='/Accounts/Details?id=@(account.Id)&returnUrl=/Admin/Users/Details/@(account.OwnerId)'">
-						<div class="card shadow align-items-center m-3">
-							<div class="d-flex flex-row align-items-center mb-2">
-								<div class="p-2">
-									<img src="/icons/icons8-wallet-64.png" style="width: 50px;">
-								</div>
-								<div class="card-body p-2 flex-grow-1">
-									<h5 class="card-title display-6 fs-5"><b>@account.Name</b></h5>
-									<p class="card-text display-6 fs-6">@account.Balance @account.CurrencyName</p>
+					foreach (var account in Model.Accounts)
+					{
+						<div class="col-md-6 col-sm-12" role="button" onclick="location.href='/Accounts/Details?id=@(account.Id)&returnUrl=/Admin/Users/Details/@(account.OwnerId)'">
+							<div class="card shadow align-items-center m-3">
+								<div class="d-flex flex-row align-items-center mb-2">
+									<div class="p-2">
+										<img src="/icons/icons8-wallet-64.png" style="width: 50px;">
+									</div>
+									<div class="card-body p-2 flex-grow-1">
+										<h5 class="card-title display-6 fs-5"><b>@account.Name</b></h5>
+										<p class="card-text display-6 fs-6">@account.Balance @account.CurrencyName</p>
+									</div>
 								</div>
 							</div>
 						</div>
+					}
+				}
+				else
+				{
+					<div class="d-flex justify-content-center">
+						<p>The user doesn't have any created accounts.</p>
 					</div>
 				}
 			</div>

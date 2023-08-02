@@ -34,28 +34,29 @@
 					await userManager.AddToRoleAsync(admin, AdminRoleName);
 			}
 
+			// This is test data, and it's not mandatory.
 			ApplicationUser? testUser = await userManager.FindByEmailAsync(FirstUserEmail);
 
 			if (testUser == null)
 			{
 				testUser = new ApplicationUser
 				{
-					FirstName = "Petar",
-					LastName = "Petrov",
-					Email = "petar@mail.com",
-					NormalizedEmail = "PETAR@MAIL.COM",
-					UserName = "petar",
-					NormalizedUserName = "PETAR2023",
+					FirstName = "Test",
+					LastName = "User",
+					Email = "test.user@mail.com",
+					NormalizedEmail = "TEST.USER@MAIL.COM",
+					UserName = "test-user",
+					NormalizedUserName = "TEST-USER",
 					PhoneNumber = "1234567890",
 					EmailConfirmed = true,
 				};
 
-				IdentityResult creationResult = 
+				IdentityResult creationResult =
 					await userManager.CreateAsync(testUser, FirstUserPassword);
 
 				if (creationResult.Succeeded)
 					await userManager.AddToRoleAsync(testUser, UserRoleName);
-			}			
+			}
 		}
 	}
 }

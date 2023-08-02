@@ -2,11 +2,11 @@
 {
 	public static class SeedConstants
 	{
-		public const string FirstUserEmail = "petar@mail.com";
+		public const string FirstUserEmail = "test.user@mail.com";
 		public const string AdminEmail = "admin@admin.com";
 
-		public const string FirstUserPassword = "petar123";
-		public const string AdminPassword = "admin123";
+		public const string FirstUserPassword = "TestUser123!";
+		public const string AdminPassword = "Admin123!";
 
 		public const string FirstUserCashAccountTypeId = "f4c3803a-7ed5-4d78-9038-7b21bf08a040";
 		public const string FirstUserBankAccountTypeId = "1dfe1780-daed-4198-8360-378aa33c5411";
