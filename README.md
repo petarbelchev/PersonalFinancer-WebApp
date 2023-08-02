@@ -20,11 +20,12 @@ I created this project to practice my skills, and it will also serve as my defen
     - AutoMapper
     - Cache in-memory (on the create account and transactions pages, loading users dropdown data)
     - Logger
-    - Custom action filter and attribute (for HTML sanitizing)
-    - Model binders (for decimal and datetime binding)
+    - Custom Action Filter and Attribute (for HTML sanitizing)
+    - Custom Model Binders (for decimal and datetime binding)
     - TempData messages
     - Admin Area
     - Partial views
+    - Two-factor authentication
     - Moq
     - NUnit
     - Bootstrap
@@ -44,7 +45,7 @@ The Project can be easy tested locally. All you need to do:
 
 ![Appsettings File](./Screenshots/appsettings-file.png)
 
-When the App is fired up its will seed the Database with: 
+When the App is fired up its will seed the database with: 
 - Admin - email: admin@admin.com, password: admin123
 - User with accounts and transactions for easy and fast tests - email: petar@mail.com, password: petar123
 
@@ -66,6 +67,7 @@ Mongo DB example of saved documents:
 - [Transactions page](#all-transactions-page)
 - [Messages](#messages)
 - [User Roles](#user-roles)
+- [User Profile Management](#user-profile-management)
 - [Responsive design](#responsive-design)
 
 
@@ -188,6 +190,12 @@ The administrators can manage all users and their accounts. They can edit and de
 ![All Users Page](./Screenshots/user-details-page.jpeg)
 
 [Back to Features <<](#features)
+
+### User Profile Management
+
+The application requires a unique and confirmed email from users during registration. Users can change their username, first name, last name, phone number, email, and password. If the user desires, they can activate Two-factor authentication.
+
+![All Users Page](./Screenshots/user-profile.jpeg)
 
 ### Responsive design
 
