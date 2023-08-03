@@ -33,13 +33,13 @@
 		};
 
 		private Mock<ActionExecutionDelegate> nextMock;
-		private HtmlSanitizeAsyncActionFilter actionFilter;
+		private HtmlSanitizeActionFilter actionFilter;
 
 		[SetUp]
 		public void SetUp()
 		{
 			this.nextMock = new Mock<ActionExecutionDelegate>();
-			this.actionFilter = new HtmlSanitizeAsyncActionFilter();
+			this.actionFilter = new HtmlSanitizeActionFilter();
 		}
 
 		[Test]

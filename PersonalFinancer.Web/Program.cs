@@ -27,7 +27,7 @@ builder.Services.AddAutoMapper(
     typeof(IAccountsUpdateService).Assembly, 
     typeof(HomeController).Assembly);
 
-builder.Services.ConfigureApplicationCookie(options => options.Cookie.HttpOnly = true);
+builder.ConfigureApplicationCookies();
 
 WebApplication app = builder.Build();
 

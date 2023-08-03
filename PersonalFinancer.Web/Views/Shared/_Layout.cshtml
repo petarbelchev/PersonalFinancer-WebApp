@@ -21,7 +21,7 @@
 				<div class="navbar-collapse d-flex justify-content-between">
 					<div class="navbar-nav">
 						<a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index" title="Dashboard">
-							<img src="/icons/icons8-mortgage-64.png" style="max-height: 40px;" />
+							<img src="/icons/icons8-mortgage-64.png" class="mediumIcon" alt="Icon of house" />
 						</a>
 					</div>
 					<ul class="navbar-nav">
@@ -29,15 +29,19 @@
 						{
 							if (this.User.IsAdmin())
 							{
-								<a class="nav-link text-light" asp-area="Admin" asp-controller="Users" asp-action="Index" title="All Users">
-									<img src="~/icons/icons8-people-64.png" style="max-height: 40px;" />
-								</a>
-								<a class="nav-link text-light" asp-area="Admin" asp-controller="Accounts" asp-action="Index" title="All Accounts">
-									<img src="~/icons/icons8-wallet-64.png" style="max-height: 40px;" />
-								</a>
+								<li>
+									<a class="nav-link text-light" asp-area="Admin" asp-controller="Users" asp-action="Index" title="All Users">
+										<img src="~/icons/icons8-people-64.png" class="mediumIcon" alt="People icon" />
+									</a>
+								</li>
+								<li>
+									<a class="nav-link text-light" asp-area="Admin" asp-controller="Accounts" asp-action="Index" title="All Accounts">
+										<img src="~/icons/icons8-wallet-64.png" class="mediumIcon" alt="Wallet icon" />
+									</a>
+								</li>
 								<li class="nav-item dropdown">
 									<a class="nav-link" id="navpanMessagesBtn" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Messages">
-										<img src="/icons/icons8-speech-bubble-64.png" style="max-height: 40px;" />
+										<img src="/icons/icons8-speech-bubble-64.png" class="mediumIcon" alt="Speech bubble icon" />
 
 										@if (await this.messagesService.HasUnseenMessagesByAdminAsync())
 										{
@@ -54,19 +58,21 @@
 							{
 								<li class="nav-item dropdown">
 									<a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Create">
-										<img src="~/icons/icons8-plus-64.png" style="max-height: 40px;" />
+										<img src="~/icons/icons8-plus-64.png" class="mediumIcon" alt="Plus icon" />
 									</a>
 									<ul class="dropdown-menu dropdown-menu-start">
 										<li class="m-2"><a class="btn btn-link dropdown-item" asp-area="" asp-controller="Transactions" asp-action="Create">Transaction</a></li>
 										<li class="m-2"><a class="btn btn-link dropdown-item" asp-area="" asp-controller="Accounts" asp-action="Create">Account</a></li>
 									</ul>
 								</li>
-								<a class="nav-link" asp-area="" asp-controller="Transactions" asp-action="Index" title="Transactions">
-									<img src="/icons/icons8-transaction-64.png" style="max-height: 40px;" />
-								</a>
+								<li>
+									<a class="nav-link" asp-area="" asp-controller="Transactions" asp-action="Index" title="Transactions">
+										<img src="/icons/icons8-transaction-64.png" class="mediumIcon" alt="Transaction icon" />
+									</a>
+								</li>
 								<li class="nav-item dropdown">
 									<a class="nav-link" id="navpanMessagesBtn" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Contact Us">
-										<img src="/icons/icons8-speech-bubble-64.png" style="max-height: 40px;" />
+										<img src="/icons/icons8-speech-bubble-64.png" class="mediumIcon" alt="Speech bubble icon" />
 
 										@if (await this.messagesService.HasUnseenMessagesByUserAsync(this.User.Id()))
 										{
@@ -87,7 +93,7 @@
 						{
 							<li class="nav-item dropdown">
 								<a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="@User.GetUserUsername()">
-									<img src="~/icons/icons8-test-account-64.png" style="max-height: 40px;" />
+									<img src="~/icons/icons8-test-account-64.png" class="mediumIcon" alt="Person icon" />
 								</a>
 								<ul class="dropdown-menu dropdown-menu-end">
 									<li class="m-2"><a class="btn btn-link dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">Profile</a></li>

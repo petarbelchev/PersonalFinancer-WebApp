@@ -18,7 +18,7 @@ function render(model) {
     for (let transaction of model.transactions) {
         let tr = `
                 <tr role="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop" transactionId="${transaction.id}">
-					<td><img src="${transaction.transactionType == 'Income' ? '/icons/greenArrow.png' : '/icons/redArrow.png'}" style="max-width: 25px;"></td>
+					<td><img src="${transaction.transactionType == 'Income' ? '/icons/greenArrow.png' : '/icons/redArrow.png'}" class="smallIcon" alt="Arrow" /></td>
 				    <td>${new Date(transaction.createdOnLocalTime).toLocaleString('en-US', {
                         year: "numeric",
                         month: "numeric",

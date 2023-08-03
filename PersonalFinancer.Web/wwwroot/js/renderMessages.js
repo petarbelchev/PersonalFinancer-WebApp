@@ -16,7 +16,7 @@ function render(model) {
     for (let message of model.messages) {
         let tr = `
 			<tr role="button" onclick="location.href='/Messages/Details/${message.id}'">
-				<td><img src="/icons/icons8-message-64.png" style="max-width: 30px;" /></td>
+				<td><img src="/icons/icons8-message-64.png" class="smallIcon" alt="Icon of message letter" /></td>
 				<td messageId="${message.id}">
 					<span>${message.subject}</span>
 					${message.isSeen ? '' : '<span class="badge text-bg-danger">New messages</span>' }

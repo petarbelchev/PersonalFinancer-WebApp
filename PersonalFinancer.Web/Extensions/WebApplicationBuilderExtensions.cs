@@ -19,49 +19,6 @@
 
 	public static class WebApplicationBuilderExtensions
 	{
-		public static WebApplicationBuilder ConfigurePersonalFinancerDbContext(this WebApplicationBuilder builder)
-		{
-			string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-			builder.Services.AddDbContext<PersonalFinancerDbContext>(options => options.UseSqlServer(connectionString));
-			builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-			return builder;
-		}
-
-		public static WebApplicationBuilder ConfigureDefaultIdentity(this WebApplicationBuilder builder)
-		{
-			var settings = builder.Configuration
-				.GetSection("DefaultIdentityConfigurationSettings")
-				.Get<DefaultIdentityConfigurationSettings>();
-
-			builder.Services
-				.AddDefaultIdentity<ApplicationUser>(options =>
-				{
-					options.SignIn.RequireConfirmedAccount = settings.RequireConfirmedAccount;
-					options.User.RequireUniqueEmail = settings.RequireUniqueEmail;
-					options.Password.RequireUppercase = settings.RequireUppercase;
-					options.Password.RequireNonAlphanumeric = settings.RequireNonAlphanumeric;
-					options.Password.RequiredLength = UserPasswordMinLength;
-				})
-				.AddRoles<IdentityRole<Guid>>()
-				.AddEntityFrameworkStores<PersonalFinancerDbContext>();
-
-			return builder;
-		}
-
-		public static WebApplicationBuilder ConfigureControllersWithViews(this WebApplicationBuilder builder)
-		{
-			builder.Services
-				.AddControllersWithViews(options =>
-				{
-					options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-					options.Filters.Add(new HtmlSanitizeAsyncActionFilter());
-				})
-				.ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
-
-			return builder;
-		}
-
 		public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
 		{
 			builder.Services
@@ -88,6 +45,72 @@
 				.AddSingleton<IMemoryCache, MemoryCache>()
 
 				.AddTransient<IEmailSender, EmailSender>();
+
+			return builder;
+		}
+
+		public static WebApplicationBuilder ConfigureApplicationCookies(this WebApplicationBuilder builder)
+		{
+			builder.Services.ConfigureApplicationCookie(options =>
+			{
+				options.Cookie.Name = "PersonalFinancerCookie";
+				options.Cookie.HttpOnly = true;
+				options.Cookie.IsEssential = true;
+				options.Cookie.SameSite = SameSiteMode.Strict;
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+			});
+
+			builder.Services.AddAntiforgery(options =>
+			{
+				options.Cookie.Name = "AntiforgeryCookie";
+				options.Cookie.HttpOnly = true;
+				options.Cookie.IsEssential = true;
+				options.Cookie.SameSite = SameSiteMode.Strict;
+				options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+			});
+
+			return builder;
+		}
+
+		public static WebApplicationBuilder ConfigureControllersWithViews(this WebApplicationBuilder builder)
+		{
+			builder.Services
+				.AddControllersWithViews(options =>
+				{
+					options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+					options.Filters.Add(new HtmlSanitizeActionFilter());
+				})
+				.ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true);
+
+			return builder;
+		}
+
+		public static WebApplicationBuilder ConfigureDefaultIdentity(this WebApplicationBuilder builder)
+		{
+			var settings = builder.Configuration
+				.GetSection("DefaultIdentityConfigurationSettings")
+				.Get<DefaultIdentityConfigurationSettings>();
+
+			builder.Services
+				.AddDefaultIdentity<ApplicationUser>(options =>
+				{
+					options.SignIn.RequireConfirmedAccount = settings.RequireConfirmedAccount;
+					options.User.RequireUniqueEmail = settings.RequireUniqueEmail;
+					options.Password.RequireUppercase = settings.RequireUppercase;
+					options.Password.RequireNonAlphanumeric = settings.RequireNonAlphanumeric;
+					options.Password.RequiredLength = UserPasswordMinLength;
+				})
+				.AddRoles<IdentityRole<Guid>>()
+				.AddEntityFrameworkStores<PersonalFinancerDbContext>();
+
+			return builder;
+		}
+
+		public static WebApplicationBuilder ConfigurePersonalFinancerDbContext(this WebApplicationBuilder builder)
+		{
+			string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+			builder.Services.AddDbContext<PersonalFinancerDbContext>(options => options.UseSqlServer(connectionString));
+			builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 			return builder;
 		}

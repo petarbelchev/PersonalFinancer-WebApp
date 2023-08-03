@@ -4,18 +4,17 @@
 	using Microsoft.AspNetCore.Mvc.Filters;
 	using PersonalFinancer.Web.CustomAttributes;
 	using System.Reflection;
-	using System.Threading.Tasks;
 
-	public class HtmlSanitizeAsyncActionFilter : IAsyncActionFilter
+	public class HtmlSanitizeActionFilter : IActionFilter
 	{
-		public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+		public void OnActionExecuting(ActionExecutingContext context)
 		{
 			string[] httpMethodsForSanitize = new string[] { "POST", "PUT", "PATCH" };
 
 			if (httpMethodsForSanitize.Contains(context.HttpContext.Request.Method) == false
 				|| context.ActionDescriptor.FilterDescriptors.Any(f => f.Filter is NoHtmlSanitizingAttribute))
 			{
-				return next();
+				return;
 			}
 
 			var sanitizer = new HtmlSanitizer();
@@ -50,8 +49,8 @@
 					property.SetValue(context.ActionArguments[key], sanitizer.Sanitize(propertyValue));
 				}
 			}
-
-			return next();
 		}
+
+		public void OnActionExecuted(ActionExecutedContext context) { }
 	}
 }

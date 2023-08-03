@@ -1,9 +1,11 @@
 ﻿namespace PersonalFinancer.Web.Hubs
 {
+	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.SignalR;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Messages.Models;
 
+	[Authorize]
 	public class MessageHub : Hub
 	{
 		public async Task JoinGroup(string messageId)

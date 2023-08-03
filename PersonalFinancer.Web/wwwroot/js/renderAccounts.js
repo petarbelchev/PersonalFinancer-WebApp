@@ -1,7 +1,13 @@
 let container = document.getElementById('accounts');
 
 function render(model) {
-    let innerHtml = '';
+	let innerHtml = model.accountsCards.length > 0
+		? ''
+		: `
+			<div class="d-flex justify-content-center">
+				<p>The users doesn't have any created accounts.</p>
+			</div>
+		`;
 
     for (let account of model.accountsCards) {
         let div = `
@@ -9,7 +15,7 @@ function render(model) {
 				<div class="card align-items-center shadow mb-4">
 					<div class="d-flex align-items-center">
 						<div class="p-2">
-							<img src="/icons/icons8-wallet-64.png" style="width: 50px;">
+							<img src="/icons/icons8-wallet-64.png" class="largeIcon" alt="Wallet" />
 						</div>
 						<div class="card-body p-2 flex-grow-1">
 							<h5 class="card-title display-6 fs-5"><b>${account.name}</b></h5>

@@ -3,15 +3,16 @@
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Web.CustomModelBinders;
 	using System.ComponentModel.DataAnnotations;
+	using static PersonalFinancer.Common.Messages.ValidationMessages;
 
 	public class DateFilterModel : IValidatableObject
     {
-        [Required]
+        [Required(ErrorMessage = RequiredProperty)]
         [Display(Name = "From")]
         [ModelBinder(BinderType = typeof(DateTimeModelBinder))]
         public DateTime FromLocalTime { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = RequiredProperty)]
         [Display(Name = "To")]
 		[ModelBinder(BinderType = typeof(DateTimeModelBinder))]
 		public DateTime ToLocalTime { get; set; }

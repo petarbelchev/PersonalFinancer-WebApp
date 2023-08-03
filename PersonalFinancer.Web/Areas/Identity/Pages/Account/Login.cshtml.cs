@@ -70,7 +70,7 @@
 				if (user != null)
 				{
 					var result = await this.signInManager.PasswordSignInAsync(
-						user, this.Input.Password, this.Input.RememberMe, lockoutOnFailure: false);
+						user, this.Input.Password, this.Input.RememberMe, lockoutOnFailure: true);
 
 					if (result.Succeeded)
 					{

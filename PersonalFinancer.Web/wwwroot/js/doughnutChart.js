@@ -6,6 +6,10 @@ function loadChart(currencyIndex) {
 	let categories = [];
 	let amounts = [];
 
+	if (currencies.length == 0) {
+		return;
+    }
+
 	for (let category of currencies[currencyIndex].ExpensesByCategories) {
 		categories.push(category.CategoryName);
 		amounts.push(category.ExpensesAmount.toFixed(2));

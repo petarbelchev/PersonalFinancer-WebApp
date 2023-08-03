@@ -25,7 +25,7 @@
 			this.CreateMap<AccountTransactionsInputModel, AccountTransactionsFilterDTO>();
 
 			this.CreateMap<UserTransactionsApiInputModel, TransactionsFilterDTO>()
-				.ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id));
+				.ForMember(d => d.UserId, opt => opt.MapFrom(s => s.Id));
 
 			this.CreateMap<DateFilterModel, UserDashboardViewModel>();
 			this.CreateMap<UserDashboardDTO, UserDashboardViewModel>();

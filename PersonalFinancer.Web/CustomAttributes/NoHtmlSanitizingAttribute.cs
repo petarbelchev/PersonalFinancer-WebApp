@@ -3,6 +3,5 @@
 	using Microsoft.AspNetCore.Mvc.Filters;
 
 	[AttributeUsage(AttributeTargets.Method)]
-	public class NoHtmlSanitizingAttribute : ActionFilterAttribute
-	{ }
+	public class NoHtmlSanitizingAttribute : ActionFilterAttribute { }
 }

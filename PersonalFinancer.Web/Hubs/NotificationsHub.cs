@@ -1,9 +1,11 @@
 ﻿namespace PersonalFinancer.Web.Hubs
 {
+	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.SignalR;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Users;
 
+	[Authorize]
 	public class NotificationsHub : Hub
 	{
 		private readonly IUsersService usersService;
