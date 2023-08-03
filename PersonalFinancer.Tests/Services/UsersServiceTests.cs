@@ -226,15 +226,19 @@
 				{
 					OwnerAccounts = u.Accounts
 						.Where(a => !a.IsDeleted || a.Transactions.Any())
+						.OrderBy(a => a.Name)
 						.Select(a => this.mapper.Map<DropdownDTO>(a)),
 					OwnerAccountTypes = u.AccountTypes
 						.Where(at => !at.IsDeleted || at.Accounts.Any(a => !a.IsDeleted || a.Transactions.Any()))
+						.OrderBy(at => at.Name)
 						.Select(at => this.mapper.Map<DropdownDTO>(at)),
 					OwnerCurrencies = u.Currencies
 						.Where(c => !c.IsDeleted || c.Accounts.Any(a => !a.IsDeleted || a.Transactions.Any()))
+						.OrderBy(c => c.Name)
 						.Select(c => this.mapper.Map<DropdownDTO>(c)),
 					OwnerCategories = u.Categories
 						.Where(c => !c.IsDeleted || c.Transactions.Any())
+						.OrderBy(c => c.Name)
 						.Select(c => this.mapper.Map<DropdownDTO>(c))
 						.ToList(),
 				})

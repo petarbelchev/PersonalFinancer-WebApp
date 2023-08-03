@@ -32,15 +32,11 @@
 			{ "inputModel", inputModelForSanitize }
 		};
 
-		private Mock<ActionExecutionDelegate> nextMock;
 		private HtmlSanitizeActionFilter actionFilter;
 
 		[SetUp]
-		public void SetUp()
-		{
-			this.nextMock = new Mock<ActionExecutionDelegate>();
-			this.actionFilter = new HtmlSanitizeActionFilter();
-		}
+		public void SetUp() 
+			=> this.actionFilter = new HtmlSanitizeActionFilter();
 
 		[Test]
 		[TestCase("GET")]
@@ -49,7 +45,7 @@
 		[TestCase("CONNECT")]
 		[TestCase("OPTIONS")]
 		[TestCase("TRACE")]
-		public async Task ShouldContinueExecutionWithoutSanitizing_WhenTheContextMethodDoesNotRequireSanitization(string method)
+		public void ShouldContinueExecutionWithoutSanitizing_WhenTheContextMethodDoesNotRequireSanitization(string method)
 		{
 			//Arrange
 			var httpContext = new DefaultHttpContext();
@@ -68,10 +64,9 @@
 				Mock.Of<Controller>());
 
 			//Act
-			await this.actionFilter.OnActionExecutionAsync(context, this.nextMock.Object);
+			this.actionFilter.OnActionExecuting(context);
 
 			//Assert
-			this.nextMock.Verify(x => x(), Times.Once);
 			Assert.That(JsonConvert.SerializeObject(context.ActionArguments),
 				Is.EqualTo(JsonConvert.SerializeObject(this.arguments)));
 		}
@@ -80,7 +75,7 @@
 		[TestCase("POST")]
 		[TestCase("PUT")]
 		[TestCase("PATCH")]
-		public async Task ShouldContinueExecutionWithoutSanitizing_WhenTheActionHaveNoHtmlSanitizingAttribute(string method)
+		public void ShouldContinueExecutionWithoutSanitizing_WhenTheActionHaveNoHtmlSanitizingAttribute(string method)
 		{
 			//Arrange
 			var httpContext = new DefaultHttpContext();
@@ -105,10 +100,9 @@
 				Mock.Of<Controller>());
 
 			//Act
-			await this.actionFilter.OnActionExecutionAsync(context, this.nextMock.Object);
+			this.actionFilter.OnActionExecuting(context);
 
 			//Assert
-			this.nextMock.Verify(x => x(), Times.Once);
 			Assert.That(JsonConvert.SerializeObject(context.ActionArguments), 
 				Is.EqualTo(JsonConvert.SerializeObject(this.arguments)));
 		}
@@ -117,7 +111,7 @@
 		[TestCase("POST")]
 		[TestCase("PUT")]
 		[TestCase("PATCH")]
-		public async Task ShouldSanitizeTheArguments(string method)
+		public void ShouldSanitizeTheArguments(string method)
 		{
 			//Arrange
 			var httpContext = new DefaultHttpContext();
@@ -136,10 +130,9 @@
 				Mock.Of<Controller>());
 
 			//Act
-			await this.actionFilter.OnActionExecutionAsync(context, this.nextMock.Object);
+			this.actionFilter.OnActionExecuting(context);
 
 			//Assert
-			this.nextMock.Verify(x => x(), Times.Once);
 			Assert.Multiple(() =>
 			{
 				Assert.That(context.ActionArguments["forSanitize"], Is.EqualTo(string.Empty));
