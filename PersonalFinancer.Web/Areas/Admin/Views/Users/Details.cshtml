@@ -31,6 +31,10 @@
 							<td>@Model.Email</td>
 						</tr>
 						<tr>
+							<td>Role:</td>
+							<td>@(Model.IsAdmin ? "Admin" : "User")</td>
+						</tr>
+						<tr>
 							<td>Phone Number:</td>
 							<td>@Model.PhoneNumber</td>
 						</tr>
