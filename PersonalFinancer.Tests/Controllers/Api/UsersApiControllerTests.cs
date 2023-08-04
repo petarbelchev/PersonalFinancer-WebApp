@@ -73,6 +73,7 @@
 						FirstName = "First Name",
 						LastName = "Last Name",
 						Email = "email@mail.com",
+						IsAdmin = true
 					},
 					new UserInfoDTO
 					{

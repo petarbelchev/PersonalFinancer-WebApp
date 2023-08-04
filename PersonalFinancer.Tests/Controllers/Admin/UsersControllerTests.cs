@@ -48,6 +48,7 @@
 				FirstName = "User First Name",
 				LastName = "User Last Name",
 				Email = "user@email.com",
+				IsAdmin = true,
 				PhoneNumber = "1234567890",
 				Accounts = new AccountCardDTO[]
 				{
