@@ -2,9 +2,8 @@
 {
 	using Microsoft.EntityFrameworkCore;
 	using PersonalFinancer.Data.Models;
-	using static PersonalFinancer.Common.Constants.SeedConstants;
 
-	public class CurrencySeeder : IUserDataSeeder
+	public class CurrenciesSeeder : IUserDataSeeder
     {
         public async Task SeedAsync(PersonalFinancerDbContext dbContext, ApplicationUser user)
         {
@@ -15,19 +14,19 @@
             {
                 new Currency
                 {
-                    Id = Guid.Parse(FirstUserBGNCurrencyId),
+                    Id = Guid.NewGuid(),
                     Name = "BGN",
                     OwnerId = user.Id,
                 },
                 new Currency
                 {
-                    Id = Guid.Parse(FirstUserEURCurrencyId),
+                    Id = Guid.NewGuid(),
                     Name = "EUR",
                     OwnerId = user.Id,
                 },
                 new Currency
                 {
-                    Id = Guid.Parse(FirstUserUSDCurrencyId),
+                    Id = Guid.NewGuid(),
                     Name = "USD",
                     OwnerId = user.Id,
                 },

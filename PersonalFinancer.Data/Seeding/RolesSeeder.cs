@@ -5,7 +5,7 @@
 	using System.Threading.Tasks;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
-	public static class RoleSeeder
+	public static class RolesSeeder
 	{
 		public static async Task SeedAsync(RoleManager<IdentityRole<Guid>> roleManager)
 		{

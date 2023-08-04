@@ -2,9 +2,8 @@
 {
 	using Microsoft.EntityFrameworkCore;
 	using PersonalFinancer.Data.Models;
-	using static PersonalFinancer.Common.Constants.SeedConstants;
 
-	public class CategorySeeder : IUserDataSeeder
+	public class CategoriesSeeder : IUserDataSeeder
     {
         public async Task SeedAsync(PersonalFinancerDbContext dbContext, ApplicationUser user)
         {
@@ -15,43 +14,43 @@
             {
                 new Category
                 {
-                    Id = Guid.Parse(FoodDrinkCategoryId),
+                    Id = Guid.NewGuid(),
                     Name = "Food & Drink",
                     OwnerId = user.Id,
                 },
                 new Category
                 {
-                    Id = Guid.Parse(UtilitiesCategoryId),
+                    Id = Guid.NewGuid(),
                     Name = "Utilities",
                     OwnerId = user.Id,
                 },
                 new Category
                 {
-                    Id = Guid.Parse(TransportCategoryId),
+                    Id = Guid.NewGuid(),
                     Name = "Transport",
                     OwnerId = user.Id,
                 },
                 new Category
                 {
-                    Id = Guid.Parse(MedicalHealthcareCategoryId),
+                    Id = Guid.NewGuid(),
                     Name = "Medical & Healthcare",
                     OwnerId = user.Id,
                 },
                 new Category
                 {
-                    Id = Guid.Parse(SalaryCategoryId),
+                    Id = Guid.NewGuid(),
                     Name = "Salary",
                     OwnerId = user.Id,
                 },
                 new Category
                 {
-                    Id = Guid.Parse(MoneyTransferCategoryId),
+                    Id = Guid.NewGuid(),
                     Name = "Money Transfer",
                     OwnerId = user.Id,
                 },
                 new Category
                 {
-                    Id = Guid.Parse(DividendsCategoryId),
+                    Id = Guid.NewGuid(),
                     Name = "Dividends",
                     OwnerId = user.Id,
                 },

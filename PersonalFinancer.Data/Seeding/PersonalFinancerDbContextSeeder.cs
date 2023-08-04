@@ -18,25 +18,44 @@
 			UserManager<ApplicationUser> userManager =
 			   serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-			// This seed is mandatory, except for seeding the test user.
-			await RoleSeeder.SeedAsync(roleManager);
-			await UserSeeder.SeedAsync(userManager);
+			// This seed is mandatory, except for seeding the test users.
+			await RolesSeeder.SeedAsync(roleManager);
+			await UsersSeeder.SeedAsync(userManager);
 			await SeedInitialBalanceCategory(dbContext, userManager);
 
-			// This seed is for the test user and is not mandatory.
+			// This seed is for the first test user and is not mandatory.
 			// If you don't have a test user, don't execute this seed.
-			ApplicationUser testUser = await userManager.FindByEmailAsync(FirstUserEmail);
+			ApplicationUser testUser = await userManager.FindByEmailAsync(FirstTestUserEmail);
 			var userDataSeeders = new IUserDataSeeder[]
 			{
-				new AccountTypeSeeder(),
-				new CurrencySeeder(),
-				new AccountSeeder(),
-				new CategorySeeder(),
-				new TransactionSeeder(),
+				new AccountsTypesSeeder(),
+				new CurrenciesSeeder(),
+				new AccountsSeeder(),
+				new CategoriesSeeder(),
+				new TransactionsSeeder(),
 			};
 
 			foreach (IUserDataSeeder seeder in userDataSeeders)
 				await seeder.SeedAsync(dbContext, testUser);
+
+			// This seed is for the rest of the test users and is not mandatory.
+			// If you don't have a test users, don't execute this seed.
+			ApplicationUser[] testUsers = await userManager.Users
+				.Where(u => !u.IsAdmin && !u.Accounts.Any())
+				.ToArrayAsync();
+
+			userDataSeeders = new IUserDataSeeder[]
+			{
+				new AccountsTypesSeeder(),
+				new CurrenciesSeeder(),
+				new AccountsSeeder()
+			};
+
+			foreach (var user in testUsers)
+			{
+				foreach (IUserDataSeeder seeder in userDataSeeders)
+					await seeder.SeedAsync(dbContext, user);
+			}
 		}
 
 		private static async Task SeedInitialBalanceCategory(PersonalFinancerDbContext dbContext, UserManager<ApplicationUser> userManager)
@@ -45,7 +64,7 @@
 
 			if (!await dbContext.Categories.AnyAsync(c => c.Id == initialBalanceCategoryId))
 			{
-				ApplicationUser admin = await userManager.FindByEmailAsync(AdminEmail);
+				ApplicationUser admin = await userManager.FindByEmailAsync(FirstAdminEmail);
 
 				await dbContext.Categories.AddAsync(new Category
 				{

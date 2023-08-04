@@ -2,51 +2,70 @@
 {
 	using Microsoft.EntityFrameworkCore;
 	using PersonalFinancer.Data.Models;
-	using static PersonalFinancer.Common.Constants.SeedConstants;
 
-	public class AccountSeeder : IUserDataSeeder
+	public class AccountsSeeder : IUserDataSeeder
     {
         public async Task SeedAsync(PersonalFinancerDbContext dbContext, ApplicationUser user)
         {
             if (await dbContext.Accounts.AnyAsync(a => a.OwnerId == user.Id))
                 return;
 
-            var accounts = new Account[]
+			Guid[] userAccountTypes = await dbContext.AccountTypes
+				.Where(at => at.OwnerId == user.Id)
+				.OrderBy(at => at.Name)
+				.Select(at => at.Id)
+				.ToArrayAsync();
+
+			Guid bankAccType = userAccountTypes[0];
+			Guid cashAccType = userAccountTypes[1];
+			Guid savingsAccType = userAccountTypes[2];
+
+			Guid[] userCurrencies = await dbContext.Currencies
+				.Where(c => c.OwnerId == user.Id)
+				.OrderBy(c => c.Name)
+				.Select(c => c.Id)
+				.ToArrayAsync();
+
+			Guid bgnId = userCurrencies[0];
+			Guid eurId = userCurrencies[1];
+			Guid usdId = userCurrencies[2];
+
+			var accounts = new Account[]
             {
                 new Account
                 {
-                    Id = Guid.Parse(CashBgnAccountId),
+                    Id = Guid.NewGuid(),
                     Name = "Cash BGN",
                     Balance = 0,
-                    AccountTypeId = Guid.Parse(FirstUserCashAccountTypeId),
-                    CurrencyId = Guid.Parse(FirstUserBGNCurrencyId),
+                    AccountTypeId = cashAccType,
+                    CurrencyId = bgnId,
                     OwnerId = user.Id,
                 },
                 new Account
                 {
-                    Id = Guid.Parse(BankBgnAccountId),
+                    Id = Guid.NewGuid(),
                     Name = "Bank BGN",
                     Balance = 0,
-                    AccountTypeId = Guid.Parse(FirstUserBankAccountTypeId),
-                    CurrencyId = Guid.Parse(FirstUserBGNCurrencyId),
+                    AccountTypeId = bankAccType,
+                    CurrencyId = bgnId,
                     OwnerId = user.Id,
                 },
                 new Account
                 {
-                    Id = Guid.Parse(BankEurAccountId),
+                    Id = Guid.NewGuid(),
                     Name = "Euro Savings",
                     Balance = 0,
-                    AccountTypeId = Guid.Parse(FirstUserSavingAccountTypeId),
-                    CurrencyId = Guid.Parse(FirstUserEURCurrencyId),
+                    AccountTypeId = savingsAccType,
+                    CurrencyId = eurId,
                     OwnerId = user.Id,
                 },
                 new Account
                 {
-                    Id = Guid.Parse(BankUsdAccountId),
+                    Id = Guid.NewGuid(),
                     Name = "Dollar Savings",
                     Balance = 0,
-                    AccountTypeId = Guid.Parse(FirstUserSavingAccountTypeId),
-                    CurrencyId = Guid.Parse(FirstUserUSDCurrencyId),
+                    AccountTypeId = savingsAccType,
+                    CurrencyId = usdId,
                     OwnerId = user.Id,
                 },
             };

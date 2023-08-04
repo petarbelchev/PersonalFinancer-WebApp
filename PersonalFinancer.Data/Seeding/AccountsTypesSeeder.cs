@@ -2,9 +2,8 @@
 {
 	using Microsoft.EntityFrameworkCore;
 	using PersonalFinancer.Data.Models;
-	using static PersonalFinancer.Common.Constants.SeedConstants;
 
-	public class AccountTypeSeeder : IUserDataSeeder
+	public class AccountsTypesSeeder : IUserDataSeeder
     {
         public async Task SeedAsync(PersonalFinancerDbContext dbContext, ApplicationUser user)
         {
@@ -15,19 +14,19 @@
             {
                 new AccountType
                 {
-                    Id = Guid.Parse(FirstUserCashAccountTypeId),
+                    Id = Guid.NewGuid(),
                     Name = "Cash",
                     OwnerId = user.Id,
                 },
                 new AccountType
                 {
-                    Id = Guid.Parse(FirstUserBankAccountTypeId),
+                    Id = Guid.NewGuid(),
                     Name = "Bank",
                     OwnerId = user.Id,
                 },
                 new AccountType
                 {
-                    Id = Guid.Parse(FirstUserSavingAccountTypeId),
+                    Id = Guid.NewGuid(),
                     Name = "Savings",
                     OwnerId = user.Id,
                 },
