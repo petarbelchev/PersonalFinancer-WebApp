@@ -7,12 +7,17 @@
 
     public class UsersAccountsCardsViewModel
 	{
-        public UsersAccountsCardsViewModel(AccountsCardsDTO usersCardsData)
+        public UsersAccountsCardsViewModel(
+			AccountsCardsDTO usersCardsData,
+			int page)
         {
 			this.AccountsCards = usersCardsData.Accounts;
 
 			this.Pagination = new PaginationModel(
-				AccountsName, AccountsPerPage, usersCardsData.TotalAccountsCount);
+				AccountsName, 
+				AccountsPerPage, 
+				usersCardsData.TotalAccountsCount,
+				page);
 		}
 
         public IEnumerable<AccountCardDTO> AccountsCards { get; set; }

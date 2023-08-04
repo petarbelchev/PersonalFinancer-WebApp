@@ -12,8 +12,11 @@
 		{
 			this.Transactions = transactionsDTO.Transactions;
 
-			this.Pagination = new PaginationModel(TransactionsName, TransactionsPerPage, 
-				transactionsDTO.TotalTransactionsCount, page);
+			this.Pagination = new PaginationModel(
+				TransactionsName, 
+				TransactionsPerPage, 
+				transactionsDTO.TotalTransactionsCount, 
+				page);
 		}
 
 		public IEnumerable<TransactionTableDTO> Transactions { get; private set; }

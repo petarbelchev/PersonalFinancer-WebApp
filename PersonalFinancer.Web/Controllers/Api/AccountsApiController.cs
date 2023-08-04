@@ -39,7 +39,7 @@
 		{
 			AccountsCardsDTO usersCardsData =
 				await this.accountsInfoService.GetAccountsCardsDataAsync(page);
-			var usersCardsModel = new UsersAccountsCardsViewModel(usersCardsData);
+			var usersCardsModel = new UsersAccountsCardsViewModel(usersCardsData, page);
 
 			return this.Ok(usersCardsModel);
 		}

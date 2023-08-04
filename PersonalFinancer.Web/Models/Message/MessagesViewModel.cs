@@ -6,12 +6,15 @@
 
 	public class MessagesViewModel
 	{
-        public MessagesViewModel(MessagesDTO messagesDTO, int page = 1)
+        public MessagesViewModel(MessagesDTO messagesDTO, int page)
         {
             this.Messages = messagesDTO.Messages;
 
             this.Pagination = new PaginationModel(
-                MessagesName, MessagesPerPage, messagesDTO.TotalMessagesCount, page);
+                MessagesName, 
+				MessagesPerPage, 
+				messagesDTO.TotalMessagesCount, 
+				page);
         }
 
         public IEnumerable<MessageOutputDTO> Messages { get; set; }

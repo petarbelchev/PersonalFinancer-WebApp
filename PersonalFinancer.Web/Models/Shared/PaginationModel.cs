@@ -6,12 +6,12 @@
 			string elementsName,
 			int elementsPerPage,
 			int totalElements,
-			int page = 1)
+			int page)
 		{
 			this.ElementsName = elementsName;
 			this.ElementsPerPage = elementsPerPage;
-			this.Page = page;
 			this.TotalElements = totalElements;
+			this.Page = page;
 		}
 
 		public string ElementsName { get; private set; }

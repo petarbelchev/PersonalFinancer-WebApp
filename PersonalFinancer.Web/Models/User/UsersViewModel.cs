@@ -11,7 +11,10 @@
 			this.Users = usersInfoDTO.Users;
 
 			this.Pagination = new PaginationModel(
-				UsersName, UsersPerPage, usersInfoDTO.TotalUsersCount, page);
+				UsersName, 
+				UsersPerPage, 
+				usersInfoDTO.TotalUsersCount, 
+				page);
 		}
 
 		public IEnumerable<UserInfoDTO> Users { get; private set; }
