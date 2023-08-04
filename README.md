@@ -1,7 +1,7 @@
 # Personal Financer
 
 ## Link to the App: <a href='https://financer.azurewebsites.net/'><b>financer.azurewebsites.net</b></a>
-You can use user with test data - email: "test.user@mail.com", password: "TestUser123!"
+You can use user with test data - email: "test.user@mail.com", password: "TestUser1!"
 The initial loading of the page may take a little bit more time because of the Azure hosting plan.
 
 ## Overview
@@ -46,8 +46,8 @@ The Project can be easy tested locally. All you need to do:
 ![Appsettings File](./Screenshots/appsettings-file.png)
 
 When the App is fired up its will seed the database with: 
-- Admin - email: "admin@admin.com", password: "Admin123!"
-- User with accounts and transactions for easy and fast tests - email: "test.user@mail.com", password: "TestUser123!"
+- Admin - email: "alfa.admin@admin.com", password: "Admin1!"
+- User with accounts and transactions for easy and fast tests - email: "test.user@mail.com", password: "TestUser1!"
 
 ## Databases
 
