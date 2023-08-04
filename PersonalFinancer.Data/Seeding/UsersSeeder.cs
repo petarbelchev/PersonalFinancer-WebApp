@@ -11,11 +11,11 @@
 	{
 		public static async Task SeedAsync(UserManager<ApplicationUser> userManager)
 		{
-			ApplicationUser? admin = await userManager.FindByEmailAsync(FirstAdminEmail);
+			bool isAdminExist = await userManager.Users.AnyAsync(u => u.IsAdmin);
 
-			if (admin == null)
+			if (!isAdminExist)
 			{
-				admin = new ApplicationUser
+				var admin = new ApplicationUser
 				{
 					FirstName = "Alfa",
 					LastName = "Admin",
