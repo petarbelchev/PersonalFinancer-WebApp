@@ -1,7 +1,8 @@
 # Personal Financer
 
 ## Link to the App: <a href='https://financer.azurewebsites.net/'><b>financer.azurewebsites.net</b></a>
-You can use user with test data - email: "test.user@mail.com", password: "TestUser1!"
+You can use user with test data - email: "test.user@mail.com", password: "TestUser1!".
+
 The initial loading of the page may take a little bit more time because of the Azure hosting plan.
 
 ## Overview
@@ -45,9 +46,10 @@ The Project can be easy tested locally. All you need to do:
 
 ![Appsettings File](./Screenshots/appsettings-file.png)
 
-When the App is fired up its will seed the database with: 
-- Admin - email: "alfa.admin@admin.com", password: "Admin1!"
-- User with accounts and transactions for easy and fast tests - email: "test.user@mail.com", password: "TestUser1!"
+When the App is fired up, its will seed the database with: 
+- Admin - email: "alfa.admin@admin.com", password: "Admin1!";
+- User with accounts and transactions for easy and fast tests - email: "test.user@mail.com", password: "TestUser1!";
+- 13 more users without transactions so that admin pages are not empty.
 
 ## Databases
 
@@ -131,7 +133,7 @@ You can change any data on transactions, including the account. This will automa
 
 The Dashboard page provides the user with the following information:
 - A section displaying the user's accounts;
-- The last five transactions made from all accounts;
+- The last five transactions made from all accounts for the selected period;
 - Cash flow for the selected period;
 - Expenses structure for the selected period (uses HTML5 Canvas).
 
@@ -179,7 +181,11 @@ Personal Financer has two roles - User and Admin. Here's what an Admin can do.
 
 ![Admin Home Page](./Screenshots/admin-homepage.jpeg)
 
-The administrators can manage all users and their accounts. They can edit and delete accounts and transactions, and have access to information about the number of users and accounts. When the 'More statistics' button on the Home page is pressed, an AJAX request is made to the server to retrieve up-to-date data on the total amount of transactions made by users, grouped by currencies.
+The administrators can manage all users and their accounts. They can edit and delete accounts and transactions, and have access to information about the number of users and accounts. 
+
+When the 'More statistics' button on the Home page is pressed, an AJAX request is made to the server to retrieve up-to-date data on the total amount of transactions made by users, grouped by currencies.
+
+Every administrator has access to all users' messages and can reply.
 
 ![More statistics](./Screenshots/admin-more-statistics.jpeg)
 
