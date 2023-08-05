@@ -13,6 +13,7 @@
 	using PersonalFinancer.Web.Models.Message;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
+	using static PersonalFinancer.Common.Constants.HubConstants;
 
 	[Authorize]
 	public class MessagesController : Controller
@@ -117,11 +118,11 @@
 
 			await this.notificationsHub.Clients
 				.Users(adminsIds)
-				.SendAsync("ReceiveNotification");
+				.SendAsync(ReceiveNotificationMethodName);
 
 			await this.allMessagesHub.Clients
 				.Users(adminsIds)
-				.SendAsync("RefreshMessages");
+				.SendAsync(RefreshMessagesMethodName);
 
 			return this.RedirectToAction(nameof(Details), new { id = newMessageId });
 		}
@@ -168,7 +169,7 @@
 
 			await this.allMessagesHub.Clients
 				.Users(ids)
-				.SendAsync("RefreshMessages");
+				.SendAsync(RefreshMessagesMethodName);
 
 			if (this.User.IsAdmin())
 			{
@@ -176,7 +177,7 @@
 				{
 					await this.notificationsHub.Clients
 						.Users(ids)
-						.SendAsync("RemoveNotification");
+						.SendAsync(RemoveNotificationMethodName);
 				}
 			}
 			else
@@ -185,7 +186,7 @@
 				{
 					await this.notificationsHub.Clients
 						.Users(ids)
-						.SendAsync("RemoveNotification");
+						.SendAsync(RemoveNotificationMethodName);
 				}
 			}
 

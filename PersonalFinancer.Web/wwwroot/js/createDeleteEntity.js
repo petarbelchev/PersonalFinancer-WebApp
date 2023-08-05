@@ -39,6 +39,11 @@ async function createEntity() {
     let inputField = newElemInputDiv.querySelector('input');
     let errorMsgField = newElemInputDiv.querySelector('p');
 
+    if (!inputField.value) {
+        errorMsgField.textContent = 'Please enter a name.';
+        return;
+    }
+
     for (let elem of selectTag.children) {
         if (elem.innerText.toLowerCase() == inputField.value.toLowerCase().trim()) {
             errorMsgField.textContent = 'You already have this. Try another one!';

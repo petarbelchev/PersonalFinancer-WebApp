@@ -4,6 +4,7 @@
 	using Microsoft.AspNetCore.SignalR;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Users;
+	using static PersonalFinancer.Common.Constants.HubConstants;
 
 	[Authorize]
 	public class NotificationsHub : Hub
@@ -27,8 +28,13 @@
 				? new List<string>() { authorId }
 				: await this.usersService.GetAdminsIdsAsync();
 
-			await this.Clients.Users(ids).SendAsync("ReceiveNotification");
-			await this.allMessagesHub.Clients.Users(ids).SendAsync("RefreshMessages");
+			await this.Clients
+				.Users(ids)
+				.SendAsync(ReceiveNotificationMethodName);
+
+			await this.allMessagesHub.Clients
+				.Users(ids)
+				.SendAsync(RefreshMessagesMethodName);
 
 			return ResponseMessages.NotificationSuccessfullySend;
 		}

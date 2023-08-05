@@ -7,7 +7,6 @@
 	using PersonalFinancer.Services.Users.Models;
 	using PersonalFinancer.Web.Models.Home;
 	using PersonalFinancer.Web.Models.Shared;
-	using System.Diagnostics;
 
 	public class HomeController : Controller
     {
@@ -35,8 +34,7 @@
                 UserDashboardDTO userDashboardData = await this.usersService
                     .GetUserDashboardDataAsync(this.User.IdToGuid(), fromLocalTime, toLocalTime);
 
-				UserDashboardViewModel viewModel = 
-                    this.mapper.Map<UserDashboardViewModel>(userDashboardData);
+				var viewModel = this.mapper.Map<UserDashboardViewModel>(userDashboardData);
 
                 return this.View(viewModel);
             }
@@ -87,8 +85,6 @@
 
             return this.View(viewModel);
         }
-
-		public void Test() => throw new InvalidOperationException();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

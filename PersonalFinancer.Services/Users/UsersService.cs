@@ -4,6 +4,7 @@
 	using AutoMapper.QueryableExtensions;
 	using Microsoft.EntityFrameworkCore;
 	using Microsoft.Extensions.Caching.Memory;
+	using PersonalFinancer.Common.Constants;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Data.Repositories;
@@ -12,9 +13,6 @@
 	using PersonalFinancer.Services.Users.Models;
 	using System.Collections.Generic;
 	using System.Linq.Expressions;
-	using static PersonalFinancer.Common.Constants.CacheConstants;
-	using static PersonalFinancer.Common.Constants.CategoryConstants;
-	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	public class UsersService : IUsersService
 	{
@@ -51,7 +49,7 @@
 
 		public async Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownsAsync(Guid userId)
 		{
-			string cacheKey = AccountsAndCategoriesKey + userId;
+			string cacheKey = CacheConstants.AccountsAndCategoriesKey + userId;
 
 			if (!this.memoryCache.TryGetValue(cacheKey, out AccountsAndCategoriesDropdownDTO dropdowns))
 			{
@@ -77,7 +75,7 @@
 
 		public async Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownsAsync(Guid userId)
 		{
-			string cacheKey = AccountTypesAndCurrenciesKey + userId;
+			string cacheKey = CacheConstants.AccountTypesAndCurrenciesKey + userId;
 
 			if (!this.memoryCache.TryGetValue(cacheKey, out AccountTypesAndCurrenciesDropdownDTO dropdowns))
 			{
@@ -173,7 +171,7 @@
 				.FirstAsync();
 
 			resultDTO.OwnerCategories.Add(await this.categoriesRepo.All()
-				.Where(c => c.Id == Guid.Parse(InitialBalanceCategoryId))
+				.Where(c => c.Id == Guid.Parse(CategoryConstants.InitialBalanceCategoryId))
 				.ProjectTo<DropdownDTO>(this.mapper.ConfigurationProvider)
 				.FirstAsync());
 
@@ -187,8 +185,8 @@
 				Users = await this.usersRepo.All()
 					.OrderBy(u => u.FirstName)
 					.ThenBy(u => u.LastName)
-					.Skip(UsersPerPage * (page - 1))
-					.Take(UsersPerPage)
+					.Skip(PaginationConstants.UsersPerPage * (page - 1))
+					.Take(PaginationConstants.UsersPerPage)
 					.ProjectTo<UserInfoDTO>(this.mapper.ConfigurationProvider)
 					.ToListAsync(),
 				TotalUsersCount = await this.usersRepo.All().CountAsync()
@@ -210,8 +208,8 @@
 			{
 				Transactions = await query
 					.OrderByDescending(t => t.CreatedOnUtc)
-					.Skip(TransactionsPerPage * (dto.Page - 1))
-					.Take(TransactionsPerPage)
+					.Skip(PaginationConstants.TransactionsPerPage * (dto.Page - 1))
+					.Take(PaginationConstants.TransactionsPerPage)
 					.ProjectTo<TransactionTableDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
 				TotalTransactionsCount = await query.CountAsync()

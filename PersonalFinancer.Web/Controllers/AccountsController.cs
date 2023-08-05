@@ -66,9 +66,7 @@
 			{
 				try
 				{
-					CreateEditAccountInputDTO accountDTO =
-						this.mapper.Map<CreateEditAccountInputDTO>(inputModel);
-
+					var accountDTO = this.mapper.Map<CreateEditAccountInputDTO>(inputModel);
 					Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(accountDTO);
 					this.TempData[ResponseMessages.TempDataKey] = ResponseMessages.CreatedAccount;
 
@@ -222,7 +220,7 @@
 				return this.BadRequest();
 			}
 
-			AccountDetailsViewModel viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
+			var viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
 			viewModel.FromLocalTime = DateTime.Now.AddMonths(-1);
 			viewModel.ToLocalTime = DateTime.Now;
 			viewModel.ReturnUrl = returnUrl;
@@ -261,7 +259,7 @@
 				return this.BadRequest();
 			}
 
-			AccountDetailsViewModel viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
+			var viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
 			this.mapper.Map(inputModel, viewModel);
 
 			return this.View(viewModel);
