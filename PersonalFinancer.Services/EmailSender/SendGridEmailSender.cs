@@ -6,15 +6,18 @@
 	using SendGrid;
 	using SendGrid.Helpers.Mail;
 
-	public class EmailSender : IEmailSender
+	public class SendGridEmailSender : IEmailSender
 	{
+		private readonly ISendGridClient sendGridClient;
 		private readonly AuthEmailSenderOptions options;
-		private readonly ILogger<EmailSender> logger;
+		private readonly ILogger<SendGridEmailSender> logger;
 
-		public EmailSender(
+		public SendGridEmailSender(
+			ISendGridClient sendGridClient,
 			IOptions<AuthEmailSenderOptions> optionsAccessor,
-			ILogger<EmailSender> logger)
+			ILogger<SendGridEmailSender> logger)
 		{
+			this.sendGridClient = sendGridClient;
 			this.options = optionsAccessor.Value;
 			this.logger = logger;
 		}
@@ -27,20 +30,17 @@
 				throw new Exception("Null Message Sender Options");
 			}
 
-			var client = new SendGridClient(this.options.SendGridKey);
-
 			var msg = new SendGridMessage()
 			{
 				From = new EmailAddress(this.options.EmailSender),
 				Subject = subject,
-				PlainTextContent = message,
 				HtmlContent = message
 			};
 
 			msg.AddTo(new EmailAddress(email));
 			msg.SetClickTracking(false, false);
 
-			Response response = await client.SendEmailAsync(msg);
+			Response response = await this.sendGridClient.SendEmailAsync(msg);
 
 			if (response.IsSuccessStatusCode)
 				this.logger.LogInformation("Email to {email} queued successfully!", email);

@@ -15,6 +15,7 @@
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Web.CustomFilters;
+	using SendGrid.Extensions.DependencyInjection;
 	using static PersonalFinancer.Common.Constants.UserConstants;
 
 	public static class WebApplicationBuilderExtensions
@@ -44,7 +45,7 @@
 
 				.AddSingleton<IMemoryCache, MemoryCache>()
 
-				.AddTransient<IEmailSender, EmailSender>();
+				.AddTransient<IEmailSender, SendGridEmailSender>();
 
 			return builder;
 		}
@@ -111,6 +112,15 @@
 			string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 			builder.Services.AddDbContext<PersonalFinancerDbContext>(options => options.UseSqlServer(connectionString));
 			builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+			return builder;
+		}
+
+		public static WebApplicationBuilder ConfigureSendGridEmailSender(this WebApplicationBuilder builder)
+		{
+			builder.Services.Configure<AuthEmailSenderOptions>(builder.Configuration.GetSection("SendGrid"));
+
+			builder.Services.AddSendGrid(options => options.ApiKey = builder.Configuration.GetValue<string>("SendGrid:SendGridKey"));
 
 			return builder;
 		}

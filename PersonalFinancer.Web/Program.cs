@@ -1,6 +1,5 @@
 using PersonalFinancer.Data.Configurations;
 using PersonalFinancer.Services.Accounts;
-using PersonalFinancer.Services.EmailSender;
 using PersonalFinancer.Web.Controllers;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -12,8 +11,7 @@ builder.ConfigurePersonalFinancerDbContext();
 builder.Services.Configure<MongoDbConfigurationSettings>(
     builder.Configuration.GetSection("MongoDbConfigurationSettings"));
 
-builder.Services.Configure<AuthEmailSenderOptions>(
-    builder.Configuration.GetSection("SendGrid"));
+builder.ConfigureSendGridEmailSender();
 
 builder.ConfigureDefaultIdentity();
 
