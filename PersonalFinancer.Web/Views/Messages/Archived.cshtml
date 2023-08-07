@@ -1,16 +1,19 @@
-﻿@using PersonalFinancer.Common.Constants;
+﻿@using Newtonsoft.Json;
+@using PersonalFinancer.Common.Constants;
 @using PersonalFinancer.Web.Models.Message;
-@model MessagesViewModel
 @{
 	ViewData["Title"] = "Archived Messages";
 }
 
-<partial name="_MessagesTablePartial" model="Model" />
+<partial name="_MessagesTablePartial" />
 
 @section Scripts {
 	<script>
 		let params = {
-			url: '@UrlPathConstants.ApiArchivedMessagesEndpoint'
+			url: '@UrlPathConstants.ApiArchivedMessagesEndpoint',
+			body: {
+				search: @Html.Raw(JsonConvert.SerializeObject(ViewBag.Search))
+			}
 		};
 	</script>
 	<script src="~/js/pagination.js"></script>

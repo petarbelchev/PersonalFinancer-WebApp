@@ -7,6 +7,7 @@
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Web.CustomAttributes;
+	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.Message;
 	using System.ComponentModel.DataAnnotations;
 
@@ -81,30 +82,50 @@
 			}			
 		}
 
-		[HttpGet]
-		[Route("all/{page}")]
+		[HttpPost("all")]
+		[NoHtmlSanitizing]
 		[Produces("application/json")]
 		[ProducesResponseType(typeof(MessagesViewModel), StatusCodes.Status200OK)]
-		public async Task<IActionResult> All(int page)
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public async Task<IActionResult> All(SearchFilterInputModel inputModel)
 		{
-			MessagesDTO messagesDTO = this.User.IsAdmin()
-				? await this.messagesService.GetAllMessagesAsync(page)
-				: await this.messagesService.GetUserMessagesAsync(this.User.Id(), page);
+			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetMessagesInfoWithInvalidInputData,
+					this.User.Id());
 
-			return this.Ok(new MessagesViewModel(messagesDTO, page));
+				return this.BadRequest();
+			}
+
+			MessagesDTO messagesDTO = this.User.IsAdmin()
+				? await this.messagesService.GetAllMessagesAsync(inputModel.Page, inputModel.Search)
+				: await this.messagesService.GetUserMessagesAsync(this.User.Id(), inputModel.Page, inputModel.Search);
+
+			return this.Ok(new MessagesViewModel(messagesDTO, inputModel.Page));
 		}
 
-		[HttpGet]
-		[Route("archived/{page}")]
+		[HttpPost("archived")]
+		[NoHtmlSanitizing]
 		[Produces("application/json")]
 		[ProducesResponseType(typeof(MessagesViewModel), StatusCodes.Status200OK)]
-		public async Task<IActionResult> Archived(int page)
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public async Task<IActionResult> Archived(SearchFilterInputModel inputModel)
 		{
-			MessagesDTO messagesDTO = this.User.IsAdmin()
-				? await this.messagesService.GetAllArchivedMessagesAsync(page)
-				: await this.messagesService.GetUserArchivedMessagesAsync(this.User.Id(), page);
+			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetMessagesInfoWithInvalidInputData,
+					this.User.Id());
 
-			return this.Ok(new MessagesViewModel(messagesDTO, page));
+				return this.BadRequest();
+			}
+
+			MessagesDTO messagesDTO = this.User.IsAdmin()
+				? await this.messagesService.GetAllArchivedMessagesAsync(inputModel.Page, inputModel.Search)
+				: await this.messagesService.GetUserArchivedMessagesAsync(this.User.Id(), inputModel.Page, inputModel.Search);
+
+			return this.Ok(new MessagesViewModel(messagesDTO, inputModel.Page));
 		}
 
 		[HttpPatch("{messageId}")]

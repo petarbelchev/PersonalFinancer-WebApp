@@ -3,6 +3,7 @@
 	using AutoMapper.QueryableExtensions;
 	using Microsoft.EntityFrameworkCore;
 	using MongoDB.Bson;
+	using Newtonsoft.Json;
 	using NUnit.Framework;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
@@ -63,25 +64,46 @@
 		}
 
 		[Test]
-		public async Task GetUsersInfoAsync_ShouldReturnCorrectData()
+		[TestCase(1, null)]
+		[TestCase(1, "user0")]
+		[TestCase(1, "User0")]
+		[TestCase(1, "user1")]
+		[TestCase(1, "invalid search")]
+		public async Task GetUsersInfoAsync_ShouldReturnCorrectData(int page, string? search)
 		{
 			//Arrange
+			var query = this.usersRepo.All();
+
+			if (search != null)
+			{
+				string expectedSearch = search.ToLower();
+
+				query = query.Where(u =>
+					u.FirstName.Contains(expectedSearch) ||
+					u.LastName.Contains(expectedSearch) ||
+					u.Email.Contains(expectedSearch) ||
+					u.UserName.Contains(expectedSearch) ||
+					u.PhoneNumber.Contains(expectedSearch));
+			}
+
 			var expected = new UsersInfoDTO
 			{
-				Users = await this.usersRepo.All()
+				Users = await query
 					.OrderBy(u => u.FirstName)
 					.ThenBy(u => u.LastName)
+					.Skip(UsersPerPage * (page - 1))
 					.Take(UsersPerPage)
 					.ProjectTo<UserInfoDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
-				TotalUsersCount = await this.usersRepo.All().CountAsync()
+				TotalUsersCount = await query.CountAsync()
 			};
 
 			//Act
-			UsersInfoDTO actual = await this.usersService.GetUsersInfoAsync(1);
+			UsersInfoDTO actual = await this.usersService.GetUsersInfoAsync(page, search);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]

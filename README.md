@@ -28,7 +28,7 @@ I created this project to practice my skills, and it will also serve as my defen
     - Admin Area
     - Partial views
     - Two-factor authentication
-    - NUnit & Moq (329 unit tests with 100% coverage of services and 99% coverage of controllers and helpers)
+    - NUnit & Moq (365 unit tests with 100% coverage of services and 99% coverage of controllers and helpers)
     - Bootstrap
     - Modal components (for transaction details)
     - HTML5 Canvas

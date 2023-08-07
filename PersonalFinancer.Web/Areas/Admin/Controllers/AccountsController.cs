@@ -20,6 +20,11 @@
             : base(accountsUpdateService, accountsInfoService, usersService, mapper, logger)
         { }
 
-		public IActionResult Index() => this.View();
+		public IActionResult Index(string? search)
+		{
+			this.ViewBag.Search = search;
+
+			return this.View();
+		}
 	}
 }

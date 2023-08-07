@@ -178,18 +178,32 @@
 			return resultDTO;
 		}
 
-		public async Task<UsersInfoDTO> GetUsersInfoAsync(int page)
+		public async Task<UsersInfoDTO> GetUsersInfoAsync(int page, string? search = null)
 		{
+			var query = this.usersRepo.All();
+
+			if (search != null)
+			{
+				search = search.ToLower();
+
+				query = query.Where(u => 
+					u.FirstName.ToLower().Contains(search) ||
+					u.LastName.ToLower().Contains(search) ||
+					u.Email.ToLower().Contains(search) ||
+					u.UserName.ToLower().Contains(search) ||
+					u.PhoneNumber.ToLower().Contains(search));
+			}
+
 			return new UsersInfoDTO
 			{
-				Users = await this.usersRepo.All()
+				Users = await query
 					.OrderBy(u => u.FirstName)
 					.ThenBy(u => u.LastName)
 					.Skip(PaginationConstants.UsersPerPage * (page - 1))
 					.Take(PaginationConstants.UsersPerPage)
 					.ProjectTo<UserInfoDTO>(this.mapper.ConfigurationProvider)
 					.ToListAsync(),
-				TotalUsersCount = await this.usersRepo.All().CountAsync()
+				TotalUsersCount = await query.CountAsync()
 			};
 		}
 

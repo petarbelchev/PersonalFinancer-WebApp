@@ -1,17 +1,20 @@
-﻿@using PersonalFinancer.Common.Constants;
+﻿@using Newtonsoft.Json;
+@using PersonalFinancer.Common.Constants;
 @using PersonalFinancer.Web.Models.Message;
-@model MessagesViewModel
 @{
 	ViewData["Title"] = "Messages";
 }
 
-<partial name="_MessagesTablePartial" model="Model" />
+<partial name="_MessagesTablePartial" />
 
 @section Scripts {
 	<script src="~/js/hubs/allMessagesHub.js"></script>
 	<script>
 		let params = {
-			url: '@UrlPathConstants.ApiAllMessagesEndpoint'
+			url: '@UrlPathConstants.ApiAllMessagesEndpoint',
+			body: {
+				search: @Html.Raw(JsonConvert.SerializeObject(ViewBag.Search))
+			}
 		};
 	</script>
 	<script src="~/js/pagination.js"></script>

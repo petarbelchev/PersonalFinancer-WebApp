@@ -13,6 +13,7 @@
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Web.Controllers.Api;
 	using PersonalFinancer.Web.Models.Account;
+	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
@@ -48,14 +49,18 @@
 		public async Task GetAccounts_ShouldReturnCorrectData(AccountsCardsDTO expected)
 		{
 			//Arrange
-			int page = 1;
+			var inputModel = new SearchFilterInputModel
+			{
+				Page = 1,
+				Search = null
+			};
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountsCardsDataAsync(page))
+				.Setup(x => x.GetAccountsCardsDataAsync(inputModel.Page, inputModel.Search))
 				.ReturnsAsync(expected);
 
 			//Act
-			var actual = (OkObjectResult)await this.apiController.GetAccounts(page);
+			var actual = (OkObjectResult)await this.apiController.GetAccounts(inputModel);
 			var value = actual.Value as UsersAccountsCardsViewModel;
 
 			//Assert
@@ -64,8 +69,29 @@
 			{
 				Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
 				Assert.That(value.AccountsCards, Is.EquivalentTo(expected.Accounts));
-				AssertPaginationModelIsEqual(value.Pagination, "accounts", AccountsPerPage, expected.TotalAccountsCount, page);
+				AssertPaginationModelIsEqual(value.Pagination, "accounts", AccountsPerPage, expected.TotalAccountsCount, inputModel.Page);
 			});
+		}
+
+		[Test]
+		public async Task GetAccounts_ShouldReturnBadRequest_WhenTheModelStateIsInvalid()
+		{
+			//Arrange
+			var inputModel = new SearchFilterInputModel
+			{
+				Page = 0,
+				Search = null
+			};
+
+			this.apiController.ModelState.AddModelError(nameof(inputModel.Page), "Invalid page.");
+			string expectedLogMessage = string.Format(LoggerMessages.GetAccountsInfoWithInvalidInputData, this.userId);
+
+			//Act
+			var actual = (BadRequestResult)await this.apiController.GetAccounts(inputModel);
+
+			//Assert
+			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]

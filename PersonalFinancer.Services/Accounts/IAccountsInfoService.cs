@@ -19,7 +19,7 @@
 		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
 		Task<string> GetAccountNameAsync(Guid accountId, Guid userId, bool isUserAdmin);
 
-		Task<AccountsCardsDTO> GetAccountsCardsDataAsync(int page);
+		Task<AccountsCardsDTO> GetAccountsCardsDataAsync(int page, string? search);
 
 		Task<int> GetAccountsCountAsync();
 

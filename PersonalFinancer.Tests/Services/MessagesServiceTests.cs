@@ -2,11 +2,11 @@
 {
 	using AutoMapper;
 	using Microsoft.AspNetCore.Http;
-	using MongoDB.Bson;
 	using MongoDB.Bson.Serialization;
 	using MongoDB.Driver;
 	using MongoDB.Driver.Linq;
 	using Moq;
+	using Newtonsoft.Json;
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models;
@@ -28,10 +28,10 @@
 		private readonly string SecondUserId = Guid.NewGuid().ToString();
 		private readonly string SecondUserName = "Second User Name";
 
-		private static readonly IBsonSerializer<Message> documentSerializer 
+		private static readonly IBsonSerializer<Message> documentSerializer
 			= BsonSerializer.SerializerRegistry.GetSerializer<Message>();
 
-		private static readonly IBsonSerializerRegistry serializerRegistry 
+		private static readonly IBsonSerializerRegistry serializerRegistry
 			= BsonSerializer.SerializerRegistry;
 
 		private readonly IMapper mapper = new MapperConfiguration(cfg => cfg
@@ -106,7 +106,7 @@
 			Assert.That(actualDefinition, Is.Not.Null);
 			Assert.Multiple(() =>
 			{
-				Assert.That(ValidateUpdateDefinition(actualDefinition, expectedDefinition),
+				Assert.That(ValidateUpdateDefinition(actualDefinition!, expectedDefinition),
 					Is.True);
 
 				AssertSamePropertiesValuesAreEqual(actualReply, expectedReply);
@@ -279,8 +279,8 @@
 			string expectedNewMessageId = Guid.NewGuid().ToString();
 
 			this.repoMock
-				.Setup(x => x.InsertOneAsync(It.Is<Message>(m => 
-					m.AuthorId == inputModel.AuthorId 
+				.Setup(x => x.InsertOneAsync(It.Is<Message>(m =>
+					m.AuthorId == inputModel.AuthorId
 					&& m.AuthorName == inputModel.AuthorName
 					&& m.Subject == inputModel.Subject
 					&& m.Content == inputModel.Content
@@ -347,7 +347,7 @@
 			};
 
 			//Act & Assert
-			Assert.That(async () => await this.messagesService.CreateAsync(inputModel), 
+			Assert.That(async () => await this.messagesService.CreateAsync(inputModel),
 			Throws.TypeOf<ArgumentException>().With.Message.EqualTo(ValidationMessages.InvalidImageFileType));
 		}
 
@@ -384,14 +384,25 @@
 		}
 
 		[Test]
-		public async Task GetAllArchivedMessagesAsync_ShouldReturnCorrectData()
+		[TestCase(1, null)]
+		[TestCase(1, "First User")]
+		[TestCase(1, "first user")]
+		[TestCase(1, "Second User")]
+		[TestCase(1, "second user")]
+		[TestCase(1, "content")]
+		public async Task GetAllArchivedMessagesAsync_ShouldReturnCorrectData(int page, string? search)
 		{
 			//Arrange
 			bool isUserAdmin = true;
-			int page = 1;
+
+			if (search != null)
+				search = search.ToLower();
 
 			IEnumerable<MessageOutputDTO> expectedMessages = this.fakeCollection
-				.Where(m => m.IsArchivedByAdmin)
+				.Where(m => m.IsArchivedByAdmin && (search == null ||
+													m.Subject.ToLower().Contains(search) ||
+													m.Content.ToLower().Contains(search) ||
+													m.AuthorName.ToLower().Contains(search)))
 				.Select(m => new MessageOutputDTO
 				{
 					Id = m.Id,
@@ -399,15 +410,30 @@
 					Subject = m.Subject,
 					IsSeen = m.IsSeenByAdmin
 				})
+				.Skip(MessagesPerPage * (page - 1))
 				.Take(MessagesPerPage);
 
 			int expectedTotalMessages = this.fakeCollection.Count(m => m.IsArchivedByAdmin);
 
 			SortDefinition<Message> expectedSort = Builders<Message>.Sort.Descending("CreatedOnUtc");
 
+			bool archivedMessages = true;
+
 			this.repoMock
-				.Setup(x => x.FindAsync(
-					m => m.IsArchivedByAdmin,
+				.Setup(x => x.FindAsync(m =>
+					(
+						(isUserAdmin && archivedMessages && m.IsArchivedByAdmin) ||
+						(isUserAdmin && !archivedMessages && !m.IsArchivedByAdmin) ||
+						(!isUserAdmin && archivedMessages && m.IsArchivedByAuthor && m.AuthorId == null) ||
+						(!isUserAdmin && !archivedMessages && !m.IsArchivedByAuthor && m.AuthorId == null)
+					)
+					&&
+					(
+						search == null ||
+						m.Subject.ToLower().Contains(search) ||
+						m.Content.ToLower().Contains(search) ||
+						m.AuthorName.ToLower().Contains(search)
+					),
 					It.Is<SortDefinition<Message>>(actualSort => ValidateSortDefinition(actualSort, expectedSort)),
 					m => new MessageOutputDTO
 					{
@@ -420,29 +446,61 @@
 				.ReturnsAsync(expectedMessages);
 
 			this.repoMock
-				.Setup(x => x.CountAsync(m => m.IsArchivedByAdmin))
+				.Setup(x => x.CountAsync(m =>
+					(
+						(isUserAdmin && archivedMessages && m.IsArchivedByAdmin) ||
+						(isUserAdmin && !archivedMessages && !m.IsArchivedByAdmin) ||
+						(!isUserAdmin && archivedMessages && m.IsArchivedByAuthor && m.AuthorId == null) ||
+						(!isUserAdmin && !archivedMessages && !m.IsArchivedByAuthor && m.AuthorId == null)
+					)
+					&&
+					(
+						search == null ||
+						m.Subject.ToLower().Contains(search) ||
+						m.Content.ToLower().Contains(search) ||
+						m.AuthorName.ToLower().Contains(search)
+					)))
 				.ReturnsAsync(expectedTotalMessages);
 
 			//Act
-			MessagesDTO actual = await this.messagesService.GetAllArchivedMessagesAsync(page: 1);
+			MessagesDTO actual = await this.messagesService.GetAllArchivedMessagesAsync(page, search);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(actual.TotalMessagesCount, Is.EqualTo(expectedTotalMessages));
-				Assert.That(actual.Messages.ToJson(), Is.EqualTo(expectedMessages.ToJson()));
+				Assert.That(actual.TotalMessagesCount, 
+					Is.EqualTo(expectedTotalMessages));
+
+				Assert.That(JsonConvert.SerializeObject(actual.Messages), 
+					Is.EqualTo(JsonConvert.SerializeObject(expectedMessages)));
 			});
 		}
 
 		[Test]
-		public async Task GetAllMessagesAsync_ShouldReturnCorrectData()
+		[TestCase(1, null)]
+		[TestCase(1, "First User")]
+		[TestCase(1, "first user")]
+		[TestCase(1, "Second User")]
+		[TestCase(1, "second user")]
+		[TestCase(1, "content")]
+		public async Task GetAllMessagesAsync_ShouldReturnCorrectData(int page, string? search)
 		{
 			//Arrange
-			int page = 1;
 			bool isUserAdmin = true;
 
+			if (search != null)
+				search = search.ToLower();
+
+			bool FilterExpression(Message m)
+			{
+				return !m.IsArchivedByAdmin && (search == null
+												|| m.Subject.ToLower().Contains(search)
+												|| m.Content.ToLower().Contains(search)
+												|| m.AuthorName.ToLower().Contains(search));
+			}
+
 			IEnumerable<MessageOutputDTO> expectedMessages = this.fakeCollection
-				.Where(m => !m.IsArchivedByAdmin)
+				.Where(FilterExpression)
 				.Select(m => new MessageOutputDTO
 				{
 					Id = m.Id,
@@ -454,13 +512,26 @@
 				.Skip(MessagesPerPage * (page - 1))
 				.Take(MessagesPerPage);
 
-			int expectedTotalMessages = this.fakeCollection.Count(m => !m.IsArchivedByAdmin);
+			int expectedTotalMessages = this.fakeCollection.Count(FilterExpression);
 
 			SortDefinition<Message> expectedSort = Builders<Message>.Sort.Descending("CreatedOnUtc");
+			bool archivedMessages = false;
 
 			this.repoMock
-				.Setup(x => x.FindAsync(
-					m => !m.IsArchivedByAdmin,
+				.Setup(x => x.FindAsync(m =>
+					(
+						(isUserAdmin && archivedMessages && m.IsArchivedByAdmin) ||
+						(isUserAdmin && !archivedMessages && !m.IsArchivedByAdmin) ||
+						(!isUserAdmin && archivedMessages && m.IsArchivedByAuthor && m.AuthorId == null) ||
+						(!isUserAdmin && !archivedMessages && !m.IsArchivedByAuthor && m.AuthorId == null)
+					)
+					&&
+					(
+						search == null ||
+						m.Subject.ToLower().Contains(search) ||
+						m.Content.ToLower().Contains(search) ||
+						m.AuthorName.ToLower().Contains(search)
+					),
 					It.Is<SortDefinition<Message>>(actualSort => ValidateSortDefinition(actualSort, expectedSort)),
 					m => new MessageOutputDTO
 					{
@@ -472,18 +543,34 @@
 					page))
 				.ReturnsAsync(expectedMessages);
 
-			this.repoMock.Setup(x => x
-				.CountAsync(m => !m.IsArchivedByAdmin))
+			this.repoMock
+				.Setup(x => x.CountAsync(m =>
+					(
+						(isUserAdmin && archivedMessages && m.IsArchivedByAdmin) ||
+						(isUserAdmin && !archivedMessages && !m.IsArchivedByAdmin) ||
+						(!isUserAdmin && archivedMessages && m.IsArchivedByAuthor && m.AuthorId == null) ||
+						(!isUserAdmin && !archivedMessages && !m.IsArchivedByAuthor && m.AuthorId == null)
+					)
+					&&
+					(
+						search == null ||
+						m.Subject.ToLower().Contains(search) ||
+						m.Content.ToLower().Contains(search) ||
+						m.AuthorName.ToLower().Contains(search)
+					)))
 				.ReturnsAsync(expectedTotalMessages);
 
 			//Act
-			MessagesDTO actual = await this.messagesService.GetAllMessagesAsync();
+			MessagesDTO actual = await this.messagesService.GetAllMessagesAsync(page, search);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(actual.TotalMessagesCount, Is.EqualTo(expectedTotalMessages));
-				Assert.That(actual.Messages.ToJson(), Is.EqualTo(expectedMessages.ToJson()));
+				Assert.That(actual.TotalMessagesCount, 
+					Is.EqualTo(expectedTotalMessages));
+
+				Assert.That(JsonConvert.SerializeObject(actual.Messages), 
+					Is.EqualTo(JsonConvert.SerializeObject(expectedMessages)));
 			});
 		}
 
@@ -539,7 +626,8 @@
 			MessageDetailsDTO actual = await this.messagesService.GetMessageAsync(messageId, currentUserId, isUserAdmin);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expectedMessage.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expectedMessage)));
 		}
 
 		[Test]
@@ -621,15 +709,34 @@
 		}
 
 		[Test]
-		public async Task GetUserArchivedMessagesAsync_ShouldReturnCorrectData()
+		[TestCase(1, null)]
+		[TestCase(1, "First User")]
+		[TestCase(1, "first user")]
+		[TestCase(1, "Second User")]
+		[TestCase(1, "second user")]
+		[TestCase(1, "content")]
+		public async Task GetUserArchivedMessagesAsync_ShouldReturnCorrectData(int page, string? search)
 		{
 			//Arrange
 			string userId = this.FirstUserId;
 			bool isUserAdmin = false;
-			int page = 1;
+
+			if (search != null)
+				search = search.ToLower();
+
+			bool FilterExpression(Message m)
+			{
+				return
+					m.AuthorId == userId &&
+					m.IsArchivedByAuthor &&
+					(search == null ||
+						m.Subject.ToLower().Contains(search) ||
+						m.Content.ToLower().Contains(search) ||
+						m.AuthorName.ToLower().Contains(search));
+			}
 
 			IEnumerable<MessageOutputDTO> expectedMessages = this.fakeCollection
-				.Where(m => m.AuthorId == userId && m.IsArchivedByAuthor)
+				.Where(FilterExpression)
 				.Select(m => new MessageOutputDTO
 				{
 					Id = m.Id,
@@ -641,14 +748,26 @@
 				.Skip(MessagesPerPage * (page - 1))
 				.Take(MessagesPerPage);
 
-			int expectedTotalMessages = this.fakeCollection
-				.Count(m => m.AuthorId == userId && m.IsArchivedByAuthor);
+			int expectedTotalMessages = this.fakeCollection.Count(FilterExpression);
 
 			SortDefinition<Message> expectedSorting = Builders<Message>.Sort.Descending("CreatedOnUtc");
+			bool archivedMessages = true;
 
 			this.repoMock
-				.Setup(x => x.FindAsync(
-					m => m.AuthorId == userId && m.IsArchivedByAuthor,
+				.Setup(x => x.FindAsync(m =>
+					(
+						(isUserAdmin && archivedMessages && m.IsArchivedByAdmin) ||
+						(isUserAdmin && !archivedMessages && !m.IsArchivedByAdmin) ||
+						(!isUserAdmin && archivedMessages && m.IsArchivedByAuthor && m.AuthorId == userId) ||
+						(!isUserAdmin && !archivedMessages && !m.IsArchivedByAuthor && m.AuthorId == userId)
+					)
+					&&
+					(
+						search == null ||
+						m.Subject.ToLower().Contains(search) ||
+						m.Content.ToLower().Contains(search) ||
+						m.AuthorName.ToLower().Contains(search)
+					),
 					It.Is<SortDefinition<Message>>(actualSorting => ValidateSortDefinition(actualSorting, expectedSorting)),
 					m => new MessageOutputDTO
 					{
@@ -661,30 +780,65 @@
 				.ReturnsAsync(expectedMessages);
 
 			this.repoMock
-				.Setup(x => x.CountAsync(m => m.AuthorId == userId && m.IsArchivedByAuthor))
+				.Setup(x => x.CountAsync(m =>
+					(
+						(isUserAdmin && archivedMessages && m.IsArchivedByAdmin) ||
+						(isUserAdmin && !archivedMessages && !m.IsArchivedByAdmin) ||
+						(!isUserAdmin && archivedMessages && m.IsArchivedByAuthor && m.AuthorId == userId) ||
+						(!isUserAdmin && !archivedMessages && !m.IsArchivedByAuthor && m.AuthorId == userId)
+					)
+					&&
+					(
+						search == null ||
+						m.Subject.ToLower().Contains(search) ||
+						m.Content.ToLower().Contains(search) ||
+						m.AuthorName.ToLower().Contains(search)
+					)))
 				.ReturnsAsync(expectedTotalMessages);
 
 			//Act
-			MessagesDTO actual = await this.messagesService.GetUserArchivedMessagesAsync(this.FirstUserId, page);
+			MessagesDTO actual = await this.messagesService.GetUserArchivedMessagesAsync(this.FirstUserId, page, search);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(actual.TotalMessagesCount, Is.EqualTo(expectedTotalMessages));
-				Assert.That(actual.Messages.ToJson(), Is.EqualTo(expectedMessages.ToJson()));
+				Assert.That(actual.TotalMessagesCount, 
+					Is.EqualTo(expectedTotalMessages));
+
+				Assert.That(JsonConvert.SerializeObject(actual.Messages), 
+					Is.EqualTo(JsonConvert.SerializeObject(expectedMessages)));
 			});
 		}
 
 		[Test]
-		public async Task GetUserMessagesAsync_ShouldReturnCorrectData()
+		[TestCase(1, null)]
+		[TestCase(1, "First User")]
+		[TestCase(1, "first user")]
+		[TestCase(1, "Second User")]
+		[TestCase(1, "second user")]
+		[TestCase(1, "content")]
+		public async Task GetUserMessagesAsync_ShouldReturnCorrectData(int page, string? search)
 		{
 			//Arrange
-			int page = 1;
 			bool isUserAdmin = false;
 			string userId = this.FirstUserId;
 
+			if (search != null)
+				search = search.ToLower();
+
+			bool FilterExpression(Message m)
+			{
+				return 
+					m.AuthorId == userId &&
+					!m.IsArchivedByAuthor &&
+					(search == null ||
+						m.Subject.ToLower().Contains(search) ||
+						m.Content.ToLower().Contains(search) ||
+						m.AuthorName.ToLower().Contains(search));
+			}
+
 			IEnumerable<MessageOutputDTO> expectedMessages = this.fakeCollection
-				.Where(m => m.AuthorId == userId && !m.IsArchivedByAuthor)
+				.Where(FilterExpression)
 				.Select(m => new MessageOutputDTO
 				{
 					Id = m.Id,
@@ -696,14 +850,26 @@
 				.Skip(MessagesPerPage * (page - 1))
 				.Take(MessagesPerPage);
 
-			int expectedTotalMessages = this.fakeCollection
-				.Count(m => m.AuthorId == userId && !m.IsArchivedByAuthor);
+			int expectedTotalMessages = this.fakeCollection.Count(FilterExpression);
 
 			SortDefinition<Message> expectedSorting = Builders<Message>.Sort.Descending("CreatedOnUtc");
+			bool archivedMessages = false;
 
 			this.repoMock
-				.Setup(x => x.FindAsync(
-					m => m.AuthorId == userId && !m.IsArchivedByAuthor,
+				.Setup(x => x.FindAsync(m =>
+					(
+						(isUserAdmin && archivedMessages && m.IsArchivedByAdmin) ||
+						(isUserAdmin && !archivedMessages && !m.IsArchivedByAdmin) ||
+						(!isUserAdmin && archivedMessages && m.IsArchivedByAuthor && m.AuthorId == userId) ||
+						(!isUserAdmin && !archivedMessages && !m.IsArchivedByAuthor && m.AuthorId == userId)
+					)
+					&&
+					(
+						search == null ||
+						m.Subject.ToLower().Contains(search) ||
+						m.Content.ToLower().Contains(search) ||
+						m.AuthorName.ToLower().Contains(search)
+					),
 					It.Is<SortDefinition<Message>>(actualSorting => ValidateSortDefinition(actualSorting, expectedSorting)),
 					m => new MessageOutputDTO
 					{
@@ -716,17 +882,33 @@
 				.ReturnsAsync(expectedMessages);
 
 			this.repoMock
-				.Setup(x => x.CountAsync(m => m.AuthorId == userId && !m.IsArchivedByAuthor))
+				.Setup(x => x.CountAsync(m =>
+					(
+						(isUserAdmin && archivedMessages && m.IsArchivedByAdmin) ||
+						(isUserAdmin && !archivedMessages && !m.IsArchivedByAdmin) ||
+						(!isUserAdmin && archivedMessages && m.IsArchivedByAuthor && m.AuthorId == userId) ||
+						(!isUserAdmin && !archivedMessages && !m.IsArchivedByAuthor && m.AuthorId == userId)
+					)
+					&&
+					(
+						search == null ||
+						m.Subject.ToLower().Contains(search) ||
+						m.Content.ToLower().Contains(search) ||
+						m.AuthorName.ToLower().Contains(search)
+					)))
 				.ReturnsAsync(expectedTotalMessages);
 
 			//Act
-			MessagesDTO actualMessages = await this.messagesService.GetUserMessagesAsync(userId);
+			MessagesDTO actualMessages = await this.messagesService.GetUserMessagesAsync(userId, page, search);
 
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(actualMessages.TotalMessagesCount, Is.EqualTo(expectedTotalMessages));
-				Assert.That(actualMessages.Messages.ToJson(), Is.EqualTo(expectedMessages.ToJson()));
+				Assert.That(actualMessages.TotalMessagesCount, 
+					Is.EqualTo(expectedTotalMessages));
+				
+				Assert.That(JsonConvert.SerializeObject(actualMessages.Messages), 
+					Is.EqualTo(JsonConvert.SerializeObject(expectedMessages)));
 			});
 		}
 
@@ -819,7 +1001,7 @@
 			this.repoMock
 				.Setup(x => x.UpdateOneAsync(
 					m => m.Id == messageId && (isUserAdmin || m.AuthorId == userId),
-					It.Is<UpdateDefinition<Message>>(actualDefinition => 
+					It.Is<UpdateDefinition<Message>>(actualDefinition =>
 						ValidateUpdateDefinition(actualDefinition, expectedDefinition))))
 				.ReturnsAsync(this.updateResultMock.Object);
 
@@ -914,7 +1096,6 @@
 					AuthorId = this.FirstUserId,
 					AuthorName = this.FirstUserName,
 					Content = "First User First Message Content",
-					IsSeenByAuthor = false,
 					IsSeenByAdmin = true,
 					Replies = new List<Reply>
 					{
@@ -945,7 +1126,7 @@
 					AuthorId = this.FirstUserId,
 					AuthorName = this.FirstUserName,
 					Content = "First User Third Message Content",
-					IsSeenByAuthor = true,
+					IsSeenByAuthor = false,
 					IsSeenByAdmin = true,
 					IsArchivedByAdmin = true
 				},
@@ -993,12 +1174,13 @@
 			};
 		}
 
-		private static bool ValidateUpdateDefinition(UpdateDefinition<Message> actualUpdate, UpdateDefinition<Message> expectedUpdate)
+		private static bool ValidateUpdateDefinition(UpdateDefinition<Message> actualUpdate, UpdateDefinition<Message> expectedUpdate)	
 		{
 			var actualRendered = actualUpdate.Render(documentSerializer, serializerRegistry);
 			var expectedRendered = expectedUpdate.Render(documentSerializer, serializerRegistry);
 
-			return actualRendered.ToJson().Equals(expectedRendered.ToJson());
+			return JsonConvert.SerializeObject(actualRendered)
+				.Equals(JsonConvert.SerializeObject(expectedRendered));
 		}
 
 		private static bool ValidateSortDefinition(SortDefinition<Message> actualSort, SortDefinition<Message> expectedSort)
@@ -1006,7 +1188,8 @@
 			var actualRendered = actualSort.Render(documentSerializer, serializerRegistry);
 			var expectedRendered = expectedSort.Render(documentSerializer, serializerRegistry);
 
-			return actualRendered.ToJson().Equals(expectedRendered.ToJson());
+			return JsonConvert.SerializeObject(actualRendered)
+				.Equals(JsonConvert.SerializeObject(expectedRendered));
 		}
 	}
 }

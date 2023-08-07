@@ -18,7 +18,7 @@
 
 		Task<UserUsedDropdownsDTO> GetUserUsedDropdownsAsync(Guid userId);
 
-		Task<UsersInfoDTO> GetUsersInfoAsync(int page);
+		Task<UsersInfoDTO> GetUsersInfoAsync(int page, string? search = null);
 
 		Task<TransactionsDTO> GetUserTransactionsAsync(TransactionsFilterDTO dto);
 

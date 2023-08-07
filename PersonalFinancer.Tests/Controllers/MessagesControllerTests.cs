@@ -167,15 +167,22 @@
 		}
 
 		[Test]
-		public void Archived_ShouldReturnView()
+		[TestCase(null)]
+		[TestCase("test")]
+		public void Archived_ShouldReturnView(string? search)
 		{
 			//Arrange
 
 			//Act
-			var viewResult = (ViewResult)this.controller.Archived();
+			var viewResult = (ViewResult)this.controller.Archived(search);
 
 			//Assert
 			Assert.That(viewResult, Is.Not.Null);
+			Assert.Multiple(() =>
+			{
+				Assert.That(viewResult.ViewData.ContainsKey("Search"), Is.True);
+				Assert.That(viewResult.ViewData["Search"], Is.EqualTo(search));
+			});
 		}
 
 		[Test]
@@ -454,15 +461,22 @@
 		}
 
 		[Test]
-		public void Index_ShouldReturnView()
+		[TestCase(null)]
+		[TestCase("test")]
+		public void Index_ShouldReturnView(string? search)
 		{
 			//Arrange
 
 			//Act
-			var viewResult = (ViewResult)this.controller.Index();
+			var viewResult = (ViewResult)this.controller.Index(search);
 
 			//Assert
 			Assert.That(viewResult, Is.Not.Null);
+			Assert.Multiple(() =>
+			{
+				Assert.That(viewResult.ViewData.ContainsKey("Search"), Is.True);
+				Assert.That(viewResult.ViewData["Search"], Is.EqualTo(search));
+			});
 		}
 
 		[Test]

@@ -2,8 +2,11 @@
 {
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
+	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Services.Users.Models;
+	using PersonalFinancer.Web.CustomAttributes;
+	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.User;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
@@ -13,21 +16,38 @@
     public class UsersApiController : ControllerBase
     {
         private readonly IUsersService usersService;
+		private readonly ILogger<UsersApiController> logger;
 
-        public UsersApiController(IUsersService usersService)
-            => this.usersService = usersService;
+        public UsersApiController(
+			IUsersService usersService, 
+			ILogger<UsersApiController> logger)
+		{
+			this.usersService = usersService;
+			this.logger = logger;
+		}
 
-        [HttpGet("{page}")]
-        [Produces("application/json")]
-        [ProducesResponseType(typeof(UsersViewModel), StatusCodes.Status200OK)]
-        public async Task<IActionResult> AllUsers(int page)
-        {
-            UsersInfoDTO usersData =
-                await this.usersService.GetUsersInfoAsync(page);
+		[HttpPost]
+		[NoHtmlSanitizing]
+		[Produces("application/json")]
+		[ProducesResponseType(typeof(UsersViewModel), StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public async Task<IActionResult> Get(SearchFilterInputModel inputModel)
+		{
+			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetUsersInfoWithInvalidInputData,
+					this.User.Id());
 
-            var users = new UsersViewModel(usersData, page);
+				return this.BadRequest();
+			}
 
-            return this.Ok(users);
-        }
-    }
+			UsersInfoDTO usersData =
+				await this.usersService.GetUsersInfoAsync(inputModel.Page, inputModel.Search);
+
+			var users = new UsersViewModel(usersData, inputModel.Page);
+
+			return this.Ok(users);
+		}
+	}
 }

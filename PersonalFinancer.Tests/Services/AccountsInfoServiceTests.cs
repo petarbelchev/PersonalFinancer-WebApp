@@ -2,7 +2,7 @@
 {
 	using AutoMapper.QueryableExtensions;
 	using Microsoft.EntityFrameworkCore;
-	using MongoDB.Bson;
+	using Newtonsoft.Json;
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models;
@@ -31,26 +31,43 @@
 		}
 
 		[Test]
-		public async Task GetAccountsCardsDataAsync_ShouldReturnCorrectData()
+		[TestCase(1, null)]
+		[TestCase(1, "user0")]
+		[TestCase(1, "account0")]
+		[TestCase(1, "Currency0")]
+		[TestCase(1, "currency0")]
+		public async Task GetAccountsCardsDataAsync_ShouldReturnCorrectData(int page, string? search)
 		{
 			//Arrange
+			var query = this.accountsRepo.All().Where(a => !a.IsDeleted);
+
+			if (search != null)
+			{
+				string expectedSearch = search.ToLower();
+
+				query = query.Where(a =>
+					a.Name.ToLower().Contains(expectedSearch) ||
+					a.Currency.Name.ToLower().Contains(expectedSearch) ||
+					a.AccountType.Name.ToLower().Contains(expectedSearch));
+			}
+
 			var expected = new AccountsCardsDTO
 			{
-				Accounts = await this.accountsRepo.All()
-					.Where(a => !a.IsDeleted)
+				Accounts = await query
 					.OrderBy(a => a.Name)
+					.Skip(AccountsPerPage * (page - 1))
 					.Take(AccountsPerPage)
 					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
-				TotalAccountsCount = await this.accountsRepo.All()
-					.CountAsync(a => !a.IsDeleted)
+				TotalAccountsCount = await query.CountAsync()
 			};
 
 			//Act
-			AccountsCardsDTO actual = await this.accountsInfoService.GetAccountsCardsDataAsync(page: 1);
+			AccountsCardsDTO actual = await this.accountsInfoService.GetAccountsCardsDataAsync(page, search);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
@@ -67,7 +84,8 @@
 				expected.Id, expected.OwnerId, isUserAdmin: false);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
@@ -112,7 +130,8 @@
 				.GetAccountFormDataAsync(testAccount.Id, currentUserId, isUserAdmin);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
@@ -233,7 +252,8 @@
 			TransactionsDTO actual = await this.accountsInfoService.GetAccountTransactionsAsync(filterDto);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
@@ -279,7 +299,8 @@
 				await this.accountsInfoService.GetCashFlowByCurrenciesAsync();
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
@@ -300,7 +321,8 @@
 				.GetTransactionDetailsAsync(testTransaction.Id, currentUserId, isUserAdmin);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
@@ -344,7 +366,8 @@
 				.GetTransactionFormDataAsync(testTransaction.Id, testTransaction.OwnerId, isUserAdmin: false);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]

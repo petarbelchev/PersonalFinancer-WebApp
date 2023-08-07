@@ -3,6 +3,18 @@ let container = document.querySelector('tbody');
 function render(model) {
     let innerHtml = '';
 
+    if (model.users.length == 0) {
+        innerHtml = `
+            <tr>
+                <td colspan="5">
+                    <div class="d-flex justify-content-center">
+                        <p>There are no users matching the specified criteria.</p>
+                    </div>
+                </td>
+            </tr>
+		`;
+    }
+
     for (let user of model.users) {
         let role = user.isAdmin ? 'Admin' : 'User';
 

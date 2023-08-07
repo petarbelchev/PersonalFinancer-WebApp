@@ -66,19 +66,29 @@
 				: throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 		}
 
-		public async Task<AccountsCardsDTO> GetAccountsCardsDataAsync(int page)
+		public async Task<AccountsCardsDTO> GetAccountsCardsDataAsync(int page, string? search)
 		{
+			var query = this.accountsRepo.All().Where(a => !a.IsDeleted);
+
+			if (search != null)
+			{
+				search = search.ToLower();
+
+				query = query.Where(a => 
+					a.Name.ToLower().Contains(search) ||
+					a.Currency.Name.ToLower().Contains(search) ||
+					a.AccountType.Name.ToLower().Contains(search));
+			}
+
 			return new AccountsCardsDTO
 			{
-				Accounts = await this.accountsRepo.All()
-					.Where(a => !a.IsDeleted)
+				Accounts = await query
 					.OrderBy(a => a.Name)
 					.Skip(AccountsPerPage * (page - 1))
 					.Take(AccountsPerPage)
 					.ProjectTo<AccountCardDTO>(this.mapper.ConfigurationProvider)
 					.ToArrayAsync(),
-				TotalAccountsCount = await this.accountsRepo.All()
-					.CountAsync(a => !a.IsDeleted)
+				TotalAccountsCount = await query.CountAsync()
 			};
 		}
 

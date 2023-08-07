@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Areas\Admin\Views\Shared\**" />
-    <Content Remove="Areas\Admin\Views\Shared\**" />
-    <EmbeddedResource Remove="Areas\Admin\Views\Shared\**" />
-    <None Remove="Areas\Admin\Views\Shared\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <_ContentIncludedByDefault Remove="appsettings.json" />
     <_ContentIncludedByDefault Remove="wwwroot\js\qr.js" />
   </ItemGroup>

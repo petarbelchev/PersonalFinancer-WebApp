@@ -2,10 +2,13 @@
 {
 	using Microsoft.AspNetCore.Http;
 	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.Extensions.Logging;
 	using Moq;
 	using NUnit.Framework;
+	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Users.Models;
 	using PersonalFinancer.Web.Controllers.Api;
+	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.User;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
@@ -13,11 +16,14 @@
 	internal class UsersApiControllerTests : ControllersUnitTestsBase
 	{
 		private UsersApiController apiController;
+		private Mock<ILogger<UsersApiController>> loggerMock;
 		
 		[SetUp]
 		public void SetUp()
 		{
-			this.apiController = new UsersApiController(this.usersServiceMock.Object)
+			this.loggerMock = new Mock<ILogger<UsersApiController>>();
+
+			this.apiController = new UsersApiController(this.usersServiceMock.Object, this.loggerMock.Object)
 			{
 				ControllerContext = new ControllerContext
 				{
@@ -31,17 +37,21 @@
 
 		[Test]
 		[TestCaseSource(nameof(GetTestUsersInfoDTOs))]
-		public async Task AllUsers_ShouldReturnCorrectData(UsersInfoDTO expected)
+		public async Task Get_ShouldReturnCorrectData(UsersInfoDTO expected)
 		{
 			//Arrange
-			int page = 1;
+			var inputModel = new SearchFilterInputModel
+			{
+				Page = 1,
+				Search = null
+			};
 
 			this.usersServiceMock
-				.Setup(x => x.GetUsersInfoAsync(page))
+				.Setup(x => x.GetUsersInfoAsync(inputModel.Page, inputModel.Search))
 				.ReturnsAsync(expected);
 
 			//Act
-			var actual = (OkObjectResult)await this.apiController.AllUsers(page);
+			var actual = (OkObjectResult)await this.apiController.Get(inputModel);
 			var value = actual.Value as UsersViewModel;
 
 			//Assert
@@ -56,8 +66,29 @@
 					"users", 
 					UsersPerPage, 
 					expected.TotalUsersCount, 
-					page);
+					inputModel.Page);
 			});
+		}
+
+		[Test]
+		public async Task Get_ShouldReturnBadRequest_WhenTheModelStateIsInvalid()
+		{
+			//Arrange
+			var inputModel = new SearchFilterInputModel
+			{
+				Page = 0,
+				Search = null
+			};
+
+			this.apiController.ModelState.AddModelError(nameof(inputModel.Page), "Invalid page.");
+			string expectedLogMessage = string.Format(LoggerMessages.GetUsersInfoWithInvalidInputData, this.userId);
+
+			//Act
+			var actual = (BadRequestResult)await this.apiController.Get(inputModel);
+
+			//Assert
+			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		private static IEnumerable<UsersInfoDTO> GetTestUsersInfoDTOs()

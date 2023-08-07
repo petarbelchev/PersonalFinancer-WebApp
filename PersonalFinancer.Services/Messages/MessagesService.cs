@@ -64,11 +64,21 @@
 			return newMessage.Id;
 		}
 
-		public async Task<MessagesDTO> GetAllArchivedMessagesAsync(int page = 1)
-			=> await this.GetMessagesAsync(m => m.IsArchivedByAdmin, page, isUserAdmin: true);
+		public async Task<MessagesDTO> GetAllArchivedMessagesAsync(int page, string? search)
+		{
+			Expression<Func<Message, bool>> filterExpression = 
+				GetMessagesFilterExpression(isUserAdmin: true, archivedMessages: true, search);
 
-		public async Task<MessagesDTO> GetAllMessagesAsync(int page = 1)
-			=> await this.GetMessagesAsync(m => !m.IsArchivedByAdmin, page, isUserAdmin: true);
+			return await this.GetMessagesAsync(filterExpression, page, isUserAdmin: true);
+		}
+
+		public async Task<MessagesDTO> GetAllMessagesAsync(int page, string? search)
+		{
+			Expression<Func<Message, bool>> filterExpression =
+				GetMessagesFilterExpression(isUserAdmin: true, archivedMessages: false, search);
+
+			return await this.GetMessagesAsync(filterExpression, page, isUserAdmin: true);
+		}
 
 		public async Task<MessageDetailsDTO> GetMessageAsync(string messageId, string userId, bool isUserAdmin)
 		{
@@ -102,11 +112,21 @@
 		public async Task<string> GetMessageAuthorIdAsync(string messageId)
 			=> await this.messagesRepo.FindOneAsync(m => m.Id == messageId, m => m.AuthorId);
 
-		public async Task<MessagesDTO> GetUserArchivedMessagesAsync(string userId, int page = 1)
-			=> await this.GetMessagesAsync(m => m.AuthorId == userId && m.IsArchivedByAuthor, page, isUserAdmin: false);
+		public async Task<MessagesDTO> GetUserArchivedMessagesAsync(string userId, int page, string? search)
+		{
+			Expression<Func<Message, bool>> filterExpression =
+				GetMessagesFilterExpression(isUserAdmin: false, archivedMessages: true, search, userId);
 
-		public async Task<MessagesDTO> GetUserMessagesAsync(string userId, int page = 1)
-			=> await this.GetMessagesAsync(m => m.AuthorId == userId && !m.IsArchivedByAuthor, page, isUserAdmin: false);
+			return await this.GetMessagesAsync(filterExpression, page, isUserAdmin: false);
+		}
+
+		public async Task<MessagesDTO> GetUserMessagesAsync(string userId, int page, string? search)
+		{
+			Expression<Func<Message, bool>> filterExpression =
+				GetMessagesFilterExpression(isUserAdmin: false, archivedMessages: false, search, userId);
+
+			return await this.GetMessagesAsync(filterExpression, page, isUserAdmin: false);
+		}
 
 		public async Task<bool> HasUnseenMessagesByAdminAsync()
 			=> await this.messagesRepo.AnyAsync(m => !m.IsSeenByAdmin);
@@ -179,14 +199,41 @@
 			return messages;
 		}
 
+		private static Expression<Func<Message, bool>> GetMessagesFilterExpression(
+			bool isUserAdmin, 
+			bool archivedMessages, 
+			string? search, 
+			string? userId = null)
+		{
+			if (search != null)
+				search = search.ToLower();
+
+			Expression<Func<Message, bool>> expression = (m) =>
+				(
+					(isUserAdmin && archivedMessages && m.IsArchivedByAdmin) ||
+					(isUserAdmin && !archivedMessages && !m.IsArchivedByAdmin) ||
+					(!isUserAdmin && archivedMessages && m.IsArchivedByAuthor && m.AuthorId == userId) ||
+					(!isUserAdmin && !archivedMessages && !m.IsArchivedByAuthor && m.AuthorId == userId)
+				)
+				&&
+				(
+					search == null ||
+					m.Subject.ToLower().Contains(search) ||
+					m.Content.ToLower().Contains(search) ||
+					m.AuthorName.ToLower().Contains(search)
+				);
+
+			return expression;
+		}
+
 		/// <exception cref="ArgumentException">When the update was unsuccessful.</exception>
 		private async Task MarkAsSeenAsync(string messageId, string userId, bool isUserAdmin)
 		{
 			UpdateDefinition<Message> updateDefinition = Builders<Message>.Update
 				.Set(x => isUserAdmin ? x.IsSeenByAdmin : x.IsSeenByAuthor, true);
 
-			UpdateResult result = await this.messagesRepo.UpdateOneAsync(x => 
-				x.Id == messageId && (isUserAdmin || x.AuthorId == userId), 
+			UpdateResult result = await this.messagesRepo.UpdateOneAsync(x =>
+				x.Id == messageId && (isUserAdmin || x.AuthorId == userId),
 				updateDefinition);
 
 			if (!result.IsAcknowledged)

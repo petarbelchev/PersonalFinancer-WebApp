@@ -10,6 +10,7 @@
 	using PersonalFinancer.Services.Messages;
 	using PersonalFinancer.Services.Messages.Models;
 	using PersonalFinancer.Web.Controllers.Api;
+	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.Message;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
@@ -208,7 +209,11 @@
 		public async Task All_ShouldReturnCorrectData(bool isUserAdmin)
 		{
 			//Arrange
-			int page = 1;
+			var inputModel = new SearchFilterInputModel
+			{
+				Page = 1,
+				Search = null
+			};
 
 			this.userMock
 				.Setup(x => x.IsInRole(AdminRoleName))
@@ -237,24 +242,24 @@
 			};
 
 			this.messagesServiceMock
-				.Setup(x => x.GetAllMessagesAsync(page))
+				.Setup(x => x.GetAllMessagesAsync(inputModel.Page, null))
 				.ReturnsAsync(messagesDTO);
 
 			this.messagesServiceMock
-				.Setup(x => x.GetUserMessagesAsync(this.userId.ToString(), page))
+				.Setup(x => x.GetUserMessagesAsync(this.userId.ToString(), inputModel.Page, null))
 				.ReturnsAsync(messagesDTO);
 
 			//Act
-			var actual = (OkObjectResult)await this.apiController.All(page);
+			var actual = (OkObjectResult)await this.apiController.All(inputModel);
 			var value = actual.Value as MessagesViewModel;
 
 			//Assert
 			this.messagesServiceMock.Verify(
-				x => x.GetAllMessagesAsync(page),
+				x => x.GetAllMessagesAsync(inputModel.Page, inputModel.Search),
 				isUserAdmin ? Times.Once : Times.Never);
 
 			this.messagesServiceMock.Verify(
-				x => x.GetUserMessagesAsync(this.userId.ToString(), page),
+				x => x.GetUserMessagesAsync(this.userId.ToString(), inputModel.Page, inputModel.Search),
 				isUserAdmin ? Times.Never : Times.Once);
 
 			Assert.That(value, Is.Not.Null);
@@ -268,8 +273,29 @@
 					"messages",
 					MessagesPerPage,
 					messagesDTO.TotalMessagesCount,
-					page);
+					inputModel.Page);
 			});
+		}
+
+		[Test]
+		public async Task All_ShouldReturnBadRequest_WhenTheModelStateIsInvalid()
+		{
+			//Arrange
+			var inputModel = new SearchFilterInputModel
+			{
+				Page = 0,
+				Search = null
+			};
+
+			this.apiController.ModelState.AddModelError(nameof(inputModel.Page), "Invalid page.");
+			string expectedLogMessage = string.Format(LoggerMessages.GetMessagesInfoWithInvalidInputData, this.userId);
+
+			//Act
+			var actual = (BadRequestResult)await this.apiController.All(inputModel);
+
+			//Assert
+			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]
@@ -278,7 +304,11 @@
 		public async Task Archived_ShouldReturnCorrectData(bool isUserAdmin)
 		{
 			//Arrange
-			int page = 1;
+			var inputModel = new SearchFilterInputModel
+			{
+				Page = 1,
+				Search = null
+			};
 
 			this.userMock
 				.Setup(x => x.IsInRole(AdminRoleName))
@@ -307,24 +337,24 @@
 			};
 
 			this.messagesServiceMock
-				.Setup(x => x.GetAllArchivedMessagesAsync(page))
+				.Setup(x => x.GetAllArchivedMessagesAsync(inputModel.Page, inputModel.Search))
 				.ReturnsAsync(messagesDTO);
 
 			this.messagesServiceMock
-				.Setup(x => x.GetUserArchivedMessagesAsync(this.userId.ToString(), page))
+				.Setup(x => x.GetUserArchivedMessagesAsync(this.userId.ToString(), inputModel.Page, inputModel.Search))
 				.ReturnsAsync(messagesDTO);
 
 			//Act
-			var actual = (OkObjectResult)await this.apiController.Archived(page);
+			var actual = (OkObjectResult)await this.apiController.Archived(inputModel);
 			var value = actual.Value as MessagesViewModel;
 
 			//Assert
 			this.messagesServiceMock.Verify(
-				x => x.GetAllArchivedMessagesAsync(page),
+				x => x.GetAllArchivedMessagesAsync(inputModel.Page, inputModel.Search),
 				isUserAdmin ? Times.Once : Times.Never);
 
 			this.messagesServiceMock.Verify(
-				x => x.GetUserArchivedMessagesAsync(this.userId.ToString(), page),
+				x => x.GetUserArchivedMessagesAsync(this.userId.ToString(), inputModel.Page, inputModel.Search),
 				isUserAdmin ? Times.Never : Times.Once);
 
 			Assert.That(value, Is.Not.Null);
@@ -338,8 +368,29 @@
 					"messages",
 					MessagesPerPage,
 					messagesDTO.TotalMessagesCount,
-					page);
+					inputModel.Page);
 			});
+		}
+
+		[Test]
+		public async Task Archived_ShouldReturnBadRequest_WhenTheModelStateIsInvalid()
+		{
+			//Arrange
+			var inputModel = new SearchFilterInputModel
+			{
+				Page = 0,
+				Search = null
+			};
+
+			this.apiController.ModelState.AddModelError(nameof(inputModel.Page), "Invalid page.");
+			string expectedLogMessage = string.Format(LoggerMessages.GetMessagesInfoWithInvalidInputData, this.userId);
+
+			//Act
+			var actual = (BadRequestResult)await this.apiController.Archived(inputModel);
+
+			//Assert
+			Assert.That(actual.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+			VerifyLoggerLogWarning(this.loggerMock, expectedLogMessage);
 		}
 
 		[Test]

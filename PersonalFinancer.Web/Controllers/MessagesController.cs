@@ -80,7 +80,12 @@
 			return this.RedirectToAction(nameof(Index));
 		}
 
-		public IActionResult Archived() => this.View();
+		public IActionResult Archived(string? search)
+		{
+			this.ViewBag.Search = search;
+
+			return this.View();
+		}
 
 		[Authorize(Roles = UserRoleName)]
 		public IActionResult Create() => this.View(new MessageModel());
@@ -246,6 +251,11 @@
 			return this.View(viewModel);
 		}
 
-		public IActionResult Index() => this.View();
+		public IActionResult Index(string? search)
+		{
+			this.ViewBag.Search = search;
+
+			return this.View();
+		}
 	}
 }

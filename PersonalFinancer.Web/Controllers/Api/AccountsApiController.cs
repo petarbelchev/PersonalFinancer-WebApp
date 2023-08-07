@@ -9,6 +9,7 @@
 	using PersonalFinancer.Services.Shared.Models;
 	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Models.Account;
+	using PersonalFinancer.Web.Models.Api;
 	using PersonalFinancer.Web.Models.Shared;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
@@ -32,14 +33,26 @@
 		}
 
 		[Authorize(Roles = AdminRoleName)]
-		[HttpGet("{page}")]
+		[HttpPost]
+		[NoHtmlSanitizing]
 		[Produces("application/json")]
 		[ProducesResponseType(typeof(UsersAccountsCardsViewModel), StatusCodes.Status200OK)]
-		public async Task<IActionResult> GetAccounts(int page)
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		public async Task<IActionResult> GetAccounts(SearchFilterInputModel inputModel)
 		{
-			AccountsCardsDTO usersCardsData =
-				await this.accountsInfoService.GetAccountsCardsDataAsync(page);
-			var usersCardsModel = new UsersAccountsCardsViewModel(usersCardsData, page);
+			if (!this.ModelState.IsValid)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetAccountsInfoWithInvalidInputData,
+					this.User.Id());
+
+				return this.BadRequest();
+			}
+
+			AccountsCardsDTO usersCardsData = await this.accountsInfoService
+				.GetAccountsCardsDataAsync(inputModel.Page, inputModel.Search);
+
+			var usersCardsModel = new UsersAccountsCardsViewModel(usersCardsData, inputModel.Page);
 
 			return this.Ok(usersCardsModel);
 		}

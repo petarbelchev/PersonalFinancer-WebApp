@@ -18,6 +18,7 @@ async function loadPage(page) {
         setUpPagination(model.pagination);
         currentPage = page;
     } else {
+        alert('Oops... Something goes wrong!');
         container.innerHTML = '';
     }
 }
@@ -55,6 +56,7 @@ async function getData(page) {
                 accountTypeId: params.body.accountTypeId == '' ? null : params.body.accountTypeId,
                 categoryId: params.body.categoryId == '' ? null : params.body.categoryId,
                 currencyId: params.body.currencyId == '' ? null : params.body.currencyId,
+                search: params.body.search
             })
         }
     }
@@ -73,20 +75,20 @@ function setUpPagination(pagination) {
         <li class="page-item ${page == 1 ? 'disabled' : ''}">
             <a class="page-link" role="button" style="color: black;" page="${page - 1}">Previous</a>
 		</li >
-		<li class="page-item ${page == 1 ? 'active' : ''}">
+		<li class="page-item ${page == 1 ? 'disabled' : ''}">
 			<a class="page-link" role="button" style="color: black; ${page == 1 ? 'background-color: gray; border-color: gray;' : ''}" 
             page="1">1</a>
 		</li>
     `;
 
     if (page - 2 > 1) {
-        innerHtml += '<li class="page-item"><span class="page-link" style="color: black">...</span></li>';
+        innerHtml += '<li class="page-item disabled"><span class="page-link" style="color: black">...</span></li>';
     }
 
     for (let i = page - 1; i <= page + 1; i++) {
         if (i > 1 && i < pagination.pages) {
             innerHtml += `
-                <li class="page-item ${page == i ? 'active' : ''}">
+                <li class="page-item ${page == i ? 'disabled' : ''}">
                     <a class="page-link" role="button" style="color: black; ${page == i ? 'background-color: gray; border-color: gray;' : ''}" 
                     page="${i}">${i}</a>
                 </li>
@@ -95,12 +97,12 @@ function setUpPagination(pagination) {
     }
 
     if (page + 2 < pagination.pages) {
-        innerHtml += '<li class="page-item"><span class="page-link" style="color: black">...</span></li>';
+        innerHtml += '<li class="page-item disabled"><span class="page-link" style="color: black">...</span></li>';
     }
 
     if (pagination.pages > 1) {
         innerHtml += `
-            <li class="page-item ${page == pagination.pages ? 'active' : ''}">
+            <li class="page-item ${page == pagination.pages ? 'disabled' : ''}">
             <a class="page-link" role="button" style="color: black; ${page == pagination.pages ? 'background-color: gray; border-color: gray;' : ''}"
                 page="${pagination.pages}">${pagination.pages}</a>
         `;

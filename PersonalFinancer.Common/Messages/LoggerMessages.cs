@@ -5,6 +5,7 @@
 		// Accounts
 		public const string CreateAccountWithAnotherUserId = "User with ID: \"{0}\", tried to create an account with another user ID: \"{1}\".";
 		public const string DeleteAccountWithInvalidInputData = "User with ID: \"{0}\", tried to delete an account with invalid input data.";
+		public const string GetAccountsInfoWithInvalidInputData = "Admin with ID: \"{0}\", tried to get an accounts info with invalid input data.";
 		public const string GetAccountDetailsWithInvalidInputData = "User with ID: \"{0}\", tried to get an account details with invalid input data.";
 		public const string GetAccountTransactionsWithInvalidInputData = "User with ID: \"{0}\", tried to get an account transactions with invalid input data.";
 		public const string EditAccountWithInvalidInputData = "User with ID: \"{0}\", tried to edit an account with invalid input data.";
@@ -27,6 +28,7 @@
 		public const string AddReplyWithInvalidInputData = "User with ID: \"{0}\", tried to add a reply with invalid input data.";
 		public const string ArchiveMessageWithInvalidInputData = "User with ID: \"{0}\", tried to archive a message with invalid input data.";
 		public const string DeleteMessageWithInvalidInputData = "User with ID: \"{0}\", tried to delete a message with invalid input data.";
+		public const string GetMessagesInfoWithInvalidInputData = "Admin with ID: \"{0}\", tried to get a messages info with invalid input data.";
 		public const string GetMessageDetailsWithInvalidInputData = "User with ID: \"{0}\", tried to get a message details with invalid input data.";
 		public const string MarkAsSeenWithInvalidInputData = "User with ID: \"{0}\", tried to mark a message as seen with invalid input data.";
 		public const string UnauthorizedGetMessageDetails = "Unauthorized user with ID: \"{0}\", tried to get a message details with ID: \"{1}\".";
@@ -39,6 +41,7 @@
 		public const string UnsuccessfulMarkMessageAsSeen = "User with ID: \"{0}\", unsuccessfully tried to mark a message as seen with ID: \"{1}\".";
 
 		// Users
+		public const string GetUsersInfoWithInvalidInputData = "Admin with ID: \"{0}\", tried to get a users info with invalid input data.";
 		public const string GetUserDetailsWithInvalidInputData = "Admin with ID: \"{0}\", tried to get a user details with invalid input data.";
 		public const string GetUserTransactionsWithInvalidInputData = "User with ID: \"{0}\", tried to get his transactions with invalid input data.";
 		public const string UnauthorizedGetUserTransactions = "Unauthorized user with ID: \"{0}\", tried to get an user transactions with ID: \"{1}\".";

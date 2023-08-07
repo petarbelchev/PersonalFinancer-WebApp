@@ -1,9 +1,18 @@
-﻿@using PersonalFinancer.Common.Constants;
+﻿@using Newtonsoft.Json;
+@using PersonalFinancer.Common.Constants;
 @{
-	ViewData["Title"] = "All Users";
+	ViewData["Title"] = "Users";
 }
 
 <div class="row">
+	<div class="offset-lg-3 col-lg-6">
+		<div class="m-4">
+			<form method="get" class="input-group shadow rounded-3">
+				<input type="text" name="search" class="form-control" placeholder="Search for a user..." value="@ViewBag.Search">
+				<button class="btn btn-secondary" type="submit">Search</button>
+			</form>
+		</div>
+	</div>
 	<div class="justify-content-center">
 		<div class="card shadow">
 			<div class="card-header">
@@ -30,11 +39,13 @@
 	</div>
 </div>
 
-
 @section Scripts {
 	<script>
 		let params = {
-			url: '@UrlPathConstants.ApiUsersEndpoint'
+			url: '@UrlPathConstants.ApiUsersEndpoint',
+			body: {
+				search: @Html.Raw(JsonConvert.SerializeObject(ViewBag.Search))
+			}
 		};
 	</script>
 	<script src="~/js/renderUsers.js"></script>

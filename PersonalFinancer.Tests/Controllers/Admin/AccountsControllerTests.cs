@@ -35,15 +35,22 @@
 		}
 
 		[Test]
-		public void Index_ShouldReturnView()
+		[TestCase(null)]
+		[TestCase("test")]
+		public void Index_ShouldReturnView(string? search)
 		{
 			//Arrange
 
 			//Act
-			var result = this.controller.Index();
+			var result = (ViewResult)this.controller.Index(search);
 
 			//Assert
 			Assert.That(result, Is.Not.Null );
+			Assert.Multiple(() =>
+			{
+				Assert.That(result.ViewData.ContainsKey("Search"), Is.True);
+				Assert.That(result.ViewData["Search"], Is.EqualTo(search));
+			});
 		}
 	}
 }

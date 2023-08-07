@@ -1,15 +1,30 @@
-﻿@using PersonalFinancer.Common.Constants;
+﻿@using Newtonsoft.Json;
+@using PersonalFinancer.Common.Constants;
 @{
-	ViewData["Title"] = "All Accounts";
+	ViewData["Title"] = "Accounts";
 }
 
-<div class="container">
+<div class="row">
 
-	<h1 class="display-6 text-center">@ViewData["Title"]</h1>
+	<div class="offset-lg-3 col-lg-6">
+		<div class="m-4">
+			<form method="get" class="input-group shadow rounded-3">
+				<input type="text" name="search" class="form-control" placeholder="Search for an account..." value="@ViewBag.Search">
+				<button class="btn btn-secondary" type="submit">Search</button>
+			</form>
+		</div>
+	</div>
 
 	@*Account Cards*@
-	<div class="row mt-4" id="accounts">
-		@*Place for accounts data*@
+	<div class="justify-content-center">
+		<div class="card shadow">
+			<div class="card-header">
+				<h1 class="display-6 text-center">@ViewData["Title"]</h1>
+			</div>
+			<div class="row mt-4 p-3" id="accounts">
+				@*Place for accounts data*@
+			</div>
+		</div>
 	</div>
 
 	@*Pagination*@
@@ -19,7 +34,10 @@
 @section Scripts {
 	<script>
 		let params = {
-			url: '@UrlPathConstants.ApiAccountsEndpoint'
+			url: '@UrlPathConstants.ApiAccountsEndpoint',
+			body: {
+				search: @Html.Raw(JsonConvert.SerializeObject(ViewBag.Search))
+			}
 		}
 	</script>
 	<script src="~/js/renderAccounts.js"></script>

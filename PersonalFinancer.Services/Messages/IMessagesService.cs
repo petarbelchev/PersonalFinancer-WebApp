@@ -15,9 +15,9 @@
 		/// <exception cref="ArgumentException">When the image constraints are not met.</exception>
 		Task<string> CreateAsync(MessageInputDTO model);
 
-		Task<MessagesDTO> GetAllArchivedMessagesAsync(int page = 1);
+		Task<MessagesDTO> GetAllArchivedMessagesAsync(int page, string? search);
 
-		Task<MessagesDTO> GetAllMessagesAsync(int page = 1);
+		Task<MessagesDTO> GetAllMessagesAsync(int page, string? search);
 
 		/// <exception cref="UnauthorizedAccessException">The user is unauthorized.</exception>
 		/// <exception cref="ArgumentException">When marking the message as seen is unsuccessful.</exception>
@@ -27,9 +27,9 @@
 		/// <exception cref="InvalidOperationException">When the message does not exist.</exception>
 		Task<string> GetMessageAuthorIdAsync(string messageId);
 
-		Task<MessagesDTO> GetUserArchivedMessagesAsync(string userId, int page = 1);
+		Task<MessagesDTO> GetUserArchivedMessagesAsync(string userId, int page, string? search);
 
-		Task<MessagesDTO> GetUserMessagesAsync(string userId, int page = 1);
+		Task<MessagesDTO> GetUserMessagesAsync(string userId, int page, string? search);
 
 		Task<bool> HasUnseenMessagesByAdminAsync();
 
