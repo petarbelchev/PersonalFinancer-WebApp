@@ -82,7 +82,7 @@
 						await userManager.CreateAsync(newUser, $"TestUser{i}!");
 
 					if (creationResult.Succeeded)
-						await userManager.AddToRoleAsync(testUser, UserRoleName);
+						await userManager.AddToRoleAsync(newUser, UserRoleName);
 				}
 			}
 		}
