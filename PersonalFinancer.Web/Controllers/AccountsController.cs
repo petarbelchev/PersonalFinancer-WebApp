@@ -38,10 +38,12 @@
 		[Authorize(Roles = UserRoleName)]
 		public async Task<IActionResult> Create()
 		{
-			var viewModel = new CreateEditAccountViewModel { OwnerId = this.User.IdToGuid() };
+			Guid currentUserId = this.User.IdToGuid();
+
+			var viewModel = new CreateEditAccountViewModel { OwnerId = currentUserId };
 
 			var typesAndCurrenciesDTO = await this.usersService
-				.GetUserAccountTypesAndCurrenciesDropdownsAsync(viewModel.OwnerId);
+				.GetUserAccountTypesAndCurrenciesDropdownsAsync(currentUserId);
 
 			this.mapper.Map(typesAndCurrenciesDTO, viewModel);
 
@@ -52,7 +54,9 @@
 		[HttpPost]
 		public async Task<IActionResult> Create(CreateEditAccountInputModel inputModel)
 		{
-			if (inputModel.OwnerId != this.User.IdToGuid())
+			Guid currentUserId = this.User.IdToGuid();
+
+			if (inputModel.OwnerId != currentUserId)
 			{
 				this.logger.LogWarning(
 					LoggerMessages.CreateAccountWithAnotherUserId,
@@ -81,7 +85,7 @@
 			var viewModel = this.mapper.Map<CreateEditAccountViewModel>(inputModel);
 
 			var typesAndCurrenciesDTO = await this.usersService
-				.GetUserAccountTypesAndCurrenciesDropdownsAsync(viewModel.OwnerId);
+				.GetUserAccountTypesAndCurrenciesDropdownsAsync(currentUserId);
 
 			this.mapper.Map(typesAndCurrenciesDTO, viewModel);
 
@@ -309,7 +313,9 @@
 		[HttpPost]
 		public async Task<IActionResult> Edit([Required] Guid id, CreateEditAccountInputModel inputModel)
 		{
-			if (!this.User.IsAdmin() && this.User.IdToGuid() != inputModel.OwnerId)
+			Guid currentUserId = this.User.IdToGuid();
+
+			if (!this.User.IsAdmin() && currentUserId != inputModel.OwnerId)
 			{
 				this.logger.LogWarning(
 					LoggerMessages.UnauthorizedAccountEdit,
@@ -352,7 +358,7 @@
 			var viewModel = this.mapper.Map<CreateEditAccountViewModel>(inputModel);
 
 			var typesAndCurrenciesDTO = await this.usersService
-				.GetUserAccountTypesAndCurrenciesDropdownsAsync(viewModel.OwnerId);
+				.GetUserAccountTypesAndCurrenciesDropdownsAsync(currentUserId);
 
 			this.mapper.Map(typesAndCurrenciesDTO, viewModel);
 

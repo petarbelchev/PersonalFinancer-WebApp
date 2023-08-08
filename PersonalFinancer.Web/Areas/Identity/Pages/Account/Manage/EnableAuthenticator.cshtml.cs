@@ -1,17 +1,19 @@
-﻿namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
-{
-#nullable disable
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
-    using PersonalFinancer.Common.Messages;
-    using PersonalFinancer.Data.Models;
-    using System.ComponentModel.DataAnnotations;
-    using System.Globalization;
-    using System.Text;
-    using System.Text.Encodings.Web;
+﻿#nullable disable
 
-    public class EnableAuthenticatorModel : PageModel
+namespace PersonalFinancer.Web.Areas.Identity.Pages.Account.Manage
+{
+	using Microsoft.AspNetCore.Identity;
+	using Microsoft.AspNetCore.Mvc;
+	using Microsoft.AspNetCore.Mvc.RazorPages;
+	using PersonalFinancer.Common.Messages;
+	using PersonalFinancer.Data.Models;
+	using System.ComponentModel.DataAnnotations;
+	using System.Globalization;
+	using System.Text;
+	using System.Text.Encodings.Web;
+	using static PersonalFinancer.Common.Messages.ValidationMessages;
+
+	public class EnableAuthenticatorModel : PageModel
     {
         private readonly UserManager<ApplicationUser> userManager;
         private readonly ILogger<EnableAuthenticatorModel> logger;
@@ -44,7 +46,7 @@
 
         public class InputModel
         {
-            [Required]
+            [Required(ErrorMessage = RequiredProperty)]
             [StringLength(7, MinimumLength = 6, 
                 ErrorMessage = ValidationMessages.InvalidLength)]
             [DataType(DataType.Text)]
@@ -117,13 +119,13 @@
                 unformattedKey = await this.userManager.GetAuthenticatorKeyAsync(user);
             }
 
-            this.SharedKey = this.FormatKey(unformattedKey);
+            this.SharedKey = FormatKey(unformattedKey);
 
             string email = await this.userManager.GetEmailAsync(user);
             this.AuthenticatorUri = this.GenerateQrCodeUri(email, unformattedKey);
         }
 
-        private string FormatKey(string unformattedKey)
+        private static string FormatKey(string unformattedKey)
         {
             var result = new StringBuilder();
             int currentPosition = 0;

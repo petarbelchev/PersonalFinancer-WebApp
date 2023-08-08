@@ -109,8 +109,8 @@
 				Assert.That(viewModel.OwnerId, Is.EqualTo(this.userId));
 				Assert.That(viewModel.Name, Is.Null);
 				Assert.That(viewModel.Balance, Is.EqualTo(0));
-				Assert.That(viewModel.CurrencyId, Is.EqualTo(Guid.Empty));
-				Assert.That(viewModel.AccountTypeId, Is.EqualTo(Guid.Empty));
+				Assert.That(viewModel.CurrencyId, Is.Null);
+				Assert.That(viewModel.AccountTypeId, Is.Null);
 
 				AssertSamePropertiesValuesAreEqual(viewModel!, expAccountTypesAndCurrencies);
 			});

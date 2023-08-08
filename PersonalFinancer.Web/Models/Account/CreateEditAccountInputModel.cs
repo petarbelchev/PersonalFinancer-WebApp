@@ -1,34 +1,34 @@
 ﻿namespace PersonalFinancer.Web.Models.Account
 {
 	using Microsoft.AspNetCore.Mvc;
-	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Web.CustomModelBinders;
 	using System.ComponentModel.DataAnnotations;
 	using static PersonalFinancer.Common.Constants.AccountConstants;
+	using static PersonalFinancer.Common.Messages.ValidationMessages;
 
 	public class CreateEditAccountInputModel
 	{
-		[Required(ErrorMessage = ValidationMessages.RequiredProperty)]
+		[Required(ErrorMessage = RequiredProperty)]
 		[StringLength(AccountNameMaxLength,
-			MinimumLength = AccountNameMinLength,
-			ErrorMessage = ValidationMessages.InvalidLength)]
+					  MinimumLength = AccountNameMinLength,
+					  ErrorMessage = InvalidLength)]
 		public string Name { get; set; } = null!;
 
-		[Required]
+		[Required(ErrorMessage = RequiredProperty)]
 		[ModelBinder(BinderType = typeof(DecimalModelBinder))]
 		[Range(AccountInitialBalanceMinValue,
-			AccountInitialBalanceMaxValue,
-			ErrorMessage = ValidationMessages.InvalidNumericLength)]
+			   AccountInitialBalanceMaxValue,
+			   ErrorMessage = InvalidNumericLength)]
 		public decimal Balance { get; set; }
 
-		[Required]
+		[Required(ErrorMessage = RequiredProperty)]
 		public Guid? OwnerId { get; set; }
 
-		[Required]
+		[Required(ErrorMessage = RequiredProperty)]
 		[Display(Name = "Account Type")]
 		public Guid? AccountTypeId { get; set; }
 
-		[Required]
+		[Required(ErrorMessage = RequiredProperty)]
 		[Display(Name = "Currency")]
 		public Guid? CurrencyId { get; set; }
 	}
