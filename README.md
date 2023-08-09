@@ -20,7 +20,7 @@ I created this project to practice my skills, and it will also serve as my defen
     - SignalR (in the messages functionality)
     - SendGrid (for email confirmation)
     - AutoMapper
-    - Cache in-memory (on the create account and transactions pages, loading users dropdown data)
+    - Distributed Caching Using Redis (on the create account and transaction pages, loading users dropdown data)
     - Logger
     - Custom Action Filter and Attribute (for HTML sanitizing)
     - Custom Model Binders (for decimal and datetime binding)
