@@ -4,7 +4,7 @@ namespace PersonalFinancer.Services.Accounts.Models
 {
 	using PersonalFinancer.Services.Shared.Models;
 
-	public class TransactionDetailsDTO : TransactionTableDTO
+	public class TransactionDetailsDTO : TransactionTableDTO, IHaveOwner
     {
         public Guid OwnerId { get; set; }
 

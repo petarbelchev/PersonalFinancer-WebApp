@@ -4,7 +4,7 @@ namespace PersonalFinancer.Services.Accounts.Models
 {
 	using PersonalFinancer.Data.Models.Enums;
 
-	public class CreateEditTransactionInputDTO
+	public class CreateEditTransactionInputDTO : IHaveOwner
 	{
 		public decimal Amount { get; set; }
 		

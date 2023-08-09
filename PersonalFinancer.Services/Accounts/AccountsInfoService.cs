@@ -10,6 +10,7 @@
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
 	using System;
+	using System.Linq.Expressions;
 	using System.Threading.Tasks;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
@@ -118,22 +119,32 @@
 		public async Task<TransactionDetailsDTO> GetTransactionDetailsAsync(
 			Guid transactionId, Guid ownerId, bool isUserAdmin)
 		{
-			TransactionDetailsDTO transaction = await this.transactionsRepo.All()
-				.Where(t => t.Id == transactionId)
-				.ProjectTo<TransactionDetailsDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync();
-
-			return !isUserAdmin && transaction.OwnerId != ownerId
-				? throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser)
-				: transaction;
+			return await this.GetTransactionDataAsync<TransactionDetailsDTO>(
+				t => t.Id == transactionId,
+				ownerId,
+				isUserAdmin);
 		}
 
 		public async Task<CreateEditTransactionOutputDTO> GetTransactionFormDataAsync(
 			Guid transactionId, Guid userId, bool isUserAdmin)
 		{
+			return await this.GetTransactionDataAsync<CreateEditTransactionOutputDTO>(
+				t => t.Id == transactionId && !t.IsInitialBalance, 
+				userId, 
+				isUserAdmin);
+		}
+
+		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
+		/// <exception cref="InvalidOperationException">When the transaction does not exist.</exception>
+		private async Task<T> GetTransactionDataAsync<T>(
+			Expression<Func<Transaction, bool>> filterExpression, 
+			Guid userId, 
+			bool isUserAdmin)
+			where T : IHaveOwner
+		{
 			var transactionDTO = await this.transactionsRepo.All()
-				.Where(t => t.Id == transactionId && !t.IsInitialBalance)
-				.ProjectTo<CreateEditTransactionOutputDTO>(this.mapper.ConfigurationProvider)
+				.Where(filterExpression)
+				.ProjectTo<T>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 
 			return isUserAdmin || transactionDTO.OwnerId == userId
