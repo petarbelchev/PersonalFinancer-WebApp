@@ -2,7 +2,7 @@
 {
 	using AutoMapper;
 	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.Caching.Memory;
+	using Microsoft.Extensions.Caching.Distributed;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Contracts;
@@ -14,16 +14,16 @@
     {
         private readonly IEfRepository<T> repo;
         private readonly IMapper mapper;
-		private readonly IMemoryCache memoryCache;
+		private readonly IDistributedCache cache;
 
 		public ApiService(
             IEfRepository<T> repo,
             IMapper mapper,
-			IMemoryCache memoryCache)
+			IDistributedCache cache)
         {
             this.repo = repo;
             this.mapper = mapper;
-			this.memoryCache = memoryCache;
+			this.cache = cache;
 		}
 
         public async Task<ApiEntityDTO> CreateEntityAsync(string name, Guid ownerId)
@@ -77,11 +77,11 @@
 		{
 			if (typeof(T) == typeof(Category))
 			{
-				this.memoryCache.Remove(AccountsAndCategoriesKey + userId);
+				this.cache.Remove(AccountsAndCategoriesKey + userId);
 			}
 			else if (typeof(T) == typeof(AccountType) || typeof(T) == typeof(Currency))
 			{
-				this.memoryCache.Remove(AccountTypesAndCurrenciesKey + userId);
+				this.cache.Remove(AccountTypesAndCurrenciesKey + userId);
 			}
 		}
 	}

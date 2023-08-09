@@ -27,6 +27,8 @@ builder.Services.AddAutoMapper(
 
 builder.ConfigureApplicationCookies();
 
+builder.ConfigureDistributedRedisCache();
+
 WebApplication app = builder.Build();
 
 app.SeedDatabase();

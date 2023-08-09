@@ -2,7 +2,8 @@
 {
 	using AutoMapper;
 	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.Caching.Memory;
+	using Microsoft.Extensions.Caching.Distributed;
+	using Moq;
 	using NUnit.Framework;
 	using NUnit.Framework.Internal;
 	using PersonalFinancer.Data;
@@ -19,7 +20,7 @@
 
 		protected PersonalFinancerDbContext dbContext;
 		protected IMapper mapper;
-		protected IMemoryCache memoryCache;
+		protected Mock<IDistributedCache> cacheMock;
 
 		[SetUp]
 		protected async Task SetUpBase()
@@ -31,7 +32,7 @@
 			var config = new MapperConfiguration(cfg => cfg.AddProfile<ServiceMappingProfile>());
 			this.mapper = config.CreateMapper();
 
-			this.memoryCache = new MemoryCache(new MemoryCacheOptions());
+			this.cacheMock = new Mock<IDistributedCache>();
 
 			await this.SeedDatabase();
 
