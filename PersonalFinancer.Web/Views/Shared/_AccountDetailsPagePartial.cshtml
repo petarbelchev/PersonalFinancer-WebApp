@@ -27,6 +27,7 @@
 <form method="get" asp-action="Filtered" class="mt-2 mb-4 offset-lg-2 col-lg-8 offset-sm-2 col-sm-8 offset-1 col-10">
 	<div class="row">
 		<input type="hidden" asp-for="@Model.Id" />
+		<input type="hidden" asp-for="@Model.ReturnUrl" />
 		<div class="col-lg-5 form-floating mb-2">
 			<input type="datetime-local" asp-for="@Model.FromLocalTime" value="@Model.FromLocalTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
 			<label asp-for="@Model.FromLocalTime" class="form-label"></label>

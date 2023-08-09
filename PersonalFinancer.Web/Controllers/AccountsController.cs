@@ -199,75 +199,17 @@
 				return this.BadRequest();
 			}
 
-			AccountDetailsDTO accountDetails;
-
-			try
+			return await this.GetAccountDetails(new AccountDetailsInputModel
 			{
-				accountDetails = await this.accountsInfoService
-					.GetAccountDetailsAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
-			}
-			catch (UnauthorizedAccessException)
-			{
-				this.logger.LogWarning(
-					LoggerMessages.UnauthorizedGetAccountDetails,
-					this.User.Id(),
-					id);
-
-				return this.Unauthorized();
-			}
-			catch (InvalidOperationException)
-			{
-				this.logger.LogWarning(
-					LoggerMessages.GetAccountDetailsWithInvalidInputData,
-					this.User.Id());
-
-				return this.BadRequest();
-			}
-
-			var viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
-			viewModel.FromLocalTime = DateTime.Now.AddMonths(-1);
-			viewModel.ToLocalTime = DateTime.Now;
-			viewModel.ReturnUrl = returnUrl;
-
-			return this.View(viewModel);
+				Id = id,
+				FromLocalTime = DateTime.Now.AddMonths(-1),
+				ToLocalTime = DateTime.Now,
+				ReturnUrl = returnUrl
+			});
 		}
 
-		public async Task<IActionResult> Filtered(AccountDetailsInputModel inputModel)
-		{
-			AccountDetailsDTO accountDetails;
-
-			try
-			{
-				Guid accountId = inputModel.Id ??
-					throw new InvalidOperationException(string.Format(
-						ExceptionMessages.NotNullableProperty, inputModel.Id));
-
-				accountDetails = await this.accountsInfoService
-					.GetAccountDetailsAsync(accountId, this.User.IdToGuid(), this.User.IsAdmin());
-			}
-			catch (UnauthorizedAccessException)
-			{
-				this.logger.LogWarning(
-					LoggerMessages.UnauthorizedGetAccountDetails,
-					this.User.Id(),
-					inputModel.Id);
-
-				return this.Unauthorized();
-			}
-			catch (InvalidOperationException)
-			{
-				this.logger.LogWarning(
-					LoggerMessages.GetAccountDetailsWithInvalidInputData,
-					this.User.Id());
-
-				return this.BadRequest();
-			}
-
-			var viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
-			this.mapper.Map(inputModel, viewModel);
-
-			return this.View(viewModel);
-		}
+		public async Task<IActionResult> Filtered(AccountDetailsInputModel inputModel) 
+			=> await this.GetAccountDetails(inputModel);
 
 		public async Task<IActionResult> Edit([Required] Guid id)
 		{
@@ -285,7 +227,7 @@
 			try
 			{
 				accountDTO = await this.accountsInfoService
-					.GetAccountFormDataAsync(id, this.User.IdToGuid(), this.User.IsAdmin());
+					.GetAccountDataAsync<CreateEditAccountOutputDTO>(id, this.User.IdToGuid(), this.User.IsAdmin());
 			}
 			catch (UnauthorizedAccessException)
 			{
@@ -361,6 +303,43 @@
 				.GetUserAccountTypesAndCurrenciesDropdownsAsync(currentUserId);
 
 			this.mapper.Map(typesAndCurrenciesDTO, viewModel);
+
+			return this.View(viewModel);
+		}
+
+		private async Task<IActionResult> GetAccountDetails(AccountDetailsInputModel inputModel)
+		{
+			AccountDetailsDTO accountDetails;
+
+			try
+			{
+				Guid accountId = inputModel.Id ??
+					throw new InvalidOperationException(string.Format(
+						ExceptionMessages.NotNullableProperty, inputModel.Id));
+
+				accountDetails = await this.accountsInfoService
+					.GetAccountDataAsync<AccountDetailsDTO>(accountId, this.User.IdToGuid(), this.User.IsAdmin());
+			}
+			catch (UnauthorizedAccessException)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.UnauthorizedGetAccountDetails,
+					this.User.Id(),
+					inputModel.Id);
+
+				return this.Unauthorized();
+			}
+			catch (InvalidOperationException)
+			{
+				this.logger.LogWarning(
+					LoggerMessages.GetAccountDetailsWithInvalidInputData,
+					this.User.Id());
+
+				return this.BadRequest();
+			}
+
+			var viewModel = this.mapper.Map<AccountDetailsViewModel>(accountDetails);
+			this.mapper.Map(inputModel, viewModel);
 
 			return this.View(viewModel);
 		}

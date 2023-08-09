@@ -2,7 +2,7 @@
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class AccountDetailsDTO
+	public class AccountDetailsDTO : IHaveOwner
     {
         public Guid Id { get; set; }
 

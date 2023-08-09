@@ -9,11 +9,7 @@
 	{
 		/// <exception cref="UnauthorizedAccessException">When user is unauthorized.</exception>
 		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
-		Task<AccountDetailsDTO> GetAccountDetailsAsync(Guid accountId, Guid userId, bool isUserAdmin);
-
-		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
-		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>
-		Task<CreateEditAccountOutputDTO> GetAccountFormDataAsync(Guid accountId, Guid userId, bool isUserAdmin);
+		Task<T> GetAccountDataAsync<T>(Guid accountId, Guid userId, bool isUserAdmin) where T : IHaveOwner;
 
 		/// <exception cref="UnauthorizedAccessException">When the user is unauthorized.</exception>
 		/// <exception cref="InvalidOperationException">When the account does not exist.</exception>

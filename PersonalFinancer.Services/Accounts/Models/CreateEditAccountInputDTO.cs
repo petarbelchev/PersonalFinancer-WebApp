@@ -2,7 +2,7 @@
 
 namespace PersonalFinancer.Services.Accounts.Models
 {
-	public class CreateEditAccountInputDTO
+	public class CreateEditAccountInputDTO : IHaveOwner
 	{
 		public string Name { get; set; }
 

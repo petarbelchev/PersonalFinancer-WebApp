@@ -27,7 +27,7 @@
 					.MapFrom(s => s.Name + (s.IsDeleted ? " (Deleted)" : string.Empty)));
 
 			this.CreateMap<Account, AccountCardDTO>();
-			this.CreateProjection<Account, AccountDetailsDTO>();
+			this.CreateMap<Account, AccountDetailsDTO>();
 
 			DateTime fromLocalTime = default;
 			DateTime toLocalTime = default;

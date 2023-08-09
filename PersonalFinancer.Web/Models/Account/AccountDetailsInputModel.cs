@@ -7,5 +7,7 @@
 	{
 		[Required]
 		public Guid? Id { get; set; }
+
+		public string? ReturnUrl { get; set; }
 	}
 }

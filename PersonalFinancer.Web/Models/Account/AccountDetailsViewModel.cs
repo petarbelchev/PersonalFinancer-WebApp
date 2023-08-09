@@ -11,7 +11,5 @@
 		public string AccountTypeName { get; set; } = null!;
 
 		public Guid OwnerId { get; set; }
-
-		public string? ReturnUrl { get; set; }
     }
 }

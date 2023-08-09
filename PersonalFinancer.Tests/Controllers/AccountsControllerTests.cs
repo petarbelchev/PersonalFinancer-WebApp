@@ -271,8 +271,8 @@
 				.Setup(x => x.FindFirst(ClaimTypes.NameIdentifier))
 				.Returns(new Claim(ClaimTypes.NameIdentifier, currentUserId.ToString()));
 
-			this.accountsInfoServiceMock.Setup(x => x
-				.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, currentUserId, isUserAdmin))
+			this.accountsInfoServiceMock
+				.Setup(x => x.GetAccountDataAsync<AccountDetailsDTO>(expectedAccountDetailsDto.Id, currentUserId, isUserAdmin))
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
@@ -301,7 +301,7 @@
 				.Returns(false);
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountDetailsAsync(It.IsAny<Guid>(), this.userId, false))
+				.Setup(x => x.GetAccountDataAsync<AccountDetailsDTO>(It.IsAny<Guid>(), this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			string expectedLogMessage = string.Format(
@@ -332,7 +332,7 @@
 			var accountId = Guid.NewGuid();
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountDetailsAsync(accountId, this.userId, false))
+				.Setup(x => x.GetAccountDataAsync<AccountDetailsDTO>(accountId, this.userId, false))
 				.Throws<UnauthorizedAccessException>();
 
 			string expectedLogMessage = string.Format(
@@ -739,7 +739,7 @@
 				.Returns(isUserAdmin);
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountFormDataAsync(accId, currentUserId, isUserAdmin))
+				.Setup(x => x.GetAccountDataAsync<CreateEditAccountOutputDTO>(accId, currentUserId, isUserAdmin))
 				.ReturnsAsync(expServiceDto);
 
 			//Act
@@ -760,7 +760,7 @@
 		{
 			//Arrange
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountFormDataAsync(It.IsAny<Guid>(), this.userId, false))
+				.Setup(x => x.GetAccountDataAsync<CreateEditAccountOutputDTO>(It.IsAny<Guid>(), this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			string expectedLogMessage = string.Format(
@@ -787,7 +787,7 @@
 			var accountId = Guid.NewGuid();
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountFormDataAsync(accountId, this.userId, false))
+				.Setup(x => x.GetAccountDataAsync<CreateEditAccountOutputDTO>(accountId, this.userId, false))
 				.Throws<UnauthorizedAccessException>();
 
 			string expectedLogMessage = string.Format(
@@ -1080,7 +1080,7 @@
 				.Returns(new Claim(ClaimTypes.NameIdentifier, currentUserId.ToString()));
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, currentUserId, isUserAdmin))
+				.Setup(x => x.GetAccountDataAsync<AccountDetailsDTO>(expectedAccountDetailsDto.Id, currentUserId, isUserAdmin))
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
@@ -1114,7 +1114,7 @@
 				.Returns(false);
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, false))
+				.Setup(x => x.GetAccountDataAsync<AccountDetailsDTO>(expectedAccountDetailsDto.Id, this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			string expectedLogMessage = string.Format(
@@ -1150,7 +1150,7 @@
 				.Returns(false);
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, false))
+				.Setup(x => x.GetAccountDataAsync<AccountDetailsDTO>(expectedAccountDetailsDto.Id, this.userId, false))
 				.Throws<UnauthorizedAccessException>();
 
 			string expectedLogMessage = string.Format(
@@ -1206,7 +1206,7 @@
 			this.controller.ModelState.AddModelError(nameof(inputModel.FromLocalTime), "Start Date is invalid");
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountDetailsAsync(expectedAccountDetailsDto.Id, this.userId, false))
+				.Setup(x => x.GetAccountDataAsync<AccountDetailsDTO>(expectedAccountDetailsDto.Id, this.userId, false))
 				.ReturnsAsync(expectedAccountDetailsDto);
 
 			//Act
@@ -1242,7 +1242,7 @@
 			this.controller.ModelState.AddModelError(string.Empty, "Model is invalid");
 
 			this.accountsInfoServiceMock
-				.Setup(x => x.GetAccountDetailsAsync(accountId, this.userId, false))
+				.Setup(x => x.GetAccountDataAsync<AccountDetailsDTO>(accountId, this.userId, false))
 				.Throws<InvalidOperationException>();
 
 			//Act

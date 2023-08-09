@@ -29,29 +29,16 @@
 			this.mapper = mapper;
 		}
 
-		public async Task<AccountDetailsDTO> GetAccountDetailsAsync(
-			Guid accountId, Guid userId, bool isUserAdmin)
+		public async Task<T> GetAccountDataAsync<T>(Guid accountId, Guid userId, bool isUserAdmin)
+			where T : IHaveOwner
 		{
-			AccountDetailsDTO accountDetails = await this.accountsRepo.All()
+			T accountData = await this.accountsRepo.All()
 				.Where(a => a.Id == accountId && !a.IsDeleted)
-				.ProjectTo<AccountDetailsDTO>(this.mapper.ConfigurationProvider)
+				.ProjectTo<T>(this.mapper.ConfigurationProvider)
 				.FirstAsync();
 
-			return isUserAdmin || accountDetails.OwnerId == userId
-				? accountDetails
-				: throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
-		}
-
-		public async Task<CreateEditAccountOutputDTO> GetAccountFormDataAsync(
-			Guid accountId, Guid userId, bool isUserAdmin)
-		{
-			var accountForm = await this.accountsRepo.All()
-				.Where(a => a.Id == accountId && !a.IsDeleted)
-				.ProjectTo<CreateEditAccountOutputDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync();
-
-			return isUserAdmin || accountForm.OwnerId == userId
-				? accountForm
+			return isUserAdmin || accountData.OwnerId == userId
+				? accountData
 				: throw new UnauthorizedAccessException(ExceptionMessages.UnauthorizedUser);
 		}
 

@@ -11,6 +11,7 @@
 	using PersonalFinancer.Services.Accounts;
 	using PersonalFinancer.Services.Accounts.Models;
 	using PersonalFinancer.Services.Shared.Models;
+	using System.Reflection;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	[TestFixture]
@@ -66,42 +67,60 @@
 			AccountsCardsDTO actual = await this.accountsInfoService.GetAccountsCardsDataAsync(page, search);
 
 			//Assert
-			Assert.That(JsonConvert.SerializeObject(actual), 
+			Assert.That(JsonConvert.SerializeObject(actual),
 				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
-		public async Task GetAccountDetailsAsync_ShouldReturnCorrectData_WhenUserIsOwner()
+		[TestCase(false, typeof(AccountDetailsDTO))]
+		[TestCase(true, typeof(AccountDetailsDTO))]
+		[TestCase(false, typeof(CreateEditAccountOutputDTO))]
+		[TestCase(true, typeof(CreateEditAccountOutputDTO))]
+		public async Task GetAccountDataAsync_ShouldReturnCorrectData(bool isUserAdmin, Type projectionType)
 		{
 			//Arrange
-			AccountDetailsDTO expected = await this.accountsRepo.All()
-				.Where(a => !a.IsDeleted && !a.Owner.IsAdmin)
-				.ProjectTo<AccountDetailsDTO>(this.mapper.ConfigurationProvider)
-				.FirstAsync();
+			Account testAccount = await this.accountsRepo.All().FirstAsync();
+			
+			object? expected = Activator.CreateInstance(projectionType);
+			this.mapper.Map(testAccount, expected);
+
+			Guid currentUserId = isUserAdmin ? this.adminId : testAccount.OwnerId;
+
+			MethodInfo? method = this.accountsInfoService
+				.GetType()
+				.GetMethod("GetAccountDataAsync")?
+				.MakeGenericMethod(projectionType);
 
 			//Act
-			AccountDetailsDTO actual = await this.accountsInfoService.GetAccountDetailsAsync(
-				expected.Id, expected.OwnerId, isUserAdmin: false);
+			object? actual = Task
+				.Run(() => method?.Invoke(this.accountsInfoService, new object[] { testAccount.Id, currentUserId, isUserAdmin }))
+				.GetAwaiter()
+				.GetResult();
+
+			object? result = actual?
+				.GetType()
+				.GetProperty("Result")?
+				.GetValue(actual);
 
 			//Assert
-			Assert.That(JsonConvert.SerializeObject(actual), 
+			Assert.That(JsonConvert.SerializeObject(result),
 				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
-		public void GetAccountDetailsAsync_ShouldThrowInvalidOperationException_WhenAccountDoesNotExist()
+		public void GetAccountDataAsync_ShouldThrowInvalidOperationException_WhenAccountDoesNotExist()
 		{
 			//Arrange
 			var id = Guid.NewGuid();
 
 			//Act & Assert
 			Assert.That(async () => await this.accountsInfoService
-				  .GetAccountDetailsAsync(id, this.mainTestUserId, isUserAdmin: false),
+				  .GetAccountDataAsync<AccountDetailsDTO>(id, this.mainTestUserId, isUserAdmin: false),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
 		[Test]
-		public async Task GetAccountDetailsAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
+		public async Task GetAccountDataAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
 		{
 			//Arrange
 			Guid accountId = await this.accountsRepo.All()
@@ -111,53 +130,7 @@
 
 			//Act & Assert
 			Assert.That(async () => await this.accountsInfoService
-				  .GetAccountDetailsAsync(accountId, this.mainTestUserId, isUserAdmin: false),
-			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
-		}
-
-		[Test]
-		[TestCase(false)]
-		[TestCase(true)]
-		public async Task GetAccountFormDataAsync_ShouldReturnCorrectData(bool isUserAdmin)
-		{
-			//Arrange
-			Account testAccount = await this.accountsRepo.All().FirstAsync();
-			var expected = this.mapper.Map<CreateEditAccountOutputDTO>(testAccount);
-			Guid currentUserId = isUserAdmin ? this.adminId : testAccount.OwnerId;
-
-			//Act
-			var actual = await this.accountsInfoService
-				.GetAccountFormDataAsync(testAccount.Id, currentUserId, isUserAdmin);
-
-			//Assert
-			Assert.That(JsonConvert.SerializeObject(actual), 
-				Is.EqualTo(JsonConvert.SerializeObject(expected)));
-		}
-
-		[Test]
-		public void GetAccountFormDataAsync_ShouldThrowInvalidOperationException_WhenAccountDoesNotExist()
-		{
-			//Arrange
-			var invalidId = Guid.NewGuid();
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService
-				  .GetAccountFormDataAsync(invalidId, this.mainTestUserId, isUserAdmin: false),
-			Throws.TypeOf<InvalidOperationException>());
-		}
-
-		[Test]
-		public async Task GetAccountFormDataAsync_ShouldThrowUnauthorizedAccessException_WhenTheUserIsUnauthorized()
-		{
-			//Arrange
-			Guid testAccountId = await this.accountsRepo.All()
-				.Where(a => a.OwnerId != this.mainTestUserId)
-				.Select(a => a.Id)
-				.FirstAsync();
-
-			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService
-				  .GetAccountFormDataAsync(testAccountId, this.mainTestUserId, isUserAdmin: false),
+				  .GetAccountDataAsync<AccountDetailsDTO>(accountId, this.mainTestUserId, isUserAdmin: false),
 			Throws.TypeOf<UnauthorizedAccessException>().With.Message.EqualTo(ExceptionMessages.UnauthorizedUser));
 		}
 
@@ -235,7 +208,7 @@
 			};
 
 			Func<Transaction, bool> filter = (t) =>
-				t.CreatedOnUtc >= filterDto.FromLocalTime.ToUniversalTime() 
+				t.CreatedOnUtc >= filterDto.FromLocalTime.ToUniversalTime()
 				&& t.CreatedOnUtc <= filterDto.ToLocalTime.ToUniversalTime();
 
 			var expected = new TransactionsDTO
@@ -252,7 +225,7 @@
 			TransactionsDTO actual = await this.accountsInfoService.GetAccountTransactionsAsync(filterDto);
 
 			//Assert
-			Assert.That(JsonConvert.SerializeObject(actual), 
+			Assert.That(JsonConvert.SerializeObject(actual),
 				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
@@ -269,7 +242,7 @@
 			};
 
 			//Act & Assert
-			Assert.That(async () => await this.accountsInfoService.GetAccountTransactionsAsync(dto), 
+			Assert.That(async () => await this.accountsInfoService.GetAccountTransactionsAsync(dto),
 			Throws.TypeOf<InvalidOperationException>());
 		}
 
@@ -299,7 +272,7 @@
 				await this.accountsInfoService.GetCashFlowByCurrenciesAsync();
 
 			//Assert
-			Assert.That(JsonConvert.SerializeObject(actual), 
+			Assert.That(JsonConvert.SerializeObject(actual),
 				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
@@ -321,7 +294,7 @@
 				.GetTransactionDetailsAsync(testTransaction.Id, currentUserId, isUserAdmin);
 
 			//Assert
-			Assert.That(JsonConvert.SerializeObject(actual), 
+			Assert.That(JsonConvert.SerializeObject(actual),
 				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
