@@ -2,9 +2,11 @@
 {
 	using AutoMapper.QueryableExtensions;
 	using Microsoft.EntityFrameworkCore;
-	using MongoDB.Bson;
+	using Microsoft.Extensions.Caching.Distributed;
+	using Moq;
 	using Newtonsoft.Json;
 	using NUnit.Framework;
+	using PersonalFinancer.Common.Constants;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
 	using PersonalFinancer.Data.Repositories;
@@ -13,6 +15,7 @@
 	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Services.Users.Models;
 	using System.Linq.Expressions;
+	using System.Text;
 	using static PersonalFinancer.Common.Constants.CategoryConstants;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
@@ -44,7 +47,7 @@
 				this.transactionsRepo,
 				this.categoriesRepo,
 				this.mapper,
-				this.memoryCache);
+				this.cacheMock.Object);
 		}
 
 		[Test]
@@ -60,7 +63,8 @@
 			var actual = await this.usersService.GetAdminsIdsAsync();
 
 			//Arrange
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
@@ -107,9 +111,13 @@
 		}
 
 		[Test]
-		public async Task GetUserAccountsAndCategoriesDropdownsAsync_ShouldReturnCorrectData()
+		[TestCase(true)]
+		[TestCase(false)]
+		public async Task GetUserAccountsAndCategoriesDropdownsAsync_ShouldReturnCorrectData(bool isDataCached)
 		{
 			//Arrange
+			string cacheKey = CacheConstants.AccountsAndCategoriesKey + this.mainTestUserId;
+
 			var expected = new AccountsAndCategoriesDropdownDTO
 			{
 				OwnerAccounts = await this.accountsRepo.All()
@@ -124,12 +132,27 @@
 					.ToArrayAsync()
 			};
 
+			byte[] expectedCacheAsByteArr = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(expected));
+
+			this.cacheMock
+				.Setup(x => x.GetAsync(cacheKey, CancellationToken.None))
+				.ReturnsAsync(isDataCached ? expectedCacheAsByteArr : null);
+
 			//Act
 			AccountsAndCategoriesDropdownDTO actual = await this.usersService
 				.GetUserAccountsAndCategoriesDropdownsAsync(this.mainTestUserId);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
+
+			this.cacheMock.Verify(
+				x => x.SetAsync(
+					cacheKey,
+					It.Is<byte[]>(arr => arr.SequenceEqual(expectedCacheAsByteArr)),
+					It.Is<DistributedCacheEntryOptions>(opt => opt.SlidingExpiration == TimeSpan.FromDays(2)),
+					CancellationToken.None),
+				isDataCached ? Times.Never : Times.Once);
 		}
 
 		[Test]
@@ -146,13 +169,18 @@
 			var actual = await this.usersService.GetUserAccountsCardsAsync(this.mainTestUserId);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
-		public async Task GetUserAccountTypesAndCurrenciesDropdownsAsync_ShouldReturnCorrectData()
+		[TestCase(true)]
+		[TestCase(false)]
+		public async Task GetUserAccountTypesAndCurrenciesDropdownsAsync_ShouldReturnCorrectData(bool isDataCached)
 		{
 			//Arrange
+			string cacheKey = CacheConstants.AccountTypesAndCurrenciesKey + this.mainTestUserId;
+
 			var expected = new AccountTypesAndCurrenciesDropdownDTO
 			{
 				OwnerAccountTypes = await this.accountTypeRepo.All()
@@ -167,12 +195,27 @@
 					.ToArrayAsync()
 			};
 
+			byte[] expectedCacheAsByteArr = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(expected));
+
+			this.cacheMock
+				.Setup(x => x.GetAsync(cacheKey, CancellationToken.None))
+				.ReturnsAsync(isDataCached ? expectedCacheAsByteArr : null);
+
 			//Act
 			AccountTypesAndCurrenciesDropdownDTO actual =
 				await this.usersService.GetUserAccountTypesAndCurrenciesDropdownsAsync(this.mainTestUserId);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
+
+			this.cacheMock.Verify(
+				x => x.SetAsync(
+					cacheKey,
+					It.Is<byte[]>(arr => arr.SequenceEqual(expectedCacheAsByteArr)),
+					It.Is<DistributedCacheEntryOptions>(opt => opt.SlidingExpiration == TimeSpan.FromDays(2)),
+					CancellationToken.None),
+				isDataCached ? Times.Never : Times.Once);
 		}
 
 		[Test]
@@ -235,7 +278,8 @@
 				.GetUserDashboardDataAsync(this.mainTestUserId, fromLocalTime.ToLocalTime(), toLocalTime.ToLocalTime());
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
@@ -275,7 +319,8 @@
 			var actual = await this.usersService.GetUserUsedDropdownsAsync(this.mainTestUserId);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
@@ -309,7 +354,8 @@
 			TransactionsDTO actual = await this.usersService.GetUserTransactionsAsync(dto);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]
@@ -348,7 +394,8 @@
 			UserDetailsDTO actual = await this.usersService.UserDetailsAsync(this.mainTestUserId);
 
 			//Assert
-			Assert.That(actual.ToJson(), Is.EqualTo(expected.ToJson()));
+			Assert.That(JsonConvert.SerializeObject(actual), 
+				Is.EqualTo(JsonConvert.SerializeObject(expected)));
 		}
 
 		[Test]

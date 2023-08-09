@@ -1,7 +1,9 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
 	using Microsoft.EntityFrameworkCore;
+	using Moq;
 	using NUnit.Framework;
+	using PersonalFinancer.Common.Constants;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Repositories;
@@ -18,7 +20,7 @@
 		{
 			this.repo = new EfRepository<Currency>(this.dbContext);
 			this.currencyApiService = new ApiService<Currency>(
-				this.repo, this.mapper, this.memoryCache);
+				this.repo, this.mapper, this.cacheMock.Object);
 		}
 
 		[Test]
@@ -27,6 +29,8 @@
 			//Arrange
 			string currencyName = "NewCurrency";
 			int countBefore = await this.repo.All().CountAsync();
+
+			string cacheKey = CacheConstants.AccountTypesAndCurrenciesKey + this.mainTestUserId;
 
 			//Act
 			ApiEntityDTO actual = await this.currencyApiService
@@ -42,6 +46,8 @@
 				Assert.That(actual.Id, Is.Not.EqualTo(Guid.Empty));
 				Assert.That(actual.Name, Is.EqualTo(currencyName));
 			});
+
+			this.cacheMock.Verify(x => x.Remove(cacheKey), Times.Once);
 		}
 
 		[Test]
@@ -51,6 +57,8 @@
 			Currency deletedCurrency = await this.repo.All()
 				.Where(c => c.OwnerId == this.mainTestUserId && c.IsDeleted)
 				.FirstAsync();
+
+			string cacheKey = CacheConstants.AccountTypesAndCurrenciesKey + this.mainTestUserId;
 
 			int countBefore = await this.repo.All().CountAsync();
 
@@ -69,6 +77,8 @@
 
 				AssertSamePropertiesValuesAreEqual(result, deletedCurrency);
 			});
+
+			this.cacheMock.Verify(x => x.Remove(cacheKey), Times.Once);
 		}
 
 		[Test]
@@ -78,6 +88,8 @@
 			Currency anotherUserCurrency = await this.repo.All()
 				.Where(c => c.OwnerId != this.mainTestUserId)
 				.FirstAsync();
+
+			string cacheKey = CacheConstants.AccountTypesAndCurrenciesKey + this.mainTestUserId;
 
 			int countBefore = await this.repo.All().CountAsync();
 
@@ -96,6 +108,8 @@
 				Assert.That(result.Id, Is.Not.EqualTo(anotherUserCurrency.Id));
 				Assert.That(result.Name, Is.EqualTo(anotherUserCurrency.Name));
 			});
+
+			this.cacheMock.Verify(x => x.Remove(cacheKey), Times.Once);
 		}
 
 		[Test]
@@ -122,6 +136,8 @@
 				.Where(c => c.OwnerId == this.mainTestUserId && !c.IsDeleted)
 				.FirstAsync();
 
+			string cacheKey = CacheConstants.AccountTypesAndCurrenciesKey + this.mainTestUserId;
+
 			Guid currentUserId = isUserAdmin ? this.adminId : this.mainTestUserId;
 
 			//Act
@@ -133,6 +149,8 @@
 				Assert.That(currency.IsDeleted, Is.True);
 				Assert.That(await this.repo.FindAsync(currency.Id), Is.Not.Null);
 			});
+
+			this.cacheMock.Verify(x => x.Remove(cacheKey), Times.Once);
 		}
 
 		[Test]

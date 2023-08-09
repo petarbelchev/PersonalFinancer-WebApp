@@ -107,6 +107,17 @@
 			return builder;
 		}
 
+		public static WebApplicationBuilder ConfigureDistributedRedisCache(this WebApplicationBuilder builder)
+		{
+			builder.Services.AddStackExchangeRedisCache(options =>
+			{
+				options.Configuration = builder.Configuration.GetValue<string>("DistributedRedisCache:ConnectionString");
+				options.InstanceName = "Distributed Redis Cache";
+			});
+
+			return builder;
+		}
+
 		public static WebApplicationBuilder ConfigurePersonalFinancerDbContext(this WebApplicationBuilder builder)
 		{
 			string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

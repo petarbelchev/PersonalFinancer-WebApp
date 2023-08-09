@@ -2,7 +2,7 @@
 {
 	using AutoMapper;
 	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.Caching.Memory;
+	using Microsoft.Extensions.Caching.Distributed;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
@@ -19,7 +19,7 @@
 		private readonly IEfRepository<Currency> currenciesRepo;
 		private readonly IEfRepository<Category> categoriesRepo;
 		private readonly IMapper mapper;
-		private readonly IMemoryCache memoryCache;
+		private readonly IDistributedCache cache;
 
 		public AccountsUpdateService(
 			IEfRepository<Account> accountRepository,
@@ -28,7 +28,7 @@
 			IEfRepository<Currency> currenciesRepo,
 			IEfRepository<Category> categoriesRepo,
 			IMapper mapper,
-			IMemoryCache memoryCache)
+			IDistributedCache cache)
 		{
 			this.accountsRepo = accountRepository;
 			this.transactionsRepo = transactionRepository;
@@ -36,7 +36,7 @@
 			this.currenciesRepo = currenciesRepo;
 			this.categoriesRepo = categoriesRepo;
 			this.mapper = mapper;
-			this.memoryCache = memoryCache;
+			this.cache = cache;
 		}
 
 		public async Task<Guid> CreateAccountAsync(CreateEditAccountInputDTO model)
@@ -58,7 +58,7 @@
 
 			await this.accountsRepo.AddAsync(newAccount);
 			await this.accountsRepo.SaveChangesAsync();
-			this.memoryCache.Remove(AccountsAndCategoriesKey + newAccount.OwnerId);
+			this.cache.Remove(AccountsAndCategoriesKey + newAccount.OwnerId);
 
 			return newAccount.Id;
 		}
@@ -94,7 +94,7 @@
 				account.IsDeleted = true;
 
 			await this.accountsRepo.SaveChangesAsync();
-			this.memoryCache.Remove(AccountsAndCategoriesKey + account.OwnerId);
+			this.cache.Remove(AccountsAndCategoriesKey + account.OwnerId);
 		}
 
 		public async Task<decimal> DeleteTransactionAsync(

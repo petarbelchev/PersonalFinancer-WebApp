@@ -3,7 +3,8 @@
 	using AutoMapper;
 	using AutoMapper.QueryableExtensions;
 	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.Caching.Memory;
+	using Microsoft.Extensions.Caching.Distributed;
+	using Newtonsoft.Json;
 	using PersonalFinancer.Common.Constants;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
@@ -21,7 +22,7 @@
 		private readonly IEfRepository<Transaction> transactionsRepo;
 		private readonly IEfRepository<Category> categoriesRepo;
 		private readonly IMapper mapper;
-		private readonly IMemoryCache memoryCache;
+		private readonly IDistributedCache cache;
 
 		public UsersService(
 			IEfRepository<ApplicationUser> usersRepo,
@@ -29,14 +30,14 @@
 			IEfRepository<Transaction> transactionsRepo,
 			IEfRepository<Category> categoriesRepo,
 			IMapper mapper,
-			IMemoryCache memoryCache)
+			IDistributedCache cache)
 		{
 			this.usersRepo = usersRepo;
 			this.accountsRepo = accountsRepo;
 			this.transactionsRepo = transactionsRepo;
 			this.categoriesRepo = categoriesRepo;
 			this.mapper = mapper;
-			this.memoryCache = memoryCache;
+			this.cache = cache;
 		}
 
 		public async Task<IEnumerable<string>> GetAdminsIdsAsync()
@@ -50,15 +51,27 @@
 		public async Task<AccountsAndCategoriesDropdownDTO> GetUserAccountsAndCategoriesDropdownsAsync(Guid userId)
 		{
 			string cacheKey = CacheConstants.AccountsAndCategoriesKey + userId;
+			AccountsAndCategoriesDropdownDTO dropdowns;
+			string? cacheDataString = await this.cache.GetStringAsync(cacheKey);
 
-			if (!this.memoryCache.TryGetValue(cacheKey, out AccountsAndCategoriesDropdownDTO dropdowns))
+			if (cacheDataString == null)
 			{
 				dropdowns = await this.usersRepo.All()
 					.Where(u => u.Id == userId)
 					.ProjectTo<AccountsAndCategoriesDropdownDTO>(this.mapper.ConfigurationProvider)
 					.FirstAsync();
 
-				this.memoryCache.Set(cacheKey, dropdowns, TimeSpan.FromDays(3));
+				cacheDataString = JsonConvert.SerializeObject(dropdowns);
+				var cacheOptions = new DistributedCacheEntryOptions() 
+				{ 
+					SlidingExpiration = TimeSpan.FromDays(2) 
+				};
+
+				await this.cache.SetStringAsync(cacheKey, cacheDataString, cacheOptions);
+			}
+			else
+			{
+				dropdowns = JsonConvert.DeserializeObject<AccountsAndCategoriesDropdownDTO>(cacheDataString)!;
 			}
 
 			return dropdowns;
@@ -76,15 +89,27 @@
 		public async Task<AccountTypesAndCurrenciesDropdownDTO> GetUserAccountTypesAndCurrenciesDropdownsAsync(Guid userId)
 		{
 			string cacheKey = CacheConstants.AccountTypesAndCurrenciesKey + userId;
+			AccountTypesAndCurrenciesDropdownDTO dropdowns;
+			string? cacheDataString = await this.cache.GetStringAsync(cacheKey);
 
-			if (!this.memoryCache.TryGetValue(cacheKey, out AccountTypesAndCurrenciesDropdownDTO dropdowns))
+			if (cacheDataString == null)
 			{
 				dropdowns = await this.usersRepo.All()
 					.Where(u => u.Id == userId)
 					.ProjectTo<AccountTypesAndCurrenciesDropdownDTO>(this.mapper.ConfigurationProvider)
 					.FirstAsync();
 
-				this.memoryCache.Set(cacheKey, dropdowns, TimeSpan.FromDays(3));
+				cacheDataString = JsonConvert.SerializeObject(dropdowns);
+				var cacheOptions = new DistributedCacheEntryOptions()
+				{
+					SlidingExpiration = TimeSpan.FromDays(2)
+				};
+
+				await this.cache.SetStringAsync(cacheKey, cacheDataString, cacheOptions);
+			}
+			else
+			{
+				dropdowns = JsonConvert.DeserializeObject<AccountTypesAndCurrenciesDropdownDTO>(cacheDataString)!;
 			}
 
 			return dropdowns;

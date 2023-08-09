@@ -1,7 +1,9 @@
 ﻿namespace PersonalFinancer.Tests.Services
 {
 	using Microsoft.EntityFrameworkCore;
+	using Moq;
 	using NUnit.Framework;
+	using PersonalFinancer.Common.Constants;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Models.Enums;
@@ -42,7 +44,7 @@
 				this.currenciesRepo,
 				this.categoriesRepo,
 				this.mapper,
-				this.memoryCache);
+				this.cacheMock.Object);
 
 			this.mainTestAccountTypeId = await this.accountTypesRepo.All()
 				.Where(at => at.OwnerId == this.mainTestUserId && !at.IsDeleted)
@@ -86,6 +88,8 @@
 				? TransactionType.Expense
 				: TransactionType.Income;
 
+			string cacheKey = CacheConstants.AccountsAndCategoriesKey + this.mainTestUserId;
+
 			//Act
 			Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(inputModel);
 			Account newAccount = await this.accountsRepo.All()
@@ -107,6 +111,8 @@
 				Assert.That(initialBalanceTransaction.Amount, Is.EqualTo(inputModel.Balance));
 				Assert.That(initialBalanceTransaction.Reference, Is.EqualTo(CategoryInitialBalanceName));
 			});
+
+			this.cacheMock.Verify(x => x.Remove(cacheKey), Times.Once);
 		}
 
 		[Test]
@@ -124,6 +130,8 @@
 
 			int accountsCountBefore = await this.accountsRepo.All().CountAsync();
 
+			string cacheKey = CacheConstants.AccountsAndCategoriesKey + this.mainTestUserId;
+
 			//Act
 			Guid newAccountId = await this.accountsUpdateService.CreateAccountAsync(inputModel);
 			Account newAccount = await this.accountsRepo.All()
@@ -139,6 +147,8 @@
 				Assert.That(await this.accountsRepo.All().CountAsync(), Is.EqualTo(accountsCountBefore + 1));
 				Assert.That(newAccount.Transactions.Any(), Is.False);
 			});
+
+			this.cacheMock.Verify(x => x.Remove(cacheKey), Times.Once);
 		}
 
 		[Test]
@@ -303,6 +313,8 @@
 
 			Guid currentUserId = isUserAdmin ? this.adminId : testAccount.OwnerId;
 
+			string cacheKey = CacheConstants.AccountsAndCategoriesKey + this.mainTestUserId;
+
 			//Act
 			await this.accountsUpdateService.DeleteAccountAsync(
 				testAccount.Id, currentUserId, isUserAdmin, shouldDeleteTransactions);
@@ -335,6 +347,8 @@
 						Is.EqualTo(transactionsCountBefore));
 				});
 			}
+
+			this.cacheMock.Verify(x => x.Remove(cacheKey), Times.Once);
 		}
 
 		[Test]
