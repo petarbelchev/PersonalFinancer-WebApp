@@ -7,6 +7,7 @@
 	using PersonalFinancer.Services.Users.Models;
 	using PersonalFinancer.Web.Models.Home;
 	using PersonalFinancer.Web.Models.Shared;
+	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	public class HomeController : Controller
     {
@@ -42,7 +43,7 @@
             return this.View();
         }
 
-        [Authorize]
+        [Authorize(Roles = UserRoleName)]
         public async Task<IActionResult> Filtered(DateFilterModel inputModel)
         {
             UserDashboardViewModel viewModel;

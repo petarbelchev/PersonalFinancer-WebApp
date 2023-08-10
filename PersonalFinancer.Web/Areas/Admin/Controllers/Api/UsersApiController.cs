@@ -1,25 +1,25 @@
-﻿namespace PersonalFinancer.Web.Controllers.Api
+﻿namespace PersonalFinancer.Web.Areas.Admin.Controllers.Api
 {
 	using Microsoft.AspNetCore.Authorization;
 	using Microsoft.AspNetCore.Mvc;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Users;
 	using PersonalFinancer.Services.Users.Models;
+	using PersonalFinancer.Web.Areas.Admin.Models.User;
 	using PersonalFinancer.Web.CustomAttributes;
 	using PersonalFinancer.Web.Models.Api;
-	using PersonalFinancer.Web.Models.User;
 	using static PersonalFinancer.Common.Constants.RoleConstants;
 
 	[Authorize(Roles = AdminRoleName)]
-    [Route("api/users")]
-    [ApiController]
-    public class UsersApiController : ControllerBase
-    {
-        private readonly IUsersService usersService;
+	[Route("api/users")]
+	[ApiController]
+	public class UsersApiController : ControllerBase
+	{
+		private readonly IUsersService usersService;
 		private readonly ILogger<UsersApiController> logger;
 
-        public UsersApiController(
-			IUsersService usersService, 
+		public UsersApiController(
+			IUsersService usersService,
 			ILogger<UsersApiController> logger)
 		{
 			this.usersService = usersService;

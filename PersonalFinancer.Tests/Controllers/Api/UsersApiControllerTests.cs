@@ -7,9 +7,9 @@
 	using NUnit.Framework;
 	using PersonalFinancer.Common.Messages;
 	using PersonalFinancer.Services.Users.Models;
-	using PersonalFinancer.Web.Controllers.Api;
+	using PersonalFinancer.Web.Areas.Admin.Controllers.Api;
+	using PersonalFinancer.Web.Areas.Admin.Models.User;
 	using PersonalFinancer.Web.Models.Api;
-	using PersonalFinancer.Web.Models.User;
 	using static PersonalFinancer.Common.Constants.PaginationConstants;
 
 	[TestFixture]

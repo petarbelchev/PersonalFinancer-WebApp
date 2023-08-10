@@ -1,4 +1,4 @@
-﻿namespace PersonalFinancer.Web.Models.User
+﻿namespace PersonalFinancer.Web.Areas.Admin.Models.User
 {
 	using PersonalFinancer.Services.Users.Models;
 	using PersonalFinancer.Web.Models.Shared;
@@ -11,9 +11,9 @@
 			this.Users = usersInfoDTO.Users;
 
 			this.Pagination = new PaginationModel(
-				UsersName, 
-				UsersPerPage, 
-				usersInfoDTO.TotalUsersCount, 
+				UsersName,
+				UsersPerPage,
+				usersInfoDTO.TotalUsersCount,
 				page);
 		}
 
