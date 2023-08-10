@@ -24,6 +24,8 @@ I created this project to practice my skills, and it will also serve as my defen
     - Logger
     - Custom Action Filter and Attribute (for HTML sanitizing)
     - Custom Model Binders (for decimal and datetime binding)
+    - Custom Model Validation (for dates comparison)
+    - Working with files (message image)
     - TempData messages
     - Admin Area
     - Partial views
@@ -49,7 +51,7 @@ The Project can be easy tested locally. All you need to do:
 When the App is fired up, its will seed the database with: 
 - Admin - email: "alfa.admin@admin.com", password: "Admin1!";
 - User with accounts and transactions for easy and fast tests - email: "test.user@mail.com", password: "TestUser1!";
-- 13 more users without transactions so that admin pages are not empty.
+- 14 more users without transactions so that admin pages are not empty.
 
 ## Databases
 

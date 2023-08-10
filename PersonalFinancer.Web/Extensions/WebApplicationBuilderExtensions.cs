@@ -43,8 +43,6 @@
 
 				.AddSingleton<IMongoDbContext, MessagesDbContext>()
 
-				.AddSingleton<IMemoryCache, MemoryCache>()
-
 				.AddTransient<IEmailSender, SendGridEmailSender>();
 
 			return builder;
