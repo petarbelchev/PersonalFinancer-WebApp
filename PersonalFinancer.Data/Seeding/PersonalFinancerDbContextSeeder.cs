@@ -2,22 +2,18 @@
 {
 	using Microsoft.AspNetCore.Identity;
 	using Microsoft.EntityFrameworkCore;
-	using Microsoft.Extensions.DependencyInjection;
+	using PersonalFinancer.Common.Constants;
 	using PersonalFinancer.Data.Models;
 	using System;
 	using System.Threading.Tasks;
-	using static PersonalFinancer.Common.Constants.CategoryConstants;
-	using static PersonalFinancer.Common.Constants.SeedConstants;
 
 	public static class PersonalFinancerDbContextSeeder
 	{
-		public static async Task SeedAsync(PersonalFinancerDbContext dbContext, IServiceProvider serviceProvider)
+		public static async Task SeedAsync(
+			PersonalFinancerDbContext dbContext, 
+			RoleManager<IdentityRole<Guid>> roleManager,
+			UserManager<ApplicationUser> userManager)
 		{
-			RoleManager<IdentityRole<Guid>> roleManager =
-				serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-			UserManager<ApplicationUser> userManager =
-			   serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
 			// This seed is mandatory, except for seeding the test users.
 			await RolesSeeder.SeedAsync(roleManager);
 			await UsersSeeder.SeedAsync(userManager);
@@ -25,7 +21,7 @@
 
 			// This seed is for the first test user and is not mandatory.
 			// If you don't have a test user, don't execute this seed.
-			ApplicationUser testUser = await userManager.FindByEmailAsync(FirstTestUserEmail);
+			ApplicationUser testUser = await userManager.FindByEmailAsync(SeedConstants.FirstTestUserEmail);
 			var userDataSeeders = new IUserDataSeeder[]
 			{
 				new AccountsTypesSeeder(),
@@ -58,18 +54,20 @@
 			}
 		}
 
-		private static async Task SeedInitialBalanceCategory(PersonalFinancerDbContext dbContext, UserManager<ApplicationUser> userManager)
+		private static async Task SeedInitialBalanceCategory(
+			PersonalFinancerDbContext dbContext, 
+			UserManager<ApplicationUser> userManager)
 		{
-			var initialBalanceCategoryId = Guid.Parse(InitialBalanceCategoryId);
+			var initialBalanceCategoryId = Guid.Parse(CategoryConstants.InitialBalanceCategoryId);
 
 			if (!await dbContext.Categories.AnyAsync(c => c.Id == initialBalanceCategoryId))
 			{
-				ApplicationUser admin = await userManager.FindByEmailAsync(FirstAdminEmail);
+				ApplicationUser admin = await userManager.FindByEmailAsync(SeedConstants.FirstAdminEmail);
 
 				await dbContext.Categories.AddAsync(new Category
 				{
 					Id = initialBalanceCategoryId,
-					Name = CategoryInitialBalanceName,
+					Name = CategoryConstants.CategoryInitialBalanceName,
 					OwnerId = admin.Id
 				});
 			}

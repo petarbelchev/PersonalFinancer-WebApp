@@ -89,7 +89,7 @@
 
 				var accountsWithTransactions = new List<Account>();
 				accountsWithTransactions.AddRange(user.Accounts.Where(a => !a.IsDeleted).Take(2));
-				accountsWithTransactions.Add(user.Accounts.Where(c => c.IsDeleted).First());
+				accountsWithTransactions.Add(user.Accounts.Where(a => a.IsDeleted).First());
 
 				var categoriesIdsWithTransactions = new List<Guid>
 				{

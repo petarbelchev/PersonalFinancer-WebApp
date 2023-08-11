@@ -31,7 +31,7 @@ builder.ConfigureDistributedRedisCache();
 
 WebApplication app = builder.Build();
 
-app.SeedDatabase();
+await app.SeedDatabase();
 
 if (app.Environment.IsDevelopment())
 {

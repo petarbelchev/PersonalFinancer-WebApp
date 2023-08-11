@@ -2,10 +2,9 @@
 {
 	using Microsoft.AspNetCore.Identity;
 	using Microsoft.EntityFrameworkCore;
+	using PersonalFinancer.Common.Constants;
 	using PersonalFinancer.Data.Models;
 	using System.Threading.Tasks;
-	using static PersonalFinancer.Common.Constants.RoleConstants;
-	using static PersonalFinancer.Common.Constants.SeedConstants;
 
 	public static class UsersSeeder
 	{
@@ -19,8 +18,8 @@
 				{
 					FirstName = "Alfa",
 					LastName = "Admin",
-					Email = FirstAdminEmail,
-					NormalizedEmail = FirstAdminEmail.ToUpper(),
+					Email = SeedConstants.FirstAdminEmail,
+					NormalizedEmail = SeedConstants.FirstAdminEmail.ToUpper(),
 					UserName = "alfa.admin",
 					NormalizedUserName = "ALFA.ADMIN",
 					PhoneNumber = "0987654321",
@@ -29,14 +28,14 @@
 				};
 
 				IdentityResult creationResult =
-				   await userManager.CreateAsync(admin, FirstAdminPassword);
+				   await userManager.CreateAsync(admin, SeedConstants.FirstAdminPassword);
 
 				if (creationResult.Succeeded)
-					await userManager.AddToRoleAsync(admin, AdminRoleName);
+					await userManager.AddToRoleAsync(admin, RoleConstants.AdminRoleName);
 			}
 
 			// The code below is a test data, and it's not mandatory.
-			ApplicationUser? testUser = await userManager.FindByEmailAsync(FirstTestUserEmail);
+			ApplicationUser? testUser = await userManager.FindByEmailAsync(SeedConstants.FirstTestUserEmail);
 
 			if (testUser == null)
 			{
@@ -44,8 +43,8 @@
 				{
 					FirstName = "Test",
 					LastName = "User",
-					Email = FirstTestUserEmail,
-					NormalizedEmail = FirstTestUserEmail.ToUpper(),
+					Email = SeedConstants.FirstTestUserEmail,
+					NormalizedEmail = SeedConstants.FirstTestUserEmail.ToUpper(),
 					UserName = "test-user",
 					NormalizedUserName = "TEST-USER",
 					PhoneNumber = "1234567890",
@@ -53,10 +52,10 @@
 				};
 
 				IdentityResult creationResult =
-					await userManager.CreateAsync(testUser, FirstTestUserPassword);
+					await userManager.CreateAsync(testUser, SeedConstants.FirstTestUserPassword);
 
 				if (creationResult.Succeeded)
-					await userManager.AddToRoleAsync(testUser, UserRoleName);
+					await userManager.AddToRoleAsync(testUser, RoleConstants.UserRoleName);
 			}
 
 			int usersCount = await userManager.Users.CountAsync();
@@ -82,7 +81,7 @@
 						await userManager.CreateAsync(newUser, $"TestUser{i}!");
 
 					if (creationResult.Succeeded)
-						await userManager.AddToRoleAsync(newUser, UserRoleName);
+						await userManager.AddToRoleAsync(newUser, RoleConstants.UserRoleName);
 				}
 			}
 		}

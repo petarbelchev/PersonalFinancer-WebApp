@@ -92,10 +92,10 @@
 				.MakeGenericMethod(projectionType);
 
 			//Act
-			object? actual = Task
-				.Run(() => method?.Invoke(this.accountsInfoService, new object[] { testAccount.Id, currentUserId, isUserAdmin }))
-				.GetAwaiter()
-				.GetResult();
+			object? actual = await Task.Run(() => 
+				method?.Invoke(
+					this.accountsInfoService, 
+					new object[] { testAccount.Id, currentUserId, isUserAdmin }));
 
 			object? result = actual?
 				.GetType()

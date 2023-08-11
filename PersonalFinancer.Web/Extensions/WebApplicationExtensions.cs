@@ -1,23 +1,23 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection
 {
+	using Microsoft.AspNetCore.Identity;
 	using PersonalFinancer.Data;
+	using PersonalFinancer.Data.Models;
 	using PersonalFinancer.Data.Seeding;
 	using PersonalFinancer.Web.Hubs;
 
 	public static class WebApplicationExtensions
 	{
-		public static WebApplication SeedDatabase(this WebApplication app)
+		public static async Task<WebApplication> SeedDatabase(this WebApplication app)
 		{
 			using IServiceScope scope = app.Services.CreateScope();
 			IServiceProvider serviceProvider = scope.ServiceProvider;
 
-			PersonalFinancerDbContext dbContext =
-				serviceProvider.GetRequiredService<PersonalFinancerDbContext>();
+			var dbContext = serviceProvider.GetRequiredService<PersonalFinancerDbContext>();
+			var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+			var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-			PersonalFinancerDbContextSeeder
-				.SeedAsync(dbContext, serviceProvider)
-				.GetAwaiter()
-				.GetResult();
+			await PersonalFinancerDbContextSeeder.SeedAsync(dbContext, roleManager, userManager);
 
 			return app;
 		}
