@@ -75,7 +75,7 @@
 
 			ChangeAccountBalance(account, newTransaction.Amount, model.TransactionType);
 
-			await this.accountsRepo.SaveChangesAsync();
+			await this.transactionsRepo.SaveChangesAsync();
 
 			return newTransaction.Id;
 		}
@@ -153,7 +153,7 @@
 				}
 			}
 
-			await this.accountsRepo.SaveChangesAsync();
+			await this.transactionsRepo.SaveChangesAsync();
 		}
 
 		public async Task EditTransactionAsync(Guid transactionId, CreateEditTransactionInputDTO model)
