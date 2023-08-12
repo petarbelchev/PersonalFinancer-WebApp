@@ -146,10 +146,15 @@
 				}
 				else
 				{
-					transaction.Amount += balanceChange;
+					decimal newAmount = transaction.TransactionType == TransactionType.Income
+						? transaction.Amount + balanceChange
+						: balanceChange - transaction.Amount;
 
-					if (transaction.Amount < 0)
-						transaction.TransactionType = TransactionType.Expense;
+					transaction.Amount = Math.Abs(newAmount);
+
+					transaction.TransactionType = newAmount < 0 
+						? TransactionType.Expense 
+						: TransactionType.Income;
 				}
 			}
 
@@ -211,7 +216,7 @@
 				AccountId = accountId,
 				OwnerId = ownerId,
 				CategoryId = Guid.Parse(InitialBalanceCategoryId),
-				Amount = amount,
+				Amount = Math.Abs(amount),
 				CreatedOnUtc = DateTime.UtcNow,
 				TransactionType = amount < 0
 					? TransactionType.Expense

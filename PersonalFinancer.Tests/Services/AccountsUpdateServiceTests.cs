@@ -108,7 +108,7 @@
 				Assert.That(initialBalanceTransaction.CategoryId, Is.EqualTo(Guid.Parse(InitialBalanceCategoryId)));
 				Assert.That(initialBalanceTransaction.IsInitialBalance, Is.True);
 				Assert.That(initialBalanceTransaction.TransactionType, Is.EqualTo(expectedTransactionType));
-				Assert.That(initialBalanceTransaction.Amount, Is.EqualTo(inputModel.Balance));
+				Assert.That(initialBalanceTransaction.Amount, Is.EqualTo(Math.Abs(inputModel.Balance)));
 				Assert.That(initialBalanceTransaction.Reference, Is.EqualTo(CategoryInitialBalanceName));
 			});
 
@@ -570,7 +570,9 @@
 			//Assert
 			Assert.Multiple(() =>
 			{
-				Assert.That(initialTransaction.Amount, Is.EqualTo(initialTransactionAmountBefore - (balanceBefore + 1000)));
+				Assert.That(initialTransaction.Amount, 
+					Is.EqualTo(Math.Abs(initialTransactionAmountBefore - (balanceBefore + 1000))));
+
 				Assert.That(initialTransaction.TransactionType, Is.EqualTo(TransactionType.Expense));
 
 				AssertSamePropertiesValuesAreEqual(testAccount, inputModel);
