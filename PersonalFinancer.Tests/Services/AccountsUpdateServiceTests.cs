@@ -567,6 +567,17 @@
 			//Act
 			await this.accountsUpdateService.EditAccountAsync(testAccount.Id, inputModel);
 
+			//Arrange
+			decimal sumIncomes = testAccount.Transactions
+				.Where(t => t.TransactionType == TransactionType.Income)
+				.Sum(t => t.Amount);
+
+			decimal sumExpenses = testAccount.Transactions
+				.Where(t => t.TransactionType == TransactionType.Expense)
+				.Sum(t => t.Amount);
+
+			decimal expectedBalance = sumIncomes - sumExpenses;
+
 			//Assert
 			Assert.Multiple(() =>
 			{
@@ -574,6 +585,8 @@
 					Is.EqualTo(Math.Abs(initialTransactionAmountBefore - (balanceBefore + 1000))));
 
 				Assert.That(initialTransaction.TransactionType, Is.EqualTo(TransactionType.Expense));
+
+				Assert.That(testAccount.Balance, Is.EqualTo(expectedBalance));
 
 				AssertSamePropertiesValuesAreEqual(testAccount, inputModel);
 			});
