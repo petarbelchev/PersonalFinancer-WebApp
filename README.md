@@ -42,6 +42,8 @@ I created this project to practice my skills, and it will also serve as my defen
 
 ## Acknowledgments
 
+### :trophy: The project was ranked as the top project of the course!
+
 ![Certificate](./Screenshots/ASP.NET%20Advanced%20-%20June%202023%20-%20Certificate.jpeg)
 
 ## How to Run the Project
