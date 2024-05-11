@@ -1,10 +1,5 @@
 # Personal Financer
 
-## Link to the App: <a href='https://financer.azurewebsites.net/'><b>financer.azurewebsites.net</b></a>
-You can use user with test data - email: "test.user@mail.com", password: "TestUser1!".
-
-The initial loading of the page may take a little bit more time because of the Azure hosting plan.
-
 ## Overview
 Personal Financer is a web application that provides its users with the ability to record their incomes and expenses structured into accounts and transactions.
 
